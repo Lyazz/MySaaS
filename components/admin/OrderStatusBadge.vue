@@ -10,7 +10,7 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const { t } = useI18n({ useScope: 'global' })
+const { t } = useI18n()
 
 const statusKeys: Record<string, string> = {
   PENDING: 'admin.orderStatus.pending',
@@ -22,7 +22,7 @@ const statusKeys: Record<string, string> = {
 }
 
 const label = computed(() => {
-  const key = statusKeys[String(props.status || '').toUpperCase()]
+  const key = statusKeys[String(props.status || '').trim().toUpperCase()]
   return key ? t(key) : props.status
 })
 

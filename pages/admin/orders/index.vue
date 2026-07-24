@@ -464,19 +464,19 @@ const emptyHint = computed(() => {
 })
 
 const orderStats = computed(() => [
-  { label: 'total', value: total.value },
-  { label: 'pending', value: orders.value.filter(o => o.status === 'PENDING').length, tone: 'amber' as const },
-  { label: 'delivered', value: orders.value.filter(o => o.status === 'DELIVERED').length, tone: 'green' as const },
-  { label: 'cancelled', value: orders.value.filter(o => o.status === 'CANCELLED').length, tone: 'red' as const },
+  { label: t('admin.common.total'), value: total.value },
+  { label: t('admin.orderStatus.pending'), value: orders.value.filter(o => o.status === 'PENDING').length, tone: 'amber' as const },
+  { label: t('admin.orderStatus.delivered'), value: orders.value.filter(o => o.status === 'DELIVERED').length, tone: 'green' as const },
+  { label: t('admin.orderStatus.cancelled'), value: orders.value.filter(o => o.status === 'CANCELLED').length, tone: 'red' as const },
 ])
 
 const orderTabs = computed(() => [
-  { key: 'all', label: 'All' },
-  { key: 'PENDING', label: 'Pending', count: orders.value.filter(o => o.status === 'PENDING').length },
-  { key: 'CONFIRMED', label: 'Confirmed', count: orders.value.filter(o => o.status === 'CONFIRMED').length },
-  { key: 'SHIPPED', label: 'Shipped', count: orders.value.filter(o => o.status === 'SHIPPED').length },
-  { key: 'DELIVERED', label: 'Delivered', count: orders.value.filter(o => o.status === 'DELIVERED').length },
-  { key: 'CANCELLED', label: 'Cancelled', count: orders.value.filter(o => o.status === 'CANCELLED').length },
+  { key: 'all', label: t('admin.pages.orders.index.filters.allOrders') },
+  { key: 'PENDING', label: t('admin.orderStatus.pending'), count: orders.value.filter(o => o.status === 'PENDING').length },
+  { key: 'CONFIRMED', label: t('admin.orderStatus.confirmed'), count: orders.value.filter(o => o.status === 'CONFIRMED').length },
+  { key: 'SHIPPED', label: t('admin.orderStatus.shipped'), count: orders.value.filter(o => o.status === 'SHIPPED').length },
+  { key: 'DELIVERED', label: t('admin.orderStatus.delivered'), count: orders.value.filter(o => o.status === 'DELIVERED').length },
+  { key: 'CANCELLED', label: t('admin.orderStatus.cancelled'), count: orders.value.filter(o => o.status === 'CANCELLED').length },
 ])
 
 async function fetchOrders() {

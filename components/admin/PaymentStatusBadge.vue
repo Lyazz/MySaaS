@@ -10,16 +10,16 @@ interface Props {
 }
 
 const props = defineProps<Props>()
-const { t } = useI18n({ useScope: 'global' })
+const { t } = useI18n()
 
 const statusKeys: Record<string, string> = {
-  UNPAID: 'admin.paymentStatus.unpaid',
-  PARTIALLY_PAID: 'admin.paymentStatus.partiallyPaid',
-  PAID: 'admin.paymentStatus.paid'
+  UNPAID: 'admin.pages.purchases.index.filters.paymentStatusValues.UNPAID',
+  PARTIALLY_PAID: 'admin.pages.purchases.index.filters.paymentStatusValues.PARTIALLY_PAID',
+  PAID: 'admin.pages.purchases.index.filters.paymentStatusValues.PAID'
 }
 
 const label = computed(() => {
-  const key = statusKeys[String(props.status || '').toUpperCase()]
+  const key = statusKeys[String(props.status || '').trim().toUpperCase()]
   return key ? t(key, props.status) : props.status
 })
 

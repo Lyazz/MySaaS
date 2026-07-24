@@ -1,0 +1,6007 @@
+[
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 5,
+    "text": "0 }\"\r\n      style=\"border-color: var(--surface-border); color: var(--text-secondary)\"\r\n      aria-label=\"Notifications\"\r\n      :aria-expanded=\"isOpen ? 'true' : 'false'\"\r\n      aria-haspopup=\"dialog\"\r\n      @click=\"togglePanel\"\r\n    >"
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 63,
+    "text": "Notifications"
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 84,
+    "text": "0\"\r\n                  class=\"notification-action flex h-7 w-7 items-center justify-center rounded-[7px] border transition-all duration-150\"\r\n                  style=\"border-color: var(--surface-border); color: var(--text-tertiary)\"\r\n                  aria-label=\"Mark all read\"\r\n                  @click=\"handleMarkAllRead\"\r\n                >"
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 156,
+    "text": "All caught up!"
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 162,
+    "text": "No new notifications right now."
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 172,
+    "text": "Today"
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 7,
+    "text": "aria-label=\"Notifications\""
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 43,
+    "text": "aria-label=\"Notifications\""
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 87,
+    "text": "aria-label=\"Mark all read\""
+  },
+  {
+    "file": "components\\admin\\AdminNotificationsButton.vue",
+    "line": 98,
+    "text": "aria-label=\"Refresh notifications\""
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportButton.vue",
+    "line": 13,
+    "text": "Export"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportButton.vue",
+    "line": 55,
+    "text": "Export options…"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 21,
+    "text": "Export Orders"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 35,
+    "text": "Format"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 58,
+    "text": "Columns"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 64,
+    "text": "Select all"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 71,
+    "text": "None"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 94,
+    "text": "Select at least one column."
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 104,
+    "text": "Cancel"
+  },
+  {
+    "file": "components\\admin\\AdminOrderExportModal.vue",
+    "line": 113,
+    "text": "Export"
+  },
+  {
+    "file": "components\\admin\\AdminThemeToggle.vue",
+    "line": 6,
+    "text": "aria-label=\"uiStore.theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'\""
+  },
+  {
+    "file": "components\\admin\\AdminTourMenu.vue",
+    "line": 10,
+    "text": "(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'\"\r\n      @mouseleave=\"(e: MouseEvent) => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'\"\r\n      @click=\"open = !open\"\r\n    >"
+  },
+  {
+    "file": "components\\admin\\AdminTourMenu.vue",
+    "line": 23,
+    "text": "(e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'\"\r\n      @mouseleave=\"(e: MouseEvent) => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'\"\r\n      @click=\"open = !open\"\r\n    >"
+  },
+  {
+    "file": "components\\admin\\AdminTourMenu.vue",
+    "line": 48,
+    "text": "{ (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }\"\r\n          @mouseleave=\"(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }\"\r\n          @click=\"launch(tour.id)\"\r\n        >"
+  },
+  {
+    "file": "components\\admin\\AdminTourMenu.vue",
+    "line": 9,
+    "text": "title=\"t('admin.tours.menuLabel')\""
+  },
+  {
+    "file": "components\\admin\\AppearanceSettingsForm.vue",
+    "line": 6,
+    "text": "title=\"t('admin.pages.settings.appearance.title') || 'Appearance'\""
+  },
+  {
+    "file": "components\\admin\\ContactInfosForm.vue",
+    "line": 5,
+    "text": "title=\"t('admin.contactInfosForm.title')\""
+  },
+  {
+    "file": "components\\admin\\DashboardStatCard.vue",
+    "line": 43,
+    "text": "View details"
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 63,
+    "text": "Type"
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 64,
+    "text": "CNAME"
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 67,
+    "text": "Host"
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 71,
+    "text": "Value"
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 5,
+    "text": "title=\"t('admin.pages.settings.domains.title') || 'Domain settings'\""
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 20,
+    "text": "title=\"t('admin.domainSettingsForm.customDomain.title') || 'Custom domain'\""
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 36,
+    "text": "placeholder=\"www.example.com\""
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 85,
+    "text": "title=\"t('admin.domainSettingsForm.connected.title') || 'Connected domains'\""
+  },
+  {
+    "file": "components\\admin\\DomainSettingsForm.vue",
+    "line": 110,
+    "text": "title=\"t('admin.actions.viewStore') || 'View store'\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 5,
+    "text": "title=\"t('admin.pages.settings.functional.title')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 28,
+    "text": "title=\"t('admin.functionalSettingsForm.features.title')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 80,
+    "text": "title=\"t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout rules'\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 120,
+    "text": "placeholder=\"t('admin.functionalSettingsForm.checkoutRules.orderIdPrefix.placeholder')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 156,
+    "text": "title=\"t('admin.functionalSettingsForm.invoices.title')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 183,
+    "text": "placeholder=\"t('admin.functionalSettingsForm.invoices.prefix.placeholder')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 209,
+    "text": "placeholder=\"t('admin.functionalSettingsForm.invoices.footer.placeholder')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 227,
+    "text": "title=\"t('admin.appearanceSettingsForm.announcement.title')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 254,
+    "text": "placeholder=\"t('admin.appearanceSettingsForm.announcement.message.placeholder')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 265,
+    "text": "title=\"t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty points'\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 316,
+    "text": "title=\"t('admin.functionalSettingsForm.currency.title')\""
+  },
+  {
+    "file": "components\\admin\\FunctionalSettingsForm.vue",
+    "line": 337,
+    "text": "title=\"t('admin.functionalSettingsForm.localization.title')\""
+  },
+  {
+    "file": "components\\admin\\HelpCenterWidget.vue",
+    "line": 7,
+    "text": "aria-label=\"t('admin.help.button')\""
+  },
+  {
+    "file": "components\\admin\\HelpCenterWidget.vue",
+    "line": 90,
+    "text": "placeholder=\"t('admin.help.inputPlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeFeatureSection.vue",
+    "line": 50,
+    "text": "setLimit(entry.key, v)\"\r\n          />"
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeFeatureSection.vue",
+    "line": 36,
+    "text": "placeholder=\"entry.eyebrowPlaceholder\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeFeatureSection.vue",
+    "line": 41,
+    "text": "placeholder=\"entry.titlePlaceholder\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 13,
+    "text": "= 10\"\r\n        @click=\"addSlide\"\r\n      >"
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 47,
+    "text": "aria-label=\"t('admin.common.moveUp') || 'Move up'\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 56,
+    "text": "aria-label=\"t('admin.common.moveDown') || 'Move down'\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 76,
+    "text": "title=\"t('admin.common.delete')\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 103,
+    "text": "placeholder=\"e.g. Summer Collection\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 108,
+    "text": "placeholder=\"e.g. Up to 50% off\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 114,
+    "text": "placeholder=\"Shop Now\""
+  },
+  {
+    "file": "components\\admin\\homepage\\HomeHeroSection.vue",
+    "line": 119,
+    "text": "placeholder=\"/collections/summer\""
+  },
+  {
+    "file": "components\\admin\\HomepageSettingsForm.vue",
+    "line": 5,
+    "text": "title=\"t('admin.pages.settings.homepage.title') || 'Homepage'\""
+  },
+  {
+    "file": "components\\admin\\HomepageSettingsForm.vue",
+    "line": 20,
+    "text": "title=\"t('admin.homepageSettingsForm.carousel.title')\""
+  },
+  {
+    "file": "components\\admin\\HomepageSettingsForm.vue",
+    "line": 29,
+    "text": "title=\"t('admin.homepageSettingsForm.sections.title')\""
+  },
+  {
+    "file": "components\\admin\\ImageUploader.vue",
+    "line": 33,
+    "text": "((e.currentTarget as HTMLElement).style.color = '#f87171')\"\r\n            @mouseleave=\"(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)')\"\r\n            @click=\"removeImage\"\r\n          >"
+  },
+  {
+    "file": "components\\admin\\ImageUploader.vue",
+    "line": 45,
+    "text": "((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)')\"\r\n        @mouseleave=\"(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.background = '')\"\r\n      >"
+  },
+  {
+    "file": "components\\admin\\ImageUploader.vue",
+    "line": 32,
+    "text": "title=\"t('admin.common.remove')\""
+  },
+  {
+    "file": "components\\admin\\LegalPagesSettingsForm.vue",
+    "line": 27,
+    "text": "Visible in footer"
+  },
+  {
+    "file": "components\\admin\\LegalPagesSettingsForm.vue",
+    "line": 28,
+    "text": "If disabled, the link is hidden from storefront footer templates."
+  },
+  {
+    "file": "components\\admin\\LegalPagesSettingsForm.vue",
+    "line": 44,
+    "text": "Title"
+  },
+  {
+    "file": "components\\admin\\LegalPagesSettingsForm.vue",
+    "line": 54,
+    "text": "Content"
+  },
+  {
+    "file": "components\\admin\\LegalPagesSettingsForm.vue",
+    "line": 5,
+    "text": "title=\"t('admin.nav.legalPages') || 'Legal pages'\""
+  },
+  {
+    "file": "components\\admin\\LegalPagesSettingsForm.vue",
+    "line": 22,
+    "text": "title=\"page.label\""
+  },
+  {
+    "file": "components\\admin\\LegalPagesSettingsForm.vue",
+    "line": 57,
+    "text": "placeholder=\"Enter rich text content...\""
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepBrandColor.vue",
+    "line": 22,
+    "text": "placeholder=\"#4F46E5\""
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepDone.vue",
+    "line": 21,
+    "text": "Template"
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepDone.vue",
+    "line": 25,
+    "text": "Color"
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepDone.vue",
+    "line": 32,
+    "text": "Language"
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepFirstProduct.vue",
+    "line": 19,
+    "text": "placeholder=\"t('admin.pages.onboarding.firstProduct.namePlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepStoreInfo.vue",
+    "line": 16,
+    "text": "placeholder=\"t('admin.pages.onboarding.storeInfo.namePlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepStoreInfo.vue",
+    "line": 57,
+    "text": "placeholder=\"t('admin.pages.onboarding.storeInfo.descriptionPlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepTemplate.vue",
+    "line": 33,
+    "text": "BUY"
+  },
+  {
+    "file": "components\\admin\\onboarding\\StepTemplate.vue",
+    "line": 45,
+    "text": "Prévisualiser"
+  },
+  {
+    "file": "components\\admin\\orders\\OrderDetailCallPills.vue",
+    "line": 5,
+    "text": "aria-label=\"t('admin.pages.orders.detail.fields.callStatus', 'Call Status')\""
+  },
+  {
+    "file": "components\\admin\\orders\\OrderDetailNBA.vue",
+    "line": 15,
+    "text": "title=\"model.primary.hint || ''\""
+  },
+  {
+    "file": "components\\admin\\orders\\OrderDetailNBA.vue",
+    "line": 39,
+    "text": "aria-label=\"t('common.moreActions', 'More actions')\""
+  },
+  {
+    "file": "components\\admin\\orders\\OrderPaymentModal.vue",
+    "line": 37,
+    "text": "placeholder=\"t('admin.common.amount')\""
+  },
+  {
+    "file": "components\\admin\\orders\\OrderPaymentModal.vue",
+    "line": 88,
+    "text": "placeholder=\"t('admin.pages.cash.modals.delivery.referencePlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\orders\\OrderPaymentModal.vue",
+    "line": 101,
+    "text": "placeholder=\"t('admin.pages.cash.modals.delivery.notePlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\ProductForm.vue",
+    "line": 10,
+    "text": "aria-label=\"Tabs\""
+  },
+  {
+    "file": "components\\admin\\ProductForm.vue",
+    "line": 39,
+    "text": "placeholder=\"Enter product title\""
+  },
+  {
+    "file": "components\\admin\\ProductForm.vue",
+    "line": 47,
+    "text": "placeholder=\"product-slug\""
+  },
+  {
+    "file": "components\\admin\\ProductForm.vue",
+    "line": 63,
+    "text": "placeholder=\"Enter a short summary...\""
+  },
+  {
+    "file": "components\\admin\\ProductImagesUploader.vue",
+    "line": 46,
+    "text": "title=\"t('admin.imageUploader.actions.setAsMain')\""
+  },
+  {
+    "file": "components\\admin\\ProductImagesUploader.vue",
+    "line": 54,
+    "text": "title=\"t('admin.imageUploader.actions.remove')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 183,
+    "text": "setInputRef(el, index)\"\r\n                            v-model=\"newValues[option.id]\"\r\n                            type=\"text\"\r\n                            class=\"flex-1 min-w-[120px] border-none p-0 focus:ring-0 text-sm h-7 bg-transparent\" style=\"color: var(--text-primary)\"\r\n                            :placeholder=\"t('admin.productOptionsEditor.fields.addValuePlaceholder')\"\r\n                            @keydown=\"handleValueKeydown($event, option)\"\r\n                            @blur=\"handleValueBlur(option)\"\r\n                        >"
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 26,
+    "text": "placeholder=\"t('admin.productOptionsEditor.fields.optionNamePlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 107,
+    "text": "title=\"v.label\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 120,
+    "text": "title=\"v.label\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 166,
+    "text": "title=\"t('admin.productOptionsEditor.actions.editMetadata')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 187,
+    "text": "placeholder=\"t('admin.productOptionsEditor.fields.addValuePlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 199,
+    "text": "title=\"t('admin.productOptionsEditor.actions.removeOption')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 229,
+    "text": "placeholder=\"t('admin.productOptionsEditor.fields.newOptionNamePlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 304,
+    "text": "title=\"v.label\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 317,
+    "text": "title=\"v.label\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 334,
+    "text": "placeholder=\"t('admin.productOptionsEditor.fields.optionValuesPlaceholder')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 354,
+    "text": "title=\"t('admin.productOptionsEditor.deleteModal.title')\""
+  },
+  {
+    "file": "components\\admin\\ProductOptionsEditor.vue",
+    "line": 422,
+    "text": "placeholder=\"https://example.com/image.jpg\""
+  },
+  {
+    "file": "components\\admin\\ProductVariantsTable.vue",
+    "line": 159,
+    "text": "placeholder=\"t('admin.forms.product.promotionalPrice.label', 'Prix promotionnel')\""
+  },
+  {
+    "file": "components\\admin\\RichTextEditor.vue",
+    "line": 12,
+    "text": "placeholder=\"placeholder || t('admin.components.richTextEditor.placeholder')\""
+  },
+  {
+    "file": "components\\admin\\StoreSettingsForm.vue",
+    "line": 87,
+    "text": "placeholder=\"#4F46E5\""
+  },
+  {
+    "file": "components\\admin\\VariantSelectorModal.vue",
+    "line": 9,
+    "text": "{ (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }\"\r\n            @mouseleave=\"(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }\">"
+  },
+  {
+    "file": "components\\admin\\VariantSelectorModal.vue",
+    "line": 25,
+    "text": "placeholder=\"t('admin.components.variantSelectorModal.search.placeholder')\""
+  },
+  {
+    "file": "components\\branding\\SaaSLogo.vue",
+    "line": 46,
+    "text": "Swekly"
+  },
+  {
+    "file": "components\\BundleDealsPicker.vue",
+    "line": 101,
+    "text": "BEST VALUE"
+  },
+  {
+    "file": "components\\cash\\DeliveryPaymentModal.vue",
+    "line": 78,
+    "text": "placeholder=\"t('admin.pages.cash.modals.delivery.referencePlaceholder')\""
+  },
+  {
+    "file": "components\\cash\\DeliveryPaymentModal.vue",
+    "line": 91,
+    "text": "placeholder=\"t('admin.pages.cash.modals.delivery.notePlaceholder')\""
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 59,
+    "text": "Programme de points"
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 62,
+    "text": "Retrouvez ici vos points disponibles, ce que cette commande va vous faire gagner, et ce que vous pouvez utiliser maintenant."
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 67,
+    "text": "Base points"
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 71,
+    "text": "Product points"
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 75,
+    "text": "Total to earn"
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 85,
+    "text": "Current balance"
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 99,
+    "text": "Utiliser mes points"
+  },
+  {
+    "file": "components\\checkout\\CheckoutLoyaltyPanel.vue",
+    "line": 106,
+    "text": "Points a utiliser"
+  },
+  {
+    "file": "components\\LocaleSwitcher.vue",
+    "line": 50,
+    "text": "{ (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }\"\r\n        @mouseleave=\"(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }\"\r\n      >"
+  },
+  {
+    "file": "components\\loyalty\\ProductLoyaltyPreview.vue",
+    "line": 19,
+    "text": "Base points"
+  },
+  {
+    "file": "components\\loyalty\\ProductLoyaltyPreview.vue",
+    "line": 27,
+    "text": "Product points"
+  },
+  {
+    "file": "components\\loyalty\\ProductLoyaltyPreview.vue",
+    "line": 35,
+    "text": "Total"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\HeroOrb.vue",
+    "line": 127,
+    "text": "DA"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\LogoCloud.vue",
+    "line": 14,
+    "text": "{ if (i === 0 && el) firstSetMarker = el as HTMLElement }\"\r\n          class=\"mx-10 flex shrink-0 items-center gap-2 text-[color:var(--m-text-dim)] hover:text-white transition-colors\"\r\n        >"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismAnalytics.vue",
+    "line": 15,
+    "text": "REVENUE"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismLocalization.vue",
+    "line": 22,
+    "text": "EN"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismLocalization.vue",
+    "line": 23,
+    "text": "FR"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismLocalization.vue",
+    "line": 24,
+    "text": "AR"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismLocalization.vue",
+    "line": 28,
+    "text": "LOCALE"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismLogistics.vue",
+    "line": 56,
+    "text": "PICKED"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismLogistics.vue",
+    "line": 57,
+    "text": "IN TRANSIT"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismLogistics.vue",
+    "line": 58,
+    "text": "DELIVERED"
+  },
+  {
+    "file": "components\\marketing\\cinematic\\mechanisms\\MechanismPayment.vue",
+    "line": 50,
+    "text": "PAID"
+  },
+  {
+    "file": "components\\marketing\\Footer.vue",
+    "line": 26,
+    "text": "Swekly"
+  },
+  {
+    "file": "components\\marketing\\NavBar.vue",
+    "line": 58,
+    "text": "Swekly"
+  },
+  {
+    "file": "components\\pos\\PosCustomerModal.vue",
+    "line": 23,
+    "text": "placeholder=\"t('admin.forms.customer.name.placeholder')\""
+  },
+  {
+    "file": "components\\pos\\PosCustomerModal.vue",
+    "line": 37,
+    "text": "placeholder=\"t('admin.forms.customer.phone.placeholder')\""
+  },
+  {
+    "file": "components\\ProductCard.vue",
+    "line": 39,
+    "text": "0\"\r\n          class=\"text-sm\"\r\n          :class=\"product.stock"
+  },
+  {
+    "file": "components\\ProductCard.vue",
+    "line": 48,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\SaasLanding.vue",
+    "line": 219,
+    "text": "title=\"f.title\""
+  },
+  {
+    "file": "components\\storefront\\CommuneField.vue",
+    "line": 81,
+    "text": "Loading communes…"
+  },
+  {
+    "file": "components\\storefront\\PriceRangeFilter.vue",
+    "line": 157,
+    "text": "placeholder=\"minPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\PriceRangeFilter.vue",
+    "line": 172,
+    "text": "placeholder=\"maxPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\PriceRangeFilter.vue",
+    "line": 198,
+    "text": "aria-label=\"Minimum price slider\""
+  },
+  {
+    "file": "components\\storefront\\PriceRangeFilter.vue",
+    "line": 215,
+    "text": "aria-label=\"Maximum price slider\""
+  },
+  {
+    "file": "components\\storefront\\shared\\AnnouncementBar.vue",
+    "line": 84,
+    "text": "aria-label=\"t('storefront.announcement.dismissAria')\""
+  },
+  {
+    "file": "components\\storefront\\shared\\CountdownTimer.vue",
+    "line": 8,
+    "text": "0\" class=\"flex items-center\">"
+  },
+  {
+    "file": "components\\storefront\\shared\\FavoriteButton.vue",
+    "line": 32,
+    "text": "title=\"label\""
+  },
+  {
+    "file": "components\\storefront\\shared\\FavoriteButton.vue",
+    "line": 33,
+    "text": "aria-label=\"label\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Checkout.vue",
+    "line": 481,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Checkout.vue",
+    "line": 342,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Checkout.vue",
+    "line": 351,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Checkout.vue",
+    "line": 382,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Checkout.vue",
+    "line": 393,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Home.vue",
+    "line": 307,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Home.vue",
+    "line": 330,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Home.vue",
+    "line": 335,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Home.vue",
+    "line": 362,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductDetails.vue",
+    "line": 132,
+    "text": "0\"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductDetails.vue",
+    "line": 251,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductDetails.vue",
+    "line": 188,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductDetails.vue",
+    "line": 237,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductDetails.vue",
+    "line": 308,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductGallery.vue",
+    "line": 122,
+    "text": "1\" class=\"absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductGallery.vue",
+    "line": 134,
+    "text": "1\" \r\n                @click.stop=\"prevImage\" \r\n                class=\"hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductGallery.vue",
+    "line": 141,
+    "text": "1\" \r\n                @click.stop=\"nextImage\" \r\n                class=\"hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductOrderForm.vue",
+    "line": 533,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductOrderForm.vue",
+    "line": 714,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductOrderForm.vue",
+    "line": 576,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductOrderForm.vue",
+    "line": 587,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductOrderForm.vue",
+    "line": 619,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\ProductOrderForm.vue",
+    "line": 631,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\partials\\RelatedProducts.vue",
+    "line": 20,
+    "text": "0\" class=\"mt-16 border-t border-slate-200 pt-12 animate-fade-in-up\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Product.vue",
+    "line": 105,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Product.vue",
+    "line": 112,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Product.vue",
+    "line": 167,
+    "text": "0\" \r\n      :products=\"relatedProducts\" \r\n    />"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Product.vue",
+    "line": 122,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductCard.vue",
+    "line": 140,
+    "text": "New"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductCard.vue",
+    "line": 186,
+    "text": "0 && viewMode !== 'list'\"\r\n        class=\"absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductCard.vue",
+    "line": 192,
+    "text": "Low Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductCard.vue",
+    "line": 196,
+    "text": "In Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductCard.vue",
+    "line": 203,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductCard.vue",
+    "line": 167,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductCard.vue",
+    "line": 177,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductLandingPage.vue",
+    "line": 109,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 268,
+    "text": "Hot Deals"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 269,
+    "text": "New Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 270,
+    "text": "Best Sellers"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 271,
+    "text": "Discounts"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 363,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 413,
+    "text": "Newest Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 394,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 428,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\activewear\\Shop.vue",
+    "line": 436,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\AboutPage.vue",
+    "line": 29,
+    "text": "Welcome to"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\AboutPage.vue",
+    "line": 30,
+    "text": ". This page is part of your tenant storefront template and can be customized from the onboarding wizard."
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Checkout.vue",
+    "line": 367,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Checkout.vue",
+    "line": 439,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Checkout.vue",
+    "line": 338,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Checkout.vue",
+    "line": 342,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Checkout.vue",
+    "line": 359,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Checkout.vue",
+    "line": 378,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Home.vue",
+    "line": 257,
+    "text": "View all products →"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Home.vue",
+    "line": 277,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Home.vue",
+    "line": 282,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductDetails.vue",
+    "line": 138,
+    "text": "0\r\n      \"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductDetails.vue",
+    "line": 258,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductDetails.vue",
+    "line": 195,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductDetails.vue",
+    "line": 244,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductDetails.vue",
+    "line": 315,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductGallery.vue",
+    "line": 122,
+    "text": "1\" class=\"absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductGallery.vue",
+    "line": 134,
+    "text": "1\" \r\n                @click.stop=\"prevImage\" \r\n                class=\"hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#0b0f14]/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-200 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#0b0f14] z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductGallery.vue",
+    "line": 141,
+    "text": "1\" \r\n                @click.stop=\"nextImage\" \r\n                class=\"hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-[#0b0f14]/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-200 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-[#0b0f14] z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductOrderForm.vue",
+    "line": 534,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductOrderForm.vue",
+    "line": 716,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductOrderForm.vue",
+    "line": 577,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductOrderForm.vue",
+    "line": 588,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductOrderForm.vue",
+    "line": 620,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\ProductOrderForm.vue",
+    "line": 632,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\partials\\RelatedProducts.vue",
+    "line": 20,
+    "text": "0\" class=\"mt-16 border-t border-white/10 pt-12 animate-fade-in-up\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Product.vue",
+    "line": 98,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Product.vue",
+    "line": 100,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Product.vue",
+    "line": 163,
+    "text": "0\"\r\n      :products=\"relatedProducts\"\r\n    />"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Product.vue",
+    "line": 116,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\ProductCard.vue",
+    "line": 134,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\ProductCard.vue",
+    "line": 138,
+    "text": "Low Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\ProductCard.vue",
+    "line": 150,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\ProductLandingPage.vue",
+    "line": 137,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Shop.vue",
+    "line": 273,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Shop.vue",
+    "line": 434,
+    "text": "Close"
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Shop.vue",
+    "line": 303,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Shop.vue",
+    "line": 329,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\arena\\Shop.vue",
+    "line": 337,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Checkout.vue",
+    "line": 424,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Checkout.vue",
+    "line": 316,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Checkout.vue",
+    "line": 320,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Checkout.vue",
+    "line": 346,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Checkout.vue",
+    "line": 353,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 175,
+    "text": "Authenticity Guaranteed"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 179,
+    "text": "Free Worldwide Shipping"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 183,
+    "text": "30-Day Returns"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 187,
+    "text": "2-Year Warranty"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 287,
+    "text": "View all"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 325,
+    "text": "Explore Collection"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 352,
+    "text": "View all"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 358,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Home.vue",
+    "line": 383,
+    "text": "View all &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\BundleDealsPicker.vue",
+    "line": 100,
+    "text": "BEST VALUE"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductDetails.vue",
+    "line": 150,
+    "text": "0\"\r\n      class=\"space-y-5\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductDetails.vue",
+    "line": 218,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductGallery.vue",
+    "line": 71,
+    "text": "1\" class=\"absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductGallery.vue",
+    "line": 83,
+    "text": "1\" \r\n                class=\"hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10\"\r\n                style=\"background-color:rgba(14,17,23,0.85); border:1px solid rgba(212,197,169,0.2); border-radius:1px; color:#D4C5A9;\"\r\n                @click.stop=\"prevImage\" \r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductGallery.vue",
+    "line": 91,
+    "text": "1\" \r\n                class=\"hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10\"\r\n                style=\"background-color:rgba(14,17,23,0.85); border:1px solid rgba(212,197,169,0.2); border-radius:1px; color:#D4C5A9;\"\r\n                @click.stop=\"nextImage\" \r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductOrderForm.vue",
+    "line": 341,
+    "text": "0 && quantity >= maxQuantity)\" @click=\"incrementQuantity\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductOrderForm.vue",
+    "line": 502,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductOrderForm.vue",
+    "line": 381,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductOrderForm.vue",
+    "line": 386,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductOrderForm.vue",
+    "line": 412,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\ProductOrderForm.vue",
+    "line": 421,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\partials\\RelatedProducts.vue",
+    "line": 16,
+    "text": "0\" class=\"mt-16 pt-12 border-t\" style=\"border-color:rgba(212,197,169,0.08);\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Product.vue",
+    "line": 95,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Product.vue",
+    "line": 97,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Product.vue",
+    "line": 150,
+    "text": "0\" \r\n      :products=\"relatedProducts\" \r\n    />"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Product.vue",
+    "line": 104,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\ProductCard.vue",
+    "line": 128,
+    "text": "New"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\ProductCard.vue",
+    "line": 179,
+    "text": "0 && viewMode !== 'list'\"\r\n        class=\"absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\ProductCard.vue",
+    "line": 186,
+    "text": "Low Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\ProductCard.vue",
+    "line": 191,
+    "text": "In Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\ProductCard.vue",
+    "line": 201,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\ProductCard.vue",
+    "line": 159,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\ProductCard.vue",
+    "line": 170,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Shop.vue",
+    "line": 271,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Shop.vue",
+    "line": 287,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Shop.vue",
+    "line": 303,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\chrono\\Shop.vue",
+    "line": 306,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Cart.vue",
+    "line": 88,
+    "text": "= item.stock\"\r\n                        class=\"w-10 h-full flex items-center justify-center text-slate-500 hover:text-slate-900 hover:bg-slate-50 disabled:opacity-30 transition-colors\"\r\n                        @click=\"cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)\"\r\n                      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Checkout.vue",
+    "line": 453,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Checkout.vue",
+    "line": 345,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Checkout.vue",
+    "line": 354,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Checkout.vue",
+    "line": 385,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Checkout.vue",
+    "line": 396,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\ContactPage.vue",
+    "line": 31,
+    "text": "noukhba.contact@gmail.com"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Home.vue",
+    "line": 263,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Home.vue",
+    "line": 280,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Home.vue",
+    "line": 306,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductDetails.vue",
+    "line": 90,
+    "text": "0\"\r\n      class=\"space-y-6\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductDetails.vue",
+    "line": 204,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductDetails.vue",
+    "line": 147,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductDetails.vue",
+    "line": 190,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductDetails.vue",
+    "line": 261,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductGallery.vue",
+    "line": 42,
+    "text": "New Arrival"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductOrderForm.vue",
+    "line": 485,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductOrderForm.vue",
+    "line": 656,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductOrderForm.vue",
+    "line": 518,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductOrderForm.vue",
+    "line": 529,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductOrderForm.vue",
+    "line": 561,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\partials\\ProductOrderForm.vue",
+    "line": 573,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Product.vue",
+    "line": 96,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Product.vue",
+    "line": 103,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Product.vue",
+    "line": 113,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\ProductCard.vue",
+    "line": 173,
+    "text": "0 && viewMode !== 'list'\"\r\n        class=\"absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\ProductCard.vue",
+    "line": 154,
+    "text": "title=\"storefrontContent.actions.quickView\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\ProductCard.vue",
+    "line": 164,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\ProductLandingPage.vue",
+    "line": 111,
+    "text": "Experience premium quality with our latest collection. Designed for\r\n        modern living, this product combines style and functionality seamlessly."
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Shop.vue",
+    "line": 369,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-8\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Shop.vue",
+    "line": 400,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Shop.vue",
+    "line": 430,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\classic\\Shop.vue",
+    "line": 438,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Cart.vue",
+    "line": 59,
+    "text": "= item.stock\"\r\n                                      @click=\"cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)\" \r\n                                      class=\"w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 font-bold disabled:opacity-30\"\r\n                                    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Checkout.vue",
+    "line": 432,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Checkout.vue",
+    "line": 340,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Checkout.vue",
+    "line": 349,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Checkout.vue",
+    "line": 378,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Checkout.vue",
+    "line": 389,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\ContactPage.vue",
+    "line": 33,
+    "text": "123 Serenity Lane, Cloud City"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\ContactPage.vue",
+    "line": 39,
+    "text": "hello@cozy.store"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Home.vue",
+    "line": 261,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Home.vue",
+    "line": 263,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Home.vue",
+    "line": 306,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Home.vue",
+    "line": 326,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Home.vue",
+    "line": 328,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Home.vue",
+    "line": 332,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Home.vue",
+    "line": 358,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductDetails.vue",
+    "line": 93,
+    "text": "0\"\r\n      class=\"space-y-6 pt-6 border-t border-slate-100\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductDetails.vue",
+    "line": 210,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductDetails.vue",
+    "line": 149,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductDetails.vue",
+    "line": 196,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductDetails.vue",
+    "line": 269,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductGallery.vue",
+    "line": 29,
+    "text": "0\"\r\n        :src=\"images[selectedImage]\"\r\n        :alt=\"title\"\r\n        class=\"w-full h-full object-contain transition-transform duration-500\"\r\n        :style=\"zoomStyle\"\r\n      />"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductGallery.vue",
+    "line": 49,
+    "text": "1\" class=\"flex gap-3 overflow-x-auto pb-2\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductOrderForm.vue",
+    "line": 475,
+    "text": "0 && quantity >= maxQuantity)\"\r\n          @click=\"incrementQuantity\"\r\n        >"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductOrderForm.vue",
+    "line": 650,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductOrderForm.vue",
+    "line": 513,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductOrderForm.vue",
+    "line": 523,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductOrderForm.vue",
+    "line": 555,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\partials\\ProductOrderForm.vue",
+    "line": 567,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Product.vue",
+    "line": 109,
+    "text": "title=\"product.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\ProductLandingPage.vue",
+    "line": 120,
+    "text": "Experience premium quality with our latest collection. Crafted with care\r\n        for your comfort."
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\ProductLandingPage.vue",
+    "line": 130,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Shop.vue",
+    "line": 303,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\cozy\\Shop.vue",
+    "line": 335,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Cart.vue",
+    "line": 113,
+    "text": "= item.stock\"\r\n                        class=\"p-1 rounded-full text-purple-300/70 hover:text-pink-400 disabled:opacity-30 disabled:hover:text-purple-300/70 transition-colors\"\r\n                        @click=\"cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)\"\r\n                      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Checkout.vue",
+    "line": 487,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Checkout.vue",
+    "line": 346,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Checkout.vue",
+    "line": 355,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Checkout.vue",
+    "line": 385,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Checkout.vue",
+    "line": 396,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Home.vue",
+    "line": 267,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Home.vue",
+    "line": 269,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Home.vue",
+    "line": 312,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Home.vue",
+    "line": 334,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Home.vue",
+    "line": 336,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Home.vue",
+    "line": 340,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Home.vue",
+    "line": 366,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductDetails.vue",
+    "line": 92,
+    "text": "0\"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductDetails.vue",
+    "line": 217,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductDetails.vue",
+    "line": 150,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductDetails.vue",
+    "line": 199,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductDetails.vue",
+    "line": 274,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductGallery.vue",
+    "line": 37,
+    "text": "1\" class=\"absolute inset-0 flex items-center justify-between p-4 opacity-0 group-hover:opacity-100 transition-opacity\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductGallery.vue",
+    "line": 55,
+    "text": "1\" class=\"absolute bottom-4 right-4 px-3 py-1.5 bg-[#1a0a2e]/90 border border-pink-500/30 rounded-full backdrop-blur-sm\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductGallery.vue",
+    "line": 61,
+    "text": "1\" class=\"mt-4 grid grid-cols-5 gap-3\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductOrderForm.vue",
+    "line": 485,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductOrderForm.vue",
+    "line": 664,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductOrderForm.vue",
+    "line": 525,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductOrderForm.vue",
+    "line": 536,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductOrderForm.vue",
+    "line": 569,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\partials\\ProductOrderForm.vue",
+    "line": 581,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Product.vue",
+    "line": 103,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Product.vue",
+    "line": 110,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Product.vue",
+    "line": 124,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\ProductCard.vue",
+    "line": 134,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\ProductCard.vue",
+    "line": 200,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\ProductCard.vue",
+    "line": 152,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\ProductCard.vue",
+    "line": 193,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\ProductCard.vue",
+    "line": 224,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\ProductLandingPage.vue",
+    "line": 136,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\ProductLandingPage.vue",
+    "line": 154,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Shop.vue",
+    "line": 279,
+    "text": "Reset"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Shop.vue",
+    "line": 324,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Shop.vue",
+    "line": 356,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Shop.vue",
+    "line": 389,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\cyber\\Shop.vue",
+    "line": 397,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Cart.vue",
+    "line": 105,
+    "text": "= item.stock\"\r\n                        class=\"w-8 h-8 flex items-center justify-center rounded-full bg-stone-900 text-white shadow-sm hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 transition-all\"\r\n                        @click=\"cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)\"\r\n                      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Checkout.vue",
+    "line": 174,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Checkout.vue",
+    "line": 45,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Checkout.vue",
+    "line": 54,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Checkout.vue",
+    "line": 85,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Checkout.vue",
+    "line": 96,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Home.vue",
+    "line": 187,
+    "text": "&larr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Home.vue",
+    "line": 193,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Home.vue",
+    "line": 254,
+    "text": "View all"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Home.vue",
+    "line": 256,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Home.vue",
+    "line": 299,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Home.vue",
+    "line": 323,
+    "text": "No items found."
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductDetails.vue",
+    "line": 90,
+    "text": "0\"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductDetails.vue",
+    "line": 209,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductDetails.vue",
+    "line": 146,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductDetails.vue",
+    "line": 195,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductDetails.vue",
+    "line": 266,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductGallery.vue",
+    "line": 42,
+    "text": "New Arrival"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductOrderForm.vue",
+    "line": 485,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductOrderForm.vue",
+    "line": 663,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductOrderForm.vue",
+    "line": 525,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductOrderForm.vue",
+    "line": 536,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductOrderForm.vue",
+    "line": 568,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\partials\\ProductOrderForm.vue",
+    "line": 580,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Product.vue",
+    "line": 97,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Product.vue",
+    "line": 116,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\ProductCard.vue",
+    "line": 162,
+    "text": "title=\"storefrontContent.actions.quickView\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\ProductCard.vue",
+    "line": 172,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\ProductLandingPage.vue",
+    "line": 109,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 192,
+    "text": "Filters"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 206,
+    "text": "Categories"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 278,
+    "text": "Filters"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 338,
+    "text": "Filters"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 396,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-8 ml-2\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 516,
+    "text": "View Product Details"
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 347,
+    "text": "placeholder=\"storefrontContent.shop.searchPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 379,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\food\\Shop.vue",
+    "line": 387,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Checkout.vue",
+    "line": 396,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Checkout.vue",
+    "line": 506,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Checkout.vue",
+    "line": 340,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Checkout.vue",
+    "line": 349,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Checkout.vue",
+    "line": 380,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Checkout.vue",
+    "line": 418,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Home.vue",
+    "line": 308,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Home.vue",
+    "line": 330,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Home.vue",
+    "line": 332,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Home.vue",
+    "line": 336,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Home.vue",
+    "line": 362,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductDetails.vue",
+    "line": 136,
+    "text": "0\"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductDetails.vue",
+    "line": 255,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductDetails.vue",
+    "line": 192,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductDetails.vue",
+    "line": 241,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductDetails.vue",
+    "line": 312,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductGallery.vue",
+    "line": 119,
+    "text": "1\" class=\"absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductGallery.vue",
+    "line": 131,
+    "text": "1\" \r\n                @click.stop=\"prevImage\" \r\n                class=\"hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductGallery.vue",
+    "line": 138,
+    "text": "1\" \r\n                @click.stop=\"nextImage\" \r\n                class=\"hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductOrderForm.vue",
+    "line": 534,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductOrderForm.vue",
+    "line": 716,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductOrderForm.vue",
+    "line": 577,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductOrderForm.vue",
+    "line": 588,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductOrderForm.vue",
+    "line": 620,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\ProductOrderForm.vue",
+    "line": 632,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\partials\\RelatedProducts.vue",
+    "line": 20,
+    "text": "0\" class=\"mt-16 border-t border-slate-200 pt-12 animate-fade-in-up\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Product.vue",
+    "line": 107,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Product.vue",
+    "line": 114,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Product.vue",
+    "line": 170,
+    "text": "0\" \r\n      :products=\"relatedProducts\" \r\n    />"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Product.vue",
+    "line": 124,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductCard.vue",
+    "line": 132,
+    "text": "New"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductCard.vue",
+    "line": 176,
+    "text": "0 && viewMode !== 'list'\"\r\n        class=\"absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductCard.vue",
+    "line": 182,
+    "text": "Low Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductCard.vue",
+    "line": 186,
+    "text": "In Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductCard.vue",
+    "line": 193,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductCard.vue",
+    "line": 157,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductCard.vue",
+    "line": 167,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductLandingPage.vue",
+    "line": 109,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 267,
+    "text": "Hot Deals"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 268,
+    "text": "New Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 269,
+    "text": "Best Sellers"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 270,
+    "text": "Discounts"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 362,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 412,
+    "text": "Newest Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 393,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 427,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\interior\\Shop.vue",
+    "line": 435,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 14,
+    "text": "Notre histoire"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 15,
+    "text": "À propos"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 33,
+    "text": "Nous croyons que chaque espace de vie mérite d'être beau, fonctionnel et inspirant. C'est pourquoi nous sélectionnons avec soin chaque produit pour vous offrir le meilleur de la décoration et des accessoires maison."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 45,
+    "text": "Nos valeurs"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 57,
+    "text": "Qualité"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 58,
+    "text": "Des produits sélectionnés pour leur qualité de fabrication et leur durabilité."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 69,
+    "text": "Art de vivre"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 70,
+    "text": "Chaque pièce est pensée pour embellir et améliorer votre quotidien."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 80,
+    "text": "Passion"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 81,
+    "text": "Une équipe passionnée par la décoration intérieure et le design."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 92,
+    "text": "Découvrir"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 92,
+    "text": "notre boutique"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\AboutPage.vue",
+    "line": 94,
+    "text": "Explorer les produits"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Cart.vue",
+    "line": 14,
+    "text": "Votre sélection"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Cart.vue",
+    "line": 25,
+    "text": "Votre panier est vide"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Cart.vue",
+    "line": 76,
+    "text": "= item.stock\"\r\n                      class=\"cart__qty-btn\"\r\n                      @click=\"cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)\"\r\n                    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Category.vue",
+    "line": 52,
+    "text": "Collections"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Checkout.vue",
+    "line": 210,
+    "text": "Finaliser"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Checkout.vue",
+    "line": 294,
+    "text": "Chargement…"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Checkout.vue",
+    "line": 229,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Checkout.vue",
+    "line": 233,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Checkout.vue",
+    "line": 252,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Checkout.vue",
+    "line": 259,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 20,
+    "text": "Nous contacter"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 30,
+    "text": "Prenons"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 30,
+    "text": "contact"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 31,
+    "text": "Vous avez une question sur un produit, une commande ou vous souhaitez simplement nous dire bonjour ? Nous sommes là pour vous."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 43,
+    "text": "Algérie"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 47,
+    "text": "Pistachio — Art de vivre"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 55,
+    "text": "Nom complet"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 65,
+    "text": "Email"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 75,
+    "text": "Message"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 84,
+    "text": "Envoyer le message"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 59,
+    "text": "placeholder=\"Votre nom\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 69,
+    "text": "placeholder=\"votre@email.com\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ContactPage.vue",
+    "line": 79,
+    "text": "placeholder=\"Votre message…\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 155,
+    "text": "Livraison partout en Algérie"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 160,
+    "text": "Sélection rigoureuse"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 165,
+    "text": "Retours facilités"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 170,
+    "text": "0\" class=\"atelier-cats\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 176,
+    "text": "Tout explorer"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 214,
+    "text": "5\" class=\"atelier-cats__overflow\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 234,
+    "text": "Tout voir"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 261,
+    "text": "Voir tous les produits"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 272,
+    "text": "Notre Univers"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 275,
+    "text": "L'art de décorer"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 276,
+    "text": "votre espace"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 278,
+    "text": "Des pièces pensées pour embellir chaque coin de votre maison."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 279,
+    "text": "Du salon à la chambre, de la cuisine au bureau."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 283,
+    "text": "Découvrir la boutique"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 292,
+    "text": "0\" class=\"atelier-products atelier-products--sellers\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 298,
+    "text": "Tout voir"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 125,
+    "text": "aria-label=\"Précédent\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Home.vue",
+    "line": 133,
+    "text": "aria-label=\"Suivant\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductDetails.vue",
+    "line": 81,
+    "text": "0\"\r\n      class=\"details__options\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductGallery.vue",
+    "line": 25,
+    "text": "0\"\r\n          :key=\"selectedImage\"\r\n          :src=\"images[selectedImage]\"\r\n          :alt=\"title\"\r\n          class=\"gallery__main-img\"\r\n          :style=\"zoomStyle\"\r\n        >"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductGallery.vue",
+    "line": 48,
+    "text": "1\" class=\"gallery__thumbs\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductOrderForm.vue",
+    "line": 262,
+    "text": "0 && quantity >= maxQuantity)\" @click=\"incrementQuantity\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductOrderForm.vue",
+    "line": 362,
+    "text": "Chargement…"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductOrderForm.vue",
+    "line": 295,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductOrderForm.vue",
+    "line": 300,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductOrderForm.vue",
+    "line": 321,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\partials\\ProductOrderForm.vue",
+    "line": 330,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Product.vue",
+    "line": 92,
+    "text": "title=\"product.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ProductCard.vue",
+    "line": 86,
+    "text": "Ajouter"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\ProductCard.vue",
+    "line": 93,
+    "text": "Voir"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Shop.vue",
+    "line": 110,
+    "text": "Notre boutique"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\Shop.vue",
+    "line": 188,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 208,
+    "text": "{ isSearchDropdownOpen = false }, 200)\"\r\n                @focus=\"searchQuery.length >= 3 ? isSearchDropdownOpen = true : null\"\r\n              >"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 219,
+    "text": "Recherche…"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 220,
+    "text": "Aucun résultat."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 242,
+    "text": "See more"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 313,
+    "text": "Pistachio, sélection premium pour une boutique chaleureuse et raffinée."
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 343,
+    "text": "Collections"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 372,
+    "text": "Atelier · Algérie"
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 166,
+    "text": "title=\"storefrontContent.header.wishlistTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\maison\\StoreShell.vue",
+    "line": 205,
+    "text": "placeholder=\"storefrontContent.search?.placeholder || 'Rechercher un produit...'\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Checkout.vue",
+    "line": 474,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Checkout.vue",
+    "line": 335,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Checkout.vue",
+    "line": 344,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Checkout.vue",
+    "line": 375,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Checkout.vue",
+    "line": 386,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Home.vue",
+    "line": 308,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Home.vue",
+    "line": 330,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Home.vue",
+    "line": 332,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Home.vue",
+    "line": 336,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Home.vue",
+    "line": 362,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductDetails.vue",
+    "line": 132,
+    "text": "0\"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductDetails.vue",
+    "line": 251,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductDetails.vue",
+    "line": 188,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductDetails.vue",
+    "line": 237,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductDetails.vue",
+    "line": 308,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductGallery.vue",
+    "line": 119,
+    "text": "1\" class=\"absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductGallery.vue",
+    "line": 131,
+    "text": "1\" \r\n                @click.stop=\"prevImage\" \r\n                class=\"hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductGallery.vue",
+    "line": 138,
+    "text": "1\" \r\n                @click.stop=\"nextImage\" \r\n                class=\"hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductOrderForm.vue",
+    "line": 533,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductOrderForm.vue",
+    "line": 714,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductOrderForm.vue",
+    "line": 576,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductOrderForm.vue",
+    "line": 587,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductOrderForm.vue",
+    "line": 619,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\ProductOrderForm.vue",
+    "line": 631,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\partials\\RelatedProducts.vue",
+    "line": 20,
+    "text": "0\" class=\"mt-16 border-t border-slate-200 pt-12 animate-fade-in-up\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Product.vue",
+    "line": 105,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Product.vue",
+    "line": 112,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Product.vue",
+    "line": 167,
+    "text": "0\" \r\n      :products=\"relatedProducts\" \r\n    />"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Product.vue",
+    "line": 122,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductCard.vue",
+    "line": 140,
+    "text": "New"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductCard.vue",
+    "line": 184,
+    "text": "0 && viewMode !== 'list'\"\r\n        class=\"absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductCard.vue",
+    "line": 190,
+    "text": "Low Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductCard.vue",
+    "line": 194,
+    "text": "In Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductCard.vue",
+    "line": 201,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductCard.vue",
+    "line": 165,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductCard.vue",
+    "line": 175,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductLandingPage.vue",
+    "line": 109,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 267,
+    "text": "Hot Deals"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 268,
+    "text": "New Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 269,
+    "text": "Best Sellers"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 270,
+    "text": "Discounts"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 362,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 412,
+    "text": "Newest Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 393,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 427,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\minimal\\Shop.vue",
+    "line": 435,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Checkout.vue",
+    "line": 403,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Checkout.vue",
+    "line": 513,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Checkout.vue",
+    "line": 347,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Checkout.vue",
+    "line": 356,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Checkout.vue",
+    "line": 387,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Checkout.vue",
+    "line": 425,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Home.vue",
+    "line": 308,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Home.vue",
+    "line": 330,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Home.vue",
+    "line": 332,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Home.vue",
+    "line": 336,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Home.vue",
+    "line": 362,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductDetails.vue",
+    "line": 138,
+    "text": "0\r\n      \"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductDetails.vue",
+    "line": 258,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductDetails.vue",
+    "line": 195,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductDetails.vue",
+    "line": 244,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductDetails.vue",
+    "line": 315,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductGallery.vue",
+    "line": 122,
+    "text": "1\" class=\"absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductGallery.vue",
+    "line": 134,
+    "text": "1\" \r\n                @click.stop=\"prevImage\" \r\n                class=\"hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductGallery.vue",
+    "line": 141,
+    "text": "1\" \r\n                @click.stop=\"nextImage\" \r\n                class=\"hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductOrderForm.vue",
+    "line": 534,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductOrderForm.vue",
+    "line": 716,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductOrderForm.vue",
+    "line": 577,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductOrderForm.vue",
+    "line": 588,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductOrderForm.vue",
+    "line": 620,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\ProductOrderForm.vue",
+    "line": 632,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\partials\\RelatedProducts.vue",
+    "line": 20,
+    "text": "0\" class=\"mt-16 border-t border-slate-200 pt-12 animate-fade-in-up\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Product.vue",
+    "line": 107,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Product.vue",
+    "line": 114,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Product.vue",
+    "line": 170,
+    "text": "0\" \r\n      :products=\"relatedProducts\" \r\n    />"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Product.vue",
+    "line": 124,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductCard.vue",
+    "line": 132,
+    "text": "New"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductCard.vue",
+    "line": 176,
+    "text": "0 && viewMode !== 'list'\"\r\n        class=\"absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductCard.vue",
+    "line": 182,
+    "text": "Low Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductCard.vue",
+    "line": 186,
+    "text": "In Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductCard.vue",
+    "line": 193,
+    "text": "Out of Stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductCard.vue",
+    "line": 157,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductCard.vue",
+    "line": 167,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductLandingPage.vue",
+    "line": 109,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 283,
+    "text": "Hot Deals"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 284,
+    "text": "New Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 285,
+    "text": "Best Sellers"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 286,
+    "text": "Discounts"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 389,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 439,
+    "text": "Newest Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 420,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 454,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\modern\\Shop.vue",
+    "line": 462,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Checkout.vue",
+    "line": 481,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Checkout.vue",
+    "line": 342,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Checkout.vue",
+    "line": 351,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Checkout.vue",
+    "line": 382,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Checkout.vue",
+    "line": 393,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Home.vue",
+    "line": 279,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductDetails.vue",
+    "line": 125,
+    "text": "0\"\r\n      class=\"space-y-5\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductDetails.vue",
+    "line": 241,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductDetails.vue",
+    "line": 181,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductDetails.vue",
+    "line": 225,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductDetails.vue",
+    "line": 297,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductGallery.vue",
+    "line": 82,
+    "text": "1\" class=\"absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10 md:hidden\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductGallery.vue",
+    "line": 94,
+    "text": "1\"\r\n        class=\"hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white rounded-full items-center justify-center text-violet-700 border-3 border-violet-100 shadow-[0_3px_0_0_#ddd6fe] opacity-0 group-hover:opacity-100 hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all z-10\"\r\n        @click.stop=\"prevImage\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductGallery.vue",
+    "line": 101,
+    "text": "1\"\r\n        class=\"hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white rounded-full items-center justify-center text-violet-700 border-3 border-violet-100 shadow-[0_3px_0_0_#ddd6fe] opacity-0 group-hover:opacity-100 hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all z-10\"\r\n        @click.stop=\"nextImage\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductGallery.vue",
+    "line": 110,
+    "text": "1\" class=\"flex flex-wrap gap-3 justify-center\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductOrderForm.vue",
+    "line": 424,
+    "text": "0 && quantity >= maxQuantity)\"\r\n          @click=\"incrementQuantity\"\r\n        >"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductOrderForm.vue",
+    "line": 586,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductOrderForm.vue",
+    "line": 471,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductOrderForm.vue",
+    "line": 484,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductOrderForm.vue",
+    "line": 515,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\ProductOrderForm.vue",
+    "line": 530,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\partials\\RelatedProducts.vue",
+    "line": 20,
+    "text": "0\" class=\"mt-16 border-t-3 border-violet-100 pt-12 animate-fade-in-up\" style=\"font-family: 'DM Sans', sans-serif\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Product.vue",
+    "line": 83,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Product.vue",
+    "line": 85,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Product.vue",
+    "line": 136,
+    "text": "0\"\r\n      :products=\"relatedProducts\"\r\n    />"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Product.vue",
+    "line": 93,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductCard.vue",
+    "line": 146,
+    "text": "Low stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductCard.vue",
+    "line": 150,
+    "text": "Out of stock"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductCard.vue",
+    "line": 121,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductCard.vue",
+    "line": 162,
+    "text": "title=\"Quick View\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductCard.vue",
+    "line": 194,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductLandingPage.vue",
+    "line": 106,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductLandingPage.vue",
+    "line": 160,
+    "text": "window.scrollTo({ top: 0, behavior: 'smooth' })\"\r\n        >"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\ProductLandingPage.vue",
+    "line": 115,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Shop.vue",
+    "line": 320,
+    "text": "0\" class=\"bg-white rounded-3xl border-3 border-amber-100 p-5 shadow-[0_4px_0_0_#fde68a]\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Shop.vue",
+    "line": 351,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-5\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Shop.vue",
+    "line": 589,
+    "text": "Added!"
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Shop.vue",
+    "line": 383,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Shop.vue",
+    "line": 412,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\playful\\Shop.vue",
+    "line": 420,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Checkout.vue",
+    "line": 481,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Checkout.vue",
+    "line": 342,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Checkout.vue",
+    "line": 351,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Checkout.vue",
+    "line": 382,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Checkout.vue",
+    "line": 393,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Home.vue",
+    "line": 247,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Home.vue",
+    "line": 249,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Home.vue",
+    "line": 293,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Home.vue",
+    "line": 315,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Home.vue",
+    "line": 317,
+    "text": "&rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Home.vue",
+    "line": 321,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Home.vue",
+    "line": 348,
+    "text": "View all products &rarr;"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductDetails.vue",
+    "line": 92,
+    "text": "0\"\r\n      class=\"space-y-4\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductDetails.vue",
+    "line": 211,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductDetails.vue",
+    "line": 148,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductDetails.vue",
+    "line": 197,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductDetails.vue",
+    "line": 268,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductGallery.vue",
+    "line": 42,
+    "text": "New Arrival"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductOrderForm.vue",
+    "line": 485,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductOrderForm.vue",
+    "line": 663,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductOrderForm.vue",
+    "line": 525,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductOrderForm.vue",
+    "line": 536,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductOrderForm.vue",
+    "line": 568,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\partials\\ProductOrderForm.vue",
+    "line": 580,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Product.vue",
+    "line": 96,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Product.vue",
+    "line": 103,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Product.vue",
+    "line": 113,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\ProductCard.vue",
+    "line": 185,
+    "text": "0 && viewMode !== 'list'\"\r\n        class=\"absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300\"\r\n      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\ProductCard.vue",
+    "line": 166,
+    "text": "title=\"storefrontContent.actions.quickView\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\ProductCard.vue",
+    "line": 176,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\ProductLandingPage.vue",
+    "line": 109,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 267,
+    "text": "Hot Deals"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 268,
+    "text": "New Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 269,
+    "text": "Best Sellers"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 270,
+    "text": "Discounts"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 362,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 412,
+    "text": "Newest Arrivals"
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 393,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 427,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\stationnery\\Shop.vue",
+    "line": 435,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Cart.vue",
+    "line": 92,
+    "text": "= item.stock\"\r\n                        class=\"px-3 py-1 hover:bg-brand font-bold disabled:opacity-30 disabled:hover:bg-transparent transition-colors\"\r\n                        @click=\"cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)\"\r\n                      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Checkout.vue",
+    "line": 419,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Checkout.vue",
+    "line": 332,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Checkout.vue",
+    "line": 341,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Checkout.vue",
+    "line": 370,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Checkout.vue",
+    "line": 381,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ContactPage.vue",
+    "line": 27,
+    "text": "123 Street Ave,"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ContactPage.vue",
+    "line": 27,
+    "text": "Concrete Jungle, NY"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ContactPage.vue",
+    "line": 35,
+    "text": "contact@street.store"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ContactPage.vue",
+    "line": 48,
+    "text": "placeholder=\"t('storefront.templates.street.contact.form.name.placeholder')\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ContactPage.vue",
+    "line": 58,
+    "text": "placeholder=\"t('storefront.templates.street.contact.form.email.placeholder')\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ContactPage.vue",
+    "line": 68,
+    "text": "placeholder=\"t('storefront.templates.street.contact.form.message.placeholder')\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Home.vue",
+    "line": 258,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Home.vue",
+    "line": 275,
+    "text": "No best sellers yet."
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Home.vue",
+    "line": 301,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductDetails.vue",
+    "line": 95,
+    "text": "0\"\r\n      class=\"space-y-6\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductDetails.vue",
+    "line": 214,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductDetails.vue",
+    "line": 151,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductDetails.vue",
+    "line": 198,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductDetails.vue",
+    "line": 271,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductGallery.vue",
+    "line": 29,
+    "text": "0\"\r\n        :src=\"images[selectedImage]\"\r\n        :alt=\"title\"\r\n        class=\"w-full h-full object-contain grayscale contrast-125 hover:grayscale-0 transition-all duration-300\"\r\n        :style=\"zoomStyle\"\r\n      />"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductGallery.vue",
+    "line": 35,
+    "text": "No Image"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductGallery.vue",
+    "line": 46,
+    "text": "1\" class=\"grid grid-cols-4 gap-4\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductOrderForm.vue",
+    "line": 475,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                @click=\"incrementQuantity\"\r\n            >"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductOrderForm.vue",
+    "line": 652,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductOrderForm.vue",
+    "line": 515,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductOrderForm.vue",
+    "line": 525,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductOrderForm.vue",
+    "line": 557,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\partials\\ProductOrderForm.vue",
+    "line": 569,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Product.vue",
+    "line": 109,
+    "text": "title=\"product.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ProductCard.vue",
+    "line": 82,
+    "text": "NEW DROP"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ProductLandingPage.vue",
+    "line": 116,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\ProductLandingPage.vue",
+    "line": 125,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Shop.vue",
+    "line": 301,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-6\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\street\\Shop.vue",
+    "line": 333,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Cart.vue",
+    "line": 97,
+    "text": "= item.stock\"\r\n                        class=\"text-stone-400 hover:text-stone-900 disabled:opacity-30 disabled:hover:text-stone-400 transition-colors\"\r\n                        @click=\"cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)\"\r\n                      >"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Checkout.vue",
+    "line": 346,
+    "text": "Contact Information"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Checkout.vue",
+    "line": 465,
+    "text": "Loading..."
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Checkout.vue",
+    "line": 356,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Checkout.vue",
+    "line": 365,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Checkout.vue",
+    "line": 394,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Checkout.vue",
+    "line": 405,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Home.vue",
+    "line": 259,
+    "text": "View all products"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Home.vue",
+    "line": 279,
+    "text": "Coming soon."
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductDetails.vue",
+    "line": 65,
+    "text": "Premium Collection"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductDetails.vue",
+    "line": 97,
+    "text": "0\"\r\n      class=\"space-y-6\"\r\n    >"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductDetails.vue",
+    "line": 217,
+    "text": "Out"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductDetails.vue",
+    "line": 154,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductDetails.vue",
+    "line": 203,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductDetails.vue",
+    "line": 283,
+    "text": "title=\"`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductGallery.vue",
+    "line": 42,
+    "text": "New Arrival"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductOrderForm.vue",
+    "line": 485,
+    "text": "0 && quantity >= maxQuantity)\"\r\n                    @click=\"incrementQuantity\"\r\n                >"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductOrderForm.vue",
+    "line": 663,
+    "text": "Loading…"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductOrderForm.vue",
+    "line": 525,
+    "text": "placeholder=\"storefrontContent.checkout.form.fullName.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductOrderForm.vue",
+    "line": 536,
+    "text": "placeholder=\"storefrontContent.checkout.form.phone.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductOrderForm.vue",
+    "line": 568,
+    "text": "placeholder=\"storefrontContent.checkout.form.commune.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\partials\\ProductOrderForm.vue",
+    "line": 580,
+    "text": "placeholder=\"storefrontContent.checkout.form.address.placeholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Product.vue",
+    "line": 97,
+    "text": "Home"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Product.vue",
+    "line": 104,
+    "text": "Shop"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Product.vue",
+    "line": 114,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\ProductCard.vue",
+    "line": 162,
+    "text": "title=\"storefrontContent.actions.quickView\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\ProductCard.vue",
+    "line": 172,
+    "text": "title=\"storefrontContent.actions.addToCart\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\ProductLandingPage.vue",
+    "line": 109,
+    "text": "Experience premium quality with our latest collection."
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\ProductLandingPage.vue",
+    "line": 123,
+    "text": "title=\"product?.title\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 203,
+    "text": "Categories"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 251,
+    "text": "Shop Collection"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 254,
+    "text": "Curated essentials for your daily rituals and wellbeing."
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 289,
+    "text": "Categories"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 360,
+    "text": "0\" class=\"flex flex-wrap gap-2 mb-8\">"
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 391,
+    "text": "placeholder=\"storefrontContent.shop.searchWithinResultsPlaceholder\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 423,
+    "text": "title=\"storefrontContent.shop.view.gridTitle\""
+  },
+  {
+    "file": "components\\storefront\\templates\\wellness\\Shop.vue",
+    "line": 431,
+    "text": "title=\"storefrontContent.shop.view.listTitle\""
+  },
+  {
+    "file": "components\\StorefrontProductPagination.vue",
+    "line": 58,
+    "text": "1\"\r\n    class=\"col-span-full mt-8 w-full\"\r\n    aria-label=\"Products pagination\"\r\n  >"
+  },
+  {
+    "file": "components\\StorefrontProductPagination.vue",
+    "line": 70,
+    "text": "Prev"
+  },
+  {
+    "file": "components\\StorefrontProductPagination.vue",
+    "line": 60,
+    "text": "aria-label=\"Products pagination\""
+  },
+  {
+    "file": "components\\StorefrontProductPagination.vue",
+    "line": 68,
+    "text": "aria-label=\"Previous page\""
+  },
+  {
+    "file": "components\\ui\\DateFilter.vue",
+    "line": 34,
+    "text": "aria-label=\"t('admin.common.startDate')\""
+  },
+  {
+    "file": "components\\ui\\DateFilter.vue",
+    "line": 42,
+    "text": "aria-label=\"t('admin.common.endDate')\""
+  },
+  {
+    "file": "pages\\admin\\billing\\index.vue",
+    "line": 23,
+    "text": "0\" class=\"flex items-start gap-4 rounded-xl p-5\" style=\"background: rgba(var(--brand-rgb)/0.08); border: 1px solid rgba(var(--brand-rgb)/0.25)\">"
+  },
+  {
+    "file": "pages\\admin\\billing\\index.vue",
+    "line": 112,
+    "text": "refresh()\"\r\n              >"
+  },
+  {
+    "file": "pages\\admin\\billing\\index.vue",
+    "line": 287,
+    "text": "PNG, JPG, WEBP, PDF (Max 10MB)"
+  },
+  {
+    "file": "pages\\admin\\billing\\index.vue",
+    "line": 356,
+    "text": "0\" class=\"mt-2\">"
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1163,
+    "text": "Purchase Order (Optional)"
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1168,
+    "text": "No specific order"
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 313,
+    "text": "title=\"t('common.view')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 900,
+    "text": "placeholder=\"t('admin.pages.cash.modals.openSession.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 999,
+    "text": "placeholder=\"t('admin.pages.cash.modals.closeSession.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1053,
+    "text": "placeholder=\"t('admin.pages.cash.modals.customerPayment.customerSearchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1090,
+    "text": "placeholder=\"t('admin.pages.cash.modals.customerPayment.referencePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1097,
+    "text": "placeholder=\"t('admin.pages.cash.modals.customerPayment.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1151,
+    "text": "placeholder=\"t('admin.pages.cash.modals.supplierPayment.supplierSearchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1200,
+    "text": "placeholder=\"t('admin.pages.cash.modals.supplierPayment.referencePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1207,
+    "text": "placeholder=\"t('admin.pages.cash.modals.supplierPayment.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1270,
+    "text": "placeholder=\"t('admin.pages.cash.modals.expense.categoryPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1292,
+    "text": "placeholder=\"t('admin.pages.cash.modals.expense.referencePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1299,
+    "text": "placeholder=\"t('admin.pages.cash.modals.expense.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1372,
+    "text": "placeholder=\"t('admin.pages.cash.modals.transfer.referencePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1379,
+    "text": "placeholder=\"t('admin.pages.cash.modals.transfer.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\index.vue",
+    "line": 1421,
+    "text": "placeholder=\"t('admin.pages.cash.modals.createCashbox.namePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\[id].vue",
+    "line": 3,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\cash\\[id].vue",
+    "line": 159,
+    "text": "placeholder=\"t('admin.pages.cash.modals.openSession.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\cash\\[id].vue",
+    "line": 255,
+    "text": "placeholder=\"t('admin.pages.cash.modals.closeSession.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\create.vue",
+    "line": 6,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\categories\\create.vue",
+    "line": 65,
+    "text": "placeholder=\"t('admin.forms.category.title.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\create.vue",
+    "line": 73,
+    "text": "placeholder=\"t('admin.forms.category.slug.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 323,
+    "text": "0\"\r\n            class=\"mt-4 space-y-2\"\r\n          >"
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 437,
+    "text": "{ if (!val) deleteError = null }\"\r\n    />"
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 37,
+    "text": "placeholder=\"t('admin.pages.categories.index.filters.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 59,
+    "text": "title=\"sortOrder === 'asc' ? t('admin.common.next') : t('admin.common.previous')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 270,
+    "text": "title=\"t('admin.pages.categories.index.links.openCategory')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 281,
+    "text": "title=\"t('admin.pages.categories.index.links.copyCategory')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 293,
+    "text": "title=\"t('admin.common.edit')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 304,
+    "text": "title=\"t('admin.common.delete')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 353,
+    "text": "title=\"t('admin.pages.categories.index.links.openCategory')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 364,
+    "text": "title=\"t('admin.pages.categories.index.links.copyCategory')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 376,
+    "text": "title=\"t('admin.common.edit')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 387,
+    "text": "title=\"t('admin.common.delete')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\index.vue",
+    "line": 431,
+    "text": "title=\"t('admin.pages.categories.index.deleteModal.title')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\[id].vue",
+    "line": 6,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\categories\\[id].vue",
+    "line": 55,
+    "text": "title=\"t('admin.pages.categories.edit.links.openCategory')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\[id].vue",
+    "line": 61,
+    "text": "title=\"t('admin.pages.categories.edit.links.copyCategory')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\[id].vue",
+    "line": 95,
+    "text": "placeholder=\"t('admin.forms.category.title.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\[id].vue",
+    "line": 103,
+    "text": "placeholder=\"t('admin.forms.category.slug.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\categories\\[id].vue",
+    "line": 173,
+    "text": "title=\"t('admin.pages.categories.edit.deleteModal.title')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\create.vue",
+    "line": 4,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\customers\\create.vue",
+    "line": 52,
+    "text": "placeholder=\"t('admin.forms.customer.name.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\create.vue",
+    "line": 60,
+    "text": "placeholder=\"t('admin.forms.customer.phone.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\create.vue",
+    "line": 69,
+    "text": "placeholder=\"t('admin.forms.customer.email.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\create.vue",
+    "line": 76,
+    "text": "placeholder=\"t('admin.forms.customer.address.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\create.vue",
+    "line": 85,
+    "text": "placeholder=\"t('admin.forms.customer.openingBalance.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\edit\\[id].vue",
+    "line": 4,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\customers\\edit\\[id].vue",
+    "line": 66,
+    "text": "placeholder=\"t('admin.forms.customer.name.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\edit\\[id].vue",
+    "line": 74,
+    "text": "placeholder=\"t('admin.forms.customer.phone.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\edit\\[id].vue",
+    "line": 83,
+    "text": "placeholder=\"t('admin.forms.customer.email.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\edit\\[id].vue",
+    "line": 90,
+    "text": "placeholder=\"t('admin.forms.customer.address.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 264,
+    "text": "{ if (!val) deleteError = null }\"\r\n    />"
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 4,
+    "text": "title=\"t('admin.nav.customers')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 26,
+    "text": "placeholder=\"t('admin.pages.customers.index.filters.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 93,
+    "text": "aria-label=\"`${t('admin.pages.customers.index.table.customer')}: ${c.name}`\""
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 165,
+    "text": "title=\"t('admin.common.view')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 172,
+    "text": "title=\"t('admin.common.edit')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 178,
+    "text": "title=\"t('admin.common.delete')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\index.vue",
+    "line": 258,
+    "text": "title=\"t('admin.pages.customers.index.deleteModal.title')\""
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 72,
+    "text": "Points disponibles"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 80,
+    "text": "Points consommes"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 129,
+    "text": "Points fidelite"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 133,
+    "text": "Disponibles"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 137,
+    "text": "En attente"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 141,
+    "text": "Gagnes"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 145,
+    "text": "Consommes"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 149,
+    "text": "0\" class=\"overflow-x-auto\">"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 153,
+    "text": "Date"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 154,
+    "text": "Type"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 155,
+    "text": "Statut"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 156,
+    "text": "Source"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 157,
+    "text": "Points"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 175,
+    "text": "0\" class=\"ui-card overflow-hidden\">"
+  },
+  {
+    "file": "pages\\admin\\customers\\[id].vue",
+    "line": 241,
+    "text": "0\" class=\"ui-card overflow-hidden\">"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 223,
+    "text": "Yalidine webhook setup"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 226,
+    "text": "Use this URL in the Yalidine Webhooks Dashboard so order delivery statuses update automatically in your store."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 232,
+    "text": "Webhook URL to give Yalidine"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 243,
+    "text": "Copy URL"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 247,
+    "text": "This must be a public HTTPS tenant domain. If your store uses a custom domain, replace the domain before adding it to Yalidine."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 253,
+    "text": "Localhost cannot receive Yalidine webhooks, so this page shows your production tenant URL instead."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 266,
+    "text": "In Yalidine dashboard"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 270,
+    "text": "Open Webhooks Dashboard."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 271,
+    "text": "Add a webhook and paste the URL above."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 272,
+    "text": "Set the same secret in Yalidine and in the Webhook Secret field here."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 273,
+    "text": "Test the webhook, then activate it."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 277,
+    "text": "Select these events"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 281,
+    "text": "parcel_created"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 282,
+    "text": "parcel_edited"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 283,
+    "text": "parcel_deleted"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 284,
+    "text": "parcel_status_updated"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 285,
+    "text": "parcel_payment_updated"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 344,
+    "text": "Wilaya"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 353,
+    "text": "Commune (Maystro)"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 385,
+    "text": "Home (delivery_type=1)"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 391,
+    "text": "Office (delivery_type=2)"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 404,
+    "text": "Note: les “tarifs transporteur” du tableau sont calculés par wilaya (commune échantillon). Pour un prix exact, tester une commune ici."
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 592,
+    "text": "DZD"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 619,
+    "text": "DZD"
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 192,
+    "text": "placeholder=\"credentialPlaceholder(selectedProvider, field)\""
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 415,
+    "text": "placeholder=\"t('admin.pages.delivery.pricing.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 598,
+    "text": "placeholder=\"t('admin.pages.delivery.pricing.overridePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\delivery\\index.vue",
+    "line": 625,
+    "text": "placeholder=\"t('admin.pages.delivery.pricing.overridePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 45,
+    "text": "Device registry unavailable"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 110,
+    "text": "Tenant Devices"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 113,
+    "text": "Saved devices are scoped to this tenant only. Each row shows\r\n            activation status, workspace binding, and license capacity."
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 138,
+    "text": "Device"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 139,
+    "text": "Status"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 140,
+    "text": "Activation"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 141,
+    "text": "License"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 142,
+    "text": "Last Sync"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 143,
+    "text": "Workspace"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 144,
+    "text": "Hardware"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 162,
+    "text": "No devices are registered for this tenant yet."
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 265,
+    "text": "Never synced"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 339,
+    "text": "Offline Activation"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 344,
+    "text": "Paste the Request Code generated by the Flutter app. The server will\r\n          validate the tenant admin session, bind that device to this tenant,\r\n          assign an active tenant license, and return a signed activation code."
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 354,
+    "text": "Request Code"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 379,
+    "text": "Generate Activation Code"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 396,
+    "text": "Activation Code Generated Successfully"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 399,
+    "text": "Copy the code below and paste it into the offline device. The device\r\n            registry above will update after the device completes activation."
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 432,
+    "text": "Activate Another Device"
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 283,
+    "text": "title=\"Copy workspace ID\""
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 311,
+    "text": "title=\"Copy hardware fingerprint\""
+  },
+  {
+    "file": "pages\\admin\\devices\\index.vue",
+    "line": 360,
+    "text": "placeholder=\"Paste the Request Code here...\""
+  },
+  {
+    "file": "pages\\admin\\index.vue",
+    "line": 99,
+    "text": "title=\"t('admin.pages.dashboard.trends.revenue.title')\""
+  },
+  {
+    "file": "pages\\admin\\index.vue",
+    "line": 108,
+    "text": "title=\"t('admin.pages.dashboard.trends.orders.title')\""
+  },
+  {
+    "file": "pages\\admin\\integrations\\index.vue",
+    "line": 84,
+    "text": "placeholder=\"t('admin.pages.integrations.telegram.modal.fields.botToken.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\integrations\\index.vue",
+    "line": 149,
+    "text": "placeholder=\"t('admin.pages.integrations.telegram.modal.fields.chatId.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\integrations\\index.vue",
+    "line": 272,
+    "text": "placeholder=\"t('admin.pages.integrations.metaPixels.addPixel.fields.namePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\inventory\\index.vue",
+    "line": 203,
+    "text": "patchVariant(v.id, { trackInventory: (e.target as HTMLInputElement).checked })\"\r\n                >"
+  },
+  {
+    "file": "pages\\admin\\inventory\\index.vue",
+    "line": 64,
+    "text": "placeholder=\"t('admin.pages.inventory.filters.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 8,
+    "text": "Landing Page Architect"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 11,
+    "text": "Autonomous Design Engine"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 21,
+    "text": "Product"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 24,
+    "text": "Selected"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 45,
+    "text": "Loading products..."
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 73,
+    "text": "Change Product"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 85,
+    "text": "Style"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 110,
+    "text": "Content"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 116,
+    "text": "AI Prompt"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 127,
+    "text": "Language"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 148,
+    "text": "Asset"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 159,
+    "text": "Product"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 167,
+    "text": "Custom Upload"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 189,
+    "text": "Select a product to view images"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 211,
+    "text": "Processing..."
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 215,
+    "text": "Generate Page"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 229,
+    "text": "Preview"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 235,
+    "text": "Download"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 238,
+    "text": "Publish"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 255,
+    "text": "Designing your page..."
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 267,
+    "text": "Ready to Design"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 268,
+    "text": "Configure your preferences in the sidebar and click \"Generate Page\" to see the magic happen."
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 279,
+    "text": "NEW ARRIVAL"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 282,
+    "text": "Shop Now"
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 36,
+    "text": "placeholder=\"Find product...\""
+  },
+  {
+    "file": "pages\\admin\\marketing\\landing-page\\new.vue",
+    "line": 121,
+    "text": "placeholder=\"e.g. Minimalist layout with earth tones...\""
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 23,
+    "text": "All Notifications"
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 29,
+    "text": "Manage and view your store activity."
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 56,
+    "text": "0\"\r\n            class=\"ui-btn ui-btn--secondary\"\r\n            @click=\"handleMarkAllRead\"\r\n          >"
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 63,
+    "text": "Mark all read"
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 75,
+    "text": "Refresh"
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 93,
+    "text": "Notifications unavailable"
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 155,
+    "text": "No notifications"
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 161,
+    "text": "No new notifications right now."
+  },
+  {
+    "file": "pages\\admin\\notifications.vue",
+    "line": 174,
+    "text": "Today"
+  },
+  {
+    "file": "pages\\admin\\orders\\create.vue",
+    "line": 103,
+    "text": "Yalidine"
+  },
+  {
+    "file": "pages\\admin\\orders\\create.vue",
+    "line": 104,
+    "text": "Maystro"
+  },
+  {
+    "file": "pages\\admin\\orders\\create.vue",
+    "line": 251,
+    "text": "0\" \r\n                    class=\"absolute left-0 right-0 top-full mt-1 shadow-xl rounded-lg z-50 max-h-60 overflow-y-auto\" style=\"background: var(--surface-2); border: 1px solid var(--surface-border)\"\r\n                  >"
+  },
+  {
+    "file": "pages\\admin\\orders\\create.vue",
+    "line": 262,
+    "text": "0) ? product.images[0] : '/blank.svg?v=2'\" \r\n                            class=\"w-full h-full object-cover\"\r\n                           >"
+  },
+  {
+    "file": "pages\\admin\\orders\\create.vue",
+    "line": 415,
+    "text": "Loading variants..."
+  },
+  {
+    "file": "pages\\admin\\orders\\create.vue",
+    "line": 10,
+    "text": "title=\"t('admin.nav.orders')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\create.vue",
+    "line": 246,
+    "text": "placeholder=\"t('admin.pages.pos.catalog.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\index.vue",
+    "line": 5,
+    "text": "title=\"t('admin.confirmModal.defaults.title', 'Are you sure?')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\index.vue",
+    "line": 15,
+    "text": "title=\"t('admin.confirmModal.defaults.title', 'Are you sure?')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\index.vue",
+    "line": 25,
+    "text": "title=\"t('admin.nav.orders')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\index.vue",
+    "line": 68,
+    "text": "placeholder=\"t('admin.pages.orders.index.filters.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\index.vue",
+    "line": 206,
+    "text": "aria-label=\"`${t('admin.pages.orders.index.table.orderId')}: ${order.publicId || `#${order.id.substring(0, 8)}`}`\""
+  },
+  {
+    "file": "pages\\admin\\orders\\index.vue",
+    "line": 295,
+    "text": "title=\"t('common.view')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\index.vue",
+    "line": 302,
+    "text": "title=\"t('common.delete', 'Delete')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\[id].vue",
+    "line": 263,
+    "text": "0\" aria-hidden=\"true\">·"
+  },
+  {
+    "file": "pages\\admin\\orders\\[id].vue",
+    "line": 5,
+    "text": "title=\"t('admin.confirmModal.defaults.title', 'Are you sure?')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\[id].vue",
+    "line": 160,
+    "text": "aria-label=\"t('admin.nav.orders')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\[id].vue",
+    "line": 209,
+    "text": "aria-label=\"t('common.copy', 'Copy')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\[id].vue",
+    "line": 228,
+    "text": "aria-label=\"t('common.copy', 'Copy')\""
+  },
+  {
+    "file": "pages\\admin\\orders\\[id].vue",
+    "line": 333,
+    "text": "placeholder=\"t('admin.pages.orders.detail.fields.internalNotesPlaceholder', 'Add private remarks about this order...')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 274,
+    "text": "= 0\" class=\"lg:hidden p-4 border-t flex items-center justify-between gap-4 z-30\" style=\"background: var(--surface-1); border-color: var(--surface-border); box-shadow: 0 -4px 12px rgba(0,0,0,0.3)\">"
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 316,
+    "text": "0\"\r\n            class=\"absolute top-3 right-3 w-1.5 h-1.5 rounded-full [background:var(--brand)]\"\r\n          />"
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 328,
+    "text": "{\r\n                if (val === 'NEW') {\r\n                  showCustomerModal = true;\r\n                } else {\r\n                  selectedCustomerId = val as string;\r\n                }\r\n              }\"\r\n              class=\"w-full text-sm pl-9\"\r\n            >"
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 25,
+    "text": "placeholder=\"t('admin.pages.pos.catalog.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 42,
+    "text": "title=\"t('admin.pages.pos.catalog.actions.discount')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 50,
+    "text": "title=\"t('admin.pages.pos.catalog.actions.reprintLastOrder')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 58,
+    "text": "title=\"t('admin.pages.pos.catalog.actions.customAmount')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 71,
+    "text": "title=\"t('admin.pages.pos.catalog.actions.sort')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 77,
+    "text": "title=\"t('admin.pages.pos.catalog.actions.columns')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 345,
+    "text": "title=\"t('admin.pages.pos.actions.imageMode')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 352,
+    "text": "title=\"t('admin.pages.pos.cart.actions.clearCart')\""
+  },
+  {
+    "file": "pages\\admin\\pos\\index.vue",
+    "line": 419,
+    "text": "title=\"t('admin.pages.pos.cart.actions.paymentOptions')\""
+  },
+  {
+    "file": "pages\\admin\\preview.vue",
+    "line": 101,
+    "text": "Retour"
+  },
+  {
+    "file": "pages\\admin\\preview.vue",
+    "line": 106,
+    "text": "Simulateur de Template"
+  },
+  {
+    "file": "pages\\admin\\preview.vue",
+    "line": 107,
+    "text": "Aperçu en direct :"
+  },
+  {
+    "file": "pages\\admin\\preview.vue",
+    "line": 118,
+    "text": "Desktop"
+  },
+  {
+    "file": "pages\\admin\\preview.vue",
+    "line": 126,
+    "text": "Mobile"
+  },
+  {
+    "file": "pages\\admin\\preview.vue",
+    "line": 132,
+    "text": "Sélectionner ce template"
+  },
+  {
+    "file": "pages\\admin\\products\\index.vue",
+    "line": 12,
+    "text": "Import/Export"
+  },
+  {
+    "file": "pages\\admin\\products\\index.vue",
+    "line": 154,
+    "text": "0\" class=\"ui-card-header flex flex-wrap items-center gap-3 justify-between\" style=\"background: var(--surface-2)\">"
+  },
+  {
+    "file": "pages\\admin\\products\\index.vue",
+    "line": 287,
+    "text": "0) || product.category\"\r\n                  class=\"flex flex-wrap gap-1\"\r\n                >"
+  },
+  {
+    "file": "pages\\admin\\products\\index.vue",
+    "line": 5,
+    "text": "title=\"t('admin.nav.products')\""
+  },
+  {
+    "file": "pages\\admin\\products\\index.vue",
+    "line": 72,
+    "text": "placeholder=\"t('admin.pages.products.index.filters.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\products\\index.vue",
+    "line": 246,
+    "text": "aria-label=\"`${t('admin.pages.products.index.table.product')}: ${product.title}`\""
+  },
+  {
+    "file": "pages\\admin\\products\\[id].vue",
+    "line": 6,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\create.vue",
+    "line": 4,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\create.vue",
+    "line": 50,
+    "text": "placeholder=\"t('admin.pages.purchases.create.supplier.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\index.vue",
+    "line": 78,
+    "text": "View and manage your purchase history."
+  },
+  {
+    "file": "pages\\admin\\purchases\\index.vue",
+    "line": 201,
+    "text": "System"
+  },
+  {
+    "file": "pages\\admin\\purchases\\index.vue",
+    "line": 29,
+    "text": "placeholder=\"t('admin.pages.purchases.index.filters.allSuppliers')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\index.vue",
+    "line": 39,
+    "text": "placeholder=\"t('admin.pages.purchases.index.filters.allUsers')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\index.vue",
+    "line": 55,
+    "text": "placeholder=\"t('admin.pages.purchases.index.filters.allStatuses')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\index.vue",
+    "line": 69,
+    "text": "placeholder=\"t('admin.pages.purchases.index.filters.allPaymentStatuses')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\index.vue",
+    "line": 167,
+    "text": "aria-label=\"`${t('admin.pages.purchases.index.table.id')}: #${order.id.slice(0, 8)}`\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 313,
+    "text": "= item.quantityOrdered ? 'text-green-400' : ''\" :style=\"item.quantityReceived"
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 319,
+    "text": "0\" style=\"background: var(--surface-3)\">"
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 389,
+    "text": "= item.quantityOrdered\"\r\n                  >"
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 397,
+    "text": "= item.quantityOrdered || !receiveQtyByItem[item.id] || receiveQtyByItem[item.id]"
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 283,
+    "text": "title=\"item.variant?.product?.title || t('admin.pages.purchases.detail.items.unknownProduct')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 351,
+    "text": "title=\"Nouveau prix moyen\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 388,
+    "text": "placeholder=\"Qté\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 396,
+    "text": "title=\"t('admin.common.receive')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 417,
+    "text": "title=\"t('admin.pages.purchases.detail.items.table.removeItem')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 443,
+    "text": "title=\"t('admin.pages.purchases.detail.deleteModal.title')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 504,
+    "text": "placeholder=\"t('admin.pages.purchases.detail.paymentModal.referencePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\purchases\\[id].vue",
+    "line": 512,
+    "text": "placeholder=\"t('admin.pages.purchases.detail.paymentModal.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 168,
+    "text": "System"
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 20,
+    "text": "placeholder=\"t('admin.pages.sales.index.filters.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 27,
+    "text": "placeholder=\"t('admin.pages.sales.index.filters.allUsers')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 118,
+    "text": "aria-label=\"`${t('admin.pages.sales.index.table.saleId')}: #${sale.id.substring(0, 8)}`\""
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 180,
+    "text": "title=\"t('admin.pages.sales.actions.printInvoice')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 216,
+    "text": "title=\"t('common.view')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 337,
+    "text": "placeholder=\"t('admin.pages.sales.refundModal.referencePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\index.vue",
+    "line": 345,
+    "text": "placeholder=\"t('admin.pages.sales.refundModal.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\[id].vue",
+    "line": 3,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\sales\\[id].vue",
+    "line": 162,
+    "text": "placeholder=\"t('admin.pages.sales.refundModal.referencePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\sales\\[id].vue",
+    "line": 170,
+    "text": "placeholder=\"t('admin.pages.sales.refundModal.notePlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\settings\\index.vue",
+    "line": 6,
+    "text": "title=\"t('admin.pages.settings.index.title')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\create.vue",
+    "line": 4,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\create.vue",
+    "line": 52,
+    "text": "placeholder=\"t('admin.forms.supplier.name.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\create.vue",
+    "line": 60,
+    "text": "placeholder=\"t('admin.forms.supplier.phone.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\create.vue",
+    "line": 68,
+    "text": "placeholder=\"t('admin.forms.supplier.email.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\create.vue",
+    "line": 75,
+    "text": "placeholder=\"t('admin.forms.supplier.address.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\create.vue",
+    "line": 85,
+    "text": "placeholder=\"t('admin.forms.supplier.notes.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\index.vue",
+    "line": 261,
+    "text": "{ if (!val) deleteError = null }\"\r\n    />"
+  },
+  {
+    "file": "pages\\admin\\suppliers\\index.vue",
+    "line": 30,
+    "text": "placeholder=\"t('admin.pages.suppliers.index.filters.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\index.vue",
+    "line": 109,
+    "text": "aria-label=\"`${t('admin.pages.suppliers.index.table.name')}: ${supplier.name}`\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\index.vue",
+    "line": 168,
+    "text": "title=\"t('admin.common.edit')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\index.vue",
+    "line": 174,
+    "text": "title=\"t('admin.common.delete')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\index.vue",
+    "line": 255,
+    "text": "title=\"t('admin.pages.suppliers.index.deleteModal.title')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\[id].vue",
+    "line": 4,
+    "text": "aria-label=\"Breadcrumb\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\[id].vue",
+    "line": 58,
+    "text": "placeholder=\"t('admin.forms.supplier.name.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\[id].vue",
+    "line": 66,
+    "text": "placeholder=\"t('admin.forms.supplier.phone.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\[id].vue",
+    "line": 74,
+    "text": "placeholder=\"t('admin.forms.supplier.email.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\[id].vue",
+    "line": 81,
+    "text": "placeholder=\"t('admin.forms.supplier.address.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\suppliers\\[id].vue",
+    "line": 91,
+    "text": "placeholder=\"t('admin.forms.supplier.notes.placeholder')\""
+  },
+  {
+    "file": "pages\\admin\\template-builder-preview.vue",
+    "line": 354,
+    "text": "Product cards"
+  },
+  {
+    "file": "pages\\admin\\template-builder-preview.vue",
+    "line": 378,
+    "text": "Shell preview"
+  },
+  {
+    "file": "pages\\admin\\template-builder-preview.vue",
+    "line": 379,
+    "text": "Sahara Studio"
+  },
+  {
+    "file": "pages\\admin\\template-builder-preview.vue",
+    "line": 380,
+    "text": "The selected template shell renders the real header, navigation, announcement behavior, and footer around this neutral test content."
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 5,
+    "text": "Test screen"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 8,
+    "text": "Store template builder"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 9,
+    "text": "Select any registered storefront template, customize the shared style layer, and preview the real storefront components without saving changes."
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 45,
+    "text": "Templates"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 46,
+    "text": "Using the real storefront registry."
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 82,
+    "text": "Customize"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 83,
+    "text": "Common layer over every template."
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 93,
+    "text": "Brand colors"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 97,
+    "text": "Primary"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 104,
+    "text": "Accent"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 119,
+    "text": "Font override"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 142,
+    "text": "Roundness"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 145,
+    "text": "Buttons"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 155,
+    "text": "Cards"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 172,
+    "text": "Header style"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 193,
+    "text": "Product card style"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 214,
+    "text": "Background style"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 287,
+    "text": "Rendered components"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 288,
+    "text": "StoreShell, Home, Shop, ThemeProvider, and ProductCard from the existing registry."
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 291,
+    "text": "Persistence"
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 292,
+    "text": "None. This route only passes query params into an isolated preview iframe."
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 18,
+    "text": "aria-label=\"Reset builder\""
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 258,
+    "text": "aria-label=\"mode.label\""
+  },
+  {
+    "file": "pages\\admin\\template-builder.vue",
+    "line": 278,
+    "text": "title=\"Store template live preview\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 195,
+    "text": "0\" class=\"px-4 py-3 flex items-center justify-between sm:px-6\" style=\"border-top: 1px solid var(--surface-border)\">"
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 82,
+    "text": "placeholder=\"t('admin.pages.users.searchPlaceholder')\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 118,
+    "text": "aria-label=\"`${t('admin.common.edit')}: ${u.email}`\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 163,
+    "text": "title=\"t('admin.common.edit')\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 172,
+    "text": "title=\"t('admin.pages.users.actions.deactivate')\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 182,
+    "text": "title=\"t('admin.pages.users.actions.activate')\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 286,
+    "text": "aria-label=\"`${t('admin.common.edit')}: ${r.name}`\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 308,
+    "text": "title=\"Create\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 309,
+    "text": "title=\"Read\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 310,
+    "text": "title=\"Update\""
+  },
+  {
+    "file": "pages\\admin\\users\\index.vue",
+    "line": 311,
+    "text": "title=\"Delete\""
+  },
+  {
+    "file": "pages\\categories\\index.vue",
+    "line": 53,
+    "text": "0\"\r\n        class=\"grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6\"\r\n      >"
+  },
+  {
+    "file": "pages\\categories\\index.vue",
+    "line": 81,
+    "text": "&rarr;"
+  },
+  {
+    "file": "pages\\forgot-password.vue",
+    "line": 42,
+    "text": "placeholder=\"t('auth.forgotPassword.email.placeholder')\""
+  },
+  {
+    "file": "pages\\legal\\index.vue",
+    "line": 33,
+    "text": "Policies"
+  },
+  {
+    "file": "pages\\legal\\index.vue",
+    "line": 36,
+    "text": "Policies"
+  },
+  {
+    "file": "pages\\legal\\index.vue",
+    "line": 39,
+    "text": "Platform terms, privacy information, cookie details, billing, and subscription terms for Swekly."
+  },
+  {
+    "file": "pages\\legal\\[page].vue",
+    "line": 99,
+    "text": "Back to Swekly"
+  },
+  {
+    "file": "pages\\legal\\[page].vue",
+    "line": 106,
+    "text": "Policy"
+  },
+  {
+    "file": "pages\\login.vue",
+    "line": 176,
+    "text": "Google"
+  },
+  {
+    "file": "pages\\login.vue",
+    "line": 189,
+    "text": "Facebook"
+  },
+  {
+    "file": "pages\\login.vue",
+    "line": 202,
+    "text": "Apple"
+  },
+  {
+    "file": "pages\\login.vue",
+    "line": 168,
+    "text": "title=\"Google (coming soon)\""
+  },
+  {
+    "file": "pages\\login.vue",
+    "line": 184,
+    "text": "title=\"Facebook (coming soon)\""
+  },
+  {
+    "file": "pages\\login.vue",
+    "line": 197,
+    "text": "title=\"Apple (coming soon)\""
+  },
+  {
+    "file": "pages\\login.vue",
+    "line": 227,
+    "text": "placeholder=\"t('auth.login.form.email.placeholder')\""
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 10,
+    "text": "Order Placed Successfully!"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 13,
+    "text": "Thank you for your order. We'll contact you shortly to confirm."
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 22,
+    "text": "Order ID"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 32,
+    "text": "What's Next?"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 39,
+    "text": "We'll call you soon"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 42,
+    "text": "Our team will contact you to confirm your order and delivery details."
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 51,
+    "text": "We'll prepare your order"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 54,
+    "text": "Once confirmed, we'll prepare your items for delivery."
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 63,
+    "text": "Delivery on the way"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 66,
+    "text": "Your order will be delivered to your address. Pay in cash when you receive it."
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 78,
+    "text": "Payment: Cash on Delivery - Pay when you receive your order"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 89,
+    "text": "Continue Shopping"
+  },
+  {
+    "file": "pages\\order-success.vue",
+    "line": 95,
+    "text": "Back to Home"
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 320,
+    "text": "Google"
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 326,
+    "text": "Facebook"
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 332,
+    "text": "Apple"
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 313,
+    "text": "title=\"Google (coming soon)\""
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 322,
+    "text": "title=\"Facebook (coming soon)\""
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 328,
+    "text": "title=\"Apple (coming soon)\""
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 377,
+    "text": "placeholder=\"t('auth.register.form.companyName.placeholder')\""
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 392,
+    "text": "placeholder=\"t('auth.register.form.slug.placeholder')\""
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 414,
+    "text": "placeholder=\"t('auth.register.form.email.placeholder')\""
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 429,
+    "text": "placeholder=\"t('auth.register.form.phone.placeholder')\""
+  },
+  {
+    "file": "pages\\register.vue",
+    "line": 443,
+    "text": "placeholder=\"t('auth.register.form.otp.placeholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 3,
+    "text": "Platform Analytics"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 9,
+    "text": "Total Platform Revenue"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 15,
+    "text": "From confirmed, shipped, and delivered orders"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 54,
+    "text": "Revenue by Tenant"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 61,
+    "text": "Loading..."
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 67,
+    "text": "No revenue data available"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 101,
+    "text": "Top Performing Tenants"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 109,
+    "text": "Rank"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 112,
+    "text": "Tenant"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 115,
+    "text": "Revenue"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 118,
+    "text": "Orders"
+  },
+  {
+    "file": "pages\\super-admin\\analytics.vue",
+    "line": 121,
+    "text": "Products"
+  },
+  {
+    "file": "pages\\super-admin\\audit-logs.vue",
+    "line": 140,
+    "text": "0\"\r\n          class=\"flex items-center justify-between px-6 py-4 border-t border-slate-200 bg-slate-50\"\r\n        >"
+  },
+  {
+    "file": "pages\\super-admin\\audit-logs.vue",
+    "line": 23,
+    "text": "placeholder=\"t('superAdmin.auditLogs.filters.search.placeholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\login.vue",
+    "line": 41,
+    "text": "placeholder=\"t('superAdmin.login.form.email.placeholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\payments.vue",
+    "line": 163,
+    "text": "title=\"p.notes\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 21,
+    "text": "placeholder=\"t('superAdmin.tenants.search.placeholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 112,
+    "text": "title=\"t('admin.common.edit')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 120,
+    "text": "title=\"t('superAdmin.tenants.actions.payments')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 128,
+    "text": "title=\"t('superAdmin.tenants.actions.suspend')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 136,
+    "text": "title=\"t('superAdmin.tenants.actions.activate')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 143,
+    "text": "title=\"t('admin.common.delete')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 183,
+    "text": "placeholder=\"t('superAdmin.tenants.modal.fields.name.placeholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 195,
+    "text": "placeholder=\"t('superAdmin.tenants.modal.fields.slug.placeholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\index.vue",
+    "line": 209,
+    "text": "placeholder=\"t('superAdmin.tenants.modal.fields.ownerEmail.placeholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\[id]\\payments.vue",
+    "line": 49,
+    "text": "placeholder=\"t('superAdmin.paymentsPage.import.fields.proofUrlPlaceholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\[id]\\payments.vue",
+    "line": 60,
+    "text": "placeholder=\"t('superAdmin.paymentsPage.import.fields.externalReferencePlaceholder')\""
+  },
+  {
+    "file": "pages\\super-admin\\tenants\\[id]\\payments.vue",
+    "line": 70,
+    "text": "placeholder=\"t('superAdmin.paymentsPage.import.fields.notesPlaceholder')\""
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 82,
+    "text": "Des vitrines"
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 84,
+    "text": "magnifiques"
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 86,
+    "text": "Trouvez le design parfait pour votre boutique. Tous nos thèmes sont optimisés pour mobile, ultra-rapides et entièrement personnalisables."
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 123,
+    "text": "Populaire"
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 145,
+    "text": "Utiliser ce thème"
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 158,
+    "text": "Aucun thème trouvé"
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 161,
+    "text": "Nous n'avons pas encore de thème dans cette catégorie."
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 164,
+    "text": "Voir tous les thèmes"
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 172,
+    "text": "Prêt à créer votre boutique ?"
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 175,
+    "text": "Commencez avec l'un de nos superbes thèmes et personnalisez-le à votre image."
+  },
+  {
+    "file": "pages\\themes.vue",
+    "line": 178,
+    "text": "Commencer gratuitement"
+  },
+  {
+    "file": "layouts\\super-admin.vue",
+    "line": 139,
+    "text": "{ (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }\"\r\n              @mouseleave=\"(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }\"\r\n              :aria-label=\"t('superAdmin.layout.toggleSidebar')\"\r\n            >"
+  },
+  {
+    "file": "layouts\\super-admin.vue",
+    "line": 39,
+    "text": "aria-label=\"t('superAdmin.layout.closeSidebar')\""
+  },
+  {
+    "file": "layouts\\super-admin.vue",
+    "line": 141,
+    "text": "aria-label=\"t('superAdmin.layout.toggleSidebar')\""
+  },
+  {
+    "file": "layouts\\super-admin.vue",
+    "line": 152,
+    "text": "aria-label=\"t('superAdmin.actions.logout')\""
+  },
+  {
+    "file": "layouts\\super-admin.vue",
+    "line": 153,
+    "text": "title=\"t('superAdmin.actions.logout')\""
+  }
+]
