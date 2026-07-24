@@ -144,7 +144,12 @@ export class DeliveryController {
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
             }
             console.error('Create shipment error', error)
-            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+            res.status(500).json({ 
+                statusCode: 500, 
+                message: 'Internal Server Error (Debug)', 
+                debugMessage: String(error?.message || error), 
+                debugStack: error?.stack 
+            })
         }
     }
 

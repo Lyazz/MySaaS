@@ -243,9 +243,13 @@ export class OrdersController {
                 }
                 throw err
             }
-        } catch (error) {
-            console.error('Update order error:', error)
-            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        } catch (error: any) {
+            console.error('Update order status error:', error)
+            return res.status(error.statusCode || 500).json({
+                message: 'Internal Server Error (Debug)',
+                debugMessage: String(error?.message || error),
+                debugStack: error?.stack
+            })
         }
     }
 
