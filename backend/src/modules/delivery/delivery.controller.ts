@@ -128,17 +128,17 @@ export class DeliveryController {
             if (error.message === 'Order not found for tenant') {
                 return res.status(404).json({ statusCode: 404, statusMessage: error.message })
             }
-            if (error instanceof DeliveryConfigurationError) {
+            if (error instanceof DeliveryConfigurationError || error.name === 'DeliveryConfigurationError') {
                 return res
                     .status(error.statusCode)
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
-            if (error instanceof MaystroIntegrationError) {
+            if (error instanceof MaystroIntegrationError || error.name === 'MaystroIntegrationError') {
                 return res
                     .status(error.statusCode)
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
             }
-            if (error instanceof YalidineIntegrationError) {
+            if (error instanceof YalidineIntegrationError || error.name === 'YalidineIntegrationError') {
                 return res
                     .status(error.statusCode)
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })

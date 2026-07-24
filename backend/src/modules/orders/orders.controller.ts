@@ -192,7 +192,7 @@ export class OrdersController {
                             }
                         }
 
-                        if (shipmentErr instanceof OrderValidationError) {
+                        if (shipmentErr instanceof OrderValidationError || shipmentErr.name === 'OrderValidationError') {
                             return res.status(shipmentErr.statusCode).json({
                                 statusCode: shipmentErr.statusCode,
                                 statusMessage: shipmentErr.statusMessage,
@@ -201,14 +201,14 @@ export class OrdersController {
                             })
                         }
 
-                        if (shipmentErr instanceof DeliveryConfigurationError) {
+                        if (shipmentErr instanceof DeliveryConfigurationError || shipmentErr.name === 'DeliveryConfigurationError') {
                             return res.status(shipmentErr.statusCode).json({
                                 statusCode: shipmentErr.statusCode,
                                 statusMessage: shipmentErr.statusMessage
                             })
                         }
 
-                        if (shipmentErr instanceof MaystroIntegrationError) {
+                        if (shipmentErr instanceof MaystroIntegrationError || shipmentErr.name === 'MaystroIntegrationError') {
                             return res.status(shipmentErr.statusCode).json({
                                 statusCode: shipmentErr.statusCode,
                                 statusMessage: shipmentErr.statusMessage,
@@ -216,7 +216,7 @@ export class OrdersController {
                             })
                         }
 
-                        if (shipmentErr instanceof YalidineIntegrationError) {
+                        if (shipmentErr instanceof YalidineIntegrationError || shipmentErr.name === 'YalidineIntegrationError') {
                             return res.status(shipmentErr.statusCode).json({
                                 statusCode: shipmentErr.statusCode,
                                 statusMessage: shipmentErr.statusMessage,
