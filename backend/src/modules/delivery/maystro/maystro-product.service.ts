@@ -67,35 +67,60 @@ export class MaystroProductService {
 
                 return created
             } catch (error: any) {
-                // If the product already exists remotely (e.g., retried request), Maystro allows updating by product_id.
+                // If the product already exists remotely (e.g., retried request or manual creation),
+                // we should find it by searching and link it.
                 try {
-                    const updated = await client.request<MaystroProduct>({
-                        method: 'PATCH',
-                        path: `/stock/products/${encodeURIComponent(productId)}/`,
-                        data: { logistical_description: input.logisticalDescription }
+                    const searchRes = await client.request<any>({
+                        method: 'GET',
+                        path: '/stock/products/',
+                        params: { store: input.storeId, search: input.logisticalDescription }
                     })
+                    
+                    const products = Array.isArray(searchRes) ? searchRes : (searchRes?.results || [])
+                    const match = products.find(
+                        (p: any) =>
+                            p.product_id === productId ||
+                            p.logistical_description?.toLowerCase() === input.logisticalDescription.toLowerCase()
+                    )
+
+                    if (!match) {
+                        throw new Error('Could not find existing Maystro product to link')
+                    }
+
+                    // We found it! Let's link it and optionally patch it.
+                    let finalProduct = match
+                    try {
+                        finalProduct = await client.request<MaystroProduct>({
+                            method: 'PATCH',
+                            path: `/stock/products/${match.id}/`,
+                            data: { product_id: productId, logistical_description: input.logisticalDescription }
+                        })
+                    } catch (patchErr) {
+                        // If PATCH fails, it's okay, we at least have the link.
+                        console.error('Failed to patch existing Maystro product', patchErr)
+                    }
 
                     await this.prisma.maystroProductMapping.upsert({
                         where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
                         create: {
                             tenantId: input.tenantId,
                             localProductId: input.localProductId,
-                            maystroProductId: updated.product_id || productId,
-                            maystroUuid: updated.id,
+                            maystroProductId: finalProduct.product_id || productId,
+                            maystroUuid: finalProduct.id,
                             syncStatus: 'SYNCED',
                             lastSyncedAt: new Date(),
                             lastError: null
                         },
                         update: {
-                            maystroProductId: updated.product_id || productId,
-                            maystroUuid: updated.id,
+                            maystroProductId: finalProduct.product_id || productId,
+                            maystroUuid: finalProduct.id,
                             syncStatus: 'SYNCED',
                             lastSyncedAt: new Date(),
                             lastError: null
                         }
                     })
 
-                    return updated
+                    return finalProduct
                 } catch (secondError: any) {
                     await this.prisma.maystroProductMapping.upsert({
                         where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
