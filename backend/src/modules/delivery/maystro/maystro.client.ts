@@ -14,7 +14,13 @@ const isRetryableAxiosError = (error: AxiosError) => {
 }
 
 const asMaystroOrderErrorCode = (data: any): number | null => {
-    const candidates = [data?.error_code, data?.code, data?.errorCode, data?.error?.code]
+    const candidates = [
+        data?.error_code,
+        data?.code,
+        data?.errorCode,
+        data?.error?.code,
+        ...(Array.isArray(data?.errors) ? data.errors.map((e: any) => e?.code) : [])
+    ]
     for (const c of candidates) {
         const n = typeof c === 'string' ? Number.parseInt(c, 10) : typeof c === 'number' ? c : NaN
         if (Number.isFinite(n)) return n

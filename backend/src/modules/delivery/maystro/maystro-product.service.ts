@@ -121,7 +121,7 @@ export class MaystroProductService {
         try {
             const updated = await client.request<MaystroProduct>({
                 method: 'PATCH',
-                path: `/stock/products/${encodeURIComponent(existing.maystroProductId)}/`,
+                path: `/stock/products/${encodeURIComponent(existing.maystroUuid)}/`,
                 data: {
                     logistical_description: input.logisticalDescription
                 }

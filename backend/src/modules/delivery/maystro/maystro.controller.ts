@@ -196,6 +196,9 @@ export class MaystroController {
             return res.json(price)
         } catch (error: any) {
             if (error instanceof MaystroIntegrationError) {
+                if (error.statusCode === 404) {
+                    return res.json({ delivery_price: null })
+                }
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
             console.error('Maystro delivery price error', error)
