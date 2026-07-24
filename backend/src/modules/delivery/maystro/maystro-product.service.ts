@@ -70,21 +70,45 @@ export class MaystroProductService {
                 // If the product already exists remotely (e.g., retried request or manual creation),
                 // we should find it by searching and link it.
                 try {
-                    const searchRes = await client.request<any>({
-                        method: 'GET',
-                        path: '/stock/products/',
-                        params: { store: input.storeId, search: input.logisticalDescription }
-                    })
-                    
-                    const products = Array.isArray(searchRes) ? searchRes : (searchRes?.results || [])
-                    const match = products.find(
-                        (p: any) =>
-                            p.product_id === productId ||
-                            p.logistical_description?.toLowerCase() === input.logisticalDescription.toLowerCase()
-                    )
+                    let match = null
+                    let nextPath = '/stock/products/'
+                    let queryParams: any = { store: input.storeId, search: input.logisticalDescription }
+
+                    // Fetch pages until we find the matching product
+                    while (nextPath && !match) {
+                        const searchRes = await client.request<any>({
+                            method: 'GET',
+                            path: nextPath,
+                            params: queryParams
+                        })
+                        
+                        const products = Array.isArray(searchRes) ? searchRes : (searchRes?.results || [])
+                        match = products.find(
+                            (p: any) =>
+                                p.product_id === productId ||
+                                p.logistical_description?.toLowerCase() === input.logisticalDescription.toLowerCase()
+                        )
+
+                        if (match) break
+
+                        if (searchRes?.next && typeof searchRes.next === 'string') {
+                            const apiIndex = searchRes.next.indexOf('/api')
+                            if (apiIndex !== -1) {
+                                nextPath = searchRes.next.substring(apiIndex + 4) // everything after /api
+                                queryParams = undefined // params are already in the next URL
+                            } else {
+                                nextPath = ''
+                            }
+                        } else {
+                            nextPath = ''
+                        }
+                    }
 
                     if (!match) {
-                        throw new Error('Could not find existing Maystro product to link')
+                        throw new MaystroIntegrationError({
+                            statusCode: 400,
+                            statusMessage: `Failed to link existing product: could not find "${input.logisticalDescription}" across all pages in Maystro catalog`
+                        })
                     }
 
                     // We found it! Let's link it and optionally patch it.
