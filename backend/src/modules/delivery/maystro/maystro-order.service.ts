@@ -273,7 +273,8 @@ export class MaystroOrderService {
                 // Code 55 means duplicate order in the last 24h. We bypass it by modifying the name slightly.
                 const isDuplicate = error?.details?.errors?.some((e: any) => e.code === 55)
                 if (isDuplicate) {
-                    payload.order.customer_name = (payload.order.customer_name || '').trim() + ' .'
+                    payload.customer_name = (payload.customer_name || '').trim() + ' (2)'
+                    console.log('Retrying Maystro push with modified name to bypass duplicate check:', payload.customer_name)
                     response = await client.request<MaystroOrderResponse>({
                         method: 'POST',
                         path: '/orders/',
