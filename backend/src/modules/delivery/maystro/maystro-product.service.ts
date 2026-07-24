@@ -138,7 +138,7 @@ export class MaystroProductService {
                             lastSyncedAt: null
                         }
                     })
-                    throw error
+                    throw secondError || error
                 }
             }
         }
