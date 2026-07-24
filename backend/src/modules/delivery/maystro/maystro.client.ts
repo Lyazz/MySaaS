@@ -114,7 +114,15 @@ const extractMaystroDetail = (data: any): string | null => {
             const status = lastError.response?.status ?? 502
             const data = lastError.response?.data
             const code = asMaystroOrderErrorCode(data)
-            const detailStr = extractMaystroDetail(data)
+            let detailStr = extractMaystroDetail(data)
+
+            if (!detailStr && data) {
+                try {
+                    detailStr = typeof data === 'object' ? JSON.stringify(data) : String(data)
+                } catch {
+                    detailStr = 'unknown payload'
+                }
+            }
 
             if (code != null) {
                 const mapped = mapMaystroOrderErrorCode(code)

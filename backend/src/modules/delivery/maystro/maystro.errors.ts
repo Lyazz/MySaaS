@@ -26,6 +26,8 @@ export class MaystroIntegrationError extends Error {
         details?: unknown
     }) {
         super(input.statusMessage)
+        this.name = 'MaystroIntegrationError'
+        Object.setPrototypeOf(this, MaystroIntegrationError.prototype)
         this.statusCode = input.statusCode
         this.statusMessage = input.statusMessage
         this.code = input.code
