@@ -1201,8 +1201,15 @@ function orderStatusLabel(code: string) {
       const addr = o.customerAddress ? `\n📍 Adresse : ${o.customerAddress}` : ''
       const city = shippingWilayaCommuneLabel.value ? `\n🏙️ Ville : ${shippingWilayaCommuneLabel.value}` : ''
       
-      const storeUrl = typeof window !== 'undefined' ? window.location.origin.replace('admin.', '') : ''
-      const confirmLink = storeUrl ? `${storeUrl}/confirm-order/${res.token}` : ''
+      let confirmLink = ''
+      if (typeof window !== 'undefined') {
+        const platformBaseDomain = usePlatformBaseDomain()
+        const slug = authStore.user?.tenant?.slug
+        if (slug) {
+          const tenantHost = toTenantHost(window.location.host, slug, { platformBaseDomain })
+          confirmLink = `${window.location.protocol}//${tenantHost}/confirm-order/${res.token}`
+        }
+      }
 
       const text = `Bonjour ${o.customerName || ''},
 
