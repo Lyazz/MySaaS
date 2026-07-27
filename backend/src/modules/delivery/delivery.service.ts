@@ -578,8 +578,8 @@ export class DeliveryService {
 
         const shipment = await this.prisma.shipment.create({
             data: {
-                tenantId: baseInput.tenantId,
-                orderId: baseInput.orderId,
+                tenant: { connect: { id: baseInput.tenantId } },
+                order: { connect: { tenantId_id: { tenantId: baseInput.tenantId, id: baseInput.orderId } } },
                 provider: baseInput.provider,
                 providerShipmentId: result.providerShipmentId,
                 status: result.status || ShipmentStatus.PENDING,

@@ -28,7 +28,7 @@
 
 .driver-popover-next-btn {
   background-color: var(--brand) !important;
-  color: #05070A !important;
+  color: var(--brand-contrast) !important;
   border: none !important;
   border-radius: 8px !important;
   font-size: 12px !important;

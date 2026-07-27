@@ -1,4 +1,5 @@
 import type { DriveStep } from 'driver.js'
+import { useAuthStore } from '~/stores/auth'
 import { useSidebarTour } from './tours/useSidebarTour'
 import { useDashboardTour } from './tours/useDashboardTour'
 import { useProductsTour } from './tours/useProductsTour'
@@ -40,6 +41,13 @@ function getRegistry(): TourDef[] {
 
 export function useTour() {
   const { t } = useI18n({ useScope: 'global' })
+  const authStore = useAuthStore()
+
+  function getTourStorageKey(tourId: string) {
+    const userId = authStore.user?.id || 'unknown'
+    const tenantId = authStore.user?.tenantId || 'unknown'
+    return `tour_seen_${tenantId}_${userId}_${tourId}`
+  }
 
   async function startTour(id: string, { force = false } = {}) {
     if (!import.meta.client) return
@@ -64,7 +72,7 @@ export function useTour() {
       onDestroyed: () => {
         activeTourId.value = null
         if (import.meta.client) {
-          localStorage.setItem(`tour_seen_${id}`, '1')
+          localStorage.setItem(getTourStorageKey(id), '1')
         }
         // Chain: sidebar tour → auto-start dashboard tour
         if (id === 'sidebar') {
@@ -80,7 +88,7 @@ export function useTour() {
   function autoStartIfNeeded(id: string) {
     if (!import.meta.client) return
     if (activeTourId.value) return
-    if (localStorage.getItem(`tour_seen_${id}`)) return
+    if (localStorage.getItem(getTourStorageKey(id))) return
     setTimeout(() => startTour(id), 600)
   }
 
