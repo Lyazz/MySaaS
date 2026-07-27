@@ -184,22 +184,22 @@
             <button
               v-if="canPrintBordereauVisible"
               type="button"
-              class="ui-btn ui-btn--secondary ui-btn--sm hidden lg:inline-flex"
+              class="ui-btn ui-btn--secondary ui-btn--md hidden lg:inline-flex"
               @click="printBordereau"
             >
               <Icon name="lucide:printer" class="w-4 h-4" />
-              <span class="hidden xl:inline">{{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}</span>
+              <span class="hidden xl:inline">{{ t('admin.pages.orders.detail.printBordereau', 'Imprimer le bordereau') }}</span>
             </button>
             <button
               v-if="order.paymentStatus !== 'PAID'"
               type="button"
-              class="ui-btn ui-btn--primary ui-btn--sm hidden lg:inline-flex"
+              class="ui-btn ui-btn--primary ui-btn--md hidden lg:inline-flex"
               @click="openPaymentModal"
             >
               <Icon name="lucide:banknote" class="w-4 h-4" />
-              <span class="hidden xl:inline">{{ t('admin.pages.orders.modals.payment.title', 'Record Payment') }}</span>
+              <span class="hidden xl:inline">{{ t('admin.pages.orders.modals.payment.title', 'Enregistrer le paiement') }}</span>
             </button>
-            <OrdersOrderDetailNBA
+            <AdminOrdersOrderDetailNBA
               :model="nbaModel"
               :busy="updating"
               @action="applyNBAAction"
@@ -315,7 +315,7 @@
                 </span>
               </Transition>
             </div>
-            <OrdersOrderDetailCallPills
+            <AdminOrdersOrderDetailCallPills
               v-model="order.callStatus"
               :disabled="editing"
               :saving="savingCallStatus ? order.callStatus : null"
@@ -355,7 +355,7 @@
             @click="printBordereau"
           >
             <Icon name="lucide:printer" class="w-4 h-4" />
-            {{ t('admin.pages.orders.detail.printBordereau', 'Print bordereau') }}
+            {{ t('admin.pages.orders.detail.printBordereau', 'Imprimer le bordereau') }}
           </button>
           <button
             v-if="order.paymentStatus !== 'PAID'"
@@ -364,7 +364,7 @@
             @click="openPaymentModal"
           >
             <Icon name="lucide:banknote" class="w-4 h-4" />
-            {{ t('admin.pages.orders.modals.payment.title', 'Record Payment') }}
+            {{ t('admin.pages.orders.modals.payment.title', 'Enregistrer le paiement') }}
           </button>
         </div>
       </div>
@@ -2224,7 +2224,7 @@ async function confirmPayment(payload: { amount: number; cashboxId: string; meth
     paymentModalOpen.value = false
   } catch (err: any) {
     console.error('Record payment error:', err)
-    errorMessage.value = err.data?.statusMessage || err.message || 'Failed to record payment'
+    errorMessage.value = err.data?.statusMessage || err.message || 'Échec de l\'enregistrement du paiement'
   } finally {
     updating.value = false
   }

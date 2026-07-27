@@ -166,9 +166,9 @@ const method = ref<'CASH' | 'CARD' | 'TRANSFER' | 'OTHER'>('CASH')
 const reference = ref('')
 const note = ref('')
 
-const title = computed(() => props.title ?? t('admin.pages.orders.modals.payment.title', 'Record Payment'))
-const subtitle = computed(() => props.subtitle ?? t('admin.pages.orders.modals.payment.subtitle', 'Record a new payment on this order.'))
-const confirmText = computed(() => props.confirmText ?? t('admin.pages.orders.modals.payment.confirm', 'Record Payment'))
+const title = computed(() => props.title ?? t('admin.pages.orders.modals.payment.title', 'Enregistrer le paiement'))
+const subtitle = computed(() => props.subtitle ?? t('admin.pages.orders.modals.payment.subtitle', 'Enregistrer un nouveau paiement pour cette commande.'))
+const confirmText = computed(() => props.confirmText ?? t('admin.pages.orders.modals.payment.confirm', 'Enregistrer le paiement'))
 
 const selectableCashboxes = computed(() => (Array.isArray(props.cashboxes) ? props.cashboxes : []).filter((c) => c.isActive))
 const parsedAmount = computed(() => Number(amount.value))

@@ -107,105 +107,27 @@ export function useOrderNBA(
 
   // PENDING
   if (status === 'PENDING') {
-    if (callStatus === 'not_called') {
-      return {
-        primary: order.customerPhone
-          ? {
-              id: 'call',
-              label: t('admin.pages.orders.detail.nba.callCustomer', 'Call customer'),
-              icon: 'lucide:phone',
-              tone: 'primary',
-              href: `tel:${order.customerPhone}`
-            }
-          : {
-              id: 'confirm',
-              label: t('admin.pages.orders.detail.nba.confirm', 'Confirm order'),
-              icon: 'lucide:check',
-              tone: 'success'
-            },
-        secondary: [
-          {
-            id: 'confirm',
-            label: t('admin.pages.orders.detail.nba.confirm', 'Confirm order'),
-            icon: 'lucide:check',
-            tone: 'success'
-          },
-          {
-            id: 'editItems',
-            label: t('common.edit', 'Edit'),
-            icon: 'lucide:pencil',
-            tone: 'secondary'
-          },
-          {
-            id: 'cancel',
-            label: t('admin.pages.orders.detail.nba.cancelOrder', 'Cancel order'),
-            icon: 'lucide:x-circle',
-            tone: 'danger'
-          },
-          {
-            id: 'delete',
-            label: t('common.delete', 'Delete'),
-            icon: 'lucide:trash-2',
-            tone: 'danger'
-          },
-          ...bl
-        ],
-        pulse: true,
-        lockedNote
-      }
-    }
-
-    if (callStatus === 'called') {
-      return {
-        primary: {
-          id: 'confirm',
-          label: t('admin.pages.orders.detail.nba.confirm', 'Confirm order'),
-          icon: 'lucide:check',
-          tone: 'success'
-        },
-        secondary: [
-          {
-            id: 'call',
-            label: t('admin.pages.orders.detail.nba.callAgain', 'Call again'),
-            icon: 'lucide:phone',
-            tone: 'secondary',
-            href: order.customerPhone ? `tel:${order.customerPhone}` : undefined
-          },
-          {
-            id: 'editItems',
-            label: t('common.edit', 'Edit'),
-            icon: 'lucide:pencil',
-            tone: 'secondary'
-          },
-          {
-            id: 'cancel',
-            label: t('admin.pages.orders.detail.nba.cancelOrder', 'Cancel order'),
-            icon: 'lucide:x-circle',
-            tone: 'danger'
-          },
-          ...bl
-        ],
-        pulse: true,
-        lockedNote
-      }
-    }
-
-    // attempt_* / no_answer / switched_off
     return {
       primary: {
-        id: 'call',
-        label: t('admin.pages.orders.detail.nba.callAgain', 'Call again'),
-        icon: 'lucide:phone',
-        tone: 'primary',
-        href: order.customerPhone ? `tel:${order.customerPhone}` : undefined
+        id: 'confirm',
+        label: t('admin.pages.orders.detail.nba.confirm', 'Confirm order'),
+        icon: 'lucide:check',
+        tone: 'success'
       },
       secondary: [
-        {
-          id: 'confirm',
-          label: t('admin.pages.orders.detail.nba.confirmAnyway', 'Confirm anyway'),
-          icon: 'lucide:check',
-          tone: 'success'
-        },
+        ...(order.customerPhone
+          ? [
+              {
+                id: 'call',
+                label: callStatus === 'not_called'
+                  ? t('admin.pages.orders.detail.nba.callCustomer', 'Call customer')
+                  : t('admin.pages.orders.detail.nba.callAgain', 'Call again'),
+                icon: 'lucide:phone',
+                tone: 'secondary',
+                href: `tel:${order.customerPhone}`
+              } as NBAAction
+            ]
+          : []),
         {
           id: 'editItems',
           label: t('common.edit', 'Edit'),
@@ -218,9 +140,15 @@ export function useOrderNBA(
           icon: 'lucide:x-circle',
           tone: 'danger'
         },
+        {
+          id: 'delete',
+          label: t('common.delete', 'Delete'),
+          icon: 'lucide:trash-2',
+          tone: 'danger'
+        },
         ...bl
       ],
-      pulse: false,
+      pulse: true,
       lockedNote
     }
   }

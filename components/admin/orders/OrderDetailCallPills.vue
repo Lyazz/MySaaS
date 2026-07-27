@@ -54,7 +54,7 @@ const options = computed(() => [
     value: 'not_called',
     label: t('admin.pages.orders.detail.fields.callStatusValues.not_called', 'Not Called'),
     icon: 'lucide:phone-off',
-    tone: 'tone-neutral'
+    tone: 'tone-rose'
   },
   {
     value: 'called',
