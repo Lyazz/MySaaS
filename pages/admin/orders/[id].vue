@@ -1186,6 +1186,13 @@ function orderStatusLabel(code: string) {
     const o = order.value
     if (!o || !o.customerPhone) return
 
+    // iOS Safari blocks window.open if it occurs after an await.
+    // Opening it synchronously first prevents this.
+    let newWin: Window | null = null
+    if (typeof window !== 'undefined') {
+      newWin = window.open('about:blank', '_blank')
+    }
+
     generatingWhatsapp.value = true
     try {
       const res: any = await $fetch(`/api/admin/orders/${o.id}/generate-confirmation`, {
@@ -1231,13 +1238,19 @@ Merci de votre confiance !`
       }
 
       const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
-      window.open(whatsappUrl, '_blank')
+      
+      if (newWin) {
+        newWin.location.href = whatsappUrl
+      } else if (typeof window !== 'undefined') {
+        window.location.href = whatsappUrl
+      }
       
       if (order.value && order.value.callStatus !== 'whatsapp_sms_sent' && order.value.callStatus !== 'whatsapp_link_confirmed') {
         order.value.callStatus = 'whatsapp_sms_sent'
         await handleUpdateCallStatus()
       }
     } catch (err: any) {
+      if (newWin) newWin.close()
       console.error('Failed to generate WhatsApp link', err)
       alert(t('admin.common.error', 'An error occurred'))
     } finally {
