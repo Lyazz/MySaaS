@@ -21,6 +21,33 @@ const service = new OrdersService()
 const deliveryService = new DeliveryService()
 
 export class OrdersController {
+    async generateConfirmationToken(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const orderId = req.params.id
+            const token = await service.generateConfirmationToken(tenant.id, orderId)
+            res.json({ token })
+        } catch (error: any) {
+            console.error('Generate confirmation token error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async confirmTokenPublic(req: Request, res: Response) {
+        try {
+            const { token } = req.body
+            if (!token) return res.status(400).json({ message: 'Token is required' })
+
+            const order = await service.confirmOrderByToken(token)
+            res.json({ success: true, orderId: order.id, publicOrderId: order.publicId })
+        } catch (error: any) {
+            console.error('Confirm order token error:', error)
+            if (error.message === 'INVALID_TOKEN') {
+                return res.status(400).json({ message: 'Invalid or already used token' })
+            }
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
     async unreadCount(req: Request, res: Response) {
         try {
             const tenant = req.tenant!

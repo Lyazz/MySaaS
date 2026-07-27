@@ -8,5 +8,6 @@ const controller = new OrdersController()
 router.post('/loyalty/summary', controller.loyaltySummaryPublic.bind(controller))
 router.post('/', controller.createPublic.bind(controller))
 router.get('/:id/pixel', controller.pixelPayloadPublic.bind(controller))
+router.post('/confirm', controller.confirmTokenPublic.bind(controller))
 
 export default router

@@ -992,6 +992,9 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  confirmationToken     String?   @unique
+  confirmationTokenUsed Boolean   @default(false)
+
   @@unique([tenantId, id])
   @@unique([tenantId, publicId])
   @@index([tenantId])

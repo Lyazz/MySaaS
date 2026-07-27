@@ -159,7 +159,50 @@ const addUtcMonths = (date: Date, months: number) =>
 const addUtcYears = (date: Date, years: number) =>
     new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
 
+import crypto from 'crypto'
+
 export class OrdersService {
+  async generateConfirmationToken(tenantId: string, orderId: string): Promise<string> {
+    const order = await prisma.order.findUnique({
+      where: { tenantId, id: orderId }
+    })
+    if (!order) throw new Error('Order not found')
+
+    if (order.confirmationToken && !order.confirmationTokenUsed) {
+      return order.confirmationToken
+    }
+
+    const token = crypto.randomBytes(32).toString('hex')
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        confirmationToken: token,
+        confirmationTokenUsed: false
+      }
+    })
+    return token
+  }
+
+  async confirmOrderByToken(token: string): Promise<any> {
+    const order = await prisma.order.findUnique({
+      where: { confirmationToken: token }
+    })
+    if (!order || order.confirmationTokenUsed) {
+      throw new Error('INVALID_TOKEN')
+    }
+
+    const newNote = `\n[${new Date().toISOString()}] ✅ Order confirmed by customer via secure link`
+    const updatedNotes = (order.internalNotes || '') + newNote
+
+    return await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: 'CONFIRMED',
+        confirmationTokenUsed: true,
+        internalNotes: updatedNotes
+      }
+    })
+  }
     private maystroBordereau = new MaystroBordereauService()
     private maystroPickupPoints = new MaystroPickupPointService()
     private loyaltyFormula = new LoyaltyFormulaService()

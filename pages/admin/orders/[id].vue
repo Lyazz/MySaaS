@@ -275,18 +275,37 @@
               <Icon name="lucide:user" class="w-4 h-4" style="color: var(--text-tertiary)" />
               <span class="od-customer-card__name">{{ order.customerName }}</span>
             </div>
-            <div class="od-customer-card__phone">
-              <a :href="`tel:${order.customerPhone}`" dir="ltr" class="od-tel">
-                <Icon name="lucide:phone" class="w-3.5 h-3.5" />
-                {{ order.customerPhone }}
-              </a>
+            <div v-if="order.customerPhone" class="mt-3 space-y-2">
+              <div class="flex gap-2">
+                <a
+                  :href="`tel:${order.customerPhone}`"
+                  class="ui-btn ui-btn--sm flex-1 flex justify-center items-center gap-2"
+                  style="color: #0369a1; background-color: #f0f9ff; border: 1px solid #bae6fd;"
+                  dir="ltr"
+                >
+                  <Icon name="lucide:phone" class="w-4 h-4" />
+                  <span class="font-bold tracking-wide">{{ order.customerPhone }}</span>
+                </a>
+                <button
+                  type="button"
+                  class="ui-btn ui-btn--sm ui-btn--secondary px-3"
+                  :aria-label="t('common.copy', 'Copy')"
+                  @click="copyToClipboard(order.customerPhone)"
+                >
+                  <Icon name="lucide:copy" class="w-4 h-4" />
+                </button>
+              </div>
+              
               <button
                 type="button"
-                class="od-copy"
-                :aria-label="t('common.copy', 'Copy')"
-                @click="copyToClipboard(order.customerPhone)"
+                :disabled="generatingWhatsapp"
+                @click="generateAndSendWhatsapp"
+                class="ui-btn ui-btn--sm w-full flex justify-center items-center gap-2"
+                style="color: #16a34a; background-color: #f0fdf4; border: 1px solid #bbf7d0;"
               >
-                <Icon name="lucide:copy" class="w-3.5 h-3.5" />
+                <Icon v-if="generatingWhatsapp" name="lucide:loader" class="w-4 h-4 animate-spin" />
+                <Icon v-else name="lucide:message-circle" class="w-4 h-4" />
+                <span class="font-bold">{{ generatingWhatsapp ? t('admin.common.loading', 'Loading...') : t('admin.pages.orders.detail.sendWhatsapp', 'Send WhatsApp') }}</span>
               </button>
             </div>
             <div v-if="order.customerAddress" class="od-customer-card__address">
@@ -1159,6 +1178,60 @@ function orderStatusLabel(code: string) {
     const shipping = o.shippingAmount == null ? 0 : Number(o.shippingAmount)
     return Number(o.totalAmount || 0) + (Number.isFinite(shipping) ? shipping : 0)
   })
+
+  const generatingWhatsapp = ref(false)
+
+  async function generateAndSendWhatsapp() {
+    if (generatingWhatsapp.value) return
+    const o = order.value
+    if (!o || !o.customerPhone) return
+
+    generatingWhatsapp.value = true
+    try {
+      const res: any = await $fetch(`/api/admin/orders/${o.id}/generate-confirmation`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      })
+
+      const productsRecap = (o.items || [])
+        .map((item: any) => `- ${item.quantity}x ${item.product?.title || 'Produit'} (${formatCurrency(item.price)})`)
+        .join('\n')
+
+      const total = formatCurrency(orderTotalWithShipping.value)
+      const addr = o.customerAddress ? `\n📍 Adresse : ${o.customerAddress}` : ''
+      const city = shippingWilayaCommuneLabel.value ? `\n🏙️ Ville : ${shippingWilayaCommuneLabel.value}` : ''
+      
+      const storeUrl = typeof window !== 'undefined' ? window.location.origin.replace('admin.', '') : ''
+      const confirmLink = storeUrl ? `${storeUrl}/confirm-order/${res.token}` : ''
+
+      const text = `Bonjour ${o.customerName || ''},
+
+Merci pour votre commande ! Voici un récapitulatif :
+${productsRecap}
+
+💰 Total : ${total}
+
+Vos informations :${addr}${city}
+
+Veuillez cliquer sur le lien ci-dessous pour confirmer votre commande :
+${confirmLink}
+
+Merci de votre confiance !`
+
+      let phone = o.customerPhone.replace(/\D/g, '')
+      if (phone.startsWith('0')) {
+        phone = '213' + phone.substring(1)
+      }
+
+      const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
+      window.open(whatsappUrl, '_blank')
+    } catch (err: any) {
+      console.error('Failed to generate WhatsApp link', err)
+      alert(t('admin.common.error', 'An error occurred'))
+    } finally {
+      generatingWhatsapp.value = false
+    }
+  }
 
   const previousOrders = computed(() => order.value?.previousOrders ?? [])
 
