@@ -55,7 +55,7 @@ onMounted(async () => {
   }
 
   try {
-    const res: any = await $fetch('/api/public/orders/confirm', {
+    const res: any = await $fetch('/api/orders/confirm', {
       method: 'POST',
       body: { token }
     })
