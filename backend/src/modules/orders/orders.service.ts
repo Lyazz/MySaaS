@@ -198,6 +198,7 @@ export class OrdersService {
       where: { id: order.id },
       data: {
         status: 'CONFIRMED',
+        callStatus: 'whatsapp_link_confirmed',
         confirmationTokenUsed: true,
         internalNotes: updatedNotes
       }

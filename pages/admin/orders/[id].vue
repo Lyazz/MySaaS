@@ -1232,6 +1232,11 @@ Merci de votre confiance !`
 
       const whatsappUrl = `https://wa.me/${phone}?text=${encodeURIComponent(text)}`
       window.open(whatsappUrl, '_blank')
+      
+      if (order.value && order.value.callStatus !== 'whatsapp_sms_sent' && order.value.callStatus !== 'whatsapp_link_confirmed') {
+        order.value.callStatus = 'whatsapp_sms_sent'
+        await handleUpdateCallStatus()
+      }
     } catch (err: any) {
       console.error('Failed to generate WhatsApp link', err)
       alert(t('admin.common.error', 'An error occurred'))

@@ -91,6 +91,18 @@ const options = computed(() => [
     label: t('admin.pages.orders.detail.fields.callStatusValues.switched_off', 'Switched Off'),
     icon: 'lucide:power-off',
     tone: 'tone-rose'
+  },
+  {
+    value: 'whatsapp_sms_sent',
+    label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_sms_sent', 'WhatsApp SMS Sent'),
+    icon: 'lucide:message-square',
+    tone: 'tone-amber'
+  },
+  {
+    value: 'whatsapp_link_confirmed',
+    label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_link_confirmed', 'WhatsApp Link Confirmed'),
+    icon: 'lucide:check-square',
+    tone: 'tone-emerald'
   }
 ])
 
