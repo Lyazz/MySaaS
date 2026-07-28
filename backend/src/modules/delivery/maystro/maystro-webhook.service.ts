@@ -62,7 +62,8 @@ export class MaystroWebhookService {
 
         const statusCode = payload?.status ?? payload?.status_code ?? payload?.statusCode
         const maystroOrderId =
-            payload?.id ?? payload?.order_id ?? payload?.orderId ?? decoded?.id ?? decoded?.order_id ?? decoded?.orderId
+            payload?.id ?? payload?.order_id ?? payload?.orderId ?? payload?.instance_uuid ??
+            decoded?.id ?? decoded?.order_id ?? decoded?.orderId ?? decoded?.instance_uuid
         const externalId = payload?.external_id ?? payload?.externalId ?? decoded?.external_id ?? decoded?.externalId
 
         const shipmentStatus = statusCode != null ? maystroOrderStatusToShipmentStatus(statusCode) : null
