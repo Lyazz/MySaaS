@@ -183,6 +183,16 @@ export class OrdersService {
     return token
   }
 
+  async getOrderByToken(token: string): Promise<any> {
+    const order = await prisma.order.findUnique({
+      where: { confirmationToken: token }
+    })
+    if (!order || order.confirmationTokenUsed) {
+      throw new Error('INVALID_TOKEN')
+    }
+    return order
+  }
+
   async confirmOrderByToken(token: string): Promise<any> {
     const order = await prisma.order.findUnique({
       where: { confirmationToken: token }

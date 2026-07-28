@@ -146,7 +146,9 @@ const grandTotal = computed(() => {
   return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
 })
 
-const hasRequiredFields = computed(() => Boolean(form.value.fullName.trim() && form.value.phone.trim() && cartStore.hasItems && cartStore.total >= minimumOrderAmount.value && form.value.selectedDeliveryOption))
+const hasRequiredFields = computed(() => Boolean(form.value.fullName.trim() && form.value.phone.trim() &&
+  form.value.wilaya &&
+  form.value.commune && cartStore.hasItems && cartStore.total >= minimumOrderAmount.value && form.value.selectedDeliveryOption))
 
 onMounted(() => { cartStore.loadFromLocalStorage() })
 
@@ -157,6 +159,10 @@ async function handleSubmit() {
   if (!cartStore.hasItems) { errorMessage.value = storefrontContent.value.checkout.errors.emptyCart; return }
   if (!form.value.fullName.trim()) { errorMessage.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
   if (!form.value.phone.trim()) { errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired; return }
+    if (!form.value.wilaya || !form.value.commune) {
+      errorMessage.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+      return
+    }
   if (!form.value.selectedDeliveryOption) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
 
   submitting.value = true
@@ -235,10 +241,7 @@ async function handleSubmit() {
               <div class="co__field">
                 <label class="co__label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <div class="co__select-wrap">
-                  <select v-model="form.wilaya" class="co__select">
-                    <option value="" disabled>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
-                    <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
-                  </select>
+                  <WilayaField v-model="form.wilaya" input-class="co__select" :placeholder="storefrontContent.checkout.form.wilaya.placeholder" />
                   <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="co__select-arrow">
                     <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
                   </svg>

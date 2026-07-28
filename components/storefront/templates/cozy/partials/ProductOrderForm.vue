@@ -309,6 +309,10 @@ const handleOrderSubmit = async () => {
         orderError.value = storefrontContent.value.checkout.errors.phoneRequired
         return
     }
+    if (codEnabled.value && (!quickForm.wilaya || !quickForm.commune)) {
+        orderError.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+        return
+    }
     if (codEnabled.value && !quickForm.selectedDeliveryOption) {
         orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
         return
@@ -326,11 +330,7 @@ const handleOrderSubmit = async () => {
             : null
 
         if (isMaystro) {
-          if (!quickForm.wilaya || !quickForm.commune) {
-            orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
-            orderSubmitting.value = false
-            return
-          }
+          
           if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
@@ -528,24 +528,11 @@ const handleAddToCart = async () => {
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-            <div class="relative">
-              <select
-                v-model="quickForm.wilaya"
-                class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none appearance-none cursor-pointer"
-              >
-                <option value="" disabled>{{ storefrontContent.common.selectPlaceholder }}</option>
-                <option
-                  v-for="w in wilayas"
-                  :key="w.code"
-                  :value="w.code"
-                >
-                  {{ w.code }} - {{ w.name }}
-                </option>
-              </select>
-              <div class="absolute right-3 rtl:right-auto rtl:left-3 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                <Icon name="lucide:chevron-down" class="w-4 h-4 rtl:rotate-180" />
-              </div>
-            </div>
+            <WilayaField
+                        v-model="quickForm.wilaya"
+                        input-class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none appearance-none cursor-pointer"
+                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                      />
           </div>
           <div>
             <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.commune.label }}</label>

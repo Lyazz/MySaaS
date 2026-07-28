@@ -187,6 +187,8 @@ const grandTotal = computed(() => {
 const hasRequiredFields = computed(() => Boolean(
   form.value.fullName.trim() &&
   form.value.phone.trim() &&
+  form.value.wilaya &&
+  form.value.commune &&
   cartStore.hasItems &&
   cartStore.total >= minimumOrderAmount.value &&
   form.value.selectedDeliveryOption
@@ -215,6 +217,10 @@ async function handleSubmit() {
       errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
       return
     }
+    if (!form.value.wilaya || !form.value.commune) {
+      errorMessage.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+      return
+    }
     if (!form.value.selectedDeliveryOption) {
       errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
       return
@@ -232,10 +238,7 @@ async function handleSubmit() {
           : null
 
         if (isMaystro) {
-          if (!form.value.wilaya || !form.value.commune) {
-            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
-            return
-          }
+          
           if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
@@ -344,11 +347,11 @@ async function handleSubmit() {
               <div class="md:col-span-1">
                 <label class="block text-[10px] font-bold uppercase tracking-[0.22em] text-slate-500 mb-2">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <div class="relative">
-                  <select v-model="form.wilaya" :class="`${inputClass} appearance-none cursor-pointer pr-10`">
-                    <option value="" disabled>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
-                    <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
-                  </select>
-                  <Icon name="lucide:chevron-down" class="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                  <WilayaField
+                    v-model="form.wilaya"
+                    :input-class="`${inputClass} appearance-none cursor-pointer pr-10`"
+                    :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                  />
                 </div>
               </div>
               <div class="md:col-span-1">

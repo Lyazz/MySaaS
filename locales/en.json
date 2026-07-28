@@ -1665,6 +1665,23 @@
       },
       "confirm": {
         "discard": "Are you sure you want to discard your unsaved changes?"
+      },
+      "messaging": {
+        "title": "Messaging",
+        "subtitle": "Customize communication templates sent to your customers.",
+        "whatsappTemplate": {
+          "label": "WhatsApp Confirmation Template",
+          "hint": "Customize the message sent when you click 'Send WhatsApp' in the order details.",
+          "keywordsLabel": "Available keywords:",
+          "keywords": {
+            "customerName": "Customer's name",
+            "productsRecap": "List of ordered products",
+            "total": "Total amount with shipping",
+            "address": "Full delivery address (including wilaya/commune)",
+            "confirmLink": "The secure confirmation link"
+          },
+          "preview": "Preview"
+        }
       }
     },
     "domainSettingsForm": {

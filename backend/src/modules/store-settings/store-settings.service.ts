@@ -99,6 +99,7 @@ export type StoreSettingsPatchInput = Partial<{
     invoiceNumberPrefix: string
     invoiceFooterText: string | null
     invoiceShowLogo: boolean
+    whatsappConfirmationTemplate: string | null
     legalPages: StoreLegalPagesConfig
 }>
 
@@ -345,6 +346,17 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('invoiceFooterText is too long (max 1000 chars)')
             }
             updateSettings.invoiceFooterText = footerText || null
+        }
+
+        if (input.whatsappConfirmationTemplate !== undefined) {
+            if (input.whatsappConfirmationTemplate !== null && typeof input.whatsappConfirmationTemplate !== 'string') {
+                throw new StoreSettingsValidationError('whatsappConfirmationTemplate must be a string or null')
+            }
+            const templateText = typeof input.whatsappConfirmationTemplate === 'string' ? input.whatsappConfirmationTemplate.trim() : ''
+            if (templateText.length > 2000) {
+                throw new StoreSettingsValidationError('whatsappConfirmationTemplate is too long (max 2000 chars)')
+            }
+            updateSettings.whatsappConfirmationTemplate = templateText || null
         }
 
         if (input.invoiceShowLogo !== undefined) {

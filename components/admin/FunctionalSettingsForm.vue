@@ -144,6 +144,40 @@
         </div>
       </SettingsSection>
 
+      <!-- Messaging -->
+      <SettingsSection
+        anchor-id="messaging"
+        icon="lucide:message-square"
+        :title="t('admin.functionalSettingsForm.messaging.title')"
+        :subtitle="t('admin.functionalSettingsForm.messaging.subtitle')"
+      >
+        <div class="field-group">
+          <label class="field-label">{{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.label') }}</label>
+          <p class="field-hint mb-4">
+            {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.hint') }}
+            <br><br>
+            <strong>{{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywordsLabel') }}</strong><br>
+            <code>{customerName}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.customerName') }}<br>
+            <code>{productsRecap}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.productsRecap') }}<br>
+            <code>{total}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.total') }}<br>
+            <code>{address}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.address') }}<br>
+            <code>{confirmLink}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.confirmLink') }}
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <textarea
+              v-model="form.whatsappConfirmationTemplate"
+              class="field-input min-h-[150px]"
+              style="height: 100%;"
+            ></textarea>
+            
+            <div class="p-4 rounded-xl border h-full" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
+              <p class="text-xs font-bold mb-2 uppercase tracking-wide" style="color: var(--text-tertiary);">{{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.preview') }}</p>
+              <div class="whitespace-pre-wrap text-sm" style="color: var(--text-primary); font-family: monospace;">{{ whatsappTemplatePreview }}</div>
+            </div>
+          </div>
+        </div>
+      </SettingsSection>
+
       <div class="theme-group-heading">
         <span>{{ t('admin.functionalSettingsForm.themeGroups.invoices.title') }}</span>
         <small>{{ t('admin.functionalSettingsForm.themeGroups.invoices.subtitle') }}</small>
@@ -394,6 +428,15 @@ const successMessage = ref('')
 const errorMessage = ref('')
 const loadingCurrencies = ref(false)
 
+const defaultWhatsappTemplate = `Bonjour {customerName},
+Merci pour votre commande !
+Voici un récapitulatif :
+{productsRecap}
+
+Total : {total}
+Veuillez cliquer ici pour confirmer votre commande :
+{confirmLink}`
+
 const form = reactive({
   cartEnabled: true,
   codEnabled: true,
@@ -413,16 +456,28 @@ const form = reactive({
   salesInvoiceEnabled: false,
   invoiceNumberPrefix: 'INV',
   invoiceFooterText: '',
-  invoiceShowLogo: true
+  invoiceShowLogo: true,
+  whatsappConfirmationTemplate: defaultWhatsappTemplate
 })
 
 const initialFormString = ref(JSON.stringify(form))
 const isDirty = computed(() => initialFormString.value !== JSON.stringify(form))
 
+const whatsappTemplatePreview = computed(() => {
+  const tpl = form.whatsappConfirmationTemplate || defaultWhatsappTemplate
+  return tpl
+    .replace(/{customerName}/g, 'Amine')
+    .replace(/{productsRecap}/g, '- 1x AirPods Pro (35,000 DZD)\n- 2x Coque Silicone (3,000 DZD)')
+    .replace(/{total}/g, '38,600 DZD')
+    .replace(/{address}/g, '123 Rue de la Liberté, Alger Centre, Alger')
+    .replace(/{confirmLink}/g, 'https://store.swekly.com/confirm-order/abc123xyz')
+})
+
 const activeTab = ref('features')
 const tabs = computed(() => [
   { id: 'features', label: t('admin.functionalSettingsForm.features.title'), icon: 'lucide:toggle-right' },
   { id: 'checkout', label: t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout', icon: 'lucide:credit-card' },
+  { id: 'messaging', label: t('admin.functionalSettingsForm.messaging.title') || 'Messaging', icon: 'lucide:message-square' },
   { id: 'invoices', label: t('admin.functionalSettingsForm.invoices.title'), icon: 'lucide:receipt-text' },
   { id: 'announcement', label: t('admin.appearanceSettingsForm.announcement.title'), icon: 'lucide:megaphone' },
   { id: 'loyalty', label: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty', icon: 'lucide:badge-percent' },
@@ -497,6 +552,7 @@ const updateForm = (data: any) => {
   form.invoiceNumberPrefix = data.invoiceNumberPrefix || 'INV'
   form.invoiceFooterText = data.invoiceFooterText || ''
   form.invoiceShowLogo = data.invoiceShowLogo ?? true
+  form.whatsappConfirmationTemplate = data.whatsappConfirmationTemplate || defaultWhatsappTemplate
   initialFormString.value = JSON.stringify(form)
 }
 

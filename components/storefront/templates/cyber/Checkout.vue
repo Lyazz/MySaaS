@@ -195,6 +195,8 @@ const grandTotal = computed(() => {
 const hasRequiredFields = computed(() => Boolean(
   form.value.fullName.trim() &&
   form.value.phone.trim() &&
+  form.value.wilaya &&
+  form.value.commune &&
   cartStore.hasItems &&
   cartStore.total >= minimumOrderAmount.value &&
   form.value.selectedDeliveryOption
@@ -224,6 +226,10 @@ async function handleSubmit() {
       errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
       return
     }
+    if (!form.value.wilaya || !form.value.commune) {
+      errorMessage.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+      return
+    }
 
     if (!form.value.selectedDeliveryOption) {
       errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
@@ -243,10 +249,7 @@ async function handleSubmit() {
             : null
 
         if (isMaystro) {
-          if (!form.value.wilaya || !form.value.commune) {
-            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
-            return
-          }
+          
           if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
@@ -357,25 +360,11 @@ async function handleSubmit() {
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
                   <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                  <div class="relative">
-                    <select
-                      v-model="form.wilaya"
-                      class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none appearance-none cursor-pointer"
-                    >
-                      <option value="" disabled class="bg-[#1a0a2e]">{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
-                      <option
-                        v-for="w in wilayas"
-                        :key="w.code"
-                        :value="w.code"
-                        class="bg-[#1a0a2e]"
-                      >
-                        {{ w.code }} - {{ w.name }}
-                      </option>
-                    </select>
-                    <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
-                      <Icon name="lucide:chevron-down" class="w-4 h-4" />
-                    </div>
-                  </div>
+                  <WilayaField
+                        v-model="form.wilaya"
+                        input-class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none appearance-none cursor-pointer"
+                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                      />
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
                   <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>

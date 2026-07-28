@@ -82,6 +82,10 @@ const handleOrderSubmit = async () => {
     if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
     if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
     if (codEnabled.value && !quickForm.phone.trim()) { orderError.value = storefrontContent.value.checkout.errors.phoneRequired; return }
+    if (codEnabled.value && (!quickForm.wilaya || !quickForm.commune)) {
+        orderError.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+        return
+    }
     if (codEnabled.value && !quickForm.selectedDeliveryOption) {
         orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
         return
@@ -99,11 +103,7 @@ const handleOrderSubmit = async () => {
             : null
 
         if (isMaystro) {
-          if (!quickForm.wilaya || !quickForm.commune) {
-            orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
-            orderSubmitting.value = false
-            return
-          }
+          
           if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
@@ -389,20 +389,11 @@ const scrollToForm = () => {
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
                         <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                        <div class="relative">
-                            <select v-model="quickForm.wilaya" class="w-full h-11 px-4 text-sm appearance-none cursor-pointer focus:outline-none" style="background-color:#0E1117; border:1px solid rgba(212,197,169,0.12); color:#E8E0D5; border-radius:1px;">
-                                <option value="" disabled style="background:#0E1117;">{{ storefrontContent.common.selectPlaceholder }}</option>
-                                <option
-                                  v-for="w in wilayas"
-                                  :key="w.code"
-                                  :value="w.code"
-                                  style="background:#0E1117;"
-                                >
-                                  {{ w.code }} - {{ w.name }}
-                                </option>
-                            </select>
-                            <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color:#5A5450;"><Icon name="lucide:chevron-down" class="w-4 h-4" /></div>
-                        </div>
+                        <WilayaField
+                        v-model="quickForm.wilaya"
+                        input-class="w-full h-11 px-4 text-sm appearance-none cursor-pointer focus:outline-none"
+                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                      />
                     </div>
                     <div class="space-y-1.5">
                         <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.commune.label }}</label>

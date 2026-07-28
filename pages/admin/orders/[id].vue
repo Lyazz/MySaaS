@@ -1195,18 +1195,26 @@ function orderStatusLabel(code: string) {
 
     generatingWhatsapp.value = true
     try {
-      const res: any = await $fetch(`/api/admin/orders/${o.id}/generate-confirmation`, {
-        method: 'POST',
-        headers: { Authorization: `Bearer ${authStore.token}` }
-      })
+      const [res, settings]: [any, any] = await Promise.all([
+        $fetch(`/api/admin/orders/${o.id}/generate-confirmation`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${authStore.token}` }
+        }),
+        $fetch('/api/admin/store-settings', {
+          headers: { Authorization: `Bearer ${authStore.token}` }
+        }).catch(() => null)
+      ])
 
       const productsRecap = (o.items || [])
         .map((item: any) => `- ${item.quantity}x ${item.product?.title || 'Produit'} (${formatCurrency(item.price)})`)
         .join('\n')
 
       const total = formatCurrency(orderTotalWithShipping.value)
-      const addr = o.customerAddress ? `\n📍 Adresse : ${o.customerAddress}` : ''
-      const city = shippingWilayaCommuneLabel.value ? `\n🏙️ Ville : ${shippingWilayaCommuneLabel.value}` : ''
+      
+      const addrParts = []
+      if (o.customerAddress) addrParts.push(o.customerAddress)
+      if (shippingWilayaCommuneLabel.value) addrParts.push(shippingWilayaCommuneLabel.value)
+      const fullAddress = addrParts.join(', ')
       
       let confirmLink = ''
       if (typeof window !== 'undefined') {
@@ -1218,19 +1226,24 @@ function orderStatusLabel(code: string) {
         }
       }
 
-      const text = `Bonjour ${o.customerName || ''},
-
-Merci pour votre commande ! Voici un récapitulatif :
+      let text = ''
+      if (settings?.whatsappConfirmationTemplate) {
+        text = settings.whatsappConfirmationTemplate
+          .replace(/{customerName}/g, o.customerName || '')
+          .replace(/{productsRecap}/g, productsRecap)
+          .replace(/{total}/g, total)
+          .replace(/{address}/g, fullAddress)
+          .replace(/{confirmLink}/g, confirmLink)
+      } else {
+        text = `Bonjour ${o.customerName || ''},
+Merci pour votre commande !
+Voici un récapitulatif :
 ${productsRecap}
 
-💰 Total : ${total}
-
-Vos informations :${addr}${city}
-
-Veuillez cliquer sur le lien ci-dessous pour confirmer votre commande :
-${confirmLink}
-
-Merci de votre confiance !`
+Total : ${total}
+Veuillez cliquer ici pour confirmer votre commande :
+${confirmLink}`
+      }
 
       let phone = o.customerPhone.replace(/\D/g, '')
       if (phone.startsWith('0')) {

@@ -1651,6 +1651,23 @@
       },
       "confirm": {
         "discard": "Voulez-vous vraiment annuler les modifications non enregistrées ?"
+      },
+      "messaging": {
+        "title": "Messagerie",
+        "subtitle": "Personnalisez les modèles de communication envoyés à vos clients.",
+        "whatsappTemplate": {
+          "label": "Modèle de confirmation WhatsApp",
+          "hint": "Personnalisez le message envoyé lorsque vous cliquez sur 'Envoyer WhatsApp' dans les détails de la commande.",
+          "keywordsLabel": "Mots-clés disponibles :",
+          "keywords": {
+            "customerName": "Nom du client",
+            "productsRecap": "Liste des produits commandés",
+            "total": "Montant total avec livraison",
+            "address": "Adresse de livraison complète (y compris wilaya/commune)",
+            "confirmLink": "Le lien de confirmation sécurisé"
+          },
+          "preview": "Aperçu"
+        }
       }
     },
     "domainSettingsForm": {

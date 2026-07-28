@@ -321,6 +321,8 @@ model StoreSettings {
   currencyCode          String  @default("DZD") // ISO currency code
   currencyCountry       String  @default("DZ") // ISO country for flag/locale
 
+  whatsappConfirmationTemplate String? // Customizable WhatsApp confirmation message template
+
   isCompleted              Boolean  @default(false)
   checklistDismissed       Boolean  @default(false)
   allowedDeliveryProviders String[] @default(["SELF"])

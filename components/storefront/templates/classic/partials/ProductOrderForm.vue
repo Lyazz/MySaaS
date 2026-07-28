@@ -312,6 +312,10 @@ const handleOrderSubmit = async () => {
         orderError.value = storefrontContent.value.checkout.errors.phoneRequired
         return
     }
+    if (codEnabled.value && (!quickForm.wilaya || !quickForm.commune)) {
+        orderError.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+        return
+    }
     if (codEnabled.value && !quickForm.selectedDeliveryOption) {
         orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
         return
@@ -329,11 +333,7 @@ const handleOrderSubmit = async () => {
             : null
 
         if (isMaystro) {
-          if (!quickForm.wilaya || !quickForm.commune) {
-            orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
-            orderSubmitting.value = false
-            return
-          }
+          
           if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
@@ -534,24 +534,11 @@ const handleAddToCart = async () => {
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
                     <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                    <div class="relative">
-                    <select
+                    <WilayaField
                         v-model="quickForm.wilaya"
-                        class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none appearance-none cursor-pointer rounded-none"
-                    >
-                        <option value="" disabled>{{ storefrontContent.common.selectPlaceholder }}</option>
-                        <option
-                          v-for="w in wilayas"
-                          :key="w.code"
-                          :value="w.code"
-                        >
-                          {{ w.code }} - {{ w.name }}
-                        </option>
-                    </select>
-                    <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500">
-                        <Icon name="lucide:chevron-down" class="w-4 h-4 rtl:rotate-180" />
-                    </div>
-                    </div>
+                        input-class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none appearance-none cursor-pointer rounded-none"
+                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                      />
                 </div>
                 <div class="space-y-2">
                     <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.commune.label }}</label>

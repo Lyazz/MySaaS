@@ -197,6 +197,10 @@ const handleOrderSubmit = async () => {
   if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
   if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
   if (codEnabled.value && !quickForm.phone.trim()) { orderError.value = storefrontContent.value.checkout.errors.phoneRequired; return }
+    if (codEnabled.value && (!quickForm.wilaya || !quickForm.commune)) {
+        orderError.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+        return
+    }
   if (codEnabled.value && !quickForm.selectedDeliveryOption) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
   orderSubmitting.value = true
   try {
@@ -304,10 +308,7 @@ const handleAddToCart = async () => {
           <div class="order-form__field">
             <label class="order-form__label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
             <div class="order-form__select-wrap">
-              <select v-model="quickForm.wilaya" class="at-select">
-                <option value="" disabled>{{ storefrontContent.common.selectPlaceholder }}</option>
-                <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
-              </select>
+              <WilayaField v-model="quickForm.wilaya" input-class="at-select" :placeholder="storefrontContent.checkout.form.wilaya.placeholder" />
               <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="order-form__select-arrow">
                 <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
               </svg>

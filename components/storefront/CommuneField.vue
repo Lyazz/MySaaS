@@ -28,46 +28,30 @@ watch(
   }
 )
 
-watch(
-  communes,
-  (next) => {
-    if (props.modelValue) return
-    const first = next?.[0]
-    if (first?.id != null) emit('update:modelValue', String(first.id))
-  },
-  { immediate: true }
-)
+const communeOptions = computed(() => {
+  if (!communes.value) return []
+  return communes.value.map(c => ({
+    value: String(c.id),
+    label: `${c.id} - ${c.name}`
+  }))
+})
 </script>
 
 <template>
   <div class="space-y-1">
-    <select
+    <SearchableSelect
       v-model="value"
-      :class="selectClass || inputClass"
+      :options="communeOptions"
+      :input-class="selectClass || inputClass"
       :disabled="!wilayaCode || loading || communes.length === 0"
-    >
-      <option
-        value=""
-        disabled
-      >
-        {{
-          !wilayaCode
-            ? (placeholder || 'Select commune')
-            : loading
-              ? 'Loading communes…'
-              : error
-                ? 'Communes unavailable'
-                : (placeholder || 'Select commune')
-        }}
-      </option>
-      <option
-        v-for="c in communes"
-        :key="c.id"
-        :value="String(c.id)"
-      >
-        {{ c.id }} - {{ c.name }}
-      </option>
-    </select>
+      :placeholder="!wilayaCode
+        ? (placeholder || 'Select commune')
+        : loading
+          ? 'Loading communes…'
+          : error
+            ? 'Communes unavailable'
+            : (placeholder || 'Select commune')"
+    />
 
     <p
       v-if="error"

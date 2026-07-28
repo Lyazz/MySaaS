@@ -195,6 +195,8 @@ const grandTotal = computed(() => {
 const hasRequiredFields = computed(() => Boolean(
   form.value.fullName.trim() &&
   form.value.phone.trim() &&
+  form.value.wilaya &&
+  form.value.commune &&
   cartStore.hasItems &&
   cartStore.total >= minimumOrderAmount.value &&
   form.value.selectedDeliveryOption
@@ -224,6 +226,10 @@ async function handleSubmit() {
       errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
       return
     }
+    if (!form.value.wilaya || !form.value.commune) {
+      errorMessage.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+      return
+    }
 
     if (!form.value.selectedDeliveryOption) {
       errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
@@ -243,10 +249,7 @@ async function handleSubmit() {
             : null
 
         if (isMaystro) {
-          if (!form.value.wilaya || !form.value.commune) {
-            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
-            return
-          }
+          
           if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
@@ -351,24 +354,11 @@ async function handleSubmit() {
               </div>
               <div>
                 <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                <div class="relative">
-                  <select
-                    v-model="form.wilaya"
-                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none appearance-none cursor-pointer"
-                  >
-                    <option value="" disabled>{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
-                    <option
-                      v-for="w in wilayas"
-                      :key="w.code"
-                      :value="w.code"
-                    >
-                      {{ w.code }} - {{ w.name }}
-                    </option>
-                  </select>
-                  <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                    <Icon name="lucide:chevron-down" class="w-5 h-5" />
-                  </div>
-                </div>
+                <WilayaField
+                        v-model="form.wilaya"
+                        input-class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none appearance-none cursor-pointer"
+                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                      />
               </div>
               <div>
                 <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.commune.label }}</label>

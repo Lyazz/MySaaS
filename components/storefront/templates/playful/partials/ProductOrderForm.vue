@@ -273,6 +273,10 @@ const handleOrderSubmit = async () => {
     if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
     if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
     if (codEnabled.value && !quickForm.phone.trim()) { orderError.value = storefrontContent.value.checkout.errors.phoneRequired; return }
+    if (codEnabled.value && (!quickForm.wilaya || !quickForm.commune)) {
+        orderError.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+        return
+    }
     if (codEnabled.value && !quickForm.selectedDeliveryOption) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
 
     orderSubmitting.value = true
@@ -492,18 +496,11 @@ const scrollToForm = () => {
             <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
               {{ storefrontContent.checkout.form.wilaya.label }}
             </label>
-            <div class="relative">
-              <select
-                v-model="quickForm.wilaya"
-                class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 focus:border-violet-400 focus:outline-none appearance-none cursor-pointer transition-colors shadow-sm"
-              >
-                <option value="" disabled>{{ storefrontContent.common.selectPlaceholder }}</option>
-                <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
-              </select>
-              <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-                <Icon name="lucide:chevron-down" class="w-4 h-4" />
-              </div>
-            </div>
+            <WilayaField
+                        v-model="quickForm.wilaya"
+                        input-class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 focus:border-violet-400 focus:outline-none appearance-none cursor-pointer transition-colors shadow-sm"
+                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                      />
           </div>
           <div>
             <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
