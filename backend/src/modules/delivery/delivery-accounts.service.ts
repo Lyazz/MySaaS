@@ -302,7 +302,10 @@ export class DeliveryAccountsService {
         if (!apiToken) return
 
         const platformDomain = (process.env.PLATFORM_BASE_DOMAIN ?? process.env.PLATFORM_DOMAIN ?? '').trim()
-        if (!platformDomain) return  // not configured — skip silently
+        if (!platformDomain) {
+            console.warn(`[delivery-accounts] Maystro webhook registration skipped: PLATFORM_BASE_DOMAIN not configured.`)
+            return  // not configured — skip silently
+        }
 
         const tenant = await this.prisma.tenant.findUnique({
             where: { id: tenantId },
@@ -327,12 +330,16 @@ export class DeliveryAccountsService {
 
         const hooks = new MaystroHooksService()
 
-        // Per Maystro docs, the "all" trigger type catches every event (orderCreated,
-        // OrderStatusChanged, InventoryMovement). Prefer it; fall back to first available.
+        // Per Maystro docs, we need OrderStatusChanged to sync statuses.
+        // We prefer 'OrderStatusChanged', fall back to 'all', then to the first available.
         const types = await hooks.listTypes({ apiToken })
-        const allType = types.find((t) => String(t.name ?? t.code ?? '').toLowerCase() === 'all')
+        const targetType = types.find((t) => String(t.name ?? t.code ?? '').toLowerCase() === 'orderstatuschanged')
+            ?? types.find((t) => String(t.name ?? t.code ?? '').toLowerCase() === 'all')
             ?? types[0]
-        if (!allType) return
+        if (!targetType) {
+            console.warn(`[delivery-accounts] Maystro webhook registration skipped: No suitable trigger types found in API.`)
+            return
+        }
 
         const existing = await hooks.listHooks({ apiToken })
 
@@ -354,7 +361,7 @@ export class DeliveryAccountsService {
         const alreadyRegistered = existing.some((h) => h.endpoint === webhookUrl)
         if (alreadyRegistered) return
 
-        await hooks.createHook({ apiToken, endpoint: webhookUrl, triggerTypeId: allType.id })
-        console.log(`[delivery-accounts] Maystro webhook registered for tenant ${tenantId}`)
+        await hooks.createHook({ apiToken, endpoint: webhookUrl, triggerTypeId: targetType.id })
+        console.log(`[delivery-accounts] Maystro webhook (${targetType.name || targetType.code || targetType.id}) registered for tenant ${tenantId}`)
     }
 }

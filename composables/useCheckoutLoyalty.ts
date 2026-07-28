@@ -32,8 +32,14 @@ export const useCheckoutLoyalty = () => {
   }
 
   const refreshSummary = async () => {
+    if (!process.client) {
+      applySummary(null)
+      summaryError.value = ''
+      return
+    }
+
     const cartStore = useCartStore()
-    if (!process.client || !cartStore.hasItems) {
+    if (!cartStore.hasItems) {
       applySummary(null)
       summaryError.value = ''
       return
