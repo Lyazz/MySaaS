@@ -598,7 +598,8 @@ const save = async () => {
         salesInvoiceEnabled: form.salesInvoiceEnabled,
         invoiceNumberPrefix: form.invoiceNumberPrefix,
         invoiceFooterText: form.invoiceFooterText,
-        invoiceShowLogo: form.invoiceShowLogo
+        invoiceShowLogo: form.invoiceShowLogo,
+        whatsappConfirmationTemplate: form.whatsappConfirmationTemplate
       }
     })
     useState<any>('storeSettings').value = updated
