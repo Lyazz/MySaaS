@@ -37,6 +37,8 @@ app.use(
     })
 )
 
+app.use('/api/webhooks/maystro', express.text({ type: '*/*', limit: '1mb' }))
+
 app.use(
     express.json({
         limit: '1mb',

@@ -182,8 +182,12 @@ export class DeliveryController {
     }
 
     async maystroWebhook(req: Request, res: Response) {
+        console.log(`[Webhook] Raw request received on /api/webhooks/maystro. Host: ${req.hostname}, Secret in query: ${!!req.query.secret}`)
         const tenant = req.tenant
-        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+        if (!tenant) {
+            console.warn(`[Webhook] Dropped Maystro webhook - Tenant not found for host ${req.hostname}`)
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+        }
 
         try {
             console.log(`[Webhook] Maystro payload received for tenant ${tenant.id}:`, req.body ? 'Payload present' : 'Empty body')
