@@ -186,6 +186,7 @@ export class DeliveryController {
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         try {
+            console.log(`[Webhook] Maystro payload received for tenant ${tenant.id}:`, req.body ? 'Payload present' : 'Empty body')
             // Preferred authentication is X-Webhook-Secret.
             // Legacy fallback (?secret=...) remains for backward compatibility.
             const incomingHeaderSecret = req.get('x-webhook-secret')
