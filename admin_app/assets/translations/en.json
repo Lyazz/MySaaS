@@ -3390,7 +3390,9 @@
               "attempt_1": "1st Attempt",
               "attempt_2": "2nd Attempt",
               "attempt_3": "3rd Attempt",
-              "switched_off": "Switched Off"
+              "switched_off": "Switched Off",
+              "whatsapp_sms_sent": "WhatsApp SMS Sent",
+              "whatsapp_link_confirmed": "WhatsApp Link Confirmed"
             },
             "internalNotesPlaceholder": "Add private remarks about this order..."
           },

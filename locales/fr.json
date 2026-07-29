@@ -3323,7 +3323,9 @@
               "attempt_1": "1ère tentative",
               "attempt_2": "2ème tentative",
               "attempt_3": "3ème tentative",
-              "switched_off": "Hors réseau"
+              "switched_off": "Hors réseau",
+              "whatsapp_sms_sent": "SMS WhatsApp envoyé",
+              "whatsapp_link_confirmed": "Lien WhatsApp confirmé"
             },
             "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande..."
           },

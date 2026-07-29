@@ -3394,7 +3394,9 @@
               "attempt_1": "محاولة 1",
               "attempt_2": "محاولة 2",
               "attempt_3": "محاولة 3",
-              "switched_off": "الهاتف مغلق"
+              "switched_off": "الهاتف مغلق",
+              "whatsapp_sms_sent": "تم إرسال رسالة واتساب",
+              "whatsapp_link_confirmed": "تم تأكيد رابط واتساب"
             },
             "internalNotesPlaceholder": "أضف ملاحظات خاصة حول هذا الطلب..."
           },

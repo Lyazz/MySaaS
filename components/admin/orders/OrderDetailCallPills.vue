@@ -52,55 +52,55 @@ const { t } = useI18n({ useScope: 'global' })
 const options = computed(() => [
   {
     value: 'not_called',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.not_called', 'Not Called'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.not_called'),
     icon: 'lucide:phone-off',
     tone: 'tone-rose'
   },
   {
     value: 'called',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.called', 'Called'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.called'),
     icon: 'lucide:phone-call',
     tone: 'tone-emerald'
   },
   {
     value: 'no_answer',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.no_answer', 'No Answer'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.no_answer'),
     icon: 'lucide:phone-missed',
     tone: 'tone-amber'
   },
   {
     value: 'attempt_1',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.attempt_1', '1st Attempt'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.attempt_1'),
     icon: 'lucide:phone-incoming',
     tone: 'tone-amber'
   },
   {
     value: 'attempt_2',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.attempt_2', '2nd Attempt'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.attempt_2'),
     icon: 'lucide:phone-incoming',
     tone: 'tone-amber'
   },
   {
     value: 'attempt_3',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.attempt_3', '3rd Attempt'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.attempt_3'),
     icon: 'lucide:phone-incoming',
     tone: 'tone-amber'
   },
   {
     value: 'switched_off',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.switched_off', 'Switched Off'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.switched_off'),
     icon: 'lucide:power-off',
     tone: 'tone-rose'
   },
   {
     value: 'whatsapp_sms_sent',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_sms_sent', 'WhatsApp SMS Sent'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_sms_sent'),
     icon: 'lucide:message-square',
     tone: 'tone-amber'
   },
   {
     value: 'whatsapp_link_confirmed',
-    label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_link_confirmed', 'WhatsApp Link Confirmed'),
+    label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_link_confirmed'),
     icon: 'lucide:check-square',
     tone: 'tone-emerald'
   }
