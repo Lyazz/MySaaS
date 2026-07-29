@@ -183,20 +183,62 @@ export class DeliveryController {
 
     async maystroWebhook(req: Request, res: Response) {
         console.log(`[Webhook] Raw request received on /api/webhooks/maystro. Host: ${req.hostname}, Secret in query: ${!!req.query.secret}`)
-        const tenant = req.tenant
+        
+        let tenant = req.tenant
+
+        const rawBodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
+        console.log(`[Webhook][Debug] Maystro Webhook Payload:`, rawBodyStr.length > 1000 ? rawBodyStr.substring(0, 1000) + '...' : rawBodyStr)
+
         if (!tenant) {
-            console.warn(`[Webhook] Dropped Maystro webhook - Tenant not found for host ${req.hostname}`)
+            console.warn(`[Webhook] Tenant not found from host ${req.hostname}. Attempting to infer tenant from payload...`)
+            try {
+                // Try to infer tenant from the payload using the order mapping
+                // First, attempt to extract the order ID directly from the raw string
+                const idMatch = rawBodyStr.match(/"(id|order_id|orderId|instance_uuid)"\s*:\s*"?([a-zA-Z0-9-]+)"?/)
+                if (idMatch && idMatch[2]) {
+                    const inferredId = idMatch[2]
+                    console.log(`[Webhook][Debug] Inferred Maystro Order ID from payload: ${inferredId}`)
+                    const mapping = await prisma.maystroOrderMapping.findFirst({
+                        where: {
+                            OR: [
+                                { maystroOrderId: inferredId },
+                                { tracking: inferredId },
+                                { externalId: inferredId }
+                            ]
+                        },
+                        include: { tenant: true }
+                    })
+                    if (mapping?.tenant) {
+                        tenant = mapping.tenant
+                        console.log(`[Webhook][Debug] Successfully inferred tenant ${tenant.id} from mapping!`)
+                    }
+                }
+            } catch (err) {
+                console.error(`[Webhook][Debug] Error inferring tenant from payload`, err)
+            }
+        }
+
+        if (!tenant) {
+            console.warn(`[Webhook] Dropped Maystro webhook - Tenant not found and could not be inferred.`)
             return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
         }
 
         try {
-            console.log(`[Webhook] Maystro payload received for tenant ${tenant.id}:`, req.body ? 'Payload present' : 'Empty body')
+            console.log(`[Webhook] Maystro payload processing for tenant ${tenant.id}.`)
             // Preferred authentication is X-Webhook-Secret.
             // Legacy fallback (?secret=...) remains for backward compatibility.
-            const incomingHeaderSecret = req.get('x-webhook-secret')
+            const incomingHeaderSecret = req.get('x-webhook-secret') || req.get('authorization')
             const incomingHeader = typeof incomingHeaderSecret === 'string' ? incomingHeaderSecret.trim() : ''
             const incomingQuery = typeof req.query.secret === 'string' ? req.query.secret.trim() : ''
-            const incoming = incomingHeader || incomingQuery
+            
+            // Maystro might send it as Bearer token
+            let incoming = incomingHeader || incomingQuery
+            if (incoming.toLowerCase().startsWith('bearer ')) {
+                incoming = incoming.substring(7).trim()
+            }
+
+            console.log(`[Webhook][Debug] Extracted secret from request. Length: ${incoming.length}`)
+
             const account = await prisma.tenantDeliveryAccount.findUnique({
                 where: { tenantId_provider: { tenantId: tenant.id, provider: 'MAYSTRO' } },
                 select: { config: true }
@@ -204,7 +246,10 @@ export class DeliveryController {
             const config = (account?.config && typeof account.config === 'object' ? account.config : {}) as Record<string, unknown>
             const storedSecret = typeof config.webhookSecret === 'string' ? config.webhookSecret : ''
 
+            console.log(`[Webhook][Debug] Stored secret length: ${storedSecret.length}`)
+
             if (!storedSecret || !incoming) {
+                console.warn(`[Webhook][Debug] Missing secret. incoming: ${!!incoming}, stored: ${!!storedSecret}`)
                 return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
             }
 
@@ -212,6 +257,7 @@ export class DeliveryController {
             const incomingBuf = Buffer.from(incoming)
             const storedBuf = Buffer.from(storedSecret)
             if (incomingBuf.length !== storedBuf.length || !timingSafeEqual(incomingBuf, storedBuf)) {
+                console.warn(`[Webhook][Debug] Secret mismatch.`)
                 return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
             }
 

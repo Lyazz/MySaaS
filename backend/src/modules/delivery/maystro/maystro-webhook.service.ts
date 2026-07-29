@@ -52,7 +52,13 @@ export class MaystroWebhookService {
 
     async handleWebhook(input: { tenantId: string; raw: any; inventorySyncEnabled: boolean }) {
         const decoded = decodeMaystroWebhookBody(input.raw)
-        if (!decoded) return null
+        
+        console.log(`[Webhook][MaystroWebhookService] Decoded payload for tenant ${input.tenantId}:`, JSON.stringify(decoded, null, 2))
+
+        if (!decoded) {
+            console.warn(`[Webhook][MaystroWebhookService] Failed to decode webhook payload`, input.raw)
+            return null
+        }
 
         const eventRaw = decoded?.event ?? decoded?.type ?? decoded?.name ?? decoded?.trigger_type
         const event = typeof eventRaw === 'string' ? eventRaw.trim() : ''
@@ -60,11 +66,14 @@ export class MaystroWebhookService {
 
         const payload = decoded?.payload ?? decoded?.data ?? decoded
 
-        const statusCode = payload?.status ?? payload?.status_code ?? payload?.statusCode
+        const statusCode = payload?.status ?? payload?.status_code ?? payload?.statusCode ?? payload?.order?.status_code ?? payload?.order?.status
         const maystroOrderId =
             payload?.id ?? payload?.order_id ?? payload?.orderId ?? payload?.instance_uuid ??
-            decoded?.id ?? decoded?.order_id ?? decoded?.orderId ?? decoded?.instance_uuid
-        const externalId = payload?.external_id ?? payload?.externalId ?? decoded?.external_id ?? decoded?.externalId
+            decoded?.id ?? decoded?.order_id ?? decoded?.orderId ?? decoded?.instance_uuid ??
+            payload?.order?.id ?? payload?.order?.order_id
+        const externalId = payload?.external_id ?? payload?.externalId ?? decoded?.external_id ?? decoded?.externalId ?? payload?.order?.external_id
+
+        console.log(`[Webhook][MaystroWebhookService] Extracted event: ${event}, statusCode: ${statusCode}, maystroOrderId: ${maystroOrderId}, externalId: ${externalId}`)
 
         const shipmentStatus = statusCode != null ? maystroOrderStatusToShipmentStatus(statusCode) : null
         const localOrderStatus = statusCode != null ? maystroOrderStatusToLocalOrderStatus(statusCode) : null
@@ -101,6 +110,7 @@ export class MaystroWebhookService {
         }
 
         if (!shipmentStatus || (!maystroOrderId && !externalId)) {
+            console.warn(`[Webhook][MaystroWebhookService] Ignoring webhook. shipmentStatus: ${shipmentStatus}, maystroOrderId: ${maystroOrderId}, externalId: ${externalId}`)
             return { event: event || 'unknown', handled: false }
         }
 
@@ -134,6 +144,8 @@ export class MaystroWebhookService {
                 })
                 : null
 
+        console.log(`[Webhook][MaystroWebhookService] Found mapping:`, mapping, ` Found shipment:`, shipment?.id)
+
         if (shipment) {
             await this.prisma.shipment.update({
                 where: { tenantId_id: { tenantId: input.tenantId, id: shipment.id } },
@@ -154,10 +166,12 @@ export class MaystroWebhookService {
         }
 
         if (mapping?.localOrderId && localOrderStatus) {
+            console.log(`[Webhook][MaystroWebhookService] Updating local order ${mapping.localOrderId} to status ${localOrderStatus}`)
             const orders = new OrdersService()
             await orders.applyCarrierStatus(input.tenantId, mapping.localOrderId, localOrderStatus, { userId: null })
         }
 
+        console.log(`[Webhook][MaystroWebhookService] Successfully handled webhook for shipment ${shipment?.id}`)
         return { event: event || 'OrderStatusChanged', handled: true, shipmentId: shipment?.id, status: shipmentStatus }
     }
 }
