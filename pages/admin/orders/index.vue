@@ -20,6 +20,11 @@
       @cancel="bulkDeleteError = null"
     />
 
+    <AdminMaystroSyncModal
+      v-model="syncModalOpen"
+      @completed="fetchOrders"
+    />
+
     <!-- Header -->
     <AdminPageHeader
       :title="t('admin.nav.orders')"
@@ -27,6 +32,13 @@
       :stats="orderStats"
     >
       <div class="flex items-center gap-3">
+        <button
+          class="ui-btn ui-btn--secondary flex items-center gap-2"
+          @click="syncModalOpen = true"
+        >
+          <Icon name="lucide:refresh-cw" class="w-4 h-4" />
+          Sync Maystro
+        </button>
         <AdminOrderExportButton
           data-tour="orders-export"
           :filters="exportFilters"
@@ -451,6 +463,7 @@ const exportFilters = computed(() => ({
 const selectedIds = ref<string[]>([])
 const singleDeleteOpen = ref(false)
 const bulkDeleteOpen = ref(false)
+const syncModalOpen = ref(false)
 const singleDeleteError = ref<string | null>(null)
 const bulkDeleteError = ref<string | null>(null)
 const deleteTargetId = ref<string | null>(null)

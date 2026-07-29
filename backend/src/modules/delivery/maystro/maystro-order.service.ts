@@ -449,4 +449,62 @@ export class MaystroOrderService {
 
         return [...existing, ...saved]
     }
+
+    async syncOrderFromBackendApi(input: { tenantId: string; apiToken: string; localOrderId: string }) {
+        const mapping = await this.prisma.maystroOrderMapping.findUnique({
+            where: { tenantId_localOrderId: { tenantId: input.tenantId, localOrderId: input.localOrderId } }
+        })
+
+        if (!mapping?.maystroOrderId) {
+            throw new MaystroIntegrationError({ statusCode: 404, statusMessage: 'Order is not mapped to Maystro or missing maystroOrderId' })
+        }
+
+        const client = new MaystroClient({ apiToken: input.apiToken, baseURL: 'https://b.maystro-delivery.com/api' })
+        
+        let response: any
+        try {
+            response = await client.request<any>({
+                method: 'GET',
+                path: `/orders/${mapping.maystroOrderId}/`
+            })
+        } catch (error: any) {
+            throw new MaystroIntegrationError({
+                statusCode: error.statusCode || 500,
+                statusMessage: `Failed to fetch manual sync for ${mapping.maystroOrderId}: ${error.statusMessage || error.message}`
+            })
+        }
+
+        const statusCode = response?.status ?? response?.status_code
+        if (statusCode == null) {
+            throw new MaystroIntegrationError({ statusCode: 500, statusMessage: 'No status returned from Maystro backend API' })
+        }
+
+        // We use the MaystroWebhookService to handle the side effects precisely the same way 
+        // as a real webhook, including shipment tracking and converting to Sales when DELIVERED.
+        // We import dynamically to avoid circular dependencies if any exist, but it's safe to require it.
+        const { MaystroWebhookService } = await import('./maystro-webhook.service')
+        const webhookService = new MaystroWebhookService(this.prisma)
+
+        const result = await webhookService.handleWebhook({
+            tenantId: input.tenantId,
+            inventorySyncEnabled: false,
+            raw: {
+                event: 'ManualSync',
+                payload: {
+                    id: mapping.maystroOrderId,
+                    status: statusCode,
+                    order_id: mapping.maystroOrderId,
+                    external_id: mapping.externalId
+                }
+            }
+        })
+
+        return {
+            localOrderId: input.localOrderId,
+            maystroOrderId: mapping.maystroOrderId,
+            statusCode,
+            synced: result?.handled ?? false,
+            newStatus: result?.status
+        }
+    }
 }

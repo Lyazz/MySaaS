@@ -723,4 +723,67 @@ export class OrdersController {
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
+
+    async getMaystroSyncCandidates(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            // Find active MaystroOrderMapping where Order is not DELIVERED, CANCELLED, or RETURNED
+            const mappings = await prisma.maystroOrderMapping.findMany({
+                where: {
+                    tenantId: tenant.id,
+                    success: true,
+                    maystroOrderId: { not: null },
+                    order: {
+                        status: { notIn: ['DELIVERED', 'CANCELLED', 'RETURNED'] }
+                    }
+                },
+                select: { localOrderId: true, externalId: true, maystroOrderId: true, order: { select: { publicId: true } } }
+            })
+
+            const candidates = mappings.map(m => ({
+                id: m.localOrderId,
+                publicId: m.order?.publicId,
+                maystroOrderId: m.maystroOrderId,
+                externalId: m.externalId
+            }))
+
+            res.json({ candidates })
+        } catch (error) {
+            console.error('Get Maystro sync candidates error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async syncMaystroOrder(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { id } = req.params
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+            }
+
+            const creds = await getMaystroCredentials(tenant.id)
+            const maystroService = new MaystroOrderService()
+
+            const result = await maystroService.syncOrderFromBackendApi({
+                tenantId: tenant.id,
+                apiToken: creds.apiToken,
+                localOrderId: id
+            })
+
+            res.json({ success: true, result })
+        } catch (error: any) {
+            console.error('Sync Maystro order error:', error)
+            if (error instanceof MaystroIntegrationError || error.name === 'MaystroIntegrationError') {
+                return res.status(error.statusCode || 500).json({
+                    statusCode: error.statusCode || 500,
+                    statusMessage: error.statusMessage || error.message,
+                    code: error.code
+                })
+            }
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
 }
+
