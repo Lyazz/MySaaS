@@ -450,6 +450,8 @@ const loading = ref(true)
 const orders = ref<Order[]>([])
 const total = ref(0)
 const totalPages = ref(1)
+const stats = ref<Record<string, number>>({})
+const globalTotal = ref(0)
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
 const activeTab = ref('all')
@@ -488,19 +490,19 @@ const emptyHint = computed(() => {
 })
 
 const orderStats = computed(() => [
-  { label: t('admin.common.total'), value: total.value },
-  { label: t('admin.orderStatus.pending'), value: orders.value.filter(o => o.status === 'PENDING').length, tone: 'amber' as const },
-  { label: t('admin.orderStatus.delivered'), value: orders.value.filter(o => o.status === 'DELIVERED').length, tone: 'green' as const },
-  { label: t('admin.orderStatus.cancelled'), value: orders.value.filter(o => o.status === 'CANCELLED').length, tone: 'red' as const },
+  { label: t('admin.common.total'), value: globalTotal.value },
+  { label: t('admin.orderStatus.pending'), value: stats.value['PENDING'] || 0, tone: 'amber' as const },
+  { label: t('admin.orderStatus.delivered'), value: stats.value['DELIVERED'] || 0, tone: 'green' as const },
+  { label: t('admin.orderStatus.cancelled'), value: stats.value['CANCELLED'] || 0, tone: 'red' as const },
 ])
 
 const orderTabs = computed(() => [
   { key: 'all', label: t('admin.pages.orders.index.filters.allOrders') },
-  { key: 'PENDING', label: t('admin.orderStatus.pending'), count: orders.value.filter(o => o.status === 'PENDING').length },
-  { key: 'CONFIRMED', label: t('admin.orderStatus.confirmed'), count: orders.value.filter(o => o.status === 'CONFIRMED').length },
-  { key: 'SHIPPED', label: t('admin.orderStatus.shipped'), count: orders.value.filter(o => o.status === 'SHIPPED').length },
-  { key: 'DELIVERED', label: t('admin.orderStatus.delivered'), count: orders.value.filter(o => o.status === 'DELIVERED').length },
-  { key: 'CANCELLED', label: t('admin.orderStatus.cancelled'), count: orders.value.filter(o => o.status === 'CANCELLED').length },
+  { key: 'PENDING', label: t('admin.orderStatus.pending'), count: stats.value['PENDING'] || 0 },
+  { key: 'CONFIRMED', label: t('admin.orderStatus.confirmed'), count: stats.value['CONFIRMED'] || 0 },
+  { key: 'SHIPPED', label: t('admin.orderStatus.shipped'), count: stats.value['SHIPPED'] || 0 },
+  { key: 'DELIVERED', label: t('admin.orderStatus.delivered'), count: stats.value['DELIVERED'] || 0 },
+  { key: 'CANCELLED', label: t('admin.orderStatus.cancelled'), count: stats.value['CANCELLED'] || 0 },
 ])
 
 async function fetchOrders() {
@@ -520,11 +522,21 @@ async function fetchOrders() {
 
     const data = await $fetch(url, {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    }) as { items: Order[]; total: number; page: number; totalPages: number }
+    }) as { items: Order[]; total: number; page: number; totalPages: number; stats?: Record<string, number>; globalTotal?: number }
 
     orders.value = data.items
     total.value = data.total
     totalPages.value = data.totalPages
+    if (data.stats) {
+      stats.value = data.stats
+    } else {
+      stats.value = {}
+    }
+    if (data.globalTotal !== undefined) {
+      globalTotal.value = data.globalTotal
+    } else {
+      globalTotal.value = data.total
+    }
     selectedIds.value = []
   } catch (error) {
     console.error('Failed to fetch orders:', error)

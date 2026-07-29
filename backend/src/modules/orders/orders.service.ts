@@ -855,7 +855,10 @@ export class OrdersService {
             orderBy.createdAt = 'desc'
         }
 
-        const [items, total] = await Promise.all([
+        const whereWithoutStatus = { ...where }
+        delete whereWithoutStatus.status
+
+        const [items, total, statusGroups] = await Promise.all([
             prisma.order.findMany({
                 where,
                 select: {
@@ -882,14 +885,30 @@ export class OrdersService {
                 skip,
                 take: limit
             }),
-            prisma.order.count({ where })
+            prisma.order.count({ where }),
+            prisma.order.groupBy({
+                by: ['status'],
+                where: whereWithoutStatus,
+                _count: {
+                    id: true
+                }
+            })
         ])
+
+        const stats: Record<string, number> = {}
+        let globalTotal = 0
+        for (const group of statusGroups) {
+            stats[group.status] = group._count.id
+            globalTotal += group._count.id
+        }
 
         return {
             items,
             total,
             page,
-            totalPages: Math.max(1, Math.ceil(total / limit))
+            totalPages: Math.max(1, Math.ceil(total / limit)),
+            stats,
+            globalTotal
         }
     }
 
