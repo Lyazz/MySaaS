@@ -89,7 +89,7 @@ export class TelegramService {
         return { bot: { id: String(bot.id), username: bot.username ?? null, name: bot.first_name }, chats }
     }
 
-    async sendOrderNotification(tenantId: string, order: any) {
+    async sendOrderNotification(tenantId: string, order: any, isWhatsAppConfirmation: boolean = false) {
         const integration = await this.integrationsService.getIntegration(tenantId, 'TELEGRAM')
 
         if (!integration || !integration.isActive || !integration.config) {
@@ -125,7 +125,7 @@ export class TelegramService {
                 customDomain: tenant.domains[0]?.domain ?? null,
                 orderId: order.id
             })
-            const message = this.formatOrderMessage(order, adminUrl)
+            const message = this.formatOrderMessage(order, adminUrl, isWhatsAppConfirmation)
             await bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' })
         } catch (error) {
             console.error(`[TelegramService] Failed to send notification for tenant ${tenantId}:`, error)
@@ -143,10 +143,14 @@ export class TelegramService {
         }
     }
 
-    private formatOrderMessage(order: any, adminUrl: string): string {
+    private formatOrderMessage(order: any, adminUrl: string, isWhatsAppConfirmation: boolean = false): string {
         const orderReference = typeof order.publicId === 'string' && order.publicId.trim().length > 0
             ? order.publicId.trim()
             : order.id.slice(0, 8)
+
+        if (isWhatsAppConfirmation) {
+            return `✅ *Commande #${orderReference} confirmée via WhatsApp*\n🔗 [Voir la commande](${adminUrl})`
+        }
 
         const lines = [
             `📦 *Nouvelle Commande Reçue !*`,

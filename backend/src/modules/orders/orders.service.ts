@@ -204,15 +204,27 @@ export class OrdersService {
     const newNote = `\n[${new Date().toISOString()}] ✅ Order confirmed by customer via secure link`
     const updatedNotes = (order.internalNotes || '') + newNote
 
-    return await prisma.order.update({
+    const updatedOrder = await prisma.order.update({
       where: { id: order.id },
       data: {
         status: 'CONFIRMED',
         callStatus: 'whatsapp_link_confirmed',
         confirmationTokenUsed: true,
         internalNotes: updatedNotes
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+            variant: true
+          }
+        }
       }
     })
+
+    telegramService.sendOrderNotification(updatedOrder.tenantId, updatedOrder, true).catch(console.error)
+
+    return updatedOrder
   }
     private maystroBordereau = new MaystroBordereauService()
     private maystroPickupPoints = new MaystroPickupPointService()

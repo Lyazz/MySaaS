@@ -264,6 +264,34 @@ export class NotificationsService {
         })
     }
 
+    async emitOrderConfirmed(tenantId: string, orderId: string) {
+        const order = await prisma.order.findFirst({
+            where: { tenantId, id: orderId },
+            select: {
+                id: true,
+                publicId: true,
+                customerName: true
+            }
+        })
+
+        if (!order) return null
+
+        const orderReference = order.publicId || order.id.slice(0, 8)
+
+        return this.emit(tenantId, {
+            type: 'ORDER_CONFIRMED',
+            entityType: 'ORDER',
+            entityId: order.id,
+            title: 'Order Confirmed',
+            body: `Order #${orderReference} from ${order.customerName} has been confirmed.`,
+            data: {
+                type: 'ORDER_CONFIRMED',
+                orderId: order.id,
+                publicId: order.publicId
+            }
+        })
+    }
+
     async emit(tenantId: string, payload: NotificationPayload) {
         const recipients = await this.getOrderNotificationRecipients(tenantId)
         if (recipients.length === 0) return null

@@ -6,6 +6,7 @@ import { MaystroOrderService } from '../delivery/maystro/maystro-order.service'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
 import { YalidineIntegrationError } from '../delivery/yalidine/yalidine.errors'
 import prisma from '../../lib/prisma'
+import { NotificationsService } from '../notifications/notifications.service'
 import {
   fetchForExport,
   toRows,
@@ -19,6 +20,7 @@ import {
 
 const service = new OrdersService()
 const deliveryService = new DeliveryService()
+const notificationsService = new NotificationsService()
 
 export class OrdersController {
     async generateConfirmationToken(req: Request, res: Response) {
@@ -69,6 +71,12 @@ export class OrdersController {
 
             // 3. If delivery succeeded (or wasn't needed), consume token and confirm
             const confirmedOrder = await service.confirmOrderByToken(token)
+
+            try {
+                await notificationsService.emitOrderConfirmed(confirmedOrder.tenantId, confirmedOrder.id)
+            } catch (notifyErr) {
+                console.error('Failed to emit order confirmed notification:', notifyErr)
+            }
 
             res.json({ success: true, orderId: confirmedOrder.id, publicOrderId: confirmedOrder.publicId })
         } catch (error: any) {
