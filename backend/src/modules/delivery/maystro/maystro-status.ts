@@ -30,3 +30,28 @@ export const maystroOrderStatusToLocalOrderStatus = (code: unknown): 'SHIPPED' |
     return null
 }
 
+export const maystroOrderStatusToString = (code: unknown): string => {
+    const n = typeof code === 'string' ? Number.parseInt(code, 10) : typeof code === 'number' ? code : NaN
+    const map: Record<number, string> = {
+        4: 'CREATED',
+        5: 'PICK_UP_REQUESTED',
+        6: 'IN_PROCESS',
+        8: 'WAITING_TRANSIT',
+        9: 'IN_TRANSIT_TO_BE_SHIPPED',
+        10: 'IN_TRANSIT_TO_BE_RETURNED',
+        11: 'PENDING',
+        12: 'OUT_OF_STOCK',
+        15: 'READY_TO_SHIP',
+        22: 'ASSIGNED',
+        31: 'SHIPPED',
+        32: 'ALERTED',
+        41: 'DELIVERED',
+        42: 'POSTPONED',
+        50: 'ABORTED',
+        51: 'READY_TO_RETURN',
+        52: 'TAKEN_BY_STORE',
+        53: 'NOT_RECEIVED'
+    }
+    return map[n] || String(code)
+}
+

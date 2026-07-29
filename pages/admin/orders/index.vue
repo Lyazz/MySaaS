@@ -309,10 +309,11 @@
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <button
+                    type="button"
                     v-if="order.shippingProvider === 'MAYSTRO' && !['PENDING', 'CANCELLED', 'DELIVERED'].includes(order.status)"
                     class="ui-table-action text-blue-500 hover:text-blue-700"
                     title="Sync Maystro"
-                    @click.stop="syncIndividualMaystroOrder(order.id)"
+                    @click.stop.prevent="syncIndividualMaystroOrder(order.id)"
                   >
                     <Icon name="lucide:refresh-cw" class="w-4 h-4" />
                   </button>
@@ -404,6 +405,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { useToast } from '~/composables/useToast'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import DateFilter from '~/components/ui/DateFilter.vue'
@@ -422,6 +424,7 @@ const storeSettings = useState<any>('storeSettings')
 const tenantId = computed(() => storeSettings.value?.tenantId ?? '')
 const { format: formatCurrency } = useCurrency()
 const { t, locale } = useI18n({ useScope: 'global' })
+const { showToast } = useToast()
 
 interface Order {
   id: string
@@ -582,12 +585,14 @@ async function syncIndividualMaystroOrder(id: string) {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` }
     }) as any
-    alert(data?.result?.synced 
-          ? `Synced successfully (Status: ${data?.result?.newStatus})` 
-          : 'No changes')
+    if (data?.result?.synced) {
+      showToast(`Synced successfully (Status: ${data?.result?.newStatus})`, 'success')
+    } else {
+      showToast('No changes', 'info')
+    }
     fetchOrders()
   } catch (err: any) {
-    alert(`Failed: ${err?.data?.statusMessage || err.message}`)
+    showToast(`Failed: ${err?.data?.statusMessage || err.message}`, 'error')
   }
 }
 

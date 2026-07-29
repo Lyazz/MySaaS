@@ -5,6 +5,7 @@ import { MaystroIntegrationError } from './maystro.errors'
 import { MaystroLocationService } from './maystro-location.service'
 import { MaystroPickupPointService } from './maystro-pickup-point.service'
 import { MaystroProductService } from './maystro-product.service'
+import { maystroOrderStatusToString } from './maystro-status'
 
 type MaystroOrderDetail = {
     product: string
@@ -499,12 +500,13 @@ export class MaystroOrderService {
             }
         })
 
+        const maystroStatusStr = maystroOrderStatusToString(statusCode)
         return {
             localOrderId: input.localOrderId,
             maystroOrderId: mapping.maystroOrderId,
             statusCode,
             synced: result?.handled ?? false,
-            newStatus: result?.status
+            newStatus: result?.status ? `${result.status} (${maystroStatusStr})` : maystroStatusStr
         }
     }
 }
