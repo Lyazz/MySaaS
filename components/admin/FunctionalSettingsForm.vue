@@ -160,6 +160,8 @@
             <code>{customerName}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.customerName') }}<br>
             <code>{productsRecap}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.productsRecap') }}<br>
             <code>{total}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.total') }}<br>
+            <code>{payment}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.payment', 'Payment') }}<br>
+            <code>{remaining}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.remaining', 'Remaining') }}<br>
             <code>{address}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.address') }}<br>
             <code>{confirmLink}</code> - {{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.keywords.confirmLink') }}
           </p>
@@ -434,6 +436,8 @@ Voici un récapitulatif :
 {productsRecap}
 
 Total : {total}
+Versement : {payment}
+Reste à payer : {remaining}
 Veuillez cliquer ici pour confirmer votre commande :
 {confirmLink}`
 
@@ -469,6 +473,8 @@ const whatsappTemplatePreview = computed(() => {
     .replace(/{customerName}/g, 'Amine')
     .replace(/{productsRecap}/g, '- 1x AirPods Pro (35,000 DZD)\n- 2x Coque Silicone (3,000 DZD)')
     .replace(/{total}/g, '38,600 DZD')
+    .replace(/{payment}/g, '10,000 DZD')
+    .replace(/{remaining}/g, '28,600 DZD')
     .replace(/{address}/g, '123 Rue de la Liberté, Alger Centre, Alger')
     .replace(/{confirmLink}/g, 'https://store.swekly.com/confirm-order/abc123xyz')
 })

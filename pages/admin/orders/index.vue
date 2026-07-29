@@ -309,10 +309,18 @@
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <button
+                    v-if="order.shippingProvider === 'MAYSTRO' && !['PENDING', 'CANCELLED', 'DELIVERED'].includes(order.status)"
+                    class="ui-table-action text-blue-500 hover:text-blue-700"
+                    title="Sync Maystro"
+                    @click.stop="syncIndividualMaystroOrder(order.id)"
+                  >
+                    <Icon name="lucide:refresh-cw" class="w-4 h-4" />
+                  </button>
+                  <button
                     v-if="order.status === 'PENDING'"
                     class="ui-table-action ui-table-action--danger"
                     :title="t('common.delete', 'Delete')"
-                    @click="openSingleDelete(order.id)"
+                    @click.stop="openSingleDelete(order.id)"
                   >
                     <Icon name="lucide:trash-2" class="w-4 h-4" />
                   </button>
@@ -565,6 +573,21 @@ async function confirmSingleDelete() {
   } catch (error: any) {
     console.error('Failed to delete order:', error)
     singleDeleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+  }
+}
+
+async function syncIndividualMaystroOrder(id: string) {
+  try {
+    const data = await $fetch(`/api/admin/orders/${id}/sync-maystro`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    }) as any
+    alert(data?.result?.synced 
+          ? `Synced successfully (Status: ${data?.result?.newStatus})` 
+          : 'No changes')
+    fetchOrders()
+  } catch (err: any) {
+    alert(`Failed: ${err?.data?.statusMessage || err.message}`)
   }
 }
 

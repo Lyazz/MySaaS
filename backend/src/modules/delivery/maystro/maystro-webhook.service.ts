@@ -119,6 +119,7 @@ export class MaystroWebhookService {
                 tenantId: input.tenantId,
                 OR: [
                     maystroOrderId ? { maystroOrderId: String(maystroOrderId) } : undefined,
+                    maystroOrderId ? { tracking: String(maystroOrderId) } : undefined,
                     externalId ? { externalId: String(externalId) } : undefined
                 ].filter(Boolean) as any
             }

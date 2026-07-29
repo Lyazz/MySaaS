@@ -459,7 +459,7 @@ export class MaystroOrderService {
             throw new MaystroIntegrationError({ statusCode: 404, statusMessage: 'Order is not mapped to Maystro or missing maystroOrderId' })
         }
 
-        const client = new MaystroClient({ apiToken: input.apiToken, baseURL: 'https://b.maystro-delivery.com/api' })
+        const client = new MaystroClient({ apiToken: input.apiToken })
         
         let response: any
         try {

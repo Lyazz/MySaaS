@@ -727,14 +727,14 @@ export class OrdersController {
     async getMaystroSyncCandidates(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            // Find active MaystroOrderMapping where Order is not DELIVERED, CANCELLED, or RETURNED
+            // Find active MaystroOrderMapping where Order is not PENDING, CANCELLED, or DELIVERED
             const mappings = await prisma.maystroOrderMapping.findMany({
                 where: {
                     tenantId: tenant.id,
                     success: true,
                     maystroOrderId: { not: null },
                     order: {
-                        status: { notIn: ['DELIVERED', 'CANCELLED', 'RETURNED'] }
+                        status: { notIn: ['PENDING', 'CANCELLED', 'DELIVERED'] }
                     }
                 },
                 select: { localOrderId: true, externalId: true, maystroOrderId: true, order: { select: { publicId: true } } }

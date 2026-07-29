@@ -1232,6 +1232,8 @@ function orderStatusLabel(code: string) {
           .replace(/{customerName}/g, o.customerName || '')
           .replace(/{productsRecap}/g, productsRecap)
           .replace(/{total}/g, total)
+          .replace(/{payment}/g, formatCurrency(o.paidAmount || 0))
+          .replace(/{remaining}/g, formatCurrency(orderTotalWithShipping.value - (o.paidAmount || 0)))
           .replace(/{address}/g, fullAddress)
           .replace(/{confirmLink}/g, confirmLink)
       } else {
@@ -1241,6 +1243,8 @@ Voici un récapitulatif :
 ${productsRecap}
 
 Total : ${total}
+Versement : ${formatCurrency(o.paidAmount || 0)}
+Reste à payer : ${formatCurrency(orderTotalWithShipping.value - (o.paidAmount || 0))}
 Veuillez cliquer ici pour confirmer votre commande :
 ${confirmLink}`
       }
