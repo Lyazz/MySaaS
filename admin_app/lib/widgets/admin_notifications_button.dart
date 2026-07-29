@@ -460,6 +460,7 @@ class _NotificationPanel extends StatelessWidget {
                 hoverBg: _hoverBg,
                 onRefresh: onRefresh,
                 onMarkAllRead: state.unreadCount > 0 ? onMarkAllRead : null,
+                onClose: onClose,
               ),
 
               // ── Divider ─────────────────────────────────────────────────
@@ -556,6 +557,7 @@ class _PanelHeader extends StatelessWidget {
     required this.hoverBg,
     required this.onRefresh,
     required this.onMarkAllRead,
+    required this.onClose,
   });
 
   final int unreadCount;
@@ -568,6 +570,7 @@ class _PanelHeader extends StatelessWidget {
   final Color hoverBg;
   final VoidCallback onRefresh;
   final VoidCallback? onMarkAllRead;
+  final VoidCallback onClose;
 
   @override
   Widget build(BuildContext context) {
@@ -662,6 +665,16 @@ class _PanelHeader extends StatelessWidget {
                 border: border,
                 onPressed: onRefresh,
                 isLoading: isLoading,
+              ),
+              const SizedBox(width: 4),
+              _HeaderAction(
+                icon: LucideIcons.x,
+                tooltip: 'Close',
+                isDark: isDark,
+                hoverBg: hoverBg,
+                textTertiary: textTertiary,
+                border: border,
+                onPressed: onClose,
               ),
             ],
           ),

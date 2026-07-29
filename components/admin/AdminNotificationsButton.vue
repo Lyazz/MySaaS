@@ -104,6 +104,17 @@
                     :class="{ 'animate-spin': isLoading }"
                   />
                 </button>
+                <button
+                  class="notification-action flex h-7 w-7 items-center justify-center rounded-[7px] border transition-all duration-150"
+                  style="border-color: var(--surface-border); color: var(--text-tertiary)"
+                  aria-label="Close notifications"
+                  @click="closePanel"
+                >
+                  <Icon
+                    name="lucide:x"
+                    class="h-[13px] w-[13px]"
+                  />
+                </button>
               </div>
             </div>
 
