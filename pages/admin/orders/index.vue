@@ -446,23 +446,26 @@ interface Order {
   items?: any[]
 }
 
+const router = useRouter()
+
 const loading = ref(true)
 const orders = ref<Order[]>([])
 const total = ref(0)
 const totalPages = ref(1)
 const stats = ref<Record<string, number>>({})
 const globalTotal = ref(0)
+
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
-const activeTab = ref('all')
+const activeTab = ref(typeof route.query.status === 'string' && route.query.status ? route.query.status : 'all')
 const defaultDateRange = getDashboardPresetDateRange('7d')
-const startDate = ref(defaultDateRange.from)
-const endDate = ref(defaultDateRange.to)
+const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
+const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
 
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
-const sortBy = ref('createdAt')
-const sortOrder = ref<'asc' | 'desc'>('desc')
+const sortBy = ref(typeof route.query.sortBy === 'string' ? route.query.sortBy : 'createdAt')
+const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'asc' ? 'asc' : 'desc')
 
 const exportFilters = computed(() => ({
   status: selectedStatus.value || undefined,
@@ -710,18 +713,36 @@ async function handleGauthCallback() {
   }
 }
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      status: selectedStatus.value || undefined,
+      startDate: startDate.value === defaultDateRange.from ? undefined : startDate.value,
+      endDate: endDate.value === defaultDateRange.to ? undefined : endDate.value,
+      sortBy: sortBy.value === 'createdAt' ? undefined : sortBy.value,
+      sortOrder: sortOrder.value === 'desc' ? undefined : sortOrder.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 watch(activeTab, (tab) => {
   selectedStatus.value = tab === 'all' ? '' : tab
   currentPage.value = 1
+  syncToUrl()
   fetchOrders()
 })
 
 watch([searchQuery, selectedStatus, startDate, endDate, sortBy, sortOrder], () => {
   currentPage.value = 1
+  syncToUrl()
   fetchOrders()
 })
 
 watch(currentPage, () => {
+  syncToUrl()
   fetchOrders()
 })
 </script>

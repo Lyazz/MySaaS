@@ -107,7 +107,7 @@ watchEffect(() => {
 
 <template>
   <NuxtLayout>
-    <NuxtPage />
+    <NuxtPage :keepalive="{ max: 10 }" />
   </NuxtLayout>
   <Toast />
 </template>
