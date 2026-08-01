@@ -18,7 +18,7 @@
         <span
           v-if="tab.key === modelValue"
           class="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full"
-          style="background: var(--brand)"
+          style="background: var(--admin-active-color)"
         />
       </button>
     </div>
@@ -27,7 +27,7 @@
 
 <style scoped>
 .tab-active {
-  color: var(--brand);
+  color: var(--admin-active-color);
 }
 
 .tab-idle {
@@ -58,7 +58,7 @@ defineEmits<{
 
 function countStyle(key: string) {
   if (key === props.modelValue) {
-    return 'background: rgba(var(--brand-rgb) / 0.15); color: var(--brand);'
+    return 'background: rgba(var(--brand-rgb) / 0.15); color: var(--admin-active-color);'
   }
   return 'background: var(--surface-2); color: var(--text-tertiary); border: 1px solid var(--surface-border);'
 }
