@@ -317,13 +317,13 @@
       <div class="pt-6 border-t flex items-center justify-end gap-3" style="border-color: var(--surface-border)">
         <div
           v-if="successMessage"
-          class="text-sm text-emerald-600 font-medium mr-auto animate-fadeIn"
+          class="text-sm text-emerald-600 font-medium me-auto animate-fadeIn"
         >
           {{ successMessage }}
         </div>
         <div
           v-if="errorMessage"
-          class="text-sm text-red-600 font-medium mr-auto animate-fadeIn"
+          class="text-sm text-red-600 font-medium me-auto animate-fadeIn"
         >
           {{ errorMessage }}
         </div>

@@ -51,7 +51,7 @@
       <Icon name="lucide:triangle-alert" class="h-4 w-4 shrink-0" />
       <div>
         <span class="font-semibold">{{ t('admin.pages.dashboard.loadErrorTitle') }}</span>
-        <span class="ml-1.5 opacity-70">{{ t('admin.pages.dashboard.loadErrorHint') }}</span>
+        <span class="ms-1.5 opacity-70">{{ t('admin.pages.dashboard.loadErrorHint') }}</span>
       </div>
     </div>
 
@@ -144,7 +144,7 @@
           <table class="min-w-full">
             <thead>
               <tr style="background: var(--surface-2)">
-                <th v-for="col in tableColumns" :key="col" class="px-5 py-2.5 text-left text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">
+                <th v-for="col in tableColumns" :key="col" class="px-5 py-2.5 text-start text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">
                   {{ col }}
                 </th>
               </tr>
@@ -187,7 +187,7 @@
                 <td class="px-5 py-3.5 whitespace-nowrap text-[12px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">
                   {{ formatDateTime(order.createdAt) }}
                 </td>
-                <td class="px-5 py-3.5 whitespace-nowrap text-right" style="border-bottom: 1px solid var(--surface-border)">
+                <td class="px-5 py-3.5 whitespace-nowrap text-end" style="border-bottom: 1px solid var(--surface-border)">
                   <NuxtLink :to="`/admin/orders/${order.id}`" class="inline-flex items-center gap-1.5 text-[12px] font-medium transition-colors hover:opacity-70" style="color: var(--brand)">
                     <Icon name="lucide:eye" class="h-3.5 w-3.5" />
                     {{ t('common.view') }}

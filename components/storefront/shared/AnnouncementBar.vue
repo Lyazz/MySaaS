@@ -79,7 +79,7 @@ const isScrollingActive = computed(() => props.scrolling ?? globalScrolling.valu
         <button 
           v-if="dismissible !== false"
           @click="dismiss" 
-          class="absolute right-4 p-1 rounded-full hover:bg-black/10 transition-colors z-50 cursor-pointer"
+          class="absolute end-4 p-1 rounded-full hover:bg-black/10 transition-colors z-50 cursor-pointer"
           :class="textColor || 'text-brand-600 hover:text-brand-800'"
           :aria-label="t('storefront.announcement.dismissAria')"
         >

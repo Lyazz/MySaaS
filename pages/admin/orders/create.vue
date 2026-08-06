@@ -238,7 +238,7 @@
                <div class="relative group">
                   <Icon
                     name="lucide:search"
-                    class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted)"
+                    class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted)"
                   />
                   <input
                     v-model="productSearch"
@@ -249,7 +249,7 @@
                   <!-- Search Results Dropdown -->
                   <div 
                     v-if="productSearch.length > 0" 
-                    class="absolute left-0 right-0 top-full mt-1 shadow-xl rounded-lg z-50 max-h-60 overflow-y-auto" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
+                    class="absolute start-0 end-0 top-full mt-1 shadow-xl rounded-lg z-50 max-h-60 overflow-y-auto" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
                   >
                      <div 
                       v-for="product in searchedProducts" 
@@ -392,7 +392,7 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle shadow-xl transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                 <DialogTitle
                   as="h3"
                   class="text-lg font-bold leading-6 flex justify-between items-center" style="color: var(--text-primary)"
@@ -421,7 +421,7 @@
                     class="w-full p-4 rounded-xl hover:[border-color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] hover:ring-1 hover:[--tw-ring-color:var(--brand)] transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
                     @click="onVariantSelected(v)"
                   >
-                    <div class="text-left">
+                    <div class="text-start">
                       <div class="font-semibold group-hover:[color:var(--brand)]" style="color: var(--text-primary)">
                         {{ v.label }}
                       </div>

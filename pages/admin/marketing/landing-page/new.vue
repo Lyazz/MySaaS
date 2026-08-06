@@ -29,7 +29,7 @@
                 <!-- Product Search -->
                 <div class="relative mb-3">
                     <div class="relative flex items-center rounded-lg overflow-hidden border focus-within:[border-color:var(--brand)] focus-within:ring-1 focus-within:[--tw-ring-color:var(--brand)]/20 transition-all" style="background: var(--surface-2); border-color: var(--surface-border)">
-                        <Icon name="lucide:search" class="w-4 h-4 ml-3" style="color: var(--text-muted)" />
+                        <Icon name="lucide:search" class="w-4 h-4 ms-3" style="color: var(--text-muted)" />
                         <input
                             v-model="searchQuery"
                             type="text"
@@ -41,7 +41,7 @@
                 </div>
 
                 <!-- Compact Product List -->
-                <div v-if="!selectedProduct" class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                <div v-if="!selectedProduct" class="space-y-2 max-h-[300px] overflow-y-auto pe-1">
                     <div v-if="loading" class="py-4 text-center text-sm" style="color: var(--text-muted)">Loading products...</div>
                     <div
                         v-else
@@ -70,7 +70,7 @@
                         <h4 class="text-sm font-bold truncate" style="color: var(--text-primary)">{{ selectedProduct.title }}</h4>
                         <p class="text-xs line-clamp-2 mt-0.5" style="color: var(--text-secondary)">{{ selectedProduct.description }}</p>
                         <button @click="selectedProduct = null" class="text-xs text-red-400 hover:text-red-300 font-medium mt-2 flex items-center">
-                            <Icon name="lucide:x" class="w-3 h-3 mr-1" />
+                            <Icon name="lucide:x" class="w-3 h-3 me-1" />
                             Change Product
                         </button>
                     </div>
@@ -90,7 +90,7 @@
                         v-for="style in styles"
                         :key="style.id"
                         @click="config.style = style.id"
-                        class="relative p-3 rounded-lg border text-left transition-all"
+                        class="relative p-3 rounded-lg border text-start transition-all"
                         :class="config.style === style.id ? '[border-color:var(--brand)] ring-1 [--tw-ring-color:rgba(var(--brand-rgb)/0.2)]' : ''"
                         :style="config.style === style.id ? 'background: rgba(var(--brand-rgb)/0.08)' : 'background: var(--surface-2); border-color: var(--surface-border)'"
                     >
@@ -207,7 +207,7 @@
                 style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary)"
             >
                 <div v-if="isGenerating" class="flex items-center">
-                    <Icon name="lucide:loader-2" class="w-4 h-4 mr-2 animate-spin" style="color: var(--text-muted)" />
+                    <Icon name="lucide:loader-2" class="w-4 h-4 me-2 animate-spin" style="color: var(--text-muted)" />
                     <span>Processing...</span>
                 </div>
                 <div v-else class="flex items-center">
@@ -230,14 +230,14 @@
                 Preview
             </div>
 
-            <div class="flex items-center space-x-3">
+            <div class="flex items-center space-x-3 rtl:space-x-reverse">
                 <button v-if="hasGenerated" @click="downloadImage" class="text-xs font-bold flex items-center px-3 py-1.5 rounded-lg transition-all" style="color: var(--text-secondary); background: var(--surface-2); border: 1px solid var(--surface-border)">
-                    <Icon name="lucide:download" class="w-3.5 h-3.5 mr-1.5" />
+                    <Icon name="lucide:download" class="w-3.5 h-3.5 me-1.5" />
                     Download
                 </button>
                 <button v-if="hasGenerated" class="px-4 py-1.5 [background:var(--brand)] hover:opacity-90 text-black text-xs font-bold rounded-lg transition-all flex items-center">
                     Publish
-                    <Icon name="lucide:arrow-right" class="w-3.5 h-3.5 ml-1.5" />
+                    <Icon name="lucide:arrow-right" class="w-3.5 h-3.5 ms-1.5" />
                 </button>
             </div>
         </div>

@@ -399,7 +399,7 @@ const scrollToForm = () => {
             style="background-color:#111620; border-color:rgba(166,124,82,0.2); border-radius:2px;"
         >
             <!-- Top accent line -->
-            <div class="absolute top-0 left-0 right-0 h-px" style="background:linear-gradient(to right, #A67C52, rgba(166,124,82,0.1));"></div>
+            <div class="absolute top-0 start-0 end-0 h-px" style="background:linear-gradient(to right, #A67C52, rgba(166,124,82,0.1));"></div>
             
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 flex items-center justify-center border" style="background-color:#1A1F2E; border-color:rgba(166,124,82,0.25); border-radius:1px; color:#A67C52;">
@@ -413,18 +413,18 @@ const scrollToForm = () => {
             
             <form class="space-y-4" @submit.prevent="handleOrderSubmit">
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                    <label class="block text-xs font-medium tracking-[0.2em] uppercase ms-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.fullName.label }}</label>
                     <input v-model="quickForm.fullName" type="text" :placeholder="storefrontContent.checkout.form.fullName.placeholder" class="block w-full h-11 px-4 text-sm placeholder:text-[#3A3530] focus:outline-none transition-all" style="background-color:#0E1117; border:1px solid rgba(212,197,169,0.12); color:#E8E0D5; border-radius:1px;" :class="{ 'border-[#A67C52]': !quickForm.fullName }">
                 </div>
                 
                 <div class="space-y-1.5">
-                    <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.phone.label }}</label>
+                    <label class="block text-xs font-medium tracking-[0.2em] uppercase ms-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.phone.label }}</label>
                     <input v-model="quickForm.phone" type="tel" :placeholder="storefrontContent.checkout.form.phone.placeholder" class="block w-full h-11 px-4 text-sm placeholder:text-[#3A3530] focus:outline-none transition-all" style="background-color:#0E1117; border:1px solid rgba(212,197,169,0.12); color:#E8E0D5; border-radius:1px;">
                 </div>
 
                 <div class="grid grid-cols-2 gap-4">
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                        <label class="block text-xs font-medium tracking-[0.2em] uppercase ms-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                         <WilayaField
                         v-model="quickForm.wilaya"
                         input-class="w-full h-11 px-4 text-sm appearance-none cursor-pointer focus:outline-none"
@@ -432,7 +432,7 @@ const scrollToForm = () => {
                       />
                     </div>
                     <div class="space-y-1.5">
-                        <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.commune.label }}</label>
+                        <label class="block text-xs font-medium tracking-[0.2em] uppercase ms-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.commune.label }}</label>
                         <CommuneField
                           v-model="quickForm.commune"
                           :wilaya-code="quickForm.wilaya"
@@ -444,11 +444,11 @@ const scrollToForm = () => {
                 </div>
 
                 <div v-if="!hideOptionalAddress" class="space-y-1.5">
-                    <label class="block text-xs font-medium tracking-[0.2em] uppercase ml-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.address.label }}</label>
+                    <label class="block text-xs font-medium tracking-[0.2em] uppercase ms-1" style="color:#A67C52;">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input v-model="quickForm.address" type="text" :placeholder="storefrontContent.checkout.form.address.placeholder" class="block w-full h-11 px-4 text-sm placeholder:text-[#3A3530] focus:outline-none" style="background-color:#0E1117; border:1px solid rgba(212,197,169,0.12); color:#E8E0D5; border-radius:1px;">
                 </div>
                 <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
-                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                    <label class="block text-sm font-semibold text-slate-700 ms-1">
                         {{ storefrontContent.checkout.sections.deliveryOptions }}
                     </label>
                     <div 
@@ -493,7 +493,7 @@ const scrollToForm = () => {
                         </div>
                         
                         <div class="flex items-center gap-3 flex-shrink-0">
-                            <div class="text-right">
+                            <div class="text-end">
                             <div class="font-bold text-brand-600 text-base">
                                 {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                             </div>
@@ -519,7 +519,7 @@ const scrollToForm = () => {
                         v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
                         class="space-y-2 mt-4"
                     >
-                        <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                        <label class="block text-sm font-semibold text-slate-700 ms-1">
                             {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
                         </label>
                         <div
@@ -629,7 +629,7 @@ const scrollToForm = () => {
         
         <!-- Success Toast -->
         <Transition enter-active-class="transform ease-out duration-300 transition" enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2" enter-to-class="translate-y-0 opacity-100 sm:translate-x-0" leave-active-class="transition ease-in duration-100" leave-from-class="opacity-100" leave-to-class="opacity-0">
-            <div v-if="showSuccess" class="fixed bottom-4 right-4 z-50 px-6 py-4 shadow-2xl flex items-center gap-4" style="background-color:#1A1F2E; border:1px solid rgba(166,124,82,0.25); border-radius:2px; color:#E8E0D5;">
+            <div v-if="showSuccess" class="fixed bottom-4 end-4 z-50 px-6 py-4 shadow-2xl flex items-center gap-4" style="background-color:#1A1F2E; border:1px solid rgba(166,124,82,0.25); border-radius:2px; color:#E8E0D5;">
                 <div class="w-8 h-8 flex items-center justify-center shrink-0" style="background-color:#A67C52; border-radius:1px; color:#fff;">
                     <Icon name="lucide:check" class="w-4 h-4" />
                 </div>
@@ -642,7 +642,7 @@ const scrollToForm = () => {
 
         <!-- Mobile Sticky Bar -->
         <Transition enter-active-class="transform transition ease-out duration-300" enter-from-class="translate-y-full" enter-to-class="translate-y-0" leave-active-class="transform transition ease-in duration-200" leave-from-class="translate-y-0" leave-to-class="translate-y-full">
-            <div v-if="showStickyBar && codEnabled" class="fixed bottom-0 left-0 right-0 z-40 p-4 md:hidden flex items-center justify-between gap-4 border-t" style="background-color:#111620; border-color:rgba(166,124,82,0.15);">
+            <div v-if="showStickyBar && codEnabled" class="fixed bottom-0 start-0 end-0 z-40 p-4 md:hidden flex items-center justify-between gap-4 border-t" style="background-color:#111620; border-color:rgba(166,124,82,0.15);">
                 <div class="flex flex-col">
                     <span class="text-xs" style="color:#5A5450;">Total</span>
                     <span class="text-xl font-light" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>

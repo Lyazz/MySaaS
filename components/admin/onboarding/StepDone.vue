@@ -16,7 +16,7 @@
     </div>
 
     <!-- Summary cards -->
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-left">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-start">
       <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border)">
         <p class="text-xs" style="color: var(--text-tertiary)">Template</p>
         <p class="font-semibold text-sm capitalize" style="color: var(--text-primary)">{{ modelValue.templateKey }}</p>

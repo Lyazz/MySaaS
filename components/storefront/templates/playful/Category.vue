@@ -106,7 +106,7 @@ const sortedProducts = computed(() => {
             class="px-6 py-3 rounded-[2rem] text-sm font-black transition-all shadow-sm border-2 whitespace-nowrap"
             :class="cat.id === category.id ? 'bg-[#fbbf24] text-amber-900 border-amber-300 shadow-[0_4px_0_0_#d97706] -translate-y-1' : 'bg-white text-slate-600 border-purple-100 hover:border-amber-200 hover:-translate-y-1 hover:shadow-md'"
           >
-            <span class="opacity-80 mr-1">🌟</span> {{ categoryDisplayTitle(cat) }}
+            <span class="opacity-80 me-1">🌟</span> {{ categoryDisplayTitle(cat) }}
           </NuxtLink>
         </div>
 

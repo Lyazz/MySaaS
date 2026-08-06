@@ -5,7 +5,7 @@
       class="flex mb-6"
       aria-label="Breadcrumb"
     >
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/categories"
@@ -17,7 +17,7 @@
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
+            <span class="ms-1" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -46,7 +46,7 @@
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center space-x-2 p-1.5 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+          <div class="flex items-center space-x-2 p-1.5 rounded-lg rtl:space-x-reverse" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
             <span class="text-xs font-medium px-2" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.links.label') }}:</span>
             <a
               :href="categoryUrl"
@@ -148,7 +148,7 @@
           >
             {{ t('admin.pages.categories.edit.deleteLink') }}
           </button>
-          <div class="space-x-3">
+          <div class="space-x-3 rtl:space-x-reverse">
             <NuxtLink
               to="/admin/categories"
               class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"

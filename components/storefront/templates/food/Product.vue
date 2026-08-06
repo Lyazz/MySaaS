@@ -138,7 +138,7 @@ onUnmounted(() => {
             <!-- Recipe Card Container -->
             <div class="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-stone-100 relative">
                 <!-- Decorative Top Border -->
-                <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-400 via-orange-400 to-yellow-400 rounded-t-[2rem]"></div>
+                <div class="absolute top-0 start-0 end-0 h-2 bg-gradient-to-r from-brand-400 via-orange-400 to-yellow-400 rounded-t-[2rem]"></div>
                 
                 <h1 class="text-4xl md:text-5xl font-bold text-stone-900 mb-6 leading-tight">
                     {{ product?.title }}

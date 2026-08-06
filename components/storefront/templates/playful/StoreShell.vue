@@ -140,7 +140,7 @@ const props = defineProps<{
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                   @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                 >
-                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
                   <Icon name="lucide:search" class="w-4 h-4 text-violet-400" />
                 </div>
                 <!-- Search Dropdown -->
@@ -161,13 +161,13 @@ const props = defineProps<{
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-xl border-2 border-violet-100 shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-violet-600 font-black mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-xs text-violet-600 font-black mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                     <button
                       v-if="hasMoreSearchResults"
                       type="button"
-                      class="w-full px-4 py-3 text-left text-sm font-bold text-violet-600 hover:bg-violet-50 transition-colors"
+                      class="w-full px-4 py-3 text-start text-sm font-bold text-violet-600 hover:bg-violet-50 transition-colors"
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >See more</button>
@@ -198,7 +198,7 @@ const props = defineProps<{
                     {{ storefrontContent.nav.categories || 'Categories' }}
                     <Icon name="lucide:chevron-down" class="w-3.5 h-3.5" />
                   </button>
-                  <div class="absolute top-full left-0 mt-2 w-52 bg-white border-3 border-violet-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-2xl overflow-hidden">
+                  <div class="absolute top-full start-0 mt-2 w-52 bg-white border-3 border-violet-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-2xl overflow-hidden">
                     <NuxtLink
                       v-for="cat in tenantCategories"
                       :key="cat.id"
@@ -231,7 +231,7 @@ const props = defineProps<{
                   <ClientOnly>
                     <span
                       v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-pink-500 text-[10px] font-black text-white absolute -top-0.5 -right-0.5"
+                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-pink-500 text-[10px] font-black text-white absolute -top-0.5 -end-0.5"
                     >{{ favorites.count.value }}</span>
                   </ClientOnly>
                 </button>
@@ -278,12 +278,12 @@ const props = defineProps<{
                   v-model="searchQuery"
                   type="text"
                   :placeholder="storefrontContent.search?.placeholder || 'Search...'"
-                  class="w-full border-3 border-violet-200 bg-white rounded-full py-2.5 pl-4 pr-10 text-sm text-stone-900 outline-none focus:border-violet-400"
+                  class="w-full border-3 border-violet-200 bg-white rounded-full py-2.5 ps-4 pe-10 text-sm text-stone-900 outline-none focus:border-violet-400"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                   @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-violet-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <div v-show="isSearchDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-violet-100 shadow-xl z-50 rounded-2xl overflow-hidden pointer-events-auto">
+                <Icon name="lucide:search" class="w-4 h-4 text-violet-400 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <div v-show="isSearchDropdownOpen" class="absolute top-full start-0 end-0 mt-1 bg-white border-2 border-violet-100 shadow-xl z-50 rounded-2xl overflow-hidden pointer-events-auto">
                   <div v-if="searchLoading" class="px-4 py-3 text-sm text-stone-500">Searching...</div>
                   <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-stone-500">No products found.</div>
                   <div v-else class="flex flex-col">
@@ -297,7 +297,7 @@ const props = defineProps<{
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-xl" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-violet-600 font-black">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-xs text-violet-600 font-black">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                   </div>
@@ -314,7 +314,7 @@ const props = defineProps<{
             <div v-if="tenantCategories && tenantCategories.length" class="px-4 py-3">
   <button
     type="button"
-    class="w-full flex items-center justify-between text-left"
+    class="w-full flex items-center justify-between text-start"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">

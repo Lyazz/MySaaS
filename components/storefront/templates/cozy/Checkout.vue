@@ -414,7 +414,7 @@ async function handleSubmit() {
                       <p class="text-sm text-slate-400">{{ option.modeLabel }}</p>
                     </div>
                   </div>
-                  <div class="text-right">
+                  <div class="text-end">
                     <span class="font-bold text-slate-700">
                       {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                     </span>
@@ -469,7 +469,7 @@ async function handleSubmit() {
                     :alt="item.title"
                     class="w-full h-full object-cover"
                   >
-                  <span class="absolute -top-1 -right-1 bg-brand-500 text-white w-5 h-5 flex items-center justify-center text-xs font-bold rounded-full">
+                  <span class="absolute -top-1 -end-1 bg-brand-500 text-white w-5 h-5 flex items-center justify-center text-xs font-bold rounded-full">
                     {{ item.quantity }}
                   </span>
                 </div>

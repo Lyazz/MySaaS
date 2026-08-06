@@ -92,7 +92,7 @@
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.submitted', 'Submitted') }}</th>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.proof', 'Proof') }}</th>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.notes', 'Notes') }}</th>
-                <th class="ui-th text-right">{{ t('superAdmin.pendingPayments.table.actions', 'Actions') }}</th>
+                <th class="ui-th text-end">{{ t('superAdmin.pendingPayments.table.actions', 'Actions') }}</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
@@ -166,7 +166,7 @@
                 </td>
 
                 <!-- Actions -->
-                <td class="ui-td text-right">
+                <td class="ui-td text-end">
                   <div class="flex items-center justify-end gap-2">
                     <button
                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-semibold transition-colors"

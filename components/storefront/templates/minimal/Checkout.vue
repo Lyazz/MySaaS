@@ -333,7 +333,7 @@ async function handleSubmit() {
           <div class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                 <input
                   v-model="form.fullName"
                   type="text"
@@ -342,7 +342,7 @@ async function handleSubmit() {
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
+                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                 <input
                   v-model="form.phone"
                   type="tel"
@@ -351,7 +351,7 @@ async function handleSubmit() {
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <WilayaField
                         v-model="form.wilaya"
                         input-class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
@@ -359,7 +359,7 @@ async function handleSubmit() {
                       />
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
+                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                 <CommuneField
                   v-model="form.commune"
                   :wilaya-code="form.wilaya"
@@ -369,7 +369,7 @@ async function handleSubmit() {
                 />
               </div>
               <div v-if="!hideOptionalAddress" class="col-span-2 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
+                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
                   type="text"
@@ -440,7 +440,7 @@ async function handleSubmit() {
                   
                   <!-- Price & Radio -->
                   <div class="flex items-center gap-3 flex-shrink-0">
-                    <div class="text-right">
+                    <div class="text-end">
                       <div class="font-bold text-brand-600 text-base">
                         {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                       </div>
@@ -501,7 +501,7 @@ async function handleSubmit() {
             </div>
 
             <!-- Cart Items -->
-            <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pr-2">
+            <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pe-2">
               <div
                 v-for="item in cartStore.items"
                 :key="item.productId"

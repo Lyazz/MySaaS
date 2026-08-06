@@ -14,7 +14,7 @@
     <!-- Sidebar -->
     <aside :class="[
       'text-white transition-all duration-300 flex flex-col shadow-2xl z-30',
-      'fixed inset-y-0 left-0 lg:static', // Mobile fixed, Desktop static
+      'fixed inset-y-0 start-0 lg:static', // Mobile fixed, Desktop static
       sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'
     ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
       <!-- Logo/Brand -->
@@ -67,7 +67,7 @@
             <!-- Pending badge on collapsed icon -->
             <span
               v-if="item.badge && !sidebarOpen"
-              class="absolute -top-1.5 -right-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-[9px] font-bold leading-none text-white"
+              class="absolute -top-1.5 -end-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-[9px] font-bold leading-none text-white"
               style="background: var(--brand)"
             >
               {{ item.badge }}
@@ -84,7 +84,7 @@
           <!-- Pending badge on expanded label -->
           <span
             v-if="item.badge && sidebarOpen"
-            class="ml-auto flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-bold leading-none text-white"
+            class="ms-auto flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-bold leading-none text-white"
             style="background: var(--brand)"
           >
             {{ item.badge }}
@@ -93,10 +93,10 @@
           <!-- Tooltip for collapsed state -->
           <div 
             v-if="!sidebarOpen" 
-            class="fixed left-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ml-2"
+            class="fixed start-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ms-2"
           >
             {{ item.label }}
-            <span v-if="item.badge" class="ml-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style="background: var(--brand)">
+            <span v-if="item.badge" class="ms-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style="background: var(--brand)">
               {{ item.badge }}
             </span>
           </div>
@@ -114,7 +114,7 @@
           </div>
           <div 
             class="min-w-0 transition-all duration-300 overflow-hidden"
-            :class="sidebarOpen ? 'w-auto opacity-100 ml-3' : 'w-0 opacity-0 ml-0'"
+            :class="sidebarOpen ? 'w-auto opacity-100 ms-3' : 'w-0 opacity-0 ms-0'"
           >
             <p class="text-sm font-medium text-slate-200 truncate">{{ authStore.user?.email }}</p>
             <p class="text-xs text-slate-500 truncate mt-0.5">{{ t('superAdmin.layout.role') }}</p>
@@ -134,7 +134,7 @@
           <div class="flex items-center gap-4">
             <button 
               @click="toggleSidebar" 
-              class="p-2 -ml-2 rounded-lg transition-colors"
+              class="p-2 -ms-2 rounded-lg transition-colors"
               style="color: var(--text-secondary)"
               @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }"
               @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }"

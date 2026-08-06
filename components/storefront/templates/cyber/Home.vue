@@ -144,7 +144,7 @@ const {
       </div>
 
       <!-- Arrows -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-4">
+      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 end-8 z-20 gap-4">
         <button
           class="w-12 h-12 rounded-full border border-pink-500/30 flex items-center justify-center text-white hover:bg-pink-500/20 hover:border-pink-500 transition-all backdrop-blur-sm"
           @click="prevSlide"
@@ -160,7 +160,7 @@ const {
       </div>
 
       <!-- Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 left-6 md:left-8 z-20 flex space-x-2">
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 start-6 md:start-8 z-20 flex space-x-2 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -228,7 +228,7 @@ const {
             </div>
 
             <!-- Background Decoration (Circle) -->
-            <div class="absolute -top-10 -right-10 w-32 h-32 md:w-40 md:h-40 rounded-full bg-pink-500/20 blur-2xl group-hover:scale-150 transition-transform duration-700" />
+            <div class="absolute -top-10 -end-10 w-32 h-32 md:w-40 md:h-40 rounded-full bg-pink-500/20 blur-2xl group-hover:scale-150 transition-transform duration-700" />
 
             <div class="z-10 relative transform transition-transform duration-300 group-hover:-translate-y-2 bg-[#1a0a2e]/85 backdrop-blur-sm px-4 py-3 rounded-2xl border border-purple-500/30">
               <h3 class="text-xl md:text-2xl font-bold text-white mb-1 group-hover:text-pink-400 transition-colors">
@@ -241,7 +241,7 @@ const {
             </div>
                 
             <!-- Action Icon -->
-            <div class="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-pink-500/20 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 border border-pink-500/30">
+            <div class="absolute top-4 end-4 md:top-6 md:end-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-pink-500/20 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0 border border-pink-500/30">
               <Icon name="lucide:arrow-right" class="w-4 h-4 md:w-5 md:h-5 text-white" />
             </div>
           </NuxtLink>

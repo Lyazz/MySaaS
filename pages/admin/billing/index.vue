@@ -52,7 +52,7 @@
       <div class="lg:col-span-3 bg-gradient-to-br from-slate-900 via-slate-800 [--tw-gradient-to:color-mix(in_srgb,var(--brand)_60%,#000)] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
         <!-- Decorative Background Glow -->
         <div class="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 [background:var(--brand)]/20 blur-3xl rounded-full pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 -mb-16 -ml-16 w-48 h-48 bg-slate-500/20 blur-3xl rounded-full pointer-events-none"></div>
+        <div class="absolute bottom-0 start-0 -mb-16 -ms-16 w-48 h-48 bg-slate-500/20 blur-3xl rounded-full pointer-events-none"></div>
 
         <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           
@@ -170,7 +170,7 @@
             <!-- Current Plan Badge -->
             <div 
               v-if="plan.code === snapshot?.subscription?.planCode" 
-              class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-slate-800 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm"
+              class="absolute -top-3 start-1/2 -translate-x-1/2 px-3 py-1 bg-slate-800 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm"
             >
               {{ t('admin.pages.billing.currentPlanBadge', 'Your Plan') }}
             </div>
@@ -185,7 +185,7 @@
                 {{ formatDzd(billingInterval === 'year' ? (plan.pricing?.annualAmountDzd || 0) * 12 : plan.pricing?.monthlyAmountDzd) }}
               </span>
               <span class="text-sm font-bold uppercase" style="color: var(--text-tertiary)">{{ plan.pricing?.currency }}</span>
-              <span class="text-xs ml-1" style="color: var(--text-muted)">/ {{ billingInterval === 'year' ? t('admin.pages.billing.yr', 'yr') : t('admin.pages.billing.mo', 'mo') }}</span>
+              <span class="text-xs ms-1" style="color: var(--text-muted)">/ {{ billingInterval === 'year' ? t('admin.pages.billing.yr', 'yr') : t('admin.pages.billing.mo', 'mo') }}</span>
             </div>
 
             <!-- Features -->
@@ -222,13 +222,13 @@
         <div id="checkout-section" class="lg:col-span-5 w-full sticky top-6">
           <!-- Checkout / Payment Flow Section -->
           <div v-if="selectedPlanCode && selectedPlanCode !== snapshot?.subscription?.planCode" class="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div class="w-full rounded-2xl overflow-hidden text-left" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.3)">
+            <div class="w-full rounded-2xl overflow-hidden text-start" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.3)">
             <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4" style="background: var(--surface-2); border-bottom: 1px solid var(--surface-border)">
               <div>
                 <h3 class="text-xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.billing.payment.title', 'Complete your upgrade') }}</h3>
                 <p class="text-sm mt-1" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.subtitle', 'Select a payment method to proceed.') }}</p>
               </div>
-              <div class="text-right">
+              <div class="text-end">
                 <div class="text-sm font-semibold mb-1" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.totalLabel', 'Total to pay') }}</div>
                 <div class="text-2xl font-black" style="color: var(--text-primary)">
                   {{ formatDzd(billingInterval === 'year' ? (plans.find(p => p.code === selectedPlanCode)?.pricing?.annualAmountDzd || 0) * 12 : plans.find(p => p.code === selectedPlanCode)?.pricing?.monthlyAmountDzd) }}

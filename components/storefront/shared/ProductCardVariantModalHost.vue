@@ -371,7 +371,7 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
             <p class="text-sm font-medium text-red-600">{{ error }}</p>
           </div>
 
-          <div v-else class="mt-4 max-h-[55vh] space-y-3 overflow-y-auto pr-1">
+          <div v-else class="mt-4 max-h-[55vh] space-y-3 overflow-y-auto pe-1">
             <div
               v-for="variant in variants"
               :key="variant.id"
@@ -388,7 +388,7 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
                     <span v-else>{{ storefrontContent.product.inStock }}</span>
                   </p>
                 </div>
-                <div class="shrink-0 text-right">
+                <div class="shrink-0 text-end">
                   <p class="text-sm font-semibold sm:text-base" :class="tokens.price">
                     {{ formatCurrency(variant.price) }}
                   </p>

@@ -125,7 +125,7 @@ async function handleAddToCart() {
       <div v-if="viewMode !== 'list'" class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style="background: linear-gradient(to top, rgba(8,11,18,0.4) 0%, transparent 50%);" />
 
       <!-- Badges (Top Left) -->
-      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
+      <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10">
         <span
           v-if="isNew"
           class="px-2.5 py-1 text-xs font-medium tracking-wider uppercase"
@@ -145,7 +145,7 @@ async function handleAddToCart() {
 
       <!-- Floating Actions (Right) -->
       <div 
-        class="absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 z-10"
+        class="absolute top-3 end-3 flex flex-col gap-2 transition-all duration-300 z-10"
         :class="[
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-8 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
         ]"
@@ -187,7 +187,7 @@ async function handleAddToCart() {
       <!-- Stock Badge -->
       <div
         v-if="product.stock > 0 && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <span
           v-if="isLowStock"
@@ -203,7 +203,7 @@ async function handleAddToCart() {
 
       <div
         v-if="isOutOfStock && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <span 
           class="px-2 py-1 text-[10px] font-medium tracking-wider uppercase"
@@ -227,8 +227,8 @@ async function handleAddToCart() {
     <div 
       :class="[
         viewMode === 'list' 
-          ? 'flex-1 text-left' 
-          : 'mt-4 text-left w-full px-1'
+          ? 'flex-1 text-start' 
+          : 'mt-4 text-start w-full px-1'
       ]"
     >
       <NuxtLink :to="`/product/${product.slug}`" class="block">
@@ -278,7 +278,7 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 px-6 py-4 shadow-2xl flex items-center gap-4"
+        class="fixed bottom-4 end-4 z-50 px-6 py-4 shadow-2xl flex items-center gap-4"
         style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.15); border-radius: 2px; color: #E8E0D5;"
       >
         <div class="w-8 h-8 flex items-center justify-center shrink-0" style="background-color: #A67C52; border-radius: 1px; color: #fff;">

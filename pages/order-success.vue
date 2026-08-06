@@ -28,13 +28,13 @@
       </div>
 
       <!-- Order Details -->
-      <div class="bg-white rounded-lg shadow p-6 text-left mb-8">
+      <div class="bg-white rounded-lg shadow p-6 text-start mb-8">
         <h2 class="text-lg font-semibold text-gray-900 mb-4">
           {{ t('storefront.orderSuccess.whatsNext') }}
         </h2>
         <div class="space-y-3">
           <div class="flex items-start">
-            <Icon name="lucide:phone" class="w-6 h-6 text-brand mr-3 flex-shrink-0" />
+            <Icon name="lucide:phone" class="w-6 h-6 text-brand me-3 flex-shrink-0" />
             <div>
               <p class="font-medium text-gray-900">
                 {{ t('storefront.orderSuccess.callTitle') }}
@@ -46,7 +46,7 @@
           </div>
 
           <div class="flex items-start">
-            <Icon name="lucide:package" class="w-6 h-6 text-brand mr-3 flex-shrink-0" />
+            <Icon name="lucide:package" class="w-6 h-6 text-brand me-3 flex-shrink-0" />
             <div>
               <p class="font-medium text-gray-900">
                 {{ t('storefront.orderSuccess.prepareTitle') }}
@@ -58,7 +58,7 @@
           </div>
 
           <div class="flex items-start">
-            <Icon name="lucide:truck" class="w-6 h-6 text-brand mr-3 flex-shrink-0" />
+            <Icon name="lucide:truck" class="w-6 h-6 text-brand me-3 flex-shrink-0" />
             <div>
               <p class="font-medium text-gray-900">
                 {{ t('storefront.orderSuccess.deliveryTitle') }}
@@ -74,7 +74,7 @@
       <!-- Payment Info -->
       <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-8">
         <div class="flex items-center justify-center">
-          <Icon name="lucide:banknote" class="w-5 h-5 text-blue-600 mr-2" />
+          <Icon name="lucide:banknote" class="w-5 h-5 text-blue-600 me-2" />
           <p class="text-sm font-medium text-blue-900">
             {{ t('storefront.orderSuccess.paymentInfo') }}
           </p>

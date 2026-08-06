@@ -374,9 +374,9 @@
             <Icon
               v-if="activationPending"
               name="lucide:loader-2"
-              class="w-4 h-4 mr-2 animate-spin"
+              class="w-4 h-4 me-2 animate-spin"
             />
-            <Icon v-else name="lucide:key" class="w-4 h-4 mr-2" />
+            <Icon v-else name="lucide:key" class="w-4 h-4 me-2" />
             Generate Activation Code
           </button>
         </div>
@@ -411,7 +411,7 @@
           />
           <button
             type="button"
-            class="absolute top-3 right-3 ui-btn ui-btn--sm ui-btn--secondary"
+            class="absolute top-3 end-3 ui-btn ui-btn--sm ui-btn--secondary"
             @click="copyText(activationCode)"
           >
             <Icon

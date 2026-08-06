@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <nav class="flex mb-6" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink to="/admin/sales" class="hover:[color:var(--brand)]" style="color: var(--text-secondary)">
             {{ t('admin.nav.salesItem') }}
@@ -10,7 +10,7 @@
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.breadcrumb', { id: saleId.substring(0, 8) }) }}</span>
+            <span class="ms-1" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.breadcrumb', { id: saleId.substring(0, 8) }) }}</span>
           </div>
         </li>
       </ol>
@@ -89,9 +89,9 @@
               <tr>
                 <th class="ui-th">{{ t('admin.pages.sales.detail.itemsTable.product') }}</th>
                 <th class="ui-th">{{ t('admin.pages.sales.detail.itemsTable.variant') }}</th>
-                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.qty') }}</th>
-                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.price') }}</th>
-                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.total') }}</th>
+                <th class="ui-th text-end">{{ t('admin.pages.sales.detail.itemsTable.qty') }}</th>
+                <th class="ui-th text-end">{{ t('admin.pages.sales.detail.itemsTable.price') }}</th>
+                <th class="ui-th text-end">{{ t('admin.pages.sales.detail.itemsTable.total') }}</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
@@ -102,9 +102,9 @@
                 <td class="ui-td text-sm" style="color: var(--text-secondary)">
                   {{ item.variantId ? item.variantId.substring(0, 8) : t('admin.pages.sales.detail.itemsTable.defaultVariant') }}
                 </td>
-                <td class="ui-td text-sm text-right" style="color: var(--text-primary)">{{ item.quantity }}</td>
-                <td class="ui-td text-sm text-right" style="color: var(--text-primary)">{{ formatCurrency(item.price) }}</td>
-                <td class="ui-td text-sm font-semibold text-right" style="color: var(--text-primary)">
+                <td class="ui-td text-sm text-end" style="color: var(--text-primary)">{{ item.quantity }}</td>
+                <td class="ui-td text-sm text-end" style="color: var(--text-primary)">{{ formatCurrency(item.price) }}</td>
+                <td class="ui-td text-sm font-semibold text-end" style="color: var(--text-primary)">
                   {{ formatCurrency(item.price * item.quantity) }}
                 </td>
               </tr>

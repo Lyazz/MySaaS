@@ -92,19 +92,19 @@ async function handleAddToCart() {
             
             <StorefrontSharedFavoriteButton
                 :product-id="product.id"
-                button-class="absolute top-4 left-4 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:bg-red-50 hover:text-red-600 transition-colors"
+                button-class="absolute top-4 start-4 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:bg-red-50 hover:text-red-600 transition-colors"
                 icon-class="w-6 h-6"
             />
 
             <span
                 v-if="isClearanceEligible"
-                class="absolute top-4 right-4 z-10 px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wide shadow-lg"
+                class="absolute top-4 end-4 z-10 px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wide shadow-lg"
             >{{ t('storefront.clearance.badge') }}</span>
 
             <!-- Floating Add Button -->
             <button 
                 @click.prevent="handleAddToCart"
-                class="absolute bottom-4 right-4 w-12 h-12 bg-white/90 backdrop-blur-md text-brand-600 rounded-full flex items-center justify-center shadow-lg transform translate-y-16 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-brand-500 hover:text-white"
+                class="absolute bottom-4 end-4 w-12 h-12 bg-white/90 backdrop-blur-md text-brand-600 rounded-full flex items-center justify-center shadow-lg transform translate-y-16 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-brand-500 hover:text-white"
             >
                 <Icon name="lucide:plus" class="w-6 h-6" />
             </button>
@@ -150,7 +150,7 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 bg-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-100 flex items-center gap-4"
+        class="fixed bottom-4 end-4 z-50 bg-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-100 flex items-center gap-4"
       >
         <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
           <Icon name="lucide:check" class="w-5 h-5 text-green-600" />

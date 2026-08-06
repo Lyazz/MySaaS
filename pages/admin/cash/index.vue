@@ -26,7 +26,7 @@
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
-          <MenuItems class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
+          <MenuItems class="absolute end-0 z-10 mt-2 w-64 origin-top-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
             <div class="py-1">
               <MenuItem v-slot="{ active }">
                 <button
@@ -87,7 +87,7 @@
     </div>
 
     <!-- Mobile FAB -->
-    <Menu as="div" class="fixed bottom-6 right-6 z-40 md:hidden">
+    <Menu as="div" class="fixed bottom-6 end-6 z-40 md:hidden">
       <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full [background:var(--brand)] text-black shadow-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
         <Icon name="lucide:plus" class="h-6 w-6" />
       </MenuButton>
@@ -99,7 +99,7 @@
         leave-from-class="transform opacity-100 scale-100"
         leave-to-class="transform opacity-0 scale-95"
       >
-        <MenuItems class="absolute bottom-full right-0 mb-2 w-64 origin-bottom-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
+        <MenuItems class="absolute bottom-full end-0 mb-2 w-64 origin-bottom-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
           <div class="py-1">
             <MenuItem v-slot="{ active }">
               <button
@@ -383,7 +383,7 @@
                 <!-- Collapsible Filters -->
                 <Disclosure v-slot="{ open }" defaultOpen>
                   <div class="border-b px-5 py-4" style="border-color: var(--surface-border)">
-                    <DisclosureButton class="flex w-full items-center justify-between text-left">
+                    <DisclosureButton class="flex w-full items-center justify-between text-start">
                       <div class="flex items-center gap-2">
                         <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.transactions.filters.title') }}</h3>
                         <span v-if="activeTransactionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full [background:rgba(var(--brand-rgb)/0.12)] px-2 py-0.5 text-xs font-medium [color:var(--brand)]">
@@ -492,7 +492,7 @@
                     </span>
                   </div>
                 </div>
-                <p class="shrink-0 whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+                <p class="shrink-0 whitespace-nowrap text-end text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
                   {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
                 </p>
               </div>
@@ -518,7 +518,7 @@
                   <th class="ui-th">
                     {{ t('admin.pages.cash.transactions.table.method') }}
                   </th>
-                  <th class="ui-th text-right">
+                  <th class="ui-th text-end">
                     {{ t('admin.pages.cash.transactions.table.amount') }}
                   </th>
                 </tr>
@@ -553,7 +553,7 @@
                       {{ methodLabel(tx.method) }}
                     </span>
                   </td>
-                  <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+                  <td class="ui-td whitespace-nowrap text-end text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
                     {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
                   </td>
                 </tr>
@@ -596,7 +596,7 @@
                 <nav class="relative z-0 inline-flex rounded-md -space-x-px">
                   <button
                     :disabled="txPage === 1"
-                    class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                    class="relative inline-flex items-center px-2 py-2 rounded-s-md text-sm font-medium disabled:opacity-50"
                     style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                     @click="txPage--; fetchTransactions()"
                   >
@@ -614,7 +614,7 @@
                   </button>
                   <button
                     :disabled="txPage === txTotalPages"
-                    class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                    class="relative inline-flex items-center px-2 py-2 rounded-e-md text-sm font-medium disabled:opacity-50"
                     style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                     @click="txPage++; fetchTransactions()"
                   >
@@ -631,7 +631,7 @@
           <!-- Collapsible Filters -->
           <Disclosure v-slot="{ open }" defaultOpen>
             <div class="border-b px-5 py-4" style="border-color: var(--surface-border)">
-              <DisclosureButton class="flex w-full items-center justify-between text-left">
+              <DisclosureButton class="flex w-full items-center justify-between text-start">
                 <div class="flex items-center gap-2">
                   <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.sessions.filters.title') }}</h3>
                   <span v-if="activeSessionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full [background:rgba(var(--brand-rgb)/0.12)] px-2 py-0.5 text-xs font-medium [color:var(--brand)]">
@@ -711,7 +711,7 @@
                         :class="s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-400' : ''"
                         :style="s.status !== 'OPEN' ? 'background: var(--surface-3); color: var(--text-secondary)' : ''"
                       >
-                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
+                        <span class="me-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
                         {{ t(`admin.pages.cash.status.${s.status}`) }}
                       </span>
                     </div>
@@ -749,16 +749,16 @@
                     <th class="ui-th">
                       {{ t('admin.pages.cash.sessions.table.closedAt') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.openingFloat') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.expectedClosing') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.closingCount') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.difference') }}
                     </th>
                   </tr>
@@ -774,7 +774,7 @@
                         :class="s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-400' : ''"
                         :style="s.status !== 'OPEN' ? 'background: var(--surface-3); color: var(--text-secondary)' : ''"
                       >
-                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
+                        <span class="me-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
                         {{ t(`admin.pages.cash.status.${s.status}`) }}
                       </span>
                     </td>
@@ -787,16 +787,16 @@
                     <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                       {{ s.closedAt ? formatDate(s.closedAt) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-medium" style="color: var(--text-primary)">
                       {{ formatCurrency(Number(s.openingFloat)) }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-medium" style="color: var(--text-primary)">
                       {{ s.expectedClosing ? formatCurrency(Number(s.expectedClosing)) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-medium" style="color: var(--text-primary)">
                       {{ s.closingCount ? formatCurrency(Number(s.closingCount)) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-400' : ''" :style="!(s.difference && Number(s.difference) !== 0) ? 'color: var(--text-primary)' : ''">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-400' : ''" :style="!(s.difference && Number(s.difference) !== 0) ? 'color: var(--text-primary)' : ''">
                       {{ s.difference ? formatCurrency(Number(s.difference)) : '—' }}
                     </td>
                   </tr>
@@ -839,7 +839,7 @@
                   <nav class="relative z-0 inline-flex rounded-md -space-x-px">
                     <button
                       :disabled="sessionsPage === 1"
-                      class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-s-md text-sm font-medium disabled:opacity-50"
                       style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                       @click="sessionsPage--; fetchSessions()"
                     >
@@ -857,7 +857,7 @@
                     </button>
                     <button
                       :disabled="sessionsPage === sessionsTotalPages"
-                      class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                      class="relative inline-flex items-center px-2 py-2 rounded-e-md text-sm font-medium disabled:opacity-50"
                       style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
                       @click="sessionsPage++; fetchSessions()"
                     >

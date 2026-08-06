@@ -39,7 +39,7 @@ const sortedProducts = computed(() => {
         <h1 class="font-street text-6xl md:text-8xl uppercase leading-none inline-block border-4 border-black px-6 shadow-[8px_8px_0_0_var(--brand)] bg-white">
             {{ category.title }}
         </h1>
-        <p class="mt-6 font-mono text-xl uppercase max-w-2xl mx-auto border-l-4 border-black pl-4 text-left">
+        <p class="mt-6 font-mono text-xl uppercase max-w-2xl mx-auto border-s-4 border-black ps-4 text-start">
             {{ category.description || storefrontContent.category.description }}
         </p>
     </div>

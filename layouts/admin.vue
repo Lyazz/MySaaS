@@ -11,7 +11,7 @@
     <!-- Sidebar -->
     <aside :class="[
       'flex flex-col z-30 shrink-0',
-      'fixed inset-y-0 left-0 lg:relative transition-all duration-300',
+      'fixed inset-y-0 start-0 lg:relative transition-all duration-300',
       sidebarOpen
         ? 'translate-x-0 w-[220px]'
         : '-translate-x-full w-[220px] lg:translate-x-0 lg:w-[64px]'
@@ -51,7 +51,7 @@
 
         <button
           @click="sidebarOpen = false"
-          class="ml-auto p-1 rounded-lg transition-colors lg:hidden shrink-0"
+          class="ms-auto p-1 rounded-lg transition-colors lg:hidden shrink-0"
           style="color: var(--text-tertiary)"
         >
           <Icon name="lucide:x" class="w-4 h-4" />
@@ -113,7 +113,7 @@
               <!-- Tooltip (collapsed) -->
               <div
                 v-if="!sidebarOpen"
-                class="fixed left-[72px] px-2.5 py-1.5 text-[11px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
+                class="fixed start-[72px] px-2.5 py-1.5 text-[11px] font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl"
                 style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary); top: auto"
               >
                 {{ t(item.labelKey) }}
@@ -179,7 +179,7 @@
           {{ pageTitle }}
         </h1>
 
-        <div class="flex items-center gap-1.5 ml-auto shrink-0">
+        <div class="flex items-center gap-1.5 ms-auto shrink-0">
           <a
             :href="storefrontUrl"
             target="_blank"

@@ -531,7 +531,7 @@ const handleAddToCart = async () => {
       data-test="cod-order-card"
         class="bg-white border-4 border-black p-6 shadow-[8px_8px_0_0_var(--brand)] relative overflow-hidden mb-6"
     >
-        <div class="absolute top-0 left-0 w-full h-1 bg-brand" />
+        <div class="absolute top-0 start-0 w-full h-1 bg-brand" />
         
         <div class="flex items-center gap-3 mb-6">
             <div class="w-10 h-10 border-2 border-black flex items-center justify-center bg-brand">
@@ -595,7 +595,7 @@ const handleAddToCart = async () => {
                 >
             </div>
                 <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
-                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                    <label class="block text-sm font-semibold text-slate-700 ms-1">
                         {{ storefrontContent.checkout.sections.deliveryOptions }}
                     </label>
                     <div 
@@ -640,7 +640,7 @@ const handleAddToCart = async () => {
                         </div>
                         
                         <div class="flex items-center gap-3 flex-shrink-0">
-                            <div class="text-right">
+                            <div class="text-end">
                             <div class="font-bold text-brand-600 text-base">
                                 {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                             </div>
@@ -666,7 +666,7 @@ const handleAddToCart = async () => {
                         v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
                         class="space-y-2 mt-4"
                     >
-                        <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                        <label class="block text-sm font-semibold text-slate-700 ms-1">
                             {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
                         </label>
                         <div

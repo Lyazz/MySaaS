@@ -119,7 +119,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </option>
           </select>
           <div
-            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400"
+            class="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400"
           >
             <Icon name="lucide:chevron-down" class="w-4 h-4" />
           </div>
@@ -239,7 +239,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             />
             <label
               :for="`${option.id}-${value.id}`"
-              class="ml-2 block text-sm font-medium text-purple-100"
+              class="ms-2 block text-sm font-medium text-purple-100"
               :class="{
                 'text-purple-400 line-through':
                   optionValueState(option.id, value.id) !== 'available',
@@ -248,7 +248,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               }"
             >
               {{ value.label }}
-              <span class="text-xs font-normal ml-1">{{
+              <span class="text-xs font-normal ms-1">{{
                 optionValueSuffix(option.id, value.id)
               }}</span>
             </label>
@@ -286,7 +286,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </span>
             <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
-              class="ml-2 text-[10px] font-semibold"
+              class="ms-2 text-[10px] font-semibold"
             >
               {{ optionValueSuffix(option.id, value.id) }}
             </span>

@@ -95,10 +95,10 @@ const categoriesDropdownOpen = ref(true)
         <!-- Sidebar -->
         <aside class="w-full lg:w-72 flex-shrink-0">
           <div class="relative bg-[#0b0f14] border border-white/[0.06] p-6 lg:sticky lg:top-24">
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
             <button type="button" class="w-full flex items-center justify-between mb-5" @click="categoriesDropdownOpen = !categoriesDropdownOpen">
               <h3 class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500">{{ storefrontContent.shop.categories }}</h3>
@@ -109,7 +109,7 @@ const categoriesDropdownOpen = ref(true)
                 v-for="cat in allCategories"
                 :key="cat.id"
                 :to="`/category/${cat.slug}`"
-                class="flex items-center gap-3 group py-2 px-3 -mx-3 transition-colors border-l-2 hover:bg-white/[0.03]"
+                class="flex items-center gap-3 group py-2 px-3 -mx-3 transition-colors border-s-2 hover:bg-white/[0.03]"
                 :class="cat.id === category.id ? 'border-brand-500 bg-brand-500/10 text-brand-500' : 'border-transparent text-slate-400 hover:border-white/15 hover:text-white'"
               >
                 
@@ -139,7 +139,7 @@ const categoriesDropdownOpen = ref(true)
                   <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
                   <option value="priceHighToLow">{{ storefrontContent.category.sort.priceHighToLow }}</option>
                 </select>
-                <Icon name="lucide:chevron-down" class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Icon name="lucide:chevron-down" class="w-3.5 h-3.5 text-slate-500 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
           </div>
@@ -148,10 +148,10 @@ const categoriesDropdownOpen = ref(true)
             v-if="sortedProducts.length === 0"
             class="relative bg-[#0b0f14] border border-white/[0.06] p-16 text-center"
           >
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
             <Icon name="lucide:package-x" class="w-12 h-12 text-brand-500 mx-auto mb-5" />
             <h3 class="text-xl font-black uppercase text-white">{{ storefrontContent.shop.results.noResults }}</h3>
             <p class="text-sm text-slate-500 mt-2">{{ storefrontContent.category.emptyHint }}</p>

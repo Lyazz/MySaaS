@@ -6,7 +6,7 @@
           to="/admin/customers"
           class="inline-flex items-center text-sm hover:[color:var(--brand)]" style="color: var(--text-tertiary)"
         >
-          <Icon name="lucide:arrow-left" class="w-4 h-4 mr-1" />
+          <Icon name="lucide:arrow-left" class="w-4 h-4 me-1" />
           {{ t('admin.nav.customers') }}
         </NuxtLink>
         <div class="flex items-center gap-3 mt-2">
@@ -18,7 +18,7 @@
             :to="`/admin/customers/edit/${summary.id}`"
             class="inline-flex items-center px-3 py-1.5 shadow-sm text-sm font-medium rounded-md transition-colors" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
           >
-            <Icon name="lucide:pencil" class="w-4 h-4 mr-1.5" />
+            <Icon name="lucide:pencil" class="w-4 h-4 me-1.5" />
             {{ t('admin.common.edit') }}
           </NuxtLink>
         </div>
@@ -154,7 +154,7 @@
                 <th class="ui-th">Type</th>
                 <th class="ui-th">Statut</th>
                 <th class="ui-th">Source</th>
-                <th class="ui-th text-right">Points</th>
+                <th class="ui-th text-end">Points</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
@@ -163,7 +163,7 @@
                 <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-primary)">{{ entry.direction }}</td>
                 <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ entry.status }}</td>
                 <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ entry.sourceType }} #{{ entry.sourceId.slice(0, 8) }}</td>
-                <td class="ui-td whitespace-nowrap text-right font-semibold" :class="entry.direction === 'REDEEM' ? 'text-red-600' : 'text-emerald-700'">
+                <td class="ui-td whitespace-nowrap text-end font-semibold" :class="entry.direction === 'REDEEM' ? 'text-red-600' : 'text-emerald-700'">
                   {{ entry.direction === 'REDEEM' ? '-' : '+' }}{{ entry.points }}
                 </td>
               </tr>
@@ -192,7 +192,7 @@
                 <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.date') }}
                 </th>
-                <th class="ui-th text-right">
+                <th class="ui-th text-end">
                   {{ t('admin.pages.customers.detail.table.actions') }}
                 </th>
               </tr>
@@ -221,13 +221,13 @@
                 <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   {{ formatDate(s.createdAt) }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-right">
+                <td class="ui-td whitespace-nowrap text-end">
                   <div class="flex items-center justify-end">
                     <NuxtLink
                       :to="`/admin/sales/${s.id}`"
                       class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
-                      <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
+                      <Icon name="lucide:eye" class="w-4 h-4 me-1" />
                       <span>{{ t('admin.common.view') }}</span>
                     </NuxtLink>
                   </div>
@@ -258,7 +258,7 @@
                 <th class="ui-th">
                   {{ t('admin.pages.customers.detail.stats.reference') }}
                 </th>
-                <th class="ui-th text-right">
+                <th class="ui-th text-end">
                   {{ t('admin.pages.customers.detail.table.actions') }}
                 </th>
               </tr>
@@ -283,14 +283,14 @@
                 <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   {{ p.reference || '—' }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-right">
+                <td class="ui-td whitespace-nowrap text-end">
                   <div class="flex items-center justify-end">
                     <NuxtLink
                       v-if="p.saleId"
                       :to="`/admin/sales/${p.saleId}`"
                       class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
-                      <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
+                      <Icon name="lucide:eye" class="w-4 h-4 me-1" />
                       <span>{{ t('admin.common.view') }}</span>
                     </NuxtLink>
                     <span v-else style="color: var(--text-muted)">—</span>

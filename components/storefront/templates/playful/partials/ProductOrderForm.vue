@@ -484,7 +484,7 @@ const scrollToForm = () => {
       class="bg-white rounded-3xl border-3 border-violet-100 p-6 shadow-[0_4px_0_0_#ddd6fe] relative overflow-hidden mb-4"
     >
       <!-- Top accent stripe -->
-      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-500 via-pink-400 to-amber-400 rounded-t-3xl" />
+      <div class="absolute top-0 start-0 end-0 h-1.5 bg-gradient-to-r from-violet-500 via-pink-400 to-amber-400 rounded-t-3xl" />
 
       <div class="flex items-center gap-3 mb-6 mt-1">
         <div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
@@ -501,7 +501,7 @@ const scrollToForm = () => {
       <form class="space-y-4" @submit.prevent="handleOrderSubmit">
         <!-- Name -->
         <div>
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
+          <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
             {{ storefrontContent.checkout.form.fullName.label }}
           </label>
           <input
@@ -514,7 +514,7 @@ const scrollToForm = () => {
 
         <!-- Phone -->
         <div>
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
+          <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
             {{ storefrontContent.checkout.form.phone.label }}
           </label>
           <input
@@ -528,7 +528,7 @@ const scrollToForm = () => {
         <!-- Wilaya + Commune -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
+            <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
               {{ storefrontContent.checkout.form.wilaya.label }}
             </label>
             <WilayaField
@@ -538,7 +538,7 @@ const scrollToForm = () => {
                       />
           </div>
           <div>
-            <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
+            <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
               {{ storefrontContent.checkout.form.commune.label }}
             </label>
             <CommuneField
@@ -553,7 +553,7 @@ const scrollToForm = () => {
 
         <!-- Address -->
         <div v-if="!hideOptionalAddress">
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
+          <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
             {{ storefrontContent.checkout.form.address.label }}
           </label>
           <input
@@ -732,7 +732,7 @@ const scrollToForm = () => {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 bg-stone-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-stone-700/50"
+        class="fixed bottom-4 end-4 z-50 bg-stone-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-stone-700/50"
       >
         <div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
           <Icon name="lucide:check" class="w-4 h-4" />

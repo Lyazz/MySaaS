@@ -1,9 +1,9 @@
 <template>
   <div class="bg-[#f8faf9] min-h-screen py-10 font-sans text-stone-600 selection:bg-brand-100 selection:text-brand-900">
     <!-- Decorative Background -->
-    <div class="fixed top-0 left-0 w-full h-full pointer-events-none overflow-hidden z-0">
-         <div class="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-gradient-to-br from-orange-100/40 to-transparent rounded-full blur-3xl"></div>
-         <div class="absolute top-[20%] right-[10%] w-[30%] h-[30%] bg-gradient-to-bl from-green-100/40 to-transparent rounded-full blur-3xl"></div>
+    <div class="fixed top-0 start-0 w-full h-full pointer-events-none overflow-hidden z-0">
+         <div class="absolute -top-[10%] -start-[10%] w-[50%] h-[50%] bg-gradient-to-br from-orange-100/40 to-transparent rounded-full blur-3xl"></div>
+         <div class="absolute top-[20%] end-[10%] w-[30%] h-[30%] bg-gradient-to-bl from-green-100/40 to-transparent rounded-full blur-3xl"></div>
     </div>
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -37,7 +37,7 @@
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                 <input
                   v-model="form.fullName"
                   type="text"
@@ -46,7 +46,7 @@
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ms-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                 <input
                   v-model="form.phone"
                   type="tel"
@@ -55,7 +55,7 @@
                 >
               </div>
               <div class="col-span-2 md:col-span-1 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <WilayaField
                         v-model="form.wilaya"
                         input-class="w-full h-14 rounded-2xl border-2 border-stone-100 bg-stone-50 px-5 text-stone-900 focus:border-stone-900 focus:ring-0 transition-all duration-300 outline-none appearance-none cursor-pointer font-medium"
@@ -63,7 +63,7 @@
                       />
               </div>
 	              <div class="col-span-2 md:col-span-1 space-y-3">
-	                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
+	                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
 	                <CommuneField
 	                  v-model="form.commune"
 	                  :wilaya-code="form.wilaya"
@@ -73,7 +73,7 @@
 	                />
 	              </div>
               <div v-if="!hideOptionalAddress" class="col-span-2 space-y-3">
-                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
+                <label class="block text-xs font-bold uppercase tracking-widest text-stone-500 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
                   type="text"
@@ -133,7 +133,7 @@
                   
                   <!-- Price & Radio -->
                   <div class="flex items-center gap-4 flex-shrink-0">
-                    <div class="text-right">
+                    <div class="text-end">
                       <div class="font-bold text-stone-900 text-base">
                         {{
                           option.price === 'FREE'
@@ -195,13 +195,13 @@
             </div>
 
             <!-- Cart Items -->
-            <div class="space-y-4 mb-8 max-h-80 overflow-y-auto pr-2 text-sm">
+            <div class="space-y-4 mb-8 max-h-80 overflow-y-auto pe-2 text-sm">
               <div
                 v-for="item in cartStore.items"
                 :key="item.productId"
                 class="flex justify-between items-start pb-4 border-b border-dashed border-stone-200 last:border-0"
               >
-                <div class="flex-1 pr-4">
+                <div class="flex-1 pe-4">
                   <h4 class="font-bold text-stone-900 uppercase">
                     {{ item.title }}
                   </h4>

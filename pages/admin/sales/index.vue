@@ -103,7 +103,7 @@
                   <Icon v-if="sortBy === 'updatedAt'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.pages.sales.index.table.actions') }}
               </th>
             </tr>
@@ -170,7 +170,7 @@
               <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 {{ formatDate(sale.updatedAt) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
+              <td class="ui-td whitespace-nowrap text-end">
                 <div class="flex items-center justify-end gap-2">
                   <button
                     v-if="salesInvoiceEnabled"
@@ -259,7 +259,7 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-s-md text-sm font-medium disabled:opacity-50"
                 style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
@@ -277,7 +277,7 @@
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-e-md text-sm font-medium disabled:opacity-50"
                 style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >

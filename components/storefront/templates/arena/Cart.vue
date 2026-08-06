@@ -22,7 +22,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
           <h1 class="text-4xl md:text-6xl font-black uppercase tracking-[-0.04em] text-white leading-[0.92]">
             {{ storefrontContent.cart.title }}
           </h1>
-          <div v-if="cartStore.hasItems" class="border-l-2 border-brand-500 pl-4">
+          <div v-if="cartStore.hasItems" class="border-s-2 border-brand-500 ps-4">
             <div class="text-2xl font-black text-white">{{ String(cartStore.itemCount).padStart(2, '0') }}</div>
             
           </div>
@@ -33,10 +33,10 @@ const { currencyCode, format: formatCurrency } = useCurrency()
     <div class="max-w-[1400px] mx-auto px-5 lg:px-10 py-12">
       <!-- Empty state -->
       <div v-if="!cartStore.hasItems" class="relative bg-[#0b0f14] border border-white/[0.06] py-20 px-6 text-center">
-        <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-        <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-        <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-        <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+        <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+        <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+        <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+        <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
         <div class="mx-auto h-20 w-20 flex items-center justify-center mb-8 border border-brand-500/40 bg-brand-500/5">
           <Icon name="lucide:shopping-cart" class="h-9 w-9 text-brand-500" />
@@ -134,10 +134,10 @@ const { currencyCode, format: formatCurrency } = useCurrency()
         <!-- Summary -->
         <aside aria-labelledby="summary-heading" class="mt-10 lg:mt-0 lg:col-span-5 lg:sticky lg:top-24">
           <div class="relative bg-[#0b0f14] border border-white/[0.06] p-6 sm:p-8">
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
             
             <h2 id="summary-heading" class="text-2xl font-black uppercase tracking-[-0.02em] text-white">

@@ -26,20 +26,20 @@
           class="h-full w-full object-contain"
         >
 
-        <div v-if="image.isMain" class="absolute left-2 top-2">
+        <div v-if="image.isMain" class="absolute start-2 top-2">
           <span class="inline-flex items-center rounded-md [background:var(--brand)] px-2 py-1 text-xs font-medium text-white shadow-sm">
-            <Icon name="lucide:star" class="mr-1 h-3 w-3" />
+            <Icon name="lucide:star" class="me-1 h-3 w-3" />
             {{ t('admin.imageUploader.mainBadge') }}
           </span>
         </div>
 
-        <div class="absolute bottom-2 left-2">
+        <div class="absolute bottom-2 start-2">
           <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs font-semibold text-white">
             {{ index + 1 }}
           </span>
         </div>
 
-        <div class="absolute right-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+        <div class="absolute end-2 top-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
           <button
             v-if="!image.isMain"
             type="button"

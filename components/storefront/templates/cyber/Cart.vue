@@ -71,7 +71,7 @@
                   </div>
                 </div>
 
-                <div class="ml-6 rtl:ml-0 rtl:mr-6 flex flex-1 flex-col relative z-10">
+                <div class="ms-6 flex flex-1 flex-col relative z-10">
                   <div class="flex justify-between">
                     <div class="min-w-0 flex-1">
                       <h3 class="text-lg font-medium text-white hover:text-pink-400 transition-colors">
@@ -83,7 +83,7 @@
                         {{ storefrontContent.cart.item.variant }}: {{ item.variantId.slice(0,8) }}
                       </p>
                     </div>
-                    <div class="ml-4 rtl:ml-0 rtl:mr-4 flow-root flex-shrink-0">
+                    <div class="ms-4 flow-root flex-shrink-0">
                       <button
                         type="button"
                         class="-m-2.5 flex items-center justify-center bg-transparent p-2.5 text-purple-400/60 hover:text-red-400 transition-colors"

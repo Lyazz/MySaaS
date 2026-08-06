@@ -61,7 +61,7 @@
                   </div>
                 </div>
 
-                <div class="ml-6 rtl:ml-0 rtl:mr-6 flex flex-1 flex-col">
+                <div class="ms-6 flex flex-1 flex-col">
                   <div class="flex justify-between">
                     <div class="min-w-0 flex-1">
                       <h3 class="text-lg font-medium text-gray-900 hover:text-brand transition-colors">
@@ -74,7 +74,7 @@
                         <template v-else>{{ storefrontContent.cart.item.standardItem }}</template>
                       </p>
                     </div>
-                    <div class="ml-4 rtl:ml-0 rtl:mr-4 flow-root flex-shrink-0">
+                    <div class="ms-4 flow-root flex-shrink-0">
                       <button
                         type="button"
                         class="-m-2.5 flex items-center justify-center bg-transparent p-2.5 text-gray-400 hover:text-red-500 transition-colors"

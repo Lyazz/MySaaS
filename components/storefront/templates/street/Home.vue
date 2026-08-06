@@ -135,7 +135,7 @@ const {
       </div>
 
       <!-- Navigation Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-4">
+      <div v-if="hasMultipleSlides" class="absolute bottom-10 start-0 end-0 z-20 flex justify-center space-x-4 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -147,13 +147,13 @@ const {
       
       <!-- Arrows -->
       <button 
-        v-if="hasMultipleSlides" class="absolute left-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 border-2 border-white text-white hover:bg-brand hover:border-brand hover:text-black transition-all hidden md:flex items-center justify-center"
+        v-if="hasMultipleSlides" class="absolute start-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 border-2 border-white text-white hover:bg-brand hover:border-brand hover:text-black transition-all hidden md:flex items-center justify-center"
         @click="prevSlide"
       >
          <Icon name="lucide:arrow-left" class="w-6 h-6" />
       </button>
       <button 
-        v-if="hasMultipleSlides" class="absolute right-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 border-2 border-white text-white hover:bg-brand hover:border-brand hover:text-black transition-all hidden md:flex items-center justify-center"
+        v-if="hasMultipleSlides" class="absolute end-8 top-1/2 -translate-y-1/2 z-20 w-12 h-12 bg-white/10 border-2 border-white text-white hover:bg-brand hover:border-brand hover:text-black transition-all hidden md:flex items-center justify-center"
         @click="nextSlide"
       >
          <Icon name="lucide:arrow-right" class="w-6 h-6" />

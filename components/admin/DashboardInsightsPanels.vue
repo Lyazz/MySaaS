@@ -24,7 +24,7 @@
           <p class="text-[12px] font-medium truncate" style="color: var(--text-primary)">
             {{ product.title }}
           </p>
-          <div class="text-right shrink-0">
+          <div class="text-end shrink-0">
             <p class="text-[11px] font-semibold font-mono-nums" style="color: var(--text-primary)">
               {{ formatMoney(product.revenue) }}
             </p>
@@ -60,7 +60,7 @@
           <p class="text-[12px] font-medium truncate" style="color: var(--text-primary)">
             {{ category.title }}
           </p>
-          <div class="text-right shrink-0">
+          <div class="text-end shrink-0">
             <p class="text-[11px] font-semibold font-mono-nums" style="color: var(--text-primary)">
               {{ formatMoney(category.revenue) }}
             </p>
@@ -96,7 +96,7 @@
           <p class="text-[12px] font-medium truncate" style="color: var(--text-primary)">
             {{ product.title }}
           </p>
-          <div class="text-right shrink-0">
+          <div class="text-end shrink-0">
             <p class="text-[11px] font-semibold font-mono-nums" style="color: var(--accent)">
               {{ product.stock }}
             </p>

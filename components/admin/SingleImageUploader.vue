@@ -27,7 +27,7 @@
         >
         <button
           type="button"
-          class="absolute right-2 top-2 rounded-full p-1.5"
+          class="absolute end-2 top-2 rounded-full p-1.5"
           style="background: var(--surface-3); border: 1px solid var(--surface-border)"
           @click="removeImage"
         >

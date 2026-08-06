@@ -101,7 +101,7 @@ const {
       @touchend.passive="resumeSlideAutoplay"
     >
       <!-- Organic Background Blob -->
-      <div class="absolute top-0 right-0 w-[80%] h-[120%] bg-brand-50/50 rounded-bl-[10rem] -z-10 transform translate-x-20 -translate-y-20 pointer-events-none" />
+      <div class="absolute top-0 end-0 w-[80%] h-[120%] bg-brand-50/50 rounded-es-[10rem] -z-10 transform translate-x-20 -translate-y-20 pointer-events-none" />
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20 md:pt-20 md:pb-32">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
@@ -123,7 +123,7 @@ const {
                     </NuxtLink>
                     
                     <!-- Navigation Dots (Inline) -->
-                    <div v-if="hasMultipleSlides" class="flex space-x-2 ml-4">
+                    <div v-if="hasMultipleSlides" class="flex space-x-2 ms-4 rtl:space-x-reverse">
                         <button 
                         v-for="(slide, index) in heroSlides" 
                         :key="index" 
@@ -149,7 +149,7 @@ const {
                      >
                         <div :key="currentSlide" class="w-full h-full">
                            <!-- Organic Image Shape -->
-                           <div class="w-full h-full rounded-[3rem] rounded-tr-[8rem] overflow-hidden shadow-2xl relative rotate-2 hover:rotate-0 transition-transform duration-500">
+                           <div class="w-full h-full rounded-[3rem] rounded-se-[8rem] overflow-hidden shadow-2xl relative rotate-2 hover:rotate-0 transition-transform duration-500">
                                 <img
                                 :src="heroSlides[currentSlide].imageUrl"
                                 class="w-full h-full object-cover scale-110"
@@ -219,7 +219,7 @@ const {
                         <div v-else class="w-full h-full bg-stone-200" />
                         
                         <!-- Tape Decoration -->
-                        <div class="absolute top-2 left-1/2 transform -translate-x-1/2 w-24 h-6 bg-white/30 rotate-2 backdrop-blur-sm" />
+                        <div class="absolute top-2 start-1/2 transform -translate-x-1/2 w-24 h-6 bg-white/30 rotate-2 backdrop-blur-sm" />
                     </div>
                     
                     <div class="p-6 text-center">
@@ -306,7 +306,7 @@ const {
     <!-- Best Sellers (with different background) -->
     <section v-if="sections.bestSellers.enabled" class="py-16 md:py-24 bg-white relative">
        <!-- Decoration -->
-       <div class="absolute right-0 top-1/4 w-64 h-64 bg-yellow-50 rounded-full blur-3xl opacity-50 -z-0 pointer-events-none" />
+       <div class="absolute end-0 top-1/4 w-64 h-64 bg-yellow-50 rounded-full blur-3xl opacity-50 -z-0 pointer-events-none" />
 
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         <div class="flex items-center justify-between mb-8 md:mb-10">

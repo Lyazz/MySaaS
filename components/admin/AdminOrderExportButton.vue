@@ -31,13 +31,13 @@
     <!-- Dropdown -->
     <div
       v-if="dropdownOpen"
-      class="absolute top-full right-0 mt-1 z-20 w-48 rounded-lg shadow-lg overflow-hidden"
+      class="absolute top-full end-0 mt-1 z-20 w-48 rounded-lg shadow-lg overflow-hidden"
       style="background: var(--surface-1); border: 1px solid var(--surface-border)"
     >
       <button
         v-for="fmt in formats"
         :key="fmt.value"
-        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-left"
+        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-start"
         style="color: var(--text-primary)"
         @click="exportAs(fmt.value)"
       >
@@ -48,7 +48,7 @@
       <div class="h-px mx-3 my-1" style="background: var(--surface-border)" />
 
       <button
-        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-left"
+        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-start"
         style="color: var(--brand)"
         @click="openModal"
       >

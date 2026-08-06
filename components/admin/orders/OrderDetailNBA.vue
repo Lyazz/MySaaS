@@ -53,7 +53,7 @@
         leave-to-class="opacity-0 scale-95"
       >
         <MenuItems
-          :class="['absolute right-0 w-60 rounded-xl shadow-lg ring-1 focus:outline-none z-30 overflow-hidden', menuDirection]"
+          :class="['absolute end-0 w-60 rounded-xl shadow-lg ring-1 focus:outline-none z-30 overflow-hidden', menuDirection]"
           style="background: var(--surface-1); border: 1px solid var(--surface-border); --tw-ring-color: var(--surface-border)"
         >
           <div
@@ -63,7 +63,7 @@
           >
             <Icon
               name="lucide:lock"
-              class="w-3 h-3 inline-block mr-1 -mt-0.5"
+              class="w-3 h-3 inline-block me-1 -mt-0.5"
             />
             {{ model.lockedNote }}
           </div>
@@ -79,7 +79,7 @@
                 :to="action.href && !action.href.startsWith('tel:') && !action.href.startsWith('http') ? action.href : undefined"
                 :href="action.href && (action.href.startsWith('tel:') || action.href.startsWith('http')) ? action.href : undefined"
                 :type="!action.href ? 'button' : undefined"
-                class="w-full flex items-center gap-2 px-3 py-2 text-sm text-left transition-colors"
+                class="w-full flex items-center gap-2 px-3 py-2 text-sm text-start transition-colors"
                 :class="[
                   active ? 'bg-[var(--surface-2)]' : '',
                   disabled ? 'opacity-50 cursor-not-allowed' : '',

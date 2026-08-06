@@ -15,85 +15,85 @@
           <tr>
             <th
               scope="col"
-              class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6" style="color: var(--text-primary)"
+              class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold sm:ps-6" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.variant') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.price') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.cost') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.promotion', 'Promotion') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.track') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.onHand') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.reserved') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.safety') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.available') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.sku') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.barcode') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.active') }}
             </th>
             <th
               scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
+              class="px-3 py-3.5 text-start text-sm font-semibold" style="color: var(--text-primary)"
             >
               {{ t('admin.variantsTable.columns.images') }}
             </th>
             <th
               scope="col"
-              class="relative py-3.5 pl-3 pr-4 sm:pr-6"
+              class="relative py-3.5 ps-3 pe-4 sm:pe-6"
             >
               <span class="sr-only">{{ t('admin.common.actions') }}</span>
             </th>
@@ -105,7 +105,7 @@
             :key="variant.id"
             class="ui-tr"
           >
-            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6" style="color: var(--text-primary)">
+            <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium sm:ps-6" style="color: var(--text-primary)">
               {{ getVariantTitle(variant) }}
             </td>
             <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
@@ -289,7 +289,7 @@
                 {{ t('admin.variantsTable.actions.manageImages', { count: variant.images?.length || 0 }) }}
               </button>
             </td>
-            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+            <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
               <button
                 type="button"
                 class="ui-table-action"
@@ -348,13 +348,13 @@
           <table class="ui-table">
             <thead class="ui-thead">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.date') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.type') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaStock') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaReserved') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaSafety') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.after') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.by') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.date') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.type') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaStock') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaReserved') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaSafety') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.after') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.by') }}</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">

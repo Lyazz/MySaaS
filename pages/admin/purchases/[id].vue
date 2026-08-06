@@ -73,7 +73,7 @@
     >
       <Icon
         name="lucide:alert-circle"
-        class="w-5 h-5 mr-2 flex-shrink-0"
+        class="w-5 h-5 me-2 flex-shrink-0"
       />
       {{ errorMessage }}
     </div>
@@ -230,7 +230,7 @@
             <span class="font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.purchases.detail.items.table.costMode.label') }}</span>
             <select
               v-model="costMode"
-              class="ui-input text-sm py-1 pl-2 pr-8"
+              class="ui-input text-sm py-1 ps-2 pe-8"
             >
               <option value="replace">{{ t('admin.pages.purchases.detail.items.table.costMode.replace') }}</option>
               <option value="weighted">{{ t('admin.pages.purchases.detail.items.table.costMode.weighted') }}</option>
@@ -240,7 +240,7 @@
             <span class="font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.label') }}</span>
             <select
               v-model="salePriceMode"
-              class="ui-input text-sm py-1 pl-2 pr-8"
+              class="ui-input text-sm py-1 ps-2 pe-8"
             >
               <option value="replace">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.replace') }}</option>
               <option value="weighted">{{ t('admin.pages.purchases.detail.items.table.salePriceMode.weighted') }}</option>
@@ -251,22 +251,22 @@
         <table class="ui-table border-t-0">
           <thead class="ui-thead">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[20%]" style="color: var(--text-tertiary)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider w-[20%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.product') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.ordered') }} / {{ t('admin.pages.purchases.detail.items.table.received') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.unitCost') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.salePrice') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider w-[20%]" style="color: var(--text-tertiary)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider w-[20%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.receiveNow') }}
               </th>
-              <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
+              <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wider w-[15%]" style="color: var(--text-tertiary)">
                 {{ t('admin.pages.purchases.detail.items.table.total') }}
               </th>
             </tr>
@@ -332,7 +332,7 @@
                     v-if="item.quantityReceived === 0"
                     v-model="editingItems[item.id].unitCost"
                     type="text"
-                    class="ui-input w-24 px-2 py-1 text-sm text-right"
+                    class="ui-input w-24 px-2 py-1 text-sm text-end"
                     placeholder="0.00"
                     @change="updateItem(item)"
                   >
@@ -363,7 +363,7 @@
                     v-if="item.quantityReceived === 0"
                     v-model="editingItems[item.id].salePrice"
                     type="text"
-                    class="ui-input w-24 px-2 py-1 text-sm text-right"
+                    class="ui-input w-24 px-2 py-1 text-sm text-end"
                     placeholder="—"
                     @change="updateItem(item)"
                   >
@@ -405,7 +405,7 @@
               </td>
               
               <!-- Total & Row Actions -->
-              <td class="px-4 py-3 align-top text-right">
+              <td class="px-4 py-3 align-top text-end">
                 <div class="flex flex-col items-end gap-2">
                   <span class="text-sm font-semibold" style="color: var(--text-primary)">
                     {{ formatCurrency(Number(editingItems[item.id]?.unitCost || 0) * (editingItems[item.id]?.quantityOrdered || item.quantityOrdered)) }}
@@ -425,7 +425,7 @@
           </tbody>
           <tfoot class="font-semibold" style="background: var(--surface-2); color: var(--text-primary); border-top: 1px solid var(--surface-border)">
             <tr>
-              <td colspan="5" class="px-4 py-4 text-right">
+              <td colspan="5" class="px-4 py-4 text-end">
                 {{ t('admin.pages.purchases.detail.items.table.totalOrderValue') }}
               </td>
               <td class="px-4 py-4 text-right text-base [color:var(--brand)]">

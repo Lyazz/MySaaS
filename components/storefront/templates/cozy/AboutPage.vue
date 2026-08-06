@@ -16,7 +16,7 @@ const { t } = useI18n({ useScope: 'global' })
         </div>
 
         <div class="bg-white p-8 md:p-16 rounded-[4rem] shadow-soft mb-16 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-200 via-brand-100 to-brand-200"></div>
+            <div class="absolute top-0 start-0 w-full h-2 bg-gradient-to-r from-brand-200 via-brand-100 to-brand-200"></div>
             
             <p class="font-medium text-lg md:text-xl text-slate-600 leading-loose mb-8">
                 {{ storeSettings?.description || t('storefront.templates.cozy.about.descriptionFallback') }}

@@ -16,7 +16,7 @@
       <span
         v-if="unreadCount > 0"
         :key="badgeAnimationKey"
-        class="notification-badge absolute -right-1 -top-1 flex min-w-[17px] items-center justify-center rounded-full px-1 text-[9px] font-extrabold leading-[17px]"
+        class="notification-badge absolute -end-1 -top-1 flex min-w-[17px] items-center justify-center rounded-full px-1 text-[9px] font-extrabold leading-[17px]"
         style="background: var(--brand); color: var(--brand-contrast); border: 1px solid var(--admin-topbar-bg)"
       >
         {{ unreadCount > 9 ? '9+' : unreadCount }}
@@ -36,7 +36,7 @@
           />
 
           <div
-            class="notification-panel absolute left-4 right-4 top-[60px] overflow-hidden rounded-[14px] sm:left-auto sm:right-4 sm:w-[380px]"
+            class="notification-panel absolute start-4 end-4 top-[60px] overflow-hidden rounded-[14px] sm:start-auto sm:end-4 sm:w-[380px]"
             style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: 0 8px 28px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.08)"
             role="dialog"
             aria-modal="true"
@@ -186,7 +186,7 @@
                   <button
                     v-for="item in groupedItems.today"
                     :key="item.id"
-                    class="notification-row flex w-full items-start gap-3 px-4 py-[11px] text-left transition-all duration-150"
+                    class="notification-row flex w-full items-start gap-3 px-4 py-[11px] text-start transition-all duration-150"
                     :style="item.readAt ? '' : 'background: rgba(var(--brand-rgb) / 0.04)'"
                     @click="openNotification(item)"
                   >
@@ -211,7 +211,7 @@
                           {{ item.title }}
                         </span>
                         <span
-                          class="ml-auto shrink-0 text-[10px]"
+                          class="ms-auto shrink-0 text-[10px]"
                           style="color: var(--text-tertiary)"
                         >
                           {{ formatAdminNotificationRelative(item.createdAt, locale) }}
@@ -250,7 +250,7 @@
                   <button
                     v-for="item in groupedItems.earlier"
                     :key="item.id"
-                    class="notification-row flex w-full items-start gap-3 px-4 py-[11px] text-left transition-all duration-150"
+                    class="notification-row flex w-full items-start gap-3 px-4 py-[11px] text-start transition-all duration-150"
                     :style="item.readAt ? '' : 'background: rgba(var(--brand-rgb) / 0.04)'"
                     @click="openNotification(item)"
                   >
@@ -275,7 +275,7 @@
                           {{ item.title }}
                         </span>
                         <span
-                          class="ml-auto shrink-0 text-[10px]"
+                          class="ms-auto shrink-0 text-[10px]"
                           style="color: var(--text-tertiary)"
                         >
                           {{ formatAdminNotificationRelative(item.createdAt, locale) }}

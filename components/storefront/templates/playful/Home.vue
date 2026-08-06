@@ -195,7 +195,7 @@ const categories = computed(() => {
               </div>
 
               <!-- Count badge at bottom -->
-              <div class="absolute bottom-3 right-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full z-10">
+              <div class="absolute bottom-3 end-3 bg-white/90 backdrop-blur px-2.5 py-1 rounded-full z-10">
                 <span class="text-[10px] font-black text-violet-600">{{ storefrontContent.common.productsCount(cat.itemCount) }}</span>
               </div>
             </div>

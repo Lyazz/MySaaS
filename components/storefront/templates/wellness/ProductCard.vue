@@ -138,7 +138,7 @@ async function handleAddToCart() {
       <div v-if="viewMode !== 'list'" class="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/5 transition-colors duration-500 pointer-events-none" />
 
       <!-- Badges (Top Left - Minimal Pill) -->
-      <div class="absolute top-4 left-4 flex flex-col gap-2 items-start z-10">
+      <div class="absolute top-4 start-4 flex flex-col gap-2 items-start z-10">
         <span
           v-if="isNew"
           class="px-3 py-1 bg-white/90 backdrop-blur text-emerald-800 text-xs font-medium uppercase tracking-wider rounded-full shadow-sm"
@@ -270,7 +270,7 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-6 right-6 z-50 bg-stone-900 text-stone-50 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-stone-800"
+        class="fixed bottom-6 end-6 z-50 bg-stone-900 text-stone-50 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-stone-800"
       >
         <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
           <Icon name="lucide:check" class="w-4 h-4" />

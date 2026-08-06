@@ -26,7 +26,7 @@ const displayText = computed(() => text.value ?? t('storefront.clearance.bannerF
 
         <button
           type="button"
-          class="absolute right-4 p-1 rounded-full hover:bg-black/10 transition-colors z-50 cursor-pointer"
+          class="absolute end-4 p-1 rounded-full hover:bg-black/10 transition-colors z-50 cursor-pointer"
           :aria-label="t('storefront.announcement.dismissAria')"
           @click="dismiss"
         >

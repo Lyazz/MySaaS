@@ -58,7 +58,7 @@ const handleUpdate = (val: any) => {
     <div class="relative w-full">
       <div class="relative w-full">
         <ComboboxInput
-          :class="[inputClass, 'w-full pr-10 truncate rtl:pr-4 rtl:pl-10']"
+          :class="[inputClass, 'w-full pe-10 truncate rtl:pr-4 rtl:pl-10']"
           :displayValue="(option: any) => option?.label || ''"
           :placeholder="placeholder"
           @change="query = $event.target.value"
@@ -67,7 +67,7 @@ const handleUpdate = (val: any) => {
         />
         <ComboboxButton
           ref="btnRef"
-          class="absolute inset-y-0 right-0 rtl:right-auto rtl:left-0 flex items-center pr-4 rtl:pr-0 rtl:pl-4"
+          class="absolute inset-y-0 end-0 rtl:right-auto rtl:left-0 flex items-center pe-4"
         >
           <Icon name="lucide:chevron-down" class="h-4 w-4 text-slate-500" aria-hidden="true" />
         </ComboboxButton>

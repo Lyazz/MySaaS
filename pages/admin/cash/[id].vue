@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-6xl mx-auto space-y-6">
     <nav class="flex" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink to="/admin/cash" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">
             {{ t('admin.pages.cash.title') }}
@@ -10,7 +10,7 @@
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ cashbox?.name ?? cashboxId.substring(0, 8) }}</span>
+            <span class="ms-1" style="color: var(--text-tertiary)">{{ cashbox?.name ?? cashboxId.substring(0, 8) }}</span>
           </div>
         </li>
       </ol>
@@ -94,16 +94,16 @@
         <table class="min-w-full divide-y" style="border-color: var(--surface-border)">
           <thead style="background: var(--surface-2)">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                 {{ t('admin.pages.cash.transactions.table.date') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                 {{ t('admin.pages.cash.transactions.table.type') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                 {{ t('admin.pages.cash.transactions.table.method') }}
               </th>
-              <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                 {{ t('admin.pages.cash.transactions.table.amount') }}
               </th>
             </tr>
@@ -127,7 +127,7 @@
               <td class="px-4 py-3 text-sm" style="color: var(--text-secondary)">
                 {{ methodLabel(tx.method) }}
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-semibold" :class="tx.direction === 'IN' ? 'text-emerald-400' : 'text-rose-400'">
+              <td class="px-4 py-3 whitespace-nowrap text-end text-sm font-semibold" :class="tx.direction === 'IN' ? 'text-emerald-400' : 'text-rose-400'">
                 {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
               </td>
             </tr>

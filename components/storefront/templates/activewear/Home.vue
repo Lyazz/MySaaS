@@ -150,7 +150,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Arrows -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-4">
+      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 end-8 z-20 gap-4">
         <button
           class="w-12 h-12 skew-x-[-15deg] border-2 border-white/30 flex items-center justify-center text-white hover:bg-brand-500 hover:text-black hover:border-brand-500 transition-all backdrop-blur-sm"
           @click="prevSlide"
@@ -166,7 +166,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 left-6 md:left-8 z-20 flex space-x-3">
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 start-6 md:start-8 z-20 flex space-x-3 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -243,7 +243,7 @@ const displayedProducts = computed(() => {
             </div>
                 
             <!-- Action Icon -->
-            <div class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 skew-x-[8deg] bg-brand-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+            <div class="absolute top-4 end-4 md:top-6 md:end-6 w-10 h-10 skew-x-[8deg] bg-brand-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
               <Icon name="lucide:arrow-right" class="w-5 h-5 text-black font-bold -skew-x-[8deg]" />
             </div>
           </NuxtLink>

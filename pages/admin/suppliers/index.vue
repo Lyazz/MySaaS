@@ -61,7 +61,7 @@
           to="/admin/suppliers/create"
           class="ui-btn ui-btn--primary ui-btn--md"
         >
-          <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
+          <Icon name="lucide:plus" class="w-5 h-5 me-2" />
           {{ t('admin.pages.suppliers.index.empty.newSupplier') }}
         </NuxtLink>
       </div>
@@ -94,7 +94,7 @@
                   <Icon v-if="sortBy === 'address'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="w-3 h-3 [color:var(--brand)]" />
                 </div>
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.common.actions') }}
               </th>
             </tr>
@@ -116,7 +116,7 @@
                   <div class="flex-shrink-0 h-10 w-10 [background:rgba(var(--brand-rgb)/0.12)] rounded-full flex items-center justify-center [color:var(--brand)] font-bold uppercase">
                      {{ supplier.name.charAt(0) }}
                   </div>
-                  <div class="ml-4">
+                  <div class="ms-4">
                     <NuxtLink
                       :to="`/admin/suppliers/${supplier.id}`"
                       class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)"
@@ -160,8 +160,8 @@
                  </a>
                  <span v-else style="color: var(--text-muted)">—</span>
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-1">
+              <td class="ui-td whitespace-nowrap text-end">
+                <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
                   <NuxtLink
                     :to="`/admin/suppliers/${supplier.id}`"
                     class="ui-table-action"
@@ -218,7 +218,7 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-s-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -238,7 +238,7 @@
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-e-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}

@@ -21,7 +21,7 @@ const submitForm = () => {
             {{ t('storefront.templates.street.contact.titlePrefix') }}<br>{{ t('storefront.templates.street.contact.titleAccent') }}
         </h1>
         
-        <div class="space-y-12 font-mono text-lg uppercase pl-4 border-l-4 border-brand">
+        <div class="space-y-12 font-mono text-lg uppercase ps-4 border-s-4 border-brand">
             <div>
                 <h3 class="font-bold mb-2 text-gray-400 text-xs">{{ t('storefront.templates.street.contact.sections.hqLocation') }}</h3>
                 <p class="text-2xl font-bold">123 Street Ave,<br>Concrete Jungle, NY</p>

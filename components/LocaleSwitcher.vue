@@ -40,7 +40,7 @@ const switchLocale = async (code: string) => {
 </script>
 
 <template>
-  <Menu as="div" class="relative inline-block text-left" data-testid="locale-switcher">
+  <Menu as="div" class="relative inline-block text-start" data-testid="locale-switcher">
     <div>
       <MenuButton
         data-testid="locale-switch-toggle"
@@ -67,7 +67,7 @@ const switchLocale = async (code: string) => {
       leave-to-class="transform opacity-0 scale-95 translate-y-[-4px]"
     >
       <MenuItems
-        class="absolute right-0 z-50 mt-2 w-40 origin-top-right overflow-hidden rounded-xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 ring-1 ring-black/5 focus:outline-none"
+        class="absolute end-0 z-50 mt-2 w-40 origin-top-right overflow-hidden rounded-xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 ring-1 ring-black/5 focus:outline-none"
       >
         <div class="p-1.5">
           <MenuItem
@@ -81,7 +81,7 @@ const switchLocale = async (code: string) => {
               :class="[
                 active ? 'bg-slate-100/80 text-lime-700' : 'text-slate-600',
                 i18n.locale.value === locale.code ? 'font-semibold bg-lime-50/50 text-lime-700' : '',
-                'group flex w-full items-center rounded-md px-3 py-2 text-sm text-left transition-all duration-150'
+                'group flex w-full items-center rounded-md px-3 py-2 text-sm text-start transition-all duration-150'
               ]"
               @click="switchLocale(locale.code)"
             >
@@ -89,7 +89,7 @@ const switchLocale = async (code: string) => {
               <Icon 
                 v-if="i18n.locale.value === locale.code"
                 name="lucide:check" 
-                class="ml-2 h-4 w-4 text-lime-600" 
+                class="ms-2 h-4 w-4 text-lime-600" 
               />
             </button>
           </MenuItem>

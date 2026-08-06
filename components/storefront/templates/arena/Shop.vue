@@ -219,10 +219,10 @@ const closeQuickView = () => {
         <aside class="hidden lg:block w-72 flex-shrink-0">
           <div class="relative bg-[#0b0f14] border border-white/[0.06] sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto custom-scrollbar">
             <!-- Corner brackets -->
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
             <div class="p-6">
               <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.06]">
@@ -303,7 +303,7 @@ const closeQuickView = () => {
                 :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder"
                 class="w-full bg-[#0b0f14] border border-white/10 text-white text-sm pl-4 pr-10 py-3 outline-none focus:border-brand-500 placeholder:text-slate-600 uppercase tracking-wider"
               />
-              <Icon name="lucide:search" class="w-4 h-4 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2" />
+              <Icon name="lucide:search" class="w-4 h-4 text-slate-500 absolute end-3 top-1/2 -translate-y-1/2" />
             </div>
 
             <div class="hidden sm:flex items-center gap-2">
@@ -317,7 +317,7 @@ const closeQuickView = () => {
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <Icon name="lucide:chevron-down" class="w-3.5 h-3.5 text-slate-500 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Icon name="lucide:chevron-down" class="w-3.5 h-3.5 text-slate-500 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
 
@@ -346,10 +346,10 @@ const closeQuickView = () => {
             v-if="filteredProducts.length === 0"
             class="relative bg-[#0b0f14] border border-white/[0.06] p-16 text-center"
           >
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
             <Icon name="lucide:package-x" class="w-12 h-12 text-brand-500 mx-auto mb-5" />
             <h3 class="text-xl font-black uppercase tracking-[-0.01em] text-white">{{ storefrontContent.shop.results.noResults }}</h3>
             <p class="text-sm text-slate-500 mt-2">{{ storefrontContent.shop.results.noResultsHint }}</p>
@@ -404,12 +404,12 @@ const closeQuickView = () => {
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closeQuickView" />
         <div class="relative bg-[#0b0f14] border border-white/[0.08] max-w-4xl w-full max-h-[90vh] overflow-hidden flex flex-col md:flex-row z-10">
-          <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-          <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-          <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-          <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+          <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+          <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+          <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+          <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
-          <button @click="closeQuickView" class="absolute top-4 right-4 z-20 h-9 w-9 flex items-center justify-center bg-black/70 border border-white/15 text-slate-400 hover:border-brand-500 hover:text-brand-500 transition-colors">
+          <button @click="closeQuickView" class="absolute top-4 end-4 z-20 h-9 w-9 flex items-center justify-center bg-black/70 border border-white/15 text-slate-400 hover:border-brand-500 hover:text-brand-500 transition-colors">
             <Icon name="lucide:x" class="w-4 h-4" />
           </button>
 

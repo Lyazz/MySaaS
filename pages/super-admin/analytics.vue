@@ -84,7 +84,7 @@
                 {{ item.tenantSlug }}
               </p>
             </div>
-            <div class="text-right">
+            <div class="text-end">
               <p class="text-2xl font-bold text-lime-600">
                 {{ formatMoney(item.revenue) }}
               </p>
@@ -112,13 +112,13 @@
                 <th class="ui-th">
                   Tenant
                 </th>
-                <th class="ui-th text-right">
+                <th class="ui-th text-end">
                   Revenue
                 </th>
-                <th class="ui-th text-right">
+                <th class="ui-th text-end">
                   Orders
                 </th>
-                <th class="ui-th text-right">
+                <th class="ui-th text-end">
                   Products
                 </th>
               </tr>
@@ -144,7 +144,7 @@
                   >🥉</span>
                   <span
                     v-else
-                    class="text-gray-500 ml-2"
+                    class="text-gray-500 ms-2"
                   >{{ index + 1 }}</span>
                 </td>
                 <td class="px-4 py-3">
@@ -155,13 +155,13 @@
                     {{ tenant.slug }}
                   </p>
                 </td>
-                <td class="px-4 py-3 text-right text-lime-600 font-semibold">
+                <td class="px-4 py-3 text-end text-lime-600 font-semibold">
                   {{ formatMoney(tenant.revenue) }}
                 </td>
-                <td class="px-4 py-3 text-right text-gray-600">
+                <td class="px-4 py-3 text-end text-gray-600">
                   {{ tenant._count?.orders || 0 }}
                 </td>
-                <td class="px-4 py-3 text-right text-gray-600">
+                <td class="px-4 py-3 text-end text-gray-600">
                   {{ tenant._count?.products || 0 }}
                 </td>
               </tr>

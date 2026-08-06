@@ -16,7 +16,7 @@
           class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-700 transition-colors"
           @click="refreshAll"
         >
-          <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block mr-2" />
+          <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block me-2" />
           {{ t('superAdmin.paymentsPage.actions.refresh') }}
         </button>
       </div>
@@ -85,7 +85,7 @@
               :disabled="submitting"
               class="w-full px-4 py-2 bg-lime-600 hover:bg-lime-700 rounded-lg text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              <Icon v-if="submitting" name="lucide:loader-2" class="h-4 w-4 inline-block mr-2 animate-spin" />
+              <Icon v-if="submitting" name="lucide:loader-2" class="h-4 w-4 inline-block me-2 animate-spin" />
               {{ submitting ? t('superAdmin.paymentsPage.import.actions.importing') : t('superAdmin.paymentsPage.import.actions.importProof') }}
             </button>
           </form>
@@ -148,7 +148,7 @@
                     </button>
                     <span v-else class="text-slate-400">—</span>
                   </td>
-                  <td class="ui-td text-right">
+                  <td class="ui-td text-end">
                     <div v-if="p.status === 'PENDING'" class="flex items-center justify-end gap-2">
                       <button
                         class="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-semibold"

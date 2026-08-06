@@ -109,7 +109,7 @@
           >
             <span v-if="!loading">{{ confirmText }}</span>
             <span v-else>
-              <Icon name="lucide:loader-2" class="h-4 w-4 animate-spin mr-2 inline" />
+              <Icon name="lucide:loader-2" class="h-4 w-4 animate-spin me-2 inline" />
               {{ t('admin.common.updating') }}
             </span>
           </button>

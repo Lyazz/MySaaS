@@ -155,14 +155,14 @@ const props = defineProps<{
                 <input 
                   type="text" 
                   v-model="searchQuery" :placeholder="storefrontContent.search?.placeholder || 'Search products...'" @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null" @blur="setTimeout(() => isSearchDropdownOpen = false, 200)" 
-                  class="w-full h-10 bg-purple-900/30 border border-purple-500/30 text-white text-sm rounded-full focus:ring-2 focus:ring-pink-500 focus:border-transparent block pl-5 pr-10 transition-all shadow-sm group-hover:bg-purple-900/50 placeholder:text-purple-400/50" 
+                  class="w-full h-10 bg-purple-900/30 border border-purple-500/30 text-white text-sm rounded-full focus:ring-2 focus:ring-pink-500 focus:border-transparent block ps-5 pe-10 transition-all shadow-sm group-hover:bg-purple-900/50 placeholder:text-purple-400/50" 
                 >
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <Icon name="lucide:search" class="w-5 h-5 text-purple-400 group-hover:text-pink-400 transition-colors" />
                   <!-- Search Dropdown -->
                   <div
                     v-show="isSearchDropdownOpen"
-                    class="absolute top-[100%] right-0 mt-2 w-64 bg-white border border-slate-100 shadow-xl z-50 rounded-md overflow-hidden text-left pointer-events-auto"
+                    class="absolute top-[100%] end-0 mt-2 w-64 bg-white border border-slate-100 shadow-xl z-50 rounded-md overflow-hidden text-start pointer-events-auto"
                   >
                     <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
                     <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
@@ -177,13 +177,13 @@ const props = defineProps<{
                         <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
                         <div class="flex-1 min-w-0">
                           <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                         </div>
                       </NuxtLink>
                     <button
                       v-if="hasMoreSearchResults"
                       type="button"
-                      class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                      class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >
@@ -209,7 +209,7 @@ const props = defineProps<{
                   {{ storefrontContent.nav.categories || 'Categories' }}
                   <Icon name="lucide:chevron-down" class="w-4 h-4" />
                 </button>
-                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
+                <div class="absolute top-[80%] start-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
                   <NuxtLink
                     v-for="cat in tenantCategories"
                     :key="cat.id"
@@ -238,7 +238,7 @@ const props = defineProps<{
                   <ClientOnly>
                     <span
                       v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white absolute -top-1 -right-1"
+                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-pink-500 text-[10px] font-bold text-white absolute -top-1 -end-1"
                     >{{ favorites.count.value }}</span>
                   </ClientOnly>
                 </button>
@@ -251,7 +251,7 @@ const props = defineProps<{
                   <Icon name="lucide:handbag" class="w-5 h-5" />
                   <span
                     v-if="cartStore.itemCount > 0"
-                    class="ml-1 text-xs font-bold"
+                    class="ms-1 text-xs font-bold"
                   >{{ cartStore.itemCount }}</span>
                 </NuxtLink>
                 <!-- Hamburger (Mobile) -->
@@ -271,7 +271,7 @@ const props = defineProps<{
           <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
         </Transition>
         <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
+          <div v-if="mobileMenuOpen" class="fixed top-0 start-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
             <!-- Drawer header -->
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <span class="text-lg font-bold text-slate-900">{{ tenantName }}</span>
@@ -287,15 +287,15 @@ const props = defineProps<{
                   type="text"
                   v-model="searchQuery"
                   :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 ps-4 pe-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                   @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
+                  class="absolute top-[100%] start-0 end-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
                 >
                   <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
                   <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
@@ -310,13 +310,13 @@ const props = defineProps<{
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                   <button
                     v-if="hasMoreSearchResults"
                     type="button"
-                    class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                    class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
@@ -338,7 +338,7 @@ const props = defineProps<{
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
   <button
     type="button"
-    class="w-full flex items-center justify-between text-left"
+    class="w-full flex items-center justify-between text-start"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">

@@ -18,16 +18,16 @@
 
         <!-- Search -->
         <div class="flex-1 max-w-md mx-auto relative group">
-          <Icon name="lucide:search" class="absolute left-3 top-1/2 -translate-y-1/2 transition-colors w-5 h-5" style="color: var(--text-muted)" />
+          <Icon name="lucide:search" class="absolute start-3 top-1/2 -translate-y-1/2 transition-colors w-5 h-5" style="color: var(--text-muted)" />
           <input
             v-model="productSearch"
             type="text"
             :placeholder="t('admin.pages.pos.catalog.searchPlaceholder')"
-            class="ui-input w-full pl-10 pr-10 py-2 text-sm"
+            class="ui-input w-full ps-10 pe-10 py-2 text-sm"
           >
           <button
             v-if="productSearch"
-            class="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors"
+            class="absolute end-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors"
             style="color: var(--text-muted)"
             @click="productSearch = ''"
           >
@@ -105,7 +105,7 @@
       <div class="flex-1 flex overflow-hidden relative">
 
         <!-- Category Sidebar -->
-        <div class="w-20 md:w-24 lg:w-40 border-r overflow-y-auto shrink-0 flex flex-col no-scrollbar" style="background: var(--surface-1); border-color: var(--surface-border)">
+        <div class="w-20 md:w-24 lg:w-40 border-e overflow-y-auto shrink-0 flex flex-col no-scrollbar" style="background: var(--surface-1); border-color: var(--surface-border)">
           <button
             class="p-2 md:p-3 border-b flex flex-col items-center gap-2 text-center group transition-colors"
             :class="!selectedCategoryId ? 'border-r-4 [border-right-color:var(--brand)]' : ''"
@@ -216,7 +216,7 @@
             <button
               v-for="product in filteredProducts"
               :key="product.id"
-              class="relative group rounded-xl shadow-sm hover:shadow-md transition-all text-left overflow-hidden flex h-full min-h-[180px]"
+              class="relative group rounded-xl shadow-sm hover:shadow-md transition-all text-start overflow-hidden flex h-full min-h-[180px]"
               :class="productsView === 'grid' ? 'flex-col' : 'flex-row items-center p-2 min-h-[80px]'"
               style="background: var(--surface-1); border: 1px solid var(--surface-border)"
               @click="handleAddProduct(product)"
@@ -224,7 +224,7 @@
               <!-- Badge -->
               <div
                 v-if="product.stock <= 5"
-                class="absolute top-2 right-2 z-10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
+                class="absolute top-2 end-2 z-10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
                 :class="product.stock <= 0 ? 'bg-red-500' : 'bg-orange-500'"
               >
                 {{ product.stock <= 0 ? t('admin.pages.pos.catalog.badges.outOfStock') : t('admin.pages.pos.catalog.badges.lowStock', { count: product.stock }) }}
@@ -288,13 +288,13 @@
 
     <!-- Right: Cart & Checkout -->
     <div
-      class="fixed inset-y-0 right-0 z-30 w-full sm:w-[400px] border-l flex flex-col shadow-2xl lg:shadow-xl transform transition-transform duration-300 lg:relative lg:transform-none lg:w-[400px] lg:block"
+      class="fixed inset-y-0 end-0 z-30 w-full sm:w-[400px] border-s flex flex-col shadow-2xl lg:shadow-xl transform transition-transform duration-300 lg:relative lg:transform-none lg:w-[400px] lg:block"
       :class="showCart ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
       style="background: var(--surface-1); border-color: var(--surface-border)"
     >
       <!-- Mobile Close Button -->
       <button
-        class="lg:hidden absolute top-4 left-4 p-2 rounded-full z-50"
+        class="lg:hidden absolute top-4 start-4 p-2 rounded-full z-50"
         style="background: var(--surface-3); color: var(--text-secondary)"
         @click="showCart = false"
       >
@@ -332,13 +332,13 @@
                   selectedCustomerId = val as string;
                 }
               }"
-              class="w-full text-sm pl-9"
+              class="w-full text-sm ps-9"
             >
               <option value="">{{ t('admin.pages.pos.customer.defaultClient') }}</option>
               <option value="NEW" class="[color:rgba(var(--brand-rgb)/0.85)] font-bold">+ {{ t('admin.pages.pos.customer.addClient') }}</option>
               <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
             </BaseSelect>
-            <Icon name="lucide:user" class="absolute left-3 top-3 w-4 h-4" style="color: var(--text-muted)" />
+            <Icon name="lucide:user" class="absolute start-3 top-3 w-4 h-4" style="color: var(--text-muted)" />
           </div>
           <button
             class="ui-btn ui-btn--secondary w-10 h-10 flex items-center justify-center"
@@ -468,7 +468,7 @@
               enter="duration-300 ease-out" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100"
               leave="duration-200 ease-in" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
                 <DialogTitle as="h3" class="text-lg font-bold leading-6 flex justify-between items-center" style="color: var(--text-primary)">
                   {{ variantModal.productTitle }}
                   <button class="p-1 rounded-full transition-colors" style="color: var(--text-muted)" @click="closeVariantModal">
@@ -486,7 +486,7 @@
                     style="border: 1px solid var(--surface-border); background: var(--surface-3)"
                     @click="addVariantToCart(variantModal.productId, variantModal.productTitle, v)"
                   >
-                    <div class="text-left">
+                    <div class="text-start">
                       <div class="font-semibold group-hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)">{{ v.label }}</div>
                       <div class="text-xs mt-0.5" style="color: var(--text-muted)">
                         {{ v.trackInventory ? t('admin.pages.pos.variants.inStockCount', { count: v.availableStock }) : t('admin.pages.pos.variants.inStock') }}

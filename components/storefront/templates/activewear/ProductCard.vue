@@ -119,7 +119,7 @@ async function handleAddToCart() {
       :class="[
         viewMode === 'list' 
           ? 'w-48 h-48 aspect-square flex-shrink-0' 
-          : 'w-[102%] aspect-[3/4] -ml-[2%] -mt-[2%]'
+          : 'w-[102%] aspect-[3/4] -ms-[2%] -mt-[2%]'
       ]"
     >
       <!-- Background Image -->
@@ -138,7 +138,7 @@ async function handleAddToCart() {
       <div v-if="viewMode !== 'list'" class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
       <!-- Badges (Top Left) -->
-      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10 skew-x-[5deg]">
+      <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10 skew-x-[5deg]">
         <span
           v-if="isNew"
           class="px-3 py-1 bg-brand-500 text-black text-[11px] font-black rounded-none shadow-sm uppercase tracking-widest skew-x-[-10deg]"
@@ -157,7 +157,7 @@ async function handleAddToCart() {
       <!-- In List View, we might want these visible or positioned differently. For now, keep generic behavior or hide in list if preferred. 
            Let's keep them absolute for consistency but adjust visibility. -->
       <div 
-        class="absolute top-3 right-3 flex flex-col gap-3 transition-all duration-300 z-10 skew-x-[5deg]"
+        class="absolute top-3 end-3 flex flex-col gap-3 transition-all duration-300 z-10 skew-x-[5deg]"
         :class="[
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-12 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
         ]"
@@ -193,7 +193,7 @@ async function handleAddToCart() {
       <!-- Static In Stock Badge (Grid Only) -->
       <div
         v-if="product.stock > 0 && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
       >
         <span
           v-if="isLowStock"
@@ -207,7 +207,7 @@ async function handleAddToCart() {
 
       <div
         v-if="isOutOfStock && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
       >
         <span class="px-3 py-1 bg-[#333] text-[#888] text-[11px] font-black uppercase tracking-widest skew-x-[-10deg] block">
           Out of Stock
@@ -230,7 +230,7 @@ async function handleAddToCart() {
     <div 
       :class="[
         viewMode === 'list' 
-          ? 'flex-1 text-left skew-x-[5deg]' 
+          ? 'flex-1 text-start skew-x-[5deg]' 
           : 'mt-4 text-center w-full px-2 skew-x-[5deg]'
       ]"
     >
@@ -255,7 +255,7 @@ async function handleAddToCart() {
         class="flex items-center gap-2" 
         :class="[ viewMode === 'list' ? '' : 'justify-center mt-2' ]"
       >
-        <span class="text-2xl font-black text-brand-500">{{ formatAmount(product.price) }} <span class="text-sm font-bold text-slate-500 ml-1">{{ currencyCode }}</span></span>
+        <span class="text-2xl font-black text-brand-500">{{ formatAmount(product.price) }} <span class="text-sm font-bold text-slate-500 ms-1">{{ currencyCode }}</span></span>
         <span
           v-if="originalPrice"
           class="text-sm text-slate-600 line-through font-bold"

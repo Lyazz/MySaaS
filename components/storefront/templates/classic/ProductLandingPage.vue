@@ -146,7 +146,7 @@ onUnmounted(() => {
     <!-- Mobile Sticky Bottom Bar (Minimal) -->
     <div
       v-if="cartEnabled"
-      class="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-slate-100 md:hidden z-40 flex items-center justify-between"
+      class="fixed bottom-0 start-0 w-full p-4 bg-white border-t border-slate-100 md:hidden z-40 flex items-center justify-between"
     >
       <div class="flex flex-col">
         <span

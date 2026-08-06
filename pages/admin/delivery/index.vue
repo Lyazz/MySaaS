@@ -588,13 +588,13 @@
                 </td>
                 <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   <div class="relative rounded-md shadow-sm">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                       <span class="sm:text-sm" style="color: var(--text-muted)">DZD</span>
                     </div>
                     <input 
                       v-model="modelRates.home[wilaya.code]" 
                       type="number" 
-                      class="ui-input block w-full pl-12 sm:text-sm"
+                      class="ui-input block w-full ps-12 sm:text-sm"
                       :placeholder="t('admin.pages.delivery.pricing.overridePlaceholder')"
                     >
                   </div>
@@ -615,13 +615,13 @@
                 </td>
                 <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                   <div class="relative rounded-md shadow-sm">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none">
                       <span class="sm:text-sm" style="color: var(--text-muted)">DZD</span>
                     </div>
                     <input 
                       v-model="modelRates.office[wilaya.code]" 
                       type="number" 
-                      class="ui-input block w-full pl-12 sm:text-sm"
+                      class="ui-input block w-full ps-12 sm:text-sm"
                       :placeholder="t('admin.pages.delivery.pricing.overridePlaceholder')"
                     >
                   </div>

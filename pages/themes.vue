@@ -115,7 +115,7 @@ const filteredThemes = computed(() => {
               class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
             >
 
-            <div class="absolute top-4 left-4 flex gap-2">
+            <div class="absolute top-4 start-4 flex gap-2">
               <span class="rounded-full border-2 border-[#0D1F1A] bg-[#FFF8E7] px-3 py-1 text-xs font-bold text-[#0D1F1A]">
                 {{ theme.category }}
               </span>

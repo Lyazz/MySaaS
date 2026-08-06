@@ -21,7 +21,7 @@
     >
       <div 
         v-if="isOpen" 
-        class="fixed bottom-24 right-6 w-80 sm:w-[400px] rounded-2xl z-[99] flex flex-col overflow-hidden"
+        class="fixed bottom-24 end-6 w-80 sm:w-[400px] rounded-2xl z-[99] flex flex-col overflow-hidden"
         style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5); max-height: calc(100vh - 120px); height: 550px;"
       >
         <!-- Header -->
@@ -62,7 +62,7 @@
                 ? 'background: var(--brand); color: #fff'
                 : 'background: var(--surface-1); border: 1px solid var(--surface-border); color: var(--text-secondary)'"
               :class="[
-                msg.role === 'user' ? 'rounded-tr-none ml-auto' : 'rounded-tl-none'
+                msg.role === 'user' ? 'rounded-se-none ms-auto' : 'rounded-ss-none'
               ]"
             >
               {{ msg.content }}
@@ -74,7 +74,7 @@
             <div class="w-8 h-8 rounded-full [background:rgba(var(--brand-rgb)/0.15)] flex items-center justify-center flex-shrink-0 [color:rgba(var(--brand-rgb)/0.85)]">
               <Icon name="lucide:bot" class="w-5 h-5" />
             </div>
-            <div class="py-3 px-4 rounded-2xl rounded-tl-none flex items-center gap-1.5 h-11" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+            <div class="py-3 px-4 rounded-2xl rounded-ss-none flex items-center gap-1.5 h-11" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
               <div class="w-1.5 h-1.5 [background:var(--brand)] rounded-full animate-bounce" style="animation-delay: 0ms"></div>
               <div class="w-1.5 h-1.5 [background:var(--brand)] rounded-full animate-bounce" style="animation-delay: 150ms"></div>
               <div class="w-1.5 h-1.5 [background:var(--brand)] rounded-full animate-bounce" style="animation-delay: 300ms"></div>

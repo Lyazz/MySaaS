@@ -62,7 +62,7 @@
               leave-to="opacity-0 scale-95"
             >
               <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle shadow-xl transition-all"
+                class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle shadow-xl transition-all"
                 style="background: var(--surface-2); border: 1px solid var(--surface-border)"
               >
                 <DialogTitle
@@ -98,7 +98,7 @@
                     style="border: 1px solid var(--surface-border)"
                     @click="onVariantSelected(v)"
                   >
-                    <div class="text-left">
+                    <div class="text-start">
                       <div class="font-semibold group-hover:[color:var(--brand)]" style="color: var(--text-primary)">
                         {{ v.label }}
                       </div>
@@ -106,7 +106,7 @@
                         {{ v.availableStock }} {{ t('admin.pages.orders.create.inStock', 'in stock') }}
                       </div>
                     </div>
-                    <div class="text-right">
+                    <div class="text-end">
                       <div class="font-bold [color:var(--brand)]">
                         {{ formatCurrency(v.displayPrice ?? v.price) }}
                       </div>
@@ -118,7 +118,7 @@
                         <span class="line-through">{{ formatCurrency(v.originalPrice ?? v.price) }}</span>
                         <span
                           v-if="v.promotionDiscountPercent != null"
-                          class="ml-1 font-semibold text-emerald-600"
+                          class="ms-1 font-semibold text-emerald-600"
                         >-{{ v.promotionDiscountPercent }}%</span>
                       </div>
                     </div>
@@ -352,7 +352,7 @@
               <Icon name="lucide:eye-off" class="w-3 h-3" />
               {{ t('admin.pages.orders.detail.internalNotesHelp', 'Notes are only visible to your team.') }}
               <Transition name="od-fade">
-                <span v-if="savingNotes || notesSavedMessage" class="od-saved ml-auto">
+                <span v-if="savingNotes || notesSavedMessage" class="od-saved ms-auto">
                   <Icon
                     :name="savingNotes ? 'lucide:loader' : 'lucide:check'"
                     class="w-3 h-3"
@@ -479,7 +479,7 @@
               <div class="relative">
                 <Icon
                   name="lucide:search"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+                  class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4"
                   style="color: var(--text-tertiary)"
                 />
                 <input
@@ -505,10 +505,10 @@
                       <div class="mt-0.5 text-xs">
                         <span class="font-semibold [color:var(--brand)]">{{ formatCurrency(product.effectivePrice) }}</span>
                         <template v-if="product.promotionApplied">
-                          <span class="line-through ml-2" style="color: var(--text-tertiary)">{{ formatCurrency(product.originalPrice) }}</span>
+                          <span class="line-through ms-2" style="color: var(--text-tertiary)">{{ formatCurrency(product.originalPrice) }}</span>
                           <span
                             v-if="product.promotionDiscountPercent != null"
-                            class="ml-1 font-semibold text-emerald-600"
+                            class="ms-1 font-semibold text-emerald-600"
                           >-{{ product.promotionDiscountPercent }}%</span>
                         </template>
                       </div>

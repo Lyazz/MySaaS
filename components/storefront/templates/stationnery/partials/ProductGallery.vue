@@ -38,7 +38,7 @@ watch(() => props.images, () => {
             class="w-full h-full object-contain object-center transition-transform duration-700 ease-out"
             :style="zoomStyle"
         >
-        <div class="absolute top-4 left-4">
+        <div class="absolute top-4 start-4">
             <span class="bg-white/90 backdrop-blur-md text-stone-900 text-xs font-stationery italic px-3 py-1.5 border border-stone-200">
             New Arrival
             </span>

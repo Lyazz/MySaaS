@@ -2,7 +2,7 @@
   <div class="max-w-7xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex mb-6" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink to="/admin/customers" class="hover:[color:var(--brand)]" style="color: var(--text-secondary)">
             {{ t('admin.nav.customers') }}
@@ -19,7 +19,7 @@
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.customers.edit.breadcrumb') }}</span>
+            <span class="ms-1" style="color: var(--text-tertiary)">{{ t('admin.pages.customers.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -103,7 +103,7 @@
         <p class="text-sm text-red-800">{{ errorMessage }}</p>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-4" style="border-top: 1px solid var(--surface-border)">
+      <div class="flex justify-end space-x-3 pt-4 rtl:space-x-reverse" style="border-top: 1px solid var(--surface-border)">
         <NuxtLink
           :to="`/admin/customers/${customerId}`"
           class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"

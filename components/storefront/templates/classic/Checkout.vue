@@ -474,7 +474,7 @@ async function handleSubmit() {
             </h2>
             
             <!-- Cart Items -->
-            <div class="space-y-6 mb-8 max-h-96 overflow-y-auto pr-2">
+            <div class="space-y-6 mb-8 max-h-96 overflow-y-auto pe-2">
               <div
                 v-for="item in cartStore.items"
                 :key="item.productId"

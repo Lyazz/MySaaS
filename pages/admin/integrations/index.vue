@@ -125,7 +125,7 @@
                     v-for="c in detectedChats"
                     :key="c.chatId"
                     type="button"
-                    class="w-full text-left rounded-lg px-3 py-2 transition-colors"
+                    class="w-full text-start rounded-lg px-3 py-2 transition-colors"
                     style="background: var(--surface-1); border: 1px solid var(--surface-border)"
                     @click="selectDetectedChat(c.chatId)"
                   >
@@ -211,7 +211,7 @@
                       <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.pixelId') }}</th>
                       <th class="ui-th">{{ t('admin.pages.integrations.metaPixels.table.global') }}</th>
                       <th class="ui-th">{{ t('admin.common.active') }}</th>
-                      <th class="ui-th text-right">{{ t('admin.common.actions') }}</th>
+                      <th class="ui-th text-end">{{ t('admin.common.actions') }}</th>
                     </tr>
                   </thead>
                   <tbody class="ui-tbody">
@@ -245,7 +245,7 @@
                           <span class="text-xs" style="color: var(--text-secondary)">{{ p.isActive ? t('admin.common.active') : t('admin.common.inactive') }}</span>
                         </label>
                       </td>
-                      <td class="ui-td text-right">
+                      <td class="ui-td text-end">
                         <button
                           class="ui-table-action ui-table-action--danger"
                           :disabled="metaPixelsSaving"

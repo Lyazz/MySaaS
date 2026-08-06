@@ -42,7 +42,7 @@ const handleError = () => clearError({ redirect: '/' })
         {{ t('common.errorPage.actions.backHome') }}
       </button>
       
-      <div v-if="error?.statusCode !== 404" class="mt-8 p-4 bg-red-50 rounded-lg border border-red-100 text-left">
+      <div v-if="error?.statusCode !== 404" class="mt-8 p-4 bg-red-50 rounded-lg border border-red-100 text-start">
           <p class="text-xs font-mono text-red-600 break-all">
               {{ t('common.errorPage.details') }}: {{ error?.message }}
           </p>

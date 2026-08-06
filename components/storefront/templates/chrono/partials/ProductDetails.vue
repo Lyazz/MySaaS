@@ -184,7 +184,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </option>
           </select>
           <div
-            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none"
+            class="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none"
             style="color: #7a7060"
           >
             <Icon name="lucide:chevron-down" class="w-4 h-4" />
@@ -268,7 +268,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             >
             <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
-              class="ml-2 text-[10px] font-normal"
+              class="ms-2 text-[10px] font-normal"
             >
               {{ optionValueSuffix(option.id, value.id) }}
             </span>

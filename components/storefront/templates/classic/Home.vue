@@ -140,7 +140,7 @@ const {
       </div>
 
       <!-- Navigation Points (Classic Style) -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-4">
+      <div v-if="hasMultipleSlides" class="absolute bottom-10 start-0 end-0 z-20 flex justify-center space-x-4 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -152,13 +152,13 @@ const {
       
       <!-- Arrows (Minimal) -->
       <button 
-        v-if="hasMultipleSlides" class="absolute left-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
+        v-if="hasMultipleSlides" class="absolute start-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
         @click="prevSlide"
       >
          <Icon name="lucide:arrow-left" class="w-8 h-8 font-light" />
       </button>
       <button 
-        v-if="hasMultipleSlides" class="absolute right-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
+        v-if="hasMultipleSlides" class="absolute end-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
         @click="nextSlide"
       >
          <Icon name="lucide:arrow-right" class="w-8 h-8 font-light" />

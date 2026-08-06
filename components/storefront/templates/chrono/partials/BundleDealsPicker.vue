@@ -69,7 +69,7 @@ const onPick = (qty: number) => {
         v-for="(o, index) in offers"
         :key="o.id || String(o.bundleQty)"
         type="button"
-        class="w-full relative flex flex-col sm:flex-row sm:items-center justify-between p-4 border transition-all duration-300 text-left group overflow-hidden gap-3 sm:gap-4"
+        class="w-full relative flex flex-col sm:flex-row sm:items-center justify-between p-4 border transition-all duration-300 text-start group overflow-hidden gap-3 sm:gap-4"
         :style="disabled 
           ? 'background-color:#0B0E16; border-color:rgba(212,197,169,0.05); color:#3A3530; cursor:not-allowed;' 
           : 'background-color:#131720; border-color:rgba(212,197,169,0.08); color:#C2B89A; cursor:pointer;'"
@@ -107,7 +107,7 @@ const onPick = (qty: number) => {
             </div>
         </div>
 
-        <div class="relative z-10 sm:text-right shrink-0 ml-8 sm:ml-auto flex sm:flex-col items-baseline sm:items-end gap-2 sm:gap-0 mt-1 sm:mt-0">
+        <div class="relative z-10 sm:text-end shrink-0 ms-8 sm:ms-auto flex sm:flex-col items-baseline sm:items-end gap-2 sm:gap-0 mt-1 sm:mt-0">
             <div class="text-lg font-light tracking-tight leading-none whitespace-nowrap" style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;">
                 {{ formatCurrency(o.bundlePrice) }}
             </div>

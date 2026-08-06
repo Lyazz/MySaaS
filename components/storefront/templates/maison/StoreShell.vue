@@ -238,7 +238,7 @@ watch(searchQuery, async (q) => {
               <button
                 v-if="hasMoreSearchResults"
                 type="button"
-                class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
                 @mousedown.prevent
                 @click="showMoreSearchResults"
               >
@@ -274,7 +274,7 @@ watch(searchQuery, async (q) => {
             <div v-if="tenantCategories?.length" class="shell-drawer__cats">
   <button
     type="button"
-    class="w-full flex items-center justify-between text-left"
+    class="w-full flex items-center justify-between text-start"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
     <h4 class="shell-drawer__cats-title">

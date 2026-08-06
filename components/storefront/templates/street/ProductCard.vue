@@ -83,7 +83,7 @@ async function handleAddToCart() {
         @mouseleave="isHovered = false"
     >
         <!-- Badge -->
-        <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+        <div class="absolute top-2 start-2 z-10 flex flex-col gap-1 items-start">
             <span v-if="product.isNew" class="bg-brand text-black px-3 py-1 border-2 border-black font-street uppercase transform -rotate-2 group-hover:rotate-0 transition-transform">
                 NEW DROP
             </span>
@@ -107,7 +107,7 @@ async function handleAddToCart() {
 
             <StorefrontSharedFavoriteButton
                 :product-id="product.id"
-                button-class="absolute top-2 right-2 w-10 h-10 bg-white border-2 border-black flex items-center justify-center hover:bg-red-50 transition-colors"
+                button-class="absolute top-2 end-2 w-10 h-10 bg-white border-2 border-black flex items-center justify-center hover:bg-red-50 transition-colors"
                 icon-class="w-5 h-5"
                 inactive-class="text-black"
                 active-class="text-red-600"
@@ -116,7 +116,7 @@ async function handleAddToCart() {
             <!-- Quick Add Overlay (Street Style) -->
             <button 
                 @click.prevent="handleAddToCart"
-                class="absolute bottom-0 left-0 w-full bg-black text-white py-3 font-street text-xl uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-200 hover:bg-brand hover:text-black border-t-2 border-black"
+                class="absolute bottom-0 start-0 w-full bg-black text-white py-3 font-street text-xl uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-200 hover:bg-brand hover:text-black border-t-2 border-black"
             >
                 {{ storefrontContent.actions.addToCart }}
             </button>

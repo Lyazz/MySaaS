@@ -151,7 +151,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     <div class="h-10 w-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center">
                        <Icon name="lucide:flower-2" class="w-6 h-6" />
                     </div>
-                    <span class="text-2xl font-wellness font-bold text-stone-800 tracking-tight ml-2">{{ tenantName }}</span>
+                    <span class="text-2xl font-wellness font-bold text-stone-800 tracking-tight ms-2">{{ tenantName }}</span>
                   </div>
                 </template>
               </NuxtLink>
@@ -168,7 +168,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   {{ storefrontContent.nav.categories || 'Categories' }}
                   <Icon name="lucide:chevron-down" class="w-4 h-4" />
                 </button>
-                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
+                <div class="absolute top-[80%] start-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
                   <NuxtLink
                     v-for="cat in tenantCategories"
                     :key="cat.id"
@@ -191,16 +191,16 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     type="text"
                     v-model="searchQuery"
                     :placeholder="storefrontContent.search?.placeholder || 'Search...'"
-                    class="w-[120px] sm:w-[160px] p-2 pl-4 pr-10 text-sm text-stone-800 bg-white/60 focus:bg-white border border-stone-200 focus:border-brand-500 rounded-full outline-none transition-all placeholder:text-stone-400"
+                    class="w-[120px] sm:w-[160px] p-2 ps-4 pe-10 text-sm text-stone-800 bg-white/60 focus:bg-white border border-stone-200 focus:border-brand-500 rounded-full outline-none transition-all placeholder:text-stone-400"
                     @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                     @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                   >
-                  <Icon name="lucide:search" class="w-4 h-4 text-stone-400 absolute right-3 pointer-events-none" />
+                  <Icon name="lucide:search" class="w-4 h-4 text-stone-400 absolute end-3 pointer-events-none" />
 
                   <!-- Search Dropdown -->
                   <div
                     v-show="isSearchDropdownOpen"
-                    class="absolute top-[100%] right-0 mt-2 w-64 bg-white border border-stone-100 shadow-xl z-50 rounded-[1.5rem] p-2 overflow-hidden text-left pointer-events-auto"
+                    class="absolute top-[100%] end-0 mt-2 w-64 bg-white border border-stone-100 shadow-xl z-50 rounded-[1.5rem] p-2 overflow-hidden text-start pointer-events-auto"
                   >
                     <div v-if="searchLoading" class="px-4 py-3 text-sm text-stone-500">Searching...</div>
                     <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-stone-500">No products found.</div>
@@ -215,13 +215,13 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                         <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-[1rem] shadow-sm" />
                         <div class="flex-1 min-w-0">
                           <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                         </div>
                       </NuxtLink>
                     <button
                       v-if="hasMoreSearchResults"
                       type="button"
-                      class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                      class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >
@@ -244,7 +244,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     <ClientOnly>
                       <span
                         v-if="favorites.count.value > 0"
-                        class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-stone-900 text-[10px] font-bold text-white absolute -top-1 -right-1"
+                        class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-stone-900 text-[10px] font-bold text-white absolute -top-1 -end-1"
                       >{{ favorites.count.value }}</span>
                     </ClientOnly>
                   </button>
@@ -270,7 +270,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
           <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
         </Transition>
         <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
+          <div v-if="mobileMenuOpen" class="fixed top-0 start-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
             <!-- Drawer header -->
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <span class="text-lg font-bold text-slate-900">{{ tenantName }}</span>
@@ -286,15 +286,15 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   type="text"
                   v-model="searchQuery"
                   :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 ps-4 pe-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                   @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
+                  class="absolute top-[100%] start-0 end-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
                 >
                   <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
                   <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
@@ -309,13 +309,13 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                   <button
                     v-if="hasMoreSearchResults"
                     type="button"
-                    class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                    class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
@@ -337,7 +337,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
   <button
     type="button"
-    class="w-full flex items-center justify-between text-left"
+    class="w-full flex items-center justify-between text-start"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">

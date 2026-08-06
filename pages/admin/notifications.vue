@@ -178,7 +178,7 @@
             <button
               v-for="item in groupedItems.today"
               :key="item.id"
-              class="notification-page-row flex w-full items-start gap-4 rounded-2xl border px-4 py-4 text-left transition-all duration-150"
+              class="notification-page-row flex w-full items-start gap-4 rounded-2xl border px-4 py-4 text-start transition-all duration-150"
               :style="item.readAt
                 ? 'border-color: var(--surface-border); background: var(--surface-1)'
                 : 'border-color: rgba(var(--brand-rgb) / 0.28); background: rgba(var(--brand-rgb) / 0.05)'"
@@ -210,7 +210,7 @@
                     style="background: var(--brand)"
                   />
                   <span
-                    class="ml-auto text-[12px]"
+                    class="ms-auto text-[12px]"
                     style="color: var(--text-tertiary)"
                   >
                     {{ formatAdminNotificationAbsolute(item.createdAt, locale) }}
@@ -246,7 +246,7 @@
             <button
               v-for="item in groupedItems.earlier"
               :key="item.id"
-              class="notification-page-row flex w-full items-start gap-4 rounded-2xl border px-4 py-4 text-left transition-all duration-150"
+              class="notification-page-row flex w-full items-start gap-4 rounded-2xl border px-4 py-4 text-start transition-all duration-150"
               :style="item.readAt
                 ? 'border-color: var(--surface-border); background: var(--surface-1)'
                 : 'border-color: rgba(var(--brand-rgb) / 0.28); background: rgba(var(--brand-rgb) / 0.05)'"
@@ -278,7 +278,7 @@
                     style="background: var(--brand)"
                   />
                   <span
-                    class="ml-auto text-[12px]"
+                    class="ms-auto text-[12px]"
                     style="color: var(--text-tertiary)"
                   >
                     {{ formatAdminNotificationAbsolute(item.createdAt, locale) }}

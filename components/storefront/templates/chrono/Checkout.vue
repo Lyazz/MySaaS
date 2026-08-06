@@ -398,7 +398,7 @@ async function handleSubmit() {
                   </div>
                   
                   <div class="flex items-center gap-3 flex-shrink-0">
-                    <div class="text-right">
+                    <div class="text-end">
                       <div class="font-bold text-[#A67C52] text-base">{{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}</div>
                     </div>
                     <span
@@ -452,7 +452,7 @@ async function handleSubmit() {
             </div>
 
             <!-- Cart Items -->
-            <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pr-2">
+            <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pe-2">
               <div v-for="item in cartStore.items" :key="item.productId" class="flex items-center gap-4 py-2 border-b border-[#A67C52]/5 last:border-0">
                 <div class="h-16 w-16 bg-[#131720] flex-shrink-0 overflow-hidden relative border border-[#A67C52]/10" style="border-radius: 2px;">
                   <img v-if="item.image" :src="item.image" :alt="item.title" class="h-full w-full object-cover object-center" >

@@ -39,7 +39,7 @@ watch(() => props.images, () => {
       <!-- Image Counter -->
       <div 
         v-if="images && images.length > 1"
-        class="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-slate-600 font-medium"
+        class="absolute bottom-4 end-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-slate-600 font-medium"
       >
         {{ selectedImage + 1 }} / {{ images.length }}
       </div>

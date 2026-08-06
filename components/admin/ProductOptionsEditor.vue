@@ -13,7 +13,7 @@
             :key="option.id"
             class="rounded-xl p-4 relative group overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
         >
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pr-8">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-4 pe-8">
                 <!-- Option Name & Display Type -->
                 <div class="md:col-span-4 space-y-3">
                     <div>
@@ -47,7 +47,7 @@
                             <div v-if="option.displayType === 'dropdown'" class="relative max-w-xs">
                                 <select
                                     disabled
-                                    class="ui-input h-9 pr-8 appearance-none text-sm"
+                                    class="ui-input h-9 pe-8 appearance-none text-sm"
                                 >
                                     <option
                                         v-for="v in previewValuesForOption(option, { max: 6, min: 1 })"
@@ -57,7 +57,7 @@
                                         {{ v.label }}
                                     </option>
                                 </select>
-                                <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                <div class="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                     <Icon name="lucide:chevron-down" class="w-4 h-4" style="color: var(--text-tertiary)" />
                                 </div>
                             </div>
@@ -88,7 +88,7 @@
                                         <div v-if="i === 0" class="w-2 h-2 rounded-full [background:var(--brand)]"></div>
                                     </div>
                                     <span
-                                        class="ml-2 text-sm"
+                                        class="ms-2 text-sm"
                                         :style="i === 0 ? 'color: var(--text-primary); font-weight: 500' : 'color: var(--text-secondary)'"
                                     >
                                         {{ v.label }}
@@ -195,7 +195,7 @@
             <!-- Delete Option -->
             <button 
                 type="button"
-                class="absolute top-4 right-4 hover:text-red-400 p-1" style="color: var(--text-muted)"
+                class="absolute top-4 end-4 hover:text-red-400 p-1" style="color: var(--text-muted)"
                 :title="t('admin.productOptionsEditor.actions.removeOption')"
                 @click="requestDeleteOption(option)"
             >
@@ -211,7 +211,7 @@
                 class="ui-btn ui-btn--secondary text-sm"
                 @click="startCreatingOption"
             >
-                <Icon name="lucide:plus" class="-ml-1 mr-2 h-5 w-5" style="color: var(--text-tertiary)" />
+                <Icon name="lucide:plus" class="-ms-1 me-2 h-5 w-5" style="color: var(--text-tertiary)" />
                 {{ t('admin.productOptionsEditor.actions.addAnotherOption') }}
             </button>
 
@@ -247,7 +247,7 @@
                                 <div v-if="newOptionType === 'dropdown'" class="relative max-w-xs">
                                     <select
                                         disabled
-                                        class="ui-input h-8 pr-8 appearance-none text-sm"
+                                        class="ui-input h-8 pe-8 appearance-none text-sm"
                                     >
                                         <option
                                             v-for="v in newOptionPreviewValues.slice(0, 6)"
@@ -257,7 +257,7 @@
                                             {{ v.label }}
                                         </option>
                                     </select>
-                                    <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
+                                    <div class="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none">
                                         <Icon name="lucide:chevron-down" class="w-4 h-4" style="color: var(--text-tertiary)" />
                                     </div>
                                 </div>
@@ -287,7 +287,7 @@
                                         >
                                             <span v-if="i === 0" class="w-1.5 h-1.5 rounded-full [background:var(--brand)]"></span>
                                         </span>
-                                        <span class="ml-2 text-xs" :style="i === 0 ? 'color: var(--text-primary); font-weight: 500' : 'color: var(--text-secondary)'">
+                                        <span class="ms-2 text-xs" :style="i === 0 ? 'color: var(--text-primary); font-weight: 500' : 'color: var(--text-secondary)'">
                                             {{ v.label }}
                                         </span>
                                     </div>
@@ -388,7 +388,7 @@
             leave-to="opacity-0 scale-95"
           >
             <DialogPanel
-              class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-left align-middle transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)"
+              class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)"
             >
               <DialogTitle
                 as="h3"
@@ -429,7 +429,7 @@
                   </div>
               </div>
 
-              <div class="mt-6 flex justify-end space-x-3">
+              <div class="mt-6 flex justify-end space-x-3 rtl:space-x-reverse">
                 <button
                   type="button"
                   class="ui-btn ui-btn--secondary text-sm"

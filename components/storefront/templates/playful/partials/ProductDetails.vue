@@ -153,7 +153,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </option>
           </select>
           <div
-            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400"
+            class="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400"
           >
             <Icon name="lucide:chevron-down" class="w-4 h-4" />
           </div>
@@ -271,7 +271,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
                   optionValueState(option.id, value.id) === 'out_of_stock',
               }"
               >{{ value.label }}
-              <span class="text-xs font-normal ml-1">{{
+              <span class="text-xs font-normal ms-1">{{
                 optionValueSuffix(option.id, value.id)
               }}</span></label
             >
@@ -309,7 +309,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </span>
             <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
-              class="ml-1.5 text-[10px] font-bold"
+              class="ms-1.5 text-[10px] font-bold"
             >
               {{ optionValueSuffix(option.id, value.id) }}
             </span>

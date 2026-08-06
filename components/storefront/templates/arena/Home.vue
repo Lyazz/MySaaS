@@ -109,11 +109,11 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Diagonal cyan stripes (Logitech G HUD vibe) -->
-      <div class="pointer-events-none absolute inset-y-0 right-0 w-1/3 z-20 hidden lg:block">
-        <div class="absolute top-12 right-10 h-px w-40 bg-brand-500" />
-        <div class="absolute top-16 right-10 h-px w-24 bg-brand-500/60" />
-        <div class="absolute bottom-12 right-10 h-px w-32 bg-brand-500" />
-        <div class="absolute bottom-16 right-10 h-px w-20 bg-brand-500/60" />
+      <div class="pointer-events-none absolute inset-y-0 end-0 w-1/3 z-20 hidden lg:block">
+        <div class="absolute top-12 end-10 h-px w-40 bg-brand-500" />
+        <div class="absolute top-16 end-10 h-px w-24 bg-brand-500/60" />
+        <div class="absolute bottom-12 end-10 h-px w-32 bg-brand-500" />
+        <div class="absolute bottom-16 end-10 h-px w-20 bg-brand-500/60" />
       </div>
 
       <div class="relative z-20 max-w-[1400px] mx-auto px-5 lg:px-10 min-h-[640px] lg:min-h-[760px] flex items-center py-20">
@@ -195,10 +195,10 @@ const displayedProducts = computed(() => {
             </div>
 
             <!-- Cyan corner brackets (HUD style) -->
-            <span class="absolute top-3 left-3 w-4 h-4 border-t-2 border-l-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <span class="absolute top-3 right-3 w-4 h-4 border-t-2 border-r-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <span class="absolute bottom-3 left-3 w-4 h-4 border-b-2 border-l-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <span class="absolute bottom-3 right-3 w-4 h-4 border-b-2 border-r-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span class="absolute top-3 start-3 w-4 h-4 border-t-2 border-s-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span class="absolute top-3 end-3 w-4 h-4 border-t-2 border-e-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span class="absolute bottom-3 start-3 w-4 h-4 border-b-2 border-s-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <span class="absolute bottom-3 end-3 w-4 h-4 border-b-2 border-e-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
             <div class="absolute inset-x-0 bottom-0 p-6 z-10">
               <h3 class="text-2xl font-black uppercase tracking-[-0.02em] text-white leading-tight">{{ categoryDisplayTitle(cat) }}</h3>

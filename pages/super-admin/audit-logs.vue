@@ -8,7 +8,7 @@
           class="px-4 py-2 bg-lime-50 hover:bg-lime-100 border border-lime-200 rounded-lg text-lime-700 transition-colors"
           @click="loadLogs"
         >
-          <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block mr-2" />
+          <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block me-2" />
           {{ t('superAdmin.auditLogs.actions.refresh') }}
         </button>
       </div>
@@ -143,7 +143,7 @@
           <p class="text-sm text-gray-500">
             {{ t('superAdmin.auditLogs.pagination.showing', { from: (currentPage - 1) * perPage + 1, to: Math.min(currentPage * perPage, filteredLogs.length), total: filteredLogs.length }) }}
           </p>
-          <div class="flex space-x-2">
+          <div class="flex space-x-2 rtl:space-x-reverse">
             <button
               :disabled="currentPage === 1"
               class="px-3 py-1 bg-white border border-slate-300 hover:bg-slate-50 rounded text-gray-700 text-sm disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"

@@ -591,7 +591,7 @@ const scrollToForm = () => {
             data-test="cod-order-card"
             class="bg-white rounded-3xl p-6 md:p-8 shadow-soft border border-slate-100 relative overflow-hidden"
         >
-            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-brand-400 to-brand-600" />
+            <div class="absolute top-0 start-0 w-full h-1 bg-gradient-to-r from-brand-400 to-brand-600" />
             
             <div class="flex items-center gap-3 mb-6">
                 <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shadow-sm ring-1 ring-brand-100">
@@ -605,7 +605,7 @@ const scrollToForm = () => {
             
             <form class="space-y-5" @submit.prevent="handleOrderSubmit">
                 <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                 <input 
                     v-model="quickForm.fullName"
                     type="text" 
@@ -616,7 +616,7 @@ const scrollToForm = () => {
                 </div>
                 
                 <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
+                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                 <input
                     v-model="quickForm.phone"
                     type="tel"
@@ -627,7 +627,7 @@ const scrollToForm = () => {
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                    <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                     <WilayaField
                         v-model="quickForm.wilaya"
                         input-class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
@@ -635,7 +635,7 @@ const scrollToForm = () => {
                       />
                 </div>
                 <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
+                    <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                     <CommuneField
                         v-model="quickForm.commune"
                         :wilaya-code="quickForm.wilaya"
@@ -647,7 +647,7 @@ const scrollToForm = () => {
                 </div>
 
                 <div v-if="!hideOptionalAddress" class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
+                    <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input
                         v-model="quickForm.address"
                         type="text"
@@ -656,7 +656,7 @@ const scrollToForm = () => {
                     >
                 </div>
                 <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
-                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                    <label class="block text-sm font-semibold text-slate-700 ms-1">
                         {{ storefrontContent.checkout.sections.deliveryOptions }}
                     </label>
                     <div 
@@ -701,7 +701,7 @@ const scrollToForm = () => {
                         </div>
                         
                         <div class="flex items-center gap-3 flex-shrink-0">
-                            <div class="text-right">
+                            <div class="text-end">
                             <div class="font-bold text-brand-600 text-base">
                                 {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                             </div>
@@ -727,7 +727,7 @@ const scrollToForm = () => {
                         v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
                         class="space-y-2 mt-4"
                     >
-                        <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                        <label class="block text-sm font-semibold text-slate-700 ms-1">
                             {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
                         </label>
                         <div
@@ -861,7 +861,7 @@ const scrollToForm = () => {
         >
         <div
             v-if="showSuccess"
-            class="fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 border border-slate-700/50 backdrop-blur-md bg-slate-900/95"
+            class="fixed bottom-4 end-4 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 border border-slate-700/50 backdrop-blur-md bg-slate-900/95"
         >
             <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0">
             <Icon name="lucide:check" class="w-5 h-5" />

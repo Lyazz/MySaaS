@@ -37,7 +37,7 @@ watch(() => props.images, () => {
       </div>
       
       <!-- View Indicator -->
-      <div class="absolute top-4 left-4 bg-brand px-2 py-1 border-2 border-black font-street text-sm uppercase">
+      <div class="absolute top-4 start-4 bg-brand px-2 py-1 border-2 border-black font-street text-sm uppercase">
         VIEW_0{{ selectedImage + 1 }}
       </div>
     </div>

@@ -307,7 +307,7 @@ async function handleSubmit() {
           <h1 class="text-4xl md:text-6xl font-black uppercase tracking-[-0.04em] text-white leading-[0.92]">
             {{ storefrontContent.checkout.title }}
           </h1>
-          <div v-if="cartStore.hasItems" class="border-l-2 border-brand-500 pl-4">
+          <div v-if="cartStore.hasItems" class="border-s-2 border-brand-500 ps-4">
             <div class="text-2xl font-black text-white">{{ String(cartStore.itemCount).padStart(2, '0') }}</div>
             
           </div>
@@ -330,10 +330,10 @@ async function handleSubmit() {
         <div class="lg:col-span-7 space-y-6">
           <!-- Personal info card -->
           <div class="relative bg-[#0b0f14] border border-white/[0.06] p-6 sm:p-8">
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
             
             
@@ -388,10 +388,10 @@ async function handleSubmit() {
 
           <!-- Delivery options -->
           <div v-if="form.wilaya && form.commune" class="relative bg-[#0b0f14] border border-white/[0.06] p-6 sm:p-8">
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
             <div class="flex items-center justify-between mb-2">
               
@@ -405,7 +405,7 @@ async function handleSubmit() {
                 v-for="option in deliveryOptions"
                 :key="option.id"
                 type="button"
-                class="w-full text-left relative flex items-center gap-4 p-4 border transition-colors group"
+                class="w-full text-start relative flex items-center gap-4 p-4 border transition-colors group"
                 :class="form.selectedDeliveryOption === option.id
                   ? 'border-brand-500 bg-brand-500/5'
                   : 'border-white/[0.06] hover:border-white/15'"
@@ -469,10 +469,10 @@ async function handleSubmit() {
         <!-- Right: summary -->
         <div class="lg:col-span-5">
           <div class="relative bg-[#0b0f14] border border-white/[0.06] p-6 sm:p-8 lg:sticky lg:top-24">
-            <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-            <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+            <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
             <div class="flex items-center justify-between pb-5 mb-5 border-b border-white/[0.06]">
               <div>
@@ -486,7 +486,7 @@ async function handleSubmit() {
             </div>
 
             <!-- Items -->
-            <ul class="space-y-3 mb-6 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+            <ul class="space-y-3 mb-6 max-h-72 overflow-y-auto pe-1 custom-scrollbar">
               <li v-for="item in cartStore.items" :key="item.productId" class="flex items-center gap-3 py-2 border-b border-white/[0.04] last:border-0">
                 <div class="h-14 w-14 bg-[#04060a] border border-white/[0.06] flex-shrink-0 overflow-hidden">
                   <img v-if="item.image" :src="item.image" :alt="item.title" class="h-full w-full object-cover" />

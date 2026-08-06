@@ -125,7 +125,7 @@
           >
           <label
             for="isActive"
-            class="ml-2 block text-sm" style="color: var(--text-primary)"
+            class="ms-2 block text-sm" style="color: var(--text-primary)"
           >
             Product is active and visible to customers
           </label>
@@ -172,7 +172,7 @@
     </div>
 
     <!-- Actions Footer -->
-    <div class="px-6 py-4 flex justify-end space-x-3" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
+    <div class="px-6 py-4 flex justify-end space-x-3 rtl:space-x-reverse" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
       <NuxtLink
         v-if="cancelTo"
         :to="cancelTo"

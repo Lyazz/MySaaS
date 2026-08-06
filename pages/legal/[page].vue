@@ -135,7 +135,7 @@ definePageMeta({
               </p>
               <ul
                 v-if="section.bullets?.length"
-                class="space-y-2 pl-5"
+                class="space-y-2 ps-5"
               >
                 <li
                   v-for="bullet in section.bullets"

@@ -5,7 +5,7 @@
       class="flex mb-6"
       aria-label="Breadcrumb"
     >
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink
             to="/admin/products"
@@ -17,7 +17,7 @@
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">
+            <span class="ms-1" style="color: var(--text-tertiary)">
               <span v-if="isNewProduct">{{ t('admin.pages.products.create.title', 'Créer un produit') }}</span>
               <span v-else>{{ t('admin.pages.products.edit.breadcrumbEdit', { title: form.title || t('admin.pages.products.edit.fallbackTitle') }) }}</span>
             </span>
@@ -53,11 +53,11 @@
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <!-- Public Links -->
-          <div class="flex items-center space-x-2 p-1.5 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+          <div class="flex items-center space-x-2 p-1.5 rounded-lg rtl:space-x-reverse" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
             <span class="text-xs font-medium px-2" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.label') }}:</span>
 
             <!-- Product Page -->
-            <div class="flex items-center space-x-1 pr-2" style="border-right: 1px solid var(--surface-border)">
+            <div class="flex items-center space-x-1 pe-2 rtl:space-x-reverse" style="border-right: 1px solid var(--surface-border)">
               <span class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.product') }}</span>
               <a
                 :href="productUrl"
@@ -77,7 +77,7 @@
             </div>
 
             <!-- Landing Page -->
-            <div class="flex items-center space-x-1 pl-1">
+            <div class="flex items-center space-x-1 ps-1 rtl:space-x-reverse">
               <span class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.landing') }}</span>
               <a
                 :href="landingUrl"
@@ -334,7 +334,7 @@
                 >
                 <label
                   for="isPromotionActive"
-                  class="ml-2 block text-sm" style="color: var(--text-primary)"
+                  class="ms-2 block text-sm" style="color: var(--text-primary)"
                 >
                   {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
                 </label>
@@ -376,7 +376,7 @@
                   >
                   <label
                     for="showCountdown"
-                    class="ml-2 block text-sm" style="color: var(--text-primary)"
+                    class="ms-2 block text-sm" style="color: var(--text-primary)"
                   >
                     {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
                   </label>
@@ -395,7 +395,7 @@
                 >
                 <label
                   for="isClearance"
-                  class="ml-2 block text-sm" style="color: var(--text-primary)"
+                  class="ms-2 block text-sm" style="color: var(--text-primary)"
                 >
                   {{ t('admin.forms.product.isClearance.label', 'Produit en destockage') }}
                 </label>
@@ -581,7 +581,7 @@
                       <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.price') }}</th>
                       <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.tag') }}</th>
                       <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.active') }}</th>
-                      <th class="ui-th text-right">{{ t('admin.pages.products.edit.bundlesTab.table.actions') }}</th>
+                      <th class="ui-th text-end">{{ t('admin.pages.products.edit.bundlesTab.table.actions') }}</th>
                     </tr>
                   </thead>
                   <tbody class="ui-tbody">
@@ -632,7 +632,7 @@
                           <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.common.active') }}</span>
                         </label>
                       </td>
-                      <td class="ui-td text-right space-x-2">
+                      <td class="ui-td text-end space-x-2 rtl:space-x-reverse">
                         <button
                           type="button"
                           class="ui-btn ui-btn--primary ui-btn--sm"
@@ -699,8 +699,8 @@
                     <div class="min-w-0">
                       <div class="font-medium truncate" style="color: var(--text-primary)">
                         {{ p.name || '—' }}
-                        <span v-if="p.isGlobal" class="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
-                        <span v-if="!p.isActive" class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style="background: var(--surface-3); color: var(--text-secondary)">{{ t('admin.common.inactive') }}</span>
+                        <span v-if="p.isGlobal" class="ms-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
+                        <span v-if="!p.isActive" class="ms-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style="background: var(--surface-3); color: var(--text-secondary)">{{ t('admin.common.inactive') }}</span>
                       </div>
                       <div class="text-xs font-mono truncate" style="color: var(--text-secondary)">{{ p.pixelId }}</div>
                     </div>
@@ -728,7 +728,7 @@
         </div>
 
         <!-- Actions Footer (Sticky on Mobile if needed, or just bottom) -->
-        <div class="px-6 py-4 flex justify-end space-x-3" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
+        <div class="px-6 py-4 flex justify-end space-x-3 rtl:space-x-reverse" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
           <NuxtLink
             to="/admin/products"
             class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary)"

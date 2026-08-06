@@ -21,10 +21,10 @@ useTenantSeo({
 
     <div class="max-w-3xl mx-auto px-5 lg:px-10 py-16 lg:py-24">
       <div class="relative bg-[#0b0f14] border border-white/[0.06] p-8 lg:p-12">
-        <span class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500" />
-        <span class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500" />
-        <span class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500" />
-        <span class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500" />
+        <span class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500" />
+        <span class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500" />
+        <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
+        <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
         <p class="text-base lg:text-lg text-slate-300 leading-relaxed">
           Welcome to <span class="text-white font-bold">{{ tenantName }}</span>. This page is part of your tenant storefront template and can be customized from the onboarding wizard.

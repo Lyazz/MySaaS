@@ -120,7 +120,7 @@
           <thead style="background: var(--surface-2)">
             <tr>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
+                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('productTitle')"
               >
                 <div class="flex items-center gap-1">
@@ -129,7 +129,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
+                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('trackInventory')"
               >
                 <div class="flex items-center gap-1">
@@ -138,7 +138,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
+                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('stock')"
               >
                 <div class="flex items-center gap-1">
@@ -147,7 +147,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
+                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('reserved')"
               >
                 <div class="flex items-center gap-1">
@@ -156,7 +156,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
+                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('safetyStock')"
               >
                 <div class="flex items-center gap-1">
@@ -165,7 +165,7 @@
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
+                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
                 @click="setSort('available')"
               >
                 <div class="flex items-center gap-1">
@@ -173,7 +173,7 @@
                   <Icon v-if="sortBy === 'available'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
-              <th class="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-5 py-3 text-end text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                 {{ t('admin.common.actions') }}
               </th>
             </tr>
@@ -240,7 +240,7 @@
                   ∞
                 </span>
               </td>
-              <td class="px-5 py-4 text-right">
+              <td class="px-5 py-4 text-end">
                 <button
                   type="button"
                   class="ui-btn ui-btn--secondary text-sm"
@@ -301,25 +301,25 @@
             <table class="min-w-full divide-y">
               <thead style="background: var(--surface-3)">
                 <tr>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.date') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.type') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.deltaStock') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.deltaReserved') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.deltaSafety') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.after') }}
                   </th>
-                  <th class="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
                     {{ t('admin.pages.inventory.movements.table.by') }}
                   </th>
                 </tr>

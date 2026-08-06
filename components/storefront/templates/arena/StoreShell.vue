@@ -142,14 +142,14 @@ const props = defineProps<{
             <nav class="hidden lg:flex items-center gap-7 flex-1">
               <NuxtLink
                 to="/"
-                class="text-[12px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white relative py-1 transition-colors after:absolute after:left-0 after:right-0 after:bottom-0 after:h-[2px] after:bg-brand-500 after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform"
+                class="text-[12px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white relative py-1 transition-colors after:absolute after:start-0 after:end-0 after:bottom-0 after:h-[2px] after:bg-brand-500 after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform"
                 active-class="text-white"
               >
                 {{ storefrontContent.nav.home }}
               </NuxtLink>
               <NuxtLink
                 to="/products"
-                class="text-[12px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white relative py-1 transition-colors after:absolute after:left-0 after:right-0 after:bottom-0 after:h-[2px] after:bg-brand-500 after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform"
+                class="text-[12px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white relative py-1 transition-colors after:absolute after:start-0 after:end-0 after:bottom-0 after:h-[2px] after:bg-brand-500 after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform"
                 active-class="text-white"
               >
                 {{ storefrontContent.nav.shop }}
@@ -160,14 +160,14 @@ const props = defineProps<{
                   {{ (storefrontContent.nav as any).categories || 'Categories' }}
                   <Icon name="lucide:chevron-down" class="w-3.5 h-3.5 mt-0.5 transition-transform group-hover:rotate-180" />
                 </button>
-                <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all absolute left-1/2 -translate-x-1/2 top-full pt-3 z-50">
+                <div class="invisible opacity-0 group-hover:visible group-hover:opacity-100 transition-all absolute start-1/2 -translate-x-1/2 top-full pt-3 z-50">
                   <div class="bg-[#0b0f14] border border-white/10 shadow-2xl min-w-[280px] py-3 relative">
-                    <div class="absolute -top-px left-0 right-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent" />
+                    <div class="absolute -top-px start-0 end-0 h-px bg-gradient-to-r from-transparent via-brand-500 to-transparent" />
                     <NuxtLink
                       v-for="cat in tenantCategories"
                       :key="cat.id"
                       :to="`/category/${cat.slug}`"
-                      class="block px-5 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-brand-500 border-l-2 border-transparent hover:border-brand-500 transition-all"
+                      class="block px-5 py-2.5 text-sm text-slate-300 hover:bg-white/5 hover:text-brand-500 border-s-2 border-transparent hover:border-brand-500 transition-all"
                     >
                       {{ categoryDisplayTitle(cat) }}
                     </NuxtLink>
@@ -177,14 +177,14 @@ const props = defineProps<{
 
               <NuxtLink
                 to="/contact"
-                class="text-[12px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white relative py-1 transition-colors after:absolute after:left-0 after:right-0 after:bottom-0 after:h-[2px] after:bg-brand-500 after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform"
+                class="text-[12px] font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white relative py-1 transition-colors after:absolute after:start-0 after:end-0 after:bottom-0 after:h-[2px] after:bg-brand-500 after:scale-x-0 hover:after:scale-x-100 after:origin-left after:transition-transform"
                 active-class="text-white"
               >
                 {{ storefrontContent.nav.contact }}
               </NuxtLink>
             </nav>
 
-            <div class="ml-auto flex items-center gap-1">
+            <div class="ms-auto flex items-center gap-1">
               <button
                 class="hidden lg:inline-flex h-10 w-10 items-center justify-center text-slate-400 hover:text-brand-500 transition-colors"
                 @click="searchOverlayOpen = true"
@@ -262,7 +262,7 @@ const props = defineProps<{
                     <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-14 h-14 object-cover bg-[#0b0f14]" />
                     <div class="flex-1 min-w-0">
                       <div class="text-sm font-black uppercase text-white truncate group-hover:text-brand-500 transition-colors">{{ product.title }}</div>
-                      <div class="text-xs text-slate-500 mt-0.5 font-mono">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-2 text-brand-500 font-bold">-{{ product.promotionDiscountPercent }}%</span></div>
+                      <div class="text-xs text-slate-500 mt-0.5 font-mono">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-2 text-brand-500 font-bold">-{{ product.promotionDiscountPercent }}%</span></div>
                     </div>
                     <Icon name="lucide:arrow-up-right" class="w-4 h-4 text-slate-600 group-hover:text-brand-500 transition-colors" />
                   </NuxtLink>
@@ -302,10 +302,10 @@ const props = defineProps<{
                   type="text"
                   v-model="searchQuery"
                   :placeholder="storefrontContent.search?.placeholder || 'Search...'"
-                  class="w-full border-0 border-b border-white/15 bg-transparent py-2 pr-8 text-sm text-white outline-none focus:border-brand-500 placeholder:text-slate-600 uppercase tracking-wider"
+                  class="w-full border-0 border-b border-white/15 bg-transparent py-2 pe-8 text-sm text-white outline-none focus:border-brand-500 placeholder:text-slate-600 uppercase tracking-wider"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-slate-500 absolute right-0 top-1/2 -translate-y-1/2" />
+                <Icon name="lucide:search" class="w-4 h-4 text-slate-500 absolute end-0 top-1/2 -translate-y-1/2" />
               </div>
             </div>
 

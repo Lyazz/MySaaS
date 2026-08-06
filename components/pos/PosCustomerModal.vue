@@ -49,7 +49,7 @@
           :disabled="loading"
           @click="submit"
         >
-          <Icon v-if="loading" name="lucide:loader-2" class="w-4 h-4 animate-spin mr-2" />
+          <Icon v-if="loading" name="lucide:loader-2" class="w-4 h-4 animate-spin me-2" />
           {{ t('admin.common.create') }}
         </button>
       </div>

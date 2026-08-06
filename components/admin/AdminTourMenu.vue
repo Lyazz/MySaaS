@@ -18,7 +18,7 @@
     <button
       v-else
       type="button"
-      class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-left"
+      class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg transition-colors text-start"
       style="color: var(--text-muted)"
       @mouseenter="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'"
       @mouseleave="(e: MouseEvent) => (e.currentTarget as HTMLElement).style.color = 'var(--text-muted)'"
@@ -43,7 +43,7 @@
           v-for="tour in tours"
           :key="tour.id"
           type="button"
-          class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-left transition-colors group"
+          class="w-full flex items-center gap-2 px-2 py-1.5 rounded-lg text-start transition-colors group"
           style="color: var(--text-secondary)"
           @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
           @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"

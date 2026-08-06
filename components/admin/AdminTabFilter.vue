@@ -17,7 +17,7 @@
         <!-- Active underline -->
         <span
           v-if="tab.key === modelValue"
-          class="absolute bottom-0 left-0 right-0 h-[2px] rounded-t-full"
+          class="absolute bottom-0 start-0 end-0 h-[2px] rounded-t-full"
           style="background: var(--admin-active-color)"
         />
       </button>

@@ -19,9 +19,9 @@
           v-model="searchQuery"
           type="text"
           :placeholder="t('superAdmin.tenants.search.placeholder')"
-          class="w-full px-4 py-3 pl-10 bg-white border border-slate-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-500 shadow-sm"
+          class="w-full px-4 py-3 ps-10 bg-white border border-slate-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-500 shadow-sm"
         >
-        <Icon name="lucide:search" class="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        <Icon name="lucide:search" class="h-5 w-5 absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
       </div>
 
       <!-- Tenants Table -->
@@ -62,7 +62,7 @@
               <th class="ui-th">
                 {{ t('superAdmin.tenants.table.created') }}
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('superAdmin.tenants.table.actions') }}
               </th>
             </tr>
@@ -106,7 +106,7 @@
                 {{ formatDate(tenant.createdAt) }}
               </td>
               <td class="ui-td">
-                <div class="flex justify-end space-x-2">
+                <div class="flex justify-end space-x-2 rtl:space-x-reverse">
                   <button
                     class="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-600 transition-colors" 
                     :title="t('admin.common.edit')"
@@ -222,7 +222,7 @@
             >
           </div>
 
-          <div class="flex space-x-3 pt-4">
+          <div class="flex space-x-3 pt-4 rtl:space-x-reverse">
             <button
               type="button"
               class="flex-1 px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-gray-700 transition-colors"

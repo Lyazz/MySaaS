@@ -190,14 +190,14 @@ async function handleAddToCart() {
       <!-- Quick View Button -->
       <StorefrontSharedFavoriteButton
         :product-id="product.id"
-        button-class="absolute bottom-4 left-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+        button-class="absolute bottom-4 start-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
         icon-class="w-5 h-5"
         inactive-class="text-white"
         active-class="text-pink-400"
       />
       <button
         type="button"
-        class="absolute bottom-4 right-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+        class="absolute bottom-4 end-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
         title="Quick View"
         @click.prevent="emit('quick-view', product)"
       >
@@ -205,7 +205,7 @@ async function handleAddToCart() {
       </button>
 
       <!-- Stock Badge -->
-      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
+      <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10">
         <div v-if="!isInStock" class="px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
           Out of Stock
         </div>

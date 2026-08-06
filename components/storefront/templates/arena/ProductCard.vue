@@ -107,10 +107,10 @@ async function handleAddToCart() {
     ]"
   >
     <!-- Cyan corner brackets (HUD) -->
-    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute top-0 left-0 w-3 h-3 border-t-2 border-l-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute top-0 right-0 w-3 h-3 border-t-2 border-r-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute bottom-0 left-0 w-3 h-3 border-b-2 border-l-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
-    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute bottom-0 right-0 w-3 h-3 border-b-2 border-r-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute top-0 start-0 w-3 h-3 border-t-2 border-s-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute top-0 end-0 w-3 h-3 border-t-2 border-e-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
+    <span v-if="viewMode !== 'list'" class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500 opacity-0 group-hover:opacity-100 transition-opacity" />
 
     <!-- Image area -->
     <div
@@ -128,7 +128,7 @@ async function handleAddToCart() {
       </NuxtLink>
 
       <!-- Stock / discount pills -->
-      <div class="absolute top-3 left-3 z-20 flex flex-col gap-1.5">
+      <div class="absolute top-3 start-3 z-20 flex flex-col gap-1.5">
         <span
           v-if="discountPercent"
           class="bg-brand-500 text-[#02060a] text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1 [clip-path:polygon(8%_0,100%_0,92%_100%,0_100%)]"
@@ -148,7 +148,7 @@ async function handleAddToCart() {
       </div>
 
       <!-- Hover action stack (desktop reveal) -->
-      <div class="absolute right-3 top-3 z-20 flex flex-col gap-2 lg:opacity-0 lg:translate-x-2 lg:group-hover:opacity-100 lg:group-hover:translate-x-0 transition-all duration-300">
+      <div class="absolute end-3 top-3 z-20 flex flex-col gap-2 lg:opacity-0 lg:translate-x-2 lg:group-hover:opacity-100 lg:group-hover:translate-x-0 transition-all duration-300">
         <StorefrontSharedFavoriteButton
           :product-id="product.id"
           button-class="h-9 w-9 flex items-center justify-center bg-black/70 border border-white/15 text-white hover:border-brand-500 hover:text-brand-500 backdrop-blur transition-colors"
@@ -173,7 +173,7 @@ async function handleAddToCart() {
     </div>
 
     <!-- Info area -->
-    <div :class="[viewMode === 'list' ? 'flex-1 flex flex-col justify-center py-2 pr-3' : 'p-5']">
+    <div :class="[viewMode === 'list' ? 'flex-1 flex flex-col justify-center py-2 pe-3' : 'p-5']">
       <NuxtLink :to="`/product/${product.slug}`" class="block group/title">
         <h3
           class="font-black uppercase text-white tracking-[-0.01em] leading-tight group-hover/title:text-brand-500 transition-colors"

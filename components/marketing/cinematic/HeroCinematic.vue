@@ -43,7 +43,7 @@
           <div
             v-for="proof in proofPoints"
             :key="proof.label"
-            class="cinematic-glass flex items-center gap-3 rounded-2xl px-4 py-3.5 text-left"
+            class="cinematic-glass flex items-center gap-3 rounded-2xl px-4 py-3.5 text-start"
           >
             <Icon :name="proof.icon" class="h-4 w-4 flex-none text-lime-neon" />
             <div class="min-w-0">

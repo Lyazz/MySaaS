@@ -2,7 +2,7 @@
   <div class="max-w-7xl mx-auto">
     <!-- Breadcrumb -->
     <nav class="flex mb-6" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink to="/admin/suppliers" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">
             {{ t('admin.nav.suppliers') }}
@@ -11,7 +11,7 @@
         <li aria-current="page">
           <div class="flex items-center">
             <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.suppliers.edit.breadcrumb') }}</span>
+            <span class="ms-1" style="color: var(--text-tertiary)">{{ t('admin.pages.suppliers.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -96,7 +96,7 @@
         <p class="text-sm text-red-800">{{ errorMessage }}</p>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-4 border-t">
+      <div class="flex justify-end space-x-3 pt-4 border-t rtl:space-x-reverse">
         <NuxtLink
           to="/admin/suppliers"
           class="ui-btn ui-btn--secondary text-sm"

@@ -6,11 +6,11 @@
       :subtitle="t('admin.pages.products.index.subtitle')"
       :stats="productStats"
     >
-      <Menu as="div" class="relative inline-block text-left">
+      <Menu as="div" class="relative inline-block text-start">
         <MenuButton class="ui-btn ui-btn--secondary ui-btn--md">
           <Icon name="lucide:arrow-down-up" class="w-5 h-5" />
           <span>Import/Export</span>
-          <Icon name="lucide:chevron-down" class="w-4 h-4 ml-1 -mr-1" style="color: var(--text-tertiary)" />
+          <Icon name="lucide:chevron-down" class="w-4 h-4 ms-1 -me-1" style="color: var(--text-tertiary)" />
         </MenuButton>
         <transition
           enter-active-class="transition ease-out duration-100"
@@ -20,7 +20,7 @@
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
-          <MenuItems class="absolute right-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+          <MenuItems class="absolute end-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
             <div class="py-1">
               <MenuItem v-slot="{ active }">
                 <button
@@ -29,7 +29,7 @@
                   :disabled="loading"
                   @click="openImportModal"
                 >
-                  <Icon name="lucide:download" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  <Icon name="lucide:download" class="me-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
                   {{ t('admin.pages.products.index.bulk.import') }}
                 </button>
               </MenuItem>
@@ -40,7 +40,7 @@
                   :disabled="loading"
                   @click="exportProductsCsv"
                 >
-                  <Icon name="lucide:upload" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  <Icon name="lucide:upload" class="me-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
                   {{ t('admin.pages.products.index.bulk.export') }}
                 </button>
               </MenuItem>
@@ -139,7 +139,7 @@
           to="/admin/products/create"
           class="ui-btn ui-btn--primary ui-btn--md"
         >
-          <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
+          <Icon name="lucide:plus" class="w-5 h-5 me-2" />
           {{ t('admin.pages.products.index.empty.newProduct') }}
         </NuxtLink>
       </div>
@@ -162,7 +162,7 @@
             :disabled="loading || selectedIds.length === 0"
             @click="openBulkUpdateModal"
           >
-            <Icon name="lucide:wand-2" class="w-4 h-4 mr-1" />
+            <Icon name="lucide:wand-2" class="w-4 h-4 me-1" />
             <span>{{ t('admin.pages.products.index.bulk.update') }}</span>
           </button>
 
@@ -172,7 +172,7 @@
             :disabled="loading || selectedIds.length !== 1"
             @click="duplicateSelectedProduct"
           >
-            <Icon name="lucide:copy" class="w-4 h-4 mr-1" />
+            <Icon name="lucide:copy" class="w-4 h-4 me-1" />
             <span>{{ t('admin.pages.products.index.bulk.duplicate') }}</span>
           </button>
 
@@ -182,7 +182,7 @@
             :disabled="loading || selectedIds.length === 0"
             @click="confirmBulkDelete"
           >
-            <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
+            <Icon name="lucide:trash" class="w-4 h-4 me-1" />
             <span>{{ t('admin.pages.products.index.bulk.delete') || t('admin.common.delete') }}</span>
           </button>
         </div>
@@ -231,7 +231,7 @@
               <th class="ui-th text-center">
                 {{ t('admin.pages.products.index.table.links') }}
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.pages.products.index.table.actions') }}
               </th>
             </tr>
@@ -272,7 +272,7 @@
                       class="w-5 h-5" style="color: var(--text-tertiary)"
                     />
                   </div>
-                  <div class="ml-4">
+                  <div class="ms-4">
                     <div class="font-medium flex items-center gap-1.5" style="color: var(--text-primary)">
                       {{ product.title }}
                       <span
@@ -350,7 +350,7 @@
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap text-center">
-                <Menu as="div" class="relative inline-block text-left text-sm">
+                <Menu as="div" class="relative inline-block text-start text-sm">
                   <MenuButton class="ui-table-action">
                     <Icon name="lucide:globe" class="w-5 h-5" />
                   </MenuButton>
@@ -362,7 +362,7 @@
                     leave-from-class="transform opacity-100 scale-100"
                     leave-to-class="transform opacity-0 scale-95"
                   >
-                    <MenuItems class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+                    <MenuItems class="absolute end-0 z-10 mt-2 w-56 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
                       <div class="py-1">
                         <!-- Product Links -->
                         <div class="flex items-center px-1">
@@ -373,7 +373,7 @@
                               :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4" style="color: var(--text-tertiary)" />
+                              <Icon name="lucide:external-link" class="me-3 h-4 w-4" style="color: var(--text-tertiary)" />
                               {{ t('admin.pages.products.index.links.openProduct') }}
                             </a>
                           </MenuItem>
@@ -400,7 +400,7 @@
                               :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4" style="color: var(--text-tertiary)" />
+                              <Icon name="lucide:external-link" class="me-3 h-4 w-4" style="color: var(--text-tertiary)" />
                               {{ t('admin.pages.products.index.links.openLanding') }}
                             </a>
                           </MenuItem>
@@ -420,8 +420,8 @@
                   </transition>
                 </Menu>
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-1">
+              <td class="ui-td whitespace-nowrap text-end">
+                <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
                   <NuxtLink
                     :to="`/admin/products/${product.id}`"
                     class="ui-table-action"
@@ -478,7 +478,7 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-s-md border text-sm font-medium disabled:opacity-50"
                 style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
@@ -500,7 +500,7 @@
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-e-md border text-sm font-medium disabled:opacity-50"
                 style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
@@ -589,7 +589,7 @@
 	                <summary class="cursor-pointer text-xs font-semibold text-amber-900">
 	                  Warnings ({{ importCsvResult.warnings.length }})
 	                </summary>
-	                <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-900">
+	                <ul class="mt-2 list-disc space-y-1 ps-5 text-xs text-amber-900">
 	                  <li v-for="(w, idx) in importCsvResult.warnings.slice(0, 20)" :key="idx">
 	                    Row {{ w.row }}: {{ w.message }}
 	                  </li>
@@ -608,7 +608,7 @@
 	                <div class="mt-1 text-xs text-red-800">
 	                  {{ t('admin.pages.products.index.bulk.importErrors', { count: importCsvResult.errors.length }) }}
 	                </div>
-	                <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-red-900">
+	                <ul class="mt-2 list-disc space-y-1 ps-5 text-xs text-red-900">
 	                  <li v-for="(e, idx) in importCsvResult.errors.slice(0, 50)" :key="idx">
 	                    Row {{ e.row }}: {{ e.message }}
 	                  </li>

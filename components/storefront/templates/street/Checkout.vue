@@ -314,7 +314,7 @@ async function handleSubmit() {
     <div class="grid grid-cols-1 lg:grid-cols-2 min-h-screen">
         
         <!-- Left: Form -->
-        <div class="p-8 lg:p-16 border-r-4 border-black">
+        <div class="p-8 lg:p-16 border-e-4 border-black">
             <h1 class="font-street text-5xl mb-8 uppercase">{{ storefrontContent.checkout.title }}</h1>
 
             <div
@@ -401,7 +401,7 @@ async function handleSubmit() {
                                     <p class="font-mono text-xs uppercase text-gray-600">{{ option.modeLabel }}</p>
                                 </div>
                             </div>
-                            <div class="text-right">
+                            <div class="text-end">
                                 <span class="font-mono font-bold">
                                     {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                                 </span>
@@ -473,7 +473,7 @@ async function handleSubmit() {
                                 :alt="item.title"
                                 class="w-full h-full object-cover"
                             >
-                            <span class="absolute -top-2 -right-2 bg-black text-white w-6 h-6 flex items-center justify-center font-mono text-xs font-bold rounded-full border border-white">
+                            <span class="absolute -top-2 -end-2 bg-black text-white w-6 h-6 flex items-center justify-center font-mono text-xs font-bold rounded-full border border-white">
                                 {{ item.quantity }}
                             </span>
                         </div>

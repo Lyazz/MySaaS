@@ -131,7 +131,7 @@ const displayedProducts = computed(() => {
         <!-- Content (Editorial Overlay) -->
         <div class="absolute inset-0 flex items-end justify-start p-8 md:p-16">
              <div 
-               class="max-w-xl w-full text-left transform transition-all duration-1000 delay-300"
+               class="max-w-xl w-full text-start transform transition-all duration-1000 delay-300"
                :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
              >
                 <div class="inline-flex items-center gap-2 mb-6">
@@ -159,7 +159,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Navigation Sprinkles -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-10 right-10 z-20 flex space-x-3">
+      <div v-if="hasMultipleSlides" class="absolute bottom-10 end-10 z-20 flex space-x-3 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 

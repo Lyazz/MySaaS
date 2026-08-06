@@ -5,15 +5,15 @@
       <span v-if="required" class="text-red-400">*</span>
     </label>
     <div class="relative">
-      <div v-if="$slots.prefix" class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-2">
+      <div v-if="$slots.prefix" class="pointer-events-none absolute inset-y-0 start-0 flex items-center px-2">
         <slot name="prefix" />
       </div>
       <select
         :value="modelValue"
-        class="ui-input appearance-none pr-9"
+        class="ui-input appearance-none pe-9"
         :class="[
           error ? 'border-red-500/50 focus:border-red-500' : '',
-          $slots.prefix ? 'pl-10' : '',
+          $slots.prefix ? 'ps-10' : '',
           $attrs.class
         ]"
         v-bind="{ ...$attrs, class: undefined }"
@@ -33,7 +33,7 @@
           </option>
         </slot>
       </select>
-      <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2.5" style="color: var(--text-tertiary)">
+      <div class="pointer-events-none absolute inset-y-0 end-0 flex items-center px-2.5" style="color: var(--text-tertiary)">
         <Icon name="lucide:chevron-down" class="h-3.5 w-3.5" />
       </div>
     </div>

@@ -355,7 +355,7 @@ function handleQuickViewAddToCart() {
               class="flex items-center gap-1.5 px-3 py-1.5 bg-violet-100 text-violet-800 rounded-full text-sm font-black border-2 border-violet-200"
             >
               <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
-              <button class="hover:text-violet-950 ml-0.5" @click="removeCategory(catId)">
+              <button class="hover:text-violet-950 ms-0.5" @click="removeCategory(catId)">
                 <Icon name="lucide:x" class="w-3.5 h-3.5" />
               </button>
             </div>
@@ -381,9 +381,9 @@ function handleQuickViewAddToCart() {
                 v-model="searchQuery"
                 type="text"
                 :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder"
-                class="w-full bg-white border-3 border-violet-100 text-stone-900 text-sm rounded-full focus:outline-none focus:border-violet-400 pl-5 pr-10 py-2.5 transition-colors font-medium"
+                class="w-full bg-white border-3 border-violet-100 text-stone-900 text-sm rounded-full focus:outline-none focus:border-violet-400 ps-5 pe-10 py-2.5 transition-colors font-medium"
               >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+              <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
                 <Icon name="lucide:search" class="w-4 h-4 text-stone-400" />
               </div>
             </div>
@@ -393,13 +393,13 @@ function handleQuickViewAddToCart() {
               <div class="relative">
                 <select
                   v-model="sortOption"
-                  class="appearance-none bg-white rounded-full border-3 border-violet-100 text-sm py-2.5 pl-4 pr-8 focus:outline-none focus:border-violet-400 cursor-pointer text-stone-700 font-black transition-colors"
+                  class="appearance-none bg-white rounded-full border-3 border-violet-100 text-sm py-2.5 ps-4 pe-8 focus:outline-none focus:border-violet-400 cursor-pointer text-stone-700 font-black transition-colors"
                 >
                   <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-stone-400" />
                 </div>
               </div>
@@ -514,7 +514,7 @@ function handleQuickViewAddToCart() {
       <div class="bg-[#fffbf0] rounded-3xl border-4 border-violet-100 shadow-2xl max-w-3xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden">
         <!-- Close -->
         <button
-          class="absolute top-4 right-4 z-20 w-9 h-9 bg-white rounded-full flex items-center justify-center border-2 border-violet-100 hover:border-violet-300 text-stone-600 transition-colors shadow-sm"
+          class="absolute top-4 end-4 z-20 w-9 h-9 bg-white rounded-full flex items-center justify-center border-2 border-violet-100 hover:border-violet-300 text-stone-600 transition-colors shadow-sm"
           @click="closeQuickView"
         >
           <Icon name="lucide:x" class="w-5 h-5" />
@@ -530,7 +530,7 @@ function handleQuickViewAddToCart() {
           <!-- Promo badge -->
           <div
             v-if="quickViewIsPromoValid"
-            class="absolute top-3 left-3 bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full border border-pink-400"
+            class="absolute top-3 start-3 bg-pink-500 text-white text-xs font-black px-3 py-1 rounded-full border border-pink-400"
           >
             -{{ Math.round(((Number(quickViewProduct.price) - Number(quickViewProduct.promotionalPrice)) / Number(quickViewProduct.price)) * 100) }}%
           </div>

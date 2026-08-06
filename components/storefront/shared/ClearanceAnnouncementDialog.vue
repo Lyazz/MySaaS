@@ -57,7 +57,7 @@ onMounted(() => {
 
             <button
               type="button"
-              class="cl-close absolute top-4 right-4 rtl:right-auto rtl:left-4 z-30 flex items-center justify-center w-8 h-8 rounded-full text-stone-400"
+              class="cl-close absolute top-4 end-4 rtl:right-auto rtl:left-4 z-30 flex items-center justify-center w-8 h-8 rounded-full text-stone-400"
               :aria-label="t('storefront.clearance.dialogDismissAria')"
               @click="dialog.dismiss()"
             >
@@ -76,7 +76,7 @@ onMounted(() => {
 
               <!-- Badge -->
               <div class="cl-rise cl-rise--1 mt-6">
-                <span class="cl-badge inline-flex items-center gap-2 pl-2.5 pr-3.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.18em]">
+                <span class="cl-badge inline-flex items-center gap-2 ps-2.5 pe-3.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.18em]">
                   <span class="cl-dot relative w-1.5 h-1.5 rounded-full" />
                   {{ t('storefront.clearance.badge') }}
                 </span>

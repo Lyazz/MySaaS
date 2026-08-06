@@ -111,7 +111,7 @@ watch(() => props.images, () => {
             </transition-group>
 
             <!-- Badges -->
-            <div class="absolute top-4 left-4 z-10">
+            <div class="absolute top-4 start-4 z-10">
                 <span class="bg-[#0b0f14]/90 backdrop-blur-md text-white text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ring-1 ring-slate-900/5 flex items-center gap-1">
                     <Icon name="lucide:star" class="w-3 h-3 text-amber-500 fill-amber-500" />
                     {{ $t('storefront.product.bestsellerBadge') }}
@@ -119,7 +119,7 @@ watch(() => props.images, () => {
             </div>
 
             <!-- Mobile Navigation Dots -->
-            <div v-if="images?.length > 1" class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden">
+            <div v-if="images?.length > 1" class="absolute bottom-4 start-0 end-0 flex justify-center gap-2 z-10 md:hidden">
                 <button
                     v-for="(_, idx) in images"
                     :key="'dot-'+idx"

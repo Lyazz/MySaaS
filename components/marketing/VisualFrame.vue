@@ -24,7 +24,7 @@ const toneClasses: Record<MarketingTone, string> = {
   >
     <div class="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.12),transparent_36%)]" />
     <div class="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),transparent_22%,transparent_78%,rgba(255,255,255,0.04))]" />
-    <div class="pointer-events-none absolute -right-16 top-0 h-40 w-40 rounded-full blur-3xl" :class="`bg-gradient-to-br ${toneClasses[props.tone]}`" />
+    <div class="pointer-events-none absolute -end-16 top-0 h-40 w-40 rounded-full blur-3xl" :class="`bg-gradient-to-br ${toneClasses[props.tone]}`" />
 
     <div class="relative z-10">
       <slot />

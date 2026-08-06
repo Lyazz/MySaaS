@@ -47,7 +47,7 @@
                 class="flex py-6 px-6 bg-white rounded-3xl shadow-sm border border-stone-100 hover:shadow-md transition-shadow group relative overflow-hidden"
               >
                 <!-- Decorative corner fold or distinct marker -->
-                <div class="absolute top-0 left-0 w-2 h-full bg-brand-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div class="absolute top-0 start-0 w-2 h-full bg-brand-400 opacity-0 group-hover:opacity-100 transition-opacity"></div>
 
                 <div class="h-28 w-28 flex-shrink-0 overflow-hidden rounded-2xl border border-stone-100 bg-stone-50 relative">
                   <img
@@ -64,9 +64,9 @@
                   </div>
                 </div>
 
-                <div class="ml-6 rtl:ml-0 rtl:mr-6 flex flex-1 flex-col justify-between">
+                <div class="ms-6 flex flex-1 flex-col justify-between">
                   <div class="flex justify-between items-start">
-                    <div class="min-w-0 flex-1 pr-4">
+                    <div class="min-w-0 flex-1 pe-4">
                       <h3 class="text-xl font-bold text-stone-900 hover:text-brand-600 transition-colors leading-tight">
                         <NuxtLink :to="`/product/${item.slug}`">
                           {{ item.title }}
@@ -79,7 +79,7 @@
                     
                     <button
                         type="button"
-                        class="text-stone-300 hover:text-red-500 transition-colors p-2 -mr-2 rtl:-mr-0 rtl:-ml-2"
+                        class="text-stone-300 hover:text-red-500 transition-colors p-2 -me-2 rtl:-mr-0 rtl:-ml-2"
                         @click="cartStore.removeItem(item.productId, item.variantId)"
                       >
                         <span class="sr-only">{{ storefrontContent.cart.item.remove }}</span>

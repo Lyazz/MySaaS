@@ -97,7 +97,7 @@ async function handleAddToCart() {
       <NuxtLink :to="`/product/${product.slug}`" class="block w-full h-full">
         <img :src="mainImage" :alt="product.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
       </NuxtLink>
-      <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+      <div class="absolute top-2 start-2 flex flex-col gap-1 items-start">
         <span v-if="isPromoValid" class="bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
           -{{ Math.round(((Number(product.price) - Number(product.promotionalPrice)) / Number(product.price)) * 100) }}%
         </span>
@@ -145,7 +145,7 @@ async function handleAddToCart() {
       </NuxtLink>
 
       <!-- Badges top-left -->
-      <div class="absolute top-3 left-3 flex flex-col gap-1.5 z-10">
+      <div class="absolute top-3 start-3 flex flex-col gap-1.5 z-10">
         <span
           v-if="isPromoValid"
           class="px-2.5 py-1 bg-pink-500 text-white text-xs font-black rounded-xl shadow-sm border border-pink-400"
@@ -165,7 +165,7 @@ async function handleAddToCart() {
       </div>
 
       <!-- Action buttons top-right -->
-      <div class="absolute top-3 right-3 flex flex-col gap-1.5 z-10 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+      <div class="absolute top-3 end-3 flex flex-col gap-1.5 z-10 translate-x-10 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
         <StorefrontSharedFavoriteButton
           :product-id="product.id"
           button-class="w-8 h-8 bg-white rounded-full flex items-center justify-center hover:bg-pink-50 hover:text-pink-500 shadow-md border-2 border-violet-100 transition-colors"
@@ -224,7 +224,7 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 bg-stone-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-stone-700/50"
+        class="fixed bottom-4 end-4 z-50 bg-stone-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-stone-700/50"
       >
         <div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
           <Icon name="lucide:check" class="w-4 h-4" />

@@ -118,7 +118,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </option>
           </select>
           <div
-            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
+            class="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400"
           >
             <Icon name="lucide:chevron-down" class="w-5 h-5" />
           </div>
@@ -232,7 +232,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             />
             <label
               :for="`${option.id}-${value.id}`"
-              class="ml-3 text-sm"
+              class="ms-3 text-sm"
               :class="{
                 'text-slate-400 line-through':
                   optionValueState(option.id, value.id) !== 'available',

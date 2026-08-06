@@ -8,7 +8,7 @@
       {{ label }}
       <span
         v-if="required"
-        class="text-red-400 ml-0.5"
+        class="text-red-400 ms-0.5"
       >*</span>
     </label>
     <slot :input-id="inputId" />

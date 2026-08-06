@@ -78,7 +78,7 @@
               <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.lastOrder') }}
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.pages.customers.index.table.actions') }}
               </th>
             </tr>
@@ -100,7 +100,7 @@
                   <div class="flex-shrink-0 h-10 w-10 [background:rgba(var(--brand-rgb)/0.12)] rounded-full flex items-center justify-center [color:var(--brand)] font-bold uppercase">
                     {{ c.name.charAt(0) }}
                   </div>
-                  <div class="ml-4">
+                  <div class="ms-4">
                     <NuxtLink
                       :to="`/admin/customers/${c.id}`"
                       class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
@@ -157,8 +157,8 @@
               <td class="ui-td whitespace-nowrap" style="color: var(--text-secondary)">
                 {{ formatDate(c.lastOrderAt) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-1">
+              <td class="ui-td whitespace-nowrap text-end">
+                <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
                     class="ui-table-action"
@@ -222,7 +222,7 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-s-md text-sm font-medium disabled:opacity-50"
                 style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
@@ -240,7 +240,7 @@
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-e-md text-sm font-medium disabled:opacity-50"
                 style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >

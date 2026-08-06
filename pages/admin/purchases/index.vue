@@ -110,7 +110,7 @@
           to="/admin/purchases/create"
           class="ui-btn ui-btn--primary ui-btn--md"
         >
-          <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
+          <Icon name="lucide:plus" class="w-5 h-5 me-2" />
           {{ t('admin.pages.purchases.index.newPurchase') }}
         </NuxtLink>
       </div>
@@ -152,7 +152,7 @@
               <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.date') }}
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.pages.purchases.index.table.action') }}
               </th>
             </tr>
@@ -219,7 +219,7 @@
               <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
                 {{ formatDate(order.createdAt) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
+              <td class="ui-td whitespace-nowrap text-end">
                 <NuxtLink
                   :to="`/admin/purchases/${order.id}`"
                   class="ui-btn ui-btn--secondary ui-btn--sm"
@@ -268,7 +268,7 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
+                class="relative inline-flex items-center px-2 py-2 rounded-s-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -291,7 +291,7 @@
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
+                class="relative inline-flex items-center px-2 py-2 rounded-e-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}

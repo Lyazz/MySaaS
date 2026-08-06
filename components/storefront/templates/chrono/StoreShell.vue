@@ -161,7 +161,7 @@ const props = defineProps<{
                   {{ storefrontContent.nav.categories || 'Categories' }}
                   <Icon name="lucide:chevron-down" class="w-4 h-4" />
                 </button>
-                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
+                <div class="absolute top-[80%] start-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
                   <NuxtLink
                     v-for="cat in tenantCategories"
                     :key="cat.id"
@@ -207,7 +207,7 @@ const props = defineProps<{
                   @mouseleave="($event.target as HTMLElement).closest('a')!.style.backgroundColor = '#1F2533'; ($event.target as HTMLElement).closest('a')!.style.color = '#D4C5A9'; ($event.target as HTMLElement).closest('a')!.style.borderColor = 'rgba(212,197,169,0.2)'"
                 >
                   <Icon name="lucide:shopping-bag" class="w-4 h-4" />
-                  <span v-if="cartStore.itemCount > 0" class="ml-1.5 text-xs font-bold">{{ cartStore.itemCount }}</span>
+                  <span v-if="cartStore.itemCount > 0" class="ms-1.5 text-xs font-bold">{{ cartStore.itemCount }}</span>
                 </NuxtLink>
                 <!-- Hamburger (Mobile) -->
               <button class="lg:hidden p-1" style="color: #E8E0D5;" @click="mobileMenuOpen = true">
@@ -226,7 +226,7 @@ const props = defineProps<{
           <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
         </Transition>
         <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs z-[61] shadow-2xl flex flex-col overflow-y-auto" style="background-color: #0E1117;">
+          <div v-if="mobileMenuOpen" class="fixed top-0 start-0 bottom-0 w-[85%] max-w-xs z-[61] shadow-2xl flex flex-col overflow-y-auto" style="background-color: #0E1117;">
             <div class="flex items-center justify-between px-5 py-4 border-b" style="border-color: rgba(212,197,169,0.12);">
               <span class="text-lg font-bold" style="color: #E8E0D5;">{{ tenantName }}</span>
               <button @click="mobileMenuOpen = false" class="p-1" style="color: #6B7280;">
@@ -241,16 +241,16 @@ const props = defineProps<{
                   type="text"
                   v-model="searchQuery"
                   :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full rounded-lg py-2.5 pl-4 pr-10 text-sm outline-none"
+                  class="w-full rounded-lg py-2.5 ps-4 pe-10 text-sm outline-none"
                   style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.15); color: #E8E0D5;"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                   @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color: #6B7280;" />
+                <Icon name="lucide:search" class="w-4 h-4 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color: #6B7280;" />
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
+                  class="absolute top-[100%] start-0 end-0 mt-1 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
                   style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.12);"
                 >
                   <div v-if="searchLoading" class="px-4 py-3 text-sm" style="color: #7A7060;">Searching...</div>
@@ -267,13 +267,13 @@ const props = defineProps<{
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium truncate" style="color: #E8E0D5;">{{ product.title }}</div>
-                        <div class="text-xs font-bold mt-0.5" style="color: #A67C52;">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-xs font-bold mt-0.5" style="color: #A67C52;">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                   <button
                     v-if="hasMoreSearchResults"
                     type="button"
-                    class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                    class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
@@ -295,7 +295,7 @@ const props = defineProps<{
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
   <button
     type="button"
-    class="w-full flex items-center justify-between text-left"
+    class="w-full flex items-center justify-between text-start"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
     <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">

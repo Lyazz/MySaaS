@@ -123,7 +123,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </option>
           </select>
           <div
-            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500"
+            class="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-500"
           >
             <Icon name="lucide:chevron-down" class="w-4 h-4" />
           </div>
@@ -228,7 +228,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             class="flex items-center group cursor-pointer"
             @click="setOptionIfAllowed(option.id, value.id)"
           >
-            <div class="relative flex items-center justify-center w-5 h-5 mr-3">
+            <div class="relative flex items-center justify-center w-5 h-5 me-3">
               <div
                 class="w-5 h-5 rounded-full border transition-all"
                 :class="
@@ -257,7 +257,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               }"
             >
               {{ value.label }}
-              <span class="text-xs font-normal ml-1 text-stone-400">{{
+              <span class="text-xs font-normal ms-1 text-stone-400">{{
                 optionValueSuffix(option.id, value.id)
               }}</span>
             </span>
@@ -295,7 +295,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </span>
             <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
-              class="ml-2 text-[10px] font-semibold"
+              class="ms-2 text-[10px] font-semibold"
             >
               {{ optionValueSuffix(option.id, value.id) }}
             </span>
@@ -307,7 +307,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <!-- Mini Description -->
     <p
       v-if="product?.miniDescription"
-      class="text-stone-600 mb-6 text-lg leading-loose font-light border-l-4 border-brand-200 pl-4 py-1 italic"
+      class="text-stone-600 mb-6 text-lg leading-loose font-light border-s-4 border-brand-200 ps-4 py-1 italic"
     >
       {{ product.miniDescription }}
     </p>

@@ -18,8 +18,8 @@ const submitForm = () => {
         
         <!-- Info Side -->
         <div class="bg-brand-500 p-12 md:p-16 text-white flex flex-col justify-center relative overflow-hidden">
-            <div class="absolute -top-24 -right-24 w-64 h-64 bg-brand-400 rounded-full opacity-50"></div>
-            <div class="absolute -bottom-24 -left-24 w-64 h-64 bg-brand-600 rounded-full opacity-50"></div>
+            <div class="absolute -top-24 -end-24 w-64 h-64 bg-brand-400 rounded-full opacity-50"></div>
+            <div class="absolute -bottom-24 -start-24 w-64 h-64 bg-brand-600 rounded-full opacity-50"></div>
             
             <div class="relative z-10">
                 <h1 class="font-cozy font-black text-5xl mb-6 leading-tight">{{ t('storefront.templates.cozy.contact.heading') }}</h1>
@@ -46,7 +46,7 @@ const submitForm = () => {
         <div class="p-12 md:p-16 bg-white">
             <form @submit.prevent="submitForm" class="space-y-6">
                 <div>
-                    <label class="block text-sm font-bold text-slate-500 mb-2 ml-4">{{ t('storefront.templates.cozy.contact.form.nameLabel') }}</label>
+                    <label class="block text-sm font-bold text-slate-500 mb-2 ms-4">{{ t('storefront.templates.cozy.contact.form.nameLabel') }}</label>
                     <input 
                         v-model="form.name"
                         type="text" 
@@ -54,7 +54,7 @@ const submitForm = () => {
                     >
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-500 mb-2 ml-4">{{ t('storefront.templates.cozy.contact.form.emailLabel') }}</label>
+                    <label class="block text-sm font-bold text-slate-500 mb-2 ms-4">{{ t('storefront.templates.cozy.contact.form.emailLabel') }}</label>
                     <input 
                         v-model="form.email"
                         type="email" 
@@ -62,7 +62,7 @@ const submitForm = () => {
                     >
                 </div>
                 <div>
-                    <label class="block text-sm font-bold text-slate-500 mb-2 ml-4">{{ t('storefront.templates.cozy.contact.form.messageLabel') }}</label>
+                    <label class="block text-sm font-bold text-slate-500 mb-2 ms-4">{{ t('storefront.templates.cozy.contact.form.messageLabel') }}</label>
                     <textarea 
                         v-model="form.message"
                         rows="4"

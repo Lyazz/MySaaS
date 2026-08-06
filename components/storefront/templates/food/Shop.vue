@@ -156,8 +156,8 @@ const closeQuickView = () => {
 <template>
   <div class="bg-[#f8faf9] min-h-screen py-8 lg:py-16 font-sans relative selection:bg-brand-100 selection:text-brand-900">
     <!-- Decorative Background Elements -->
-    <div class="absolute top-0 left-0 w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-60 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
-    <div class="absolute bottom-0 right-0 w-96 h-96 bg-lime-50 rounded-full blur-3xl opacity-60 translate-x-1/3 translate-y-1/3 pointer-events-none" />
+    <div class="absolute top-0 start-0 w-64 h-64 bg-orange-50 rounded-full blur-3xl opacity-60 -translate-x-1/2 -translate-y-1/2 pointer-events-none" />
+    <div class="absolute bottom-0 end-0 w-96 h-96 bg-lime-50 rounded-full blur-3xl opacity-60 translate-x-1/3 translate-y-1/3 pointer-events-none" />
 
     <!-- Mobile Filter Drawer Overlay -->
     <Transition
@@ -193,7 +193,7 @@ const closeQuickView = () => {
             Filters
           </h3>
           <button
-            class="p-2 -mr-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-full transition-colors"
+            class="p-2 -me-2 text-stone-500 hover:text-stone-900 hover:bg-stone-100 rounded-full transition-colors"
             @click="isFilterDrawerOpen = false"
           >
             <Icon name="lucide:x" class="w-6 h-6" />
@@ -345,9 +345,9 @@ const closeQuickView = () => {
                 v-model="searchQuery" 
                 type="text"
                 :placeholder="storefrontContent.shop.searchPlaceholder" 
-                class="w-full bg-stone-50 border-none text-stone-900 text-sm rounded-lg focus:ring-2 focus:ring-brand-200 block pl-10 rtl:pl-3 rtl:pr-10 h-11 transition-all hover:bg-stone-100 placeholder-stone-400 font-medium" 
+                class="w-full bg-stone-50 border-none text-stone-900 text-sm rounded-lg focus:ring-2 focus:ring-brand-200 block ps-10 rtl:pl-3 rtl:pr-10 h-11 transition-all hover:bg-stone-100 placeholder-stone-400 font-medium" 
               >
-              <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-3.5 rtl:pl-0 rtl:pr-3.5 pointer-events-none">
+              <div class="absolute inset-y-0 start-0 rtl:left-auto rtl:right-0 flex items-center ps-3.5 pointer-events-none">
                 <Icon name="lucide:search" class="w-5 h-5 text-stone-400" />
               </div>
             </div>
@@ -357,13 +357,13 @@ const closeQuickView = () => {
               <div class="relative w-full sm:w-48">
                 <select
                   v-model="sortOption"
-                  class="w-full appearance-none bg-transparent text-sm py-2 pl-2 pr-8 cursor-pointer text-stone-600 font-bold hover:text-stone-900 focus:ring-0 border-none text-right"
+                  class="w-full appearance-none bg-transparent text-sm py-2 ps-2 pe-8 cursor-pointer text-stone-600 font-bold hover:text-stone-900 focus:ring-0 border-none text-end"
                 >
                   <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-2 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-stone-500" />
                 </div>
               </div>
@@ -393,7 +393,7 @@ const closeQuickView = () => {
           </div>
           
            <!-- Active Filters Chips -->
-          <div v-if="selectedCategories.length > 0" class="flex flex-wrap gap-2 mb-8 ml-2">
+          <div v-if="selectedCategories.length > 0" class="flex flex-wrap gap-2 mb-8 ms-2">
               <div 
                 v-for="catId in selectedCategories" 
                 :key="catId"
@@ -401,7 +401,7 @@ const closeQuickView = () => {
               >
                   <span class="w-2 h-2 rounded-full bg-brand-500"></span>
                   <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) }}</span>
-                  <button @click="removeCategory(catId)" class="hover:text-red-500 ml-1">
+                  <button @click="removeCategory(catId)" class="hover:text-red-500 ms-1">
                       <Icon name="lucide:x" class="w-3.5 h-3.5" />
                   </button>
               </div>
@@ -478,7 +478,7 @@ const closeQuickView = () => {
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-md" @click="closeQuickView"></div>
           <div class="bg-white rounded-[3rem] shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden border-8 border-white">
-              <button @click="closeQuickView" class="absolute top-6 right-6 z-20 p-2 bg-white rounded-full hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition-all shadow-sm">
+              <button @click="closeQuickView" class="absolute top-6 end-6 z-20 p-2 bg-white rounded-full hover:bg-stone-100 text-stone-500 hover:text-stone-900 transition-all shadow-sm">
                   <Icon name="lucide:x" class="w-6 h-6" />
               </button>
               
@@ -488,13 +488,13 @@ const closeQuickView = () => {
                     :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" 
                     class="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110"
                   >
-                   <div class="absolute bottom-6 left-6 rtl:left-auto rtl:right-6 inline-block px-4 py-2 bg-white/90 backdrop-blur rounded-full text-xs font-bold uppercase tracking-widest text-brand-700 shadow-lg">
+                   <div class="absolute bottom-6 start-6 rtl:left-auto rtl:right-6 inline-block px-4 py-2 bg-white/90 backdrop-blur rounded-full text-xs font-bold uppercase tracking-widest text-brand-700 shadow-lg">
                         {{ storefrontContent.product.inStock }}
                    </div>
               </div>
 
               <!-- Content Side -->
-              <div class="w-full md:w-1/2 p-10 md:p-14 flex flex-col items-start text-left">
+              <div class="w-full md:w-1/2 p-10 md:p-14 flex flex-col items-start text-start">
                   <div class="w-12 h-1 bg-brand-500 mb-8 rounded-full"></div>
                   
                   <h2 class="text-4xl md:text-5xl font-bold text-stone-900 mb-4 leading-tight">{{ quickViewProduct.title }}</h2>

@@ -143,7 +143,7 @@
             <div class="w-10 h-10 bg-lime-100 rounded-lg flex items-center justify-center group-hover:bg-lime-200 text-lime-600 transition-colors">
               <Icon name="lucide:plus" class="w-6 h-6" />
             </div>
-            <div class="ml-4">
+            <div class="ms-4">
               <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.createTenant.title') }}</p>
               <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.createTenant.subtitle') }}</p>
             </div>
@@ -156,7 +156,7 @@
              <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 text-blue-600 transition-colors">
               <Icon name="lucide:building" class="w-6 h-6" />
             </div>
-            <div class="ml-4">
+            <div class="ms-4">
               <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.manageTenants.title') }}</p>
               <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.manageTenants.subtitle') }}</p>
             </div>
@@ -169,7 +169,7 @@
              <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 text-indigo-600 transition-colors">
               <Icon name="lucide:bar-chart-2" class="w-6 h-6" />
             </div>
-            <div class="ml-4">
+            <div class="ms-4">
               <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.viewAnalytics.title') }}</p>
               <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.viewAnalytics.subtitle') }}</p>
             </div>

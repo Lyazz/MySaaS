@@ -183,14 +183,14 @@ const closeQuickView = () => {
     >
       <aside
         v-if="isFilterDrawerOpen"
-        class="fixed inset-y-0 right-0 w-[320px] bg-stone-50 z-50 shadow-2xl p-8 overflow-y-auto lg:hidden border-l border-stone-100"
+        class="fixed inset-y-0 end-0 w-[320px] bg-stone-50 z-50 shadow-2xl p-8 overflow-y-auto lg:hidden border-s border-stone-100"
       >
         <div class="flex items-center justify-between mb-8">
           <h3 class="font-bold text-stone-900 text-xl font-wellness">
             {{ storefrontContent.actions.filters }}
           </h3>
           <button
-            class="p-2 -mr-2 text-stone-400 hover:text-stone-900 transition-colors"
+            class="p-2 -me-2 text-stone-400 hover:text-stone-900 transition-colors"
             @click="isFilterDrawerOpen = false"
           >
             <Icon name="lucide:x" class="w-6 h-6" />
@@ -389,9 +389,9 @@ const closeQuickView = () => {
                 v-model="searchQuery" 
                 type="text"
                 :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
-                class="w-full bg-white border border-stone-200 text-stone-900 text-sm rounded-full focus:ring-2 focus:ring-stone-100 focus:border-stone-400 block pl-12 rtl:pl-6 rtl:pr-12 pr-6 py-3.5 shadow-sm transition-all hover:bg-stone-50 placeholder:text-stone-400" 
+                class="w-full bg-white border border-stone-200 text-stone-900 text-sm rounded-full focus:ring-2 focus:ring-stone-100 focus:border-stone-400 block ps-12 rtl:pl-6 rtl:pr-12 pe-6 py-3.5 shadow-sm transition-all hover:bg-stone-50 placeholder:text-stone-400" 
               >
-              <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-4 rtl:pl-0 rtl:pr-4 pointer-events-none">
+              <div class="absolute inset-y-0 start-0 rtl:left-auto rtl:right-0 flex items-center ps-4 pointer-events-none">
                 <Icon name="lucide:search" class="w-5 h-5 text-stone-400" />
               </div>
             </div>
@@ -402,13 +402,13 @@ const closeQuickView = () => {
               <div class="relative w-full sm:w-56">
                 <select
                   v-model="sortOption"
-                  class="w-full appearance-none bg-white rounded-full border border-stone-200 text-sm py-3.5 pl-6 pr-12 focus:border-stone-400 focus:ring-stone-100 shadow-sm cursor-pointer hover:bg-stone-50 transition-colors text-stone-800 font-medium outline-none"
+                  class="w-full appearance-none bg-white rounded-full border border-stone-200 text-sm py-3.5 ps-6 pe-12 focus:border-stone-400 focus:ring-stone-100 shadow-sm cursor-pointer hover:bg-stone-50 transition-colors text-stone-800 font-medium outline-none"
                 >
                   <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-stone-400" />
                 </div>
               </div>
@@ -503,7 +503,7 @@ const closeQuickView = () => {
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-md" @click="closeQuickView"></div>
           <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden border border-stone-100">
-              <button @click="closeQuickView" class="absolute top-6 right-6 z-20 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors shadow-sm text-stone-500 hover:text-stone-900">
+              <button @click="closeQuickView" class="absolute top-6 end-6 z-20 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors shadow-sm text-stone-500 hover:text-stone-900">
                   <Icon name="lucide:x" class="w-5 h-5" />
               </button>
               

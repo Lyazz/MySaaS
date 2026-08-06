@@ -138,7 +138,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Slide controls -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-3">
+      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 end-8 z-20 gap-3">
         <button
           class="w-11 h-11 border flex items-center justify-center transition-all duration-200"
           style="border-color: rgba(212,197,169,0.25); color: #D4C5A9; border-radius: 1px;"
@@ -156,7 +156,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Progress dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-7 left-7 z-20 flex gap-2">
+      <div v-if="hasMultipleSlides" class="absolute bottom-7 start-7 z-20 flex gap-2">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 

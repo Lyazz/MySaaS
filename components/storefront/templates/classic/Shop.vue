@@ -198,14 +198,14 @@ const closeQuickView = () => {
     >
       <aside
         v-if="isFilterDrawerOpen"
-        class="fixed inset-y-0 right-0 w-[300px] bg-white z-50 shadow-2xl p-6 overflow-y-auto lg:hidden"
+        class="fixed inset-y-0 end-0 w-[300px] bg-white z-50 shadow-2xl p-6 overflow-y-auto lg:hidden"
       >
         <div class="flex items-center justify-between mb-8">
           <h3 class="font-serif text-slate-900 text-xl font-bold">
             {{ storefrontContent.actions.filters }}
           </h3>
           <button
-            class="p-2 -mr-2 text-slate-500 hover:text-slate-900"
+            class="p-2 -me-2 text-slate-500 hover:text-slate-900"
             @click="isFilterDrawerOpen = false"
           >
             <Icon name="lucide:x" class="w-6 h-6" />
@@ -400,7 +400,7 @@ const closeQuickView = () => {
                 :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
                 class="w-full bg-transparent border-b border-slate-300 text-slate-900 text-sm focus:border-slate-900 focus:ring-0 block px-0 py-2 placeholder-slate-400" 
               >
-              <div class="absolute inset-y-0 right-0 flex items-center pointer-events-none">
+              <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none">
                 <Icon name="lucide:search" class="w-4 h-4 text-slate-400" />
               </div>
             </div>
@@ -410,13 +410,13 @@ const closeQuickView = () => {
                 <div class="relative">
                   <select
                     v-model="sortOption"
-                    class="appearance-none bg-transparent border-none text-sm py-2 pr-6 pl-0 focus:ring-0 cursor-pointer text-slate-700 font-medium hover:text-slate-900 transition-colors"
+                    class="appearance-none bg-transparent border-none text-sm py-2 pe-6 ps-0 focus:ring-0 cursor-pointer text-slate-700 font-medium hover:text-slate-900 transition-colors"
                   >
                     <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                     <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                     <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                   </select>
-                  <div class="absolute inset-y-0 right-0 flex items-center pointer-events-none">
+                  <div class="absolute inset-y-0 end-0 flex items-center pointer-events-none">
                     <Icon name="lucide:chevron-down" class="w-3 h-3 text-slate-500" />
                   </div>
                 </div>
@@ -510,7 +510,7 @@ const closeQuickView = () => {
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-0 md:p-8">
           <div class="absolute inset-0 bg-white/90 backdrop-blur-md" @click="closeQuickView"></div>
           <div class="bg-white w-full max-w-5xl h-full md:h-auto max-h-screen md:max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row shadow-2xl">
-              <button @click="closeQuickView" class="absolute top-6 right-6 z-20 p-2 text-slate-500 hover:text-slate-900 transition-colors">
+              <button @click="closeQuickView" class="absolute top-6 end-6 z-20 p-2 text-slate-500 hover:text-slate-900 transition-colors">
                   <Icon name="lucide:x" class="w-8 h-8" />
               </button>
               

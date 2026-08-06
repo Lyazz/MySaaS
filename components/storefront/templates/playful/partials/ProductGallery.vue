@@ -79,7 +79,7 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
       </transition-group>
 
       <!-- Mobile dots -->
-      <div v-if="images?.length > 1" class="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10 md:hidden">
+      <div v-if="images?.length > 1" class="absolute bottom-3 start-0 end-0 flex justify-center gap-2 z-10 md:hidden">
         <button
           v-for="(_, idx) in images"
           :key="'dot-'+idx"

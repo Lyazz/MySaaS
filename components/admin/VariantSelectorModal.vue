@@ -15,13 +15,13 @@
         <!-- Search -->
         <div class="p-4" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" style="color: var(--text-tertiary)">
+            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none" style="color: var(--text-tertiary)">
               <Icon name="lucide:search" class="h-4 w-4" />
             </div>
             <input
               v-model="searchQuery"
               type="text"
-              class="ui-input pl-9"
+              class="ui-input ps-9"
               :placeholder="t('admin.components.variantSelectorModal.search.placeholder')"
               @input="handleSearch"
             />
@@ -96,7 +96,7 @@
           <div class="text-[13px]" style="color: var(--text-secondary)">
             {{ t('admin.components.variantSelectorModal.selectedCount', { count: selectedVariants.length }) }}
           </div>
-          <div class="flex space-x-3">
+          <div class="flex space-x-3 rtl:space-x-reverse">
             <button
               @click="close"
               class="ui-btn ui-btn--secondary ui-btn--md"

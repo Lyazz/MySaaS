@@ -74,7 +74,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-2 gap-1 max-h-56 overflow-y-auto pr-1">
+          <div class="grid grid-cols-2 gap-1 max-h-56 overflow-y-auto pe-1">
             <label
               v-for="col in allColumns"
               :key="col.key"

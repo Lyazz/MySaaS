@@ -597,7 +597,7 @@ const handleAddToCart = async () => {
                     >
                 </div>
                 <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
-                    <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                    <label class="block text-sm font-semibold text-slate-700 ms-1">
                         {{ storefrontContent.checkout.sections.deliveryOptions }}
                     </label>
                     <div 
@@ -642,7 +642,7 @@ const handleAddToCart = async () => {
                         </div>
                         
                         <div class="flex items-center gap-3 flex-shrink-0">
-                            <div class="text-right">
+                            <div class="text-end">
                             <div class="font-bold text-brand-600 text-base">
                                 {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                             </div>
@@ -668,7 +668,7 @@ const handleAddToCart = async () => {
                         v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
                         class="space-y-2 mt-4"
                     >
-                        <label class="block text-sm font-semibold text-slate-700 ml-1 rtl:ml-0 rtl:mr-1">
+                        <label class="block text-sm font-semibold text-slate-700 ms-1">
                             {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
                         </label>
                         <div
@@ -768,7 +768,7 @@ const handleAddToCart = async () => {
         >
         <div
             v-if="showSuccess"
-            class="fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-6 py-4 shadow-xl flex items-center gap-4 border border-slate-700"
+            class="fixed bottom-4 end-4 z-50 bg-slate-900 text-white px-6 py-4 shadow-xl flex items-center gap-4 border border-slate-700"
         >
             <div class="w-6 h-6 flex items-center justify-center text-white shrink-0">
             <Icon name="lucide:check" class="w-5 h-5" />

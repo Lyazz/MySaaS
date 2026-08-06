@@ -120,7 +120,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </option>
           </select>
           <div
-            class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none"
+            class="absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none"
           >
             <Icon name="lucide:chevron-down" class="w-5 h-5" />
           </div>
@@ -236,7 +236,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             />
             <label
               :for="`${option.id}-${value.id}`"
-              class="ml-2 block font-mono text-sm uppercase"
+              class="ms-2 block font-mono text-sm uppercase"
               :class="{
                 'text-gray-400 line-through':
                   optionValueState(option.id, value.id) !== 'available',
@@ -245,7 +245,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               }"
             >
               {{ value.label }}
-              <span class="text-xs font-normal ml-1">{{
+              <span class="text-xs font-normal ms-1">{{
                 optionValueSuffix(option.id, value.id)
               }}</span>
             </label>
@@ -283,7 +283,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </span>
             <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
-              class="ml-2 text-[10px] font-bold"
+              class="ms-2 text-[10px] font-bold"
             >
               {{ optionValueSuffix(option.id, value.id) }}
             </span>
@@ -295,7 +295,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <!-- Mini Description -->
     <p
       v-if="product?.miniDescription"
-      class="font-mono text-sm text-gray-600 leading-relaxed border-l-4 border-brand pl-4"
+      class="font-mono text-sm text-gray-600 leading-relaxed border-s-4 border-brand ps-4"
     >
       {{ product.miniDescription }}
     </p>

@@ -99,7 +99,7 @@
               <th class="ui-th">{{ t('admin.pages.users.columns.cashbox') }}</th>
               <th class="ui-th">{{ t('admin.pages.users.columns.status') }}</th>
               <th class="ui-th">{{ t('admin.pages.users.columns.createdAt') }}</th>
-              <th class="ui-th text-right">{{ t('admin.common.actions') }}</th>
+              <th class="ui-th text-end">{{ t('admin.common.actions') }}</th>
             </tr>
           </thead>
           <tbody class="ui-tbody">
@@ -155,8 +155,8 @@
               <td class="ui-td" style="color: var(--text-secondary)">
                 {{ formatDate(u.createdAt) }}
               </td>
-              <td class="ui-td text-right">
-                <div class="flex items-center justify-end space-x-1">
+              <td class="ui-td text-end">
+                <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
                   <button
                     type="button"
                     class="ui-table-action"
@@ -226,7 +226,7 @@
             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
+                class="relative inline-flex items-center px-2 py-2 rounded-s-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -243,7 +243,7 @@
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
+                class="relative inline-flex items-center px-2 py-2 rounded-e-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}
@@ -267,7 +267,7 @@
             <tr>
               <th class="ui-th">{{ t('admin.pages.users.roles.columns.name') }}</th>
               <th class="ui-th">{{ t('admin.pages.users.roles.columns.permissions') }}</th>
-              <th class="ui-th text-right">{{ t('admin.common.actions') }}</th>
+              <th class="ui-th text-end">{{ t('admin.common.actions') }}</th>
             </tr>
           </thead>
           <tbody class="ui-tbody">
@@ -321,8 +321,8 @@
                   </div>
                 </div>
               </td>
-              <td class="ui-td text-right">
-                <div class="flex items-center justify-end space-x-1">
+              <td class="ui-td text-end">
+                <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
                   <button
                     type="button"
                     class="ui-table-action"
@@ -420,13 +420,13 @@
             :hint="editing ? t('admin.pages.users.hints.passwordOptional') : t('admin.pages.users.hints.passwordRequired')"
             :error="fieldErrors.password"
             autocomplete="new-password"
-            class="pr-10"
+            class="pe-10"
             :required="!editing"
           >
             <template #suffix>
               <button
                 type="button"
-                class="absolute inset-y-0 right-0 inline-flex items-center px-3 hover:text-white transition-colors" style="color: var(--text-muted)"
+                class="absolute inset-y-0 end-0 inline-flex items-center px-3 hover:text-white transition-colors" style="color: var(--text-muted)"
                 :aria-label="passwordVisible ? 'Hide password' : 'Show password'"
                 @click="passwordVisible = !passwordVisible"
               >
@@ -442,13 +442,13 @@
             :type="confirmPasswordVisible ? 'text' : 'password'"
             :error="fieldErrors.confirmPassword"
             autocomplete="new-password"
-            class="pr-10"
+            class="pe-10"
             :required="!editing || form.password.trim().length > 0"
           >
             <template #suffix>
               <button
                 type="button"
-                class="absolute inset-y-0 right-0 inline-flex items-center px-3 hover:text-white transition-colors" style="color: var(--text-muted)"
+                class="absolute inset-y-0 end-0 inline-flex items-center px-3 hover:text-white transition-colors" style="color: var(--text-muted)"
                 :aria-label="confirmPasswordVisible ? 'Hide password confirmation' : 'Show password confirmation'"
                 @click="confirmPasswordVisible = !confirmPasswordVisible"
               >
