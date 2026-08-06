@@ -1151,6 +1151,21 @@
         }
       }
     },
+    "orderSuccess": {
+      "title": "Order Placed Successfully!",
+      "subtitle": "Thank you for your order. We'll contact you shortly to confirm.",
+      "orderId": "Order ID",
+      "whatsNext": "What's Next?",
+      "callTitle": "We'll call you soon",
+      "callDescription": "Our team will contact you to confirm your order and delivery details.",
+      "prepareTitle": "We'll prepare your order",
+      "prepareDescription": "Once confirmed, we'll prepare your items for delivery.",
+      "deliveryTitle": "Delivery on the way",
+      "deliveryDescription": "Your order will be delivered to your address. Pay in cash when you receive it.",
+      "paymentInfo": "Payment: Cash on Delivery - Pay when you receive your order",
+      "continueShopping": "Continue Shopping",
+      "backToHome": "Back to Home"
+    },
     "product": {
       "detailsTitle": "Product Details",
       "addedToCart": "{title} added to cart!",

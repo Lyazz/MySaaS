@@ -1137,6 +1137,21 @@
         }
       }
     },
+    "orderSuccess": {
+      "title": "Commande passée avec succès !",
+      "subtitle": "Merci pour votre commande. Nous vous contacterons bientôt pour la confirmer.",
+      "orderId": "Numéro de commande",
+      "whatsNext": "Et maintenant ?",
+      "callTitle": "Nous vous appellerons bientôt",
+      "callDescription": "Notre équipe vous contactera pour confirmer votre commande et les détails de livraison.",
+      "prepareTitle": "Nous préparerons votre commande",
+      "prepareDescription": "Une fois confirmée, nous préparerons vos articles pour la livraison.",
+      "deliveryTitle": "Livraison en cours",
+      "deliveryDescription": "Votre commande sera livrée à votre adresse. Payez en espèces à la réception.",
+      "paymentInfo": "Paiement : Paiement à la livraison - Payez à la réception de votre commande",
+      "continueShopping": "Continuer mes achats",
+      "backToHome": "Retour à l'accueil"
+    },
     "product": {
       "detailsTitle": "Détails du produit",
       "addedToCart": "{title} ajouté au panier !",
