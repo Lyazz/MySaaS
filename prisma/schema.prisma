@@ -339,6 +339,13 @@ model StoreSettings {
   invoiceFooterText            String?
   invoiceShowLogo              Boolean @default(true)
 
+  // Clearance ("destockage") module settings
+  clearanceEnabled       Boolean @default(false)
+  clearanceMultiple      Int     @default(6)
+  clearanceDivisor       Int     @default(3)
+  clearanceBannerEnabled Boolean @default(false)
+  clearanceBannerText    String?
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -480,6 +487,9 @@ model Product {
   promotionStartDate DateTime?
   promotionEndDate   DateTime?
   showCountdown      Boolean   @default(false)
+
+  // Clearance ("destockage") module: tags this product as part of the tenant's clearance rule
+  isClearance Boolean @default(false)
 
   isActive      Boolean        @default(true)
   images        String[]       @default([]) // Deprecated: Use ProductImage model
@@ -955,6 +965,8 @@ model Order {
   earnedPointsTotal       Int     @default(0)
   redeemedPointsTotal     Int     @default(0)
   redeemedAmount          Float   @default(0)
+  clearanceDiscountAmount Float   @default(0)
+  clearanceBreakdown      Json?
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)

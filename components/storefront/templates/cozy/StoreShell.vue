@@ -68,6 +68,8 @@ const currentYear = new Date().getFullYear()
       <!-- Top Announcement Bar -->
       <!-- Top Announcement Bar -->
       <StorefrontSharedAnnouncementBar v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['sticky top-4 z-50 px-4 md:px-8', { 'hidden md:block': mobileHeaderHidden }]">

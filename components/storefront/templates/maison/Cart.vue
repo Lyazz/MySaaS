@@ -4,6 +4,7 @@ import { useCartStore } from '~/stores/cart'
 const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const { format: formatCurrency } = useCurrency()
+const { t } = useI18n({ useScope: 'global' })
 </script>
 
 <template>
@@ -99,6 +100,10 @@ const { format: formatCurrency } = useCurrency()
                 <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
                 <dd>{{ formatCurrency(cartStore.total) }}</dd>
               </div>
+              <div v-if="cartStore.clearanceDiscount > 0" class="cart__summary-row cart__summary-row--clearance">
+                <dt>{{ t('storefront.clearance.discountLine') }}</dt>
+                <dd>-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+              </div>
               <div class="cart__summary-row">
                 <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
                 <dd class="cart__summary-hint">{{ storefrontContent.cart.summary.shippingHint }}</dd>
@@ -107,7 +112,7 @@ const { format: formatCurrency } = useCurrency()
 
             <div class="cart__summary-total">
               <span>{{ storefrontContent.cart.summary.total }}</span>
-              <span class="cart__summary-total-price">{{ formatCurrency(cartStore.total) }}</span>
+              <span class="cart__summary-total-price">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</span>
             </div>
 
             <NuxtLink to="/checkout" class="at-btn-solid cart__checkout-btn">
@@ -298,6 +303,7 @@ const { format: formatCurrency } = useCurrency()
   margin: 0;
 }
 .cart__summary-hint { font-size: 10px; color: var(--at-muted) !important; }
+.cart__summary-row--clearance dt, .cart__summary-row--clearance dd { color: var(--at-gold) !important; }
 
 .cart__summary-total {
   display: flex;

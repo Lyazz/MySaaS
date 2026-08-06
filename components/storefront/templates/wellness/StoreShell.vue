@@ -123,11 +123,13 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
     <div class="min-h-screen flex flex-col font-wellness text-stone-600 bg-stone-50">
       <!-- Top Announcement Bar -->
       <!-- Top Announcement Bar -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
         background-color="bg-brand-600"
         text-color="text-white"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <!-- Header (Wellness Redesign) -->

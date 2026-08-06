@@ -2,6 +2,7 @@ import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
+import { computeClearanceDiscount, type ClearanceDiscountResult } from '../../../../shared/pricing/clearance-pricing'
 import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
@@ -62,6 +63,7 @@ type PreparedPublicOrderItem = {
     reserved: number
     safetyStock: number
     isDefaultVariant: boolean
+    promotionApplied: boolean
 }
 
 export type PublicOrderInput = {
@@ -331,6 +333,7 @@ export class OrdersService {
                 promotionalPrice: true,
                 promotionStartDate: true,
                 promotionEndDate: true,
+                isClearance: true,
                 _count: {
                     select: { options: true }
                 }
@@ -459,7 +462,8 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = buildScopedProductPricing(product as any, variant as any).effectivePrice
+            const scopedPricing = buildScopedProductPricing(product as any, variant as any)
+            const price = scopedPricing.effectivePrice
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY
@@ -493,15 +497,61 @@ export class OrdersService {
                 trackInventory,
                 reserved: variant.reserved,
                 safetyStock: variant.safetyStock,
-                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id,
+                promotionApplied: scopedPricing.promotionApplied
             }
         })
+
+        const clearance = await this.computeClearanceForItems(
+            tenantId,
+            storeSettings as any,
+            validatedItems,
+            productMap as any,
+            bundleDealsByProductId
+        )
+        totalCents -= clearance.discountCents
 
         return {
             storeSettings,
             validatedItems,
+            clearanceDiscountAmount: centsToMoney(clearance.discountCents),
+            clearanceBreakdown: clearance.freeCount > 0 ? clearance : null,
             totalAmount: centsToMoney(totalCents)
         }
+    }
+
+    private async computeClearanceForItems(
+        tenantId: string,
+        storeSettings: { clearanceEnabled?: boolean; clearanceMultiple?: number; clearanceDivisor?: number },
+        items: { productId: string; variantId: string; quantity: number; price: number; promotionApplied: boolean }[],
+        productMap: Map<string, { isClearance?: boolean }>,
+        bundleDealsByProductId: Map<string, unknown[]>
+    ): Promise<ClearanceDiscountResult> {
+        if (!storeSettings?.clearanceEnabled) {
+            return { eligibleQuantity: 0, freeCount: 0, discountCents: 0, freeUnits: [] }
+        }
+
+        const taggedCount = await prisma.product.count({ where: { tenantId, isClearance: true } })
+        const anyTaggedInTenant = taggedCount > 0
+
+        const lines = items
+            .filter((item) => {
+                const product = productMap.get(item.productId)
+                const isEligibleProduct = anyTaggedInTenant ? Boolean(product?.isClearance) : true
+                const hasBundleDeal = (bundleDealsByProductId.get(item.productId) ?? []).length > 0
+                return isEligibleProduct && !item.promotionApplied && !hasBundleDeal
+            })
+            .map((item) => ({
+                key: `${item.productId}:${item.variantId}`,
+                unitPriceCents: moneyToCents(item.price),
+                quantity: item.quantity
+            }))
+
+        return computeClearanceDiscount({
+            lines,
+            multiple: storeSettings.clearanceMultiple ?? 6,
+            divisor: storeSettings.clearanceDivisor ?? 3
+        })
     }
 
     private async resolveShippingPickupPoint(input: {
@@ -1488,8 +1538,11 @@ export class OrdersService {
             lineTotal: number
             pricingBreakdown: any
             trackInventory: boolean
+            promotionApplied: boolean
         }> = []
         let totalCents = 0
+        let clearanceDiscountAmount = 0
+        let clearanceBreakdown: ClearanceDiscountResult | null = null
 
         if (shouldUpdateItems) {
             if (!Array.isArray(itemsInput) || itemsInput.length === 0) {
@@ -1533,6 +1586,7 @@ export class OrdersService {
                     promotionalPrice: true,
                     promotionStartDate: true,
                     promotionEndDate: true,
+                    isClearance: true,
                     _count: {
                         select: { options: true }
                     }
@@ -1649,7 +1703,8 @@ export class OrdersService {
                     throw new OrderValidationError(400, 'Variant selection is required for this product')
                 }
 
-                const price = buildScopedProductPricing(product as any, variant as any).effectivePrice
+                const scopedPricing = buildScopedProductPricing(product as any, variant as any)
+                const price = scopedPricing.effectivePrice
 
                 const availableStock = variant.trackInventory
                     ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
@@ -1678,9 +1733,26 @@ export class OrdersService {
                     price,
                     lineTotal: centsToMoney(pricing.bestTotalCents),
                     pricingBreakdown: pricing,
-                    trackInventory
+                    trackInventory,
+                    promotionApplied: scopedPricing.promotionApplied
                 }
             })
+
+            const orderStoreSettings = await prisma.storeSettings.upsert({
+                where: { tenantId },
+                create: { tenantId },
+                update: {}
+            })
+            const clearance = await this.computeClearanceForItems(
+                tenantId,
+                orderStoreSettings as any,
+                validatedItems as any,
+                productMap as any,
+                bundleDealsByProductId
+            )
+            totalCents -= clearance.discountCents
+            clearanceDiscountAmount = centsToMoney(clearance.discountCents)
+            clearanceBreakdown = clearance.freeCount > 0 ? clearance : null
         }
 
         await prisma.$transaction(async (tx) => {
@@ -1755,6 +1827,10 @@ export class OrdersService {
             }
             const nextTotalAmount = shouldUpdateItems ? centsToMoney(totalCents) : existing.totalAmount
             updateData.totalAmount = nextTotalAmount
+            if (shouldUpdateItems) {
+                updateData.clearanceDiscountAmount = clearanceDiscountAmount
+                updateData.clearanceBreakdown = clearanceBreakdown as any
+            }
 
             updateData.totalWithShippingAmount = computeTotalWithShipping(nextTotalAmount, nextShippingAmount)
 
@@ -2464,7 +2540,8 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
         }
 
-        const { storeSettings, validatedItems, totalAmount } = await this.preparePublicOrderItems(input.tenantId, normalizedItems)
+        const { storeSettings, validatedItems, totalAmount, clearanceDiscountAmount, clearanceBreakdown } =
+            await this.preparePublicOrderItems(input.tenantId, normalizedItems)
 
         if (storeSettings.cartEnabled === false) {
             throw new OrderValidationError(403, 'Checkout is disabled for this store')
@@ -2593,6 +2670,8 @@ export class OrdersService {
                     earnedPointsTotal: pointsPreview.totalPoints,
                     redeemedPointsTotal: redemption.pointsReserved,
                     redeemedAmount: redemption.redeemedAmount,
+                    clearanceDiscountAmount,
+                    clearanceBreakdown: clearanceBreakdown as any,
                     status: 'PENDING',
                     readAt: null
                 }
@@ -2764,6 +2843,7 @@ export class OrdersService {
                 promotionalPrice: true,
                 promotionStartDate: true,
                 promotionEndDate: true,
+                isClearance: true,
                 _count: {
                     select: { options: true }
                 }
@@ -2895,7 +2975,8 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = buildScopedProductPricing(product as any, variant as any).effectivePrice
+            const scopedPricing = buildScopedProductPricing(product as any, variant as any)
+            const price = scopedPricing.effectivePrice
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY
@@ -2931,9 +3012,21 @@ export class OrdersService {
                 trackInventory,
                 reserved: variant.reserved,
                 safetyStock: variant.safetyStock,
-                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id,
+                promotionApplied: scopedPricing.promotionApplied
             }
         })
+
+        const clearance = await this.computeClearanceForItems(
+            tenantId,
+            storeSettings as any,
+            validatedItems,
+            productMap as any,
+            bundleDealsByProductId
+        )
+        totalCents -= clearance.discountCents
+        const clearanceDiscountAmount = centsToMoney(clearance.discountCents)
+        const clearanceBreakdown = clearance.freeCount > 0 ? clearance : null
 
         let shippingProvider = null
         if (input.shippingProvider) {
@@ -3030,6 +3123,8 @@ export class OrdersService {
                     totalAmount,
                     totalWithShippingAmount,
                     earnedPointsTotal: pointsPreview.totalPoints,
+                    clearanceDiscountAmount,
+                    clearanceBreakdown: clearanceBreakdown as any,
                     status: 'PENDING',
                     readAt: new Date()
                 }

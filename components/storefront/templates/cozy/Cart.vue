@@ -4,6 +4,7 @@ import { useCartStore } from '~/stores/cart'
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const { currencyCode, format: formatCurrency } = useCurrency()
 </script>
 
@@ -85,6 +86,10 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                             <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
                             <dd class="text-slate-700 font-bold">{{ formatCurrency(cartStore.total) }}</dd>
                         </div>
+                        <div v-if="cartStore.clearanceDiscount > 0" class="flex justify-between">
+                            <dt class="text-amber-600">{{ t('storefront.clearance.discountLine') }}</dt>
+                            <dd class="text-amber-600 font-bold">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+                        </div>
                         <div class="flex justify-between">
                             <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
                             <dd class="text-slate-400 text-xs">{{ storefrontContent.cart.summary.shippingHint }}</dd>
@@ -95,7 +100,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                         </div>
                         <div class="flex justify-between pt-4 border-t border-slate-100 text-lg">
                             <dt class="text-slate-800 font-bold">{{ storefrontContent.cart.summary.total }}</dt>
-                            <dd class="text-brand-500 font-bold">{{ formatCurrency(cartStore.total) }}</dd>
+                            <dd class="text-brand-500 font-bold">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</dd>
                         </div>
                     </dl>
 

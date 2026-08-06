@@ -16,6 +16,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -59,7 +60,11 @@ const mainImage = computed(() => {
 })
 
 // TODO: Replace with real discount logic when available in backend
-const discount = 0 
+const discount = 0
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 
 const isNew = computed(() => {
@@ -142,6 +147,10 @@ async function handleAddToCart() {
           v-if="discount > 0"
           class="px-3 py-1 bg-white/90 backdrop-blur text-orange-600 text-xs font-bold rounded-full shadow-sm"
         >-{{ discount }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-3 py-1 bg-amber-600 text-white text-xs font-bold rounded-full shadow-sm"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
       <!-- Quick Action Buttons (Floating on Hover for Grid) -->

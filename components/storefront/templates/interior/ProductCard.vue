@@ -16,6 +16,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -53,6 +54,10 @@ const displayPrice = computed(() => {
 const originalPrice = computed(() => {
     return (isPromoValid.value && props.product.promotionalPrice) ? Number(props.product.price) : null
 })
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const isNew = computed(() => {
     // Logic for "New" badge, e.g. created within last 30 days
@@ -134,6 +139,10 @@ async function handleAddToCart() {
           v-if="isPromoValid"
           class="px-2.5 py-1 bg-red-600 text-white text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90"
         >-{{ Math.round(((Number(product.price) - Number(product.promotionalPrice)) / Number(product.price)) * 100) }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-2.5 py-1 bg-amber-600 text-white text-xs font-bold rounded-lg shadow-sm backdrop-blur-md bg-opacity-90"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
       <!-- Floating Actions (Right) -->

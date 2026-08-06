@@ -465,7 +465,7 @@ export class BulkProductsService {
         tenantId: string,
         input: {
             ids: string[]
-            data: { price?: unknown; stock?: unknown; isActive?: unknown; categoryId?: unknown; categoryIds?: unknown }
+            data: { price?: unknown; stock?: unknown; isActive?: unknown; categoryId?: unknown; categoryIds?: unknown; isClearance?: unknown }
             options?: { propagatePriceToVariants?: boolean }
             actorUserId?: string | null
         }
@@ -544,6 +544,28 @@ export class BulkProductsService {
 
         await prisma.product.updateMany({ where: { tenantId, id: { in: ids } }, data: patch })
 
+        let clearanceSkippedIds: string[] = []
+        if (data.isClearance !== undefined) {
+            if (typeof data.isClearance !== 'boolean') throw new Error('isClearance must be boolean')
+
+            let targetIds = ids
+            if (data.isClearance === true) {
+                const promoActive = await prisma.product.findMany({
+                    where: { tenantId, id: { in: ids }, isPromotionActive: true },
+                    select: { id: true }
+                })
+                clearanceSkippedIds = promoActive.map((p) => p.id)
+                targetIds = ids.filter((id) => !clearanceSkippedIds.includes(id))
+            }
+
+            if (targetIds.length > 0) {
+                await prisma.product.updateMany({
+                    where: { tenantId, id: { in: targetIds } },
+                    data: { isClearance: data.isClearance }
+                })
+            }
+        }
+
         if (resolvedCategoryIds !== undefined) {
             await prisma.productCategory.deleteMany({
                 where: { tenantId, productId: { in: ids } }
@@ -570,7 +592,7 @@ export class BulkProductsService {
             })
         }
 
-        return { success: true }
+        return { success: true, clearanceSkippedIds }
     }
 
     async bulkDeleteProducts(tenantId: string, input: { ids: string[] }) {

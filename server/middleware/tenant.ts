@@ -74,11 +74,14 @@ export default defineEventHandler(async (event) => {
             update: {}
         })
 
+        const clearanceTaggedCount = await prisma.product.count({ where: { tenantId: tenant.id, isClearance: true } })
+
         event.context.storeSettings = {
             ...storeSettings,
             loyaltyRedeemRateDzdPerPoint: storeSettings.loyaltyRedeemRateDzdPerPoint.toNumber(),
             loyaltyBasePoints: storeSettings.loyaltyBasePoints.toNumber(),
-            loyaltyMarginFactor: storeSettings.loyaltyMarginFactor.toNumber()
+            loyaltyMarginFactor: storeSettings.loyaltyMarginFactor.toNumber(),
+            clearanceAppliesToAllProducts: clearanceTaggedCount === 0
         }
 
         const contactInfos = await prisma.tenantContactInfo.findMany({

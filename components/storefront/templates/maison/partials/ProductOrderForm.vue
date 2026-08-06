@@ -2,6 +2,9 @@
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
+import { computeClearanceDiscount } from '~/shared/pricing/clearance-pricing'
+import { moneyToCents, centsToMoney } from '~/shared/pricing/bundle-pricing'
 
 const props = defineProps<{
   product: any
@@ -14,6 +17,7 @@ const props = defineProps<{
 const router = useRouter()
 const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
 const { currencyCode, format: formatCurrency } = useCurrency()
@@ -31,7 +35,23 @@ const orderError = ref('')
 const quantity = ref(1)
 const LOW_STOCK_THRESHOLD = 5
 
-const totalPrice = computed(() => (props.currentPrice || 0) * quantity.value)
+const rawSubtotal = computed(() => (props.currentPrice || 0) * quantity.value)
+
+const quickOrderClearanceDiscount = computed(() => {
+  if (!clearance.isProductEligible(props.product)) return 0
+  const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
+  if (scopedPricing.promotionApplied) return 0
+  if (Array.isArray(props.product?.bundleDeals) && props.product.bundleDeals.length > 0) return 0
+
+  const result = computeClearanceDiscount({
+    lines: [{ key: 'quick-order', unitPriceCents: moneyToCents(props.currentPrice || 0), quantity: quantity.value }],
+    multiple: clearance.config.value.multiple,
+    divisor: clearance.config.value.divisor
+  })
+  return centsToMoney(result.discountCents)
+})
+
+const totalPrice = computed(() => Math.max(0, rawSubtotal.value - quickOrderClearanceDiscount.value))
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
 const maxQuantity = computed(() => {
   if (props.currentVariant?.trackInventory === false) return 99
@@ -66,6 +86,9 @@ const selectBundleQty = (qty: number) => {
   const cap = maxQuantity.value > 0 ? maxQuantity.value : qty
   quantity.value = Math.max(1, Math.min(qty, cap))
 }
+
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const quickForm = reactive({
   fullName: '',
@@ -241,7 +264,8 @@ const handleAddToCart = async () => {
   if (!canPurchase.value) { triggerSuccessToast(storefrontContent.value.actions.outOfStock, storefrontContent.value.toasts.outOfStock.message); return }
   addToCartSubmitting.value = true
   const variantLabel = props.currentVariant ? getVariantTitle(props.currentVariant) : ''
-  cartStore.addItem({ productId: props.product.id, variantId: props.currentVariant?.id, title: props.product.title + (variantLabel ? ` (${variantLabel})` : ''), slug: props.product.slug, price: props.currentPrice, bundleDeals: props.product?.bundleDeals || [], stock: cartStockCap.value, image: props.activeImage, quantity: quantity.value, metaPixelIds: (props.product as any)?.metaPixelIds })
+  const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
+  cartStore.addItem({ productId: props.product.id, variantId: props.currentVariant?.id, title: props.product.title + (variantLabel ? ` (${variantLabel})` : ''), slug: props.product.slug, price: props.currentPrice, bundleDeals: props.product?.bundleDeals || [], stock: cartStockCap.value, image: props.activeImage, quantity: quantity.value, metaPixelIds: (props.product as any)?.metaPixelIds, isClearance: Boolean(props.product?.isClearance), promotionApplied: scopedPricing.promotionApplied })
   triggerSuccessToast(storefrontContent.value.toasts.addedToCart.title, storefrontContent.value.toasts.addedToCart.message)
   addToCartSubmitting.value = false
 }
@@ -276,6 +300,14 @@ const handleAddToCart = async () => {
       :disabled="!canPurchase"
       @select-qty="selectBundleQty"
     />
+
+    <div v-if="isClearanceEligible" class="order-form__clearance">
+      <Icon name="lucide:package-open" style="width:14px;height:14px;flex-shrink:0" />
+      <span v-if="clearance.remainingForNextThreshold.value > 0">
+        {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
+      </span>
+      <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
+    </div>
 
     <!-- COD form -->
     <div v-if="codEnabled" class="order-form__cod" data-test="cod-order-card">
@@ -389,6 +421,14 @@ const handleAddToCart = async () => {
           {{ orderError }}
         </div>
 
+        <div
+          v-if="quickOrderClearanceDiscount > 0"
+          style="display:flex; align-items:center; justify-content:space-between; padding: 6px 14px; font-family: var(--at-f-mono); font-size: 9px; letter-spacing: 0; text-transform: uppercase; color: var(--at-gold);"
+        >
+          <span>{{ t('storefront.clearance.discountLine') }}</span>
+          <span>-{{ formatCurrency(quickOrderClearanceDiscount) }}</span>
+        </div>
+
         <div class="order-form__total">
           <span class="order-form__total-label">{{ storefrontContent.productForm.totalPrice }}</span>
           <span class="order-form__total-price">
@@ -454,6 +494,8 @@ const handleAddToCart = async () => {
 .order-form__qty-btn:hover { color: var(--at-gold); }
 .order-form__qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .order-form__qty-val { min-width: 36px; text-align: center; font-family: var(--at-f-mono); font-size: 12px; color: var(--at-text); border-left: 1px solid var(--at-border-2); border-right: 1px solid var(--at-border-2); line-height: 32px; }
+
+.order-form__clearance { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border: 1px solid rgba(213,168,93,0.42); background: rgba(213,168,93,0.08); font-family: var(--at-f-mono); font-size: 10px; font-weight: 400; color: var(--at-gold); }
 
 .order-form__cod { border: 1px solid var(--at-border); background: var(--at-surface); }
 .order-form__cod-head { display: flex; align-items: center; gap: 12px; padding: 16px 18px; border-bottom: 1px solid var(--at-border); }

@@ -101,6 +101,11 @@ export type StoreSettingsPatchInput = Partial<{
     invoiceShowLogo: boolean
     whatsappConfirmationTemplate: string | null
     legalPages: StoreLegalPagesConfig
+    clearanceEnabled: boolean
+    clearanceMultiple: number
+    clearanceDivisor: number
+    clearanceBannerEnabled: boolean
+    clearanceBannerText: string | null
 }>
 
 const toDecimalString = (value: unknown, field: string): string => {
@@ -366,6 +371,47 @@ export class StoreSettingsService {
             updateSettings.invoiceShowLogo = input.invoiceShowLogo
         }
 
+        if (input.clearanceEnabled !== undefined) {
+            if (typeof input.clearanceEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('clearanceEnabled must be a boolean')
+            }
+            updateSettings.clearanceEnabled = input.clearanceEnabled
+        }
+
+        if (input.clearanceMultiple !== undefined) {
+            const clearanceMultiple = Math.trunc(Number(input.clearanceMultiple))
+            if (!Number.isFinite(clearanceMultiple) || clearanceMultiple < 1) {
+                throw new StoreSettingsValidationError('clearanceMultiple must be a positive integer')
+            }
+            updateSettings.clearanceMultiple = clearanceMultiple
+        }
+
+        if (input.clearanceDivisor !== undefined) {
+            const clearanceDivisor = Math.trunc(Number(input.clearanceDivisor))
+            if (!Number.isFinite(clearanceDivisor) || clearanceDivisor < 1) {
+                throw new StoreSettingsValidationError('clearanceDivisor must be a positive integer')
+            }
+            updateSettings.clearanceDivisor = clearanceDivisor
+        }
+
+        if (input.clearanceBannerEnabled !== undefined) {
+            if (typeof input.clearanceBannerEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('clearanceBannerEnabled must be a boolean')
+            }
+            updateSettings.clearanceBannerEnabled = input.clearanceBannerEnabled
+        }
+
+        if (input.clearanceBannerText !== undefined) {
+            if (input.clearanceBannerText !== null && typeof input.clearanceBannerText !== 'string') {
+                throw new StoreSettingsValidationError('clearanceBannerText must be a string or null')
+            }
+            const bannerText = typeof input.clearanceBannerText === 'string' ? input.clearanceBannerText.trim() : ''
+            if (bannerText.length > 300) {
+                throw new StoreSettingsValidationError('clearanceBannerText is too long (max 300 chars)')
+            }
+            updateSettings.clearanceBannerText = bannerText || null
+        }
+
         if (input.legalPages !== undefined) {
             if (!isValidStoreLegalPagesConfig(input.legalPages)) {
                 throw new StoreSettingsValidationError(
@@ -398,6 +444,11 @@ export class StoreSettingsService {
         // We need to fetch tenant data to return consistent shape
         const t = await prisma.tenant.findUnique({ where: { id: tenantId } })
         return { ...s, name: t?.name, slug: t?.slug }
+    }
+
+    async clearanceAppliesToAllProducts(tenantId: string): Promise<boolean> {
+        const taggedCount = await prisma.product.count({ where: { tenantId, isClearance: true } })
+        return taggedCount === 0
     }
 
     async getOnboardingChecklist(tenantId: string) {

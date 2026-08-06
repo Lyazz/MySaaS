@@ -26,6 +26,10 @@ const displayPrice = computed(() => {
     return originalPrice.value
 })
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const { format: formatPrice } = useCurrency()
@@ -79,8 +83,13 @@ async function handleAddToCart() {
         @mouseleave="isHovered = false"
     >
         <!-- Badge -->
-        <div v-if="product.isNew" class="absolute top-2 left-2 z-10 bg-brand text-black px-3 py-1 border-2 border-black font-street uppercase transform -rotate-2 group-hover:rotate-0 transition-transform">
-            NEW DROP
+        <div class="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+            <span v-if="product.isNew" class="bg-brand text-black px-3 py-1 border-2 border-black font-street uppercase transform -rotate-2 group-hover:rotate-0 transition-transform">
+                NEW DROP
+            </span>
+            <span v-if="isClearanceEligible" class="bg-amber-500 text-black px-3 py-1 border-2 border-black font-street uppercase transform -rotate-2 group-hover:rotate-0 transition-transform">
+                {{ t('storefront.clearance.badge') }}
+            </span>
         </div>
 
         <!-- Image -->

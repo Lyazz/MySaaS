@@ -952,6 +952,19 @@
       "buy": "Acheter {qty}",
       "save": "Économisez {amount}"
     },
+    "clearance": {
+      "badge": "Destockage",
+      "progressHint": "Ajoutez encore {remaining} article(s) destockage pour débloquer une remise",
+      "unlockedHint": "Vous avez débloqué une remise destockage !",
+      "discountLine": "Remise destockage",
+      "bannerFallback": "Grand destockage — achetez plus, économisez plus !",
+      "dialogTitle": "Grand destockage en cours !",
+      "dialogBody": "Achetez {multiple} articles destockage, et les {free} moins chers parmi eux vous sont offerts. Et ça se cumule : {multiple2} articles = {free2} offerts, {multiple4} articles = {free4} offerts.",
+      "dialogCta": "J'ai compris",
+      "dialogDismissAria": "Fermer la fenêtre destockage",
+      "dialogBuyLabel": "achetés",
+      "dialogFreeLabel": "offerts"
+    },
     "pages": {
       "contact": {
         "seo": {
@@ -1620,6 +1633,21 @@
         "marginFactor": "Facteur de marge",
         "minRedeem": "Seuil minimum (points)",
         "dzdPerPoint": "DZD par point"
+      },
+      "clearance": {
+        "title": "Destockage",
+        "subtitle": "Récompensez les clients qui achètent en grande quantité vos produits en destockage.",
+        "enable": "Activer le module destockage",
+        "enableSubtitle": "Offrez une remise égale aux articles les moins chers une fois un seuil de quantité atteint.",
+        "multiple": "Seuil de quantité",
+        "multipleHint": "Atteint tous les N articles destockage achetés (ex: 6).",
+        "divisor": "Diviseur",
+        "divisorHint": "Les quantité/diviseur articles les moins chers deviennent gratuits (ex: 6/3 = 2 gratuits).",
+        "scopeHint": "Taguez les produits éligibles depuis leur fiche produit. Si aucun produit n'est tagué, l'offre s'applique à tout le catalogue.",
+        "banner": "Afficher la bannière d'accueil",
+        "bannerSubtitle": "Affiche une bannière annonçant l'offre destockage.",
+        "bannerText": "Texte de la bannière",
+        "bannerTextPlaceholder": "Grand destockage — achetez plus, économisez plus !"
       },
       "currency": {
         "title": "Devise de la boutique",

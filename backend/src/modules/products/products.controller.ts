@@ -94,6 +94,9 @@ export class ProductsController {
                 if (e.message === 'Invalid id') {
                     return res.status(400).json({ statusCode: 400, statusMessage: e.message })
                 }
+                if (e.message === 'A product cannot be both in clearance and in promotion at the same time') {
+                    return res.status(400).json({ statusCode: 400, statusMessage: e.message })
+                }
                 throw e
             }
         } catch (error) {

@@ -16,6 +16,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -24,6 +25,10 @@ const props = defineProps<{
 }>()
 
 defineEmits(['quick-view'])
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
@@ -92,8 +97,13 @@ async function handleAddToCart() {
       <NuxtLink :to="`/product/${product.slug}`" class="block w-full h-full">
         <img :src="mainImage" :alt="product.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
       </NuxtLink>
-      <div v-if="isPromoValid" class="absolute top-2 left-2 bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
-        -{{ Math.round(((Number(product.price) - Number(product.promotionalPrice)) / Number(product.price)) * 100) }}%
+      <div class="absolute top-2 left-2 flex flex-col gap-1 items-start">
+        <span v-if="isPromoValid" class="bg-pink-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+          -{{ Math.round(((Number(product.price) - Number(product.promotionalPrice)) / Number(product.price)) * 100) }}%
+        </span>
+        <span v-if="isClearanceEligible" class="bg-amber-600 text-white text-[10px] font-black px-2 py-0.5 rounded-full">
+          {{ t('storefront.clearance.badge') }}
+        </span>
       </div>
     </div>
 
@@ -140,6 +150,10 @@ async function handleAddToCart() {
           v-if="isPromoValid"
           class="px-2.5 py-1 bg-pink-500 text-white text-xs font-black rounded-xl shadow-sm border border-pink-400"
         >-{{ Math.round(((Number(product.price) - Number(product.promotionalPrice)) / Number(product.price)) * 100) }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-2.5 py-1 bg-amber-600 text-white text-xs font-black rounded-xl shadow-sm border border-amber-700"
+        >{{ t('storefront.clearance.badge') }}</span>
         <span
           v-if="isLowStock"
           class="px-2.5 py-1 bg-amber-400 text-amber-900 text-[10px] font-black rounded-xl shadow-sm border border-amber-300"

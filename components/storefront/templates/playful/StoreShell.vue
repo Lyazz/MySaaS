@@ -105,6 +105,8 @@ const props = defineProps<{
         background-color="bg-violet-700"
         text-color="text-white"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <header

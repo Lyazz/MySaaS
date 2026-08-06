@@ -124,6 +124,10 @@
               <dt class="text-base text-gray-400">{{ storefrontContent.cart.summary.subtotal }}</dt>
               <dd class="text-base font-medium text-white">{{ formatCurrency(cartStore.total) }}</dd>
             </div>
+            <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between border-b border-[#A67C52]/10 pb-4">
+              <dt class="text-base text-[#D9A050]">{{ t('storefront.clearance.discountLine') }}</dt>
+              <dd class="text-base font-medium text-[#D9A050]">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+            </div>
             <div class="flex items-center justify-between border-b border-[#A67C52]/10 pb-4">
               <dt class="flex text-base text-gray-400 items-center"><span>{{ storefrontContent.cart.summary.shipping }}</span></dt>
               <dd class="text-sm font-medium text-gray-500">{{ storefrontContent.cart.summary.shippingHint }}</dd>
@@ -134,7 +138,7 @@
             </div>
             <div class="flex items-center justify-between pt-4">
               <dt class="text-xl font-bold text-white">{{ storefrontContent.cart.summary.total }}</dt>
-              <dd class="text-2xl font-bold text-[#A67C52]">{{ formatCurrency(cartStore.total) }}</dd>
+              <dd class="text-2xl font-bold text-[#A67C52]">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</dd>
             </div>
           </div>
 
@@ -168,6 +172,7 @@ const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
+const { t } = useI18n({ useScope: 'global' })
 </script>
 
 <style scoped>

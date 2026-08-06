@@ -112,6 +112,8 @@ const props = defineProps<{
         background-color="bg-brand-500"
         text-color="text-[#02060a]"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header: Logitech G dark bar with cyan accents -->
       <header

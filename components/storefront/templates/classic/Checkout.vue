@@ -7,6 +7,7 @@ const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const { currencyCode, formatAmount } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -189,11 +190,13 @@ watch(
   { immediate: true }
 )
 
+const discountedSubtotal = computed(() => Math.max(0, cartStore.total - cartStore.clearanceDiscount))
+
 const grandTotal = computed(() => {
   const delivery = selectedDelivery.value
-  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return cartStore.total
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return discountedSubtotal.value
   const deliveryPrice = Number(delivery.price)
-  return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
+  return isNaN(deliveryPrice) ? discountedSubtotal.value : discountedSubtotal.value + deliveryPrice
 })
 
 const hasRequiredFields = computed(() => Boolean(
@@ -202,7 +205,7 @@ const hasRequiredFields = computed(() => Boolean(
   form.value.wilaya &&
   form.value.commune &&
   cartStore.hasItems &&
-  cartStore.total >= minimumOrderAmount.value &&
+  discountedSubtotal.value >= minimumOrderAmount.value &&
   form.value.selectedDeliveryOption
 ))
 
@@ -525,6 +528,10 @@ async function handleSubmit() {
               <div class="flex justify-between text-sm">
                 <span class="text-slate-500 uppercase tracking-wider text-xs font-bold">{{ storefrontContent.cart.summary.subtotal }}</span>
                 <span class="font-medium text-slate-900">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</span>
+              </div>
+              <div v-if="cartStore.clearanceDiscount > 0" class="flex justify-between text-sm">
+                <span class="text-amber-700 uppercase tracking-wider text-xs font-bold">{{ t('storefront.clearance.discountLine') }}</span>
+                <span class="font-medium text-amber-700">-{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}</span>
               </div>
               <div v-if="selectedDelivery" class="flex justify-between text-sm">
                 <span class="text-slate-500 uppercase tracking-wider text-xs font-bold">{{ storefrontContent.cart.summary.shipping }}</span>

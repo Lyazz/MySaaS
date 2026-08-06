@@ -26,6 +26,10 @@ const displayPrice = computed(() => {
     return originalPrice.value
 })
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const { format: formatPrice } = useCurrency()
@@ -91,6 +95,11 @@ async function handleAddToCart() {
                 button-class="absolute top-4 left-4 w-12 h-12 bg-white/90 backdrop-blur-md rounded-full shadow-lg hover:bg-red-50 hover:text-red-600 transition-colors"
                 icon-class="w-6 h-6"
             />
+
+            <span
+                v-if="isClearanceEligible"
+                class="absolute top-4 right-4 z-10 px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-bold uppercase tracking-wide shadow-lg"
+            >{{ t('storefront.clearance.badge') }}</span>
 
             <!-- Floating Add Button -->
             <button 

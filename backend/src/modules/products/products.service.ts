@@ -385,6 +385,12 @@ export class ProductsService {
         const sanitizedDescription = sanitizeOptionalRichText(data.description, { allowImages: true })
         const sanitizedMiniDescription = sanitizeOptionalRichText(data.miniDescription)
 
+        const nextIsPromotionActive = data.isPromotionActive ?? false
+        const nextIsClearance = data.isClearance ?? false
+        if (nextIsPromotionActive && nextIsClearance) {
+            throw new Error('A product cannot be both in clearance and in promotion at the same time')
+        }
+
         const created = await prisma.$transaction(async (tx) => {
             const product = await tx.product.create({
                 data: {
@@ -402,10 +408,11 @@ export class ProductsService {
                     categoryId: categoryAssignment?.categoryId ?? null,
                     images: images ?? [],
                     promotionalPrice: data.promotionalPrice !== undefined && data.promotionalPrice !== null ? String(data.promotionalPrice) : null,
-                    isPromotionActive: data.isPromotionActive ?? false,
+                    isPromotionActive: nextIsPromotionActive,
                     promotionStartDate: data.promotionStartDate ? new Date(data.promotionStartDate) : null,
                     promotionEndDate: data.promotionEndDate ? new Date(data.promotionEndDate) : null,
-                    showCountdown: data.showCountdown ?? false
+                    showCountdown: data.showCountdown ?? false,
+                    isClearance: nextIsClearance
                 }
             })
 
@@ -569,6 +576,19 @@ export class ProductsService {
         const categoryAssignment = await this.resolveCategoryAssignment(tenantId, data)
         const shouldDisableProductPromotion = Array.isArray(existing.options) && existing.options.length > 0
 
+        const nextIsPromotionActive = shouldDisableProductPromotion
+            ? false
+            : typeof data.isPromotionActive === 'boolean'
+                ? data.isPromotionActive
+                : Boolean((existing as any).isPromotionActive)
+        const nextIsClearance = typeof data.isClearance === 'boolean' ? data.isClearance : Boolean((existing as any).isClearance)
+        if (nextIsPromotionActive && nextIsClearance) {
+            const err = new Error('A product cannot be both in clearance and in promotion at the same time') as any
+            err.statusCode = 400
+            err.statusMessage = err.message
+            throw err
+        }
+
         const images = normalizeImages(data.images)
         const sanitizedDescription = this.hasOwn(data, 'description')
             ? sanitizeOptionalRichText(data.description, { allowImages: true })
@@ -614,7 +634,8 @@ export class ProductsService {
                         ? false
                         : typeof data.showCountdown === 'boolean'
                             ? data.showCountdown
-                            : undefined
+                            : undefined,
+                    isClearance: typeof data.isClearance === 'boolean' ? data.isClearance : undefined
                 }
             })
 

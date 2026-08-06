@@ -5,6 +5,7 @@ const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
+const { t } = useI18n({ useScope: 'global' })
 </script>
 
 <template>
@@ -120,6 +121,10 @@ const { currencyCode, format: formatCurrency } = useCurrency()
               <dt class="text-sm font-bold text-stone-600">{{ storefrontContent.cart.summary.subtotal }}</dt>
               <dd class="text-sm font-black text-stone-900">{{ formatCurrency(cartStore.total) }}</dd>
             </div>
+            <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between border-b-2 border-dashed border-violet-100 pb-3">
+              <dt class="text-sm font-bold text-amber-700">{{ t('storefront.clearance.discountLine') }}</dt>
+              <dd class="text-sm font-black text-amber-700">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+            </div>
             <div class="flex items-center justify-between border-b-2 border-dashed border-violet-100 pb-3">
               <dt class="flex flex-col text-sm text-stone-500 font-bold">
                 <span>{{ storefrontContent.cart.summary.shipping }}</span>
@@ -129,7 +134,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
             </div>
             <div class="flex items-center justify-between pt-3 bg-violet-50 rounded-2xl px-4 py-3 border-2 border-violet-100">
               <dt class="font-black text-stone-900" style="font-family: 'Fredoka', sans-serif">{{ storefrontContent.cart.summary.total }}</dt>
-              <dd class="text-2xl font-black text-violet-700" style="font-family: 'Fredoka', sans-serif">{{ formatCurrency(cartStore.total) }}</dd>
+              <dd class="text-2xl font-black text-violet-700" style="font-family: 'Fredoka', sans-serif">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</dd>
             </div>
           </div>
 

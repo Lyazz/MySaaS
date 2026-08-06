@@ -2,6 +2,9 @@
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
+import { computeClearanceDiscount } from '~/shared/pricing/clearance-pricing'
+import { moneyToCents, centsToMoney } from '~/shared/pricing/bundle-pricing'
 
 const props = defineProps<{
     product: any
@@ -14,6 +17,7 @@ const props = defineProps<{
 const router = useRouter()
 const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
 const { currencyCode, formatAmount } = useCurrency()
@@ -31,8 +35,24 @@ const orderError = ref('')
 const quantity = ref(1)
 const LOW_STOCK_THRESHOLD = 5
 
+const rawSubtotal = computed(() => (props.currentPrice || 0) * quantity.value)
+
+const quickOrderClearanceDiscount = computed(() => {
+    if (!clearance.isProductEligible(props.product)) return 0
+    const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
+    if (scopedPricing.promotionApplied) return 0
+    if (Array.isArray(props.product?.bundleDeals) && props.product.bundleDeals.length > 0) return 0
+
+    const result = computeClearanceDiscount({
+        lines: [{ key: 'quick-order', unitPriceCents: moneyToCents(props.currentPrice || 0), quantity: quantity.value }],
+        multiple: clearance.config.value.multiple,
+        divisor: clearance.config.value.divisor
+    })
+    return centsToMoney(result.discountCents)
+})
+
 const totalPrice = computed(() => {
-    return (props.currentPrice || 0) * quantity.value
+    return Math.max(0, rawSubtotal.value - quickOrderClearanceDiscount.value)
 })
 
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
@@ -81,6 +101,8 @@ const selectBundleQty = (qty: number) => {
     quantity.value = Math.max(1, Math.min(qty, cap))
 }
 
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const quickForm = reactive({
     fullName: '',
@@ -427,6 +449,7 @@ const handleAddToCart = async () => {
     addToCartSubmitting.value = true
 
     const variantLabel = props.currentVariant ? getVariantTitle(props.currentVariant) : ''
+    const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
 
     cartStore.addItem({
         productId: props.product.id,
@@ -438,7 +461,9 @@ const handleAddToCart = async () => {
         stock: cartStockCap.value,
         image: props.activeImage,
         quantity: quantity.value,
-        metaPixelIds: (props.product as any)?.metaPixelIds
+        metaPixelIds: (props.product as any)?.metaPixelIds,
+        isClearance: Boolean(props.product?.isClearance),
+        promotionApplied: scopedPricing.promotionApplied
     })
 
     triggerSuccessToast(
@@ -497,6 +522,17 @@ const handleAddToCart = async () => {
             :disabled="!canPurchase"
             @select-qty="selectBundleQty"
         />
+
+        <div
+            v-if="isClearanceEligible"
+            class="flex items-center gap-2 px-4 py-3 mb-6 rounded-sm border border-amber-300 bg-amber-50 text-amber-800 text-xs font-semibold"
+        >
+            <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
+            <span v-if="clearance.remainingForNextThreshold.value > 0">
+                {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
+            </span>
+            <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
+        </div>
 
         <!-- Quick COD Order Form -->
         <div
@@ -685,6 +721,12 @@ const handleAddToCart = async () => {
                     class="p-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm"
                 >
                     {{ orderError }}
+                </div>
+
+                <!-- Clearance discount -->
+                <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between py-2 text-sm">
+                    <span class="text-amber-700 uppercase tracking-wider text-xs font-bold">{{ t('storefront.clearance.discountLine') }}</span>
+                    <span class="font-medium text-amber-700">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
                 </div>
 
                 <!-- Total Price Display -->

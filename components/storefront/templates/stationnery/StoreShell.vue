@@ -122,11 +122,13 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
     <div class="min-h-screen flex flex-col font-stationery text-slate-700 bg-[#fdfbf7]">
       <!-- Top Announcement Bar -->
       <!-- Top Announcement Bar -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
         background-color="bg-brand-600"
         text-color="text-white"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['bg-[#fdfbf7] border-b border-stone-200 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">

@@ -118,11 +118,13 @@ const props = defineProps<{
     <div class="min-h-screen flex flex-col font-serif text-slate-600 bg-white">
       <!-- Top Announcement Bar (Minimal) -->
       <!-- Top Announcement Bar (Minimal) -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
         background-color="bg-slate-900"
         text-color="text-white"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['bg-white border-b border-slate-100 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">

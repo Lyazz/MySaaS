@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 
+interface Product {
+  isClearance?: boolean
+  [key: string]: any
+}
+
 const props = defineProps<{
-  product: any
+  product: Product
   viewMode?: 'grid' | 'list'
 }>()
 
@@ -19,6 +24,10 @@ const displayPrice = computed(() => {
   if (isPromoValid.value && props.product.promotionalPrice) return Number(props.product.promotionalPrice)
   return originalPrice.value
 })
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
@@ -65,8 +74,11 @@ async function handleAddToCart() {
         <img :src="mainImage" :alt="product.title" class="pc__img">
       </NuxtLink>
 
-      <!-- Promo badge -->
-      <div v-if="isPromoValid" class="pc__badge">— {{ Math.round((1 - displayPrice / originalPrice) * 100) }}%</div>
+      <!-- Badges -->
+      <div class="pc__badge-stack">
+        <div v-if="isPromoValid" class="pc__badge">— {{ Math.round((1 - displayPrice / originalPrice) * 100) }}%</div>
+        <div v-if="isClearanceEligible" class="pc__badge pc__badge--clearance">{{ t('storefront.clearance.badge') }}</div>
+      </div>
 
       <!-- Favorite -->
       <StorefrontSharedFavoriteButton
@@ -179,10 +191,17 @@ async function handleAddToCart() {
 .pc:hover .pc__img { transform: scale(1.05); filter: brightness(1); }
 
 /* Promo badge */
-.pc__badge {
+.pc__badge-stack {
   position: absolute;
   top: 10px;
   left: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  z-index: 2;
+}
+.pc__badge {
   background: var(--at-gold);
   color: var(--at-surface);
   font-family: var(--at-f-mono);
@@ -190,7 +209,10 @@ async function handleAddToCart() {
   font-weight: 400;
   letter-spacing: 0;
   padding: 4px 8px;
-  z-index: 2;
+}
+.pc__badge--clearance {
+  background: #b45309;
+  color: #fff;
 }
 
 /* Favorite */

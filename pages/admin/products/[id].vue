@@ -383,6 +383,30 @@
                 </div>
               </div>
             </template>
+
+            <div class="rounded-2xl border p-4 space-y-3" style="border-color: var(--surface-border); background: var(--surface-2)">
+              <div class="flex items-center">
+                <input
+                  id="isClearance"
+                  v-model="form.isClearance"
+                  type="checkbox"
+                  class="admin-checkbox"
+                  :disabled="form.isPromotionActive"
+                >
+                <label
+                  for="isClearance"
+                  class="ml-2 block text-sm" style="color: var(--text-primary)"
+                >
+                  {{ t('admin.forms.product.isClearance.label', 'Produit en destockage') }}
+                </label>
+              </div>
+              <p class="text-sm" style="color: var(--text-secondary)">
+                {{ t('admin.forms.product.isClearance.hint', 'Ce produit participe à la remise destockage configurée dans Réglages > Fonctionnel. Un produit ne peut pas être à la fois en destockage et en promotion.') }}
+              </p>
+              <p v-if="form.isPromotionActive" class="text-sm font-medium" style="color: var(--warning, #d97706)">
+                {{ t('admin.forms.product.isClearance.blockedByPromotion', 'Désactivez la promotion pour pouvoir activer le destockage.') }}
+              </p>
+            </div>
           </div>
 
           <!-- Landing Page Description Tab -->
@@ -858,7 +882,12 @@ const form = ref({
   isPromotionActive: false,
   promotionStartDate: '',
   promotionEndDate: '',
-  showCountdown: false
+  showCountdown: false,
+  isClearance: false
+})
+
+watch(() => form.value.isPromotionActive, (active) => {
+  if (active) form.value.isClearance = false
 })
 
 const options = ref<any[]>([])
@@ -1074,7 +1103,8 @@ async function fetchProduct() {
       isPromotionActive: data.isPromotionActive ?? false,
       promotionStartDate: data.promotionStartDate ? new Date(data.promotionStartDate).toISOString().slice(0, 16) : '',
       promotionEndDate: data.promotionEndDate ? new Date(data.promotionEndDate).toISOString().slice(0, 16) : '',
-      showCountdown: data.showCountdown ?? false
+      showCountdown: data.showCountdown ?? false,
+      isClearance: data.isClearance ?? false
     }
     lastAutoSlug.value = slugify(data.slug || data.title || '')
 
@@ -1394,7 +1424,8 @@ async function handleSubmit() {
       isPromotionActive: allowProductPromotion && form.value.isPromotionActive,
       promotionStartDate: allowProductPromotion && form.value.isPromotionActive && form.value.promotionStartDate ? new Date(form.value.promotionStartDate).toISOString() : null,
       promotionEndDate: allowProductPromotion && form.value.isPromotionActive && form.value.promotionEndDate ? new Date(form.value.promotionEndDate).toISOString() : null,
-      showCountdown: allowProductPromotion && form.value.isPromotionActive && form.value.showCountdown
+      showCountdown: allowProductPromotion && form.value.isPromotionActive && form.value.showCountdown,
+      isClearance: !(allowProductPromotion && form.value.isPromotionActive) && form.value.isClearance
     }
 
     payload.categoryIds = form.value.categoryIds

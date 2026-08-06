@@ -117,11 +117,13 @@ const props = defineProps<{
     <div class="min-h-screen flex flex-col font-sans text-purple-200 bg-[#0d0515]">
       <!-- Top Announcement Bar -->
       <!-- Top Announcement Bar -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
         background-color="bg-gradient-to-r from-pink-600 to-orange-500"
         text-color="text-white"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['bg-[#1a0a2e]/95 border-b border-purple-500/20 sticky top-0 z-50 backdrop-blur-md', { 'hidden md:block': mobileHeaderHidden }]">

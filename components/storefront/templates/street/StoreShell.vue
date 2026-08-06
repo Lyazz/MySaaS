@@ -67,11 +67,13 @@ const currentYear = new Date().getFullYear()
     <div class="min-h-screen flex flex-col border-x-4 border-black max-w-[1920px] mx-auto bg-white shadow-[8px_0_0_0_#000,-8px_0_0_0_#000]">
       <!-- Top Announcement Bar -->
       <!-- Top Announcement Bar -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
         background-color="bg-brand border-b-4 border-black"
         text-color="text-black font-mono uppercase"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['sticky top-0 z-50 bg-white border-b-4 border-black', { 'hidden md:block': mobileHeaderHidden }]">

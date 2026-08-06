@@ -105,6 +105,8 @@ watch(searchQuery, async (q) => {
   <StoreThemeProvider>
     <div class="shell">
       <StorefrontSharedAnnouncementBar v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- ── Header ───────────────────────────────────────────── -->
       <header

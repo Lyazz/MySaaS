@@ -340,6 +340,73 @@
         </div>
       </SettingsSection>
 
+      <!-- Clearance (destockage) -->
+      <SettingsSection
+        anchor-id="clearance"
+        icon="lucide:package-open"
+        :title="t('admin.functionalSettingsForm.clearance.title') || 'Clearance (destockage)'"
+        :subtitle="t('admin.functionalSettingsForm.clearance.subtitle') || 'Reward customers who buy in bulk from your clearance products.'"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:package-open" class="w-4 h-4" />
+              </div>
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.clearance.enable') || 'Enable clearance module' }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.clearance.enableSubtitle') || 'Give a discount equal to the cheapest items once a quantity threshold is reached.' }}</p>
+              </div>
+            </div>
+            <BaseToggle v-model="form.clearanceEnabled" :sr-label="t('admin.functionalSettingsForm.clearance.enable') || 'Enable clearance module'" />
+          </div>
+
+          <Transition name="reveal">
+            <div v-if="form.clearanceEnabled" class="reveal-block">
+              <div class="field-grid">
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.clearance.multiple') || 'Quantity threshold' }}</label>
+                  <input v-model.number="form.clearanceMultiple" type="number" min="1" step="1" class="field-input" placeholder="6" >
+                  <p class="field-hint">{{ t('admin.functionalSettingsForm.clearance.multipleHint') || 'Reached every N clearance items bought (e.g. 6).' }}</p>
+                </div>
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.clearance.divisor') || 'Divisor' }}</label>
+                  <input v-model.number="form.clearanceDivisor" type="number" min="1" step="1" class="field-input" placeholder="3" >
+                  <p class="field-hint">{{ t('admin.functionalSettingsForm.clearance.divisorHint') || 'The cheapest quantity/divisor items become free (e.g. 6/3 = 2 free).' }}</p>
+                </div>
+              </div>
+              <p class="field-hint">{{ t('admin.functionalSettingsForm.clearance.scopeHint') || 'Tag eligible products from their product page. If no product is tagged, the offer applies to your whole catalog.' }}</p>
+
+              <div class="toggle-row compact" style="margin-top: 8px;">
+                <div class="toggle-row-info">
+                  <div class="toggle-row-icon">
+                    <Icon name="lucide:megaphone" class="w-4 h-4" />
+                  </div>
+                  <div>
+                    <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.clearance.banner') || 'Show homepage banner' }}</p>
+                    <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.clearance.bannerSubtitle') || 'Display a banner announcing the clearance offer.' }}</p>
+                  </div>
+                </div>
+                <BaseToggle v-model="form.clearanceBannerEnabled" :sr-label="t('admin.functionalSettingsForm.clearance.banner') || 'Show homepage banner'" />
+              </div>
+
+              <Transition name="reveal">
+                <div v-if="form.clearanceBannerEnabled" class="field" style="margin-top: 8px;">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.clearance.bannerText') || 'Banner text' }}</label>
+                  <input
+                    v-model="form.clearanceBannerText"
+                    type="text"
+                    maxlength="300"
+                    class="field-input"
+                    :placeholder="t('admin.functionalSettingsForm.clearance.bannerTextPlaceholder') || 'Big clearance sale — buy more, save more!'"
+                  >
+                </div>
+              </Transition>
+            </div>
+          </Transition>
+        </div>
+      </SettingsSection>
+
       <div class="theme-group-heading">
         <span>{{ t('admin.functionalSettingsForm.themeGroups.localization.title') }}</span>
         <small>{{ t('admin.functionalSettingsForm.themeGroups.localization.subtitle') }}</small>
@@ -454,6 +521,11 @@ const form = reactive({
   loyaltyMarginFactor: 0,
   loyaltyMinRedeemPoints: 0,
   loyaltyRedeemRateDzdPerPoint: 1,
+  clearanceEnabled: false,
+  clearanceMultiple: 6,
+  clearanceDivisor: 3,
+  clearanceBannerEnabled: false,
+  clearanceBannerText: '',
   orderIdPrefix: 'ORDR',
   minimumOrderAmountDzd: 1000,
   hideOptionalAddress: true,
@@ -487,6 +559,7 @@ const tabs = computed(() => [
   { id: 'invoices', label: t('admin.functionalSettingsForm.invoices.title'), icon: 'lucide:receipt-text' },
   { id: 'announcement', label: t('admin.appearanceSettingsForm.announcement.title'), icon: 'lucide:megaphone' },
   { id: 'loyalty', label: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty', icon: 'lucide:badge-percent' },
+  { id: 'clearance', label: t('admin.functionalSettingsForm.clearance.title') || 'Clearance', icon: 'lucide:package-open' },
   { id: 'currency', label: t('admin.functionalSettingsForm.currency.title'), icon: 'lucide:dollar-sign' },
   { id: 'localization', label: t('admin.functionalSettingsForm.localization.title'), icon: 'lucide:languages' }
 ])
@@ -552,6 +625,11 @@ const updateForm = (data: any) => {
   form.loyaltyMarginFactor = Number(data.loyaltyMarginFactor ?? 0)
   form.loyaltyMinRedeemPoints = Number(data.loyaltyMinRedeemPoints ?? 0)
   form.loyaltyRedeemRateDzdPerPoint = Number(data.loyaltyRedeemRateDzdPerPoint ?? 1)
+  form.clearanceEnabled = data.clearanceEnabled ?? false
+  form.clearanceMultiple = Number(data.clearanceMultiple ?? 6)
+  form.clearanceDivisor = Number(data.clearanceDivisor ?? 3)
+  form.clearanceBannerEnabled = data.clearanceBannerEnabled ?? false
+  form.clearanceBannerText = data.clearanceBannerText || ''
   form.minimumOrderAmountDzd = Number(data.minimumOrderAmountDzd ?? 1000)
   form.hideOptionalAddress = data.hideOptionalAddress ?? true
   form.salesInvoiceEnabled = data.salesInvoiceEnabled ?? false
@@ -599,6 +677,11 @@ const save = async () => {
         loyaltyMarginFactor: form.loyaltyMarginFactor,
         loyaltyMinRedeemPoints: form.loyaltyMinRedeemPoints,
         loyaltyRedeemRateDzdPerPoint: form.loyaltyRedeemRateDzdPerPoint,
+        clearanceEnabled: form.clearanceEnabled,
+        clearanceMultiple: form.clearanceMultiple,
+        clearanceDivisor: form.clearanceDivisor,
+        clearanceBannerEnabled: form.clearanceBannerEnabled,
+        clearanceBannerText: form.clearanceBannerText,
         minimumOrderAmountDzd: form.minimumOrderAmountDzd,
         hideOptionalAddress: form.hideOptionalAddress,
         salesInvoiceEnabled: form.salesInvoiceEnabled,
@@ -648,7 +731,7 @@ const sanitizeInvoicePrefixInput = () => {
 
 function setupScrollSpy() {
   if (typeof window === 'undefined') return
-  const ids = ['features', 'checkout', 'invoices', 'announcement', 'loyalty', 'currency', 'localization']
+  const ids = ['features', 'checkout', 'invoices', 'announcement', 'loyalty', 'clearance', 'currency', 'localization']
   const observer = new IntersectionObserver(
     (entries) => {
       const visible = entries

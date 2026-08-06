@@ -966,6 +966,19 @@
       "buy": "Buy {qty}",
       "save": "Save {amount}"
     },
+    "clearance": {
+      "badge": "Clearance",
+      "progressHint": "Buy {remaining} more clearance item(s) to unlock a discount",
+      "unlockedHint": "You've unlocked a clearance discount!",
+      "discountLine": "Clearance discount",
+      "bannerFallback": "Clearance sale — buy more, save more!",
+      "dialogTitle": "Big clearance sale is on!",
+      "dialogBody": "Buy {multiple} clearance items and the {free} cheapest among them are on us. And it stacks: {multiple2} items = {free2} free, {multiple4} items = {free4} free.",
+      "dialogCta": "Got it",
+      "dialogDismissAria": "Close clearance dialog",
+      "dialogBuyLabel": "bought",
+      "dialogFreeLabel": "free"
+    },
     "pages": {
       "contact": {
         "seo": {
@@ -1634,6 +1647,21 @@
         "marginFactor": "Margin factor",
         "minRedeem": "Minimum redemption (points)",
         "dzdPerPoint": "DZD per point"
+      },
+      "clearance": {
+        "title": "Clearance (destockage)",
+        "subtitle": "Reward customers who buy in bulk from your clearance products.",
+        "enable": "Enable clearance module",
+        "enableSubtitle": "Give a discount equal to the cheapest items once a quantity threshold is reached.",
+        "multiple": "Quantity threshold",
+        "multipleHint": "Reached every N clearance items bought (e.g. 6).",
+        "divisor": "Divisor",
+        "divisorHint": "The cheapest quantity/divisor items become free (e.g. 6/3 = 2 free).",
+        "scopeHint": "Tag eligible products from their product page. If no product is tagged, the offer applies to your whole catalog.",
+        "banner": "Show homepage banner",
+        "bannerSubtitle": "Display a banner announcing the clearance offer.",
+        "bannerText": "Banner text",
+        "bannerTextPlaceholder": "Big clearance sale — buy more, save more!"
       },
       "currency": {
         "title": "Store currency",

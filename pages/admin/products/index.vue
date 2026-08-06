@@ -195,9 +195,9 @@
 	                <input
 	                  type="checkbox"
 	                  class="admin-checkbox"
-                 
+	                  :title="t('admin.pages.products.index.table.selectAllHint', 'Sélectionne tous les produits correspondant aux filtres actuels (toutes les pages)')"
 	                  :checked="allVisibleSelected"
-	                  :disabled="paginatedProducts.length === 0"
+	                  :disabled="filteredProducts.length === 0"
 	                  @change="toggleSelectAllVisible"
 	                >
 	              </th>
@@ -273,8 +273,13 @@
                     />
                   </div>
                   <div class="ml-4">
-                    <div class="font-medium" style="color: var(--text-primary)">
+                    <div class="font-medium flex items-center gap-1.5" style="color: var(--text-primary)">
                       {{ product.title }}
+                      <span
+                        v-if="product.isClearance"
+                        class="ui-badge"
+                        style="background: color-mix(in srgb, #d97706 15%, transparent); color: #d97706"
+                      >{{ t('admin.pages.products.index.table.clearance', 'Destockage') }}</span>
                     </div>
                     <div class="text-sm" style="color: var(--text-tertiary)">
                       {{ product.slug }}
@@ -713,6 +718,29 @@
 	            {{ t('admin.pages.products.index.bulk.fields.propagatePrice') }}
 	          </label>
 
+	          <BaseSelect
+	            v-model="bulkIsClearance"
+	            :label="t('admin.pages.products.index.bulk.fields.clearance', 'Destockage')"
+	            :hint="t('admin.pages.products.index.bulk.fields.clearanceHint', 'Les produits avec une promotion active sont ignores.')"
+	          >
+	            <option value="">
+	              {{ t('admin.pages.products.index.bulk.fields.noChange') }}
+	            </option>
+	            <option value="true">
+	              {{ t('admin.pages.products.index.bulk.fields.clearanceOn', 'Marquer en destockage') }}
+	            </option>
+	            <option value="false">
+	              {{ t('admin.pages.products.index.bulk.fields.clearanceOff', 'Retirer du destockage') }}
+	            </option>
+	          </BaseSelect>
+
+	          <div
+	            v-if="bulkClearanceSkipped.length > 0"
+	            class="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+	          >
+	            {{ bulkClearanceSkipped.length }} {{ t('admin.pages.products.index.bulk.fields.clearanceSkippedSuffix', 'produit(s) ignore(s) car en promotion active.') }}
+	          </div>
+
 	          <div
 	            v-if="bulkError"
 	            class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
@@ -786,6 +814,7 @@ interface Product {
   category?: { id: string; title: string }
   categories?: Array<{ id: string; title: string; slug?: string }>
   categoryIds?: string[]
+  isClearance?: boolean
 }
  
 interface Category {
@@ -830,6 +859,8 @@ const bulkStock = ref('')
 const bulkIsActive = ref('')
 const bulkCategoryId = ref('')
 const bulkPropagatePriceToVariants = ref(true)
+const bulkIsClearance = ref('')
+const bulkClearanceSkipped = ref<string[]>([])
 const bulkSaving = ref(false)
 const bulkError = ref<string | null>(null)
 
@@ -935,6 +966,8 @@ const filteredProducts = computed(() => {
     filtered = filtered.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5))
   } else if (activeTab.value === 'outOfStock') {
     filtered = filtered.filter(p => p.stock === 0)
+  } else if (activeTab.value === 'clearance') {
+    filtered = filtered.filter(p => p.isClearance === true)
   }
 
   // Status filter
@@ -972,6 +1005,7 @@ const productTabs = computed(() => [
   { key: 'draft', label: 'Draft', count: products.value.filter(p => !p.isActive).length },
   { key: 'lowStock', label: 'Low Stock', count: products.value.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5)).length },
   { key: 'outOfStock', label: 'Out of Stock', count: products.value.filter(p => p.stock === 0).length },
+  { key: 'clearance', label: t('admin.pages.products.index.filters.clearance', 'Destockage'), count: products.value.filter(p => p.isClearance === true).length },
 ])
 
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
@@ -983,7 +1017,7 @@ const paginatedProducts = computed(() => {
 })
 
 const allVisibleSelected = computed(() => {
-  const visible = paginatedProducts.value.map(p => p.id)
+  const visible = filteredProducts.value.map(p => p.id)
   return visible.length > 0 && visible.every(id => selectedIds.value.includes(id))
 })
  
@@ -1136,7 +1170,7 @@ async function submitBulkDelete() {
 }
 
 function toggleSelectAllVisible() {
-  const visible = paginatedProducts.value.map(p => p.id)
+  const visible = filteredProducts.value.map(p => p.id)
   if (visible.length === 0) return
 
   if (allVisibleSelected.value) {
@@ -1244,6 +1278,8 @@ function openBulkUpdateModal() {
   bulkIsActive.value = ''
   bulkCategoryId.value = ''
   bulkPropagatePriceToVariants.value = true
+  bulkIsClearance.value = ''
+  bulkClearanceSkipped.value = []
   showBulkUpdateModal.value = true
 }
 
@@ -1251,6 +1287,7 @@ function closeBulkUpdateModal() {
   showBulkUpdateModal.value = false
   bulkSaving.value = false
   bulkError.value = null
+  bulkClearanceSkipped.value = []
 }
 
 async function submitBulkUpdate() {
@@ -1265,6 +1302,8 @@ async function submitBulkUpdate() {
 	    if (bulkIsActive.value === 'false') data.isActive = false
 	    if (bulkCategoryId.value === '__clear__') data.categoryId = null
 	    if (bulkCategoryId.value && bulkCategoryId.value !== '__clear__') data.categoryId = bulkCategoryId.value
+	    if (bulkIsClearance.value === 'true') data.isClearance = true
+	    if (bulkIsClearance.value === 'false') data.isClearance = false
 
     if (Object.keys(data).length === 0) {
       bulkError.value = t('admin.pages.products.index.bulk.noChanges')
@@ -1272,7 +1311,7 @@ async function submitBulkUpdate() {
       return
     }
 
-    await $fetch('/api/admin/products/bulk', {
+    const result = await $fetch<{ clearanceSkippedIds?: string[] }>('/api/admin/products/bulk', {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -1284,8 +1323,16 @@ async function submitBulkUpdate() {
       }
     })
 
-    showBulkUpdateModal.value = false
     await fetchProducts()
+
+    const skipped = result?.clearanceSkippedIds || []
+    if (skipped.length > 0) {
+      bulkClearanceSkipped.value = skipped
+      bulkSaving.value = false
+      return
+    }
+
+    showBulkUpdateModal.value = false
   } catch (error: any) {
     console.error('Bulk update failed:', error)
     bulkError.value = error?.data?.statusMessage || t('admin.pages.products.index.bulk.updateError')

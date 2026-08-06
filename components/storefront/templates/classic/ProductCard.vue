@@ -17,6 +17,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -39,6 +40,10 @@ const pricing = computed(() => buildProductPricing(props.product))
 const originalPrice = computed(() => pricing.value.originalPrice)
 const displayPrice = computed(() => pricing.value.effectivePrice)
 const promotionApplied = computed(() => pricing.value.promotionApplied)
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
@@ -133,6 +138,10 @@ async function handleAddToCart() {
           v-if="discount > 0"
           class="px-2 py-0.5 bg-brand-600 text-white text-[10px] font-bold uppercase tracking-wider"
         >-{{ discount }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-2 py-0.5 bg-amber-600 text-white text-[10px] font-bold uppercase tracking-wider"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
       <!-- Floating Actions (Right) -->

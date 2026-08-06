@@ -16,6 +16,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -64,6 +65,10 @@ const discountPercent = computed(() => {
   if (!Number.isFinite(price) || price <= 0 || !Number.isFinite(promotionalPrice)) return null
   return Math.max(0, Math.round(((price - promotionalPrice) / price) * 100))
 })
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const showSuccess = ref(false)
 const successTitle = ref('')
@@ -128,6 +133,10 @@ async function handleAddToCart() {
           v-if="discountPercent"
           class="bg-brand-500 text-[#02060a] text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1 [clip-path:polygon(8%_0,100%_0,92%_100%,0_100%)]"
         >-{{ discountPercent }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="bg-amber-600 text-white text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1 [clip-path:polygon(8%_0,100%_0,92%_100%,0_100%)]"
+        >{{ t('storefront.clearance.badge') }}</span>
         <span
           v-if="isOutOfStock"
           class="bg-rose-500 text-white text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1"

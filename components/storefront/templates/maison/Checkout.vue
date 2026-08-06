@@ -7,6 +7,7 @@ const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const { currencyCode, format: formatCurrency } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -139,16 +140,18 @@ watch(
   { immediate: true }
 )
 
+const discountedSubtotal = computed(() => Math.max(0, cartStore.total - cartStore.clearanceDiscount))
+
 const grandTotal = computed(() => {
   const delivery = selectedDelivery.value
-  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return cartStore.total
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return discountedSubtotal.value
   const deliveryPrice = Number(delivery.price)
-  return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
+  return isNaN(deliveryPrice) ? discountedSubtotal.value : discountedSubtotal.value + deliveryPrice
 })
 
 const hasRequiredFields = computed(() => Boolean(form.value.fullName.trim() && form.value.phone.trim() &&
   form.value.wilaya &&
-  form.value.commune && cartStore.hasItems && cartStore.total >= minimumOrderAmount.value && form.value.selectedDeliveryOption))
+  form.value.commune && cartStore.hasItems && discountedSubtotal.value >= minimumOrderAmount.value && form.value.selectedDeliveryOption))
 
 onMounted(() => { cartStore.loadFromLocalStorage() })
 
@@ -360,6 +363,10 @@ async function handleSubmit() {
               <div class="co__total-row">
                 <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
                 <dd>{{ formatCurrency(cartStore.total) }}</dd>
+              </div>
+              <div v-if="cartStore.clearanceDiscount > 0" class="co__total-row co__total-row--clearance">
+                <dt>{{ t('storefront.clearance.discountLine') }}</dt>
+                <dd>-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
               </div>
               <div v-if="selectedDelivery" class="co__total-row">
                 <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
@@ -619,6 +626,7 @@ async function handleSubmit() {
 }
 .co__total-row dt { }
 .co__total-row dd { color: var(--at-text); margin: 0; }
+.co__total-row--clearance dt, .co__total-row--clearance dd { color: var(--at-gold) !important; }
 .co__total-detail { font-size: 9px !important; color: var(--at-muted) !important; }
 .co__total-row--grand {
   padding-top: 14px;

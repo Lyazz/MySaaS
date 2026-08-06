@@ -4,6 +4,7 @@ import { useCartStore } from '~/stores/cart'
 const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const { currencyCode, format: formatCurrency } = useCurrency()
 </script>
 
@@ -148,6 +149,10 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                 <dt class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{{ storefrontContent.cart.summary.subtotal }}</dt>
                 <dd class="text-sm font-black text-white">{{ formatCurrency(cartStore.total) }}</dd>
               </div>
+              <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
+                <dt class="text-xs font-bold uppercase tracking-[0.18em] text-amber-400">{{ t('storefront.clearance.discountLine') }}</dt>
+                <dd class="text-sm font-black text-amber-400">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+              </div>
               <div class="flex items-center justify-between pb-3 border-b border-white/[0.06]">
                 <dt class="text-xs font-bold uppercase tracking-[0.18em] text-slate-500">{{ storefrontContent.cart.summary.shipping }}</dt>
                 <dd class="text-xs text-slate-500">{{ storefrontContent.cart.summary.shippingHint }}</dd>
@@ -158,7 +163,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
               </div>
               <div class="flex items-center justify-between pt-3">
                 <dt class="text-sm font-black uppercase tracking-[0.18em] text-white">{{ storefrontContent.cart.summary.total }}</dt>
-                <dd class="text-3xl font-black text-brand-500 tracking-[-0.03em]">{{ formatCurrency(cartStore.total) }}</dd>
+                <dd class="text-3xl font-black text-brand-500 tracking-[-0.03em]">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</dd>
               </div>
             </dl>
 

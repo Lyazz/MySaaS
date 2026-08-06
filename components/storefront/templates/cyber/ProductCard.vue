@@ -30,6 +30,10 @@ const displayPrice = computed(() => {
     return originalPrice.value
 })
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const { format: formatPrice } = useCurrency()
@@ -134,6 +138,10 @@ async function handleAddToCart() {
         >
           Out of Stock
         </span>
+        <span
+          v-if="isClearanceEligible"
+          class="text-xs font-bold text-amber-300 bg-amber-500/20 px-2 py-1 rounded-full border border-amber-500/30"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
     </div>
 
@@ -197,8 +205,14 @@ async function handleAddToCart() {
       </button>
 
       <!-- Stock Badge -->
-      <div v-if="!isInStock" class="absolute top-3 left-3 px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
-        Out of Stock
+      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
+        <div v-if="!isInStock" class="px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
+          Out of Stock
+        </div>
+        <span
+          v-if="isClearanceEligible"
+          class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold rounded-full"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
     </NuxtLink>
 

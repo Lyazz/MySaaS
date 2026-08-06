@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '~/shared/pricing/bundle-pricing'
+import { computeClearanceDiscount } from '~/shared/pricing/clearance-pricing'
 import { useMetaPixel } from '~/composables/useMetaPixel'
 
 export type BundleDeal = {
@@ -22,6 +23,8 @@ export interface CartItem {
     lineTotal?: number
     pricingBreakdown?: any
     metaPixelIds?: string[]
+    isClearance?: boolean
+    promotionApplied?: boolean
 }
 
 const computeLinePricing = (unitPrice: number, quantity: number, bundleDeals?: BundleDeal[]) => {
@@ -56,7 +59,34 @@ export const useCartStore = defineStore('cart', {
         total: (state) =>
             state.items.reduce((sum, item) => sum + (item.lineTotal ?? (item.price * item.quantity)), 0),
 
-        hasItems: (state) => state.items.length > 0
+        hasItems: (state) => state.items.length > 0,
+
+        clearanceDiscount: (state) => {
+            const storeSettings = useState<any>('storeSettings')
+            const settings = storeSettings.value
+            if (!settings?.clearanceEnabled) return 0
+
+            const appliesToAll = settings.clearanceAppliesToAllProducts !== false
+            const lines = state.items
+                .filter((item) => {
+                    const eligibleProduct = appliesToAll ? true : Boolean(item.isClearance)
+                    const hasBundle = Array.isArray(item.bundleDeals) && item.bundleDeals.length > 0
+                    return eligibleProduct && !item.promotionApplied && !hasBundle
+                })
+                .map((item) => ({
+                    key: `${item.productId}:${item.variantId ?? ''}`,
+                    unitPriceCents: moneyToCents(item.price),
+                    quantity: item.quantity
+                }))
+
+            const result = computeClearanceDiscount({
+                lines,
+                multiple: Number(settings.clearanceMultiple) > 0 ? Number(settings.clearanceMultiple) : 6,
+                divisor: Number(settings.clearanceDivisor) > 0 ? Number(settings.clearanceDivisor) : 3
+            })
+
+            return centsToMoney(result.discountCents)
+        }
     },
 
     actions: {

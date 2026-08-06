@@ -3,6 +3,9 @@ import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import BundleDealsPicker from './BundleDealsPicker.vue'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
+import { computeClearanceDiscount } from '~/shared/pricing/clearance-pricing'
+import { moneyToCents, centsToMoney } from '~/shared/pricing/bundle-pricing'
 
 const props = defineProps<{
     product: any
@@ -15,6 +18,7 @@ const props = defineProps<{
 const router = useRouter()
 const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
 const { currencyCode, formatAmount } = useCurrency()
@@ -32,7 +36,23 @@ const orderError = ref('')
 const quantity = ref(1)
 const LOW_STOCK_THRESHOLD = 5
 
-const totalPrice = computed(() => (props.currentPrice || 0) * quantity.value)
+const rawSubtotal = computed(() => (props.currentPrice || 0) * quantity.value)
+
+const quickOrderClearanceDiscount = computed(() => {
+    if (!clearance.isProductEligible(props.product)) return 0
+    const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
+    if (scopedPricing.promotionApplied) return 0
+    if (Array.isArray(props.product?.bundleDeals) && props.product.bundleDeals.length > 0) return 0
+
+    const result = computeClearanceDiscount({
+        lines: [{ key: 'quick-order', unitPriceCents: moneyToCents(props.currentPrice || 0), quantity: quantity.value }],
+        multiple: clearance.config.value.multiple,
+        divisor: clearance.config.value.divisor
+    })
+    return centsToMoney(result.discountCents)
+})
+
+const totalPrice = computed(() => Math.max(0, rawSubtotal.value - quickOrderClearanceDiscount.value))
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
 const maxQuantity = computed(() => { if (props.currentVariant?.trackInventory === false) return 99; return Math.max(0, Number(props.currentStock ?? 0)) })
 const isInStock = computed(() => {
@@ -49,6 +69,9 @@ const cartStockCap = computed(() => props.currentVariant?.trackInventory === fal
 const incrementQuantity = () => { if (!canPurchase.value) return; if (maxQuantity.value > 0 && quantity.value >= maxQuantity.value) return; quantity.value++ }
 const decrementQuantity = () => { if (!canPurchase.value) return; if (quantity.value > 1) quantity.value-- }
 const selectBundleQty = (qty: number) => { if (!canPurchase.value) return; quantity.value = Math.max(1, Math.min(qty, maxQuantity.value || qty)) }
+
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const quickForm = reactive({ fullName: '', phone: '', wilaya: '', commune: '', address: '',
     pickupPoint: '',
@@ -143,7 +166,8 @@ const handleAddToCart = async () => {
     if (!canPurchase.value) { triggerSuccessToast(storefrontContent.value.actions.outOfStock, storefrontContent.value.toasts.outOfStock.message); return }
     addToCartSubmitting.value = true
     const variantLabel = props.currentVariant ? getVariantTitle(props.currentVariant) : ''
-    cartStore.addItem({ productId: props.product.id, variantId: props.currentVariant?.id, title: props.product.title + (variantLabel ? ` (${variantLabel})` : ''), slug: props.product.slug, price: props.currentPrice, bundleDeals: props.product?.bundleDeals || [], stock: cartStockCap.value, image: props.activeImage, quantity: quantity.value, metaPixelIds: (props.product as any)?.metaPixelIds })
+    const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
+    cartStore.addItem({ productId: props.product.id, variantId: props.currentVariant?.id, title: props.product.title + (variantLabel ? ` (${variantLabel})` : ''), slug: props.product.slug, price: props.currentPrice, bundleDeals: props.product?.bundleDeals || [], stock: cartStockCap.value, image: props.activeImage, quantity: quantity.value, metaPixelIds: (props.product as any)?.metaPixelIds, isClearance: Boolean(props.product?.isClearance), promotionApplied: scopedPricing.promotionApplied })
     triggerSuccessToast(storefrontContent.value.toasts.addedToCart.title, storefrontContent.value.toasts.addedToCart.message)
     addToCartSubmitting.value = false
 }
@@ -354,6 +378,18 @@ const scrollToForm = () => {
             @select-qty="selectBundleQty"
         />
 
+        <div
+            v-if="isClearanceEligible"
+            class="flex items-center gap-2 px-4 py-3 mb-6 border text-xs font-medium"
+            style="background-color:rgba(217,160,80,0.1); border-color:rgba(217,160,80,0.4); color:#D9A050; border-radius:2px;"
+        >
+            <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
+            <span v-if="clearance.remainingForNextThreshold.value > 0">
+                {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
+            </span>
+            <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
+        </div>
+
         <!-- Quick COD Order Form -->
         <div
             v-if="codEnabled"
@@ -525,6 +561,12 @@ const scrollToForm = () => {
 
                 <div v-if="orderError" class="p-3 border text-sm" style="background-color:rgba(139,20,20,0.2); border-color:rgba(200,80,80,0.25); color:#FCA5A5; border-radius:1px;">
                     {{ orderError }}
+                </div>
+
+                <!-- Clearance discount -->
+                <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between px-1 py-2 text-sm">
+                    <span class="uppercase tracking-wider text-xs font-bold" style="color:#D4C5A9;">{{ t('storefront.clearance.discountLine') }}</span>
+                    <span class="font-medium" style="color:#D4C5A9;">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
                 </div>
 
                 <!-- Total Price -->

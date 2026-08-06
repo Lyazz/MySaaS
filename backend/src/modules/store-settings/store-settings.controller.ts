@@ -99,6 +99,7 @@ export class StoreSettingsController {
             }
 
             const settings = await service.getOrCreate(tenant.id)
+            const clearanceAppliesToAllProducts = await service.clearanceAppliesToAllProducts(tenant.id)
             res.json({
                 tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
                 storeSettings: {
@@ -123,7 +124,13 @@ export class StoreSettingsController {
                     loyaltyMinRedeemPoints: settings.loyaltyMinRedeemPoints,
                     loyaltyRedeemRateDzdPerPoint: settings.loyaltyRedeemRateDzdPerPoint,
                     loyaltyPublicFormulaMode: settings.loyaltyPublicFormulaMode,
-                    legalPages: settings.legalPages
+                    legalPages: settings.legalPages,
+                    clearanceEnabled: (settings as any).clearanceEnabled,
+                    clearanceMultiple: (settings as any).clearanceMultiple,
+                    clearanceDivisor: (settings as any).clearanceDivisor,
+                    clearanceBannerEnabled: (settings as any).clearanceBannerEnabled,
+                    clearanceBannerText: (settings as any).clearanceBannerText,
+                    clearanceAppliesToAllProducts
                 }
             })
         } catch (error) {
