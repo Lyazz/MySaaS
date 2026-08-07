@@ -181,7 +181,7 @@
               </button>
             </div>
 
-            <AdminOrderStatusBadge :status="order.status" />
+            <AdminOrderStatusBadge :status="order.status" :detail="order.providerStatusDetail" />
             <AdminPaymentStatusBadge :status="order.paymentStatus" />
 
             <span class="od-bar__date hidden md:inline">
@@ -877,7 +877,7 @@
                 >
                   <div class="od-history__top">
                     <span class="od-history__id">{{ historyOrder.publicId || `#${historyOrder.id.substring(0, 8).toUpperCase()}` }}</span>
-                    <AdminOrderStatusBadge :status="historyOrder.status" />
+                    <AdminOrderStatusBadge :status="historyOrder.status" :detail="historyOrder.providerStatusDetail" />
                   </div>
                   <div class="od-history__meta">
                     <span>{{ formatDate(historyOrder.createdAt) }}</span>
@@ -988,6 +988,7 @@ interface PreviousOrder {
   id: string
   publicId?: string | null
   status: string
+  providerStatusDetail?: string | null
   callStatus?: string | null
   customerName: string
   customerPhone: string
@@ -1037,6 +1038,7 @@ type PreviousOrdersMatch =
       createdAt: string
     }>
     status: string
+    providerStatusDetail?: string | null
     callStatus: string
     internalNotes: string | null
     createdAt: string
@@ -2605,10 +2607,17 @@ watch(
   backdrop-filter: saturate(140%);
 }
 
+@media (max-width: 640px) {
+  .od-bar {
+    position: static;
+  }
+}
+
 .od-bar__inner {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
   gap: 12px;
   min-height: 52px;
   padding-top: 8px;
@@ -3185,7 +3194,7 @@ watch(
   font-size: 14px;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
-.od-input--search { padding-left: 38px; }
+.od-input--search { padding-inline-start: 38px; }
 .od-input:focus {
   outline: none;
   border-color: var(--brand);

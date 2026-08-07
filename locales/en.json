@@ -2237,7 +2237,24 @@
       "shipped": "Shipped",
       "delivered": "Delivered",
       "cancelled": "Cancelled",
-      "returned": "Returned"
+      "returned": "Returned",
+      "providerDetail": {
+        "created": "Created",
+        "pick_up_requested": "Pickup requested",
+        "in_process": "In process",
+        "waiting_transit": "Waiting for transit",
+        "in_transit_to_be_shipped": "In transit to be shipped",
+        "in_transit_to_be_returned": "In transit to be returned",
+        "out_of_stock": "Out of stock",
+        "ready_to_ship": "Ready to ship",
+        "assigned": "Assigned to courier",
+        "alerted": "Courier alerted",
+        "postponed": "Postponed",
+        "aborted": "Aborted",
+        "ready_to_return": "Ready to return",
+        "taken_by_store": "Taken by store",
+        "not_received": "Not received"
+      }
     },
     "forms": {
       "product": {

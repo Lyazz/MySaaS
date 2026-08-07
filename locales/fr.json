@@ -2221,7 +2221,24 @@
       "shipped": "Expédiée",
       "delivered": "Livrée",
       "cancelled": "Annulée",
-      "returned": "Retournée"
+      "returned": "Retournée",
+      "providerDetail": {
+        "created": "Créée",
+        "pick_up_requested": "Ramassage demandé",
+        "in_process": "En cours de traitement",
+        "waiting_transit": "En attente de transit",
+        "in_transit_to_be_shipped": "En transit vers expédition",
+        "in_transit_to_be_returned": "En transit vers retour",
+        "out_of_stock": "Rupture de stock",
+        "ready_to_ship": "Prête à expédier",
+        "assigned": "Assignée au livreur",
+        "alerted": "Alerte livreur",
+        "postponed": "Reportée",
+        "aborted": "Annulée (transporteur)",
+        "ready_to_return": "Prête pour retour",
+        "taken_by_store": "Récupérée par le magasin",
+        "not_received": "Non reçue"
+      }
     },
     "forms": {
       "product": {

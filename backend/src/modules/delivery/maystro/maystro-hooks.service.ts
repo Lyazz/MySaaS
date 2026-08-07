@@ -1,7 +1,12 @@
 import { MaystroClient } from './maystro.client'
 
 export type MaystroHookType = { id: string; name?: string; description?: string; [key: string]: any }
-export type MaystroHook = { id: string; endpoint: string; trigger_type_id: string; [key: string]: any }
+export type MaystroHook = {
+    id: string
+    endpoint: string
+    trigger_type?: { id: string; name?: string; description?: string }
+    [key: string]: any
+}
 
 export class MaystroHooksService {
     async listTypes(input: { apiToken: string }): Promise<MaystroHookType[]> {

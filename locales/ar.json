@@ -2239,7 +2239,24 @@
       "shipped": "تم الشحن",
       "delivered": "تم التسليم",
       "cancelled": "ملغي",
-      "returned": "مرتجع"
+      "returned": "مرتجع",
+      "providerDetail": {
+        "created": "تم الإنشاء",
+        "pick_up_requested": "طلب الاستلام",
+        "in_process": "قيد المعالجة",
+        "waiting_transit": "في انتظار النقل",
+        "in_transit_to_be_shipped": "في الطريق للشحن",
+        "in_transit_to_be_returned": "في الطريق للإرجاع",
+        "out_of_stock": "نفاد المخزون",
+        "ready_to_ship": "جاهزة للشحن",
+        "assigned": "تم تعيين المندوب",
+        "alerted": "تنبيه للمندوب",
+        "postponed": "مؤجلة",
+        "aborted": "ملغاة",
+        "ready_to_return": "جاهزة للإرجاع",
+        "taken_by_store": "استلمها المتجر",
+        "not_received": "لم يتم الاستلام"
+      }
     },
     "forms": {
       "product": {

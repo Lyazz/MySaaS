@@ -31,7 +31,7 @@
       :subtitle="t('admin.pages.orders.index.subtitle')"
       :stats="orderStats"
     >
-      <div class="flex items-center gap-3">
+      <div class="flex flex-wrap items-center gap-3">
         <button
           class="ui-btn ui-btn--secondary flex items-center gap-2"
           @click="syncModalOpen = true"
@@ -284,7 +284,7 @@
               </td>
               <td class="ui-td whitespace-nowrap">
                 <div class="flex flex-col gap-1 items-start">
-                  <AdminOrderStatusBadge :status="order.status" />
+                  <AdminOrderStatusBadge :status="order.status" :detail="order.providerStatusDetail" />
                   <span
                     v-if="order.status === 'PENDING' && order.callStatus"
                     class="text-xs truncate max-w-[120px]" style="color: var(--text-tertiary)"
@@ -442,6 +442,7 @@ interface Order {
   deliveryMode?: string | null
   status: string
   callStatus?: string
+  providerStatusDetail?: string | null
   createdAt: string
   items?: any[]
 }

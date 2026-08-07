@@ -1,6 +1,6 @@
 <template>
   <div class="mb-6">
-    <div class="flex items-start justify-between gap-4">
+    <div class="flex flex-wrap items-start justify-between gap-4">
       <div class="min-w-0">
         <p
           v-if="section"
@@ -23,7 +23,7 @@
           {{ subtitle }}
         </p>
       </div>
-      <div v-if="$slots.default" class="flex items-center gap-2 shrink-0 mt-0.5">
+      <div v-if="$slots.default" class="flex flex-wrap items-center gap-2 mt-0.5">
         <slot />
       </div>
     </div>

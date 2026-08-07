@@ -10,6 +10,7 @@ import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { CashService, CashValidationError } from '../cash/cash.service'
 import { renderGenericBordereauPdf } from './bordereau-pdf'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
+import { maystroOrderStatusToString } from '../delivery/maystro/maystro-status'
 import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
 import { MaystroPickupPointService } from '../delivery/maystro/maystro-pickup-point.service'
 import { LoyaltyCheckoutError, LoyaltyCheckoutService } from '../loyalty/loyalty-checkout.service'
@@ -36,6 +37,37 @@ export class OrderValidationError extends Error {
         this.code = opts?.code
         this.meta = opts?.meta
     }
+}
+
+type ShipmentDetailEvent = { code: string | null; description: string | null; details: Prisma.JsonValue | null }
+type ShipmentForDetail = { provider: string; events?: ShipmentDetailEvent[] }
+
+const providerStatusShipmentSelect = {
+    provider: true,
+    events: {
+        orderBy: { eventTime: 'desc' as const },
+        take: 1,
+        select: { code: true, description: true, details: true }
+    }
+} satisfies Prisma.ShipmentSelect
+
+// Surfaces the raw carrier-side status (e.g. Maystro's "ALERTED"/"POSTPONED") behind the
+// generic local order status, so admins can see why an order is stuck without leaving the list.
+function deriveProviderStatusDetail(shipment: ShipmentForDetail | null | undefined): string | null {
+    const event = shipment?.events?.[0]
+    if (!event) return null
+
+    if (shipment!.provider === 'MAYSTRO') {
+        return event.code ? maystroOrderStatusToString(event.code) : null
+    }
+
+    if (shipment!.provider === 'YALIDINE') {
+        const details = event.details as Record<string, unknown> | null
+        const rawStatus = details && typeof details.status === 'string' ? details.status : null
+        return rawStatus || event.description || null
+    }
+
+    return event.description || null
 }
 
 type PublicOrderItemInput = {
@@ -929,7 +961,12 @@ export class OrdersService {
                     paymentStatus: true,
                     paidAmount: true,
                     createdAt: true,
-                    updatedAt: true
+                    updatedAt: true,
+                    shipments: {
+                        orderBy: { createdAt: 'desc' },
+                        take: 1,
+                        select: providerStatusShipmentSelect
+                    }
                 },
                 orderBy,
                 skip,
@@ -952,8 +989,13 @@ export class OrdersService {
             globalTotal += group._count.id
         }
 
+        const itemsWithDetail = items.map(({ shipments, ...item }) => ({
+            ...item,
+            providerStatusDetail: deriveProviderStatusDetail(shipments?.[0])
+        }))
+
         return {
-            items,
+            items: itemsWithDetail,
             total,
             page,
             totalPages: Math.max(1, Math.ceil(total / limit)),
@@ -1033,7 +1075,12 @@ export class OrdersService {
                         labelUrl: true,
                         trackingUrl: true,
                         createdAt: true,
-                        updatedAt: true
+                        updatedAt: true,
+                        events: {
+                            orderBy: { eventTime: 'desc' },
+                            take: 1,
+                            select: { code: true, description: true, details: true }
+                        }
                     }
                 }
             }
@@ -1099,7 +1146,12 @@ export class OrdersService {
                     deliveryMode: true,
                     createdAt: true,
                     updatedAt: true,
-                    items: { select: previousOrderItemSelect }
+                    items: { select: previousOrderItemSelect },
+                    shipments: {
+                        orderBy: { createdAt: 'desc' },
+                        take: 1,
+                        select: providerStatusShipmentSelect
+                    }
                 }
             })
         } else {
@@ -1132,7 +1184,12 @@ export class OrdersService {
                         deliveryMode: true,
                         createdAt: true,
                         updatedAt: true,
-                        items: { select: previousOrderItemSelect }
+                        items: { select: previousOrderItemSelect },
+                        shipments: {
+                            orderBy: { createdAt: 'desc' },
+                            take: 1,
+                            select: providerStatusShipmentSelect
+                        }
                     }
                 })
             } else {
@@ -1144,9 +1201,15 @@ export class OrdersService {
             }
         }
 
+        const previousOrdersWithDetail = previousOrders.map(({ shipments, ...previousOrder }) => ({
+            ...previousOrder,
+            providerStatusDetail: deriveProviderStatusDetail(shipments?.[0])
+        }))
+
         return {
             ...order,
-            previousOrders,
+            providerStatusDetail: deriveProviderStatusDetail(order.shipments?.[0]),
+            previousOrders: previousOrdersWithDetail,
             previousOrdersMatch
         }
     }
