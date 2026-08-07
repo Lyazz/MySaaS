@@ -1,7 +1,13 @@
 import { useCartStore } from '~/stores/cart'
+import { isPromotionActiveNow } from '~/shared/pricing/product-pricing'
 
 export type ClearanceProductLike = {
     isClearance?: boolean
+    isPromotionActive?: boolean
+    promotionalPrice?: unknown
+    promotionStartDate?: unknown
+    promotionEndDate?: unknown
+    bundleDeals?: unknown[]
 }
 
 export const useClearanceDiscount = () => {
@@ -20,6 +26,8 @@ export const useClearanceDiscount = () => {
 
     const isProductEligible = (product?: ClearanceProductLike | null): boolean => {
         if (!config.value.enabled) return false
+        if (isPromotionActiveNow(product as any)) return false
+        if (Array.isArray(product?.bundleDeals) && product.bundleDeals.length > 0) return false
         if (config.value.appliesToAll) return true
         return Boolean(product?.isClearance)
     }
