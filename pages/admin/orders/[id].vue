@@ -10,6 +10,16 @@
       @cancel="deleteError = null"
     />
 
+    <AdminConfirmModal
+      v-model="cancelOrderOpen"
+      :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
+      :message="t('admin.pages.orders.detail.cancelConfirm', 'Cancel this order? This cannot be undone.')"
+      :confirm-text="t('admin.pages.orders.detail.nba.cancelOrder', 'Cancel order')"
+      :error="cancelOrderError"
+      @confirm="confirmCancelOrder"
+      @cancel="cancelOrderError = null"
+    />
+
     <DeliveryPaymentModal
       v-model="deliveryModalOpen"
       :cashboxes="cashboxes"
@@ -182,15 +192,6 @@
           <!-- Right: action buttons -->
           <div class="od-bar__right">
             <button
-              v-if="canPrintBordereauVisible"
-              type="button"
-              class="ui-btn ui-btn--secondary ui-btn--md hidden lg:inline-flex"
-              @click="printBordereau"
-            >
-              <Icon name="lucide:printer" class="w-4 h-4" />
-              <span class="hidden xl:inline">{{ t('admin.pages.orders.detail.printBordereau', 'Imprimer le bordereau') }}</span>
-            </button>
-            <button
               v-if="order.paymentStatus !== 'PAID'"
               type="button"
               class="ui-btn ui-btn--primary ui-btn--md hidden lg:inline-flex"
@@ -272,15 +273,16 @@
           <!-- Customer Card -->
           <div class="od-customer-card">
             <div class="od-customer-card__header">
-              <Icon name="lucide:user" class="w-4 h-4" style="color: var(--text-tertiary)" />
-              <span class="od-customer-card__name">{{ order.customerName }}</span>
+              <span class="od-customer-card__avatar">
+                <Icon name="lucide:user" class="w-4 h-4" />
+              </span>
+              <span class="od-customer-card__name od-display">{{ order.customerName }}</span>
             </div>
             <div v-if="order.customerPhone" class="mt-3 space-y-2">
               <div class="flex gap-2">
                 <a
                   :href="`tel:${order.customerPhone}`"
-                  class="ui-btn ui-btn--sm flex-1 flex justify-center items-center gap-2"
-                  style="color: #0369a1; background-color: #f0f9ff; border: 1px solid #bae6fd;"
+                  class="ui-btn ui-btn--sm flex-1 flex justify-center items-center gap-2 od-phone-btn"
                   dir="ltr"
                 >
                   <Icon name="lucide:phone" class="w-4 h-4" />
@@ -300,21 +302,22 @@
                 type="button"
                 :disabled="generatingWhatsapp"
                 @click="generateAndSendWhatsapp"
-                class="ui-btn ui-btn--sm w-full flex justify-center items-center gap-2"
-                style="color: #16a34a; background-color: #f0fdf4; border: 1px solid #bbf7d0;"
+                class="ui-btn ui-btn--sm w-full flex justify-center items-center gap-2 od-whatsapp-btn"
               >
                 <Icon v-if="generatingWhatsapp" name="lucide:loader" class="w-4 h-4 animate-spin" />
                 <Icon v-else name="lucide:message-circle" class="w-4 h-4" />
                 <span class="font-bold">{{ generatingWhatsapp ? t('admin.common.loading', 'Loading...') : t('admin.pages.orders.detail.sendWhatsapp', 'Send WhatsApp') }}</span>
               </button>
             </div>
-            <div v-if="order.customerAddress" class="od-customer-card__address">
-              <Icon name="lucide:map-pin" class="w-3 h-3" style="color: var(--text-tertiary); flex-shrink: 0" />
-              <span>{{ order.customerAddress }}</span>
-            </div>
-            <div v-if="order.shippingWilayaCode || order.shippingCommuneCode" class="od-customer-card__geo">
-              <Icon name="lucide:navigation" class="w-3 h-3" style="color: var(--text-tertiary); flex-shrink: 0" />
-              <span>{{ shippingWilayaCommuneLabel }}</span>
+            <div v-if="order.customerAddress || order.shippingWilayaCode || order.shippingCommuneCode" class="od-customer-card__location">
+              <div v-if="order.customerAddress" class="od-customer-card__address">
+                <Icon name="lucide:map-pin" class="w-3.5 h-3.5" style="color: var(--text-tertiary); flex-shrink: 0" />
+                <span>{{ order.customerAddress }}</span>
+              </div>
+              <div v-if="order.shippingWilayaCode || order.shippingCommuneCode" class="od-customer-card__geo">
+                <Icon name="lucide:navigation" class="w-3.5 h-3.5" style="color: var(--text-tertiary); flex-shrink: 0" />
+                <span>{{ shippingWilayaCommuneLabel }}</span>
+              </div>
             </div>
           </div>
 
@@ -367,15 +370,6 @@
 
         <!-- Mobile action row (visible below lg) -->
         <div class="od-mobile-actions lg:hidden">
-          <button
-            v-if="canPrintBordereauVisible"
-            type="button"
-            class="ui-btn ui-btn--secondary ui-btn--sm flex-1"
-            @click="printBordereau"
-          >
-            <Icon name="lucide:printer" class="w-4 h-4" />
-            {{ t('admin.pages.orders.detail.printBordereau', 'Imprimer le bordereau') }}
-          </button>
           <button
             v-if="order.paymentStatus !== 'PAID'"
             type="button"
@@ -910,7 +904,7 @@
 
       <!-- MOBILE STICKY ACTION BAR -->
       <div class="od-mobile-bar lg:hidden">
-        <OrdersOrderDetailNBA
+        <AdminOrdersOrderDetailNBA
           :model="nbaModel"
           :busy="updating"
           :full-width="true"
@@ -1086,6 +1080,9 @@ async function openPaymentModal() {
 
 const deleteOpen = ref(false)
 const deleteError = ref<string | null>(null)
+
+const cancelOrderOpen = ref(false)
+const cancelOrderError = ref<string | null>(null)
 
 const savingNotes = ref(false)
 const notesSavedMessage = ref('')
@@ -1307,12 +1304,6 @@ ${confirmLink}`
     const hasApiCarrier = Boolean(provider) && provider !== 'SELF'
     
     return hasApiCarrier && o.status !== 'PENDING'
-  })
-
-  const canPrintBordereau = computed(() => {
-    const o = order.value
-    if (!o) return false
-    return Boolean(o.shippingProvider) || Boolean(o.shipments && o.shipments.length)
   })
 
   // Show "Push to Maystro" retry button when order is confirmed with Maystro but no shipment was created yet
@@ -2257,7 +2248,19 @@ async function handleStatusUpdate() {
     deliveryModalOpen.value = true
     return
   }
-  
+
+  if (newStatus.value === 'CANCELLED' && order.value.status !== 'CANCELLED') {
+    errorMessage.value = ''
+    successMessage.value = ''
+    cancelOrderError.value = null
+    cancelOrderOpen.value = true
+    return
+  }
+
+  await performStatusUpdate()
+}
+
+async function performStatusUpdate() {
   errorMessage.value = ''
   successMessage.value = ''
   updating.value = true
@@ -2285,6 +2288,35 @@ async function handleStatusUpdate() {
   } catch (error: any) {
     console.error('Failed to update order:', error)
     errorMessage.value = error.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')
+  } finally {
+    updating.value = false
+  }
+}
+
+async function confirmCancelOrder() {
+  if (!order.value) return
+  cancelOrderError.value = null
+  updating.value = true
+
+  try {
+    const updated = await $fetch(`/api/admin/orders/${orderId.value}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      body: {
+        status: 'CANCELLED'
+      }
+    }) as any
+
+    order.value = { ...order.value, ...updated }
+    newStatus.value = updated.status
+    cancelOrderOpen.value = false
+    successMessage.value = t('admin.pages.orders.detail.statusUpdate.success')
+    setTimeout(() => { successMessage.value = '' }, 3000)
+  } catch (error: any) {
+    console.error('Failed to cancel order:', error)
+    cancelOrderError.value = error?.data?.statusMessage || t('admin.pages.orders.detail.statusUpdate.errors.updateFailed')
   } finally {
     updating.value = false
   }
@@ -2426,15 +2458,6 @@ function formatDate(dateString: string) {
 }
 
 // ── Redesign: NBA model + tabbed detail zone ──
-
-// Only show bordereau when the order has been confirmed (or beyond).
-const canPrintBordereauVisible = computed(() => {
-  const o = order.value
-  if (!o) return false
-  const s = String(o.status || '').toUpperCase()
-  if (s !== 'CONFIRMED' && s !== 'SHIPPED' && s !== 'DELIVERED') return false
-  return canPrintBordereau.value
-})
 
 const nbaModel = computed(() => useOrderNBA(order.value as any, t as any))
 
@@ -2656,11 +2679,11 @@ watch(
   align-items: center;
   gap: 6px;
   font-size: 11px;
-  color: rgb(180 83 9);
   background: rgb(245 158 11 / 0.06);
   border-top: 1px solid rgb(245 158 11 / 0.15);
 }
-:global(.dark) .od-bar__locked-note { color: rgb(252 211 77); }
+:global([data-theme="light"] .od-bar__locked-note) { color: rgb(180 83 9); }
+:global([data-theme="dark"] .od-bar__locked-note) { color: rgb(252 211 77); }
 
 /* ── ZONE 2: Command Center ── */
 .od-command {
@@ -2712,14 +2735,14 @@ watch(
 }
 .od-kpi--success .od-kpi__icon {
   background: rgb(16 185 129 / 0.1);
-  color: rgb(5 150 105);
 }
 .od-kpi--warn .od-kpi__icon {
   background: rgb(245 158 11 / 0.1);
-  color: rgb(180 83 9);
 }
-:global(.dark) .od-kpi--success .od-kpi__icon { color: rgb(110 231 183); }
-:global(.dark) .od-kpi--warn .od-kpi__icon { color: rgb(252 211 77); }
+:global([data-theme="light"] .od-kpi--success .od-kpi__icon) { color: rgb(5 150 105); }
+:global([data-theme="light"] .od-kpi--warn .od-kpi__icon) { color: rgb(180 83 9); }
+:global([data-theme="dark"] .od-kpi--success .od-kpi__icon) { color: rgb(110 231 183); }
+:global([data-theme="dark"] .od-kpi--warn .od-kpi__icon) { color: rgb(252 211 77); }
 
 .od-kpi__data {
   display: flex;
@@ -2749,10 +2772,10 @@ watch(
 }
 
 .od-kpi--accent .od-kpi__value { color: var(--brand); }
-.od-kpi--success .od-kpi__value { color: rgb(5 150 105); }
-.od-kpi--warn .od-kpi__value { color: rgb(180 83 9); }
-:global(.dark) .od-kpi--success .od-kpi__value { color: rgb(110 231 183); }
-:global(.dark) .od-kpi--warn .od-kpi__value { color: rgb(252 211 77); }
+:global([data-theme="light"] .od-kpi--success .od-kpi__value) { color: rgb(5 150 105); }
+:global([data-theme="light"] .od-kpi--warn .od-kpi__value) { color: rgb(180 83 9); }
+:global([data-theme="dark"] .od-kpi--success .od-kpi__value) { color: rgb(110 231 183); }
+:global([data-theme="dark"] .od-kpi--warn .od-kpi__value) { color: rgb(252 211 77); }
 
 /* Cockpit Row: Customer + Call */
 .od-cockpit-row {
@@ -2777,15 +2800,57 @@ watch(
   gap: 8px;
 }
 
+.od-phone-btn {
+  border-width: 1px;
+  border-style: solid;
+}
+:global([data-theme="light"] .od-phone-btn) {
+  color: #0369a1;
+  background-color: #f0f9ff;
+  border-color: #bae6fd;
+}
+:global([data-theme="dark"] .od-phone-btn) {
+  color: #7dd3fc;
+  background-color: rgb(56 189 248 / 0.12);
+  border-color: rgb(56 189 248 / 0.35);
+}
+
+.od-whatsapp-btn {
+  border-width: 1px;
+  border-style: solid;
+}
+:global([data-theme="light"] .od-whatsapp-btn) {
+  color: #16a34a;
+  background-color: #f0fdf4;
+  border-color: #bbf7d0;
+}
+:global([data-theme="dark"] .od-whatsapp-btn) {
+  color: rgb(110 231 183);
+  background-color: rgb(16 185 129 / 0.12);
+  border-color: rgb(16 185 129 / 0.35);
+}
+
 .od-customer-card__header {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+}
+
+.od-customer-card__avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: rgb(var(--brand-rgb, 99 102 241) / 0.12);
+  color: var(--brand);
+  flex-shrink: 0;
 }
 
 .od-customer-card__name {
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 17px;
   color: var(--text-primary);
 }
 
@@ -2795,14 +2860,24 @@ watch(
   gap: 6px;
 }
 
+.od-customer-card__location {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 2px;
+  padding-top: 10px;
+  border-top: 1px solid var(--surface-border);
+}
+
 .od-customer-card__address,
 .od-customer-card__geo {
   display: flex;
   align-items: flex-start;
-  gap: 6px;
-  font-size: 12px;
-  color: var(--text-secondary);
-  line-height: 1.4;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.45;
 }
 
 /* Call Panel Card */
@@ -2832,6 +2907,11 @@ watch(
   display: flex;
   gap: 8px;
   margin-top: 10px;
+}
+@media (min-width: 1024px) {
+  .od-mobile-actions {
+    display: none;
+  }
 }
 
 /* ── ZONE 3: Tabbed Detail Zone ── */
@@ -2900,9 +2980,9 @@ watch(
 }
 .od-tab__badge--highlight {
   background: rgb(245 158 11 / 0.12);
-  color: rgb(180 83 9);
 }
-:global(.dark) .od-tab__badge--highlight { color: rgb(252 211 77); }
+:global([data-theme="light"] .od-tab__badge--highlight) { color: rgb(180 83 9); }
+:global([data-theme="dark"] .od-tab__badge--highlight) { color: rgb(252 211 77); }
 
 .od-panel {
   padding-top: 16px;
@@ -2997,9 +3077,9 @@ watch(
   align-items: center;
   gap: 4px;
   font-size: 11px;
-  color: rgb(5 150 105);
 }
-:global(.dark) .od-saved { color: rgb(110 231 183); }
+:global([data-theme="light"] .od-saved) { color: rgb(5 150 105); }
+:global([data-theme="dark"] .od-saved) { color: rgb(110 231 183); }
 
 .od-notes {
   width: 100%;
@@ -3387,15 +3467,15 @@ watch(
 .od-alert--error {
   background: rgb(244 63 94 / 0.06);
   border-color: rgb(244 63 94 / 0.25);
-  color: rgb(190 18 60);
 }
 .od-alert--success {
   background: rgb(16 185 129 / 0.06);
   border-color: rgb(16 185 129 / 0.25);
-  color: rgb(5 150 105);
 }
-:global(.dark) .od-alert--error { color: rgb(253 164 175); }
-:global(.dark) .od-alert--success { color: rgb(110 231 183); }
+:global([data-theme="light"] .od-alert--error) { color: rgb(190 18 60); }
+:global([data-theme="light"] .od-alert--success) { color: rgb(5 150 105); }
+:global([data-theme="dark"] .od-alert--error) { color: rgb(253 164 175); }
+:global([data-theme="dark"] .od-alert--success) { color: rgb(110 231 183); }
 
 /* ── Mobile bottom action bar ── */
 .od-mobile-bar {

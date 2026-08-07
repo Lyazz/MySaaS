@@ -450,7 +450,8 @@ const navGroups = ref<NavGroup[]>([
     titleKey: 'admin.nav.overview',
     collapsed: false,
     items: [
-      { path: '/admin', labelKey: 'admin.nav.dashboard', icon: 'lucide:layout-dashboard', access: 'admin' }
+      { path: '/admin', labelKey: 'admin.nav.dashboard', icon: 'lucide:layout-dashboard', access: 'admin' },
+      { path: '/admin/statistics', labelKey: 'admin.nav.statistics', icon: 'lucide:bar-chart-3', access: 'admin' }
     ]
   },
   {

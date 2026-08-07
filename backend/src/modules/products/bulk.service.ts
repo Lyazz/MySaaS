@@ -5,6 +5,7 @@ import { ProductsService } from './products.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { buildPublicUrl } from '../../lib/s3'
 import { sanitizeOptionalRichText } from '../../lib/rich-text'
+import { syncDerivedProductPrice } from './product-price-sync'
 
 type ImportSummary = {
     created: number
@@ -426,7 +427,6 @@ export class BulkProductsService {
                 if (miniDescription !== undefined) updateData.miniDescription = miniDescription
                 if (isActive !== null) updateData.isActive = isActive
                 if (categoryIds !== undefined) updateData.categoryIds = categoryIds
-                if (price !== null) updateData.price = price
                 if (images !== undefined) updateData.images = images ?? []
 
                 // Only allow slug change when targeting by id.
@@ -443,6 +443,20 @@ export class BulkProductsService {
                     await this.products.updateProduct(tenantId, existing.id, updateData, {
                         userId: opts?.actorUserId ?? null
                     })
+                }
+
+                if (price !== null) {
+                    // Price lives on the default (no-option) variant; Product.price is a derived cache.
+                    const defaultVariant = await prisma.productVariant.findFirst({
+                        where: { tenantId, productId: existing.id, optionValues: { none: {} } }
+                    })
+                    if (defaultVariant) {
+                        await prisma.productVariant.updateMany({
+                            where: { tenantId, id: defaultVariant.id },
+                            data: { price }
+                        })
+                        await syncDerivedProductPrice(prisma, tenantId, existing.id)
+                    }
                 }
 
                 if (stock !== null) {

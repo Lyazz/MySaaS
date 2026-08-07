@@ -53,6 +53,7 @@ export const STAFF_ROLE_PRESETS: StaffRolePreset[] = [
         name: 'Lecture seule',
         permissions: [
             { resource: 'dashboard', actions: ['read'] },
+            { resource: 'statistics', actions: ['read'] },
             { resource: 'products', actions: ['read'] },
             { resource: 'categories', actions: ['read'] },
             { resource: 'variants', actions: ['read'] },

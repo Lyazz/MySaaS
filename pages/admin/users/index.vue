@@ -1021,6 +1021,7 @@ const getHiddenPermissionsTitle = (permissions: StaffRole['permissions']) => {
 
 const staffResources = [
   'dashboard',
+  'statistics',
   'products',
   'categories',
   'variants',
@@ -1046,6 +1047,7 @@ const staffActions = ['create', 'read', 'update', 'delete'] as const
 const resourceLabel = (resource: string): string => {
   const keyMap: Record<string, string> = {
     dashboard: 'admin.nav.dashboard',
+    statistics: 'admin.nav.statistics',
     products: 'admin.nav.products',
     categories: 'admin.nav.categories',
     variants: 'admin.pages.users.roles.resources.variants',

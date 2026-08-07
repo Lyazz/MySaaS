@@ -10,6 +10,7 @@ export type AdminSettingsResource =
 
 export type AdminResource =
   | 'dashboard'
+  | 'statistics'
   | 'products'
   | 'inventory'
   | 'categories'
@@ -406,6 +407,7 @@ export const SETTINGS_THEMES: SettingsTheme[] = [
 
 export function adminPathToResource(path: string): AdminResource | null {
   if (path === '/admin' || path.startsWith('/admin/dashboard')) return 'dashboard'
+  if (path.startsWith('/admin/statistics')) return 'statistics'
   if (path.startsWith('/admin/products')) return 'products'
   if (path.startsWith('/admin/inventory')) return 'inventory'
   if (path.startsWith('/admin/categories')) return 'categories'

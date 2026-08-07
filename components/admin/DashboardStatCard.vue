@@ -25,6 +25,17 @@
           <p v-if="hint && !loading" class="mt-1.5 text-[11px]" style="color: var(--text-tertiary)">
             {{ hint }}
           </p>
+
+          <div v-if="changePct !== undefined && changePct !== null && !loading" class="mt-1.5 flex items-center gap-1">
+            <span
+              class="inline-flex items-center gap-0.5 text-[11px] font-semibold font-mono-nums rounded-md px-1.5 py-0.5"
+              :style="changeBadgeStyle"
+            >
+              <Icon :name="changePct >= 0 ? 'lucide:arrow-up-right' : 'lucide:arrow-down-right'" class="h-3 w-3" />
+              {{ Math.abs(changePct) }}%
+            </span>
+            <span v-if="compareLabel" class="text-[10.5px]" style="color: var(--text-muted)">{{ compareLabel }}</span>
+          </div>
         </div>
 
         <div
@@ -70,16 +81,27 @@ interface Props {
   loading?: boolean
   to?: string
   tone?: Tone
+  changePct?: number | null
+  compareLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   tone: 'brand',
   to: undefined,
-  hint: undefined
+  hint: undefined,
+  changePct: undefined,
+  compareLabel: undefined
 })
 
 const NuxtLink = resolveComponent('NuxtLink')
+
+const changeBadgeStyle = computed(() => {
+  if (props.changePct === undefined || props.changePct === null) return ''
+  if (props.changePct > 0) return 'color: #34d399; background: rgba(52,211,153,0.12);'
+  if (props.changePct < 0) return 'color: #f87171; background: rgba(248,113,113,0.12);'
+  return 'color: var(--text-tertiary); background: var(--surface-2);'
+})
 
 const toneMap: Record<Tone, { icon: string; wrap: string; topLine: string; wash: string }> = {
   brand: {

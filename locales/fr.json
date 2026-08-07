@@ -1359,7 +1359,9 @@
       "soon": "Bientôt",
       "moveUp": "Monter",
       "moveDown": "Descendre",
-      "amount": "Montant"
+      "amount": "Montant",
+      "paid": "Payé",
+      "remaining": "Reste à payer"
     },
     "confirmModal": {
       "defaults": {
@@ -2127,6 +2129,7 @@
       "settingsHub": "Paramètres",
       "settings": "Administration",
       "dashboard": "Tableau de bord",
+      "statistics": "Statistiques",
       "products": "Produits",
       "inventory": "Stock",
       "categories": "Catégories",
@@ -2933,6 +2936,164 @@
           "newLandingPage": "Nouvelle landing page"
         }
       },
+      "statistics": {
+        "title": "Statistiques",
+        "subtitle": "Analysez les performances de votre boutique en détail.",
+        "loadErrorTitle": "Les statistiques n’ont pas pu être chargées.",
+        "loadErrorHint": "Essayez d’actualiser. Si cela continue, vérifiez votre connexion ou votre session.",
+        "refresh": "Actualiser",
+        "export": "Exporter CSV",
+        "compareLabel": "vs période précédente",
+        "noCostData": "Coût d’achat inconnu pour {pct}% des ventes — la marge est estimée.",
+        "filters": {
+          "range": "Période",
+          "channel": "Canal",
+          "channels": {
+            "all": "Tous",
+            "online": "En ligne",
+            "pos": "Point de vente"
+          },
+          "category": "Catégorie",
+          "allCategories": "Toutes les catégories",
+          "wilaya": "Wilaya",
+          "allWilayas": "Toutes les wilayas",
+          "provider": "Transporteur",
+          "allProviders": "Tous les transporteurs"
+        },
+        "tabs": {
+          "sales": "Ventes",
+          "delivery": "Livraison",
+          "products": "Produits & Stock",
+          "customers": "Clients",
+          "profitability": "Rentabilité"
+        },
+        "sales": {
+          "kpis": {
+            "revenue": "Chiffre d’affaires",
+            "onlineRevenue": "CA en ligne",
+            "posRevenue": "CA point de vente",
+            "ordersCount": "Commandes",
+            "avgBasket": "Panier moyen"
+          },
+          "trend": {
+            "title": "Évolution du chiffre d’affaires",
+            "hint": "Cliquez sur un point pour filtrer la période ci-dessous."
+          },
+          "byCategory": {
+            "title": "CA par catégorie",
+            "empty": "Aucune vente sur cette période."
+          }
+        },
+        "delivery": {
+          "kpis": {
+            "totalShipments": "Expéditions",
+            "deliveredRate": "Taux de livraison",
+            "returnedRate": "Taux de retour",
+            "cancelledRate": "Taux d’annulation",
+            "avgDeliveryDays": "Délai moyen (jours)"
+          },
+          "byProvider": {
+            "title": "Performance par transporteur",
+            "empty": "Aucune expédition sur cette période."
+          },
+          "byWilaya": {
+            "title": "Performance par wilaya",
+            "empty": "Aucune donnée de livraison sur cette période."
+          },
+          "selfProvider": "Livraison propre",
+          "table": {
+            "provider": "Transporteur",
+            "total": "Total",
+            "delivered": "Livrées",
+            "returned": "Retournées",
+            "cancelled": "Annulées",
+            "rate": "Taux de livraison",
+            "wilaya": "Wilaya"
+          }
+        },
+        "products": {
+          "kpis": {
+            "activeProducts": "Produits actifs",
+            "lowStockProducts": "Stock faible",
+            "outOfStockProducts": "Rupture de stock",
+            "neverSoldProducts": "Jamais vendus",
+            "clearanceDiscountTotal": "Remises déstockage"
+          },
+          "top": {
+            "title": "Meilleures ventes",
+            "empty": "Aucune vente sur cette période."
+          },
+          "flop": {
+            "title": "Ventes les plus faibles",
+            "empty": "Aucune vente sur cette période."
+          },
+          "rotation": {
+            "title": "Rotation des stocks",
+            "hint": "Quantité vendue rapportée au stock actuel.",
+            "empty": "Aucune donnée de stock."
+          },
+          "criticalStock": {
+            "title": "Stock critique",
+            "empty": "Aucun produit en stock critique actuellement."
+          },
+          "table": {
+            "product": "Produit",
+            "quantity": "Quantité",
+            "revenue": "CA",
+            "stock": "Stock",
+            "rotation": "Rotation",
+            "threshold": "Seuil"
+          }
+        },
+        "customers": {
+          "kpis": {
+            "newCustomers": "Nouveaux clients",
+            "returningCustomers": "Clients récurrents",
+            "repeatPurchaseRate": "Taux de rachat",
+            "avgOrdersPerCustomer": "Commandes / client"
+          },
+          "top": {
+            "title": "Meilleurs clients",
+            "empty": "Aucun client sur cette période."
+          },
+          "byWilaya": {
+            "title": "Clients par wilaya",
+            "empty": "Aucune donnée client sur cette période."
+          },
+          "table": {
+            "customer": "Client",
+            "phone": "Téléphone",
+            "orders": "Commandes",
+            "revenue": "CA",
+            "wilaya": "Wilaya",
+            "customers": "Clients"
+          }
+        },
+        "profitability": {
+          "kpis": {
+            "revenue": "Chiffre d’affaires",
+            "cogs": "Coût des ventes",
+            "grossMargin": "Marge brute",
+            "grossMarginPct": "Marge brute %",
+            "shippingCost": "Frais de livraison",
+            "netMargin": "Marge nette",
+            "netMarginPct": "Marge nette %",
+            "costDataCoverage": "Couverture des coûts"
+          },
+          "byProduct": {
+            "title": "Marge par produit",
+            "empty": "Aucune donnée de marge sur cette période."
+          },
+          "table": {
+            "product": "Produit",
+            "quantity": "Quantité",
+            "revenue": "CA",
+            "cogs": "Coût",
+            "margin": "Marge",
+            "marginPct": "Marge %"
+          }
+        }
+      },
       "billing": {
         "metaTitle": "Facturation",
         "title": "Facturation",
@@ -3310,12 +3471,18 @@
           "itemsSection": "Articles de la commande",
           "emptyCart": "Le panier est vide",
           "itemsTotal": "Total des articles",
+          "inStock": "en stock",
           "submit": "Créer la commande"
         },
         "index": {
           "title": "Commandes",
           "subtitle": "Gérez les commandes clients",
           "addBtn": "Nouvelle commande",
+          "deliveryModes": {
+            "home": "Livraison à domicile",
+            "pickup": "Point relais",
+            "store": "Retrait en boutique"
+          },
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher par nom ou téléphone…",
@@ -3342,6 +3509,7 @@
           "metaTitle": "Détail de la commande",
           "breadcrumb": "Commande n°{id}",
           "loading": "Chargement de la commande…",
+          "printBordereau": "Imprimer le bordereau",
           "sections": {
             "orderInfo": "Informations de commande",
             "customerInfo": "Informations client",
@@ -3349,7 +3517,9 @@
             "internalNotes": "Notes internes",
             "securityAndFraud": "Sécurité & Fraude",
             "previousOrders": "Commandes précédentes",
-            "remainingAmount": "Reste à payer"
+            "remainingAmount": "Reste à payer",
+            "callPanel": "Panneau d'appel",
+            "deliveryAndCustomer": "Livraison et client"
           },
           "fields": {
             "orderId": "ID commande",
@@ -3370,7 +3540,14 @@
               "whatsapp_sms_sent": "SMS WhatsApp envoyé",
               "whatsapp_link_confirmed": "Lien WhatsApp confirmé"
             },
-            "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande..."
+            "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande...",
+            "currency": "Devise",
+            "deliveryCompany": "Transporteur",
+            "deliveryMode": "Mode de livraison",
+            "pickupPoint": "Point de retrait",
+            "shippingFee": "Frais de livraison",
+            "totalWithDelivery": "Total (livraison incluse)",
+            "wilayaCommune": "Wilaya / Commune"
           },
           "actions": {
             "blacklistCustomer": "Mettre le client sur liste noire",
@@ -3378,6 +3555,25 @@
             "blacklistPhone": "Mettre le téléphone sur liste noire"
           },
           "securityHelp": "Actions avancées pour gérer les comportements à risque.",
+          "deleteConfirm": "Supprimer cette commande ? Cette action est irréversible. Si la commande est confirmée auprès d'un transporteur, elle sera également annulée chez lui.",
+          "cancelConfirm": "Annuler cette commande ? Cette action est irréversible.",
+          "editHint": "Enregistrez depuis la section articles pour appliquer les modifications.",
+          "internalNotesHelp": "Les notes ne sont visibles que par votre équipe.",
+          "sendWhatsapp": "Envoyer sur WhatsApp",
+          "variantSelect": "Sélectionner une variante",
+          "paymentRecorded": "Paiement enregistré",
+          "nba": {
+            "confirm": "Confirmer la commande",
+            "callCustomer": "Appeler le client",
+            "callAgain": "Rappeler",
+            "cancelOrder": "Annuler la commande",
+            "pushTo": "Envoyer vers {provider}",
+            "pushToMaystro": "Envoyer vers Maystro",
+            "markShipped": "Marquer comme expédiée",
+            "markDelivered": "Marquer comme livrée",
+            "reopen": "Réouvrir la commande",
+            "lockedNote": "Le statut est géré par le transporteur."
+          },
           "previousOrders": {
             "matchCustomer": "Correspondance par fiche client liée.",
             "matchPhone": "Correspondance par numéro de téléphone normalisé.",
@@ -3401,6 +3597,7 @@
             "statusLabel": "Statut",
             "submit": "Mettre à jour",
             "success": "Statut de la commande mis à jour !",
+            "lockedByCarrier": "Le statut est géré par le transporteur. Vous ne pouvez pas le modifier manuellement.",
             "errors": {
               "loadCashboxesFailed": "Impossible de charger les caisses. Ouvrez d’abord une session de caisse.",
               "updateFailed": "Impossible de mettre à jour le statut"
@@ -3426,6 +3623,11 @@
           "notFound": {
             "title": "Commande introuvable",
             "hint": "Cette commande n’existe peut-être pas ou vous n’avez pas l’autorisation de la voir."
+          }
+        },
+        "modals": {
+          "payment": {
+            "title": "Enregistrer le paiement"
           }
         }
       },

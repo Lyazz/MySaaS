@@ -18,6 +18,7 @@ import publicHomepageSettingsRouter from './modules/homepage-settings/public.rou
 import publicContactInfosRouter from './modules/contact-infos/public.routes';
 import deliveryRouter from './modules/delivery/routes';
 import dashboardRouter from './modules/dashboard/routes';
+import statisticsRouter from './modules/statistics/routes';
 import billingRouter from './modules/billing/routes';
 import billingAdminRouter from './modules/billing-admin/routes';
 import inventoryRouter from './modules/inventory/routes';
@@ -77,6 +78,7 @@ router.use('/admin/contact-infos', contactInfosRouter);
 router.use('/admin/pos', posRouter);
 router.use('/admin', cashRouter);
 router.use('/admin/dashboard', dashboardRouter);
+router.use('/admin/statistics', statisticsRouter);
 router.use('/admin/inventory', inventoryRouter);
 router.use('/admin/suppliers', suppliersRouter);
 router.use('/admin/purchases', purchasesRouter);

@@ -1377,7 +1377,9 @@
       "soon": "قريبًا",
       "moveUp": "تحريك للأعلى",
       "moveDown": "تحريك للأسفل",
-      "amount": "المبلغ"
+      "amount": "المبلغ",
+      "paid": "مدفوع",
+      "remaining": "المتبقي"
     },
     "confirmModal": {
       "defaults": {
@@ -2145,6 +2147,7 @@
       "settingsHub": "الإعدادات",
       "settings": "الإدارة",
       "dashboard": "لوحة التحكم",
+      "statistics": "الإحصائيات",
       "products": "المنتجات",
       "inventory": "المخزون",
       "categories": "التصنيفات",
@@ -2950,6 +2953,164 @@
           "newLandingPage": "صفحة هبوط جديدة"
         }
       },
+      "statistics": {
+        "title": "الإحصائيات",
+        "subtitle": "حلّل أداء متجرك بالتفصيل.",
+        "loadErrorTitle": "تعذّر تحميل الإحصائيات.",
+        "loadErrorHint": "حاول التحديث. إذا استمرت المشكلة، تحقق من اتصالك أو جلستك.",
+        "refresh": "تحديث",
+        "export": "تصدير CSV",
+        "compareLabel": "مقارنة بالفترة السابقة",
+        "noCostData": "تكلفة الشراء غير معروفة لـ {pct}% من المبيعات — الهامش تقديري.",
+        "filters": {
+          "range": "الفترة",
+          "channel": "القناة",
+          "channels": {
+            "all": "الكل",
+            "online": "عبر الإنترنت",
+            "pos": "نقطة البيع"
+          },
+          "category": "التصنيف",
+          "allCategories": "كل التصنيفات",
+          "wilaya": "الولاية",
+          "allWilayas": "كل الولايات",
+          "provider": "شركة التوصيل",
+          "allProviders": "كل شركات التوصيل"
+        },
+        "tabs": {
+          "sales": "المبيعات",
+          "delivery": "التوصيل",
+          "products": "المنتجات والمخزون",
+          "customers": "العملاء",
+          "profitability": "الربحية"
+        },
+        "sales": {
+          "kpis": {
+            "revenue": "رقم الأعمال",
+            "onlineRevenue": "رقم الأعمال عبر الإنترنت",
+            "posRevenue": "رقم أعمال نقطة البيع",
+            "ordersCount": "الطلبات",
+            "avgBasket": "متوسط السلة"
+          },
+          "trend": {
+            "title": "تطور رقم الأعمال",
+            "hint": "انقر على نقطة لتصفية الفترة أدناه."
+          },
+          "byCategory": {
+            "title": "رقم الأعمال حسب التصنيف",
+            "empty": "لا توجد مبيعات في هذه الفترة."
+          }
+        },
+        "delivery": {
+          "kpis": {
+            "totalShipments": "الشحنات",
+            "deliveredRate": "معدل التسليم",
+            "returnedRate": "معدل الإرجاع",
+            "cancelledRate": "معدل الإلغاء",
+            "avgDeliveryDays": "متوسط مدة التسليم (أيام)"
+          },
+          "byProvider": {
+            "title": "الأداء حسب شركة التوصيل",
+            "empty": "لا توجد شحنات في هذه الفترة."
+          },
+          "byWilaya": {
+            "title": "الأداء حسب الولاية",
+            "empty": "لا توجد بيانات توصيل في هذه الفترة."
+          },
+          "selfProvider": "توصيل ذاتي",
+          "table": {
+            "provider": "شركة التوصيل",
+            "total": "الإجمالي",
+            "delivered": "مُسلَّمة",
+            "returned": "مُرجَعة",
+            "cancelled": "ملغاة",
+            "rate": "معدل التسليم",
+            "wilaya": "الولاية"
+          }
+        },
+        "products": {
+          "kpis": {
+            "activeProducts": "منتجات نشطة",
+            "lowStockProducts": "مخزون منخفض",
+            "outOfStockProducts": "نفدت الكمية",
+            "neverSoldProducts": "لم تُباع أبداً",
+            "clearanceDiscountTotal": "خصومات التصفية"
+          },
+          "top": {
+            "title": "الأكثر مبيعاً",
+            "empty": "لا توجد مبيعات في هذه الفترة."
+          },
+          "flop": {
+            "title": "الأقل مبيعاً",
+            "empty": "لا توجد مبيعات في هذه الفترة."
+          },
+          "rotation": {
+            "title": "دوران المخزون",
+            "hint": "الكمية المباعة مقارنة بالمخزون الحالي.",
+            "empty": "لا توجد بيانات مخزون."
+          },
+          "criticalStock": {
+            "title": "مخزون حرج",
+            "empty": "لا توجد منتجات في مخزون حرج حالياً."
+          },
+          "table": {
+            "product": "المنتج",
+            "quantity": "الكمية",
+            "revenue": "رقم الأعمال",
+            "stock": "المخزون",
+            "rotation": "الدوران",
+            "threshold": "الحد الأدنى"
+          }
+        },
+        "customers": {
+          "kpis": {
+            "newCustomers": "عملاء جدد",
+            "returningCustomers": "عملاء عائدون",
+            "repeatPurchaseRate": "معدل الشراء المتكرر",
+            "avgOrdersPerCustomer": "طلبات / عميل"
+          },
+          "top": {
+            "title": "أفضل العملاء",
+            "empty": "لا يوجد عملاء في هذه الفترة."
+          },
+          "byWilaya": {
+            "title": "العملاء حسب الولاية",
+            "empty": "لا توجد بيانات عملاء في هذه الفترة."
+          },
+          "table": {
+            "customer": "العميل",
+            "phone": "الهاتف",
+            "orders": "الطلبات",
+            "revenue": "رقم الأعمال",
+            "wilaya": "الولاية",
+            "customers": "العملاء"
+          }
+        },
+        "profitability": {
+          "kpis": {
+            "revenue": "رقم الأعمال",
+            "cogs": "تكلفة البضاعة المباعة",
+            "grossMargin": "الهامش الإجمالي",
+            "grossMarginPct": "الهامش الإجمالي %",
+            "shippingCost": "تكلفة التوصيل",
+            "netMargin": "الهامش الصافي",
+            "netMarginPct": "الهامش الصافي %",
+            "costDataCoverage": "تغطية بيانات التكلفة"
+          },
+          "byProduct": {
+            "title": "الهامش حسب المنتج",
+            "empty": "لا توجد بيانات هامش في هذه الفترة."
+          },
+          "table": {
+            "product": "المنتج",
+            "quantity": "الكمية",
+            "revenue": "رقم الأعمال",
+            "cogs": "التكلفة",
+            "margin": "الهامش",
+            "marginPct": "الهامش %"
+          }
+        }
+      },
       "billing": {
         "metaTitle": "الفوترة",
         "title": "الفوترة",
@@ -3327,12 +3488,18 @@
           "itemsSection": "عناصر الطلب",
           "emptyCart": "السلة فارغة",
           "itemsTotal": "إجمالي العناصر",
+          "inStock": "متوفر",
           "submit": "إنشاء الطلب"
         },
         "index": {
           "title": "الطلبات",
           "subtitle": "إدارة طلبات العملاء",
           "addBtn": "طلب جديد",
+          "deliveryModes": {
+            "home": "توصيل للمنزل",
+            "pickup": "نقطة استلام",
+            "store": "استلام من المتجر"
+          },
           "filters": {
             "searchLabel": "بحث",
             "searchPlaceholder": "ابحث بالاسم أو الهاتف…",
@@ -3359,6 +3526,7 @@
           "metaTitle": "تفاصيل الطلب",
           "breadcrumb": "طلب #{id}",
           "loading": "جارٍ تحميل الطلب…",
+          "printBordereau": "طباعة بطاقة الشحن",
           "sections": {
             "orderInfo": "معلومات الطلب",
             "customerInfo": "معلومات العميل",
@@ -3366,7 +3534,9 @@
             "internalNotes": "ملاحظات داخلية",
             "securityAndFraud": "الأمان والاحتيال",
             "previousOrders": "الطلبات السابقة",
-            "remainingAmount": "المبلغ المتبقي"
+            "remainingAmount": "المبلغ المتبقي",
+            "callPanel": "لوحة الاتصال",
+            "deliveryAndCustomer": "التوصيل والعميل"
           },
           "fields": {
             "orderId": "رقم الطلب",
@@ -3387,7 +3557,14 @@
               "whatsapp_sms_sent": "تم إرسال رسالة واتساب",
               "whatsapp_link_confirmed": "تم تأكيد رابط واتساب"
             },
-            "internalNotesPlaceholder": "أضف ملاحظات خاصة حول هذا الطلب..."
+            "internalNotesPlaceholder": "أضف ملاحظات خاصة حول هذا الطلب...",
+            "currency": "العملة",
+            "deliveryCompany": "الناقل",
+            "deliveryMode": "طريقة التوصيل",
+            "pickupPoint": "نقطة الاستلام",
+            "shippingFee": "رسوم التوصيل",
+            "totalWithDelivery": "الإجمالي (مع التوصيل)",
+            "wilayaCommune": "الولاية / البلدية"
           },
           "actions": {
             "blacklistCustomer": "حظر العميل",
@@ -3395,6 +3572,25 @@
             "blacklistPhone": "حظر رقم الهاتف"
           },
           "securityHelp": "إجراءات متقدمة لإدارة السلوك المريب.",
+          "deleteConfirm": "حذف هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء. إذا كان الطلب مؤكداً لدى الناقل، سيتم إلغاؤه هناك أيضاً.",
+          "cancelConfirm": "إلغاء هذا الطلب؟ لا يمكن التراجع عن هذا الإجراء.",
+          "editHint": "احفظ من قسم العناصر لتطبيق التغييرات.",
+          "internalNotesHelp": "الملاحظات مرئية لفريقك فقط.",
+          "sendWhatsapp": "إرسال عبر واتساب",
+          "variantSelect": "اختر متغيراً",
+          "paymentRecorded": "تم تسجيل الدفع",
+          "nba": {
+            "confirm": "تأكيد الطلب",
+            "callCustomer": "اتصل بالعميل",
+            "callAgain": "أعد الاتصال",
+            "cancelOrder": "إلغاء الطلب",
+            "pushTo": "إرسال إلى {provider}",
+            "pushToMaystro": "إرسال إلى Maystro",
+            "markShipped": "تحديد كمشحون",
+            "markDelivered": "تحديد كمسلَّم",
+            "reopen": "إعادة فتح الطلب",
+            "lockedNote": "الحالة يديرها الناقل."
+          },
           "previousOrders": {
             "matchCustomer": "تمت المطابقة من سجل العميل المرتبط.",
             "matchPhone": "تمت المطابقة برقم الهاتف الموحد.",
@@ -3418,6 +3614,7 @@
             "statusLabel": "الحالة",
             "submit": "تحديث الحالة",
             "success": "تم تحديث حالة الطلب بنجاح!",
+            "lockedByCarrier": "الحالة يتحكم بها الناقل. لا يمكنك تغييرها يدوياً.",
             "errors": {
               "loadCashboxesFailed": "تعذر تحميل الصناديق. افتح جلسة صندوق أولاً.",
               "updateFailed": "تعذر تحديث حالة الطلب"
@@ -3443,6 +3640,11 @@
           "notFound": {
             "title": "الطلب غير موجود",
             "hint": "قد يكون هذا الطلب غير موجود أو ليس لديك صلاحية لعرضه."
+          }
+        },
+        "modals": {
+          "payment": {
+            "title": "تسجيل الدفع"
           }
         }
       },

@@ -1373,7 +1373,9 @@
       "soon": "Soon",
       "moveUp": "Move up",
       "moveDown": "Move down",
-      "amount": "Amount"
+      "amount": "Amount",
+      "paid": "Paid",
+      "remaining": "Remaining"
     },
     "confirmModal": {
       "defaults": {
@@ -2141,6 +2143,7 @@
       "settingsHub": "Settings",
       "settings": "Administration",
       "dashboard": "Dashboard",
+      "statistics": "Statistics",
       "products": "Products",
       "inventory": "Inventory",
       "categories": "Categories",
@@ -2952,6 +2955,164 @@
           "newLandingPage": "New Landing Page"
         }
       },
+      "statistics": {
+        "title": "Statistics",
+        "subtitle": "Analyze your store's performance in detail.",
+        "loadErrorTitle": "Statistics could not be loaded.",
+        "loadErrorHint": "Try refreshing. If this persists, check your connection or session.",
+        "refresh": "Refresh",
+        "export": "Export CSV",
+        "compareLabel": "vs previous period",
+        "noCostData": "Purchase cost unknown for {pct}% of sales — margin is estimated.",
+        "filters": {
+          "range": "Period",
+          "channel": "Channel",
+          "channels": {
+            "all": "All",
+            "online": "Online",
+            "pos": "Point of Sale"
+          },
+          "category": "Category",
+          "allCategories": "All categories",
+          "wilaya": "Wilaya",
+          "allWilayas": "All wilayas",
+          "provider": "Carrier",
+          "allProviders": "All carriers"
+        },
+        "tabs": {
+          "sales": "Sales",
+          "delivery": "Delivery",
+          "products": "Products & Stock",
+          "customers": "Customers",
+          "profitability": "Profitability"
+        },
+        "sales": {
+          "kpis": {
+            "revenue": "Revenue",
+            "onlineRevenue": "Online revenue",
+            "posRevenue": "POS revenue",
+            "ordersCount": "Orders",
+            "avgBasket": "Average basket"
+          },
+          "trend": {
+            "title": "Revenue trend",
+            "hint": "Click a point to filter the period below."
+          },
+          "byCategory": {
+            "title": "Revenue by category",
+            "empty": "No sales in this period."
+          }
+        },
+        "delivery": {
+          "kpis": {
+            "totalShipments": "Shipments",
+            "deliveredRate": "Delivered rate",
+            "returnedRate": "Returned rate",
+            "cancelledRate": "Cancelled rate",
+            "avgDeliveryDays": "Avg delivery time (days)"
+          },
+          "byProvider": {
+            "title": "Performance by carrier",
+            "empty": "No shipments in this period."
+          },
+          "byWilaya": {
+            "title": "Performance by wilaya",
+            "empty": "No delivery data in this period."
+          },
+          "selfProvider": "Self delivery",
+          "table": {
+            "provider": "Carrier",
+            "total": "Total",
+            "delivered": "Delivered",
+            "returned": "Returned",
+            "cancelled": "Cancelled",
+            "rate": "Delivered rate",
+            "wilaya": "Wilaya"
+          }
+        },
+        "products": {
+          "kpis": {
+            "activeProducts": "Active products",
+            "lowStockProducts": "Low stock",
+            "outOfStockProducts": "Out of stock",
+            "neverSoldProducts": "Never sold",
+            "clearanceDiscountTotal": "Clearance discounts"
+          },
+          "top": {
+            "title": "Best sellers",
+            "empty": "No sales in this period."
+          },
+          "flop": {
+            "title": "Lowest sellers",
+            "empty": "No sales in this period."
+          },
+          "rotation": {
+            "title": "Stock rotation",
+            "hint": "Quantity sold relative to current stock.",
+            "empty": "No stock data."
+          },
+          "criticalStock": {
+            "title": "Critical stock",
+            "empty": "No products currently in critical stock."
+          },
+          "table": {
+            "product": "Product",
+            "quantity": "Quantity",
+            "revenue": "Revenue",
+            "stock": "Stock",
+            "rotation": "Rotation",
+            "threshold": "Threshold"
+          }
+        },
+        "customers": {
+          "kpis": {
+            "newCustomers": "New customers",
+            "returningCustomers": "Returning customers",
+            "repeatPurchaseRate": "Repeat purchase rate",
+            "avgOrdersPerCustomer": "Orders / customer"
+          },
+          "top": {
+            "title": "Top customers",
+            "empty": "No customers in this period."
+          },
+          "byWilaya": {
+            "title": "Customers by wilaya",
+            "empty": "No customer data in this period."
+          },
+          "table": {
+            "customer": "Customer",
+            "phone": "Phone",
+            "orders": "Orders",
+            "revenue": "Revenue",
+            "wilaya": "Wilaya",
+            "customers": "Customers"
+          }
+        },
+        "profitability": {
+          "kpis": {
+            "revenue": "Revenue",
+            "cogs": "Cost of goods sold",
+            "grossMargin": "Gross margin",
+            "grossMarginPct": "Gross margin %",
+            "shippingCost": "Shipping cost",
+            "netMargin": "Net margin",
+            "netMarginPct": "Net margin %",
+            "costDataCoverage": "Cost data coverage"
+          },
+          "byProduct": {
+            "title": "Margin by product",
+            "empty": "No margin data in this period."
+          },
+          "table": {
+            "product": "Product",
+            "quantity": "Quantity",
+            "revenue": "Revenue",
+            "cogs": "Cost",
+            "margin": "Margin",
+            "marginPct": "Margin %"
+          }
+        }
+      },
       "billing": {
         "metaTitle": "Billing",
         "title": "Billing",
@@ -3329,12 +3490,18 @@
           "itemsSection": "Order items",
           "emptyCart": "Cart is empty",
           "itemsTotal": "Items total",
+          "inStock": "in stock",
           "submit": "Create order"
         },
         "index": {
           "title": "Orders",
           "subtitle": "Manage customer orders",
           "addBtn": "New order",
+          "deliveryModes": {
+            "home": "Home delivery",
+            "pickup": "Stop desk",
+            "store": "Store pickup"
+          },
           "filters": {
             "searchLabel": "Search",
             "searchPlaceholder": "Search by customer name or phone…",
@@ -3361,6 +3528,7 @@
           "metaTitle": "Order detail",
           "breadcrumb": "Order #{id}",
           "loading": "Loading order…",
+          "printBordereau": "Print bordereau",
           "sections": {
             "orderInfo": "Order information",
             "customerInfo": "Customer information",
@@ -3368,7 +3536,9 @@
             "internalNotes": "Internal Notes",
             "securityAndFraud": "Security & Fraud",
             "previousOrders": "Previous orders",
-            "remainingAmount": "Remaining Amount"
+            "remainingAmount": "Remaining Amount",
+            "callPanel": "Call panel",
+            "deliveryAndCustomer": "Delivery & customer"
           },
           "fields": {
             "orderId": "Order ID",
@@ -3389,7 +3559,14 @@
               "whatsapp_sms_sent": "WhatsApp SMS Sent",
               "whatsapp_link_confirmed": "WhatsApp Link Confirmed"
             },
-            "internalNotesPlaceholder": "Add private remarks about this order..."
+            "internalNotesPlaceholder": "Add private remarks about this order...",
+            "currency": "Currency",
+            "deliveryCompany": "Provider",
+            "deliveryMode": "Mode",
+            "pickupPoint": "Pickup point",
+            "shippingFee": "Shipping fee",
+            "totalWithDelivery": "Total (with delivery)",
+            "wilayaCommune": "Wilaya / Commune"
           },
           "actions": {
             "blacklistCustomer": "Blacklist Customer",
@@ -3397,6 +3574,25 @@
             "blacklistPhone": "Blacklist Phone Number"
           },
           "securityHelp": "Advanced actions to manage risky behavior.",
+          "deleteConfirm": "Delete this order? This cannot be undone. If the order is confirmed with a carrier, it will also be cancelled there.",
+          "cancelConfirm": "Cancel this order? This cannot be undone.",
+          "editHint": "Save from the items section to apply changes.",
+          "internalNotesHelp": "Notes are only visible to your team.",
+          "sendWhatsapp": "Send WhatsApp",
+          "variantSelect": "Select Variant",
+          "paymentRecorded": "Payment recorded",
+          "nba": {
+            "confirm": "Confirm order",
+            "callCustomer": "Call customer",
+            "callAgain": "Call again",
+            "cancelOrder": "Cancel order",
+            "pushTo": "Push to {provider}",
+            "pushToMaystro": "Push to Maystro",
+            "markShipped": "Mark shipped",
+            "markDelivered": "Mark delivered",
+            "reopen": "Reopen order",
+            "lockedNote": "Status is managed by the carrier."
+          },
           "previousOrders": {
             "matchCustomer": "Matched by linked customer record.",
             "matchPhone": "Matched by normalized phone number.",
@@ -3420,6 +3616,7 @@
             "statusLabel": "Status",
             "submit": "Update status",
             "success": "Order status updated successfully!",
+            "lockedByCarrier": "Status is controlled by the delivery carrier. You cannot change it manually.",
             "errors": {
               "loadCashboxesFailed": "Failed to load cashboxes. Please open a cash session first.",
               "updateFailed": "Failed to update order status"
@@ -3445,6 +3642,11 @@
           "notFound": {
             "title": "Order not found",
             "hint": "This order may not exist or you don't have permission to view it."
+          }
+        },
+        "modals": {
+          "payment": {
+            "title": "Record payment"
           }
         }
       },
