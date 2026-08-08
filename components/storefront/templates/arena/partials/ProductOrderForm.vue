@@ -546,14 +546,7 @@ const scrollToForm = () => {
                 >
                     <Icon name="lucide:minus" class="w-4 h-4" />
                 </button>
-                <input 
-                    v-model.number="quantity" 
-                    type="number" 
-                    min="1" 
-                    :max="maxQuantity"
-                    class="w-12 text-center border-none bg-transparent font-bold text-white focus:ring-0 p-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                    readonly
-                >
+                <span class="w-12 text-center font-bold text-white">{{ quantity }}</span>
                 <button 
                     type="button"
                     class="w-10 h-10 flex items-center justify-center text-slate-400 hover:bg-white/[0.06] rounded-lg transition-colors"
