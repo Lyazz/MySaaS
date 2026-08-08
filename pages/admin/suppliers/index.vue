@@ -275,6 +275,8 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
+const router = useRouter()
 
 interface Supplier {
   id: string
@@ -287,10 +289,10 @@ interface Supplier {
 
 const suppliers = ref<Supplier[]>([])
 const loading = ref(true)
-const searchQuery = ref('')
-const sortBy = ref<string>('name')
-const sortOrder = ref<'asc' | 'desc'>('asc')
-const currentPage = ref(1)
+const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const sortBy = ref<string>(typeof route.query.sortBy === 'string' ? route.query.sortBy : 'name')
+const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'desc' ? 'desc' : 'asc')
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const supplierToDelete = ref<Supplier | null>(null)
@@ -394,8 +396,29 @@ function setSort(field: string) {
   fetchSuppliers()
 }
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      sortBy: sortBy.value === 'name' ? undefined : sortBy.value,
+      sortOrder: sortOrder.value === 'asc' ? undefined : sortOrder.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 watch([searchQuery], () => {
   currentPage.value = 1
+  syncToUrl()
+})
+
+watch([sortBy, sortOrder], () => {
+  syncToUrl()
+})
+
+watch(currentPage, () => {
+  syncToUrl()
 })
 
 onMounted(() => {

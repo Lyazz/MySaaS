@@ -796,6 +796,8 @@ const authStore = useAuthStore()
 const { format: formatCurrency } = useCurrency()
 const { showToast } = useToast()
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
+const router = useRouter()
  
 interface Product {
   id: string
@@ -830,11 +832,11 @@ type CategoryOption = Category & { depth: number }
 const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
 const loading = ref(true)
-const searchQuery = ref('')
-const selectedCategory = ref('')
-const selectedStatus = ref('')
-const activeTab = ref('all')
-const currentPage = ref(1)
+const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const selectedCategory = ref(typeof route.query.categoryId === 'string' ? route.query.categoryId : '')
+const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
+const activeTab = ref(typeof route.query.tab === 'string' ? route.query.tab : 'all')
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const productToDelete = ref<Product | null>(null)
@@ -918,8 +920,12 @@ const getProductMainImage = (product: Product): string | undefined => {
   }
   return undefined
 }
-const sortBy = ref<'createdAt' | 'title' | 'price' | 'stock' | 'isActive'>('createdAt')
-const sortOrder = ref<'asc' | 'desc'>('desc')
+const sortBy = ref<'createdAt' | 'title' | 'price' | 'stock' | 'isActive'>(
+  ['createdAt', 'title', 'price', 'stock', 'isActive'].includes(route.query.sortBy as string)
+    ? (route.query.sortBy as 'createdAt' | 'title' | 'price' | 'stock' | 'isActive')
+    : 'createdAt'
+)
+const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'asc' ? 'asc' : 'desc')
 
 const sortOptions = [
   { key: 'createdAt', labelKey: 'admin.pages.products.index.sort.newest' },
@@ -1407,15 +1413,36 @@ onMounted(() => {
   fetchCategories()
   autoStartIfNeeded('products')
 })
- 
+
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      categoryId: selectedCategory.value || undefined,
+      status: selectedStatus.value || undefined,
+      tab: activeTab.value === 'all' ? undefined : activeTab.value,
+      sortBy: sortBy.value === 'createdAt' ? undefined : sortBy.value,
+      sortOrder: sortOrder.value === 'desc' ? undefined : sortOrder.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 // Watch for filter changes to reset pagination
 watch([searchQuery, selectedCategory, selectedStatus, activeTab], () => {
   currentPage.value = 1
+  syncToUrl()
 })
 
 watch([sortBy, sortOrder, selectedCategory], () => {
   fetchProducts()
   currentPage.value = 1
+  syncToUrl()
+})
+
+watch(currentPage, () => {
+  syncToUrl()
 })
 
 function setSort(field: typeof sortOptions[number]['key']) {

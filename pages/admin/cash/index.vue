@@ -352,7 +352,7 @@
     <!-- Main Content - Full Width -->
     <!-- Transactions & Sessions Tabs - Full Width -->
     <section>
-      <TabGroup @change="onTabChange">
+      <TabGroup :default-index="activeTabIndex" @change="onTabChange">
           <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
             <div class="border-b" style="border-color: var(--surface-border)">
               <TabList class="flex gap-4 px-5 pt-5">
@@ -1517,15 +1517,19 @@ type CashUser = { id: string; email: string }
 const authStore = useAuthStore()
 const { t, locale } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
+const route = useRoute()
+const router = useRouter()
 
 const errorMessage = ref('')
 
 const cashboxes = ref<Cashbox[]>([])
 const loadingCashboxes = ref(true)
 
+const activeTabIndex = ref(route.query.tab === 'sessions' ? 1 : 0)
+
 const txs = ref<CashTx[]>([])
 const loadingTxs = ref(true)
-const txPage = ref(1)
+const txPage = ref(Number(route.query.txPage) || 1)
 const txPerPage = ref(25)
 const txTotal = ref(0)
 const txTotalPages = ref(1)
@@ -1533,7 +1537,7 @@ const paginatedTxs = computed(() => txs.value)
 
 const sessions = ref<CashSession[]>([])
 const loadingSessions = ref(true)
-const sessionsPage = ref(1)
+const sessionsPage = ref(Number(route.query.sessionPage) || 1)
 const sessionsPerPage = ref(25)
 const sessionsTotal = ref(0)
 const sessionsTotalPages = ref(1)
@@ -1541,23 +1545,23 @@ const paginatedSessions = computed(() => sessions.value)
 const defaultDateRange = getDashboardPresetDateRange('7d')
 
 const sessionFilters = reactive({
-  cashboxId: '',
-  status: '',
-  userId: '',
-  startDate: defaultDateRange.from,
-  endDate: defaultDateRange.to
+  cashboxId: typeof route.query.sessionCashboxId === 'string' ? route.query.sessionCashboxId : '',
+  status: typeof route.query.sessionStatus === 'string' ? route.query.sessionStatus : '',
+  userId: typeof route.query.sessionUserId === 'string' ? route.query.sessionUserId : '',
+  startDate: typeof route.query.sessionStartDate === 'string' ? route.query.sessionStartDate : defaultDateRange.from,
+  endDate: typeof route.query.sessionEndDate === 'string' ? route.query.sessionEndDate : defaultDateRange.to
 })
 
 const actionLoading = ref(false)
 
 const filters = reactive({
-  cashboxId: '',
-  type: '',
-  direction: '',
-  method: '',
-  userId: '',
-  startDate: defaultDateRange.from,
-  endDate: defaultDateRange.to
+  cashboxId: typeof route.query.txCashboxId === 'string' ? route.query.txCashboxId : '',
+  type: typeof route.query.txType === 'string' ? route.query.txType : '',
+  direction: typeof route.query.txDirection === 'string' ? route.query.txDirection : '',
+  method: typeof route.query.txMethod === 'string' ? route.query.txMethod : '',
+  userId: typeof route.query.txUserId === 'string' ? route.query.txUserId : '',
+  startDate: typeof route.query.txStartDate === 'string' ? route.query.txStartDate : defaultDateRange.from,
+  endDate: typeof route.query.txEndDate === 'string' ? route.query.txEndDate : defaultDateRange.to
 })
 
 const cashUsers = ref<CashUser[]>([])
@@ -1608,7 +1612,8 @@ const activeSessionFiltersCount = computed(() => {
 })
 
 function onTabChange(index: number) {
-  // Optional: add any logic needed when switching tabs
+  activeTabIndex.value = index
+  syncToUrl()
 }
 
 const resetTxFilters = () => {
@@ -2171,9 +2176,34 @@ onMounted(async () => {
   await refreshAll()
 })
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      tab: activeTabIndex.value === 1 ? 'sessions' : undefined,
+      txCashboxId: filters.cashboxId || undefined,
+      txType: filters.type || undefined,
+      txDirection: filters.direction || undefined,
+      txMethod: filters.method || undefined,
+      txUserId: filters.userId || undefined,
+      txStartDate: filters.startDate === defaultDateRange.from ? undefined : filters.startDate,
+      txEndDate: filters.endDate === defaultDateRange.to ? undefined : filters.endDate,
+      txPage: txPage.value > 1 ? String(txPage.value) : undefined,
+      sessionCashboxId: sessionFilters.cashboxId || undefined,
+      sessionStatus: sessionFilters.status || undefined,
+      sessionUserId: sessionFilters.userId || undefined,
+      sessionStartDate: sessionFilters.startDate === defaultDateRange.from ? undefined : sessionFilters.startDate,
+      sessionEndDate: sessionFilters.endDate === defaultDateRange.to ? undefined : sessionFilters.endDate,
+      sessionPage: sessionsPage.value > 1 ? String(sessionsPage.value) : undefined
+    }
+  })
+}
+
 watch(
   () => ({ ...filters }),
   () => {
+    txPage.value = 1
+    syncToUrl()
     fetchTransactions(true)
   }
 )
@@ -2189,7 +2219,17 @@ watch(customerSearch, (value) => {
 watch(
   () => ({ ...sessionFilters }),
   () => {
+    sessionsPage.value = 1
+    syncToUrl()
     fetchSessions(true)
   }
 )
+
+watch(txPage, () => {
+  syncToUrl()
+})
+
+watch(sessionsPage, () => {
+  syncToUrl()
+})
 </script>

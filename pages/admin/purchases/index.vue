@@ -332,18 +332,20 @@ type PurchaseOrder = {
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
+const route = useRoute()
+const router = useRouter()
 const suppliers = ref<Supplier[]>([])
 const users = ref<{ id: string; email: string }[]>([])
 const orders = ref<PurchaseOrder[]>([])
 const loading = ref(true)
-const selectedSupplier = ref('')
-const selectedUser = ref('')
-const selectedStatus = ref('')
-const selectedPaymentStatus = ref('')
+const selectedSupplier = ref(typeof route.query.supplierId === 'string' ? route.query.supplierId : '')
+const selectedUser = ref(typeof route.query.userId === 'string' ? route.query.userId : '')
+const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
+const selectedPaymentStatus = ref(typeof route.query.paymentStatus === 'string' ? route.query.paymentStatus : '')
 const defaultDateRange = getDashboardPresetDateRange('7d')
-const startDate = ref(defaultDateRange.from)
-const endDate = ref(defaultDateRange.to)
-const currentPage = ref(1)
+const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
+const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 
 // Computed
@@ -437,20 +439,42 @@ const getPaymentStatusClass = (status: string) => {
   }
 }
 
-watch(selectedSupplier, () => currentPage.value = 1)
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      supplierId: selectedSupplier.value || undefined,
+      userId: selectedUser.value || undefined,
+      status: selectedStatus.value || undefined,
+      paymentStatus: selectedPaymentStatus.value || undefined,
+      startDate: startDate.value === defaultDateRange.from ? undefined : startDate.value,
+      endDate: endDate.value === defaultDateRange.to ? undefined : endDate.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
+watch(selectedSupplier, () => { currentPage.value = 1; syncToUrl() })
 watch([startDate, endDate], () => {
     currentPage.value = 1
+    syncToUrl()
     fetchOrders()
 })
 
 watch(selectedUser, () => {
     currentPage.value = 1
+    syncToUrl()
     fetchOrders()
 })
 
 watch([selectedStatus, selectedPaymentStatus], () => {
     currentPage.value = 1
+    syncToUrl()
     fetchOrders()
+})
+
+watch(currentPage, () => {
+    syncToUrl()
 })
 
 onMounted(async () => {

@@ -625,10 +625,12 @@ type CashboxSummary = {
 
 const authStore = useAuthStore()
 const { t, locale } = useI18n({ useScope: 'global' })
+const route = useRoute()
+const router = useRouter()
 
-const activeTab = ref<'users' | 'roles'>('users')
-const search = ref('')
-const includeInactive = ref(false)
+const activeTab = ref<'users' | 'roles'>(route.query.tab === 'roles' ? 'roles' : 'users')
+const search = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const includeInactive = ref(route.query.includeInactive === 'true')
 const errorMessage = ref('')
 
 const token = computed(() => authStore.token as string | null)
@@ -679,7 +681,7 @@ const {
   { default: () => [] as CashboxSummary[] }
 )
 
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 
 const filteredUsers = computed(() => {
@@ -698,7 +700,21 @@ const paginatedUsers = computed(() => {
   return filteredUsers.value.slice(start, start + itemsPerPage)
 })
 
-watch([search, includeInactive], () => { currentPage.value = 1 })
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      tab: activeTab.value === 'roles' ? 'roles' : undefined,
+      search: search.value || undefined,
+      includeInactive: includeInactive.value ? 'true' : undefined,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
+watch([search, includeInactive], () => { currentPage.value = 1; syncToUrl() })
+watch(activeTab, () => { syncToUrl() })
+watch(currentPage, () => { syncToUrl() })
 
 const formatDate = (iso: string) => {
   const d = new Date(iso)

@@ -387,6 +387,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const route = useRoute()
+const router = useRouter()
 const { t, locale } = useI18n()
 const { format: formatCurrency } = useCurrency()
 const { showToast } = useToast()
@@ -415,16 +416,16 @@ const loading = ref(true)
 const sales = ref<Sale[]>([])
 const total = ref(0)
 const totalPages = ref(1)
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 const users = ref<{ id: string; email: string }[]>([])
-const selectedUser = ref('')
+const selectedUser = ref(typeof route.query.userId === 'string' ? route.query.userId : '')
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
-const sortBy = ref('updatedAt')
-const sortOrder = ref<'asc' | 'desc'>('desc')
+const sortBy = ref(typeof route.query.sortBy === 'string' ? route.query.sortBy : 'updatedAt')
+const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'asc' ? 'asc' : 'desc')
 const defaultDateRange = getDashboardPresetDateRange('7d')
-const startDate = ref(defaultDateRange.from)
-const endDate = ref(defaultDateRange.to)
+const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
+const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
 const cashboxes = ref<Cashbox[]>([])
 const cashboxesLoaded = ref(false)
 const refundModalOpen = ref(false)
@@ -636,12 +637,29 @@ onMounted(() => {
   fetchSales()
 })
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      userId: selectedUser.value || undefined,
+      startDate: startDate.value === defaultDateRange.from ? undefined : startDate.value,
+      endDate: endDate.value === defaultDateRange.to ? undefined : endDate.value,
+      sortBy: sortBy.value === 'updatedAt' ? undefined : sortBy.value,
+      sortOrder: sortOrder.value === 'desc' ? undefined : sortOrder.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 watch([searchQuery, startDate, endDate, selectedUser, sortBy, sortOrder], () => {
   currentPage.value = 1
+  syncToUrl()
   fetchSales()
 })
 
 watch(currentPage, () => {
+  syncToUrl()
   fetchSales()
 })
 </script>

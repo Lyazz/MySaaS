@@ -453,6 +453,8 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
+const router = useRouter()
 
 interface Category {
   id: string
@@ -468,10 +470,14 @@ interface Category {
 
 const categories = ref<Category[]>([])
 const loading = ref(true)
-const searchQuery = ref('')
-const sortBy = ref<'createdAt' | 'title' | 'slug' | 'products'>('createdAt')
-const sortOrder = ref<'asc' | 'desc'>('desc')
-const currentPage = ref(1)
+const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const sortBy = ref<'createdAt' | 'title' | 'slug' | 'products'>(
+  ['createdAt', 'title', 'slug', 'products'].includes(route.query.sortBy as string)
+    ? (route.query.sortBy as 'createdAt' | 'title' | 'slug' | 'products')
+    : 'createdAt'
+)
+const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'asc' ? 'asc' : 'desc')
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const categoryToDelete = ref<Category | null>(null)
@@ -662,12 +668,30 @@ onMounted(() => {
   fetchCategories()
 })
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      sortBy: sortBy.value === 'createdAt' ? undefined : sortBy.value,
+      sortOrder: sortOrder.value === 'desc' ? undefined : sortOrder.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 watch(searchQuery, () => {
   currentPage.value = 1
+  syncToUrl()
 })
 
 watch([sortBy, sortOrder], () => {
   currentPage.value = 1
+  syncToUrl()
+})
+
+watch(currentPage, () => {
+  syncToUrl()
 })
 
 watch(totalPages, (value) => {

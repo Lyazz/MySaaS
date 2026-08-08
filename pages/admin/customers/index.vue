@@ -278,6 +278,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const route = useRoute()
+const router = useRouter()
 const { format: formatCurrency } = useCurrency()
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -296,9 +297,9 @@ interface CustomerSummary {
 const loading = ref(true)
 const customers = ref<CustomerSummary[]>([])
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
-const activeTab = ref('all')
+const activeTab = ref(typeof route.query.tab === 'string' ? route.query.tab : 'all')
 
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 
 const showDeleteModal = ref(false)
@@ -433,8 +434,29 @@ onMounted(() => {
   fetchCustomers()
 })
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      tab: activeTab.value === 'all' ? undefined : activeTab.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 watch([searchQuery], () => {
   currentPage.value = 1
+  syncToUrl()
   fetchCustomers()
+})
+
+watch(activeTab, () => {
+  currentPage.value = 1
+  syncToUrl()
+})
+
+watch(currentPage, () => {
+  syncToUrl()
 })
 </script>

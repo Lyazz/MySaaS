@@ -492,8 +492,11 @@ type Tab = 'sales' | 'delivery' | 'products' | 'customers' | 'profitability'
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
 const { format: formatMoney } = useCurrency()
+const route = useRoute()
+const router = useRouter()
 
-const activeTab = ref<Tab>('sales')
+const validTabs: Tab[] = ['sales', 'delivery', 'products', 'customers', 'profitability']
+const activeTab = ref<Tab>(validTabs.includes(route.query.tab as Tab) ? (route.query.tab as Tab) : 'sales')
 const tabDefs = computed(() => [
   { key: 'sales', label: t('admin.pages.statistics.tabs.sales') },
   { key: 'delivery', label: t('admin.pages.statistics.tabs.delivery') },
@@ -502,14 +505,15 @@ const tabDefs = computed(() => [
   { key: 'profitability', label: t('admin.pages.statistics.tabs.profitability') }
 ])
 
+const validRanges: DashboardRange[] = ['today', '7d', '30d', '90d', 'custom']
 const defaultCustomRange = defaultCustomDateRange()
-const selectedRange = ref<DashboardRange>('7d')
-const customFrom = ref(defaultCustomRange.from)
-const customTo = ref(defaultCustomRange.to)
-const channel = ref<'all' | 'online' | 'pos'>('all')
-const categoryId = ref('')
-const wilayaCode = ref('')
-const provider = ref('')
+const selectedRange = ref<DashboardRange>(validRanges.includes(route.query.range as DashboardRange) ? (route.query.range as DashboardRange) : '7d')
+const customFrom = ref(typeof route.query.customFrom === 'string' ? route.query.customFrom : defaultCustomRange.from)
+const customTo = ref(typeof route.query.customTo === 'string' ? route.query.customTo : defaultCustomRange.to)
+const channel = ref<'all' | 'online' | 'pos'>(route.query.channel === 'online' || route.query.channel === 'pos' ? route.query.channel : 'all')
+const categoryId = ref(typeof route.query.categoryId === 'string' ? route.query.categoryId : '')
+const wilayaCode = ref(typeof route.query.wilayaCode === 'string' ? route.query.wilayaCode : '')
+const provider = ref(typeof route.query.provider === 'string' ? route.query.provider : '')
 const selectedTrendDate = ref<string | null>(null)
 
 watch(selectedRange, (value) => {
@@ -610,9 +614,26 @@ function refresh() {
   return fetchActiveTab()
 }
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      tab: activeTab.value === 'sales' ? undefined : activeTab.value,
+      range: selectedRange.value === '7d' ? undefined : selectedRange.value,
+      customFrom: selectedRange.value === 'custom' ? customFrom.value : undefined,
+      customTo: selectedRange.value === 'custom' ? customTo.value : undefined,
+      channel: channel.value === 'all' ? undefined : channel.value,
+      categoryId: categoryId.value || undefined,
+      wilayaCode: wilayaCode.value || undefined,
+      provider: provider.value || undefined
+    }
+  })
+}
+
 watch(
   [activeTab, selectedRange, customFrom, customTo, channel, categoryId, wilayaCode, provider, () => authStore.token],
   () => {
+    syncToUrl()
     fetchActiveTab()
   },
   { immediate: true }

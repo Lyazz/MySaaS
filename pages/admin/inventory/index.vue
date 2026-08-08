@@ -430,18 +430,20 @@ type Movement = {
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
+const router = useRouter()
 const variants = ref<Variant[]>([])
 const loading = ref(false)
 const errorMessage = ref<string | null>(null)
 const importVariantsInput = ref<HTMLInputElement | null>(null)
-const sortBy = ref('productTitle')
-const sortOrder = ref<'asc' | 'desc'>('asc')
+const sortBy = ref(typeof route.query.sortBy === 'string' ? route.query.sortBy : 'productTitle')
+const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'desc' ? 'desc' : 'asc')
 
 const movementsVariant = ref<Variant | null>(null)
 const movements = ref<Movement[]>([])
 const movementsLoading = ref(false)
 
-const search = ref('')
+const search = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const savingIds = ref<Set<string>>(new Set())
 
 const recomputeAvailable = (v: Variant) => {
@@ -451,6 +453,7 @@ const recomputeAvailable = (v: Variant) => {
 const fetchVariants = async () => {
   loading.value = true
   errorMessage.value = null
+  syncToUrl()
   try {
     const query: any = {}
     if (search.value.trim()) query.search = search.value.trim()
@@ -590,7 +593,19 @@ const formatDate = (iso: string) => {
 
 onMounted(fetchVariants)
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: search.value || undefined,
+      sortBy: sortBy.value === 'productTitle' ? undefined : sortBy.value,
+      sortOrder: sortOrder.value === 'asc' ? undefined : sortOrder.value
+    }
+  })
+}
+
 watch([sortBy, sortOrder], () => {
+  syncToUrl()
   fetchVariants()
 })
 </script>
