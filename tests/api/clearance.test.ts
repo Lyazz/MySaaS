@@ -19,6 +19,9 @@ describe('Clearance (destockage) module', () => {
     let productBundleId: string
     let variantBundleId: string
 
+    let productOptionedClearanceId: string
+    let variantOptionedClearanceId: string
+
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
             data: { name: 'Clearance Tenant', slug }
@@ -97,13 +100,32 @@ describe('Clearance (destockage) module', () => {
         await prisma.productBundleDeal.create({
             data: { tenantId, productId: productBundleId, bundleQty: 2, bundlePrice: 500, isActive: true }
         })
+
+        const productOptionedClearance = await prisma.product.create({
+            data: { tenantId, title: 'Clearance Optioned', slug: `clearance-optioned-${Date.now()}`, price: 700, stock: 100, isActive: true, isClearance: true }
+        })
+        productOptionedClearanceId = productOptionedClearance.id
+        const option = await prisma.productOption.create({
+            data: { tenantId, productId: productOptionedClearanceId, name: 'Format', position: 0, displayType: 'dropdown' as any }
+        })
+        await prisma.productOptionValue.createMany({
+            data: [{ tenantId, optionId: option.id, label: 'Standard', position: 0 }]
+        })
+        const generated = await request(app)
+            .post(`/api/admin/products/${productOptionedClearanceId}/variants/generate`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+        variantOptionedClearanceId = generated.body?.[0]?.id
     })
 
     afterAll(async () => {
         await prisma.productBundleDeal.deleteMany({ where: { tenantId } })
         await prisma.orderItem.deleteMany({ where: { tenantId } })
         await prisma.order.deleteMany({ where: { tenantId } })
+        await prisma.productVariantOptionValue.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
+        await prisma.productOptionValue.deleteMany({ where: { tenantId } })
+        await prisma.productOption.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { tenantId } })
@@ -178,6 +200,22 @@ describe('Clearance (destockage) module', () => {
         const saved = await prisma.order.findUnique({ where: { id: res.body.orderId } })
         expect(Number(saved?.clearanceDiscountAmount)).toBe(0)
         expect(Number(saved?.totalAmount)).toBe(1500)
+    })
+
+    it('rejects activating a variant-level promotion on a clearance-tagged product', async () => {
+        expect(variantOptionedClearanceId).toBeTruthy()
+
+        const res = await request(app)
+            .put(`/api/admin/variants/${variantOptionedClearanceId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ isPromotionActive: true, promotionalPrice: 500 })
+
+        expect(res.status).toBe(400)
+        expect(String(res.body?.statusMessage || '')).toMatch(/clearance/i)
+
+        const variant = await prisma.productVariant.findUnique({ where: { id: variantOptionedClearanceId } })
+        expect(variant?.isPromotionActive).toBe(false)
     })
 
     it('rejects marking a product as clearance while a promotion is active', async () => {
