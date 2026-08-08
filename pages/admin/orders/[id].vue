@@ -594,6 +594,10 @@
                 <div class="od-items__qty">×{{ item.quantity }}</div>
                 <div class="od-items__line">{{ formatCurrency(item.lineTotal ?? (Number(item.price) * item.quantity)) }}</div>
               </li>
+              <li v-if="order.clearanceBreakdown?.freeCount" class="od-items__sub">
+                <span class="od-items__sub-label">{{ t('admin.pages.orders.detail.itemsTable.clearance', { count: order.clearanceBreakdown.freeCount }) }}</span>
+                <span class="od-items__sub-value od-display">-{{ formatCurrency(order.clearanceDiscountAmount || 0) }}</span>
+              </li>
               <li class="od-items__sub">
                 <span class="od-items__sub-label">{{ t('admin.pages.orders.detail.itemsTable.total') }}</span>
                 <span class="od-items__sub-value od-display">{{ formatCurrency(order.totalAmount) }}</span>
@@ -1019,6 +1023,8 @@ type PreviousOrdersMatch =
     customerAddress: string | null
     totalAmount: number
     totalWithShippingAmount?: number | null
+    clearanceDiscountAmount?: number | null
+    clearanceBreakdown?: { freeCount: number; eligibleQuantity: number; discountCents: number } | null
     shippingAmount?: number | null
     shippingCurrency?: string | null
     shippingProvider?: string | null

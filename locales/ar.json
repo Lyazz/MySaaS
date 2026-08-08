@@ -3624,7 +3624,8 @@
             "quantity": "الكمية",
             "subtotal": "الإجمالي الفرعي",
             "total": "الإجمالي",
-            "fallbackProduct": "منتج"
+            "fallbackProduct": "منتج",
+            "clearance": "تصفية: {count} وحدة مجانية"
           },
           "statusUpdate": {
             "title": "تحديث حالة الطلب",
