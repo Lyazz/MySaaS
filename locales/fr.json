@@ -3607,7 +3607,8 @@
             "quantity": "Quantité",
             "subtotal": "Sous-total",
             "total": "Total",
-            "fallbackProduct": "Produit"
+            "fallbackProduct": "Produit",
+            "clearance": "Destockage : {count} unité(s) offerte(s)"
           },
           "statusUpdate": {
             "title": "Mettre à jour le statut",

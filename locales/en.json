@@ -3626,7 +3626,8 @@
             "quantity": "Quantity",
             "subtotal": "Subtotal",
             "total": "Total",
-            "fallbackProduct": "Product"
+            "fallbackProduct": "Product",
+            "clearance": "Clearance: {count} free unit(s)"
           },
           "statusUpdate": {
             "title": "Update order status",

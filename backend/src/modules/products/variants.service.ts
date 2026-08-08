@@ -175,6 +175,16 @@ export class VariantsService {
         })
         const allowVariantPromotion = productOptionCount > 0
 
+        const nextVariantIsPromotionActive = allowVariantPromotion
+            ? (body?.isPromotionActive !== undefined ? Boolean(body.isPromotionActive) : Boolean((variant as any).isPromotionActive))
+            : false
+        if (nextVariantIsPromotionActive && variant.product.isClearance) {
+            const err = new Error('A product cannot be both in clearance and in promotion at the same time') as any
+            err.statusCode = 400
+            err.statusMessage = err.message
+            throw err
+        }
+
         const updateInfoResult = await prisma.productVariant.updateMany({
             where: { id: variantId, tenantId },
             data: {
