@@ -588,7 +588,10 @@
                 class="od-items__row"
               >
                 <div class="od-items__product">
-                  <div class="od-items__title">{{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product') }}</div>
+                  <div class="od-items__title flex items-center gap-2 flex-wrap">
+                    {{ item.product?.title || t('admin.pages.orders.detail.itemsTable.fallbackProduct', 'Product') }}
+                    <AdminDestockageBadge :active="Boolean(item.product?.isClearance)" />
+                  </div>
                   <div v-if="variantLabelFromOrderItem(item)" class="od-items__variant">{{ variantLabelFromOrderItem(item) }}</div>
                 </div>
                 <div class="od-items__price">{{ formatCurrency(item.price) }}</div>
@@ -968,6 +971,7 @@ interface OrderItem {
   lineTotal?: number
   product?: {
     title: string
+    isClearance?: boolean
   }
   variant?: {
     optionValues?: Array<{ optionValue?: { label?: string | null } | null }> | null
