@@ -960,6 +960,8 @@ export class OrdersService {
                     customerId: true,
                     paymentStatus: true,
                     paidAmount: true,
+                    clearanceDiscountAmount: true,
+                    clearanceBreakdown: true,
                     createdAt: true,
                     updatedAt: true,
                     shipments: {

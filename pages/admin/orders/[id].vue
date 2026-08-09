@@ -183,6 +183,7 @@
 
             <AdminOrderStatusBadge :status="order.status" :detail="order.providerStatusDetail" />
             <AdminPaymentStatusBadge :status="order.paymentStatus" />
+            <AdminDestockageBadge :active="hasDestockage" />
 
             <span class="od-bar__date hidden md:inline">
               {{ formatDate(order.createdAt) }}
@@ -1072,6 +1073,10 @@ const deliveryModalOpen = ref(false)
 const paymentModalOpen = ref(false)
 const cashboxes = ref<any[]>([])
 const activeTab = ref<'items' | 'delivery' | 'history'>('items')
+
+const hasDestockage = computed(() => {
+  return Boolean(order.value?.clearanceBreakdown?.freeCount) || Number(order.value?.clearanceDiscountAmount || 0) > 0
+})
 
 async function openPaymentModal() {
   try {

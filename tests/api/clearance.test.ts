@@ -154,6 +154,32 @@ describe('Clearance (destockage) module', () => {
         expect(breakdown?.freeCount).toBe(2)
     })
 
+    it('surfaces the clearance breakdown on the admin orders list (destockage badge)', async () => {
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Destockage Badge Buyer',
+                customerPhone: '0550111777',
+                items: [
+                    { productId: productAId, variantId: variantAId, quantity: 4 },
+                    { productId: productBId, variantId: variantBId, quantity: 2 }
+                ]
+            })
+        expect(created.status).toBe(201)
+
+        const res = await request(app)
+            .get('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+
+        expect(res.status).toBe(200)
+        const listed = res.body.items.find((o: any) => o.id === created.body.orderId)
+        expect(listed).toBeTruthy()
+        expect(Number(listed.clearanceDiscountAmount)).toBe(2000)
+        expect(listed.clearanceBreakdown?.freeCount).toBe(2)
+    })
+
     it('rewards a partial threshold and ignores the remainder', async () => {
         const res = await request(app)
             .post('/api/orders')

@@ -3508,6 +3508,9 @@
           "inStock": "متوفر",
           "submit": "إنشاء الطلب"
         },
+        "badges": {
+          "destockage": "تصفية"
+        },
         "index": {
           "title": "الطلبات",
           "subtitle": "إدارة طلبات العملاء",

@@ -230,12 +230,15 @@
                 />
               </td>
               <td class="ui-td whitespace-nowrap">
-                <NuxtLink
-                  :to="`/admin/orders/${order.id}`"
-                  class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
-                >
-                  {{ order.publicId || `#${order.id.substring(0, 8)}` }}
-                </NuxtLink>
+                <div class="flex items-center gap-2">
+                  <NuxtLink
+                    :to="`/admin/orders/${order.id}`"
+                    class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
+                  >
+                    {{ order.publicId || `#${order.id.substring(0, 8)}` }}
+                  </NuxtLink>
+                  <AdminDestockageBadge :active="hasDestockage(order)" />
+                </div>
                 <div v-if="order.publicId" class="text-xs font-mono" style="color: var(--text-tertiary)">
                   {{ order.id.substring(0, 8) }}
                 </div>
@@ -445,6 +448,12 @@ interface Order {
   providerStatusDetail?: string | null
   createdAt: string
   items?: any[]
+  clearanceDiscountAmount?: number | null
+  clearanceBreakdown?: { freeCount: number; eligibleQuantity: number; discountCents: number } | null
+}
+
+function hasDestockage(order: Order) {
+  return Boolean(order.clearanceBreakdown?.freeCount) || Number(order.clearanceDiscountAmount || 0) > 0
 }
 
 const router = useRouter()

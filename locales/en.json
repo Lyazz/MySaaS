@@ -3510,6 +3510,9 @@
           "inStock": "in stock",
           "submit": "Create order"
         },
+        "badges": {
+          "destockage": "Clearance"
+        },
         "index": {
           "title": "Orders",
           "subtitle": "Manage customer orders",

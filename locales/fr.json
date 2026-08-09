@@ -3491,6 +3491,9 @@
           "inStock": "en stock",
           "submit": "Créer la commande"
         },
+        "badges": {
+          "destockage": "Déstockage"
+        },
         "index": {
           "title": "Commandes",
           "subtitle": "Gérez les commandes clients",
