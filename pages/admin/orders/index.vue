@@ -39,6 +39,13 @@
           <Icon name="lucide:refresh-cw" class="w-4 h-4" />
           Sync Maystro
         </button>
+        <NuxtLink
+          to="/admin/orders/blacklist"
+          class="ui-btn ui-btn--secondary flex items-center gap-2"
+        >
+          <Icon name="lucide:shield-ban" class="w-4 h-4" />
+          {{ t('admin.pages.orders.blacklist.title', 'Order blacklist') }}
+        </NuxtLink>
         <AdminOrderExportButton
           data-tour="orders-export"
           :filters="exportFilters"

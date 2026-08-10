@@ -19,6 +19,7 @@ import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
 import { PhoneNormalizationError, PhoneNormalizationService } from '../loyalty/phone-normalization.service'
 import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
 import { notificationsService } from '../notifications/notifications.service'
+import { BlacklistService } from '../blacklist/blacklist.service'
 
 const telegramService = new TelegramService()
 const cashService = new CashService()
@@ -114,6 +115,7 @@ export type PublicOrderInput = {
     shippingProvider?: string | null
     shippingPickupPoint?: number | string | null
     redeemPointsRequested?: number | null
+    clientIp?: string | null
     items: PublicOrderItemInput[]
 }
 
@@ -265,6 +267,7 @@ export class OrdersService {
     private loyaltyFormula = new LoyaltyFormulaService()
     private loyaltyLedger = new LoyaltyLedgerService()
     private loyaltyCheckout = new LoyaltyCheckoutService()
+    private blacklist = new BlacklistService()
 
     private async generateUniquePublicId(tx: Prisma.TransactionClient, tenantId: string, configuredPrefix: unknown) {
         const prefix = normalizeOrderIdPrefix(configuredPrefix)
@@ -2585,6 +2588,26 @@ export class OrdersService {
             throw new OrderValidationError(400, 'Customer name is required')
         }
 
+        const customerPhoneNormalized = normalizeCustomerPhoneForOrder(customerPhone)
+        const clientIp = (input.clientIp || '').trim() || null
+        const existingCustomerForBlacklist = customerPhoneNormalized
+            ? await prisma.customer.findUnique({
+                where: { tenantId_phoneNormalized: { tenantId: input.tenantId, phoneNormalized: customerPhoneNormalized } },
+                select: { id: true }
+            })
+            : null
+
+        const blacklistHit = await this.blacklist.checkForCheckout(input.tenantId, {
+            phoneNormalized: customerPhoneNormalized,
+            ip: clientIp,
+            customerId: existingCustomerForBlacklist?.id ?? null
+        })
+        if (blacklistHit) {
+            throw new OrderValidationError(403, 'This order could not be placed. Please contact the store.', {
+                code: 'BLACKLISTED'
+            })
+        }
+
         const normalizedItems = this.normalizePublicOrderItems(input.items)
 
         const shippingServiceLevel =
@@ -2718,8 +2741,9 @@ export class OrdersService {
                     customerId: resolvedCustomer?.id ?? null,
                     customerName,
                     customerPhone,
-                    customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? normalizeCustomerPhoneForOrder(customerPhone),
+                    customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? customerPhoneNormalized,
                     customerAddress: normalizedCustomerAddress,
+                    customerIp: clientIp,
                     deliveryMode,
                     shippingProvider,
                     shippingWilayaCode: input.shippingWilayaCode || null,

@@ -20,6 +20,16 @@
       @cancel="cancelOrderError = null"
     />
 
+    <AdminConfirmModal
+      v-model="blacklistOpen"
+      :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
+      :message="t(`admin.pages.orders.detail.blacklist.confirm.${blacklistType}`)"
+      :confirm-text="t('admin.pages.orders.detail.blacklist.confirmBtn', 'Blacklist')"
+      :error="blacklistError"
+      @confirm="confirmBlacklist"
+      @cancel="blacklistError = null"
+    />
+
     <DeliveryPaymentModal
       v-model="deliveryModalOpen"
       :cashboxes="cashboxes"
@@ -1100,6 +1110,10 @@ const deleteError = ref<string | null>(null)
 
 const cancelOrderOpen = ref(false)
 const cancelOrderError = ref<string | null>(null)
+
+const blacklistOpen = ref(false)
+const blacklistError = ref<string | null>(null)
+const blacklistType = ref<'customer' | 'phone' | 'ip'>('phone')
 
 const savingNotes = ref(false)
 const notesSavedMessage = ref('')
@@ -2441,15 +2455,27 @@ async function handleUpdateInternalNotes() {
   }
 }
 
-function handleBlacklistPlaceholder(type: string) {
-  const target =
-    type === 'customer'
-      ? t('admin.pages.orders.detail.actions.blacklistCustomer', 'Blacklist Customer')
-      : type === 'ip'
-        ? t('admin.pages.orders.detail.actions.blacklistIp', 'Blacklist IP Address')
-        : t('admin.pages.orders.detail.actions.blacklistPhone', 'Blacklist Phone Number')
+function openBlacklist(type: 'customer' | 'phone' | 'ip') {
+  blacklistType.value = type
+  blacklistError.value = null
+  blacklistOpen.value = true
+}
 
-  showToast(`${target}: ${t('common.comingSoon', 'Coming soon')}`, 'info')
+async function confirmBlacklist() {
+  if (!order.value) return
+  blacklistError.value = null
+  try {
+    await $fetch(`/api/admin/orders/${encodeURIComponent(orderId.value)}/blacklist`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { type: blacklistType.value.toUpperCase() }
+    })
+    blacklistOpen.value = false
+    showToast(t('admin.pages.orders.detail.blacklist.success', 'Added to blacklist'), 'success')
+  } catch (error: any) {
+    console.error('Blacklist order error:', error)
+    blacklistError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+  }
 }
 
 async function copyToClipboard(text: string) {
@@ -2513,15 +2539,15 @@ async function applyNBAAction(action: NBAAction) {
       return
     }
     case 'blacklistCustomer': {
-      handleBlacklistPlaceholder('customer')
+      openBlacklist('customer')
       return
     }
     case 'blacklistPhone': {
-      handleBlacklistPlaceholder('phone')
+      openBlacklist('phone')
       return
     }
     case 'blacklistIp': {
-      handleBlacklistPlaceholder('ip')
+      openBlacklist('ip')
       return
     }
     case 'pushProvider': {

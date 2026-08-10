@@ -4,6 +4,7 @@ import productsRouter from './modules/products/routes';
 import categoriesRouter from './modules/products/categories.routes';
 import variantsRouter from './modules/products/variants.routes';
 import ordersRouter from './modules/orders/routes';
+import blacklistRouter from './modules/blacklist/routes';
 import tenantsRouter from './modules/tenants/routes';
 import superAdminRouter from './modules/superadmin/routes';
 import publicProductsRouter from './modules/products/public.routes';
@@ -72,6 +73,7 @@ router.use('/admin/variants', variantsRouter);
 // Google OAuth for orders export — must be registered before /admin/orders to avoid route shadowing
 router.use('/admin/orders/export', googleOAuthRouter);
 router.use('/admin/orders', ordersRouter);
+router.use('/admin/blacklist', blacklistRouter);
 router.use('/admin/sales', salesRouter);
 router.use('/admin/customers', customersRouter);
 router.use('/admin/contact-infos', contactInfosRouter);

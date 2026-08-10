@@ -14,6 +14,7 @@ router.get('/export', requireStaffCrud('orders'), controller.export.bind(control
 router.get('/sync-maystro/candidates', requireStaffCrud('orders'), controller.getMaystroSyncCandidates.bind(controller))
 
 router.post('/:id/mark-read', requireStaffPermission('orders', 'read'), controller.markRead.bind(controller))
+router.post('/:id/blacklist', requireStaffPermission('orders', 'update'), controller.blacklistOrder.bind(controller))
 router.get('/:id', requireStaffCrud('orders'), controller.getById.bind(controller))
 router.get('/:id/bordereau', requireStaffCrud('orders'), controller.bordereauPdf.bind(controller))
 router.post('/', requireStaffCrud('orders'), controller.createAdmin.bind(controller))
