@@ -1582,6 +1582,10 @@
         "localization": {
           "title": "Localisation",
           "subtitle": "Devise et langue de la boutique."
+        },
+        "security": {
+          "title": "Sécurité",
+          "subtitle": "Réduisez les fausses commandes et les doublons."
         }
       },
       "features": {
@@ -1665,6 +1669,22 @@
         "bannerSubtitle": "Affiche une bannière annonçant l'offre destockage.",
         "bannerText": "Texte de la bannière",
         "bannerTextPlaceholder": "Grand destockage — achetez plus, économisez plus !"
+      },
+      "fraud": {
+        "title": "Prévention de la fraude",
+        "subtitle": "Bloquez les fausses commandes des contacts sur liste noire et limitez les commandes en double.",
+        "blacklist": {
+          "title": "Activer la liste noire",
+          "subtitle": "Bloquer le checkout pour les numéros, IPs et clients sur liste noire.",
+          "manageLink": "Gérer les entrées de la liste noire"
+        },
+        "duplicate": {
+          "title": "Limiter les commandes en double",
+          "subtitle": "Bloquer le checkout quand un numéro de téléphone a passé trop de commandes en peu de temps.",
+          "limit": "Nombre max. de commandes",
+          "window": "Fenêtre de temps (heures)",
+          "hint": "Une fois ce nombre de commandes atteint pour un numéro dans la fenêtre de temps, les commandes suivantes sont bloquées."
+        }
       },
       "currency": {
         "title": "Devise de la boutique",

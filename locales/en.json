@@ -1596,6 +1596,10 @@
         "localization": {
           "title": "Localization",
           "subtitle": "Store currency and language."
+        },
+        "security": {
+          "title": "Security",
+          "subtitle": "Reduce fake and duplicate orders."
         }
       },
       "features": {
@@ -1679,6 +1683,22 @@
         "bannerSubtitle": "Display a banner announcing the clearance offer.",
         "bannerText": "Banner text",
         "bannerTextPlaceholder": "Big clearance sale — buy more, save more!"
+      },
+      "fraud": {
+        "title": "Fraud prevention",
+        "subtitle": "Block fake orders from blacklisted contacts and throttle duplicate orders.",
+        "blacklist": {
+          "title": "Enable blacklist",
+          "subtitle": "Block checkout for blacklisted phone numbers, IPs and customers.",
+          "manageLink": "Manage blacklisted entries"
+        },
+        "duplicate": {
+          "title": "Limit duplicate orders",
+          "subtitle": "Block checkout once a phone number has placed too many orders in a short time.",
+          "limit": "Max orders",
+          "window": "Time window (hours)",
+          "hint": "Once a phone number reaches this many orders within the time window, further checkouts are blocked."
+        }
       },
       "currency": {
         "title": "Store currency",

@@ -2590,22 +2590,59 @@ export class OrdersService {
 
         const customerPhoneNormalized = normalizeCustomerPhoneForOrder(customerPhone)
         const clientIp = (input.clientIp || '').trim() || null
-        const existingCustomerForBlacklist = customerPhoneNormalized
-            ? await prisma.customer.findUnique({
-                where: { tenantId_phoneNormalized: { tenantId: input.tenantId, phoneNormalized: customerPhoneNormalized } },
-                select: { id: true }
-            })
-            : null
 
-        const blacklistHit = await this.blacklist.checkForCheckout(input.tenantId, {
-            phoneNormalized: customerPhoneNormalized,
-            ip: clientIp,
-            customerId: existingCustomerForBlacklist?.id ?? null
+        const fraudSettings = await prisma.storeSettings.findUnique({
+            where: { tenantId: input.tenantId },
+            select: {
+                blacklistEnabled: true,
+                duplicateOrderLimitEnabled: true,
+                duplicateOrderLimit: true,
+                duplicateOrderWindowHours: true
+            }
         })
-        if (blacklistHit) {
-            throw new OrderValidationError(403, 'This order could not be placed. Please contact the store.', {
-                code: 'BLACKLISTED'
+        const blacklistEnabled = fraudSettings?.blacklistEnabled ?? true
+        const duplicateOrderLimitEnabled = fraudSettings?.duplicateOrderLimitEnabled ?? false
+
+        if (blacklistEnabled) {
+            const existingCustomerForBlacklist = customerPhoneNormalized
+                ? await prisma.customer.findUnique({
+                    where: { tenantId_phoneNormalized: { tenantId: input.tenantId, phoneNormalized: customerPhoneNormalized } },
+                    select: { id: true }
+                })
+                : null
+
+            const blacklistHit = await this.blacklist.checkForCheckout(input.tenantId, {
+                phoneNormalized: customerPhoneNormalized,
+                ip: clientIp,
+                customerId: existingCustomerForBlacklist?.id ?? null
             })
+            if (blacklistHit) {
+                throw new OrderValidationError(403, 'This order could not be placed. Please contact the store.', {
+                    code: 'BLACKLISTED'
+                })
+            }
+        }
+
+        if (duplicateOrderLimitEnabled && customerPhoneNormalized) {
+            const duplicateOrderLimit = fraudSettings?.duplicateOrderLimit ?? 3
+            const windowHours = fraudSettings?.duplicateOrderWindowHours ?? 24
+            const windowStart = new Date(Date.now() - windowHours * 60 * 60 * 1000)
+
+            const recentOrderCount = await prisma.order.count({
+                where: {
+                    tenantId: input.tenantId,
+                    customerPhoneNormalized,
+                    status: { not: 'CANCELLED' },
+                    createdAt: { gte: windowStart }
+                }
+            })
+            if (recentOrderCount >= duplicateOrderLimit) {
+                throw new OrderValidationError(
+                    429,
+                    'Too many recent orders from this phone number. Please contact the store.',
+                    { code: 'DUPLICATE_ORDER_LIMIT' }
+                )
+            }
         }
 
         const normalizedItems = this.normalizePublicOrderItems(input.items)

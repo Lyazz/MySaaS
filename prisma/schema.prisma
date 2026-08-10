@@ -348,6 +348,12 @@ model StoreSettings {
   clearanceBannerEnabled Boolean @default(false)
   clearanceBannerText    String?
 
+  // Fraud prevention: blacklist enforcement + duplicate-order throttling at checkout
+  blacklistEnabled           Boolean @default(true)
+  duplicateOrderLimitEnabled Boolean @default(false)
+  duplicateOrderLimit        Int     @default(3)
+  duplicateOrderWindowHours  Int     @default(24)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
