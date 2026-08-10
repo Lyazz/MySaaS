@@ -4437,7 +4437,8 @@
       "dashboard": "Dashboard",
       "tenants": "Tenants",
       "analytics": "Analytics",
-      "auditLogs": "Audit logs"
+      "auditLogs": "Audit logs",
+      "payments": "Payments"
     },
     "login": {
       "title": "Super Admin",
@@ -4732,6 +4733,64 @@
           "orders": "Orders",
           "products": "Products"
         }
+      }
+    },
+    "auditLogs": {
+      "title": "Audit Logs",
+      "actions": {
+        "refresh": "Refresh"
+      },
+      "filters": {
+        "search": {
+          "label": "Search",
+          "placeholder": "Search by action, details, or user ID..."
+        },
+        "actionType": "Action Type",
+        "allActions": "All Actions",
+        "sortBy": "Sort By",
+        "sort": {
+          "newestFirst": "Newest First",
+          "oldestFirst": "Oldest First"
+        }
+      },
+      "loading": "Loading audit logs...",
+      "empty": "No audit logs found",
+      "table": {
+        "timestamp": "Timestamp",
+        "action": "Action",
+        "details": "Details",
+        "userId": "User ID",
+        "target": "Target"
+      },
+      "pagination": {
+        "showing": "Showing {from}-{to} of {total}",
+        "previous": "Previous",
+        "next": "Next"
+      }
+    },
+    "pendingPayments": {
+      "title": "Pending Payments",
+      "subtitle": "Review and approve or reject payment proofs submitted by tenants.",
+      "pending": "pending",
+      "noProof": "No file",
+      "stats": {
+        "pending": "Pending proofs",
+        "tenants": "Tenants waiting",
+        "total": "Total value"
+      },
+      "table": {
+        "title": "Submitted proofs awaiting review",
+        "tenant": "Tenant",
+        "plan": "Plan",
+        "amount": "Amount",
+        "submitted": "Submitted",
+        "proof": "Proof",
+        "notes": "Notes",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "All caught up!",
+        "subtitle": "No pending payment proofs at the moment."
       }
     }
   }

@@ -4435,7 +4435,8 @@
       "dashboard": "لوحة التحكم",
       "tenants": "المستأجرون",
       "analytics": "التحليلات",
-      "auditLogs": "سجل التدقيق"
+      "auditLogs": "سجل التدقيق",
+      "payments": "المدفوعات"
     },
     "tenants": {
       "title": "إدارة المستأجرين",
@@ -4676,6 +4677,118 @@
           "orders": "الطلبات",
           "products": "المنتجات"
         }
+      }
+    },
+    "auditLogs": {
+      "title": "سجل التدقيق",
+      "actions": {
+        "refresh": "تحديث"
+      },
+      "filters": {
+        "search": {
+          "label": "بحث",
+          "placeholder": "ابحث حسب الإجراء أو التفاصيل أو معرّف المستخدم..."
+        },
+        "actionType": "نوع الإجراء",
+        "allActions": "جميع الإجراءات",
+        "sortBy": "الترتيب حسب",
+        "sort": {
+          "newestFirst": "الأحدث أولاً",
+          "oldestFirst": "الأقدم أولاً"
+        }
+      },
+      "loading": "جارٍ تحميل سجل التدقيق...",
+      "empty": "لا توجد سجلات",
+      "table": {
+        "timestamp": "التاريخ والوقت",
+        "action": "الإجراء",
+        "details": "التفاصيل",
+        "userId": "معرّف المستخدم",
+        "target": "الهدف"
+      },
+      "pagination": {
+        "showing": "عرض {from} إلى {to} من {total}",
+        "previous": "السابق",
+        "next": "التالي"
+      }
+    },
+    "pendingPayments": {
+      "title": "المدفوعات المعلّقة",
+      "subtitle": "راجع ووافق أو ارفض إثباتات الدفع المقدَّمة من المستأجرين.",
+      "pending": "معلّق",
+      "noProof": "لا يوجد ملف",
+      "stats": {
+        "pending": "الإثباتات المعلّقة",
+        "tenants": "المستأجرون في الانتظار",
+        "total": "القيمة الإجمالية"
+      },
+      "table": {
+        "title": "الإثباتات المقدَّمة بانتظار المراجعة",
+        "tenant": "المستأجر",
+        "plan": "الخطة",
+        "amount": "المبلغ",
+        "submitted": "تاريخ التقديم",
+        "proof": "الإثبات",
+        "notes": "ملاحظات",
+        "actions": "إجراءات"
+      },
+      "empty": {
+        "title": "كل شيء تمام!",
+        "subtitle": "لا توجد إثباتات دفع معلّقة في الوقت الحالي."
+      }
+    },
+    "dashboard": {
+      "overview": {
+        "title": "نظرة عامة على المنصة",
+        "subtitle": "إدارة منصتك متعددة المستأجرين"
+      },
+      "stats": {
+        "tenants": "إجمالي المستأجرين",
+        "users": "إجمالي المستخدمين",
+        "products": "إجمالي المنتجات",
+        "revenue": "إجمالي الإيرادات"
+      },
+      "recentActivity": {
+        "title": "النشاط الأخير",
+        "viewAll": "عرض الكل",
+        "empty": "لا يوجد نشاط حديث"
+      },
+      "quickActions": {
+        "title": "إجراءات سريعة",
+        "createTenant": {
+          "title": "إنشاء مستأجر",
+          "subtitle": "إضافة متجر جديد"
+        },
+        "manageTenants": {
+          "title": "إدارة المستأجرين",
+          "subtitle": "عرض جميع المتاجر"
+        },
+        "viewAnalytics": {
+          "title": "عرض التحليلات",
+          "subtitle": "رؤى المنصة"
+        }
+      }
+    },
+    "login": {
+      "title": "المشرف العام",
+      "subtitle": "سجّل الدخول للوصول إلى لوحة تحكم المنصة",
+      "backToSite": "العودة إلى الموقع الرئيسي",
+      "form": {
+        "email": {
+          "label": "البريد الإلكتروني",
+          "placeholder": "superadmin{'@'}example.com"
+        },
+        "password": {
+          "label": "كلمة المرور"
+        },
+        "submit": {
+          "signingIn": "جارٍ تسجيل الدخول...",
+          "signIn": "تسجيل الدخول"
+        }
+      },
+      "errors": {
+        "superAdminRequired": "تم رفض الوصول: صلاحيات المشرف العام مطلوبة",
+        "loginFailed": "فشل تسجيل الدخول"
       }
     }
   }
