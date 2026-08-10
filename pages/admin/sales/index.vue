@@ -108,7 +108,7 @@
               </th>
             </tr>
           </thead>
-          <tbody class="ui-tbody">
+          <tbody class="ui-tbody" @touchstart.passive="onRowTouchStart" @touchmove.passive="onRowTouchMove">
             <tr
               v-for="sale in sales"
               :key="sale.id"
