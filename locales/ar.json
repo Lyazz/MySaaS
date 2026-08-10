@@ -4443,7 +4443,12 @@
         "createTenant": "إنشاء مستأجر",
         "payments": "المدفوعات",
         "suspend": "تعليق",
-        "activate": "تفعيل"
+        "activate": "تفعيل",
+        "showArchived": "إظهار المؤرشفة",
+        "viewDetails": "عرض التفاصيل",
+        "archive": "أرشفة",
+        "restore": "استعادة",
+        "deletePermanently": "حذف نهائي"
       },
       "search": {
         "placeholder": "ابحث عن مستأجر..."
@@ -4462,7 +4467,8 @@
       },
       "status": {
         "active": "نشط",
-        "suspended": "معلّق"
+        "suspended": "معلّق",
+        "archived": "مؤرشف"
       },
       "modal": {
         "createTitle": "إنشاء مستأجر جديد",
@@ -4491,11 +4497,77 @@
         "generic": "حدث خطأ",
         "suspendFailed": "تعذر تعليق المستأجر",
         "activateFailed": "تعذر تفعيل المستأجر",
-        "deleteFailed": "تعذر حذف المستأجر"
+        "deleteFailed": "تعذر حذف المستأجر",
+        "archiveFailed": "تعذرت أرشفة المستأجر",
+        "restoreFailed": "تعذرت استعادة المستأجر"
       },
       "confirm": {
         "suspend": "هل أنت متأكد من تعليق {name}؟",
-        "delete": "هل أنت متأكد من حذف {name}؟ لا يمكن التراجع عن هذا الإجراء!"
+        "archive": "أرشفة {name}؟ سيتم تعطيل متجره وتسجيل دخول الإدارة. يمكنك استعادته لاحقًا.",
+        "restore": "استعادة {name}؟ سيؤدي هذا إلى إعادة تفعيل متجره وتسجيل دخول الإدارة.",
+        "deletePermanently": "حذف {name} نهائيًا؟ لا يمكن التراجع عن هذا الإجراء."
+      },
+      "detail": {
+        "breadcrumb": "التفاصيل",
+        "loading": "جارٍ تحميل بيانات المستأجر...",
+        "notFound": "المستأجر غير موجود",
+        "storefrontLink": "فتح المتجر",
+        "overview": {
+          "title": "نظرة عامة",
+          "createdAt": "تاريخ الإنشاء",
+          "slug": "المعرّف"
+        },
+        "plan": {
+          "title": "الخطة والاستخدام",
+          "currentPlan": "الخطة الحالية",
+          "interval": "دورة الفوترة",
+          "status": "حالة الاشتراك",
+          "currentPeriod": "الفترة الحالية",
+          "trialEnds": "نهاية الفترة التجريبية",
+          "noSubscription": "لا يوجد اشتراك مسجل",
+          "changePlan": "تغيير الخطة",
+          "changePlanCta": "تطبيق الخطة",
+          "updating": "جارٍ التطبيق..."
+        },
+        "usage": {
+          "title": "الاستخدام خلال هذه الفترة",
+          "products": "المنتجات",
+          "orders": "الطلبات",
+          "users": "المستخدمون"
+        },
+        "users": {
+          "title": "المستخدمون",
+          "empty": "لا يوجد مستخدمون",
+          "table": {
+            "email": "البريد الإلكتروني",
+            "role": "الدور",
+            "status": "الحالة",
+            "created": "تاريخ الإنشاء"
+          }
+        },
+        "integrations": {
+          "title": "التكاملات الاجتماعية",
+          "empty": "لا توجد تكاملات متصلة",
+          "deliveryTitle": "حسابات التوصيل",
+          "deliveryEmpty": "لا توجد حسابات توصيل متصلة",
+          "table": {
+            "provider": "المزود",
+            "status": "الحالة",
+            "updated": "آخر تحديث"
+          }
+        },
+        "domains": {
+          "title": "النطاقات المخصصة",
+          "empty": "لا توجد نطاقات مخصصة",
+          "table": {
+            "domain": "النطاق",
+            "created": "تمت الإضافة"
+          }
+        },
+        "errors": {
+          "loadFailed": "تعذر تحميل بيانات المستأجر",
+          "planUpdateFailed": "تعذر تحديث الخطة"
+        }
       }
     },
     "paymentsPage": {

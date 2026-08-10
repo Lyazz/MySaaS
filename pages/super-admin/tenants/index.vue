@@ -14,14 +14,20 @@
       </div>
 
       <!-- Search -->
-      <div class="relative">
-        <input
-          v-model="searchQuery"
-          type="text"
-          :placeholder="t('superAdmin.tenants.search.placeholder')"
-          class="w-full px-4 py-3 ps-10 bg-white border border-slate-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-500 shadow-sm"
-        >
-        <Icon name="lucide:search" class="h-5 w-5 absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+      <div class="flex flex-col sm:flex-row gap-3 sm:items-center">
+        <div class="relative flex-1">
+          <input
+            v-model="searchQuery"
+            type="text"
+            :placeholder="t('superAdmin.tenants.search.placeholder')"
+            class="w-full px-4 py-3 ps-10 bg-white border border-slate-200 rounded-lg text-gray-800 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-lime-500 shadow-sm"
+          >
+          <Icon name="lucide:search" class="h-5 w-5 absolute start-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+        </div>
+        <label class="flex items-center gap-2 text-sm text-slate-600 whitespace-nowrap px-1">
+          <input v-model="includeArchived" type="checkbox" class="h-4 w-4 accent-lime-600" @change="loadTenants">
+          {{ t('superAdmin.tenants.actions.showArchived') }}
+        </label>
       </div>
 
       <!-- Tenants Table -->
@@ -74,20 +80,28 @@
               class="ui-tr transition-colors"
             >
               <td class="ui-td text-slate-900 font-medium whitespace-nowrap">
-                {{ tenant.name }}
+                <NuxtLink :to="`/super-admin/tenants/${tenant.id}`" class="hover:text-lime-700 hover:underline">
+                  {{ tenant.name }}
+                </NuxtLink>
               </td>
               <td class="ui-td text-slate-600">
                 <code class="px-2 py-1 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{{ tenant.slug }}</code>
               </td>
               <td class="ui-td">
                 <span
-                  v-if="tenant.isSuspended" 
+                  v-if="tenant.archivedAt"
+                  class="ui-badge ui-badge--slate"
+                >
+                  {{ t('superAdmin.tenants.status.archived') }}
+                </span>
+                <span
+                  v-else-if="tenant.isSuspended"
                   class="ui-badge ui-badge--red"
                 >
                   {{ t('superAdmin.tenants.status.suspended') }}
                 </span>
                 <span
-                  v-else 
+                  v-else
                   class="ui-badge ui-badge--emerald"
                 >
                   {{ t('superAdmin.tenants.status.active') }}
@@ -108,7 +122,15 @@
               <td class="ui-td">
                 <div class="flex justify-end space-x-2 rtl:space-x-reverse">
                   <button
-                    class="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-600 transition-colors" 
+                    type="button"
+                    class="p-2 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded text-slate-600 transition-colors"
+                    :title="t('superAdmin.tenants.actions.viewDetails')"
+                    @click.stop="viewDetails(tenant)"
+                  >
+                    <Icon name="lucide:eye" class="h-4 w-4" />
+                  </button>
+                  <button
+                    class="p-2 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded text-blue-600 transition-colors"
                     :title="t('admin.common.edit')"
                     @click="editTenant(tenant)"
                   >
@@ -122,29 +144,50 @@
                   >
                     <Icon name="lucide:receipt" class="h-4 w-4" />
                   </button>
-                  <button
-                    v-if="!tenant.isSuspended"
-                    class="p-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded text-orange-600 transition-colors" 
-                    :title="t('superAdmin.tenants.actions.suspend')"
-                    @click="suspendTenant(tenant)"
-                  >
-                    <Icon name="lucide:pause-circle" class="h-4 w-4" />
-                  </button>
-                  <button
-                    v-else
-                    class="p-2 bg-green-50 hover:bg-green-100 border border-green-200 rounded text-green-600 transition-colors" 
-                    :title="t('superAdmin.tenants.actions.activate')"
-                    @click="unsuspendTenant(tenant)"
-                  >
-                    <Icon name="lucide:play-circle" class="h-4 w-4" />
-                  </button>
-                  <button
-                    class="p-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded text-red-600 transition-colors" 
-                    :title="t('admin.common.delete')"
-                    @click="deleteTenant(tenant)"
-                  >
-                    <Icon name="lucide:trash" class="h-4 w-4" />
-                  </button>
+                  <template v-if="!tenant.archivedAt">
+                    <button
+                      v-if="!tenant.isSuspended"
+                      class="p-2 bg-orange-50 hover:bg-orange-100 border border-orange-200 rounded text-orange-600 transition-colors"
+                      :title="t('superAdmin.tenants.actions.suspend')"
+                      @click="suspendTenant(tenant)"
+                    >
+                      <Icon name="lucide:pause-circle" class="h-4 w-4" />
+                    </button>
+                    <button
+                      v-else
+                      class="p-2 bg-green-50 hover:bg-green-100 border border-green-200 rounded text-green-600 transition-colors"
+                      :title="t('superAdmin.tenants.actions.activate')"
+                      @click="unsuspendTenant(tenant)"
+                    >
+                      <Icon name="lucide:play-circle" class="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      class="p-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded text-red-600 transition-colors"
+                      :title="t('superAdmin.tenants.actions.archive')"
+                      @click="archiveTenant(tenant)"
+                    >
+                      <Icon name="lucide:archive" class="h-4 w-4" />
+                    </button>
+                  </template>
+                  <template v-else>
+                    <button
+                      type="button"
+                      class="p-2 bg-green-50 hover:bg-green-100 border border-green-200 rounded text-green-600 transition-colors"
+                      :title="t('superAdmin.tenants.actions.restore')"
+                      @click="restoreTenant(tenant)"
+                    >
+                      <Icon name="lucide:rotate-ccw" class="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      class="p-2 bg-red-50 hover:bg-red-100 border border-red-200 rounded text-red-600 transition-colors"
+                      :title="t('superAdmin.tenants.actions.deletePermanently')"
+                      @click="deleteTenant(tenant)"
+                    >
+                      <Icon name="lucide:trash" class="h-4 w-4" />
+                    </button>
+                  </template>
                 </div>
               </td>
             </tr>
@@ -259,6 +302,7 @@ const platformBaseDomain = usePlatformBaseDomain()
 const loading = ref(true)
 const tenants = ref<any[]>([])
 const searchQuery = ref('')
+const includeArchived = ref(false)
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const editingTenant = ref<any>(null)
@@ -304,7 +348,8 @@ const loadTenants = async () => {
     const response = await $fetch<any[]>('/api/super-admin/tenants', {
       headers: {
         Authorization: `Bearer ${authStore.token}`
-      }
+      },
+      query: includeArchived.value ? { includeArchived: 'true' } : undefined
     })
     tenants.value = response
   } catch (err: any) {
@@ -328,6 +373,11 @@ const editTenant = (tenant: any) => {
 const openPayments = async (tenant: any) => {
   if (!tenant?.id) return
   await navigateTo(`/super-admin/tenants/${tenant.id}/payments`)
+}
+
+const viewDetails = async (tenant: any) => {
+  if (!tenant?.id) return
+  await navigateTo(`/super-admin/tenants/${tenant.id}`)
 }
 
 const handleSubmit = async () => {
@@ -396,8 +446,8 @@ const unsuspendTenant = async (tenant: any) => {
 }
 
 const deleteTenant = async (tenant: any) => {
-  if (!confirm(t('superAdmin.tenants.confirm.delete', { name: tenant.name }))) return
-  
+  if (!confirm(t('superAdmin.tenants.confirm.deletePermanently', { name: tenant.name }))) return
+
   try {
     await $fetch(`/api/super-admin/tenants/${tenant.id}`, {
       method: 'DELETE',
@@ -409,6 +459,40 @@ const deleteTenant = async (tenant: any) => {
   } catch (err) {
     console.error('Failed to delete tenant:', err)
     alert(t('superAdmin.tenants.errors.deleteFailed'))
+  }
+}
+
+const archiveTenant = async (tenant: any) => {
+  if (!confirm(t('superAdmin.tenants.confirm.archive', { name: tenant.name }))) return
+
+  try {
+    await $fetch(`/api/super-admin/tenants/${tenant.id}/archive`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    await loadTenants()
+  } catch (err) {
+    console.error('Failed to archive tenant:', err)
+    alert(t('superAdmin.tenants.errors.archiveFailed'))
+  }
+}
+
+const restoreTenant = async (tenant: any) => {
+  if (!confirm(t('superAdmin.tenants.confirm.restore', { name: tenant.name }))) return
+
+  try {
+    await $fetch(`/api/super-admin/tenants/${tenant.id}/restore`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      }
+    })
+    await loadTenants()
+  } catch (err) {
+    console.error('Failed to restore tenant:', err)
+    alert(t('superAdmin.tenants.errors.restoreFailed'))
   }
 }
 

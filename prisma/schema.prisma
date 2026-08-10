@@ -8,13 +8,14 @@ datasource db {
 }
 
 model Tenant {
-  id          String   @id @default(uuid())
-  slug        String   @unique
+  id          String    @id @default(uuid())
+  slug        String    @unique
   name        String
-  isOffline   Boolean  @default(true)
-  isSuspended Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isOffline   Boolean   @default(true)
+  isSuspended Boolean   @default(false)
+  archivedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   users                     User[]
   staffRoles                TenantStaffRole[]
@@ -1006,8 +1007,8 @@ model Order {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  confirmationToken     String?   @unique
-  confirmationTokenUsed Boolean   @default(false)
+  confirmationToken     String? @unique
+  confirmationTokenUsed Boolean @default(false)
 
   @@unique([tenantId, id])
   @@unique([tenantId, publicId])

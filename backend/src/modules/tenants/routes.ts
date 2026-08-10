@@ -14,8 +14,11 @@ const addUtcMonths = (date: Date, months: number) =>
 
 // GET / - List tenants
 router.get('/', async (req, res) => {
+    const includeArchived = req.query.includeArchived === 'true'
+
     try {
         const tenants = await prisma.tenant.findMany({
+            where: includeArchived ? {} : { archivedAt: null },
             orderBy: { createdAt: 'desc' },
             include: {
                 _count: {
@@ -189,7 +192,117 @@ router.get('/:id/stats', async (req, res) => {
     }
 })
 
-// DELETE /:id
+// GET /:id/detail - Full detail view for the tenant detail page
+router.get('/:id/detail', async (req, res) => {
+    const { id } = req.params
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+
+    try {
+        const tenant = await prisma.tenant.findUnique({ where: { id } })
+        if (!tenant) {
+            return res.status(404).json({ statusCode: 404, statusMessage: 'Tenant not found' })
+        }
+
+        const subscription = await prisma.tenantSubscription.findUnique({ where: { tenantId: id } })
+
+        const ordersSince = subscription?.currentPeriodStart
+            ?? new Date(Date.UTC(new Date().getUTCFullYear(), new Date().getUTCMonth(), 1))
+
+        const [productCount, userCount, ordersThisPeriod, users, integrations, deliveryAccounts, domains] =
+            await Promise.all([
+                prisma.product.count({ where: { tenantId: id } }),
+                prisma.user.count({ where: { tenantId: id } }),
+                prisma.order.count({ where: { tenantId: id, createdAt: { gte: ordersSince } } }),
+                prisma.user.findMany({
+                    where: { tenantId: id },
+                    select: { id: true, email: true, role: true, isActive: true, createdAt: true },
+                    orderBy: { createdAt: 'asc' }
+                }),
+                prisma.tenantIntegration.findMany({
+                    where: { tenantId: id },
+                    select: { id: true, provider: true, isActive: true, updatedAt: true }
+                }),
+                prisma.tenantDeliveryAccount.findMany({
+                    where: { tenantId: id },
+                    select: { id: true, provider: true, isActive: true, updatedAt: true }
+                }),
+                prisma.tenantDomain.findMany({
+                    where: { tenantId: id },
+                    select: { id: true, domain: true, createdAt: true }
+                })
+            ])
+
+        res.json({
+            tenant,
+            subscription,
+            usage: { productCount, userCount, ordersThisPeriod },
+            users,
+            integrations,
+            deliveryAccounts,
+            domains
+        })
+    } catch (error) {
+        console.error('Get tenant detail error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// POST /:id/archive - Soft-delete: disables the tenant and hides it from the default list
+router.post('/:id/archive', async (req, res) => {
+    const { id } = req.params
+    const user = req.user!
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+
+    try {
+        const tenant = await prisma.tenant.update({
+            where: { id },
+            data: { archivedAt: new Date(), isSuspended: true }
+        })
+
+        await logAction({
+            action: 'ARCHIVE_TENANT',
+            details: `Tenant ${tenant.slug} archived`,
+            userId: user.id,
+            targetId: tenant.id
+        })
+
+        res.json({ success: true })
+    } catch (error) {
+        console.error('Archive tenant error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// POST /:id/restore - Reverses an archive
+router.post('/:id/restore', async (req, res) => {
+    const { id } = req.params
+    const user = req.user!
+
+    if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
+
+    try {
+        const tenant = await prisma.tenant.update({
+            where: { id },
+            data: { archivedAt: null, isSuspended: false }
+        })
+
+        await logAction({
+            action: 'RESTORE_TENANT',
+            details: `Tenant ${tenant.slug} restored`,
+            userId: user.id,
+            targetId: tenant.id
+        })
+
+        res.json({ success: true })
+    } catch (error) {
+        console.error('Restore tenant error:', error)
+        res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+    }
+})
+
+// DELETE /:id - Permanent delete. Only allowed once a tenant has been archived first.
 router.delete('/:id', async (req, res) => {
     const { id } = req.params
     const user = req.user!
@@ -197,6 +310,17 @@ router.delete('/:id', async (req, res) => {
     if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Missing ID' })
 
     try {
+        const existing = await prisma.tenant.findUnique({ where: { id } })
+        if (!existing) {
+            return res.status(404).json({ statusCode: 404, statusMessage: 'Tenant not found' })
+        }
+        if (!existing.archivedAt) {
+            return res.status(400).json({
+                statusCode: 400,
+                statusMessage: 'Tenant must be archived before it can be permanently deleted'
+            })
+        }
+
         const tenant = await prisma.tenant.delete({
             where: { id }
         })
