@@ -102,7 +102,7 @@
               <th class="ui-th text-end">{{ t('admin.common.actions') }}</th>
             </tr>
           </thead>
-          <tbody class="ui-tbody">
+          <tbody class="ui-tbody" @touchstart.passive="onRowTouchStart" @touchmove.passive="onRowTouchMove">
             <tr v-if="pending">
               <td class="px-4 py-6" colspan="7" style="color: var(--text-tertiary)">{{ t('admin.common.loading') }}</td>
             </tr>
@@ -270,7 +270,7 @@
               <th class="ui-th text-end">{{ t('admin.common.actions') }}</th>
             </tr>
           </thead>
-          <tbody class="ui-tbody">
+          <tbody class="ui-tbody" @touchstart.passive="onRowTouchStart" @touchmove.passive="onRowTouchMove">
             <tr v-if="rolesPending">
               <td class="px-4 py-6" colspan="3" style="color: var(--text-tertiary)">{{ t('admin.common.loading') }}</td>
             </tr>
