@@ -29,8 +29,6 @@
       </template>
     </SettingsPageHeader>
 
-    <SettingsAnchorTabs :tabs="tabs" :active-id="activeTab" @select="activeTab = $event" />
-
     <div v-if="message.text" class="status-toast" :class="message.type">
       <Icon :name="message.type === 'success' ? 'lucide:check-circle-2' : 'lucide:alert-triangle'" class="w-4 h-4" />
       {{ message.text }}
@@ -303,7 +301,6 @@ import { useAuthStore } from '~/stores/auth'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 import SettingsSaveBar from './settings/SettingsSaveBar.vue'
-import SettingsAnchorTabs from './settings/SettingsAnchorTabs.vue'
 import BrandImageField from './settings/BrandImageField.vue'
 import { normalizeHexColor } from '~/shared/storefront/template-brand'
 
@@ -340,13 +337,6 @@ const showQuickView = ref(false)
 const quickViewUrl = ref('')
 const baseDomain = ref('')
 
-const activeTab = ref('identity')
-const tabs = computed(() => [
-  { id: 'identity', label: t('admin.appearanceSettingsForm.identity.title'), icon: 'lucide:store' },
-  { id: 'brand', label: t('admin.appearanceSettingsForm.brandAssets.title'), icon: 'lucide:palette' },
-  { id: 'templates', label: t('admin.appearanceSettingsForm.templates.title'), icon: 'lucide:layout-template' }
-])
-
 const previewUrl = computed(() => {
   if (!form.slug || !baseDomain.value) return null
   const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:'
@@ -380,31 +370,7 @@ onMounted(() => {
     }
   }
   fetchSettings()
-  setupScrollSpy()
 })
-
-function setupScrollSpy() {
-  if (typeof window === 'undefined') return
-  const ids = ['identity', 'brand', 'templates']
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-      if (visible.length > 0 && visible[0].target.id) {
-        activeTab.value = visible[0].target.id
-      }
-    },
-    { rootMargin: '-80px 0px -50% 0px', threshold: [0.1, 0.3, 0.6] }
-  )
-  nextTick(() => {
-    ids.forEach(id => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-  })
-  onBeforeUnmount(() => observer.disconnect())
-}
 
 const templates = computed(() => [
   { key: 'classic', label: 'Classic', category: 'Classic', storeTypes: t('admin.appearanceSettingsForm.templates.options.classic.storeTypes'), fontName: 'Alice', fontStyle: "'Alice', serif", color: '#0f172a', bg: '#f8fafc', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)', border: '#e2e8f0', textColor: '#0f172a', btnText: '#ffffff', radius: '4px', emoji: '🖼️', sampleDesc: 'Élégant', samplePrice: '189 €' },

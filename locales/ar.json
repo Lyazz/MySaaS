@@ -2191,60 +2191,33 @@
       "account": "الحساب",
       "connections": "التكاملات"
     },
-    "settingsHub": {
-      "empty": {
-        "title": "لا توجد مواضيع إعدادات متاحة",
-        "description": "لا يمنحك دورك صلاحية الوصول إلى إعدادات هذا المتجر."
+    "settingsNav": {
+      "ariaLabel": "الإعدادات",
+      "groups": {
+        "store": "المتجر",
+        "commerce": "التجارة",
+        "content": "المحتوى والتسويق",
+        "localization": "اللغة والعملة",
+        "connections": "الاتصالات",
+        "administration": "الإدارة"
       },
-      "themes": {
-        "identity": {
-          "title": "الهوية والمظهر",
-          "description": "اسم المتجر، الرابط، الشعار، الأيقونة، اللون والقالب."
-        },
-        "content": {
-          "title": "الصفحة الرئيسية والمحتوى",
-          "description": "الصفحة الرئيسية، بيانات الاتصال، والصفحات القانونية في الواجهة."
-        },
-        "checkout": {
-          "title": "المبيعات والدفع",
-          "description": "السلة، الدفع عند الاستلام، الحد الأدنى، بادئة الطلب والعنوان."
-        },
-        "invoices": {
-          "title": "الفوترة",
-          "description": "فواتير البيع، بادئة الفاتورة، الشعار وملاحظة الأسفل."
-        },
-        "localization": {
-          "title": "اللغة والعملة",
-          "description": "اللغة الافتراضية، العملة، وبلد المرجع."
-        },
-        "marketing": {
-          "title": "التسويق والولاء",
-          "description": "إعلان الواجهة وبرنامج نقاط الولاء."
-        },
-        "connections": {
-          "title": "النطاقات والتكاملات",
-          "description": "النطاق المخصص والاتصالات الخارجية."
-        },
-        "administration": {
-          "title": "الإدارة",
-          "description": "المستخدمون وفوترة الاشتراك."
-        }
-      },
-      "links": {
-        "appearance": "الهوية والمظهر",
+      "items": {
+        "identity": "الهوية والعلامة",
+        "theme": "قالب الواجهة",
         "homepage": "الصفحة الرئيسية",
+        "checkout": "السلة والدفع",
+        "fraud": "منع الاحتيال",
+        "loyalty": "برنامج الولاء",
+        "clearance": "عروض التصفية",
+        "invoices": "الفواتير",
         "contact": "معلومات الاتصال",
         "legal": "الصفحات القانونية",
-        "salesFeatures": "المبيعات",
-        "checkoutRules": "قواعد الدفع",
-        "salesInvoices": "فواتير البيع",
-        "currency": "العملة",
-        "language": "اللغة",
-        "announcement": "الإعلان",
-        "loyalty": "الولاء",
+        "announcement": "شريط الإعلان",
+        "messaging": "الرسائل",
+        "localization": "العملة واللغة",
         "domains": "النطاقات",
         "integrations": "التكاملات",
-        "users": "المستخدمون",
+        "team": "الفريق والأدوار",
         "billing": "الاشتراك"
       }
     },

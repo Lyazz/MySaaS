@@ -2,11 +2,9 @@
   <div class="functional-form">
     <SettingsPageHeader
       :eyebrow="t('admin.nav.storefront') || 'Storefront'"
-      :title="t('admin.pages.settings.functional.title')"
-      :subtitle="t('admin.pages.settings.functional.subtitle')"
+      :title="pageTitle"
+      :subtitle="pageSubtitle"
     />
-
-    <SettingsAnchorTabs :tabs="tabs" :active-id="activeTab" @select="activeTab = $event" />
 
     <Transition name="status-fade">
       <div v-if="successMessage || errorMessage" class="status-toast" :class="errorMessage ? 'error' : 'success'">
@@ -16,13 +14,9 @@
     </Transition>
 
     <form @submit.prevent="save" class="functional-sections">
-      <div class="theme-group-heading">
-        <span>{{ t('admin.functionalSettingsForm.themeGroups.sales.title') }}</span>
-        <small>{{ t('admin.functionalSettingsForm.themeGroups.sales.subtitle') }}</small>
-      </div>
-
       <!-- Features -->
       <SettingsSection
+        v-show="visibleAnchors.includes('features')"
         anchor-id="features"
         icon="lucide:toggle-right"
         :title="t('admin.functionalSettingsForm.features.title')"
@@ -75,6 +69,7 @@
 
       <!-- Checkout rules -->
       <SettingsSection
+        v-show="visibleAnchors.includes('checkout')"
         anchor-id="checkout"
         icon="lucide:credit-card"
         :title="t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout rules'"
@@ -146,6 +141,7 @@
 
       <!-- Messaging -->
       <SettingsSection
+        v-show="visibleAnchors.includes('messaging')"
         anchor-id="messaging"
         icon="lucide:message-square"
         :title="t('admin.functionalSettingsForm.messaging.title')"
@@ -180,13 +176,9 @@
         </div>
       </SettingsSection>
 
-      <div class="theme-group-heading">
-        <span>{{ t('admin.functionalSettingsForm.themeGroups.invoices.title') }}</span>
-        <small>{{ t('admin.functionalSettingsForm.themeGroups.invoices.subtitle') }}</small>
-      </div>
-
       <!-- Sales invoices -->
       <SettingsSection
+        v-show="visibleAnchors.includes('invoices')"
         anchor-id="invoices"
         icon="lucide:receipt-text"
         :title="t('admin.functionalSettingsForm.invoices.title')"
@@ -251,13 +243,9 @@
         </div>
       </SettingsSection>
 
-      <div class="theme-group-heading">
-        <span>{{ t('admin.functionalSettingsForm.themeGroups.marketing.title') }}</span>
-        <small>{{ t('admin.functionalSettingsForm.themeGroups.marketing.subtitle') }}</small>
-      </div>
-
       <!-- Announcement bar -->
       <SettingsSection
+        v-show="visibleAnchors.includes('announcement')"
         anchor-id="announcement"
         icon="lucide:megaphone"
         :title="t('admin.appearanceSettingsForm.announcement.title')"
@@ -296,6 +284,7 @@
 
       <!-- Loyalty -->
       <SettingsSection
+        v-show="visibleAnchors.includes('loyalty')"
         anchor-id="loyalty"
         icon="lucide:badge-percent"
         :title="t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty points'"
@@ -342,6 +331,7 @@
 
       <!-- Clearance (destockage) -->
       <SettingsSection
+        v-show="visibleAnchors.includes('clearance')"
         anchor-id="clearance"
         icon="lucide:package-open"
         :title="t('admin.functionalSettingsForm.clearance.title') || 'Clearance (destockage)'"
@@ -407,13 +397,9 @@
         </div>
       </SettingsSection>
 
-      <div class="theme-group-heading">
-        <span>{{ t('admin.functionalSettingsForm.themeGroups.security.title') || 'Security' }}</span>
-        <small>{{ t('admin.functionalSettingsForm.themeGroups.security.subtitle') || 'Reduce fake and duplicate orders.' }}</small>
-      </div>
-
       <!-- Fraud prevention -->
       <SettingsSection
+        v-show="visibleAnchors.includes('fraud')"
         anchor-id="fraud"
         icon="lucide:shield-ban"
         :title="t('admin.functionalSettingsForm.fraud.title') || 'Fraud prevention'"
@@ -469,13 +455,9 @@
         </div>
       </SettingsSection>
 
-      <div class="theme-group-heading">
-        <span>{{ t('admin.functionalSettingsForm.themeGroups.localization.title') }}</span>
-        <small>{{ t('admin.functionalSettingsForm.themeGroups.localization.subtitle') }}</small>
-      </div>
-
       <!-- Currency -->
       <SettingsSection
+        v-show="visibleAnchors.includes('currency')"
         anchor-id="currency"
         icon="lucide:dollar-sign"
         :title="t('admin.functionalSettingsForm.currency.title')"
@@ -497,6 +479,7 @@
 
       <!-- Localization -->
       <SettingsSection
+        v-show="visibleAnchors.includes('localization')"
         anchor-id="localization"
         icon="lucide:languages"
         :title="t('admin.functionalSettingsForm.localization.title')"
@@ -548,10 +531,62 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 import SettingsSaveBar from './settings/SettingsSaveBar.vue'
-import SettingsAnchorTabs from './settings/SettingsAnchorTabs.vue'
+
+const props = withDefaults(defineProps<{ section?: string }>(), { section: 'checkout' })
 
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
+
+const SECTION_GROUPS: Record<string, string[]> = {
+  checkout: ['features', 'checkout'],
+  fraud: ['fraud'],
+  loyalty: ['loyalty'],
+  clearance: ['clearance'],
+  invoices: ['invoices'],
+  announcement: ['announcement'],
+  messaging: ['messaging'],
+  localization: ['currency', 'localization']
+}
+
+const visibleAnchors = computed(() => SECTION_GROUPS[props.section] || SECTION_GROUPS.checkout)
+
+const SECTION_TITLES: Record<string, () => { title: string; subtitle: string }> = {
+  checkout: () => ({
+    title: t('admin.settingsNav.items.checkout') || 'Checkout & Cart',
+    subtitle: t('admin.functionalSettingsForm.checkoutRules.subtitle') || 'Order conditions and checkout behavior.'
+  }),
+  fraud: () => ({
+    title: t('admin.functionalSettingsForm.fraud.title') || 'Fraud prevention',
+    subtitle: t('admin.functionalSettingsForm.fraud.subtitle') || 'Block fake orders from blacklisted contacts and throttle duplicate orders.'
+  }),
+  loyalty: () => ({
+    title: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty points',
+    subtitle: t('admin.functionalSettingsForm.loyalty.subtitle') || 'Configure points calculation and redemption rules.'
+  }),
+  clearance: () => ({
+    title: t('admin.functionalSettingsForm.clearance.title') || 'Clearance (destockage)',
+    subtitle: t('admin.functionalSettingsForm.clearance.subtitle') || 'Reward customers who buy in bulk from your clearance products.'
+  }),
+  invoices: () => ({
+    title: t('admin.functionalSettingsForm.invoices.title'),
+    subtitle: t('admin.functionalSettingsForm.invoices.subtitle')
+  }),
+  announcement: () => ({
+    title: t('admin.appearanceSettingsForm.announcement.title'),
+    subtitle: t('admin.appearanceSettingsForm.announcement.subtitle')
+  }),
+  messaging: () => ({
+    title: t('admin.functionalSettingsForm.messaging.title'),
+    subtitle: t('admin.functionalSettingsForm.messaging.subtitle')
+  }),
+  localization: () => ({
+    title: t('admin.settingsNav.items.localization') || 'Currency & Language',
+    subtitle: t('admin.functionalSettingsForm.currency.subtitle')
+  })
+}
+
+const pageTitle = computed(() => (SECTION_TITLES[props.section] || SECTION_TITLES.checkout)().title)
+const pageSubtitle = computed(() => (SECTION_TITLES[props.section] || SECTION_TITLES.checkout)().subtitle)
 
 const loading = ref(false)
 const saving = ref(false)
@@ -616,20 +651,6 @@ const whatsappTemplatePreview = computed(() => {
     .replace(/{address}/g, '123 Rue de la Liberté, Alger Centre, Alger')
     .replace(/{confirmLink}/g, 'https://store.swekly.com/confirm-order/abc123xyz')
 })
-
-const activeTab = ref('features')
-const tabs = computed(() => [
-  { id: 'features', label: t('admin.functionalSettingsForm.features.title'), icon: 'lucide:toggle-right' },
-  { id: 'checkout', label: t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout', icon: 'lucide:credit-card' },
-  { id: 'messaging', label: t('admin.functionalSettingsForm.messaging.title') || 'Messaging', icon: 'lucide:message-square' },
-  { id: 'invoices', label: t('admin.functionalSettingsForm.invoices.title'), icon: 'lucide:receipt-text' },
-  { id: 'announcement', label: t('admin.appearanceSettingsForm.announcement.title'), icon: 'lucide:megaphone' },
-  { id: 'loyalty', label: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty', icon: 'lucide:badge-percent' },
-  { id: 'clearance', label: t('admin.functionalSettingsForm.clearance.title') || 'Clearance', icon: 'lucide:package-open' },
-  { id: 'fraud', label: t('admin.functionalSettingsForm.fraud.title') || 'Fraud prevention', icon: 'lucide:shield-ban' },
-  { id: 'currency', label: t('admin.functionalSettingsForm.currency.title'), icon: 'lucide:dollar-sign' },
-  { id: 'localization', label: t('admin.functionalSettingsForm.localization.title'), icon: 'lucide:languages' }
-])
 
 const languages = computed(() => [
   { key: 'en', label: t('i18n.locales.en'), flag: '🇬🇧' },
@@ -804,33 +825,9 @@ const sanitizeInvoicePrefixInput = () => {
     .slice(0, 12)
 }
 
-function setupScrollSpy() {
-  if (typeof window === 'undefined') return
-  const ids = ['features', 'checkout', 'invoices', 'announcement', 'loyalty', 'clearance', 'fraud', 'currency', 'localization']
-  const observer = new IntersectionObserver(
-    (entries) => {
-      const visible = entries
-        .filter(e => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)
-      if (visible.length > 0 && visible[0].target.id) {
-        activeTab.value = visible[0].target.id
-      }
-    },
-    { rootMargin: '-80px 0px -50% 0px', threshold: [0.1, 0.3, 0.6] }
-  )
-  nextTick(() => {
-    ids.forEach(id => {
-      const el = document.getElementById(id)
-      if (el) observer.observe(el)
-    })
-  })
-  onBeforeUnmount(() => observer.disconnect())
-}
-
 onMounted(() => {
   fetchCurrencies()
   fetchSettings()
-  setupScrollSpy()
 })
 </script>
 
@@ -877,45 +874,6 @@ onMounted(() => {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-.theme-group-heading {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 16px;
-  margin-top: 8px;
-  padding: 4px 2px 0;
-}
-
-.theme-group-heading span {
-  color: var(--text-primary);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  line-height: 1.3;
-  text-transform: uppercase;
-}
-
-.theme-group-heading small {
-  max-width: 44ch;
-  color: var(--text-tertiary);
-  font-size: 12px;
-  line-height: 1.4;
-  text-align: right;
-}
-
-@media (max-width: 640px) {
-  .theme-group-heading {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
-  }
-
-  .theme-group-heading small {
-    max-width: none;
-    text-align: left;
-  }
 }
 
 /* Toggle list */
