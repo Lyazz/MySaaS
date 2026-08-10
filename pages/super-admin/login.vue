@@ -2,8 +2,8 @@
   <div class="min-h-screen flex items-center justify-center p-4 font-sans" style="background: var(--admin-content-bg);">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 bg-lime-600 rounded-2xl mb-4 shadow-lg shadow-lime-600/20">
-          <Icon name="lucide:shield-check" class="h-8 w-8 text-white" />
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg" style="background: var(--brand)">
+          <Icon name="lucide:shield-check" class="h-8 w-8" style="color: var(--brand-contrast)" />
         </div>
         <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">
           {{ t('superAdmin.login.title') }}
@@ -17,10 +17,11 @@
         <!-- Error Alert -->
         <div
           v-if="error"
-          class="mb-6 p-4 bg-red-50 border border-red-100 rounded-lg flex items-start space-x-3 rtl:space-x-reverse"
+          class="mb-6 p-4 rounded-lg flex items-start gap-3"
+          style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);"
         >
-          <Icon name="lucide:alert-circle" class="h-5 w-5 text-red-500 flex-shrink-0 mt-0.5" />
-          <p class="text-sm text-red-600">
+          <Icon name="lucide:alert-circle" class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: #f87171" />
+          <p class="text-sm" style="color: #f87171">
             {{ error }}
           </p>
         </div>
@@ -36,8 +37,7 @@
                 v-model="email"
                 type="email"
                 required
-                class="w-full px-4 py-3 ps-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all font-sans"
-                style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary);"
+                class="ui-input ps-10"
                 :placeholder="t('superAdmin.login.form.email.placeholder')"
               >
               <Icon name="lucide:mail" class="h-5 w-5 absolute start-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary)" />
@@ -51,8 +51,7 @@
                 v-model="password"
                 type="password"
                 required
-                class="w-full px-4 py-3 ps-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 focus:border-lime-500 transition-all font-sans"
-                style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary);"
+                class="ui-input ps-10"
                 placeholder="••••••••"
               >
               <Icon name="lucide:lock" class="h-5 w-5 absolute start-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary)" />
@@ -62,7 +61,7 @@
           <button
             type="submit"
             :disabled="loading"
-            class="w-full px-4 py-3 bg-lime-600 hover:bg-lime-700 rounded-lg text-white font-bold tracking-wide transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed shadow-md hover:shadow-lg flex items-center justify-center space-x-2 rtl:space-x-reverse"
+            class="ui-btn ui-btn--primary ui-btn--md w-full py-3 font-bold tracking-wide shadow-md"
           >
             <Icon v-if="loading" name="lucide:loader-2" class="h-5 w-5 animate-spin" />
             <span>{{ loading ? t('superAdmin.login.form.submit.signingIn') : t('superAdmin.login.form.submit.signIn') }}</span>

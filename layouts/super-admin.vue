@@ -143,8 +143,12 @@
               <Icon name="lucide:menu" class="w-6 h-6" />
             </button>
             <h1 class="text-xl font-sans font-semibold tracking-tight" style="color: var(--text-primary)">{{ pageTitle }}</h1>
-            <span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider text-white bg-fuchsia-600 shadow-sm">
-              build {{ buildMarker }}
+            <span
+              class="hidden sm:inline-block text-[10px] font-mono tracking-wide"
+              style="color: var(--text-muted)"
+              :title="`Build ${buildMarker}`"
+            >
+              {{ buildMarker }}
             </span>
           </div>
           

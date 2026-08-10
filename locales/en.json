@@ -4500,7 +4500,14 @@
         "deleteTenant": "Delete tenant",
         "suspendTenant": "Suspend tenant",
         "unsuspendTenant": "Activate tenant",
-        "impersonateUser": "Impersonate user"
+        "impersonateUser": "Impersonate user",
+        "archiveTenant": "Archive tenant",
+        "restoreTenant": "Restore tenant",
+        "setTenantPlan": "Change plan",
+        "importPaymentProof": "Import payment proof",
+        "reviewPayment": "Review payment",
+        "viewPaymentProof": "View payment proof",
+        "listTenantPayments": "List tenant payments"
       }
     },
     "tenants": {
@@ -4548,7 +4555,7 @@
             "label": "Slug (subdomain)",
             "placeholder": "your-store",
             "slugFallback": "slug",
-            "hint": "Will be accessible at {slug}.localhost:3000"
+            "hint": "Accessible at {domain}"
           },
           "ownerEmail": {
             "label": "Owner email",
@@ -4696,6 +4703,35 @@
         "loadFailed": "Failed to load payments",
         "importFailed": "Failed to import payment",
         "reviewFailed": "Failed to review payment"
+      }
+    },
+    "analytics": {
+      "title": "Platform Analytics",
+      "revenue": {
+        "title": "Total Platform Revenue",
+        "subtitle": "From confirmed, shipped, and delivered orders"
+      },
+      "stats": {
+        "tenants": "Active Tenants",
+        "users": "Total Users",
+        "products": "Total Products",
+        "orders": "Total Orders"
+      },
+      "byTenant": {
+        "title": "Revenue by Tenant",
+        "loading": "Loading...",
+        "empty": "No revenue data available",
+        "unknownTenant": "Unknown Tenant"
+      },
+      "topTenants": {
+        "title": "Top Performing Tenants",
+        "table": {
+          "rank": "Rank",
+          "tenant": "Tenant",
+          "revenue": "Revenue",
+          "orders": "Orders",
+          "products": "Products"
+        }
       }
     }
   }

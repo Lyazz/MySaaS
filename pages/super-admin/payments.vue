@@ -1,85 +1,70 @@
 <template>
   <div class="space-y-6">
-      <!-- Header -->
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-slate-800">{{ t('superAdmin.pendingPayments.title', 'Pending Payments') }}</h1>
-          <p class="text-slate-500 mt-1 text-sm">{{ t('superAdmin.pendingPayments.subtitle', 'Review and approve or reject payment proofs submitted by tenants.') }}</p>
-        </div>
-        <button
-          class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-700 text-sm transition-colors"
-          :disabled="loading"
-          @click="load"
-        >
-          <Icon name="lucide:refresh-cw" class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
-          {{ t('superAdmin.paymentsPage.actions.refresh', 'Refresh') }}
-        </button>
-      </div>
+      <SuperAdminPageHeader
+        :title="t('superAdmin.pendingPayments.title', 'Pending Payments')"
+        :subtitle="t('superAdmin.pendingPayments.subtitle', 'Review and approve or reject payment proofs submitted by tenants.')"
+      >
+        <template #actions>
+          <button
+            class="ui-btn ui-btn--secondary ui-btn--md"
+            :disabled="loading"
+            @click="load"
+          >
+            <Icon name="lucide:refresh-cw" class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
+            {{ t('superAdmin.paymentsPage.actions.refresh', 'Refresh') }}
+          </button>
+        </template>
+      </SuperAdminPageHeader>
 
       <!-- Error -->
-      <div v-if="error" class="p-4 bg-red-50 border border-red-100 rounded-xl text-red-700 text-sm flex items-center gap-2">
+      <div v-if="error" class="p-4 rounded-xl text-sm flex items-center gap-2" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171">
         <Icon name="lucide:alert-circle" class="h-4 w-4 shrink-0" />
         {{ error }}
       </div>
 
       <!-- Stats bar -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center gap-4">
-          <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-            <Icon name="lucide:clock" class="h-5 w-5 text-amber-500" />
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-slate-900">{{ payments.length }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ t('superAdmin.pendingPayments.stats.pending', 'Pending proofs') }}</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center gap-4">
-          <div class="w-10 h-10 rounded-lg bg-lime-50 flex items-center justify-center">
-            <Icon name="lucide:building-2" class="h-5 w-5 text-lime-600" />
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-slate-900">{{ uniqueTenantCount }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ t('superAdmin.pendingPayments.stats.tenants', 'Tenants waiting') }}</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center gap-4">
-          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-            <Icon name="lucide:banknote" class="h-5 w-5 text-slate-500" />
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-slate-900">{{ formatMoney(totalAmount) }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ t('superAdmin.pendingPayments.stats.total', 'Total value') }}</div>
-          </div>
-        </div>
+        <StatsCard
+          icon="lucide:clock"
+          color="amber"
+          :label="t('superAdmin.pendingPayments.stats.pending', 'Pending proofs')"
+          :value="payments.length"
+        />
+        <StatsCard
+          icon="lucide:building-2"
+          color="lime"
+          :label="t('superAdmin.pendingPayments.stats.tenants', 'Tenants waiting')"
+          :value="uniqueTenantCount"
+        />
+        <StatsCard
+          icon="lucide:banknote"
+          color="slate"
+          :label="t('superAdmin.pendingPayments.stats.total', 'Total value')"
+          :value="formatMoney(totalAmount)"
+        />
       </div>
 
       <!-- Table -->
-      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
-          <h2 class="font-semibold text-slate-800 text-sm">
+      <div class="ui-card overflow-hidden">
+        <div class="ui-card-header flex items-center justify-between">
+          <h2 class="font-semibold text-sm" style="color: var(--text-primary)">
             {{ t('superAdmin.pendingPayments.table.title', 'Submitted proofs awaiting review') }}
           </h2>
-          <span v-if="payments.length > 0" class="text-xs bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full">
+          <span v-if="payments.length > 0" class="ui-badge ui-badge--amber">
             {{ payments.length }} {{ t('superAdmin.pendingPayments.pending', 'pending') }}
           </span>
         </div>
 
-        <!-- Loading -->
-        <div v-if="loading" class="p-12 text-center">
-          <Icon name="lucide:loader-2" class="h-8 w-8 text-lime-500 animate-spin mx-auto mb-3" />
-          <p class="text-slate-500 text-sm">{{ t('superAdmin.paymentsPage.history.loading', 'Loading…') }}</p>
-        </div>
-
-        <!-- Empty -->
-        <div v-else-if="payments.length === 0" class="p-12 text-center">
-          <div class="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-            <Icon name="lucide:check-circle-2" class="h-8 w-8 text-emerald-500" />
-          </div>
-          <h3 class="text-slate-800 font-semibold mb-1">{{ t('superAdmin.pendingPayments.empty.title', 'All caught up!') }}</h3>
-          <p class="text-slate-500 text-sm">{{ t('superAdmin.pendingPayments.empty.subtitle', 'No pending payment proofs at the moment.') }}</p>
-        </div>
+        <SuperAdminLoadingState
+          v-if="loading"
+          :label="t('superAdmin.paymentsPage.history.loading', 'Loading…')"
+        />
+        <SuperAdminEmptyState
+          v-else-if="payments.length === 0"
+          icon="lucide:check-circle-2"
+          :title="t('superAdmin.pendingPayments.empty.title', 'All caught up!')"
+          :subtitle="t('superAdmin.pendingPayments.empty.subtitle', 'No pending payment proofs at the moment.')"
+        />
 
         <!-- Table -->
         <div v-else class="overflow-x-auto">
@@ -197,6 +182,10 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { formatPriceAmount } from '~/shared/pricing/money-format'
+import StatsCard from '~/components/StatsCard.vue'
+import SuperAdminPageHeader from '~/components/super-admin/SuperAdminPageHeader.vue'
+import SuperAdminEmptyState from '~/components/super-admin/SuperAdminEmptyState.vue'
+import SuperAdminLoadingState from '~/components/super-admin/SuperAdminLoadingState.vue'
 
 definePageMeta({
   middleware: 'super-admin',

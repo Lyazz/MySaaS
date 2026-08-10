@@ -241,9 +241,9 @@
   }
 
   .ui-badge--lime {
-    background: rgba(129,140,248,0.1);
-    color: #818cf8;
-    border: 1px solid rgba(129,140,248,0.2);
+    background: var(--accent-soft);
+    color: var(--brand);
+    border: 1px solid var(--accent-border);
   }
 
   .ui-badge--amber {
@@ -256,6 +256,47 @@
     background: var(--status-cancelled-bg);
     color: var(--status-cancelled-text);
     border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  /* ── Icon tiles (stat cards, quick actions) — theme-safe, translucent so they
+     read correctly on both the forced-dark super-admin shell and light mode ── */
+  .ui-icon-tile {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl;
+  }
+
+  .ui-icon-tile--slate {
+    background: rgba(113,113,122,0.12);
+    color: #a1a1aa;
+  }
+
+  .ui-icon-tile--emerald {
+    background: var(--status-delivered-bg);
+    color: var(--status-delivered-text);
+  }
+
+  .ui-icon-tile--blue {
+    background: var(--status-confirmed-bg);
+    color: var(--status-confirmed-text);
+  }
+
+  .ui-icon-tile--indigo {
+    background: var(--status-shipped-bg);
+    color: var(--status-shipped-text);
+  }
+
+  .ui-icon-tile--lime {
+    background: var(--accent-soft);
+    color: var(--brand);
+  }
+
+  .ui-icon-tile--amber {
+    background: var(--status-pending-bg);
+    color: var(--status-pending-text);
+  }
+
+  .ui-icon-tile--red {
+    background: var(--status-cancelled-bg);
+    color: var(--status-cancelled-text);
   }
 
   /* ── Tables ── */

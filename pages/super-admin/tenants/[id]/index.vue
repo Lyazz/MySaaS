@@ -94,7 +94,7 @@
         <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl p-6 shadow-sm space-y-4">
           <h2 class="text-lg font-bold text-slate-900">{{ t('superAdmin.tenants.detail.plan.title') }}</h2>
 
-          <div v-if="detail.subscription" class="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
+          <div v-if="detail.subscription" class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm">
             <div>
               <div class="text-slate-500">{{ t('superAdmin.tenants.detail.plan.currentPlan') }}</div>
               <div class="font-semibold text-slate-800">{{ currentPlanName }}</div>

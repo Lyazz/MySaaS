@@ -4481,7 +4481,14 @@
         "deleteTenant": "Supprimer le tenant",
         "suspendTenant": "Suspendre le tenant",
         "unsuspendTenant": "Activer le tenant",
-        "impersonateUser": "Usurper un utilisateur"
+        "impersonateUser": "Usurper un utilisateur",
+        "archiveTenant": "Archiver le tenant",
+        "restoreTenant": "Restaurer le tenant",
+        "setTenantPlan": "Changer l’offre",
+        "importPaymentProof": "Importer une preuve de paiement",
+        "reviewPayment": "Examiner le paiement",
+        "viewPaymentProof": "Voir la preuve de paiement",
+        "listTenantPayments": "Lister les paiements du tenant"
       }
     },
     "tenants": {
@@ -4529,7 +4536,7 @@
             "label": "Slug (sous-domaine)",
             "placeholder": "votre-boutique",
             "slugFallback": "slug",
-            "hint": "Accessible à l’adresse {slug}.localhost:3000"
+            "hint": "Accessible à l’adresse {domain}"
           },
           "ownerEmail": {
             "label": "E-mail du propriétaire",
@@ -4677,6 +4684,35 @@
         "loadFailed": "Impossible de charger les paiements",
         "importFailed": "Impossible d’importer le paiement",
         "reviewFailed": "Impossible de traiter le paiement"
+      }
+    },
+    "analytics": {
+      "title": "Analyses de la plateforme",
+      "revenue": {
+        "title": "Revenu total de la plateforme",
+        "subtitle": "Commandes confirmées, expédiées et livrées"
+      },
+      "stats": {
+        "tenants": "Tenants actifs",
+        "users": "Utilisateurs totaux",
+        "products": "Produits totaux",
+        "orders": "Commandes totales"
+      },
+      "byTenant": {
+        "title": "Revenu par tenant",
+        "loading": "Chargement...",
+        "empty": "Aucune donnée de revenu disponible",
+        "unknownTenant": "Tenant inconnu"
+      },
+      "topTenants": {
+        "title": "Tenants les plus performants",
+        "table": {
+          "rank": "Rang",
+          "tenant": "Tenant",
+          "revenue": "Revenu",
+          "orders": "Commandes",
+          "products": "Produits"
+        }
       }
     }
   }

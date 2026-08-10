@@ -4482,7 +4482,7 @@
             "label": "المعرّف (النطاق الفرعي)",
             "placeholder": "your-store",
             "slugFallback": "slug",
-            "hint": "سيكون متاحًا على {slug}.localhost:3000"
+            "hint": "سيكون متاحًا على {domain}"
           },
           "ownerEmail": {
             "label": "بريد المالك",
@@ -4630,6 +4630,52 @@
         "loadFailed": "تعذر تحميل المدفوعات",
         "importFailed": "تعذر استيراد الدفع",
         "reviewFailed": "تعذر مراجعة الدفع"
+      }
+    },
+    "audit": {
+      "actions": {
+        "createTenant": "إنشاء مستأجر",
+        "updateTenant": "تحديث المستأجر",
+        "deleteTenant": "حذف المستأجر",
+        "suspendTenant": "تعليق المستأجر",
+        "unsuspendTenant": "تفعيل المستأجر",
+        "impersonateUser": "انتحال هوية مستخدم",
+        "archiveTenant": "أرشفة المستأجر",
+        "restoreTenant": "استعادة المستأجر",
+        "setTenantPlan": "تغيير الخطة",
+        "importPaymentProof": "استيراد إثبات الدفع",
+        "reviewPayment": "مراجعة الدفعة",
+        "viewPaymentProof": "عرض إثبات الدفع",
+        "listTenantPayments": "عرض مدفوعات المستأجر"
+      }
+    },
+    "analytics": {
+      "title": "تحليلات المنصة",
+      "revenue": {
+        "title": "إجمالي إيرادات المنصة",
+        "subtitle": "من الطلبات المؤكدة والمشحونة والمُسلَّمة"
+      },
+      "stats": {
+        "tenants": "المستأجرون النشطون",
+        "users": "إجمالي المستخدمين",
+        "products": "إجمالي المنتجات",
+        "orders": "إجمالي الطلبات"
+      },
+      "byTenant": {
+        "title": "الإيرادات حسب المستأجر",
+        "loading": "جارٍ التحميل...",
+        "empty": "لا توجد بيانات إيرادات متاحة",
+        "unknownTenant": "مستأجر غير معروف"
+      },
+      "topTenants": {
+        "title": "أفضل المستأجرين أداءً",
+        "table": {
+          "rank": "الترتيب",
+          "tenant": "المستأجر",
+          "revenue": "الإيرادات",
+          "orders": "الطلبات",
+          "products": "المنتجات"
+        }
       }
     }
   }
