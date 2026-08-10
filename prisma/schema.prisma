@@ -381,7 +381,7 @@ model User {
   isActive           Boolean          @default(true)
   tokenInvalidBefore DateTime?
   tenantId           String
-  tenant             Tenant           @relation(fields: [tenantId], references: [id])
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   cashboxId          String?
   cashbox            Cashbox?         @relation("UserCashbox", fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: SetNull)
   staffRoleId        String?
@@ -453,7 +453,7 @@ model Category {
   slug     String
   imageUrl String?
   tenantId String
-  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+  tenant   Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   parentId String?
   parent   Category?  @relation("CategoryHierarchy", fields: [tenantId, parentId], references: [tenantId, id], onDelete: SetNull)
@@ -497,7 +497,7 @@ model Product {
   productImages ProductImage[]
 
   tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   categoryId    String?
   category      Category?         @relation(fields: [tenantId, categoryId], references: [tenantId, id])
@@ -957,7 +957,7 @@ model Order {
   id                      String  @id @default(uuid())
   publicId                String?
   tenantId                String
-  tenant                  Tenant  @relation(fields: [tenantId], references: [id])
+  tenant                  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   status                  String  @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
   paymentStatus           String  @default("UNPAID") // UNPAID | PARTIALLY_PAID | PAID
   totalAmount             Float
