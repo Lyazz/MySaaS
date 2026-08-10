@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import {
-  SETTINGS_THEMES,
+  SETTINGS_NAV_GROUPS,
   adminPathToResource,
-  filterSettingsThemesForRole,
+  filterSettingsNavForRole,
   hasSettingsHubAccess
 } from '../../shared/admin/settings-navigation'
 
@@ -25,20 +25,21 @@ describe('settings navigation', () => {
     expect(hasSettingsHubAccess('staff', ['integrations:read'])).toBe(true)
   })
 
-  it('filters hub themes and links by staff permissions', () => {
-    const themes = filterSettingsThemesForRole(SETTINGS_THEMES, 'staff', ['homepageSettings:read'])
+  it('filters nav groups and items by staff permissions', () => {
+    const groups = filterSettingsNavForRole(SETTINGS_NAV_GROUPS, 'staff', ['homepageSettings:read'])
 
-    expect(themes.map((theme) => theme.id)).toEqual(['content'])
-    expect(themes[0].links).toEqual([
+    expect(groups.map((group) => group.id)).toEqual(['store'])
+    expect(groups[0].items).toEqual([
       expect.objectContaining({
+        key: 'homepage',
         to: '/admin/settings/homepage',
         resource: 'homepageSettings'
       })
     ])
   })
 
-  it('keeps all themes visible for admins and owners', () => {
-    expect(filterSettingsThemesForRole(SETTINGS_THEMES, 'admin', [])).toHaveLength(SETTINGS_THEMES.length)
-    expect(filterSettingsThemesForRole(SETTINGS_THEMES, 'owner', [])).toHaveLength(SETTINGS_THEMES.length)
+  it('keeps all groups visible for admins and owners', () => {
+    expect(filterSettingsNavForRole(SETTINGS_NAV_GROUPS, 'admin', [])).toHaveLength(SETTINGS_NAV_GROUPS.length)
+    expect(filterSettingsNavForRole(SETTINGS_NAV_GROUPS, 'owner', [])).toHaveLength(SETTINGS_NAV_GROUPS.length)
   })
 })

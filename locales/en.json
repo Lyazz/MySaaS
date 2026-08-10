@@ -2189,61 +2189,34 @@
       "account": "Account",
       "connections": "Connections"
     },
-    "settingsHub": {
-      "empty": {
-        "title": "No settings themes available",
-        "description": "Your role does not grant access to this store's settings."
+    "settingsNav": {
+      "ariaLabel": "Settings",
+      "groups": {
+        "store": "Store",
+        "commerce": "Commerce",
+        "content": "Content & marketing",
+        "localization": "Localization",
+        "connections": "Connections",
+        "administration": "Administration"
       },
-      "themes": {
-        "identity": {
-          "title": "Identity & appearance",
-          "description": "Store name, URL, logo, favicon, color, and template."
-        },
-        "content": {
-          "title": "Homepage & content",
-          "description": "Homepage, contact details, and legal pages shown on the storefront."
-        },
-        "checkout": {
-          "title": "Sales & checkout",
-          "description": "Cart, COD, minimum amount, order prefix, and address behavior."
-        },
-        "invoices": {
-          "title": "Invoicing",
-          "description": "Sales invoices, invoice prefix, logo, and footer note."
-        },
-        "localization": {
-          "title": "Localization",
-          "description": "Default language, currency, and reference country."
-        },
-        "marketing": {
-          "title": "Marketing & loyalty",
-          "description": "Storefront announcement and loyalty points program."
-        },
-        "connections": {
-          "title": "Domains & integrations",
-          "description": "Custom domain and external connections."
-        },
-        "administration": {
-          "title": "Administration",
-          "description": "Users and subscription billing."
-        }
-      },
-      "links": {
-        "appearance": "Identity & appearance",
+      "items": {
+        "identity": "Identity & branding",
+        "theme": "Storefront theme",
         "homepage": "Homepage",
+        "checkout": "Checkout & cart",
+        "fraud": "Fraud prevention",
+        "loyalty": "Loyalty program",
+        "clearance": "Clearance sales",
+        "invoices": "Invoices",
         "contact": "Contact info",
         "legal": "Legal pages",
-        "salesFeatures": "Sales",
-        "checkoutRules": "Checkout rules",
-        "salesInvoices": "Sales invoices",
-        "currency": "Currency",
-        "language": "Language",
-        "announcement": "Announcement",
-        "loyalty": "Loyalty",
+        "announcement": "Announcement bar",
+        "messaging": "Messaging",
+        "localization": "Currency & language",
         "domains": "Domains",
         "integrations": "Integrations",
-        "users": "Users",
-        "billing": "Subscription"
+        "team": "Team & roles",
+        "billing": "Billing"
       }
     },
     "roles": {

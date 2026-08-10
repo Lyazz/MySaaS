@@ -26,27 +26,19 @@ export type AdminResource =
   | AdminSettingsResource
   | 'settingsHub'
 
-export type SettingsThemeLink = {
+export type SettingsNavItem = {
+  key: string
   to: string
   labelKey: string
-  descriptionKey: string
   icon: string
   resource: AdminSettingsResource
+  external?: boolean
 }
 
-export type SettingsThemeSection = {
+export type SettingsNavGroup = {
   id: string
   labelKey: string
-  links: SettingsThemeLink[]
-}
-
-export type SettingsTheme = {
-  id: string
-  icon: string
-  labelKey: string
-  descriptionKey: string
-  links: SettingsThemeLink[]
-  sections: SettingsThemeSection[]
+  items: SettingsNavItem[]
 }
 
 export const SETTINGS_HUB_RESOURCES: AdminSettingsResource[] = [
@@ -58,349 +50,61 @@ export const SETTINGS_HUB_RESOURCES: AdminSettingsResource[] = [
   'billing'
 ]
 
-export const SETTINGS_THEMES: SettingsTheme[] = [
+// Flat, grouped sidebar nav for the settings area. Each item is one honest
+// destination (a page, or a page + query/hash pointing at a single section) —
+// no nested card grid, no scroll-jump pill tabs.
+export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
   {
-    id: 'identity',
-    icon: 'lucide:palette',
-    labelKey: 'admin.settingsHub.themes.identity.title',
-    descriptionKey: 'admin.settingsHub.themes.identity.description',
-    links: [
-      {
-        to: '/admin/settings/appearance',
-        labelKey: 'admin.settingsHub.links.appearance',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.appearance',
-        icon: 'lucide:palette',
-        resource: 'storeSettings'
-      }
-    ],
-    sections: [
-      {
-        id: 'brand',
-        labelKey: 'admin.settingsHub.sections.brand',
-        links: [
-          {
-            to: '/admin/settings/appearance',
-            labelKey: 'admin.settingsHub.links.appearance',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.appearance',
-            icon: 'lucide:palette',
-            resource: 'storeSettings'
-          }
-        ]
-      }
+    id: 'store',
+    labelKey: 'admin.settingsNav.groups.store',
+    items: [
+      { key: 'identity', to: '/admin/settings/appearance', labelKey: 'admin.settingsNav.items.identity', icon: 'lucide:palette', resource: 'storeSettings' },
+      { key: 'theme', to: '/admin/settings/appearance#templates', labelKey: 'admin.settingsNav.items.theme', icon: 'lucide:layout-template', resource: 'storeSettings' },
+      { key: 'homepage', to: '/admin/settings/homepage', labelKey: 'admin.settingsNav.items.homepage', icon: 'lucide:home', resource: 'homepageSettings' }
+    ]
+  },
+  {
+    id: 'commerce',
+    labelKey: 'admin.settingsNav.groups.commerce',
+    items: [
+      { key: 'checkout', to: '/admin/settings/functional?section=checkout', labelKey: 'admin.settingsNav.items.checkout', icon: 'lucide:shopping-bag', resource: 'storeSettings' },
+      { key: 'fraud', to: '/admin/settings/functional?section=fraud', labelKey: 'admin.settingsNav.items.fraud', icon: 'lucide:shield-ban', resource: 'storeSettings' },
+      { key: 'loyalty', to: '/admin/settings/functional?section=loyalty', labelKey: 'admin.settingsNav.items.loyalty', icon: 'lucide:badge-percent', resource: 'storeSettings' },
+      { key: 'clearance', to: '/admin/settings/functional?section=clearance', labelKey: 'admin.settingsNav.items.clearance', icon: 'lucide:package-open', resource: 'storeSettings' },
+      { key: 'invoices', to: '/admin/settings/functional?section=invoices', labelKey: 'admin.settingsNav.items.invoices', icon: 'lucide:receipt-text', resource: 'storeSettings' }
     ]
   },
   {
     id: 'content',
-    icon: 'lucide:layout-grid',
-    labelKey: 'admin.settingsHub.themes.content.title',
-    descriptionKey: 'admin.settingsHub.themes.content.description',
-    links: [
-      {
-        to: '/admin/settings/homepage',
-        labelKey: 'admin.settingsHub.links.homepage',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.homepage',
-        icon: 'lucide:home',
-        resource: 'homepageSettings'
-      },
-      {
-        to: '/admin/settings/contact',
-        labelKey: 'admin.settingsHub.links.contact',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.contact',
-        icon: 'lucide:phone',
-        resource: 'contactInfos'
-      },
-      {
-        to: '/admin/settings/legal',
-        labelKey: 'admin.settingsHub.links.legal',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.legal',
-        icon: 'lucide:file-text',
-        resource: 'storeSettings'
-      }
-    ],
-    sections: [
-      {
-        id: 'storefront-content',
-        labelKey: 'admin.settingsHub.sections.storefrontContent',
-        links: [
-          {
-            to: '/admin/settings/homepage',
-            labelKey: 'admin.settingsHub.links.homepage',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.homepage',
-            icon: 'lucide:home',
-            resource: 'homepageSettings'
-          },
-          {
-            to: '/admin/settings/contact',
-            labelKey: 'admin.settingsHub.links.contact',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.contact',
-            icon: 'lucide:phone',
-            resource: 'contactInfos'
-          },
-          {
-            to: '/admin/settings/legal',
-            labelKey: 'admin.settingsHub.links.legal',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.legal',
-            icon: 'lucide:file-text',
-            resource: 'storeSettings'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'checkout',
-    icon: 'lucide:shopping-bag',
-    labelKey: 'admin.settingsHub.themes.checkout.title',
-    descriptionKey: 'admin.settingsHub.themes.checkout.description',
-    links: [
-      {
-        to: '/admin/settings/functional#features',
-        labelKey: 'admin.settingsHub.links.salesFeatures',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.salesFeatures',
-        icon: 'lucide:shopping-bag',
-        resource: 'storeSettings'
-      },
-      {
-        to: '/admin/settings/functional#checkout',
-        labelKey: 'admin.settingsHub.links.checkoutRules',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.checkoutRules',
-        icon: 'lucide:credit-card',
-        resource: 'storeSettings'
-      }
-    ],
-    sections: [
-      {
-        id: 'store-features',
-        labelKey: 'admin.settingsHub.sections.storeFeatures',
-        links: [
-          {
-            to: '/admin/settings/functional#features',
-            labelKey: 'admin.settingsHub.links.salesFeatures',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.salesFeatures',
-            icon: 'lucide:shopping-bag',
-            resource: 'storeSettings'
-          }
-        ]
-      },
-      {
-        id: 'checkout-rules',
-        labelKey: 'admin.settingsHub.sections.checkoutRules',
-        links: [
-          {
-            to: '/admin/settings/functional#checkout',
-            labelKey: 'admin.settingsHub.links.checkoutRules',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.checkoutRules',
-            icon: 'lucide:credit-card',
-            resource: 'storeSettings'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'invoices',
-    icon: 'lucide:receipt-text',
-    labelKey: 'admin.settingsHub.themes.invoices.title',
-    descriptionKey: 'admin.settingsHub.themes.invoices.description',
-    links: [
-      {
-        to: '/admin/settings/functional#invoices',
-        labelKey: 'admin.settingsHub.links.salesInvoices',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.salesInvoices',
-        icon: 'lucide:receipt-text',
-        resource: 'storeSettings'
-      }
-    ],
-    sections: [
-      {
-        id: 'invoice-documents',
-        labelKey: 'admin.settingsHub.sections.invoiceDocuments',
-        links: [
-          {
-            to: '/admin/settings/functional#invoices',
-            labelKey: 'admin.settingsHub.links.salesInvoices',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.salesInvoices',
-            icon: 'lucide:receipt-text',
-            resource: 'storeSettings'
-          }
-        ]
-      }
+    labelKey: 'admin.settingsNav.groups.content',
+    items: [
+      { key: 'contact', to: '/admin/settings/contact', labelKey: 'admin.settingsNav.items.contact', icon: 'lucide:phone', resource: 'contactInfos' },
+      { key: 'legal', to: '/admin/settings/legal', labelKey: 'admin.settingsNav.items.legal', icon: 'lucide:file-text', resource: 'storeSettings' },
+      { key: 'announcement', to: '/admin/settings/functional?section=announcement', labelKey: 'admin.settingsNav.items.announcement', icon: 'lucide:megaphone', resource: 'storeSettings' },
+      { key: 'messaging', to: '/admin/settings/functional?section=messaging', labelKey: 'admin.settingsNav.items.messaging', icon: 'lucide:message-square', resource: 'storeSettings' }
     ]
   },
   {
     id: 'localization',
-    icon: 'lucide:languages',
-    labelKey: 'admin.settingsHub.themes.localization.title',
-    descriptionKey: 'admin.settingsHub.themes.localization.description',
-    links: [
-      {
-        to: '/admin/settings/functional#currency',
-        labelKey: 'admin.settingsHub.links.currency',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.currency',
-        icon: 'lucide:circle-dollar-sign',
-        resource: 'storeSettings'
-      },
-      {
-        to: '/admin/settings/functional#localization',
-        labelKey: 'admin.settingsHub.links.language',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.language',
-        icon: 'lucide:languages',
-        resource: 'storeSettings'
-      }
-    ],
-    sections: [
-      {
-        id: 'market-format',
-        labelKey: 'admin.settingsHub.sections.marketFormat',
-        links: [
-          {
-            to: '/admin/settings/functional#currency',
-            labelKey: 'admin.settingsHub.links.currency',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.currency',
-            icon: 'lucide:circle-dollar-sign',
-            resource: 'storeSettings'
-          },
-          {
-            to: '/admin/settings/functional#localization',
-            labelKey: 'admin.settingsHub.links.language',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.language',
-            icon: 'lucide:languages',
-            resource: 'storeSettings'
-          }
-        ]
-      }
-    ]
-  },
-  {
-    id: 'marketing',
-    icon: 'lucide:badge-percent',
-    labelKey: 'admin.settingsHub.themes.marketing.title',
-    descriptionKey: 'admin.settingsHub.themes.marketing.description',
-    links: [
-      {
-        to: '/admin/settings/functional#announcement',
-        labelKey: 'admin.settingsHub.links.announcement',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.announcement',
-        icon: 'lucide:megaphone',
-        resource: 'storeSettings'
-      },
-      {
-        to: '/admin/settings/functional#loyalty',
-        labelKey: 'admin.settingsHub.links.loyalty',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.loyalty',
-        icon: 'lucide:badge-percent',
-        resource: 'storeSettings'
-      }
-    ],
-    sections: [
-      {
-        id: 'growth',
-        labelKey: 'admin.settingsHub.sections.growth',
-        links: [
-          {
-            to: '/admin/settings/functional#announcement',
-            labelKey: 'admin.settingsHub.links.announcement',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.announcement',
-            icon: 'lucide:megaphone',
-            resource: 'storeSettings'
-          },
-          {
-            to: '/admin/settings/functional#loyalty',
-            labelKey: 'admin.settingsHub.links.loyalty',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.loyalty',
-            icon: 'lucide:badge-percent',
-            resource: 'storeSettings'
-          }
-        ]
-      }
+    labelKey: 'admin.settingsNav.groups.localization',
+    items: [
+      { key: 'localization', to: '/admin/settings/functional?section=localization', labelKey: 'admin.settingsNav.items.localization', icon: 'lucide:languages', resource: 'storeSettings' }
     ]
   },
   {
     id: 'connections',
-    icon: 'lucide:plug-zap',
-    labelKey: 'admin.settingsHub.themes.connections.title',
-    descriptionKey: 'admin.settingsHub.themes.connections.description',
-    links: [
-      {
-        to: '/admin/settings/domains',
-        labelKey: 'admin.settingsHub.links.domains',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.domains',
-        icon: 'lucide:globe-2',
-        resource: 'storeSettings'
-      },
-      {
-        to: '/admin/integrations',
-        labelKey: 'admin.settingsHub.links.integrations',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.integrations',
-        icon: 'lucide:puzzle',
-        resource: 'integrations'
-      }
-    ],
-    sections: [
-      {
-        id: 'external-access',
-        labelKey: 'admin.settingsHub.sections.externalAccess',
-        links: [
-          {
-            to: '/admin/settings/domains',
-            labelKey: 'admin.settingsHub.links.domains',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.domains',
-            icon: 'lucide:globe-2',
-            resource: 'storeSettings'
-          },
-          {
-            to: '/admin/integrations',
-            labelKey: 'admin.settingsHub.links.integrations',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.integrations',
-            icon: 'lucide:puzzle',
-            resource: 'integrations'
-          }
-        ]
-      }
+    labelKey: 'admin.settingsNav.groups.connections',
+    items: [
+      { key: 'domains', to: '/admin/settings/domains', labelKey: 'admin.settingsNav.items.domains', icon: 'lucide:globe-2', resource: 'storeSettings' },
+      { key: 'integrations', to: '/admin/integrations', labelKey: 'admin.settingsNav.items.integrations', icon: 'lucide:puzzle', resource: 'integrations', external: true }
     ]
   },
   {
     id: 'administration',
-    icon: 'lucide:user-cog',
-    labelKey: 'admin.settingsHub.themes.administration.title',
-    descriptionKey: 'admin.settingsHub.themes.administration.description',
-    links: [
-      {
-        to: '/admin/users',
-        labelKey: 'admin.settingsHub.links.users',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.users',
-        icon: 'lucide:user-cog',
-        resource: 'users'
-      },
-      {
-        to: '/admin/billing',
-        labelKey: 'admin.settingsHub.links.billing',
-        descriptionKey: 'admin.settingsHub.linkDescriptions.billing',
-        icon: 'lucide:credit-card',
-        resource: 'billing'
-      }
-    ],
-    sections: [
-      {
-        id: 'workspace-admin',
-        labelKey: 'admin.settingsHub.sections.workspaceAdmin',
-        links: [
-          {
-            to: '/admin/users',
-            labelKey: 'admin.settingsHub.links.users',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.users',
-            icon: 'lucide:user-cog',
-            resource: 'users'
-          },
-          {
-            to: '/admin/billing',
-            labelKey: 'admin.settingsHub.links.billing',
-            descriptionKey: 'admin.settingsHub.linkDescriptions.billing',
-            icon: 'lucide:credit-card',
-            resource: 'billing'
-          }
-        ]
-      }
+    labelKey: 'admin.settingsNav.groups.administration',
+    items: [
+      { key: 'team', to: '/admin/users', labelKey: 'admin.settingsNav.items.team', icon: 'lucide:user-cog', resource: 'users', external: true },
+      { key: 'billing', to: '/admin/billing', labelKey: 'admin.settingsNav.items.billing', icon: 'lucide:credit-card', resource: 'billing', external: true }
     ]
   }
 ]
@@ -442,23 +146,17 @@ export function hasSettingsHubAccess(role: AdminRole, permissions: string[]) {
   return SETTINGS_HUB_RESOURCES.some((resource) => permissionAllows(resource, permissions))
 }
 
-export function filterSettingsThemesForRole(
-  themes: SettingsTheme[],
+export function filterSettingsNavForRole(
+  groups: SettingsNavGroup[],
   role: AdminRole,
   permissions: string[]
 ) {
-  if (role !== 'staff') return themes
+  if (role !== 'staff') return groups
 
-  return themes
-    .map((theme) => ({
-      ...theme,
-      links: theme.links.filter((link) => permissionAllows(link.resource, permissions)),
-      sections: theme.sections
-        .map((section) => ({
-          ...section,
-          links: section.links.filter((link) => permissionAllows(link.resource, permissions))
-        }))
-        .filter((section) => section.links.length > 0)
+  return groups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) => permissionAllows(item.resource, permissions))
     }))
-    .filter((theme) => theme.links.length > 0)
+    .filter((group) => group.items.length > 0)
 }

@@ -2173,60 +2173,33 @@
       "account": "Compte",
       "connections": "Connexions"
     },
-    "settingsHub": {
-      "empty": {
-        "title": "Aucun thème disponible",
-        "description": "Votre rôle ne donne pas accès aux paramètres de cette boutique."
+    "settingsNav": {
+      "ariaLabel": "Paramètres",
+      "groups": {
+        "store": "Boutique",
+        "commerce": "Commerce",
+        "content": "Contenu & marketing",
+        "localization": "Localisation",
+        "connections": "Connexions",
+        "administration": "Administration"
       },
-      "themes": {
-        "identity": {
-          "title": "Identité & apparence",
-          "description": "Nom, URL, logo, favicon, couleur et template."
-        },
-        "content": {
-          "title": "Page d’accueil & contenu",
-          "description": "Accueil, coordonnées et pages légales affichées sur la vitrine."
-        },
-        "checkout": {
-          "title": "Vente & checkout",
-          "description": "Panier, COD, montant minimum, préfixe commande et adresse."
-        },
-        "invoices": {
-          "title": "Facturation",
-          "description": "Factures de vente, préfixe, logo et note de bas de page."
-        },
-        "localization": {
-          "title": "Localisation",
-          "description": "Langue par défaut, devise et pays de référence."
-        },
-        "marketing": {
-          "title": "Marketing & fidélité",
-          "description": "Annonce de vitrine et programme de points."
-        },
-        "connections": {
-          "title": "Domaines & intégrations",
-          "description": "Domaine personnalisé et connexions externes."
-        },
-        "administration": {
-          "title": "Administration",
-          "description": "Utilisateurs et facturation de l’abonnement."
-        }
-      },
-      "links": {
-        "appearance": "Identité & apparence",
+      "items": {
+        "identity": "Identité & marque",
+        "theme": "Thème de la vitrine",
         "homepage": "Page d’accueil",
+        "checkout": "Panier & checkout",
+        "fraud": "Prévention de la fraude",
+        "loyalty": "Programme de fidélité",
+        "clearance": "Ventes de déstockage",
+        "invoices": "Factures",
         "contact": "Infos de contact",
         "legal": "Pages légales",
-        "salesFeatures": "Vente",
-        "checkoutRules": "Règles checkout",
-        "salesInvoices": "Factures de vente",
-        "currency": "Devise",
-        "language": "Langue",
-        "announcement": "Annonce",
-        "loyalty": "Fidélité",
+        "announcement": "Bandeau d’annonce",
+        "messaging": "Messagerie",
+        "localization": "Devise & langue",
         "domains": "Domaines",
         "integrations": "Intégrations",
-        "users": "Utilisateurs",
+        "team": "Équipe & rôles",
         "billing": "Abonnement"
       }
     },
