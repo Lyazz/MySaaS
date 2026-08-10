@@ -143,6 +143,9 @@
               <Icon name="lucide:menu" class="w-6 h-6" />
             </button>
             <h1 class="text-xl font-sans font-semibold tracking-tight" style="color: var(--text-primary)">{{ pageTitle }}</h1>
+            <span class="px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider text-white bg-fuchsia-600 shadow-sm">
+              build {{ buildMarker }}
+            </span>
           </div>
           
           <div class="flex items-center gap-4">
@@ -183,6 +186,11 @@ const superAdminStyle = {
   '--brand': '#C6F432',
   '--brand-rgb': '198 244 50'
 } as Record<string, string>
+
+// Visible marker so a fresh deploy is trivially distinguishable from a cached
+// build in the browser. Bump this string whenever you need to confirm a new
+// deploy actually landed.
+const buildMarker = '2026-08-10-2'
 
 onMounted(async () => {
   if (import.meta.client) {
