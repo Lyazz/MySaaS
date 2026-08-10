@@ -507,7 +507,7 @@ const tabDefs = computed(() => [
 
 const validRanges: DashboardRange[] = ['today', '7d', '30d', '90d', 'custom']
 const defaultCustomRange = defaultCustomDateRange()
-const selectedRange = ref<DashboardRange>(validRanges.includes(route.query.range as DashboardRange) ? (route.query.range as DashboardRange) : '7d')
+const selectedRange = ref<DashboardRange>(validRanges.includes(route.query.range as DashboardRange) ? (route.query.range as DashboardRange) : 'today')
 const customFrom = ref(typeof route.query.customFrom === 'string' ? route.query.customFrom : defaultCustomRange.from)
 const customTo = ref(typeof route.query.customTo === 'string' ? route.query.customTo : defaultCustomRange.to)
 const channel = ref<'all' | 'online' | 'pos'>(route.query.channel === 'online' || route.query.channel === 'pos' ? route.query.channel : 'all')
@@ -563,7 +563,7 @@ function buildQuery(): Record<string, string> {
   try {
     query = buildDashboardRangeQuery(selectedRange.value, customFrom.value, customTo.value)
   } catch {
-    query = { range: '7d' }
+    query = { range: 'today' }
   }
   if (channel.value !== 'all') query.channel = channel.value
   if (categoryId.value) query.categoryId = categoryId.value
@@ -619,7 +619,7 @@ function syncToUrl() {
     query: {
       ...route.query,
       tab: activeTab.value === 'sales' ? undefined : activeTab.value,
-      range: selectedRange.value === '7d' ? undefined : selectedRange.value,
+      range: selectedRange.value === 'today' ? undefined : selectedRange.value,
       customFrom: selectedRange.value === 'custom' ? customFrom.value : undefined,
       customTo: selectedRange.value === 'custom' ? customTo.value : undefined,
       channel: channel.value === 'all' ? undefined : channel.value,

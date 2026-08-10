@@ -104,7 +104,7 @@ type ResolvedPeriod = {
 export class DashboardService {
     private resolvePeriod(query: AdminDashboardQuery): ResolvedPeriod {
         const now = new Date()
-        const range = query.range || '7d'
+        const range = query.range || 'today'
 
         if (range === 'custom' && query.from && query.to) {
             const fromAt = startOfDay(query.from)
@@ -119,7 +119,7 @@ export class DashboardService {
         return { range, fromAt, toAt, from: isoDay(fromAt), to: isoDay(toAt), days }
     }
 
-    async getAdminDashboard(tenantId: string, query: AdminDashboardQuery = { range: '7d' }): Promise<AdminDashboardData> {
+    async getAdminDashboard(tenantId: string, query: AdminDashboardQuery = { range: 'today' }): Promise<AdminDashboardData> {
         const period = this.resolvePeriod(query)
         const sevenDaysAgo = new Date(Date.now() - 7 * DAY_MS)
 

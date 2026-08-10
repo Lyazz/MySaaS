@@ -12,7 +12,7 @@ const parseIsoDate = (value: unknown) => {
 }
 
 const parseRange = (value: unknown): AdminDashboardRange | null => {
-    if (value === undefined || value === null || value === '') return '7d'
+    if (value === undefined || value === null || value === '') return 'today'
     if (value === 'today' || value === '7d' || value === '30d' || value === '90d' || value === 'custom') return value
     return null
 }
