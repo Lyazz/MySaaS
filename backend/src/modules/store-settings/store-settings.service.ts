@@ -106,6 +106,10 @@ export type StoreSettingsPatchInput = Partial<{
     clearanceDivisor: number
     clearanceBannerEnabled: boolean
     clearanceBannerText: string | null
+    blacklistEnabled: boolean
+    duplicateOrderLimitEnabled: boolean
+    duplicateOrderLimit: number
+    duplicateOrderWindowHours: number
 }>
 
 const toDecimalString = (value: unknown, field: string): string => {
@@ -410,6 +414,36 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('clearanceBannerText is too long (max 300 chars)')
             }
             updateSettings.clearanceBannerText = bannerText || null
+        }
+
+        if (input.blacklistEnabled !== undefined) {
+            if (typeof input.blacklistEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('blacklistEnabled must be a boolean')
+            }
+            updateSettings.blacklistEnabled = input.blacklistEnabled
+        }
+
+        if (input.duplicateOrderLimitEnabled !== undefined) {
+            if (typeof input.duplicateOrderLimitEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('duplicateOrderLimitEnabled must be a boolean')
+            }
+            updateSettings.duplicateOrderLimitEnabled = input.duplicateOrderLimitEnabled
+        }
+
+        if (input.duplicateOrderLimit !== undefined) {
+            const duplicateOrderLimit = Math.trunc(Number(input.duplicateOrderLimit))
+            if (!Number.isFinite(duplicateOrderLimit) || duplicateOrderLimit < 1) {
+                throw new StoreSettingsValidationError('duplicateOrderLimit must be a positive integer')
+            }
+            updateSettings.duplicateOrderLimit = duplicateOrderLimit
+        }
+
+        if (input.duplicateOrderWindowHours !== undefined) {
+            const duplicateOrderWindowHours = Math.trunc(Number(input.duplicateOrderWindowHours))
+            if (!Number.isFinite(duplicateOrderWindowHours) || duplicateOrderWindowHours < 1) {
+                throw new StoreSettingsValidationError('duplicateOrderWindowHours must be a positive integer')
+            }
+            updateSettings.duplicateOrderWindowHours = duplicateOrderWindowHours
         }
 
         if (input.legalPages !== undefined) {

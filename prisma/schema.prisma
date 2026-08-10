@@ -66,6 +66,7 @@ model Tenant {
   notificationEvents        NotificationEvent[]
   notificationSubscriptions NotificationSubscription[]
   notificationDeliveries    NotificationDelivery[]
+  blacklistEntries          BlacklistEntry[]
 }
 
 model Cashbox {
@@ -347,6 +348,12 @@ model StoreSettings {
   clearanceBannerEnabled Boolean @default(false)
   clearanceBannerText    String?
 
+  // Fraud prevention: blacklist enforcement + duplicate-order throttling at checkout
+  blacklistEnabled           Boolean @default(true)
+  duplicateOrderLimitEnabled Boolean @default(false)
+  duplicateOrderLimit        Int     @default(3)
+  duplicateOrderWindowHours  Int     @default(24)
+
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -401,6 +408,7 @@ model User {
   cashTransactionsCreated   CashTransaction[]          @relation("CashTransactionCreatedBy")
   notificationSubscriptions NotificationSubscription[]
   notificationDeliveries    NotificationDelivery[]
+  blacklistEntriesCreated   BlacklistEntry[]
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
@@ -1018,6 +1026,35 @@ model Order {
   @@index([tenantId, readAt])
 }
 
+enum BlacklistType {
+  PHONE
+  CUSTOMER
+  IP
+}
+
+// Fraud prevention: entries here block matching public checkouts (see OrdersService.createPublicOrder).
+model BlacklistEntry {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  type   BlacklistType
+  value  String // normalized phone, raw IP, or Customer.id depending on type
+  reason String?
+
+  customerId String?
+  customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
+
+  createdByUserId String?
+  createdBy       User?   @relation(fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, type, value])
+  @@index([tenantId, type])
+  @@index([tenantId, customerId])
+}
+
 model Customer {
   id       String @id @default(uuid())
   tenantId String
@@ -1039,6 +1076,7 @@ model Customer {
   pointsLedger     CustomerPointsLedger[]
   payments         CustomerPayment[]
   cashTransactions CashTransaction[]      @relation("CashTxCustomer")
+  blacklistEntries BlacklistEntry[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

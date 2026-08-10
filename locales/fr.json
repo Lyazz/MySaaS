@@ -1582,6 +1582,10 @@
         "localization": {
           "title": "Localisation",
           "subtitle": "Devise et langue de la boutique."
+        },
+        "security": {
+          "title": "Sécurité",
+          "subtitle": "Réduisez les fausses commandes et les doublons."
         }
       },
       "features": {
@@ -1665,6 +1669,22 @@
         "bannerSubtitle": "Affiche une bannière annonçant l'offre destockage.",
         "bannerText": "Texte de la bannière",
         "bannerTextPlaceholder": "Grand destockage — achetez plus, économisez plus !"
+      },
+      "fraud": {
+        "title": "Prévention de la fraude",
+        "subtitle": "Bloquez les fausses commandes des contacts sur liste noire et limitez les commandes en double.",
+        "blacklist": {
+          "title": "Activer la liste noire",
+          "subtitle": "Bloquer le checkout pour les numéros, IPs et clients sur liste noire.",
+          "manageLink": "Gérer les entrées de la liste noire"
+        },
+        "duplicate": {
+          "title": "Limiter les commandes en double",
+          "subtitle": "Bloquer le checkout quand un numéro de téléphone a passé trop de commandes en peu de temps.",
+          "limit": "Nombre max. de commandes",
+          "window": "Fenêtre de temps (heures)",
+          "hint": "Une fois ce nombre de commandes atteint pour un numéro dans la fenêtre de temps, les commandes suivantes sont bloquées."
+        }
       },
       "currency": {
         "title": "Devise de la boutique",
@@ -3525,6 +3545,35 @@
             "actions": "Actions"
           }
         },
+        "blacklist": {
+          "title": "Liste noire des commandes",
+          "subtitle": "Numéros de téléphone, adresses IP et clients bloqués au moment du paiement.",
+          "backToOrders": "Retour aux commandes",
+          "form": {
+            "type": "Type",
+            "value": "Valeur",
+            "reason": "Raison (optionnel)",
+            "reasonPlaceholder": "ex. commandes fictives répétées",
+            "submit": "Ajouter à la liste noire"
+          },
+          "types": {
+            "PHONE": "Téléphone",
+            "IP": "Adresse IP",
+            "CUSTOMER": "Client"
+          },
+          "empty": {
+            "title": "Aucune entrée sur liste noire",
+            "hint": "Les numéros, IPs et clients que vous bloquez apparaîtront ici."
+          },
+          "table": {
+            "type": "Type",
+            "value": "Valeur",
+            "reason": "Raison",
+            "createdAt": "Ajouté le",
+            "actions": "Actions"
+          },
+          "deleteConfirm": "Retirer cette entrée de la liste noire ?"
+        },
         "detail": {
           "metaTitle": "Détail de la commande",
           "breadcrumb": "Commande n°{id}",
@@ -3573,6 +3622,15 @@
             "blacklistCustomer": "Mettre le client sur liste noire",
             "blacklistIp": "Mettre l'IP sur liste noire",
             "blacklistPhone": "Mettre le téléphone sur liste noire"
+          },
+          "blacklist": {
+            "confirm": {
+              "customer": "Mettre ce client sur liste noire ? Ses prochaines commandes seront automatiquement bloquées.",
+              "phone": "Mettre ce numéro de téléphone sur liste noire ? Les prochaines commandes utilisant ce numéro seront automatiquement bloquées.",
+              "ip": "Mettre cette adresse IP sur liste noire ? Les prochaines commandes provenant de cette IP seront automatiquement bloquées."
+            },
+            "confirmBtn": "Mettre sur liste noire",
+            "success": "Ajouté à la liste noire"
           },
           "securityHelp": "Actions avancées pour gérer les comportements à risque.",
           "deleteConfirm": "Supprimer cette commande ? Cette action est irréversible. Si la commande est confirmée auprès d'un transporteur, elle sera également annulée chez lui.",

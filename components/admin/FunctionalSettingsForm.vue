@@ -408,6 +408,68 @@
       </SettingsSection>
 
       <div class="theme-group-heading">
+        <span>{{ t('admin.functionalSettingsForm.themeGroups.security.title') || 'Security' }}</span>
+        <small>{{ t('admin.functionalSettingsForm.themeGroups.security.subtitle') || 'Reduce fake and duplicate orders.' }}</small>
+      </div>
+
+      <!-- Fraud prevention -->
+      <SettingsSection
+        anchor-id="fraud"
+        icon="lucide:shield-ban"
+        :title="t('admin.functionalSettingsForm.fraud.title') || 'Fraud prevention'"
+        :subtitle="t('admin.functionalSettingsForm.fraud.subtitle') || 'Block fake orders from blacklisted contacts and throttle duplicate orders.'"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:shield-ban" class="w-4 h-4" />
+              </div>
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.fraud.blacklist.title') || 'Enable blacklist' }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.fraud.blacklist.subtitle') || 'Block checkout for blacklisted phone numbers, IPs and customers.' }}</p>
+              </div>
+            </div>
+            <BaseToggle v-model="form.blacklistEnabled" :sr-label="t('admin.functionalSettingsForm.fraud.blacklist.title') || 'Enable blacklist'" />
+          </div>
+
+          <NuxtLink to="/admin/orders/blacklist" class="fraud-manage-link">
+            <Icon name="lucide:list-checks" class="w-3.5 h-3.5" />
+            {{ t('admin.functionalSettingsForm.fraud.blacklist.manageLink') || 'Manage blacklisted entries' }}
+          </NuxtLink>
+
+          <div class="toggle-row" style="margin-top: 8px;">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:copy-x" class="w-4 h-4" />
+              </div>
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.fraud.duplicate.title') || 'Limit duplicate orders' }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.fraud.duplicate.subtitle') || 'Block checkout once a phone number has placed too many orders in a short time.' }}</p>
+              </div>
+            </div>
+            <BaseToggle v-model="form.duplicateOrderLimitEnabled" :sr-label="t('admin.functionalSettingsForm.fraud.duplicate.title') || 'Limit duplicate orders'" />
+          </div>
+
+          <Transition name="reveal">
+            <div v-if="form.duplicateOrderLimitEnabled" class="reveal-block">
+              <div class="field-grid">
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.fraud.duplicate.limit') || 'Max orders' }}</label>
+                  <input v-model.number="form.duplicateOrderLimit" type="number" min="1" step="1" class="field-input" placeholder="3" >
+                </div>
+                <div class="field">
+                  <label class="field-label">{{ t('admin.functionalSettingsForm.fraud.duplicate.window') || 'Time window (hours)' }}</label>
+                  <input v-model.number="form.duplicateOrderWindowHours" type="number" min="1" step="1" class="field-input" placeholder="24" >
+                </div>
+              </div>
+              <p class="field-hint">{{ t('admin.functionalSettingsForm.fraud.duplicate.hint') || 'Once a phone number reaches this many orders within the time window, further checkouts are blocked.' }}</p>
+            </div>
+          </Transition>
+        </div>
+      </SettingsSection>
+
+      <div class="theme-group-heading">
         <span>{{ t('admin.functionalSettingsForm.themeGroups.localization.title') }}</span>
         <small>{{ t('admin.functionalSettingsForm.themeGroups.localization.subtitle') }}</small>
       </div>
@@ -526,6 +588,10 @@ const form = reactive({
   clearanceDivisor: 3,
   clearanceBannerEnabled: false,
   clearanceBannerText: '',
+  blacklistEnabled: true,
+  duplicateOrderLimitEnabled: false,
+  duplicateOrderLimit: 3,
+  duplicateOrderWindowHours: 24,
   orderIdPrefix: 'ORDR',
   minimumOrderAmountDzd: 1000,
   hideOptionalAddress: true,
@@ -560,6 +626,7 @@ const tabs = computed(() => [
   { id: 'announcement', label: t('admin.appearanceSettingsForm.announcement.title'), icon: 'lucide:megaphone' },
   { id: 'loyalty', label: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty', icon: 'lucide:badge-percent' },
   { id: 'clearance', label: t('admin.functionalSettingsForm.clearance.title') || 'Clearance', icon: 'lucide:package-open' },
+  { id: 'fraud', label: t('admin.functionalSettingsForm.fraud.title') || 'Fraud prevention', icon: 'lucide:shield-ban' },
   { id: 'currency', label: t('admin.functionalSettingsForm.currency.title'), icon: 'lucide:dollar-sign' },
   { id: 'localization', label: t('admin.functionalSettingsForm.localization.title'), icon: 'lucide:languages' }
 ])
@@ -630,6 +697,10 @@ const updateForm = (data: any) => {
   form.clearanceDivisor = Number(data.clearanceDivisor ?? 3)
   form.clearanceBannerEnabled = data.clearanceBannerEnabled ?? false
   form.clearanceBannerText = data.clearanceBannerText || ''
+  form.blacklistEnabled = data.blacklistEnabled ?? true
+  form.duplicateOrderLimitEnabled = data.duplicateOrderLimitEnabled ?? false
+  form.duplicateOrderLimit = Number(data.duplicateOrderLimit ?? 3)
+  form.duplicateOrderWindowHours = Number(data.duplicateOrderWindowHours ?? 24)
   form.minimumOrderAmountDzd = Number(data.minimumOrderAmountDzd ?? 1000)
   form.hideOptionalAddress = data.hideOptionalAddress ?? true
   form.salesInvoiceEnabled = data.salesInvoiceEnabled ?? false
@@ -682,6 +753,10 @@ const save = async () => {
         clearanceDivisor: form.clearanceDivisor,
         clearanceBannerEnabled: form.clearanceBannerEnabled,
         clearanceBannerText: form.clearanceBannerText,
+        blacklistEnabled: form.blacklistEnabled,
+        duplicateOrderLimitEnabled: form.duplicateOrderLimitEnabled,
+        duplicateOrderLimit: form.duplicateOrderLimit,
+        duplicateOrderWindowHours: form.duplicateOrderWindowHours,
         minimumOrderAmountDzd: form.minimumOrderAmountDzd,
         hideOptionalAddress: form.hideOptionalAddress,
         salesInvoiceEnabled: form.salesInvoiceEnabled,
@@ -731,7 +806,7 @@ const sanitizeInvoicePrefixInput = () => {
 
 function setupScrollSpy() {
   if (typeof window === 'undefined') return
-  const ids = ['features', 'checkout', 'invoices', 'announcement', 'loyalty', 'clearance', 'currency', 'localization']
+  const ids = ['features', 'checkout', 'invoices', 'announcement', 'loyalty', 'clearance', 'fraud', 'currency', 'localization']
   const observer = new IntersectionObserver(
     (entries) => {
       const visible = entries
@@ -930,6 +1005,21 @@ onMounted(() => {
   align-items: center;
   gap: 8px;
   margin-top: 10px;
+}
+
+.fraud-manage-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 4px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--brand);
+  width: fit-content;
+}
+
+.fraud-manage-link:hover {
+  text-decoration: underline;
 }
 
 /* Reveal block */

@@ -1,5 +1,6 @@
 import type { Request, Response } from 'express'
 import { OrdersService, OrderValidationError } from './orders.service'
+import { BlacklistService, BlacklistValidationError } from '../blacklist/blacklist.service'
 import { DeliveryConfigurationError, DeliveryService } from '../delivery/delivery.service'
 import { MaystroIntegrationError } from '../delivery/maystro/maystro.errors'
 import { MaystroOrderService } from '../delivery/maystro/maystro-order.service'
@@ -21,6 +22,7 @@ import {
 const service = new OrdersService()
 const deliveryService = new DeliveryService()
 const notificationsService = new NotificationsService()
+const blacklistService = new BlacklistService()
 
 export class OrdersController {
     async generateConfirmationToken(req: Request, res: Response) {
@@ -164,6 +166,32 @@ export class OrdersController {
             }
         } catch (error) {
             console.error('Mark order read error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async blacklistOrder(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const { id } = req.params
+            const { type, reason } = req.body ?? {}
+
+            if (!id || Array.isArray(id)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Order ID is required' })
+            }
+
+            try {
+                const entry = await blacklistService.blacklistFromOrder(tenant.id, id, type, reason, { userId: user?.id ?? null })
+                res.status(201).json(entry)
+            } catch (err) {
+                if (err instanceof BlacklistValidationError) {
+                    return res.status(err.statusCode).json({ statusCode: err.statusCode, statusMessage: err.statusMessage, code: err.code })
+                }
+                throw err
+            }
+        } catch (error) {
+            console.error('Blacklist order error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }
@@ -491,6 +519,7 @@ export class OrdersController {
                 shippingProvider: req.body?.shippingProvider,
                 shippingPickupPoint: req.body?.shippingPickupPoint,
                 redeemPointsRequested: req.body?.redeemPointsRequested,
+                clientIp: req.ip || req.socket.remoteAddress || null,
                 items: req.body?.items ?? []
             }, req.subscription ? {
                 planCode: req.subscription.planCode,

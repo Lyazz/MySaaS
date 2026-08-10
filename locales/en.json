@@ -1596,6 +1596,10 @@
         "localization": {
           "title": "Localization",
           "subtitle": "Store currency and language."
+        },
+        "security": {
+          "title": "Security",
+          "subtitle": "Reduce fake and duplicate orders."
         }
       },
       "features": {
@@ -1679,6 +1683,22 @@
         "bannerSubtitle": "Display a banner announcing the clearance offer.",
         "bannerText": "Banner text",
         "bannerTextPlaceholder": "Big clearance sale — buy more, save more!"
+      },
+      "fraud": {
+        "title": "Fraud prevention",
+        "subtitle": "Block fake orders from blacklisted contacts and throttle duplicate orders.",
+        "blacklist": {
+          "title": "Enable blacklist",
+          "subtitle": "Block checkout for blacklisted phone numbers, IPs and customers.",
+          "manageLink": "Manage blacklisted entries"
+        },
+        "duplicate": {
+          "title": "Limit duplicate orders",
+          "subtitle": "Block checkout once a phone number has placed too many orders in a short time.",
+          "limit": "Max orders",
+          "window": "Time window (hours)",
+          "hint": "Once a phone number reaches this many orders within the time window, further checkouts are blocked."
+        }
       },
       "currency": {
         "title": "Store currency",
@@ -3544,6 +3564,35 @@
             "actions": "Actions"
           }
         },
+        "blacklist": {
+          "title": "Order blacklist",
+          "subtitle": "Phone numbers, IP addresses and customers blocked from checking out.",
+          "backToOrders": "Back to orders",
+          "form": {
+            "type": "Type",
+            "value": "Value",
+            "reason": "Reason (optional)",
+            "reasonPlaceholder": "e.g. repeated fake orders",
+            "submit": "Add to blacklist"
+          },
+          "types": {
+            "PHONE": "Phone",
+            "IP": "IP address",
+            "CUSTOMER": "Customer"
+          },
+          "empty": {
+            "title": "No blacklisted entries",
+            "hint": "Phone numbers, IPs, and customers you block will show up here."
+          },
+          "table": {
+            "type": "Type",
+            "value": "Value",
+            "reason": "Reason",
+            "createdAt": "Added",
+            "actions": "Actions"
+          },
+          "deleteConfirm": "Remove this entry from the blacklist?"
+        },
         "detail": {
           "metaTitle": "Order detail",
           "breadcrumb": "Order #{id}",
@@ -3592,6 +3641,15 @@
             "blacklistCustomer": "Blacklist Customer",
             "blacklistIp": "Blacklist IP Address",
             "blacklistPhone": "Blacklist Phone Number"
+          },
+          "blacklist": {
+            "confirm": {
+              "customer": "Blacklist this customer? Their future orders will be blocked automatically.",
+              "phone": "Blacklist this phone number? Future orders using this number will be blocked automatically.",
+              "ip": "Blacklist this IP address? Future orders from this IP will be blocked automatically."
+            },
+            "confirmBtn": "Blacklist",
+            "success": "Added to blacklist"
           },
           "securityHelp": "Advanced actions to manage risky behavior.",
           "deleteConfirm": "Delete this order? This cannot be undone. If the order is confirmed with a carrier, it will also be cancelled there.",
