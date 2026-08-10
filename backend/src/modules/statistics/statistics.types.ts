@@ -72,7 +72,7 @@ export const comparable = (value: number, previousValue: number): ComparableMetr
 
 export const resolvePeriod = (query: Pick<StatsQuery, 'range' | 'from' | 'to'>): ResolvedPeriod => {
     const now = new Date()
-    const range = query.range || '7d'
+    const range = query.range || 'today'
 
     if (range === 'custom' && query.from && query.to) {
         const fromAt = startOfDay(query.from)

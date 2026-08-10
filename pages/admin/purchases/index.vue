@@ -342,7 +342,7 @@ const selectedSupplier = ref(typeof route.query.supplierId === 'string' ? route.
 const selectedUser = ref(typeof route.query.userId === 'string' ? route.query.userId : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
 const selectedPaymentStatus = ref(typeof route.query.paymentStatus === 'string' ? route.query.paymentStatus : '')
-const defaultDateRange = getDashboardPresetDateRange('7d')
+const defaultDateRange = getDashboardPresetDateRange('today')
 const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
 const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
 const currentPage = ref(Number(route.query.page) || 1)

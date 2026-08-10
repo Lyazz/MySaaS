@@ -293,9 +293,10 @@ describe('Admin dashboard API', () => {
         await prisma.tenant.deleteMany({ where: { id: { in: [tenantAId, tenantBId] } } })
     })
 
-    it('returns tenant-scoped dashboard analytics for default range (7d)', async () => {
+    it('returns tenant-scoped dashboard analytics for range=7d', async () => {
         const res = await request(app)
             .get('/api/admin/dashboard')
+            .query({ range: '7d' })
             .set('X-Forwarded-Host', hostA)
             .set('Authorization', `Bearer ${tokenA}`)
 

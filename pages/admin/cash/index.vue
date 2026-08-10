@@ -1542,7 +1542,7 @@ const sessionsPerPage = ref(25)
 const sessionsTotal = ref(0)
 const sessionsTotalPages = ref(1)
 const paginatedSessions = computed(() => sessions.value)
-const defaultDateRange = getDashboardPresetDateRange('7d')
+const defaultDateRange = getDashboardPresetDateRange('today')
 
 const sessionFilters = reactive({
   cashboxId: typeof route.query.sessionCashboxId === 'string' ? route.query.sessionCashboxId : '',
@@ -1623,7 +1623,7 @@ const resetTxFilters = () => {
   filters.method = ''
   filters.userId = ''
   
-  const range = getDashboardPresetDateRange('7d')
+  const range = getDashboardPresetDateRange('today')
   filters.startDate = range.from
   filters.endDate = range.to
 }
@@ -1633,7 +1633,7 @@ const resetSessionFilters = () => {
   sessionFilters.status = ''
   sessionFilters.userId = ''
   
-  const range = getDashboardPresetDateRange('7d')
+  const range = getDashboardPresetDateRange('today')
   sessionFilters.startDate = range.from
   sessionFilters.endDate = range.to
 }

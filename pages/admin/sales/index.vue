@@ -423,7 +423,7 @@ const selectedUser = ref(typeof route.query.userId === 'string' ? route.query.us
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const sortBy = ref(typeof route.query.sortBy === 'string' ? route.query.sortBy : 'updatedAt')
 const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'asc' ? 'asc' : 'desc')
-const defaultDateRange = getDashboardPresetDateRange('7d')
+const defaultDateRange = getDashboardPresetDateRange('today')
 const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
 const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
 const cashboxes = ref<Cashbox[]>([])

@@ -1,7 +1,7 @@
 <template>
   <div class="w-auto max-w-full min-w-0">
     <label class="ui-label block mb-1">
-      {{ label || t('admin.pages.dashboard.filters.range', 'Range') }}
+      {{ props.label || t('admin.pages.dashboard.filters.range', 'Range') }}
     </label>
     <div
       class="flex min-w-0 max-w-full flex-col gap-2 rounded-xl px-3 py-2 sm:flex-row sm:items-center"
@@ -12,7 +12,7 @@
         <select
           v-model="selectedRange"
           class="ui-input h-9 min-w-0 py-1 text-[12px] sm:h-7 sm:text-[11.5px]"
-          :data-testid="testid ? `${testid}-range-select` : undefined"
+          :data-testid="props.testid ? `${props.testid}-range-select` : undefined"
           @change="handleRangeChange"
         >
           <option value="today">{{ t('admin.pages.dashboard.filters.ranges.today', 'Today') }}</option>
@@ -29,18 +29,18 @@
       >
         <input
           type="date"
-          :value="startDate"
+          :value="props.startDate"
           class="ui-input h-9 min-w-0 py-1 text-[12px] sm:h-7 sm:text-[11.5px]"
           :aria-label="t('admin.common.startDate')"
-          :data-testid="testid ? `${testid}-custom-from` : undefined"
+          :data-testid="props.testid ? `${props.testid}-custom-from` : undefined"
           @input="updateStartDate(($event.target as HTMLInputElement).value)"
         >
         <input
           type="date"
-          :value="endDate"
+          :value="props.endDate"
           class="ui-input h-9 min-w-0 py-1 text-[12px] sm:h-7 sm:text-[11.5px]"
           :aria-label="t('admin.common.endDate')"
-          :data-testid="testid ? `${testid}-custom-to` : undefined"
+          :data-testid="props.testid ? `${props.testid}-custom-to` : undefined"
           @input="updateEndDate(($event.target as HTMLInputElement).value)"
         >
       </div>

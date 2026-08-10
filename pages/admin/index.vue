@@ -270,7 +270,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import { buildDashboardRangeQuery, defaultCustomDateRange, type DashboardRange } from '~/composables/admin/dashboardRange'
+import { buildDashboardRangeQuery, defaultCustomDateRange, getDashboardPresetDateRange, type DashboardRange } from '~/composables/admin/dashboardRange'
 import DateFilter from '~/components/ui/DateFilter.vue'
 
 definePageMeta({
@@ -314,7 +314,8 @@ const tenantName = computed(() => authStore.user?.tenant?.name || 'your store')
 const { format: formatMoney } = useCurrency()
 
 const defaultCustomRange = defaultCustomDateRange()
-const selectedRange = ref<DashboardRange>('7d')
+const defaultTodayRange = getDashboardPresetDateRange('today')
+const selectedRange = ref<DashboardRange>('today')
 const customFrom = ref(defaultCustomRange.from)
 const customTo = ref(defaultCustomRange.to)
 
@@ -330,7 +331,7 @@ const emptyDashboard: DashboardResponse = {
   counts: { products: 0, categories: 0, orders: 0 },
   last7d: { orders: 0, revenue: 0 },
   inventory: { lowStockProducts: 0, outOfStockProducts: 0 },
-  period: { range: '7d', from: defaultCustomRange.from, to: defaultCustomRange.to, days: 7 },
+  period: { range: 'today', from: defaultTodayRange.from, to: defaultTodayRange.to, days: 1 },
   revenue: { total: 0, orders: 0, pos: 0 },
   trends: [],
   topProducts: [],

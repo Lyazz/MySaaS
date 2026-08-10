@@ -468,7 +468,7 @@ const globalTotal = ref(0)
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
 const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
 const activeTab = ref(typeof route.query.status === 'string' && route.query.status ? route.query.status : 'all')
-const defaultDateRange = getDashboardPresetDateRange('7d')
+const defaultDateRange = getDashboardPresetDateRange('today')
 const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
 const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
 
