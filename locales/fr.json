@@ -4418,7 +4418,8 @@
       "dashboard": "Tableau de bord",
       "tenants": "Tenants",
       "analytics": "Analytique",
-      "auditLogs": "Journal d’audit"
+      "auditLogs": "Journal d’audit",
+      "payments": "Paiements"
     },
     "login": {
       "title": "Super Admin",
@@ -4713,6 +4714,64 @@
           "orders": "Commandes",
           "products": "Produits"
         }
+      }
+    },
+    "auditLogs": {
+      "title": "Journal d’audit",
+      "actions": {
+        "refresh": "Actualiser"
+      },
+      "filters": {
+        "search": {
+          "label": "Rechercher",
+          "placeholder": "Rechercher par action, détails ou ID utilisateur..."
+        },
+        "actionType": "Type d’action",
+        "allActions": "Toutes les actions",
+        "sortBy": "Trier par",
+        "sort": {
+          "newestFirst": "Plus récent d’abord",
+          "oldestFirst": "Plus ancien d’abord"
+        }
+      },
+      "loading": "Chargement du journal d’audit...",
+      "empty": "Aucune entrée trouvée",
+      "table": {
+        "timestamp": "Horodatage",
+        "action": "Action",
+        "details": "Détails",
+        "userId": "ID utilisateur",
+        "target": "Cible"
+      },
+      "pagination": {
+        "showing": "Affichage de {from} à {to} sur {total}",
+        "previous": "Précédent",
+        "next": "Suivant"
+      }
+    },
+    "pendingPayments": {
+      "title": "Paiements en attente",
+      "subtitle": "Examinez, approuvez ou rejetez les preuves de paiement soumises par les tenants.",
+      "pending": "en attente",
+      "noProof": "Aucun fichier",
+      "stats": {
+        "pending": "Preuves en attente",
+        "tenants": "Tenants en attente",
+        "total": "Valeur totale"
+      },
+      "table": {
+        "title": "Preuves soumises en attente d’examen",
+        "tenant": "Tenant",
+        "plan": "Offre",
+        "amount": "Montant",
+        "submitted": "Soumis le",
+        "proof": "Preuve",
+        "notes": "Notes",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "Tout est à jour !",
+        "subtitle": "Aucune preuve de paiement en attente pour le moment."
       }
     }
   }
