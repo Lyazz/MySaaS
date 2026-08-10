@@ -4490,7 +4490,12 @@
         "createTenant": "Créer un tenant",
         "payments": "Paiements",
         "suspend": "Suspendre",
-        "activate": "Activer"
+        "activate": "Activer",
+        "showArchived": "Afficher les archivés",
+        "viewDetails": "Voir les détails",
+        "archive": "Archiver",
+        "restore": "Restaurer",
+        "deletePermanently": "Supprimer définitivement"
       },
       "search": {
         "placeholder": "Rechercher des tenants..."
@@ -4509,7 +4514,8 @@
       },
       "status": {
         "active": "Actif",
-        "suspended": "Suspendu"
+        "suspended": "Suspendu",
+        "archived": "Archivé"
       },
       "modal": {
         "createTitle": "Créer un nouveau tenant",
@@ -4538,11 +4544,77 @@
         "generic": "Une erreur est survenue",
         "suspendFailed": "Impossible de suspendre le tenant",
         "activateFailed": "Impossible d’activer le tenant",
-        "deleteFailed": "Impossible de supprimer le tenant"
+        "deleteFailed": "Impossible de supprimer le tenant",
+        "archiveFailed": "Impossible d’archiver le tenant",
+        "restoreFailed": "Impossible de restaurer le tenant"
       },
       "confirm": {
         "suspend": "Voulez-vous vraiment suspendre {name} ?",
-        "delete": "Voulez-vous vraiment SUPPRIMER {name} ? Cette action est irréversible !"
+        "archive": "Archiver {name} ? Sa boutique et la connexion admin seront désactivées. Vous pourrez le restaurer plus tard.",
+        "restore": "Restaurer {name} ? Cela réactivera sa boutique et la connexion admin.",
+        "deletePermanently": "Supprimer définitivement {name} ? Cette action est irréversible."
+      },
+      "detail": {
+        "breadcrumb": "Détails",
+        "loading": "Chargement du tenant...",
+        "notFound": "Tenant introuvable",
+        "storefrontLink": "Ouvrir la boutique",
+        "overview": {
+          "title": "Aperçu",
+          "createdAt": "Créé le",
+          "slug": "Slug"
+        },
+        "plan": {
+          "title": "Offre et utilisation",
+          "currentPlan": "Offre actuelle",
+          "interval": "Intervalle de facturation",
+          "status": "Statut de l’abonnement",
+          "currentPeriod": "Période en cours",
+          "trialEnds": "Fin de l’essai",
+          "noSubscription": "Aucun abonnement enregistré",
+          "changePlan": "Changer d’offre",
+          "changePlanCta": "Appliquer l’offre",
+          "updating": "Application..."
+        },
+        "usage": {
+          "title": "Utilisation sur la période",
+          "products": "Produits",
+          "orders": "Commandes",
+          "users": "Utilisateurs"
+        },
+        "users": {
+          "title": "Utilisateurs",
+          "empty": "Aucun utilisateur",
+          "table": {
+            "email": "E-mail",
+            "role": "Rôle",
+            "status": "Statut",
+            "created": "Créé le"
+          }
+        },
+        "integrations": {
+          "title": "Intégrations sociales",
+          "empty": "Aucune intégration connectée",
+          "deliveryTitle": "Comptes de livraison",
+          "deliveryEmpty": "Aucun compte de livraison connecté",
+          "table": {
+            "provider": "Fournisseur",
+            "status": "Statut",
+            "updated": "Mis à jour"
+          }
+        },
+        "domains": {
+          "title": "Domaines personnalisés",
+          "empty": "Aucun domaine personnalisé",
+          "table": {
+            "domain": "Domaine",
+            "created": "Ajouté le"
+          }
+        },
+        "errors": {
+          "loadFailed": "Impossible de charger les détails du tenant",
+          "planUpdateFailed": "Impossible de mettre à jour l’offre"
+        }
       }
     },
     "paymentsPage": {

@@ -4509,7 +4509,12 @@
         "createTenant": "Create tenant",
         "payments": "Payments",
         "suspend": "Suspend",
-        "activate": "Activate"
+        "activate": "Activate",
+        "showArchived": "Show archived",
+        "viewDetails": "View details",
+        "archive": "Archive",
+        "restore": "Restore",
+        "deletePermanently": "Delete permanently"
       },
       "search": {
         "placeholder": "Search tenants..."
@@ -4528,7 +4533,8 @@
       },
       "status": {
         "active": "Active",
-        "suspended": "Suspended"
+        "suspended": "Suspended",
+        "archived": "Archived"
       },
       "modal": {
         "createTitle": "Create new tenant",
@@ -4557,11 +4563,77 @@
         "generic": "An error occurred",
         "suspendFailed": "Failed to suspend tenant",
         "activateFailed": "Failed to activate tenant",
-        "deleteFailed": "Failed to delete tenant"
+        "deleteFailed": "Failed to delete tenant",
+        "archiveFailed": "Failed to archive tenant",
+        "restoreFailed": "Failed to restore tenant"
       },
       "confirm": {
         "suspend": "Are you sure you want to suspend {name}?",
-        "delete": "Are you sure you want to DELETE {name}? This action cannot be undone!"
+        "archive": "Archive {name}? Its storefront and admin login will be disabled. You can restore it later.",
+        "restore": "Restore {name}? This will re-enable its storefront and admin login.",
+        "deletePermanently": "Permanently delete {name}? This cannot be undone."
+      },
+      "detail": {
+        "breadcrumb": "Details",
+        "loading": "Loading tenant...",
+        "notFound": "Tenant not found",
+        "storefrontLink": "Open storefront",
+        "overview": {
+          "title": "Overview",
+          "createdAt": "Created",
+          "slug": "Slug"
+        },
+        "plan": {
+          "title": "Plan & usage",
+          "currentPlan": "Current plan",
+          "interval": "Billing interval",
+          "status": "Subscription status",
+          "currentPeriod": "Current period",
+          "trialEnds": "Trial ends",
+          "noSubscription": "No subscription on file",
+          "changePlan": "Change plan",
+          "changePlanCta": "Apply plan",
+          "updating": "Applying..."
+        },
+        "usage": {
+          "title": "Usage this period",
+          "products": "Products",
+          "orders": "Orders",
+          "users": "Users"
+        },
+        "users": {
+          "title": "Users",
+          "empty": "No users yet",
+          "table": {
+            "email": "Email",
+            "role": "Role",
+            "status": "Status",
+            "created": "Created"
+          }
+        },
+        "integrations": {
+          "title": "Social integrations",
+          "empty": "No integrations connected",
+          "deliveryTitle": "Delivery accounts",
+          "deliveryEmpty": "No delivery accounts connected",
+          "table": {
+            "provider": "Provider",
+            "status": "Status",
+            "updated": "Updated"
+          }
+        },
+        "domains": {
+          "title": "Custom domains",
+          "empty": "No custom domains",
+          "table": {
+            "domain": "Domain",
+            "created": "Added"
+          }
+        },
+        "errors": {
+          "loadFailed": "Failed to load tenant details",
+          "planUpdateFailed": "Failed to update plan"
+        }
       }
     },
     "paymentsPage": {
