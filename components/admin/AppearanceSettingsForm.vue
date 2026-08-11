@@ -14,7 +14,10 @@
           rel="noopener noreferrer"
           class="header-action header-action-secondary"
         >
-          <Icon name="lucide:external-link" class="w-3.5 h-3.5" />
+          <Icon
+            name="lucide:external-link"
+            class="w-3.5 h-3.5"
+          />
           <span>{{ t('admin.actions.viewStore') || 'View store' }}</span>
         </a>
         <button
@@ -23,14 +26,24 @@
           :disabled="loading"
           @click="mockAiGenerate"
         >
-          <Icon name="lucide:sparkles" class="w-3.5 h-3.5" />
+          <Icon
+            name="lucide:sparkles"
+            class="w-3.5 h-3.5"
+          />
           <span>{{ t('admin.appearanceSettingsForm.brandAssets.logo.magicIdentity') || 'Magic identity' }}</span>
         </button>
       </template>
     </SettingsPageHeader>
 
-    <div v-if="message.text" class="status-toast" :class="message.type">
-      <Icon :name="message.type === 'success' ? 'lucide:check-circle-2' : 'lucide:alert-triangle'" class="w-4 h-4" />
+    <div
+      v-if="message.text"
+      class="status-toast"
+      :class="message.type"
+    >
+      <Icon
+        :name="message.type === 'success' ? 'lucide:check-circle-2' : 'lucide:alert-triangle'"
+        class="w-4 h-4"
+      />
       {{ message.text }}
     </div>
 
@@ -72,7 +85,9 @@
               >
               <span class="field-input-group-suffix">.{{ baseDomain }}</span>
             </div>
-            <p class="field-hint">{{ t('admin.appearanceSettingsForm.identity.slug.hint') }}</p>
+            <p class="field-hint">
+              {{ t('admin.appearanceSettingsForm.identity.slug.hint') }}
+            </p>
           </div>
         </div>
       </SettingsSection>
@@ -109,18 +124,28 @@
           <!-- Primary color row -->
           <div class="brand-color-row">
             <div class="brand-color-head">
-              <p class="brand-field-label-inline">{{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.label') }}</p>
-              <p class="brand-field-hint-inline">{{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.hint') }}</p>
+              <p class="brand-field-label-inline">
+                {{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.label') }}
+              </p>
+              <p class="brand-field-hint-inline">
+                {{ t('admin.appearanceSettingsForm.brandAssets.primaryColor.hint') }}
+              </p>
             </div>
             <div class="color-controls">
-              <label class="color-swatch" :style="{ background: form.primaryColor }">
+              <label
+                class="color-swatch"
+                :style="{ background: form.primaryColor }"
+              >
                 <input
                   :value="form.primaryColor"
                   type="color"
                   class="color-input"
                   @input="handlePrimaryColorInput"
                 >
-                <Icon name="lucide:pipette" class="color-swatch-icon" />
+                <Icon
+                  name="lucide:pipette"
+                  class="color-swatch-icon"
+                />
               </label>
               <input
                 :value="form.primaryColor"
@@ -141,7 +166,11 @@
                   :aria-label="color"
                   @click="setPrimaryColor(color)"
                 >
-                  <Icon v-if="form.primaryColor === color" name="lucide:check" class="w-3.5 h-3.5" />
+                  <Icon
+                    v-if="form.primaryColor === color"
+                    name="lucide:check"
+                    class="w-3.5 h-3.5"
+                  />
                 </button>
               </div>
             </div>
@@ -173,7 +202,10 @@
       >
         <template #aside>
           <div class="template-search">
-            <Icon name="lucide:search" class="template-search-icon" />
+            <Icon
+              name="lucide:search"
+              class="template-search-icon"
+            />
             <input
               v-model="searchQuery"
               type="text"
@@ -205,19 +237,47 @@
             :class="{ 'is-selected': form.templateKey === tpl.key }"
             @click="form.templateKey = tpl.key"
           >
-            <span v-if="form.templateKey === tpl.key" class="template-card-badge">
-              <Icon name="lucide:check" class="w-3.5 h-3.5" />
+            <span
+              v-if="form.templateKey === tpl.key"
+              class="template-card-badge"
+            >
+              <Icon
+                name="lucide:check"
+                class="w-3.5 h-3.5"
+              />
             </span>
 
-            <div class="template-card-preview" :style="{ background: tpl.bg, '--accent': templateAccent(tpl), '--card-bg': tpl.cardBg, '--border': tpl.border }">
+            <div
+              class="template-card-preview"
+              :style="{ background: tpl.bg, '--accent': templateAccent(tpl), '--card-bg': tpl.cardBg, '--border': tpl.border }"
+            >
               <div class="template-card-accent" />
-              <div class="template-card-mockup" :style="{ background: tpl.cardBg, borderRadius: tpl.radius, borderColor: tpl.border }">
-                <div class="template-card-mockup-img" :style="{ background: tpl.imgBg }">
+              <div
+                class="template-card-mockup"
+                :style="{ background: tpl.cardBg, borderRadius: tpl.radius, borderColor: tpl.border }"
+              >
+                <div
+                  class="template-card-mockup-img"
+                  :style="{ background: tpl.imgBg }"
+                >
                   <span>{{ tpl.emoji }}</span>
                 </div>
-                <div class="template-card-mockup-body" :style="{ fontFamily: tpl.fontStyle }">
-                  <p class="template-card-mockup-name" :style="{ color: tpl.textColor }">{{ tpl.sampleDesc }}</p>
-                  <p class="template-card-mockup-price" :style="{ color: templateAccent(tpl) }">{{ tpl.samplePrice }}</p>
+                <div
+                  class="template-card-mockup-body"
+                  :style="{ fontFamily: tpl.fontStyle }"
+                >
+                  <p
+                    class="template-card-mockup-name"
+                    :style="{ color: tpl.textColor }"
+                  >
+                    {{ tpl.sampleDesc }}
+                  </p>
+                  <p
+                    class="template-card-mockup-price"
+                    :style="{ color: templateAccent(tpl) }"
+                  >
+                    {{ tpl.samplePrice }}
+                  </p>
                   <span
                     class="template-card-mockup-cta"
                     :style="{ background: templateAccent(tpl), color: tpl.btnText, borderRadius: tpl.radius }"
@@ -226,8 +286,14 @@
               </div>
 
               <div class="template-card-overlay">
-                <span class="template-card-preview-btn" @click.stop="openQuickView(tpl.key)">
-                  <Icon name="lucide:eye" class="w-3.5 h-3.5" />
+                <span
+                  class="template-card-preview-btn"
+                  @click.stop="openQuickView(tpl.key)"
+                >
+                  <Icon
+                    name="lucide:eye"
+                    class="w-3.5 h-3.5"
+                  />
                   {{ t('admin.appearanceSettingsForm.templates.quickView') || 'Quick view' }}
                 </span>
               </div>
@@ -235,17 +301,30 @@
 
             <div class="template-card-meta">
               <div class="template-card-meta-row">
-                <p class="template-card-name">{{ tpl.label }}</p>
+                <p class="template-card-name">
+                  {{ tpl.label }}
+                </p>
                 <span class="template-card-category">{{ tpl.category }}</span>
               </div>
-              <p class="template-card-desc">{{ tpl.storeTypes }}</p>
+              <p class="template-card-desc">
+                {{ tpl.storeTypes }}
+              </p>
               <div class="template-card-pills">
-                <span class="template-card-pill template-card-pill-color" :style="{ '--c': templateAccent(tpl) }">
-                  <span class="template-card-pill-dot" :style="{ background: templateAccent(tpl) }" />
+                <span
+                  class="template-card-pill template-card-pill-color"
+                  :style="{ '--c': templateAccent(tpl) }"
+                >
+                  <span
+                    class="template-card-pill-dot"
+                    :style="{ background: templateAccent(tpl) }"
+                  />
                   {{ templateAccent(tpl).toUpperCase() }}
                 </span>
                 <span class="template-card-pill">
-                  <Icon name="lucide:type" class="w-3 h-3" />
+                  <Icon
+                    name="lucide:type"
+                    class="w-3 h-3"
+                  />
                   {{ tpl.fontName }}
                 </span>
               </div>
@@ -253,8 +332,14 @@
           </button>
         </div>
 
-        <div v-if="filteredTemplates.length === 0" class="template-empty">
-          <Icon name="lucide:search-x" class="template-empty-icon" />
+        <div
+          v-if="filteredTemplates.length === 0"
+          class="template-empty"
+        >
+          <Icon
+            name="lucide:search-x"
+            class="template-empty-icon"
+          />
           <p>{{ t('admin.common.noResults') || 'No templates match your search' }}</p>
         </div>
       </SettingsSection>
@@ -271,23 +356,48 @@
     <!-- Quick view modal -->
     <Teleport to="body">
       <Transition name="modal">
-        <div v-if="showQuickView" class="quick-view-modal" @click.self="showQuickView = false">
+        <div
+          v-if="showQuickView"
+          class="quick-view-modal"
+          @click.self="showQuickView = false"
+        >
           <div class="quick-view-panel">
             <header class="quick-view-head">
               <div class="quick-view-head-left">
-                <Icon name="lucide:monitor" class="w-4 h-4" style="color: var(--text-muted)" />
+                <Icon
+                  name="lucide:monitor"
+                  class="w-4 h-4"
+                  style="color: var(--text-muted)"
+                />
                 <h3>{{ t('admin.appearanceSettingsForm.templates.quickView') || 'Quick preview' }}</h3>
               </div>
-              <button class="quick-view-close" @click="showQuickView = false" :aria-label="t('admin.common.close') || 'Close'">
-                <Icon name="lucide:x" class="w-4 h-4" />
+              <button
+                class="quick-view-close"
+                :aria-label="t('admin.common.close') || 'Close'"
+                @click="showQuickView = false"
+              >
+                <Icon
+                  name="lucide:x"
+                  class="w-4 h-4"
+                />
               </button>
             </header>
             <div class="quick-view-body">
-              <div v-if="!quickViewUrl" class="quick-view-loading">
-                <Icon name="lucide:loader-2" class="quick-view-spinner" />
+              <div
+                v-if="!quickViewUrl"
+                class="quick-view-loading"
+              >
+                <Icon
+                  name="lucide:loader-2"
+                  class="quick-view-spinner"
+                />
                 <p>{{ t('admin.common.loading') || 'Loading preview…' }}</p>
               </div>
-              <iframe v-if="quickViewUrl" :src="quickViewUrl" class="quick-view-iframe" />
+              <iframe
+                v-if="quickViewUrl"
+                :src="quickViewUrl"
+                class="quick-view-iframe"
+              />
             </div>
           </div>
         </div>
@@ -650,28 +760,20 @@ function reset() {
 }
 
 .brand-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
+  display: flex;
+  flex-wrap: wrap;
   gap: 18px;
   align-items: stretch;
 }
 
 .brand-row-main {
+  flex: 2 1 320px;
   min-width: 0;
 }
 
 .brand-row-aside {
-  width: 280px;
-  flex-shrink: 0;
-}
-
-@media (max-width: 760px) {
-  .brand-row {
-    grid-template-columns: 1fr;
-  }
-  .brand-row-aside {
-    width: 100%;
-  }
+  flex: 1 1 260px;
+  min-width: 220px;
 }
 
 .brand-color-row {
