@@ -61,6 +61,12 @@ export const expressSubscriptionMiddleware = async (
       .json({ statusCode: 403, statusMessage: 'Tenant is suspended' });
   }
 
+  if (tenant.maintenanceMode && !isAdminApi) {
+    return res
+      .status(503)
+      .json({ statusCode: 503, statusMessage: 'Store is under maintenance' });
+  }
+
   const now = new Date();
   const defaultEnd = addUtcMonths(now, 1);
 

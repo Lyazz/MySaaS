@@ -8,6 +8,18 @@ const props = defineProps({
 const { t } = useI18n({ useScope: 'global' })
 
 const handleError = () => clearError({ redirect: '/' })
+
+const titleForError = computed(() => {
+  if (props.error?.statusCode === 404) return t('common.errorPage.notFound.title')
+  if (props.error?.statusCode === 503) return t('common.errorPage.maintenance.title')
+  return t('common.errorPage.generic.title')
+})
+
+const messageForError = computed(() => {
+  if (props.error?.statusCode === 404) return t('common.errorPage.notFound.message')
+  if (props.error?.statusCode === 503) return t('common.errorPage.maintenance.message')
+  return t('common.errorPage.generic.message')
+})
 </script>
 
 <template>
@@ -27,22 +39,23 @@ const handleError = () => clearError({ redirect: '/' })
         {{ error?.statusCode || 404 }}
       </h1>
       <h2 class="text-2xl font-bold text-slate-800 mb-4">
-        {{ error?.statusCode === 404 ? t('common.errorPage.notFound.title') : t('common.errorPage.generic.title') }}
+        {{ titleForError }}
       </h2>
-      
+
       <p class="text-slate-500 mb-8 leading-relaxed">
-        {{ error?.statusCode === 404 ? t('common.errorPage.notFound.message') : t('common.errorPage.generic.message') }}
+        {{ messageForError }}
       </p>
-      
-      <button 
+
+      <button
+        v-if="error?.statusCode !== 503"
         @click="handleError"
         class="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg shadow-sm text-white bg-lime-600 hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-lime-500 transition-all duration-200 gap-2"
       >
         <Icon name="lucide:arrow-left" class="w-4 h-4" />
         {{ t('common.errorPage.actions.backHome') }}
       </button>
-      
-      <div v-if="error?.statusCode !== 404" class="mt-8 p-4 bg-red-50 rounded-lg border border-red-100 text-start">
+
+      <div v-if="error?.statusCode !== 404 && error?.statusCode !== 503" class="mt-8 p-4 bg-red-50 rounded-lg border border-red-100 text-start">
           <p class="text-xs font-mono text-red-600 break-all">
               {{ t('common.errorPage.details') }}: {{ error?.message }}
           </p>

@@ -11,6 +11,10 @@
         "title": "Une erreur s'est produite",
         "message": "Quelque chose s'est mal passé. Veuillez réessayer plus tard."
       },
+      "maintenance": {
+        "title": "Boutique en maintenance",
+        "message": "Cette boutique est temporairement fermée pour maintenance. Merci de revenir bientôt."
+      },
       "actions": {
         "backHome": "Retour à l'accueil"
       },
@@ -1733,6 +1737,20 @@
           },
           "preview": "Aperçu"
         }
+      },
+      "maintenance": {
+        "title": "Mode maintenance",
+        "subtitle": "Fermez temporairement votre boutique aux clients.",
+        "enable": {
+          "title": "Fermer la boutique pour maintenance",
+          "subtitle": "Les clients verront une page de maintenance à la place de votre boutique. Le panneau d'administration reste accessible.",
+          "toggle": "Activer le mode maintenance"
+        },
+        "warning": "Votre boutique est inaccessible aux clients tant que ceci est activé. N'oubliez pas de le désactiver ensuite.",
+        "message": {
+          "label": "Message affiché aux clients (optionnel)",
+          "placeholder": "Nous effectuons une maintenance planifiée et serons de retour bientôt."
+        }
       }
     },
     "domainSettingsForm": {
@@ -2200,7 +2218,8 @@
         "domains": "Domaines",
         "integrations": "Intégrations",
         "team": "Équipe & rôles",
-        "billing": "Abonnement"
+        "billing": "Abonnement",
+        "maintenance": "Mode maintenance"
       }
     },
     "roles": {

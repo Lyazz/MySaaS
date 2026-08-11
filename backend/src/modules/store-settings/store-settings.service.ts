@@ -110,6 +110,8 @@ export type StoreSettingsPatchInput = Partial<{
     duplicateOrderLimitEnabled: boolean
     duplicateOrderLimit: number
     duplicateOrderWindowHours: number
+    maintenanceMode: boolean
+    maintenanceMessage: string | null
 }>
 
 const toDecimalString = (value: unknown, field: string): string => {
@@ -446,6 +448,24 @@ export class StoreSettingsService {
             updateSettings.duplicateOrderWindowHours = duplicateOrderWindowHours
         }
 
+        if (input.maintenanceMode !== undefined) {
+            if (typeof input.maintenanceMode !== 'boolean') {
+                throw new StoreSettingsValidationError('maintenanceMode must be a boolean')
+            }
+            updateTenant.maintenanceMode = input.maintenanceMode
+        }
+
+        if (input.maintenanceMessage !== undefined) {
+            if (input.maintenanceMessage !== null && typeof input.maintenanceMessage !== 'string') {
+                throw new StoreSettingsValidationError('maintenanceMessage must be a string or null')
+            }
+            const maintenanceMessage = typeof input.maintenanceMessage === 'string' ? input.maintenanceMessage.trim() : ''
+            if (maintenanceMessage.length > 300) {
+                throw new StoreSettingsValidationError('maintenanceMessage is too long (max 300 chars)')
+            }
+            updateSettings.maintenanceMessage = maintenanceMessage || null
+        }
+
         if (input.legalPages !== undefined) {
             if (!isValidStoreLegalPagesConfig(input.legalPages)) {
                 throw new StoreSettingsValidationError(
@@ -465,7 +485,12 @@ export class StoreSettingsService {
                     update: updateSettings
                 })
             ])
-            return { ...updatedSettings, name: updatedTenant.name, slug: updatedTenant.slug }
+            return {
+                ...updatedSettings,
+                name: updatedTenant.name,
+                slug: updatedTenant.slug,
+                maintenanceMode: updatedTenant.maintenanceMode
+            }
         }
 
         // Just update settings
@@ -477,7 +502,7 @@ export class StoreSettingsService {
 
         // We need to fetch tenant data to return consistent shape
         const t = await prisma.tenant.findUnique({ where: { id: tenantId } })
-        return { ...s, name: t?.name, slug: t?.slug }
+        return { ...s, name: t?.name, slug: t?.slug, maintenanceMode: t?.maintenanceMode ?? false }
     }
 
     async clearanceAppliesToAllProducts(tenantId: string): Promise<boolean> {

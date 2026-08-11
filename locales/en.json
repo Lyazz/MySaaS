@@ -11,6 +11,10 @@
         "title": "An error occurred",
         "message": "Something went wrong. Please try again later."
       },
+      "maintenance": {
+        "title": "Store under maintenance",
+        "message": "This store is temporarily closed for maintenance. Please check back soon."
+      },
       "actions": {
         "backHome": "Back to Home"
       },
@@ -1747,6 +1751,20 @@
           },
           "preview": "Preview"
         }
+      },
+      "maintenance": {
+        "title": "Maintenance mode",
+        "subtitle": "Temporarily close your storefront to customers.",
+        "enable": {
+          "title": "Close store for maintenance",
+          "subtitle": "Customers will see a maintenance page instead of your storefront. The admin panel stays accessible.",
+          "toggle": "Enable maintenance mode"
+        },
+        "warning": "Your storefront is unreachable by customers while this is on. Don't forget to turn it back off.",
+        "message": {
+          "label": "Message shown to customers (optional)",
+          "placeholder": "We are performing scheduled maintenance and will be back soon."
+        }
       }
     },
     "domainSettingsForm": {
@@ -2216,7 +2234,8 @@
         "domains": "Domains",
         "integrations": "Integrations",
         "team": "Team & roles",
-        "billing": "Billing"
+        "billing": "Billing",
+        "maintenance": "Maintenance mode"
       }
     },
     "roles": {

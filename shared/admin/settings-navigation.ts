@@ -104,7 +104,8 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
     labelKey: 'admin.settingsNav.groups.administration',
     items: [
       { key: 'team', to: '/admin/users', labelKey: 'admin.settingsNav.items.team', icon: 'lucide:user-cog', resource: 'users', external: true },
-      { key: 'billing', to: '/admin/billing', labelKey: 'admin.settingsNav.items.billing', icon: 'lucide:credit-card', resource: 'billing', external: true }
+      { key: 'billing', to: '/admin/billing', labelKey: 'admin.settingsNav.items.billing', icon: 'lucide:credit-card', resource: 'billing', external: true },
+      { key: 'maintenance', to: '/admin/settings/functional?section=maintenance', labelKey: 'admin.settingsNav.items.maintenance', icon: 'lucide:power-off', resource: 'storeSettings' }
     ]
   }
 ]

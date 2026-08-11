@@ -477,6 +477,51 @@
         </div>
       </SettingsSection>
 
+      <!-- Maintenance mode -->
+      <SettingsSection
+        v-show="visibleAnchors.includes('maintenance')"
+        anchor-id="maintenance"
+        icon="lucide:power-off"
+        :title="t('admin.functionalSettingsForm.maintenance.title') || 'Maintenance mode'"
+        :subtitle="t('admin.functionalSettingsForm.maintenance.subtitle') || 'Temporarily close your storefront to customers.'"
+      >
+        <div class="toggle-list">
+          <div class="toggle-row">
+            <div class="toggle-row-info">
+              <div class="toggle-row-icon">
+                <Icon name="lucide:power-off" class="w-4 h-4" />
+              </div>
+              <div>
+                <p class="toggle-row-title">{{ t('admin.functionalSettingsForm.maintenance.enable.title') || 'Close store for maintenance' }}</p>
+                <p class="toggle-row-subtitle">{{ t('admin.functionalSettingsForm.maintenance.enable.subtitle') || 'Customers will see a maintenance page instead of your storefront. The admin panel stays accessible.' }}</p>
+              </div>
+            </div>
+            <BaseToggle
+              v-model="form.maintenanceMode"
+              :sr-label="t('admin.functionalSettingsForm.maintenance.enable.toggle') || 'Enable maintenance mode'"
+            />
+          </div>
+
+          <div v-if="form.maintenanceMode" class="maintenance-warning">
+            <Icon name="lucide:alert-triangle" class="w-4 h-4" />
+            <p>{{ t('admin.functionalSettingsForm.maintenance.warning') || "Your storefront is unreachable by customers while this is on. Don't forget to turn it back off." }}</p>
+          </div>
+
+          <Transition name="reveal">
+            <div v-if="form.maintenanceMode" class="reveal-block">
+              <label class="field-label">{{ t('admin.functionalSettingsForm.maintenance.message.label') || 'Message shown to customers (optional)' }}</label>
+              <textarea
+                v-model="form.maintenanceMessage"
+                rows="3"
+                maxlength="300"
+                class="field-input"
+                :placeholder="t('admin.functionalSettingsForm.maintenance.message.placeholder') || 'We are performing scheduled maintenance and will be back soon.'"
+              />
+            </div>
+          </Transition>
+        </div>
+      </SettingsSection>
+
       <!-- Localization -->
       <SettingsSection
         v-show="visibleAnchors.includes('localization')"
@@ -545,6 +590,7 @@ const SECTION_GROUPS: Record<string, string[]> = {
   invoices: ['invoices'],
   announcement: ['announcement'],
   messaging: ['messaging'],
+  maintenance: ['maintenance'],
   localization: ['currency', 'localization']
 }
 
@@ -578,6 +624,10 @@ const SECTION_TITLES: Record<string, () => { title: string; subtitle: string }> 
   messaging: () => ({
     title: t('admin.functionalSettingsForm.messaging.title'),
     subtitle: t('admin.functionalSettingsForm.messaging.subtitle')
+  }),
+  maintenance: () => ({
+    title: t('admin.functionalSettingsForm.maintenance.title') || 'Maintenance mode',
+    subtitle: t('admin.functionalSettingsForm.maintenance.subtitle') || 'Temporarily close your storefront to customers.'
   }),
   localization: () => ({
     title: t('admin.settingsNav.items.localization') || 'Currency & Language',
@@ -634,7 +684,9 @@ const form = reactive({
   invoiceNumberPrefix: 'INV',
   invoiceFooterText: '',
   invoiceShowLogo: true,
-  whatsappConfirmationTemplate: defaultWhatsappTemplate
+  whatsappConfirmationTemplate: defaultWhatsappTemplate,
+  maintenanceMode: false,
+  maintenanceMessage: ''
 })
 
 const initialFormString = ref(JSON.stringify(form))
@@ -729,6 +781,8 @@ const updateForm = (data: any) => {
   form.invoiceFooterText = data.invoiceFooterText || ''
   form.invoiceShowLogo = data.invoiceShowLogo ?? true
   form.whatsappConfirmationTemplate = data.whatsappConfirmationTemplate || defaultWhatsappTemplate
+  form.maintenanceMode = data.maintenanceMode ?? false
+  form.maintenanceMessage = data.maintenanceMessage || ''
   initialFormString.value = JSON.stringify(form)
 }
 
@@ -784,7 +838,9 @@ const save = async () => {
         invoiceNumberPrefix: form.invoiceNumberPrefix,
         invoiceFooterText: form.invoiceFooterText,
         invoiceShowLogo: form.invoiceShowLogo,
-        whatsappConfirmationTemplate: form.whatsappConfirmationTemplate
+        whatsappConfirmationTemplate: form.whatsappConfirmationTemplate,
+        maintenanceMode: form.maintenanceMode,
+        maintenanceMessage: form.maintenanceMessage
       }
     })
     useState<any>('storeSettings').value = updated
@@ -978,6 +1034,19 @@ onMounted(() => {
 
 .fraud-manage-link:hover {
   text-decoration: underline;
+}
+
+.maintenance-warning {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  border-radius: 10px;
+  color: #f87171;
+  font-size: 12.5px;
+  line-height: 1.5;
 }
 
 /* Reveal block */
