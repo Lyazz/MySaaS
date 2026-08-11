@@ -68,7 +68,7 @@ const categoriesDropdownOpen = ref(false)
         <span class="font-medium text-[#2E1E20]">{{ category.title }}</span>
       </nav>
 
-      <div class="relative overflow-hidden rounded-[24px] bg-[#2E1E20] text-white mb-8 border border-[#C9A24B]/30">
+      <div class="relative overflow-hidden rounded-tl-[64px] rounded-tr-2xl rounded-br-[64px] rounded-bl-2xl bg-[#2E1E20] text-white mb-8 border border-[#C9A24B]/30">
         <img
           v-if="category.imageUrl"
           :src="category.imageUrl"
@@ -98,8 +98,8 @@ const categoriesDropdownOpen = ref(false)
       </div>
 
       <div class="flex flex-col lg:flex-row gap-8">
-        <!-- Sidebar Filters -->
-        <aside class="w-full lg:w-64 flex-shrink-0 space-y-8">
+        <!-- Sidebar Filters (arched-top bordered panel) -->
+        <aside class="w-full lg:w-64 flex-shrink-0 space-y-8 bg-[#FFFDF9] p-6 pt-8 rounded-tl-[48px] rounded-tr-lg rounded-br-lg rounded-bl-lg border border-[#C9A24B]/35 shadow-sm lg:sticky lg:top-24">
           <!-- Categories -->
           <div>
             <button
@@ -137,8 +137,8 @@ const categoriesDropdownOpen = ref(false)
 
         <!-- Main Content -->
         <div class="flex-1">
-          <!-- Header -->
-          <div class="bg-[#FFFDF9] p-6 rounded-[24px] border border-[#C9A24B]/35 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <!-- Header (cleaner, borderless toolbar) -->
+          <div class="pb-4 border-b border-[#C9A24B]/20 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
               <h1 class="text-2xl font-bold text-[#2E1E20]">
                 {{ category.title }}
@@ -151,7 +151,7 @@ const categoriesDropdownOpen = ref(false)
             <!-- Sort -->
             <div class="flex items-center gap-3">
               <span class="text-sm text-[#6B5850]">{{ storefrontContent.category.sortBy }}</span>
-              <select v-model="sortOption" class="rounded-xl border-[#C9A24B]/40 text-sm text-[#2E1E20] focus:border-brand-500 focus:ring-brand-500">
+              <select v-model="sortOption" class="bg-transparent border-0 border-b border-[#C9A24B]/30 text-sm text-[#2E1E20] focus:border-brand-500 focus:ring-0">
                 <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
                 <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
                 <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
@@ -163,7 +163,7 @@ const categoriesDropdownOpen = ref(false)
           <!-- Grid -->
           <div
             v-if="sortedProducts.length === 0"
-            class="bg-[#FFFDF9] rounded-[24px] border border-[#C9A24B]/35 shadow-sm p-12 text-center"
+            class="bg-[#FFFDF9] rounded-tl-[48px] rounded-tr-lg rounded-br-[48px] rounded-bl-lg border border-[#C9A24B]/35 shadow-sm p-12 text-center"
           >
             <Icon name="lucide:package-open" class="w-16 h-16 text-[#E4C58F] mx-auto mb-4" />
             <h3 class="text-lg font-medium text-[#2E1E20]">

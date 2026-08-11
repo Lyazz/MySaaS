@@ -345,7 +345,7 @@ async function handleSubmit() {
         <!-- Left Column: Attributes & Delivery -->
         <div class="lg:col-span-7 space-y-8">
           <!-- Personal Info -->
-          <div class="bg-[#FFFDF9] p-6 rounded-[28px] border border-[#C9A24B]/30 shadow-sm">
+          <div class="bg-[#FFFDF9] p-6 rounded-tl-[48px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl border border-[#C9A24B]/30 shadow-sm">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div class="col-span-2 md:col-span-1 space-y-2">
                 <label class="block text-sm font-semibold text-[#2E1E20]/85 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
@@ -423,7 +423,7 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery Options -->
-          <div v-if="form.wilaya && form.commune" class="bg-[#FFFDF9] p-6 rounded-[28px] border border-[#C9A24B]/30 shadow-sm">
+          <div v-if="form.wilaya && form.commune" class="bg-[#FFFDF9] p-6 rounded-tl-[48px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl border border-[#C9A24B]/30 shadow-sm">
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-sm font-bold text-[#2E1E20] uppercase tracking-wide">
                 {{ storefrontContent.checkout.sections.deliveryOptions }}
@@ -522,7 +522,7 @@ async function handleSubmit() {
               </div>
             </div>
           </div>
-          <div v-else class="bg-[#FFFDF9] p-6 rounded-[28px] border border-[#C9A24B]/30 text-center text-sm text-[#9C8B82] shadow-sm">
+          <div v-else class="bg-[#FFFDF9] p-6 rounded-tl-[48px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl border border-[#C9A24B]/30 text-center text-sm text-[#9C8B82] shadow-sm">
             <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-[#C9A24B]" />
             {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
@@ -531,7 +531,7 @@ async function handleSubmit() {
 
         <!-- Right Column: Summary -->
         <div class="lg:col-span-5">
-          <div class="bg-[#FFFDF9] p-7 rounded-[28px] shadow-md border border-[#C9A24B]/30 sticky top-24">
+          <div class="bg-[#FFFDF9] p-7 rounded-tl-[56px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl shadow-md border border-[#C9A24B]/30 sticky top-24">
             <div class="flex items-center justify-between mb-6 pb-4 border-b border-[#C9A24B]/25">
               <h2 class="text-xl font-bold text-[#2E1E20]">
                 Order Summary

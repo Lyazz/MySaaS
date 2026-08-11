@@ -584,7 +584,7 @@ const scrollToForm = () => {
             v-if="codEnabled"
             ref="mainOrderFormRef"
             data-test="cod-order-card"
-            class="bg-[#FFFDF9] rounded-[28px] p-6 md:p-8 border border-[#C9A24B]/30 shadow-sm relative overflow-hidden"
+            class="bg-[#FFFDF9] rounded-tl-[48px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl p-6 md:p-8 border border-[#C9A24B]/30 shadow-sm relative overflow-hidden"
         >
             <div class="absolute top-0 start-0 w-full h-1 bg-brand-600" />
 

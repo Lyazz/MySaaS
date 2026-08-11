@@ -31,10 +31,10 @@ const getProductMainImage = (product: any) => {
             v-for="product in products"
             :key="product.id"
             :to="`/product/${product.slug}`"
-            class="group bg-[#FFFDF9] rounded-[20px] p-4 shadow-sm border border-[#C9A24B]/30 hover:shadow-lg hover:border-brand-300 transition-all duration-300 flex flex-col"
+            class="group bg-[#FFFDF9] rounded-tl-[32px] rounded-tr-lg rounded-br-[32px] rounded-bl-lg p-4 shadow-sm border border-[#C9A24B]/30 hover:shadow-lg hover:border-brand-300 transition-all duration-300 flex flex-col"
           >
-            <!-- Image Container -->
-            <div class="aspect-square bg-[#F3E7D8] rounded-2xl overflow-hidden mb-4 relative z-0">
+            <!-- Image Container (arch motif) -->
+            <div class="aspect-square bg-[#F3E7D8] rounded-tl-[24px] rounded-tr-md rounded-br-[24px] rounded-bl-md overflow-hidden mb-4 relative z-0">
               <img
                 :src="getProductMainImage(product)"
                 :alt="product.title"

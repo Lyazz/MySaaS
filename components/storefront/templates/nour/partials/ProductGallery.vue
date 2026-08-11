@@ -87,10 +87,10 @@ watch(() => props.images, () => {
 </script>
 
 <template>
-    <div class="bg-[#FFFDF9] md:rounded-[28px] p-0 md:p-6 md:shadow-sm md:border border-[#C9A24B]/30 mb-8 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-left">
-        <!-- Main Image Carousel Area -->
+    <div class="bg-[#FFFDF9] md:rounded-tl-[64px] md:rounded-tr-2xl md:rounded-br-[64px] md:rounded-bl-2xl p-0 md:p-6 md:shadow-sm md:border border-[#C9A24B]/30 mb-8 lg:mb-0 animate-fade-in-left">
+        <!-- Main Image (full-width, magazine-style) -->
         <div
-            class="aspect-[4/5] rounded-none md:rounded-[20px] overflow-hidden bg-[#F3E7D8] relative group cursor-zoom-in mb-4 md:border border-[#C9A24B]/25"
+            class="aspect-[4/5] rounded-none md:rounded-tl-[52px] md:rounded-tr-lg md:rounded-br-[52px] md:rounded-bl-lg overflow-hidden bg-[#F3E7D8] relative group cursor-zoom-in mb-4 md:border border-[#C9A24B]/25"
             @touchstart="handleTouchStart"
             @touchend="handleTouchEnd"
             @mousemove="onPointerMove"
