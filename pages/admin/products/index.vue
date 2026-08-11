@@ -551,6 +551,7 @@
 	            </p>
 	          </div>
 	          <button
+	            v-if="!importingCsv"
 	            type="button"
 	            class="rounded-md p-2" style="color: var(--text-tertiary)"
 	            @click="closeImportModal"
@@ -568,7 +569,27 @@
 	            @change="onImportCsvFileChange"
 	          >
 
-	          <div class="rounded-md p-4" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
+	          <div
+	            v-if="importingCsv"
+	            class="rounded-md p-4 space-y-2" style="border: 1px solid var(--surface-border); background: var(--surface-1)"
+	          >
+	            <div class="flex items-center justify-between text-sm" style="color: var(--text-primary)">
+	              <span>{{ importProgressLabel }}</span>
+	              <span v-if="importProgress.total > 0">{{ importProgress.processed }} / {{ importProgress.total }}</span>
+	            </div>
+	            <div class="h-2 w-full overflow-hidden rounded-full" style="background: var(--surface-3)">
+	              <div
+	                class="h-full rounded-full transition-all duration-200"
+	                style="background: var(--brand)"
+	                :style="{ width: importProgressPercent + '%' }"
+	              />
+	            </div>
+	            <p class="text-xs" style="color: var(--text-tertiary)">
+	              {{ t('admin.pages.products.index.bulk.progressDoNotClose') }}
+	            </p>
+	          </div>
+
+	          <div v-if="!importingCsv" class="rounded-md p-4" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
 	            <div class="flex items-start justify-between gap-3">
 	              <div class="min-w-0">
 	                <div class="text-sm font-semibold" style="color: var(--text-primary)">
@@ -633,9 +654,57 @@
 	        </div>
 	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
 	          <button
+	            v-if="!importingCsv"
 	            type="button"
 	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
 	            @click="closeImportModal"
+	          >
+	            {{ t('admin.common.close') }}
+	          </button>
+	        </div>
+	      </div>
+	    </div>
+	    </Teleport>
+
+	    <!-- Export archive progress modal -->
+	    <Teleport to="body">
+	    <div
+	      v-if="showExportArchiveModal"
+	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+	    >
+	      <div class="w-full max-w-md rounded-lg shadow-xl flex flex-col" style="background: var(--surface-1)">
+	        <div class="px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
+	          <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
+	            {{ t('admin.pages.products.index.bulk.exportArchive') }}
+	          </h3>
+	        </div>
+	        <div class="px-6 py-5 space-y-3">
+	          <template v-if="exportArchiveStatus === 'failed'">
+	            <p class="text-sm text-red-700">{{ exportArchiveError }}</p>
+	          </template>
+	          <template v-else>
+	            <div class="flex items-center justify-between text-sm" style="color: var(--text-primary)">
+	              <span>{{ exportArchiveStatus === 'completed' ? t('admin.pages.products.index.bulk.progressDone') : t('admin.pages.products.index.bulk.progressExporting') }}</span>
+	              <span v-if="exportArchiveProgress.total > 0">{{ exportArchiveProgress.processed }} / {{ exportArchiveProgress.total }}</span>
+	            </div>
+	            <div class="h-2 w-full overflow-hidden rounded-full" style="background: var(--surface-3)">
+	              <div
+	                class="h-full rounded-full transition-all duration-200"
+	                style="background: var(--brand)"
+	                :style="{ width: exportArchiveProgressPercent + '%' }"
+	              />
+	            </div>
+	            <p v-if="exportArchiveStatus === 'processing'" class="text-xs" style="color: var(--text-tertiary)">
+	              {{ t('admin.pages.products.index.bulk.progressDoNotClose') }}
+	            </p>
+	          </template>
+	        </div>
+	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
+	          <button
+	            v-if="exportArchiveStatus !== 'processing'"
+	            type="button"
+	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
+	            @click="showExportArchiveModal = false"
 	          >
 	            {{ t('admin.common.close') }}
 	          </button>
@@ -859,7 +928,87 @@ const showImportCsvModal = ref(false)
 const importingCsv = ref(false)
 const importCsvResult = ref<any | null>(null)
 const importCsvInput = ref<HTMLInputElement | null>(null)
+const importProgress = ref({ phase: 'rows' as 'rows' | 'images' | 'archive', processed: 0, total: 0 })
+
+const showExportArchiveModal = ref(false)
 const exportingArchive = ref(false)
+const exportArchiveStatus = ref<'processing' | 'completed' | 'failed'>('processing')
+const exportArchiveError = ref<string | null>(null)
+const exportArchiveProgress = ref({ processed: 0, total: 0 })
+
+const importProgressPercent = computed(() => {
+  const { processed, total } = importProgress.value
+  if (!total) return 0
+  return Math.min(100, Math.round((processed / total) * 100))
+})
+const importProgressLabel = computed(() => {
+  if (importProgress.value.phase === 'images') return t('admin.pages.products.index.bulk.progressUploadingImages')
+  if (importProgress.value.phase === 'archive') return t('admin.pages.products.index.bulk.progressExporting')
+  return t('admin.pages.products.index.bulk.progressImporting')
+})
+const exportArchiveProgressPercent = computed(() => {
+  const { processed, total } = exportArchiveProgress.value
+  if (!total) return exportArchiveStatus.value === 'completed' ? 100 : 0
+  return Math.min(100, Math.round((processed / total) * 100))
+})
+
+function preventUnload(event: BeforeUnloadEvent) {
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+function guardNavigationWhileBusy() {
+  window.addEventListener('beforeunload', preventUnload)
+}
+
+function releaseNavigationGuard() {
+  window.removeEventListener('beforeunload', preventUnload)
+}
+
+/**
+ * Reads a fetch() response body as newline-delimited JSON, invoking onEvent for each parsed
+ * line as it arrives (rather than buffering the whole response) so long-running bulk product
+ * operations can report live progress instead of leaving the UI looking frozen.
+ */
+async function readNdjsonStream(response: Response, onEvent: (evt: any) => void) {
+  if (!response.body) throw new Error('Streaming is not supported by this browser')
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    let newlineIndex = buffer.indexOf('\n')
+    while (newlineIndex >= 0) {
+      const line = buffer.slice(0, newlineIndex)
+      buffer = buffer.slice(newlineIndex + 1)
+      if (line.trim()) onEvent(JSON.parse(line))
+      newlineIndex = buffer.indexOf('\n')
+    }
+  }
+
+  if (buffer.trim()) onEvent(JSON.parse(buffer))
+}
+
+function base64ToBlob(base64: string, mimeType: string): Blob {
+  const byteChars = atob(base64)
+  const bytes = new Uint8Array(byteChars.length)
+  for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i)
+  return new Blob([bytes], { type: mimeType })
+}
+
+function triggerBlobDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
 
 const productsImportTemplateHeader =
   'id,slug,title,price,stock,isActive,categoryId,categorySlug,categoryIds,categorySlugs,description,miniDescription,images'
@@ -1226,29 +1375,38 @@ async function exportProductsCsv() {
 
 async function exportProductsArchive() {
   exportingArchive.value = true
+  exportArchiveStatus.value = 'processing'
+  exportArchiveError.value = null
+  exportArchiveProgress.value = { processed: 0, total: 0 }
+  showExportArchiveModal.value = true
+  guardNavigationWhileBusy()
+
   try {
-    const zip = await $fetch<Blob>('/api/admin/products/export.zip', {
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      },
-      query: selectedIds.value.length ? { ids: selectedIds.value.join(',') } : undefined,
-      responseType: 'blob' as any
+    const query = selectedIds.value.length ? `?ids=${encodeURIComponent(selectedIds.value.join(','))}` : ''
+    const res = await fetch(`/api/admin/products/export.zip/stream${query}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
     })
 
-    const blob = zip instanceof Blob ? zip : new Blob([zip as any], { type: 'application/zip' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `products-archive-${new Date().toISOString().slice(0, 10)}.zip`
-    document.body.appendChild(a)
-    a.click()
-    a.remove()
-    URL.revokeObjectURL(url)
-  } catch (error) {
+    if (!res.ok) throw new Error(`Export failed (${res.status})`)
+
+    await readNdjsonStream(res, (evt) => {
+      if (evt.type === 'progress') {
+        exportArchiveProgress.value = { processed: evt.processed, total: evt.total }
+      } else if (evt.type === 'done') {
+        exportArchiveProgress.value = { processed: evt.total ?? exportArchiveProgress.value.total, total: exportArchiveProgress.value.total }
+        triggerBlobDownload(base64ToBlob(evt.dataBase64, 'application/zip'), evt.filename || `products-archive-${new Date().toISOString().slice(0, 10)}.zip`)
+        exportArchiveStatus.value = 'completed'
+      } else if (evt.type === 'error') {
+        throw new Error(evt.message || 'Export failed')
+      }
+    })
+  } catch (error: any) {
     console.error('Failed to export archive:', error)
-    alert(t('admin.pages.products.index.bulk.exportArchiveError'))
+    exportArchiveStatus.value = 'failed'
+    exportArchiveError.value = error?.message || t('admin.pages.products.index.bulk.exportArchiveError')
   } finally {
     exportingArchive.value = false
+    releaseNavigationGuard()
   }
 }
 
@@ -1282,19 +1440,36 @@ async function onImportCsvFileChange(event: Event) {
 
   importingCsv.value = true
   importCsvResult.value = null
+  importProgress.value = { phase: 'rows', processed: 0, total: 0 }
+  guardNavigationWhileBusy()
+
   try {
     const isZip = file.name.toLowerCase().endsWith('.zip') || file.type === 'application/zip'
-    const endpoint = isZip ? '/api/admin/products/import.zip' : '/api/admin/products/import.csv'
+    const endpoint = isZip ? '/api/admin/products/import.zip/stream' : '/api/admin/products/import.csv/stream'
 
     const form = new FormData()
     form.append('file', file)
 
-    const result = await $fetch(endpoint, {
+    const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      },
+      headers: { Authorization: `Bearer ${authStore.token}` },
       body: form
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      throw new Error(body?.statusMessage || body?.message || `Import failed (${res.status})`)
+    }
+
+    let result: any = null
+    await readNdjsonStream(res, (evt) => {
+      if (evt.type === 'progress') {
+        importProgress.value = { phase: evt.phase || 'rows', processed: evt.processed, total: evt.total }
+      } else if (evt.type === 'done') {
+        result = evt.summary
+      } else if (evt.type === 'error') {
+        throw new Error(evt.message || 'Import failed')
+      }
     })
 
     importCsvResult.value = result
@@ -1317,6 +1492,7 @@ async function onImportCsvFileChange(event: Event) {
     }
   } finally {
     importingCsv.value = false
+    releaseNavigationGuard()
   }
 }
 

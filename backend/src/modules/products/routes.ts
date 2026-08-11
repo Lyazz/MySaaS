@@ -62,6 +62,20 @@ router.get('/export.csv', bulkController.exportCsv.bind(bulkController))
 router.post('/import.csv', csvUpload.single('file'), bulkUploadErrorMiddleware, bulkController.importCsv.bind(bulkController))
 router.get('/export.zip', bulkController.exportZip.bind(bulkController))
 router.post('/import.zip', zipUpload.single('file'), bulkUploadErrorMiddleware, bulkController.importZip.bind(bulkController))
+// Progress-reporting (NDJSON) variants, used by the admin UI for large catalogs.
+router.get('/export.zip/stream', bulkController.exportZipStream.bind(bulkController))
+router.post(
+    '/import.csv/stream',
+    csvUpload.single('file'),
+    bulkUploadErrorMiddleware,
+    bulkController.importCsvStream.bind(bulkController)
+)
+router.post(
+    '/import.zip/stream',
+    zipUpload.single('file'),
+    bulkUploadErrorMiddleware,
+    bulkController.importZipStream.bind(bulkController)
+)
 router.patch('/bulk', bulkController.bulkPatch.bind(bulkController))
 router.delete('/bulk', bulkController.bulkDelete.bind(bulkController))
 router.post('/:id/duplicate', bulkController.duplicate.bind(bulkController))
