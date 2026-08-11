@@ -2133,6 +2133,11 @@
             "label": "Pistachio",
             "description": "Univers éditorial chaleureux et premium pour l'épicerie fine et le retail raffiné.",
             "storeTypes": "Food premium, cadeaux, fruits secs, retail gourmet"
+          },
+          "nour": {
+            "label": "Nour Élégance",
+            "description": "Élégance drapée et douce pour la mode modeste.",
+            "storeTypes": "Abayas, hijabs, kaftans, mode modeste"
           }
         }
       },

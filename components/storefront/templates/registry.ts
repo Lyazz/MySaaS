@@ -170,6 +170,20 @@ import ArenaShop from './arena/Shop.vue'
 import ArenaCart from './arena/Cart.vue'
 import ArenaProductLandingPage from './arena/ProductLandingPage.vue'
 
+// Nour Imports
+import NourHome from './nour/Home.vue'
+import NourStoreShell from './nour/StoreShell.vue'
+import NourThemeProvider from './nour/ThemeProvider.vue'
+import NourCategory from './nour/Category.vue'
+import NourContact from './nour/ContactPage.vue'
+import NourAbout from './nour/AboutPage.vue'
+import NourCheckout from './nour/Checkout.vue'
+import NourProduct from './nour/Product.vue'
+import NourProductCard from './nour/ProductCard.vue'
+import NourShop from './nour/Shop.vue'
+import NourCart from './nour/Cart.vue'
+import NourProductLandingPage from './nour/ProductLandingPage.vue'
+
 import ModernProductLandingPage from './modern/ProductLandingPage.vue'
 import ClassicProductLandingPage from './classic/ProductLandingPage.vue'
 import StreetProductLandingPage from './street/ProductLandingPage.vue'
@@ -181,11 +195,11 @@ import WellnessProductLandingPage from './wellness/ProductLandingPage.vue'
 import PlayfulProductLandingPage from './playful/ProductLandingPage.vue'
 import ActivewearProductLandingPage from './activewear/ProductLandingPage.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena'
+export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena' | 'nour'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena', 'nour'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
@@ -200,7 +214,8 @@ export const homeTemplates = {
   activewear: ActivewearHome,
   chrono: ChronoHome,
   maison: MaisonHome,
-  arena: ArenaHome
+  arena: ArenaHome,
+  nour: NourHome
 } satisfies Record<TemplateKey, Component>
 
 export const productTemplates = {
@@ -216,7 +231,8 @@ export const productTemplates = {
   activewear: ActivewearProduct,
   chrono: ChronoProduct,
   maison: MaisonProduct,
-  arena: ArenaProduct
+  arena: ArenaProduct,
+  nour: NourProduct
 } satisfies Record<TemplateKey, Component>
 
 export const productCardTemplates = {
@@ -232,7 +248,8 @@ export const productCardTemplates = {
   activewear: ActivewearProductCard,
   chrono: ChronoProductCard,
   maison: MaisonProductCard,
-  arena: ArenaProductCard
+  arena: ArenaProductCard,
+  nour: NourProductCard
 } satisfies Record<TemplateKey, Component>
 
 export const categoryTemplates = {
@@ -248,7 +265,8 @@ export const categoryTemplates = {
   activewear: ActivewearCategory,
   chrono: ChronoCategory,
   maison: MaisonCategory,
-  arena: ArenaCategory
+  arena: ArenaCategory,
+  nour: NourCategory
 } satisfies Record<TemplateKey, Component>
 
 export const storeShellTemplates = {
@@ -264,7 +282,8 @@ export const storeShellTemplates = {
   activewear: ActivewearStoreShell,
   chrono: ChronoStoreShell,
   maison: MaisonStoreShell,
-  arena: ArenaStoreShell
+  arena: ArenaStoreShell,
+  nour: NourStoreShell
 } satisfies Record<TemplateKey, Component>
 
 export const shopTemplates = {
@@ -280,7 +299,8 @@ export const shopTemplates = {
   activewear: ActivewearShop,
   chrono: ChronoShop,
   maison: MaisonShop,
-  arena: ArenaShop
+  arena: ArenaShop,
+  nour: NourShop
 } satisfies Record<TemplateKey, Component>
 
 export const checkoutTemplates = {
@@ -296,7 +316,8 @@ export const checkoutTemplates = {
   activewear: ActivewearCheckout,
   chrono: ChronoCheckout,
   maison: MaisonCheckout,
-  arena: ArenaCheckout
+  arena: ArenaCheckout,
+  nour: NourCheckout
 } satisfies Record<TemplateKey, Component>
 
 export const cartTemplates = {
@@ -312,7 +333,8 @@ export const cartTemplates = {
   activewear: ActivewearCart,
   chrono: ChronoCart,
   maison: MaisonCart,
-  arena: ArenaCart
+  arena: ArenaCart,
+  nour: NourCart
 } satisfies Record<TemplateKey, Component>
 
 export const aboutPageTemplates = {
@@ -328,7 +350,8 @@ export const aboutPageTemplates = {
   activewear: ActivewearAbout,
   chrono: ChronoAbout,
   maison: MaisonAbout,
-  arena: ArenaAbout
+  arena: ArenaAbout,
+  nour: NourAbout
 } satisfies Record<TemplateKey, Component>
 
 export const contactPageTemplates = {
@@ -344,7 +367,8 @@ export const contactPageTemplates = {
   activewear: ActivewearContact,
   chrono: ChronoContact,
   maison: MaisonContact,
-  arena: ArenaContact
+  arena: ArenaContact,
+  nour: NourContact
 } satisfies Record<TemplateKey, Component>
 
 export const themeProviderTemplates = {
@@ -360,7 +384,8 @@ export const themeProviderTemplates = {
   activewear: ActivewearThemeProvider,
   chrono: ChronoThemeProvider,
   maison: MaisonThemeProvider,
-  arena: ArenaThemeProvider
+  arena: ArenaThemeProvider,
+  nour: NourThemeProvider
 } satisfies Record<TemplateKey, Component>
 
 export const productLandingPageTemplates = {
@@ -376,7 +401,8 @@ export const productLandingPageTemplates = {
   activewear: ActivewearProductLandingPage,
   chrono: ModernProductLandingPage,
   maison: ModernProductLandingPage,
-  arena: ArenaProductLandingPage
+  arena: ArenaProductLandingPage,
+  nour: NourProductLandingPage
 } satisfies Record<TemplateKey, Component>
 
 export const selectTemplate = (
