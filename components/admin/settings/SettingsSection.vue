@@ -1,14 +1,31 @@
 <template>
-  <section :id="anchorId" class="settings-section">
+  <section
+    :id="anchorId"
+    class="settings-section"
+  >
     <div class="settings-section-head">
       <div class="settings-section-titles">
         <div class="settings-section-title-row">
-          <Icon v-if="icon" :name="icon" class="settings-section-icon" />
-          <h2 class="settings-section-title">{{ title }}</h2>
+          <Icon
+            v-if="icon"
+            :name="icon"
+            class="settings-section-icon"
+          />
+          <h2 class="settings-section-title">
+            {{ title }}
+          </h2>
         </div>
-        <p v-if="subtitle" class="settings-section-subtitle">{{ subtitle }}</p>
+        <p
+          v-if="subtitle"
+          class="settings-section-subtitle"
+        >
+          {{ subtitle }}
+        </p>
       </div>
-      <div v-if="$slots.aside" class="settings-section-aside">
+      <div
+        v-if="$slots.aside"
+        class="settings-section-aside"
+      >
         <slot name="aside" />
       </div>
     </div>
@@ -43,6 +60,7 @@ defineProps<{
 
 .settings-section-head {
   display: flex;
+  flex-wrap: wrap;
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
@@ -51,10 +69,21 @@ defineProps<{
   border-bottom: 1px solid var(--surface-border);
 }
 
+.settings-section-titles {
+  min-width: 0;
+  flex: 1 1 260px;
+}
+
+.settings-section-aside {
+  min-width: 0;
+  max-width: 100%;
+}
+
 .settings-section-title-row {
   display: flex;
   align-items: center;
   gap: 10px;
+  min-width: 0;
 }
 
 .settings-section-icon {

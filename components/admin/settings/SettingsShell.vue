@@ -23,10 +23,10 @@ import SettingsSidebarNav from './SettingsSidebarNav.vue'
   min-width: 0;
 }
 
-@media (max-width: 860px) {
+@media (max-width: 900px) {
   .settings-shell {
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
   }
 }
 </style>
