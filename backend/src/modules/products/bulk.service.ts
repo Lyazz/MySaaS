@@ -1,11 +1,43 @@
+import path from 'path'
+import AdmZip from 'adm-zip'
 import prisma from '../../lib/prisma'
 import { parseCsv, stringifyCsv } from '../../lib/csv'
 import { InventoryService } from '../inventory/inventory.service'
 import { ProductsService } from './products.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { buildPublicUrl } from '../../lib/s3'
+import { readPublicAssetBuffer } from '../../lib/public-assets'
+import { UploadService } from '../upload/upload.service'
 import { sanitizeOptionalRichText } from '../../lib/rich-text'
 import { syncDerivedProductPrice } from './product-price-sync'
+
+const ARCHIVE_CSV_ENTRY = 'products.csv'
+const ARCHIVE_IMAGES_DIR = 'images'
+
+const EXT_BY_MIME: Record<string, string> = {
+    'image/png': '.png',
+    'image/jpeg': '.jpg',
+    'image/webp': '.webp'
+}
+
+const MIME_BY_EXT: Record<string, string> = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp'
+}
+
+const guessImageExtension = (url: string, contentType?: string): string => {
+    if (contentType && EXT_BY_MIME[contentType.toLowerCase()]) return EXT_BY_MIME[contentType.toLowerCase()]!
+    try {
+        const pathname = /^https?:\/\//i.test(url) ? new URL(url).pathname : url
+        const ext = path.extname(pathname).toLowerCase()
+        if (ext && MIME_BY_EXT[ext]) return ext
+    } catch {
+        // ignore
+    }
+    return '.jpg'
+}
 
 type ImportSummary = {
     created: number
@@ -208,6 +240,7 @@ const resolveCategoryIdsForImport = async (
 export class BulkProductsService {
     private inventory = new InventoryService()
     private products = new ProductsService()
+    private uploads = new UploadService()
 
     async exportProductsCsv(tenantId: string, opts?: { ids?: string[] | null }) {
         const ids = opts?.ids?.filter(Boolean) ?? null
@@ -264,6 +297,174 @@ export class BulkProductsService {
         })
 
         return stringifyCsv(header, rows)
+    }
+
+    /**
+     * Export products as a downloadable ZIP archive: a products.csv plus the actual image
+     * files (fetched from S3/local storage) so the catalog can be backed up/restored with images
+     * intact, rather than relying on image URLs that may not resolve in another environment.
+     */
+    async exportProductsArchive(tenantId: string, opts?: { ids?: string[] | null }): Promise<Buffer> {
+        const ids = opts?.ids?.filter(Boolean) ?? null
+        const products = await prisma.product.findMany({
+            where: { tenantId, ...(ids && ids.length > 0 ? { id: { in: ids } } : {}) },
+            include: {
+                category: { select: { id: true, slug: true, title: true } },
+                categoryLinks: {
+                    where: { tenantId },
+                    include: { category: { select: { id: true, slug: true, title: true } } }
+                }
+            },
+            orderBy: { createdAt: 'desc' }
+        })
+
+        const header = [
+            'id',
+            'title',
+            'slug',
+            'isActive',
+            'price',
+            'stock',
+            'categoryId',
+            'categorySlug',
+            'categoryIds',
+            'categorySlugs',
+            'description',
+            'miniDescription',
+            'images'
+        ]
+
+        const zip = new AdmZip()
+        const rows: Array<Record<string, string>> = []
+
+        for (const p of products) {
+            const categories = (p.categoryLinks || [])
+                .map((link: any) => link?.category)
+                .filter((category: any) => category?.id)
+            const categoryIds = categories.map((category: any) => category.id)
+            const categorySlugs = categories.map((category: any) => category.slug)
+
+            const imageUrls = (p.images ?? []) as string[]
+            const archivedRefs: string[] = []
+
+            for (let i = 0; i < imageUrls.length; i++) {
+                const url = imageUrls[i]!
+                const asset = await readPublicAssetBuffer(url)
+                if (!asset) {
+                    // Couldn't fetch the bytes (e.g. external host down) — keep the URL so
+                    // import can still fall back to linking it directly.
+                    archivedRefs.push(url)
+                    continue
+                }
+
+                const ext = guessImageExtension(url, asset.contentType)
+                const entryName = `${ARCHIVE_IMAGES_DIR}/${p.id}/${i}${ext}`
+                zip.addFile(entryName, asset.buffer)
+                archivedRefs.push(entryName)
+            }
+
+            rows.push({
+                id: p.id,
+                title: p.title,
+                slug: p.slug,
+                isActive: p.isActive ? 'true' : 'false',
+                price: String(p.price),
+                stock: String(p.stock),
+                categoryId: p.categoryId ?? '',
+                categorySlug: p.category?.slug ?? '',
+                categoryIds: categoryIds.join('|'),
+                categorySlugs: categorySlugs.join('|'),
+                description: p.description ?? '',
+                miniDescription: p.miniDescription ?? '',
+                images: archivedRefs.join('|')
+            })
+        }
+
+        zip.addFile(ARCHIVE_CSV_ENTRY, Buffer.from(stringifyCsv(header, rows), 'utf8'))
+        return zip.toBuffer()
+    }
+
+    /**
+     * Import products from a ZIP archive produced by exportProductsArchive: uploads the bundled
+     * image files to this tenant's storage, rewrites the CSV image references to the resulting
+     * URLs, then delegates to importProductsCsv for the actual create/update logic.
+     */
+    async importProductsArchive(
+        tenantId: string,
+        zipBuffer: Buffer,
+        opts?: { actorUserId?: string | null }
+    ): Promise<ImportSummary> {
+        let zip: AdmZip
+        try {
+            zip = new AdmZip(zipBuffer)
+        } catch {
+            throw new Error('Invalid ZIP archive')
+        }
+
+        const entries = zip.getEntries().filter((e) => !e.isDirectory)
+        const csvEntry = entries.find((e) => e.entryName.replace(/^\/+/, '').toLowerCase() === ARCHIVE_CSV_ENTRY)
+        if (!csvEntry) throw new Error(`Archive must contain a ${ARCHIVE_CSV_ENTRY} file`)
+
+        const entryByName = new Map<string, (typeof entries)[number]>(
+            entries.map((e) => [e.entryName.replace(/^\/+/, ''), e])
+        )
+        const uploadedUrlByEntry = new Map<string, string>()
+        const archiveWarnings: Array<{ row: number; message: string }> = []
+
+        const csvText = csvEntry.getData().toString('utf8')
+        const parsed = parseCsv(csvText)
+
+        for (let i = 0; i < parsed.records.length; i++) {
+            const record = parsed.records[i]!
+            const rowNumber = i + 2
+            const raw = (record.images ?? '').trim()
+            if (!raw) continue
+
+            const parts = raw.split('|').map((p) => p.trim()).filter(Boolean)
+            const resolvedParts: string[] = []
+
+            for (const part of parts) {
+                const normalizedName = part.replace(/^\.?\/+/, '')
+                const entry = entryByName.get(normalizedName)
+                if (!entry) {
+                    // Not a bundled file (already a URL/path) — keep as-is for normal import handling.
+                    resolvedParts.push(part)
+                    continue
+                }
+
+                let uploadedUrl = uploadedUrlByEntry.get(normalizedName)
+                if (!uploadedUrl) {
+                    try {
+                        const buffer = entry.getData()
+                        const ext = path.extname(normalizedName).toLowerCase()
+                        const mimeType = MIME_BY_EXT[ext] || 'image/jpeg'
+                        const result = await this.uploads.uploadPublicImage({
+                            tenantId,
+                            originalName: path.basename(normalizedName),
+                            mimeType,
+                            buffer
+                        })
+                        uploadedUrl = result.url
+                        uploadedUrlByEntry.set(normalizedName, uploadedUrl)
+                    } catch (error: any) {
+                        archiveWarnings.push({
+                            row: rowNumber,
+                            message: `Failed to import image ${normalizedName}: ${error?.message || 'upload failed'}`
+                        })
+                        continue
+                    }
+                }
+
+                resolvedParts.push(uploadedUrl)
+            }
+
+            record.images = resolvedParts.join('|')
+        }
+
+        const rebuiltCsv = stringifyCsv(parsed.header, parsed.records)
+        const summary = await this.importProductsCsv(tenantId, rebuiltCsv, opts)
+        summary.warnings.push(...archiveWarnings)
+        return summary
     }
 
     async importProductsCsv(

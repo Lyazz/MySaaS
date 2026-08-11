@@ -40,6 +40,7 @@
     "@types/sanitize-html": "^2.16.1",
     "@vueup/vue-quill": "^1.2.0",
     "@vueuse/motion": "^3.0.3",
+    "adm-zip": "^0.5.18",
     "axios": "^1.13.2",
     "bcrypt": "^6.0.0",
     "bcryptjs": "^3.0.3",

@@ -1,8 +1,22 @@
 import request from 'supertest'
+import AdmZip from 'adm-zip'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
 import { signAccessToken } from '../../backend/src/lib/jwt'
+
+// Minimal valid 1x1 PNG, reused to exercise the real image-upload pipeline (sharp optimizeImage).
+const createTestPng = () =>
+    Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+        0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+        0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89,
+        0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54,
+        0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44,
+        0xae, 0x42, 0x60, 0x82
+    ])
 
 describe('Admin products bulk ops', () => {
     const slugA = `bulk-a-${Date.now()}`
@@ -292,6 +306,80 @@ describe('Admin products bulk ops', () => {
         expect(warningsText).toMatch(/Ignoring unsupported columns/i)
         expect(warningsText).toMatch(/name_i18n/i)
         expect(warningsText).toMatch(/description_i18n/i)
+    })
+
+    it('exports a ZIP archive containing products.csv', async () => {
+        const res = await request(app)
+            .get('/api/admin/products/export.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .buffer(true)
+            .parse((response, callback) => {
+                const chunks: Buffer[] = []
+                response.on('data', (chunk: Buffer) => chunks.push(chunk))
+                response.on('end', () => callback(null, Buffer.concat(chunks)))
+            })
+
+        expect(res.status).toBe(200)
+        expect(String(res.headers['content-type'])).toContain('application/zip')
+
+        const zip = new AdmZip(res.body as Buffer)
+        const csvEntry = zip.getEntries().find((e) => e.entryName === 'products.csv')
+        expect(csvEntry).toBeTruthy()
+
+        const csvText = csvEntry!.getData().toString('utf8')
+        expect(csvText).toContain('id,title,slug')
+        expect(csvText).toContain('Bulk Product Updated')
+    })
+
+    it('rejects cross-tenant admin token for archive export', async () => {
+        const res = await request(app)
+            .get('/api/admin/products/export.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminBToken}`)
+
+        expect(res.status).toBe(403)
+    })
+
+    it('imports a ZIP archive, uploading bundled images and creating the product', async () => {
+        const slug = `zip-import-${Date.now()}`
+        const csv = [
+            'slug,title,price,images',
+            `${slug},Zip Imported Product,49.99,images/${slug}.png`
+        ].join('\n')
+
+        const zip = new AdmZip()
+        zip.addFile('products.csv', Buffer.from(csv, 'utf8'))
+        zip.addFile(`images/${slug}.png`, createTestPng())
+
+        const res = await request(app)
+            .post('/api/admin/products/import.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', zip.toBuffer(), { filename: 'archive.zip', contentType: 'application/zip' })
+
+        expect(res.status).toBe(200)
+        expect(res.body.errors?.length || 0).toBe(0)
+        expect(res.body.created).toBe(1)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantAId, slug } })
+        expect(created).toBeTruthy()
+
+        const images = (created as any)?.images as string[]
+        expect(images?.length).toBe(1)
+        // The bundled zip-relative reference must have been replaced by a real, tenant-scoped upload URL.
+        expect(images[0]).not.toBe(`images/${slug}.png`)
+        expect(images[0]).toContain(tenantAId)
+    })
+
+    it('rejects non-ZIP uploads on the archive import endpoint', async () => {
+        const res = await request(app)
+            .post('/api/admin/products/import.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', Buffer.from('id,title\n', 'utf8'), { filename: 'not-a-zip.csv', contentType: 'text/csv' })
+
+        expect(res.status).toBe(400)
     })
 
     it('bulk patches products and duplicates selected product', async () => {

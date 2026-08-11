@@ -44,6 +44,17 @@
                   {{ t('admin.pages.products.index.bulk.export') }}
                 </button>
               </MenuItem>
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
+                  :disabled="loading || exportingArchive"
+                  @click="exportProductsArchive"
+                >
+                  <Icon name="lucide:archive" class="me-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  {{ t('admin.pages.products.index.bulk.exportArchive') }}
+                </button>
+              </MenuItem>
             </div>
           </MenuItems>
         </transition>
@@ -551,7 +562,7 @@
 	          <input
 	            ref="importCsvInput"
 	            type="file"
-	            accept=".csv,text/csv"
+	            accept=".csv,.zip,text/csv,application/zip,application/x-zip-compressed"
 	            class="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:[background:rgba(var(--brand-rgb)/0.08)] file:px-4 file:py-2 file:text-sm file:font-semibold file:[color:var(--brand)] hover:file:[background:rgba(var(--brand-rgb)/0.12)]" style="color: var(--text-secondary)"
 	            :disabled="importingCsv"
 	            @change="onImportCsvFileChange"
@@ -848,6 +859,7 @@ const showImportCsvModal = ref(false)
 const importingCsv = ref(false)
 const importCsvResult = ref<any | null>(null)
 const importCsvInput = ref<HTMLInputElement | null>(null)
+const exportingArchive = ref(false)
 
 const productsImportTemplateHeader =
   'id,slug,title,price,stock,isActive,categoryId,categorySlug,categoryIds,categorySlugs,description,miniDescription,images'
@@ -1212,6 +1224,34 @@ async function exportProductsCsv() {
   }
 }
 
+async function exportProductsArchive() {
+  exportingArchive.value = true
+  try {
+    const zip = await $fetch<Blob>('/api/admin/products/export.zip', {
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      query: selectedIds.value.length ? { ids: selectedIds.value.join(',') } : undefined,
+      responseType: 'blob' as any
+    })
+
+    const blob = zip instanceof Blob ? zip : new Blob([zip as any], { type: 'application/zip' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `products-archive-${new Date().toISOString().slice(0, 10)}.zip`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (error) {
+    console.error('Failed to export archive:', error)
+    alert(t('admin.pages.products.index.bulk.exportArchiveError'))
+  } finally {
+    exportingArchive.value = false
+  }
+}
+
 function downloadProductsImportTemplate() {
   const blob = new Blob([productsImportTemplateCsv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
@@ -1243,10 +1283,13 @@ async function onImportCsvFileChange(event: Event) {
   importingCsv.value = true
   importCsvResult.value = null
   try {
+    const isZip = file.name.toLowerCase().endsWith('.zip') || file.type === 'application/zip'
+    const endpoint = isZip ? '/api/admin/products/import.zip' : '/api/admin/products/import.csv'
+
     const form = new FormData()
     form.append('file', file)
 
-    const result = await $fetch('/api/admin/products/import.csv', {
+    const result = await $fetch(endpoint, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -1258,7 +1301,7 @@ async function onImportCsvFileChange(event: Event) {
     await fetchProducts()
     await fetchCategories()
   } catch (error) {
-    console.error('Failed to import CSV:', error)
+    console.error('Failed to import products:', error)
     const msg =
       (error as any)?.data?.statusMessage ||
       (error as any)?.data?.message ||

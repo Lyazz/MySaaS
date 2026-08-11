@@ -1,5 +1,6 @@
 import { Router } from 'express'
 import multer from 'multer'
+import type { ErrorRequestHandler } from 'express'
 import { requireTenantMember } from '../../middleware/rbac.middleware'
 import { requireStaffCrud } from '../../middleware/staff-permissions.middleware'
 import { ProductsController } from './products.controller'
@@ -25,13 +26,42 @@ const csvUpload = multer({
     }
 })
 
+const zipUpload = multer({
+    storage: multer.memoryStorage(),
+    limits: { fileSize: 50 * 1024 * 1024, files: 1 },
+    fileFilter: (_req, file, cb) => {
+        const ok =
+            file.mimetype === 'application/zip' ||
+            file.mimetype === 'application/x-zip-compressed' ||
+            file.mimetype === 'application/octet-stream' ||
+            file.originalname.toLowerCase().endsWith('.zip')
+        if (!ok) return cb(new Error('Only ZIP uploads are allowed'))
+        cb(null, true)
+    }
+})
+
+const bulkUploadErrorMiddleware: ErrorRequestHandler = (err, _req, res, next) => {
+    if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'File is too large' })
+        }
+        return res.status(400).json({ statusCode: 400, statusMessage: err.message })
+    }
+    if (err instanceof Error && /uploads are allowed/i.test(err.message)) {
+        return res.status(400).json({ statusCode: 400, statusMessage: err.message })
+    }
+    return next(err)
+}
+
 // Auth + tenant context for this router (staff permissions enforced via middleware)
 router.use(requireTenantMember)
 router.use(requireStaffCrud('products'))
 
 // Bulk ops (must be defined before "/:id" routes)
 router.get('/export.csv', bulkController.exportCsv.bind(bulkController))
-router.post('/import.csv', csvUpload.single('file'), bulkController.importCsv.bind(bulkController))
+router.post('/import.csv', csvUpload.single('file'), bulkUploadErrorMiddleware, bulkController.importCsv.bind(bulkController))
+router.get('/export.zip', bulkController.exportZip.bind(bulkController))
+router.post('/import.zip', zipUpload.single('file'), bulkUploadErrorMiddleware, bulkController.importZip.bind(bulkController))
 router.patch('/bulk', bulkController.bulkPatch.bind(bulkController))
 router.delete('/bulk', bulkController.bulkDelete.bind(bulkController))
 router.post('/:id/duplicate', bulkController.duplicate.bind(bulkController))

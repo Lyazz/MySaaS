@@ -1,4 +1,4 @@
-import { DeleteObjectCommand } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
 import path from 'path'
 import { promises as fs } from 'fs'
 import { PUBLIC_BUCKET_NAME, s3Client } from './s3'
@@ -114,4 +114,59 @@ export const deletePublicAssetIfOwned = async (args: { tenantId: string; urlOrPa
 
     await s3Client.send(new DeleteObjectCommand({ Bucket: resolved.bucket, Key: resolved.key }))
     return true
+}
+
+const streamToBuffer = async (stream: any): Promise<Buffer> => {
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) {
+        chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk))
+    }
+    return Buffer.concat(chunks)
+}
+
+/**
+ * Read the raw bytes of a public asset (product image, etc.) regardless of whether it lives
+ * on local disk, our own S3/MinIO bucket, or an external host. Used for bundling images into
+ * a downloadable export archive. Returns null if the asset can't be read (missing, unreachable).
+ */
+export const readPublicAssetBuffer = async (
+    urlOrPath: string
+): Promise<{ buffer: Buffer; contentType?: string } | null> => {
+    const resolved = resolvePublicAsset(urlOrPath)
+
+    if (resolved?.kind === 'local') {
+        try {
+            const buffer = await fs.readFile(resolved.absPath)
+            return { buffer }
+        } catch {
+            return null
+        }
+    }
+
+    if (resolved?.kind === 's3') {
+        try {
+            const result = await s3Client.send(new GetObjectCommand({ Bucket: resolved.bucket, Key: resolved.key }))
+            if (!result.Body) return null
+            const buffer = await streamToBuffer(result.Body)
+            return { buffer, contentType: result.ContentType }
+        } catch {
+            return null
+        }
+    }
+
+    // External URL not owned by us — best-effort fetch so archives stay portable.
+    const v = normalizeUrl(urlOrPath)
+    if (!/^https?:\/\//i.test(v)) return null
+
+    try {
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 10_000)
+        const res = await fetch(v, { signal: controller.signal })
+        clearTimeout(timeout)
+        if (!res.ok) return null
+        const arrayBuffer = await res.arrayBuffer()
+        return { buffer: Buffer.from(arrayBuffer), contentType: res.headers.get('content-type') || undefined }
+    } catch {
+        return null
+    }
 }
