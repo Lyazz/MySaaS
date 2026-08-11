@@ -41,6 +41,42 @@ export class BulkProductsController {
         }
     }
 
+    async exportZip(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const idsParam = typeof req.query.ids === 'string' ? req.query.ids : ''
+            const ids = idsParam ? idsParam.split(',').map((v) => v.trim()).filter(Boolean) : null
+
+            const zip = await service.exportProductsArchive(tenant.id, { ids })
+            res.setHeader('Content-Type', 'application/zip')
+            res.setHeader('Content-Disposition', 'attachment; filename="products-archive.zip"')
+            res.status(200).send(zip)
+        } catch (error: any) {
+            console.error('Export products archive error:', error)
+            res.status(500).json({ statusCode: 500, statusMessage: error?.message || 'Internal Server Error' })
+        }
+    }
+
+    async importZip(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const user = req.user
+            const file = (req as any).file as { buffer?: Buffer } | undefined
+
+            if (!file?.buffer?.length) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'ZIP file is required' })
+            }
+
+            const summary = await service.importProductsArchive(tenant.id, file.buffer, {
+                actorUserId: user?.id ?? null
+            })
+            res.json(summary)
+        } catch (error: any) {
+            console.error('Import products archive error:', error)
+            res.status(400).json({ statusCode: 400, statusMessage: error?.message || 'Import failed' })
+        }
+    }
+
     async bulkPatch(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
