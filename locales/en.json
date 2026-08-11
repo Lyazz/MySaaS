@@ -2147,6 +2147,11 @@
             "label": "Pistachio",
             "description": "Warm premium editorial look for gourmet and refined retail.",
             "storeTypes": "Premium food, gifts, nuts, gourmet retail"
+          },
+          "nour": {
+            "label": "Nour Élégance",
+            "description": "Soft draped elegance for modest fashion.",
+            "storeTypes": "Abayas, hijabs, kaftans, modest fashion"
           }
         }
       },

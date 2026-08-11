@@ -1,0 +1,364 @@
+<script setup lang="ts">
+import {
+  getOptionValueState,
+  type OptionValueState,
+  type SelectedOptions,
+} from '../variant-ux';
+
+const props = defineProps<{
+  product: any;
+  currentPrice: number;
+  originalPrice?: number;
+  selectedOptions: SelectedOptions;
+  hideOptionSelectors?: boolean;
+}>();
+
+const emit = defineEmits(['update:selectedOptions']);
+
+const storeSettings = useState<any>('storeSettings');
+const { format: formatPrice } = useCurrency();
+
+const setOption = (optionId: string, valueId: string) => {
+  const newOptions = {
+    ...props.selectedOptions,
+    [optionId]: valueId,
+  };
+  emit('update:selectedOptions', newOptions);
+};
+
+const optionValueState = (
+  optionId: string,
+  valueId: string
+): OptionValueState => {
+  // If variants aren't loaded, don't block selection in the UI.
+  if (!props.product?.variants || props.product.variants.length === 0)
+    return 'available';
+  return getOptionValueState({
+    product: props.product,
+    selectedOptions: props.selectedOptions,
+    optionId,
+    valueId,
+  });
+};
+
+const isOptionValueUnavailable = (optionId: string, valueId: string): boolean =>
+  optionValueState(optionId, valueId) === 'unavailable';
+
+const optionValueSuffix = (optionId: string, valueId: string): string => {
+  const state = optionValueState(optionId, valueId);
+  if (state === 'out_of_stock') return '(Out of stock)';
+  if (state === 'unavailable') return '(Unavailable)';
+  return '';
+};
+
+const setOptionIfAllowed = (optionId: string, valueId: string) => {
+  if (isOptionValueUnavailable(optionId, valueId)) return;
+  setOption(optionId, valueId);
+};
+</script>
+
+<template>
+  <div class="flex flex-col animate-fade-in-right space-y-8">
+    <!-- Header -->
+    <div>
+      <h1
+        class="text-3xl md:text-4xl lg:text-5xl font-bold text-[#2E1E20] tracking-tight leading-tight mb-3"
+      >
+        {{ product?.title }}
+      </h1>
+
+      <div
+        class="flex items-center gap-2 mb-4 text-sm font-medium text-[#5C4A44]"
+      >
+        <div class="flex text-[#C9A24B]">
+          <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+          <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+          <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+          <Icon name="lucide:star" class="w-4 h-4 fill-current" />
+          <Icon name="lucide:star-half" class="w-4 h-4 fill-current" />
+        </div>
+        <span class="font-bold text-[#2E1E20]">4.9 / 5</span>
+        <span class="text-[#6B5850]">{{
+          $t('storefront.product.reviewsCount', { count: 1000 })
+        }}</span>
+      </div>
+
+      <div class="flex flex-wrap items-baseline gap-3 md:gap-4 mb-4">
+        <div class="text-4xl font-bold text-brand-700 tracking-tight">
+          {{ formatPrice(currentPrice) }}
+        </div>
+        <div
+          v-if="originalPrice && originalPrice > currentPrice"
+          class="text-lg text-[#9C8B82] line-through decoration-2 whitespace-nowrap"
+        >
+          {{ formatPrice(originalPrice) }}
+        </div>
+        <div
+          v-if="originalPrice && originalPrice > currentPrice"
+          class="px-2.5 py-1 bg-brand-600 text-white text-xs font-bold rounded-full shadow-sm tracking-wide whitespace-nowrap shrink-0"
+        >
+          -{{
+            Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+          }}%
+        </div>
+      </div>
+
+      <StorefrontSharedCountdownTimer
+        v-if="product?.showCountdown && product?.promotionEndDate"
+        :end-date="product.promotionEndDate"
+        theme="danger"
+        show-icon
+        class="mb-4"
+      />
+
+      <!-- Urgency Banner -->
+      <div
+        class="bg-brand-50 border border-[#C9A24B]/35 rounded-2xl p-3 flex items-center gap-3"
+      >
+        <div class="relative flex h-3 w-3">
+          <span
+            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"
+          ></span>
+          <span
+            class="relative inline-flex rounded-full h-3 w-3 bg-brand-600"
+          ></span>
+        </div>
+        <span class="text-sm font-medium text-brand-900">
+          <strong class="font-bold">{{
+            $t('storefront.product.highDemandBadge')
+          }}</strong>
+          {{ $t('storefront.product.viewingRightNow', { count: 15 }) }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Option Selectors -->
+    <div
+      v-if="
+        !hideOptionSelectors && product?.options && product.options.length > 0
+      "
+      class="space-y-5"
+    >
+      <div v-for="option in product.options" :key="option.id">
+        <label class="block text-sm font-medium text-[#2E1E20]/80 mb-2">{{
+          option.name
+        }}</label>
+
+        <!-- Dropdown Type -->
+        <div v-if="option.displayType === 'dropdown'" class="relative max-w-xs">
+          <select
+            :value="selectedOptions[option.id] || ''"
+            @change="
+              setOption(option.id, ($event.target as HTMLSelectElement).value)
+            "
+            class="block w-full h-11 rounded-xl border border-[#C9A24B]/40 bg-[#FFFDF9] px-4 text-[#2E1E20] focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
+          >
+            <option value="" disabled>{{ option.name }}</option>
+            <option
+              v-for="value in option.values"
+              :key="value.id"
+              :value="value.id"
+              :disabled="isOptionValueUnavailable(option.id, value.id)"
+            >
+              {{ value.label }} {{ optionValueSuffix(option.id, value.id) }}
+            </option>
+          </select>
+          <div
+            class="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#6B5850]"
+          >
+            <Icon name="lucide:chevron-down" class="w-4 h-4" />
+          </div>
+        </div>
+
+        <!-- Color Swatch Type -->
+        <div
+          v-else-if="option.displayType === 'color'"
+          class="flex flex-wrap gap-3"
+        >
+          <button
+            v-for="value in option.values"
+            :key="value.id"
+            type="button"
+            :class="[
+              'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 relative',
+              optionValueState(option.id, value.id) === 'unavailable'
+                ? 'opacity-30 cursor-not-allowed'
+                : optionValueState(option.id, value.id) === 'out_of_stock'
+                  ? 'opacity-60 cursor-pointer'
+                  : 'hover:scale-110 cursor-pointer',
+              selectedOptions[option.id] === value.id
+                ? 'ring-2 ring-offset-2 ring-brand-600 scale-110 shadow-md'
+                : 'ring-1 ring-[#C9A24B]/40 hover:shadow-sm',
+            ]"
+            :style="{ backgroundColor: value.meta || '#eee' }"
+            :disabled="isOptionValueUnavailable(option.id, value.id)"
+            :title="
+              `${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()
+            "
+            @click="setOptionIfAllowed(option.id, value.id)"
+          >
+            <!-- Checkmark for selected state -->
+            <Icon
+              v-if="selectedOptions[option.id] === value.id"
+              name="lucide:check"
+              class="w-5 h-5 text-white drop-shadow-sm"
+            />
+            <!-- Slash for unavailable / out-of-stock -->
+            <div
+              v-if="optionValueState(option.id, value.id) !== 'available'"
+              class="absolute inset-0 flex items-center justify-center"
+            >
+              <div
+                class="w-full h-0.5 rotate-45 transform"
+                :class="
+                  optionValueState(option.id, value.id) === 'out_of_stock'
+                    ? 'bg-red-500/70'
+                    : 'bg-[#2E1E20]/50'
+                "
+              />
+            </div>
+          </button>
+        </div>
+
+        <!-- Image Type -->
+        <div
+          v-else-if="option.displayType === 'image'"
+          class="flex flex-wrap gap-3"
+        >
+          <button
+            v-for="value in option.values"
+            :key="value.id"
+            type="button"
+            :class="[
+              'w-16 h-16 rounded-xl border-2 transition-all duration-200 overflow-hidden relative',
+              optionValueState(option.id, value.id) === 'unavailable'
+                ? 'opacity-40 grayscale cursor-not-allowed border-[#C9A24B]/20'
+                : optionValueState(option.id, value.id) === 'out_of_stock'
+                  ? 'opacity-70 cursor-pointer border-[#C9A24B]/20'
+                  : 'hover:border-brand-300 cursor-pointer',
+              selectedOptions[option.id] === value.id
+                ? 'border-brand-600 shadow-md scale-105'
+                : 'border-[#C9A24B]/20',
+            ]"
+            :disabled="isOptionValueUnavailable(option.id, value.id)"
+            :title="
+              `${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()
+            "
+            @click="setOptionIfAllowed(option.id, value.id)"
+          >
+            <img
+              v-if="value.meta"
+              :src="value.meta"
+              class="w-full h-full object-cover"
+            />
+            <span v-else class="text-xs text-[#9C8B82]">{{ value.label }}</span>
+            <div
+              v-if="optionValueState(option.id, value.id) === 'out_of_stock'"
+              class="absolute inset-x-1 bottom-1 rounded bg-white/90 text-[10px] font-semibold text-red-700 px-1 py-0.5"
+            >
+              Out
+            </div>
+          </button>
+        </div>
+
+        <!-- Radio Buttons -->
+        <div v-else-if="option.displayType === 'radio'" class="space-y-2">
+          <div
+            v-for="value in option.values"
+            :key="value.id"
+            class="flex items-center"
+          >
+            <input
+              type="radio"
+              :id="`${option.id}-${value.id}`"
+              :name="option.id"
+              :value="value.id"
+              :checked="selectedOptions[option.id] === value.id"
+              :disabled="isOptionValueUnavailable(option.id, value.id)"
+              class="w-4 h-4 text-brand-600 border-[#C9A24B]/40 focus:ring-brand-500 disabled:opacity-50"
+              @change="setOptionIfAllowed(option.id, value.id)"
+            />
+            <label
+              :for="`${option.id}-${value.id}`"
+              class="ms-2 block text-sm font-medium text-[#2E1E20]/80"
+              :class="{
+                'text-[#9C8B82] line-through':
+                  optionValueState(option.id, value.id) !== 'available',
+                'text-red-700':
+                  optionValueState(option.id, value.id) === 'out_of_stock',
+              }"
+            >
+              {{ value.label }}
+              <span class="text-xs font-normal ms-1">{{
+                optionValueSuffix(option.id, value.id)
+              }}</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Default Buttons/Tags -->
+        <div v-else class="flex flex-wrap gap-2">
+          <button
+            v-for="value in option.values"
+            :key="value.id"
+            class="px-4 py-2 rounded-full text-sm font-medium border transition-all duration-200 relative overflow-hidden"
+            :class="[
+              optionValueState(option.id, value.id) === 'unavailable'
+                ? 'bg-[#F3E7D8]/50 text-[#C4B4A8] border-[#C9A24B]/20 cursor-not-allowed'
+                : selectedOptions[option.id] === value.id
+                  ? 'bg-brand-600 text-white border-brand-600 shadow-md shadow-brand-600/20'
+                  : optionValueState(option.id, value.id) === 'out_of_stock'
+                    ? 'bg-[#FFFDF9] text-red-700 border-red-200 hover:border-red-300 hover:bg-red-50'
+                    : 'bg-[#FFFDF9] text-[#5C4A44] border-[#C9A24B]/35 hover:border-brand-300 hover:bg-brand-50/40',
+            ]"
+            :disabled="isOptionValueUnavailable(option.id, value.id)"
+            :title="
+              `${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()
+            "
+            @click="setOptionIfAllowed(option.id, value.id)"
+          >
+            <span
+              :class="{
+                'line-through':
+                  optionValueState(option.id, value.id) !== 'available',
+              }"
+            >
+              {{ value.label }}
+            </span>
+            <span
+              v-if="optionValueState(option.id, value.id) !== 'available'"
+              class="ms-2 text-[10px] font-semibold"
+            >
+              {{ optionValueSuffix(option.id, value.id) }}
+            </span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mini Description -->
+    <p
+      v-if="product?.miniDescription"
+      class="text-[#5C4A44] mb-6 text-lg leading-relaxed"
+    >
+      {{ product.miniDescription }}
+    </p>
+  </div>
+</template>
+
+<style scoped>
+.animate-fade-in-right {
+  animation: fadeInRight 0.7s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
+  opacity: 0;
+}
+@keyframes fadeInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+</style>

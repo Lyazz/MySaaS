@@ -12,6 +12,7 @@ export const TEMPLATE_ORIGINAL_BRAND_COLORS = {
   chrono: '#A67C52',
   maison: '#0B4A25',
   arena: '#00B8FC',
+  nour: '#7A3B46',
   minimal: '#65A30D',
   interior: '#65A30D'
 } as const
