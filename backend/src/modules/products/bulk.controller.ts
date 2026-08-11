@@ -1,7 +1,20 @@
 import type { Request, Response } from 'express'
-import { BulkProductsService } from './bulk.service'
+import { BulkProductsService, type BulkProgress } from './bulk.service'
 
 const service = new BulkProductsService()
+
+const writeNdjson = (res: Response, payload: unknown) => {
+    if (res.writableEnded) return
+    res.write(`${JSON.stringify(payload)}\n`)
+}
+
+const startNdjsonStream = (res: Response) => {
+    res.setHeader('Content-Type', 'application/x-ndjson; charset=utf-8')
+    res.setHeader('Cache-Control', 'no-cache, no-transform')
+    res.setHeader('X-Accel-Buffering', 'no')
+    res.status(200)
+    ;(res as any).flushHeaders?.()
+}
 
 export class BulkProductsController {
     async exportCsv(req: Request, res: Response) {
@@ -74,6 +87,107 @@ export class BulkProductsController {
         } catch (error: any) {
             console.error('Import products archive error:', error)
             res.status(400).json({ statusCode: 400, statusMessage: error?.message || 'Import failed' })
+        }
+    }
+
+    // Streaming (NDJSON) variants: emit `{type:'progress', ...}` lines as the operation runs,
+    // then a final `{type:'done', ...}` or `{type:'error', ...}` line. Used by the admin UI to
+    // show a live progress dialog for large catalogs (import/export can take minutes for 400+
+    // products with images) instead of a single request that looks frozen until it resolves.
+    async exportZipStream(req: Request, res: Response) {
+        const tenant = req.tenant!
+        const idsParam = typeof req.query.ids === 'string' ? req.query.ids : ''
+        const ids = idsParam ? idsParam.split(',').map((v) => v.trim()).filter(Boolean) : null
+
+        startNdjsonStream(res)
+        let clientGone = false
+        req.on('close', () => {
+            clientGone = true
+        })
+
+        try {
+            const zip = await service.exportProductsArchive(tenant.id, { ids }, (progress: BulkProgress) => {
+                if (!clientGone) writeNdjson(res, { type: 'progress', ...progress })
+            })
+            if (!clientGone) {
+                writeNdjson(res, {
+                    type: 'done',
+                    filename: 'products-archive.zip',
+                    dataBase64: zip.toString('base64')
+                })
+            }
+        } catch (error: any) {
+            console.error('Export products archive (stream) error:', error)
+            if (!clientGone) writeNdjson(res, { type: 'error', message: error?.message || 'Export failed' })
+        } finally {
+            if (!res.writableEnded) res.end()
+        }
+    }
+
+    async importZipStream(req: Request, res: Response) {
+        const tenant = req.tenant!
+        const user = req.user
+        const file = (req as any).file as { buffer?: Buffer } | undefined
+
+        if (!file?.buffer?.length) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'ZIP file is required' })
+        }
+
+        startNdjsonStream(res)
+        let clientGone = false
+        req.on('close', () => {
+            clientGone = true
+        })
+
+        try {
+            const summary = await service.importProductsArchive(
+                tenant.id,
+                file.buffer,
+                { actorUserId: user?.id ?? null },
+                (progress: BulkProgress) => {
+                    if (!clientGone) writeNdjson(res, { type: 'progress', ...progress })
+                }
+            )
+            if (!clientGone) writeNdjson(res, { type: 'done', summary })
+        } catch (error: any) {
+            console.error('Import products archive (stream) error:', error)
+            if (!clientGone) writeNdjson(res, { type: 'error', message: error?.message || 'Import failed' })
+        } finally {
+            if (!res.writableEnded) res.end()
+        }
+    }
+
+    async importCsvStream(req: Request, res: Response) {
+        const tenant = req.tenant!
+        const user = req.user
+        const file = (req as any).file as { buffer?: Buffer } | undefined
+        const csvText = file?.buffer ? file.buffer.toString('utf8') : ''
+
+        if (!csvText.trim()) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'CSV file is required' })
+        }
+
+        startNdjsonStream(res)
+        let clientGone = false
+        req.on('close', () => {
+            clientGone = true
+        })
+
+        try {
+            const summary = await service.importProductsCsv(
+                tenant.id,
+                csvText,
+                { actorUserId: user?.id ?? null },
+                (processed, total) => {
+                    if (!clientGone) writeNdjson(res, { type: 'progress', phase: 'rows', processed, total })
+                }
+            )
+            if (!clientGone) writeNdjson(res, { type: 'done', summary })
+        } catch (error: any) {
+            console.error('Import products CSV (stream) error:', error)
+            if (!clientGone) writeNdjson(res, { type: 'error', message: error?.message || 'Import failed' })
+        } finally {
+            if (!res.writableEnded) res.end()
         }
     }
 

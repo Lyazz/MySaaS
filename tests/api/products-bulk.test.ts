@@ -382,6 +382,118 @@ describe('Admin products bulk ops', () => {
         expect(res.status).toBe(400)
     })
 
+    const parseNdjson = (text: string): any[] =>
+        text
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => JSON.parse(line))
+
+    it('streams export progress before the final archive payload', async () => {
+        const res = await request(app)
+            .get('/api/admin/products/export.zip/stream')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .buffer(true)
+            .parse((response, callback) => {
+                let text = ''
+                response.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
+                response.on('end', () => callback(null, text))
+            })
+
+        expect(res.status).toBe(200)
+        expect(String(res.headers['content-type'])).toContain('application/x-ndjson')
+
+        const events = parseNdjson(res.body as unknown as string)
+        expect(events.some((e) => e.type === 'progress')).toBe(true)
+        const done = events.find((e) => e.type === 'done')
+        expect(done).toBeTruthy()
+        expect(done.filename).toBe('products-archive.zip')
+
+        const zip = new AdmZip(Buffer.from(done.dataBase64, 'base64'))
+        expect(zip.getEntries().some((e) => e.entryName === 'products.csv')).toBe(true)
+    })
+
+    it('streams import progress and a final summary for a ZIP archive', async () => {
+        const slug = `zip-stream-import-${Date.now()}`
+        const csv = ['slug,title,price,images', `${slug},Zip Stream Product,29.99,images/${slug}.png`].join('\n')
+
+        const zip = new AdmZip()
+        zip.addFile('products.csv', Buffer.from(csv, 'utf8'))
+        zip.addFile(`images/${slug}.png`, createTestPng())
+
+        const res = await request(app)
+            .post('/api/admin/products/import.zip/stream')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', zip.toBuffer(), { filename: 'archive.zip', contentType: 'application/zip' })
+            .buffer(true)
+            .parse((response, callback) => {
+                let text = ''
+                response.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
+                response.on('end', () => callback(null, text))
+            })
+
+        expect(res.status).toBe(200)
+        const events = parseNdjson(res.body as unknown as string)
+        expect(events.some((e) => e.type === 'progress' && e.phase === 'images')).toBe(true)
+        expect(events.some((e) => e.type === 'progress' && e.phase === 'rows')).toBe(true)
+
+        const done = events.find((e) => e.type === 'done')
+        expect(done).toBeTruthy()
+        expect(done.summary.created).toBe(1)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantAId, slug } })
+        expect(created).toBeTruthy()
+    })
+
+    it('reports granular progress across many products so large catalogs do not look frozen', async () => {
+        const batchSlug = `scale-${Date.now()}`
+        const batchIds: string[] = []
+        for (let i = 0; i < 25; i++) {
+            const p = await prisma.product.create({
+                data: {
+                    tenantId: tenantAId,
+                    title: `Scale Product ${i}`,
+                    slug: `${batchSlug}-${i}`,
+                    price: 10,
+                    stock: 1,
+                    isActive: true
+                }
+            })
+            batchIds.push(p.id)
+        }
+
+        const res = await request(app)
+            .get(`/api/admin/products/export.zip/stream?ids=${batchIds.join(',')}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .buffer(true)
+            .parse((response, callback) => {
+                let text = ''
+                response.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
+                response.on('end', () => callback(null, text))
+            })
+
+        expect(res.status).toBe(200)
+        const events = parseNdjson(res.body as unknown as string)
+        const progressEvents = events.filter((e) => e.type === 'progress')
+
+        // More than a single jump straight to 100% — the UI needs several updates to render
+        // a moving progress bar instead of appearing stuck.
+        expect(progressEvents.length).toBeGreaterThan(5)
+        expect(progressEvents[progressEvents.length - 1].processed).toBe(25)
+        expect(progressEvents.every((e) => e.total === 25)).toBe(true)
+
+        const done = events.find((e) => e.type === 'done')
+        expect(done).toBeTruthy()
+        const zip = new AdmZip(Buffer.from(done.dataBase64, 'base64'))
+        const csvText = zip.getEntries().find((e) => e.entryName === 'products.csv')!.getData().toString('utf8')
+        expect((csvText.match(/Scale Product/g) || []).length).toBe(25)
+
+        await prisma.product.deleteMany({ where: { tenantId: tenantAId, id: { in: batchIds } } })
+    })
+
     it('bulk patches products and duplicates selected product', async () => {
         const patch = await request(app)
             .patch('/api/admin/products/bulk')

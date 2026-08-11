@@ -10,6 +10,13 @@ import { readPublicAssetBuffer } from '../../lib/public-assets'
 import { UploadService } from '../upload/upload.service'
 import { sanitizeOptionalRichText } from '../../lib/rich-text'
 import { syncDerivedProductPrice } from './product-price-sync'
+import { mapWithConcurrency } from '../../lib/concurrency'
+
+const ARCHIVE_IMAGE_FETCH_CONCURRENCY = 6
+const ARCHIVE_IMAGE_UPLOAD_CONCURRENCY = 4
+
+export type BulkProgress = { phase: 'images' | 'rows' | 'archive'; processed: number; total: number }
+export type BulkProgressCallback = (progress: BulkProgress) => void
 
 const ARCHIVE_CSV_ENTRY = 'products.csv'
 const ARCHIVE_IMAGES_DIR = 'images'
@@ -304,7 +311,11 @@ export class BulkProductsService {
      * files (fetched from S3/local storage) so the catalog can be backed up/restored with images
      * intact, rather than relying on image URLs that may not resolve in another environment.
      */
-    async exportProductsArchive(tenantId: string, opts?: { ids?: string[] | null }): Promise<Buffer> {
+    async exportProductsArchive(
+        tenantId: string,
+        opts?: { ids?: string[] | null },
+        onProgress?: BulkProgressCallback
+    ): Promise<Buffer> {
         const ids = opts?.ids?.filter(Boolean) ?? null
         const products = await prisma.product.findMany({
             where: { tenantId, ...(ids && ids.length > 0 ? { id: { in: ids } } : {}) },
@@ -315,7 +326,7 @@ export class BulkProductsService {
                     include: { category: { select: { id: true, slug: true, title: true } } }
                 }
             },
-            orderBy: { createdAt: 'desc' }
+            orderBy: [{ createdAt: 'desc' }, { id: 'asc' }]
         })
 
         const header = [
@@ -335,9 +346,11 @@ export class BulkProductsService {
         ]
 
         const zip = new AdmZip()
-        const rows: Array<Record<string, string>> = []
+        const total = products.length
+        let completed = 0
+        onProgress?.({ phase: 'archive', processed: 0, total })
 
-        for (const p of products) {
+        const rows = await mapWithConcurrency(products, ARCHIVE_IMAGE_FETCH_CONCURRENCY, async (p) => {
             const categories = (p.categoryLinks || [])
                 .map((link: any) => link?.category)
                 .filter((category: any) => category?.id)
@@ -363,7 +376,10 @@ export class BulkProductsService {
                 archivedRefs.push(entryName)
             }
 
-            rows.push({
+            completed++
+            onProgress?.({ phase: 'archive', processed: completed, total })
+
+            return {
                 id: p.id,
                 title: p.title,
                 slug: p.slug,
@@ -377,8 +393,8 @@ export class BulkProductsService {
                 description: p.description ?? '',
                 miniDescription: p.miniDescription ?? '',
                 images: archivedRefs.join('|')
-            })
-        }
+            }
+        })
 
         zip.addFile(ARCHIVE_CSV_ENTRY, Buffer.from(stringifyCsv(header, rows), 'utf8'))
         return zip.toBuffer()
@@ -392,7 +408,8 @@ export class BulkProductsService {
     async importProductsArchive(
         tenantId: string,
         zipBuffer: Buffer,
-        opts?: { actorUserId?: string | null }
+        opts?: { actorUserId?: string | null },
+        onProgress?: BulkProgressCallback
     ): Promise<ImportSummary> {
         let zip: AdmZip
         try {
@@ -408,61 +425,73 @@ export class BulkProductsService {
         const entryByName = new Map<string, (typeof entries)[number]>(
             entries.map((e) => [e.entryName.replace(/^\/+/, ''), e])
         )
-        const uploadedUrlByEntry = new Map<string, string>()
+        // Cache in-flight/completed uploads by entry name so concurrent rows referencing the
+        // same bundled image only upload it once.
+        const uploadedUrlByEntry = new Map<string, Promise<string | null>>()
         const archiveWarnings: Array<{ row: number; message: string }> = []
 
         const csvText = csvEntry.getData().toString('utf8')
         const parsed = parseCsv(csvText)
 
-        for (let i = 0; i < parsed.records.length; i++) {
-            const record = parsed.records[i]!
+        const totalRecords = parsed.records.length
+        let imagesProcessed = 0
+        onProgress?.({ phase: 'images', processed: 0, total: totalRecords })
+
+        await mapWithConcurrency(parsed.records, ARCHIVE_IMAGE_UPLOAD_CONCURRENCY, async (record, i) => {
             const rowNumber = i + 2
             const raw = (record.images ?? '').trim()
-            if (!raw) continue
 
-            const parts = raw.split('|').map((p) => p.trim()).filter(Boolean)
-            const resolvedParts: string[] = []
+            if (raw) {
+                const parts = raw.split('|').map((p) => p.trim()).filter(Boolean)
+                const resolvedParts: string[] = []
 
-            for (const part of parts) {
-                const normalizedName = part.replace(/^\.?\/+/, '')
-                const entry = entryByName.get(normalizedName)
-                if (!entry) {
-                    // Not a bundled file (already a URL/path) — keep as-is for normal import handling.
-                    resolvedParts.push(part)
-                    continue
-                }
-
-                let uploadedUrl = uploadedUrlByEntry.get(normalizedName)
-                if (!uploadedUrl) {
-                    try {
-                        const buffer = entry.getData()
-                        const ext = path.extname(normalizedName).toLowerCase()
-                        const mimeType = MIME_BY_EXT[ext] || 'image/jpeg'
-                        const result = await this.uploads.uploadPublicImage({
-                            tenantId,
-                            originalName: path.basename(normalizedName),
-                            mimeType,
-                            buffer
-                        })
-                        uploadedUrl = result.url
-                        uploadedUrlByEntry.set(normalizedName, uploadedUrl)
-                    } catch (error: any) {
-                        archiveWarnings.push({
-                            row: rowNumber,
-                            message: `Failed to import image ${normalizedName}: ${error?.message || 'upload failed'}`
-                        })
+                for (const part of parts) {
+                    const normalizedName = part.replace(/^\.?\/+/, '')
+                    const entry = entryByName.get(normalizedName)
+                    if (!entry) {
+                        // Not a bundled file (already a URL/path) — keep as-is for normal import handling.
+                        resolvedParts.push(part)
                         continue
                     }
+
+                    let uploadPromise = uploadedUrlByEntry.get(normalizedName)
+                    if (!uploadPromise) {
+                        uploadPromise = (async () => {
+                            const buffer = entry.getData()
+                            const ext = path.extname(normalizedName).toLowerCase()
+                            const mimeType = MIME_BY_EXT[ext] || 'image/jpeg'
+                            const result = await this.uploads.uploadPublicImage({
+                                tenantId,
+                                originalName: path.basename(normalizedName),
+                                mimeType,
+                                buffer
+                            })
+                            return result.url
+                        })().catch((error: any) => {
+                            archiveWarnings.push({
+                                row: rowNumber,
+                                message: `Failed to import image ${normalizedName}: ${error?.message || 'upload failed'}`
+                            })
+                            return null
+                        })
+                        uploadedUrlByEntry.set(normalizedName, uploadPromise)
+                    }
+
+                    const uploadedUrl = await uploadPromise
+                    if (uploadedUrl) resolvedParts.push(uploadedUrl)
                 }
 
-                resolvedParts.push(uploadedUrl)
+                record.images = resolvedParts.join('|')
             }
 
-            record.images = resolvedParts.join('|')
-        }
+            imagesProcessed++
+            onProgress?.({ phase: 'images', processed: imagesProcessed, total: totalRecords })
+        })
 
         const rebuiltCsv = stringifyCsv(parsed.header, parsed.records)
-        const summary = await this.importProductsCsv(tenantId, rebuiltCsv, opts)
+        const summary = await this.importProductsCsv(tenantId, rebuiltCsv, opts, (processed, total) => {
+            onProgress?.({ phase: 'rows', processed, total })
+        })
         summary.warnings.push(...archiveWarnings)
         return summary
     }
@@ -470,7 +499,8 @@ export class BulkProductsService {
     async importProductsCsv(
         tenantId: string,
         csvText: string,
-        opts?: { actorUserId?: string | null }
+        opts?: { actorUserId?: string | null },
+        onRowProgress?: (processed: number, total: number) => void
     ): Promise<ImportSummary> {
         const parsed = parseCsv(csvText)
         const summary: ImportSummary = { created: 0, updated: 0, skipped: 0, errors: [], warnings: [] }
@@ -537,6 +567,7 @@ export class BulkProductsService {
                 if (!id && !slug) {
                     summary.skipped++
                     summary.errors.push({ row: rowNumber, message: 'Missing id or slug' })
+                    onRowProgress?.(i + 1, parsed.records.length)
                     continue
                 }
 
@@ -618,6 +649,7 @@ export class BulkProductsService {
                     await this.products.createProduct(tenantId, createData)
 
                     summary.created++
+                    onRowProgress?.(i + 1, parsed.records.length)
                     continue
                 }
 
@@ -671,6 +703,8 @@ export class BulkProductsService {
             } catch (error: any) {
                 summary.errors.push({ row: rowNumber, message: error?.message || 'Import failed' })
             }
+
+            onRowProgress?.(i + 1, parsed.records.length)
         }
 
         return summary
