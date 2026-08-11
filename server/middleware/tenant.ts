@@ -43,6 +43,10 @@ export default defineEventHandler(async (event) => {
             throw createError({ statusCode: 403, statusMessage: 'Tenant is suspended' })
         }
 
+        if (tenant.maintenanceMode && !url.startsWith('/admin') && !url.startsWith('/login')) {
+            throw createError({ statusCode: 503, statusMessage: 'Store is under maintenance' })
+        }
+
         const now = new Date()
         const defaultEnd = addUtcMonths(now, 1)
         const subscription = await prisma.tenantSubscription.upsert({

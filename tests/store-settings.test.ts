@@ -131,6 +131,46 @@ describe('Store Settings API', () => {
         expect(String(res.body?.statusMessage || '')).toContain('legalPages')
     })
 
+    it('toggles maintenance mode and stores an optional message', async () => {
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                maintenanceMode: true,
+                maintenanceMessage: 'Back soon, upgrading the shop.'
+            })
+
+        expect(res.status).toBe(200)
+        expect(res.body.maintenanceMode).toBe(true)
+        expect(res.body.maintenanceMessage).toBe('Back soon, upgrading the shop.')
+
+        const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } })
+        expect(tenant?.maintenanceMode).toBe(true)
+
+        const settings = await prisma.storeSettings.findUnique({ where: { tenantId } })
+        expect(settings?.maintenanceMessage).toBe('Back soon, upgrading the shop.')
+
+        const off = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ maintenanceMode: false })
+
+        expect(off.status).toBe(200)
+        expect(off.body.maintenanceMode).toBe(false)
+    })
+
+    it('rejects a non-boolean maintenanceMode', async () => {
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ maintenanceMode: 'yes' })
+
+        expect(res.status).toBe(400)
+    })
+
     it('cleanups', async () => {
         if (tenantId) {
             await prisma.storeSettings.deleteMany({ where: { tenantId } })
