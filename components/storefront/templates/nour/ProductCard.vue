@@ -100,13 +100,13 @@ async function handleAddToCart() {
     class="group relative"
     :class="[
       viewMode === 'list'
-        ? 'flex flex-row items-center gap-6 bg-[#FFFDF9] p-4 rounded-[20px] border border-[#C9A24B]/35 hover:shadow-lg transition-all duration-300'
-        : 'flex flex-col items-center'
+        ? 'flex flex-row items-start gap-6 bg-[#FFFDF9] p-4 rounded-tl-[32px] rounded-tr-lg rounded-br-[32px] rounded-bl-lg border border-[#C9A24B]/35 hover:shadow-lg transition-all duration-300'
+        : 'flex flex-col items-start'
     ]"
   >
-    <!-- Image Card -->
+    <!-- Image Card (arched/organic corner motif) -->
     <div
-      class="relative overflow-hidden rounded-[20px] bg-[#F3E7D8] shadow-sm"
+      class="relative overflow-hidden rounded-tl-[48px] rounded-tr-lg rounded-br-[48px] rounded-bl-lg bg-[#F3E7D8] shadow-sm"
       :class="[
         viewMode === 'list'
           ? 'w-48 h-48 aspect-square flex-shrink-0'
@@ -128,7 +128,7 @@ async function handleAddToCart() {
       <!-- Gradient Overlay (Grid Only) -->
       <div v-if="viewMode !== 'list'" class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-[#2E1E20]/25 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
-      <!-- Badges (Top Left) -->
+      <!-- Badges (Top Start) -->
       <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10">
         <span
           v-if="isNew"
@@ -144,43 +144,10 @@ async function handleAddToCart() {
         >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
-      <!-- Floating Actions (Right) -->
-      <div
-        class="absolute top-3 end-3 flex flex-col gap-2 transition-all duration-300 z-10"
-        :class="[
-           viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-10 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
-        ]"
-      >
-        <StorefrontSharedFavoriteButton
-          :product-id="product.id"
-          button-class="w-9 h-9 bg-[#FFFDF9] rounded-full flex items-center justify-center hover:bg-rose-50 hover:text-rose-700 shadow-md transition-colors"
-          icon-class="w-4 h-4"
-        />
-
-        <!-- Quick View -->
-        <button
-           class="w-9 h-9 bg-[#FFFDF9] rounded-full flex items-center justify-center text-[#2E1E20] hover:bg-brand-50 hover:text-brand-700 shadow-md transition-colors"
-           title="Quick View"
-           @click.prevent="$emit('quick-view', product)"
-        >
-            <Icon name="lucide:eye" class="w-4 h-4" />
-        </button>
-
-        <button
-          v-if="storeSettings?.cartEnabled !== false"
-          :disabled="isOutOfStock || !product.isActive"
-          class="w-9 h-9 bg-[#FFFDF9] rounded-full flex items-center justify-center text-[#2E1E20] hover:bg-brand-600 hover:text-white shadow-md transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
-          :title="storefrontContent.actions.addToCart"
-          @click.prevent="handleAddToCart"
-        >
-          <Icon name="lucide:handbag" class="w-4 h-4" />
-        </button>
-      </div>
-
-      <!-- Static In Stock Badge (Grid Only) -->
+      <!-- Stock Status (Top End, opposite the badges) -->
       <div
         v-if="product.stock > 0 && viewMode !== 'list'"
-        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute top-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
       >
         <span
           v-if="isLowStock"
@@ -194,7 +161,7 @@ async function handleAddToCart() {
 
       <div
         v-if="isOutOfStock && viewMode !== 'list'"
-        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute top-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-10"
       >
         <span class="px-2.5 py-1 bg-red-50/95 backdrop-blur text-red-800 text-[10px] font-bold rounded-full shadow-sm ring-1 ring-red-200">
           Out of Stock
@@ -211,14 +178,65 @@ async function handleAddToCart() {
           />
         </div>
       </div>
+
+      <!-- Bottom Sliding Action Bar (grid cards): reveals on hover desktop, always on for touch -->
+      <div
+        v-if="viewMode !== 'list'"
+        class="absolute inset-x-0 bottom-0 z-30 flex items-center justify-center gap-2 px-3 py-2.5 bg-[#FFFDF9]/95 backdrop-blur-sm border-t border-[#C9A24B]/25 transition-transform duration-300 translate-y-0 lg:translate-y-full lg:group-hover:translate-y-0"
+      >
+        <StorefrontSharedFavoriteButton
+          :product-id="product.id"
+          button-class="w-9 h-9 bg-[#FAF3EA] rounded-full flex items-center justify-center hover:bg-rose-50 hover:text-rose-700 shadow-sm transition-colors"
+          icon-class="w-4 h-4"
+        />
+
+        <!-- Quick View -->
+        <button
+           class="w-9 h-9 bg-[#FAF3EA] rounded-full flex items-center justify-center text-[#2E1E20] hover:bg-brand-50 hover:text-brand-700 shadow-sm transition-colors"
+           title="Quick View"
+           @click.prevent="$emit('quick-view', product)"
+        >
+            <Icon name="lucide:eye" class="w-4 h-4" />
+        </button>
+
+        <button
+          v-if="storeSettings?.cartEnabled !== false"
+          :disabled="isOutOfStock || !product.isActive"
+          class="flex-1 h-9 px-3 bg-[#2E1E20] rounded-full flex items-center justify-center gap-2 text-white hover:bg-brand-700 shadow-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          :title="storefrontContent.actions.addToCart"
+          @click.prevent="handleAddToCart"
+        >
+          <Icon name="lucide:handbag" class="w-4 h-4" />
+          <span class="text-xs font-semibold truncate">{{ storefrontContent.actions.addToCart }}</span>
+        </button>
+      </div>
+
+      <!-- Floating Actions (List view only) -->
+      <div
+        v-if="viewMode === 'list'"
+        class="absolute top-3 end-3 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10"
+      >
+        <StorefrontSharedFavoriteButton
+          :product-id="product.id"
+          button-class="w-9 h-9 bg-[#FFFDF9] rounded-full flex items-center justify-center hover:bg-rose-50 hover:text-rose-700 shadow-md transition-colors"
+          icon-class="w-4 h-4"
+        />
+        <button
+           class="w-9 h-9 bg-[#FFFDF9] rounded-full flex items-center justify-center text-[#2E1E20] hover:bg-brand-50 hover:text-brand-700 shadow-md transition-colors"
+           title="Quick View"
+           @click.prevent="$emit('quick-view', product)"
+        >
+            <Icon name="lucide:eye" class="w-4 h-4" />
+        </button>
+      </div>
     </div>
 
-    <!-- Details -->
+    <!-- Details (left-aligned) -->
     <div
       :class="[
         viewMode === 'list'
           ? 'flex-1 text-start'
-          : 'mt-4 text-center w-full px-1'
+          : 'mt-4 text-start w-full px-1'
       ]"
     >
       <NuxtLink
@@ -238,8 +256,7 @@ async function handleAddToCart() {
       </p>
 
       <div
-        class="flex items-center gap-2"
-        :class="[ viewMode === 'list' ? '' : 'justify-center mt-1' ]"
+        class="flex items-center gap-2 mt-1"
       >
         <span class="text-lg font-bold text-[#2E1E20]">{{ formatAmount(displayPrice) }} <span class="text-xs font-normal text-[#6B5850]">{{ currencyCode }}</span></span>
         <span

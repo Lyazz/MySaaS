@@ -287,7 +287,7 @@ const closeQuickView = () => {
 
       <div class="flex flex-col lg:flex-row gap-10">
         <!-- Tablet/Desktop Sidebar Filters (Hidden on Mobile) -->
-        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-8 bg-[#FFFDF9] p-6 rounded-[24px] border border-[#C9A24B]/35 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 custom-scrollbar shadow-sm">
+        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-8 bg-[#FFFDF9] p-6 pt-8 rounded-tl-[48px] rounded-tr-lg rounded-br-lg rounded-bl-lg border border-[#C9A24B]/35 sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-2 custom-scrollbar shadow-sm">
           <!-- Filter Header -->
           <div class="flex items-center justify-between mb-4 border-b border-[#C9A24B]/25 pb-4">
             <h3 class="font-bold text-[#2E1E20] text-lg">
@@ -398,8 +398,8 @@ const closeQuickView = () => {
                   {{ storefrontContent.actions.clearAll }}
               </button>
           </div>
-          <!-- Toolbar -->
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <!-- Toolbar (cleaner, borderless) -->
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 pb-4 border-b border-[#C9A24B]/20">
             <!-- Mobile Filter Toggle (Visible only on mobile) -->
             <button
               class="w-full sm:hidden flex items-center justify-center gap-2 px-4 py-3 bg-[#FFFDF9] border border-[#C9A24B]/35 rounded-2xl text-[#2E1E20] font-bold shadow-sm active:scale-95 transition-all"
@@ -415,10 +415,10 @@ const closeQuickView = () => {
                 v-model="searchQuery"
                 type="text"
                 :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder"
-                class="w-full bg-[#FFFDF9] border border-[#C9A24B]/35 text-[#2E1E20] text-sm rounded-full focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 block ps-5 pe-10 py-3 shadow-sm transition-shadow hover:shadow-md"
+                class="w-full bg-transparent border-0 border-b border-[#C9A24B]/30 text-[#2E1E20] text-sm focus:ring-0 focus:border-brand-500 block ps-1 pe-8 py-2 transition-colors"
               >
-              <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
-                <Icon name="lucide:search" class="w-5 h-5 text-[#9C8B82]" />
+              <div class="absolute inset-y-0 end-0 flex items-center pe-1 pointer-events-none">
+                <Icon name="lucide:search" class="w-4 h-4 text-[#9C8B82]" />
               </div>
             </div>
 
@@ -428,13 +428,13 @@ const closeQuickView = () => {
               <div class="relative w-full sm:w-48">
                 <select
                   v-model="sortOption"
-                  class="w-full appearance-none bg-[#FFFDF9] rounded-full border border-[#C9A24B]/35 text-sm py-3 ps-4 pe-10 focus:border-brand-500 focus:ring-brand-500 shadow-sm cursor-pointer hover:border-[#C9A24B]/60 transition-colors text-[#2E1E20] font-medium"
+                  class="w-full appearance-none bg-transparent border-0 border-b border-[#C9A24B]/30 text-sm py-2 ps-1 pe-8 focus:border-brand-500 focus:ring-0 cursor-pointer text-[#2E1E20] font-medium"
                 >
                   <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-1 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-[#6B5850]" />
                 </div>
               </div>
@@ -442,9 +442,9 @@ const closeQuickView = () => {
 
 
              <!-- View Toggle -->
-            <div class="hidden sm:flex items-center bg-[#FFFDF9] rounded-full border border-[#C9A24B]/35 p-1 shadow-sm">
+            <div class="hidden sm:flex items-center gap-1">
                 <button
-                    class="p-2 rounded-full transition-all"
+                    class="p-2 rounded-lg transition-all"
                     :class="viewMode === 'grid' ? 'bg-[#F3E7D8] text-[#2E1E20]' : 'text-[#9C8B82] hover:text-[#5C4A44]'"
                     @click="viewMode = 'grid'"
                     :title="storefrontContent.shop.view.gridTitle"
@@ -452,7 +452,7 @@ const closeQuickView = () => {
                     <Icon name="lucide:layout-grid" class="w-5 h-5" />
                 </button>
                 <button
-                    class="p-2 rounded-full transition-all"
+                    class="p-2 rounded-lg transition-all"
                     :class="viewMode === 'list' ? 'bg-[#F3E7D8] text-[#2E1E20]' : 'text-[#9C8B82] hover:text-[#5C4A44]'"
                     @click="viewMode = 'list'"
                     :title="storefrontContent.shop.view.listTitle"
@@ -465,7 +465,7 @@ const closeQuickView = () => {
           <!-- Grid -->
           <div
             v-if="filteredProducts.length === 0"
-            class="bg-[#FFFDF9] rounded-[24px] border border-[#C9A24B]/35 shadow-sm p-12 text-center"
+            class="bg-[#FFFDF9] rounded-tl-[48px] rounded-tr-lg rounded-br-[48px] rounded-bl-lg border border-[#C9A24B]/35 shadow-sm p-12 text-center"
           >
             <Icon name="lucide:package-open" class="w-16 h-16 text-[#E4C58F] mx-auto mb-4" />
             <h3 class="text-lg font-medium text-[#2E1E20]">
@@ -528,7 +528,7 @@ const closeQuickView = () => {
   >
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-[#2E1E20]/60 backdrop-blur-sm" @click="closeQuickView"></div>
-          <div class="bg-[#FFFDF9] rounded-[28px] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden border border-[#C9A24B]/30">
+          <div class="bg-[#FFFDF9] rounded-tl-[56px] rounded-tr-2xl rounded-br-[56px] rounded-bl-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden border border-[#C9A24B]/30">
               <button @click="closeQuickView" class="absolute top-4 end-4 z-20 p-2 bg-white/60 rounded-full hover:bg-white transition-colors">
                   <Icon name="lucide:x" class="w-6 h-6 text-[#2E1E20]" />
               </button>

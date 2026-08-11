@@ -124,8 +124,8 @@ onUnmounted(() => {
              <ProductGallery :images="images" :title="product?.title" />
         </div>
 
-        <!-- Product Info Section (Right - 5 cols) -->
-        <div class="lg:col-span-5 flex flex-col gap-8">
+        <!-- Product Info Section (Right - 5 cols, sticky) -->
+        <div class="lg:col-span-5 flex flex-col gap-8 lg:sticky lg:top-8 self-start">
             <ProductDetails
                 :product="product"
                 :current-price="currentPrice"
@@ -156,12 +156,12 @@ onUnmounted(() => {
             </div>
             <SafeRichText
             v-if="product?.description"
-            class="prose prose-lg text-[#5C4A44] max-w-none leading-relaxed bg-[#FFFDF9] rounded-[28px] p-8 border border-[#C9A24B]/30"
+            class="prose prose-lg text-[#5C4A44] max-w-none leading-relaxed bg-[#FFFDF9] rounded-tl-[56px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl p-8 border border-[#C9A24B]/30"
             :html="product.description"
             />
             <div
             v-else
-            class="prose prose-lg text-[#5C4A44] max-w-none leading-relaxed bg-[#FFFDF9] rounded-[28px] p-8 border border-[#C9A24B]/30"
+            class="prose prose-lg text-[#5C4A44] max-w-none leading-relaxed bg-[#FFFDF9] rounded-tl-[56px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl p-8 border border-[#C9A24B]/30"
             >
             <p>{{ storefrontContent.product.descriptionFallback }}</p>
             </div>

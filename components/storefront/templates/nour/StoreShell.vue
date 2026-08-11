@@ -117,6 +117,12 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 // Actually, looking at previous file view, no props were defined.
 // Adding props definition.
 
+// Header collapsed from 3 zones (logo | search | nav+icons) to 2 zones (logo | nav+icons).
+// The search icon reveals the same search state/logic already defined above.
+const isSearchOpen = ref(false)
+watch(isSearchOpen, (open) => {
+    if (!open) isSearchDropdownOpen.value = false
+})
 </script>
 
 <template>
@@ -131,7 +137,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
       <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
       <StorefrontSharedClearanceAnnouncementDialog />
 
-      <!-- Header -->
+      <!-- Header (2 zones: logo | nav + actions) -->
       <header v-if="!hideNavigation" :class="['bg-[#FFFDF9] border-b border-[#C9A24B]/35 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="h-16 md:h-20 flex items-center justify-between gap-4">
@@ -144,64 +150,17 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                 <img
                   :src="storeSettings.logoUrl"
                   :alt="tenantName"
-                  class="h-10 max-w-[140px] object-contain"
+                  class="h-10 max-w-[140px] object-contain rounded-tl-2xl rounded-br-2xl"
                 >
               </template>
               <template v-else>
-                <div class="h-10 w-10 rounded-full bg-brand-50 text-brand-700 flex items-center justify-center border border-[#C9A24B]/40">
+                <div class="h-10 w-10 rounded-tl-2xl rounded-tr-md rounded-br-2xl rounded-bl-md bg-brand-50 text-brand-700 flex items-center justify-center border border-[#C9A24B]/40">
                   <!-- Placeholder Logo Icon -->
                   <Icon name="lucide:flower-2" class="w-5 h-5" />
                 </div>
               </template>
               <span class="text-xl font-bold text-[#2E1E20] group-hover:text-brand-700 transition-colors tracking-tight">{{ tenantName }}</span>
             </NuxtLink>
-
-            <!-- Search Bar (Centered & Rounded) -->
-               <div class="flex-1 max-w-lg hidden lg:block">
-              <div class="relative group">
-                <input
-                  type="text"
-                  v-model="searchQuery" :placeholder="storefrontContent.search?.placeholder || 'Search products...'" @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null" @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
-                  class="w-full h-11 bg-[#FAF3EA] border border-[#C9A24B]/35 text-[#2E1E20] text-sm rounded-full focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 block ps-5 pe-10 transition-all group-hover:bg-[#FFFDF9]"
-                >
-                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
-                  <Icon name="lucide:search" class="w-4 h-4 text-[#9C8B82] group-hover:text-brand-600 transition-colors" />
-                  <!-- Search Dropdown -->
-                  <div
-                    v-show="isSearchDropdownOpen"
-                    class="absolute top-[100%] end-0 mt-2 w-64 bg-[#FFFDF9] border border-[#C9A24B]/35 shadow-xl z-50 rounded-2xl overflow-hidden text-start pointer-events-auto"
-                  >
-                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-[#6B5850]">Searching...</div>
-                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-[#6B5850]">No products found.</div>
-                    <div v-else class="flex flex-col">
-                      <NuxtLink
-                        v-for="product in visibleSearchResults"
-                        :key="product.id"
-                        :to="'/product/' + product.slug"
-                        class="flex items-center gap-3 px-4 py-3 hover:bg-[#FAF3EA] transition-colors border-b border-[#C9A24B]/20 last:border-0"
-                        @click="isSearchDropdownOpen = false"
-                      >
-                        <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-lg shadow-sm" />
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm font-medium text-[#2E1E20] truncate">{{ product.title }}</div>
-                          <div class="text-xs text-brand-700 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-700">-{{ product.promotionDiscountPercent }}%</span></div>
-                        </div>
-                      </NuxtLink>
-                    <button
-                      v-if="hasMoreSearchResults"
-                      type="button"
-                      class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
-                      @mousedown.prevent
-                      @click="showMoreSearchResults"
-                    >
-                      See more
-                    </button>
-                    </div>
-                  </div>
-
-                </div>
-              </div>
-            </div>
 
             <!-- Navigation & Actions -->
             <div class="flex items-center gap-6">
@@ -216,7 +175,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   {{ storefrontContent.nav.categories || 'Categories' }}
                   <Icon name="lucide:chevron-down" class="w-4 h-4" />
                 </button>
-                <div class="absolute top-[80%] start-0 mt-2 w-48 bg-[#FFFDF9] border border-[#C9A24B]/35 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-2xl overflow-hidden">
+                <div class="absolute top-[80%] start-0 mt-2 w-48 bg-[#FFFDF9] border border-[#C9A24B]/35 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-tl-2xl rounded-tr-md rounded-br-2xl rounded-bl-md overflow-hidden">
                   <NuxtLink
                     v-for="cat in tenantCategories"
                     :key="cat.id"
@@ -236,6 +195,15 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
               <!-- Icons -->
               <div class="flex items-center gap-3">
                 <LocaleSwitcher class="hidden lg:inline-flex" />
+                <!-- Search Trigger (reveals the same search state/results below) -->
+                <button
+                  class="relative h-10 w-10 hidden lg:flex items-center justify-center text-[#2E1E20]/70 hover:text-brand-700 hover:bg-[#FAF3EA] rounded-full transition-colors"
+                  :class="{ 'text-brand-700 bg-[#FAF3EA]': isSearchOpen }"
+                  :title="storefrontContent.search?.placeholder || 'Search products...'"
+                  @click="isSearchOpen = !isSearchOpen"
+                >
+                  <Icon :name="isSearchOpen ? 'lucide:x' : 'lucide:search'" class="w-5 h-5" />
+                </button>
                 <button
                   class="relative h-10 w-10 flex items-center justify-center text-[#2E1E20]/70 hover:text-brand-700 hover:bg-[#FAF3EA] rounded-full transition-colors"
                   :title="storefrontContent.header.wishlistTitle"
@@ -270,6 +238,57 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             </div>
           </div>
         </div>
+
+        <!-- Search Reveal Panel (desktop) - same search state/logic, icon-triggered instead of always-visible -->
+        <Transition name="search-reveal">
+          <div v-if="isSearchOpen" class="hidden lg:block border-t border-[#C9A24B]/25 bg-[#FAF3EA]/60">
+            <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
+              <div class="relative group">
+                <input
+                  type="text"
+                  v-model="searchQuery" :placeholder="storefrontContent.search?.placeholder || 'Search products...'" @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null" @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  class="w-full h-12 bg-[#FFFDF9] border border-[#C9A24B]/35 text-[#2E1E20] text-sm rounded-tl-2xl rounded-tr-md rounded-br-2xl rounded-bl-md focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 block ps-5 pe-10 transition-all group-hover:bg-white shadow-sm"
+                >
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
+                  <Icon name="lucide:search" class="w-4 h-4 text-[#9C8B82] group-hover:text-brand-600 transition-colors" />
+                  <!-- Search Dropdown -->
+                  <div
+                    v-show="isSearchDropdownOpen"
+                    class="absolute top-[100%] end-0 mt-2 w-64 bg-[#FFFDF9] border border-[#C9A24B]/35 shadow-xl z-50 rounded-2xl overflow-hidden text-start pointer-events-auto"
+                  >
+                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-[#6B5850]">Searching...</div>
+                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-[#6B5850]">No products found.</div>
+                    <div v-else class="flex flex-col">
+                      <NuxtLink
+                        v-for="product in visibleSearchResults"
+                        :key="product.id"
+                        :to="'/product/' + product.slug"
+                        class="flex items-center gap-3 px-4 py-3 hover:bg-[#FAF3EA] transition-colors border-b border-[#C9A24B]/20 last:border-0"
+                        @click="isSearchDropdownOpen = false; isSearchOpen = false"
+                      >
+                        <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-lg shadow-sm" />
+                        <div class="flex-1 min-w-0">
+                          <div class="text-sm font-medium text-[#2E1E20] truncate">{{ product.title }}</div>
+                          <div class="text-xs text-brand-700 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-rose-700">-{{ product.promotionDiscountPercent }}%</span></div>
+                        </div>
+                      </NuxtLink>
+                    <button
+                      v-if="hasMoreSearchResults"
+                      type="button"
+                      class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                      @mousedown.prevent
+                      @click="showMoreSearchResults"
+                    >
+                      See more
+                    </button>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+          </div>
+        </Transition>
       </header>
 
       <!-- Mobile Drawer -->
@@ -462,4 +481,6 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+.search-reveal-enter-active, .search-reveal-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
+.search-reveal-enter-from, .search-reveal-leave-to { opacity: 0; transform: translateY(-6px); }
 </style>

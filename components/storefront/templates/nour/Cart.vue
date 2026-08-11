@@ -44,7 +44,7 @@
               <li
                 v-for="item in cartStore.items"
                 :key="item.variantId || item.productId"
-                class="flex py-6 sm:py-8 px-6 bg-[#FFFDF9] rounded-[24px] border border-[#C9A24B]/30 hover:shadow-md transition-shadow"
+                class="flex py-6 sm:py-8 px-6 bg-[#FFFDF9] rounded-tl-[36px] rounded-tr-lg rounded-br-[36px] rounded-bl-lg border border-[#C9A24B]/30 hover:shadow-md transition-shadow"
               >
                 <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-2xl border border-[#C9A24B]/25 bg-[#F3E7D8]">
                   <img
@@ -118,7 +118,7 @@
         <!-- Order Summary -->
         <section
           aria-labelledby="summary-heading"
-          class="mt-16 bg-[#FFFDF9] rounded-[28px] shadow-sm border border-[#C9A24B]/30 px-6 py-8 sm:p-10 lg:col-span-5 lg:mt-0 lg:sticky lg:top-8"
+          class="mt-16 bg-[#FFFDF9] rounded-tl-[56px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl shadow-sm border border-[#C9A24B]/30 px-6 py-8 sm:p-10 lg:col-span-5 lg:mt-0 lg:sticky lg:top-8"
         >
           <h2
             id="summary-heading"

@@ -59,8 +59,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 
 <template>
   <div class="flex flex-col animate-fade-in-right space-y-8">
-    <!-- Header -->
-    <div>
+    <!-- Header (arched decorative border) -->
+    <div class="ps-6 border-s-2 border-[#C9A24B]/45 rounded-tl-[56px]">
       <h1
         class="text-3xl md:text-4xl lg:text-5xl font-bold text-[#2E1E20] tracking-tight leading-tight mb-3"
       >

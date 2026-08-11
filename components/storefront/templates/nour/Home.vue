@@ -104,8 +104,9 @@ const displayedProducts = computed(() => {
 
 <template>
   <div class="bg-[#FAF3EA] min-h-screen pb-24">
-    <!-- Hero Slider -->
-    <div class="relative w-full h-[420px] md:h-[520px] lg:h-[620px] overflow-hidden group"
+    <!-- Editorial Hero: 2-column composition (text / arched image), sides swap responsively -->
+    <section
+      class="relative w-full min-h-[560px] md:min-h-[620px] lg:min-h-[680px] overflow-hidden bg-[#FFFDF9] border-b border-[#C9A24B]/25"
       @touchstart.passive="pauseSlideAutoplay"
       @touchend.passive="resumeSlideAutoplay"
     >
@@ -114,52 +115,61 @@ const displayedProducts = computed(() => {
         v-for="(slide, index) in heroSlides"
         :key="index"
         class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
-        :class="index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+        :class="index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'"
       >
-        <img
-          :src="slide.imageUrl"
-          class="w-full h-full object-cover"
-          :alt="slide.title"
-        >
-        <!-- Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-r from-[#2E1E20]/75 via-[#2E1E20]/35 to-transparent flex items-center">
-          <div class="max-w-7xl mx-auto px-6 w-full">
-            <div
-              class="max-w-2xl text-white transform transition-all duration-1000 delay-300"
-              :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
+        <div class="max-w-7xl mx-auto h-full px-6 sm:px-8 lg:px-10 grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-center py-14 lg:py-0">
+          <!-- Text Column -->
+          <div
+            class="order-2 transform transition-all duration-1000 delay-300"
+            :class="[index % 2 === 0 ? 'lg:order-1' : 'lg:order-2', index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0']"
+          >
+            <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-50 rounded-full text-xs md:text-sm font-medium mb-5 tracking-wide border border-[#C9A24B]/40 text-brand-800">
+              <Icon name="lucide:sparkle" class="w-3.5 h-3.5 text-[#C9A24B]" />
+              {{ storefrontContent.home.welcomeTo(tenantName) }}
+            </span>
+            <h2 class="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 md:mb-6 leading-tight tracking-tight text-[#2E1E20]">
+              {{ slide.title }}
+            </h2>
+            <p class="text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-[#5C4A44] max-w-lg leading-relaxed line-clamp-2 md:line-clamp-none">
+              {{ slide.subtitle }}
+            </p>
+            <NuxtLink
+              :to="slideTo(slide.buttonHref)"
+              class="group inline-flex items-center gap-2 px-7 py-3.5 md:px-9 md:py-4 bg-[#2E1E20] text-white font-bold rounded-full hover:bg-brand-700 transition-all shadow-lg text-sm md:text-base"
             >
-              <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-white/10 backdrop-blur-sm rounded-full text-xs md:text-sm font-medium mb-5 tracking-wide border border-[#C9A24B]/50">
-                <Icon name="lucide:sparkle" class="w-3.5 h-3.5 text-[#E4C58F]" />
-                {{ storefrontContent.home.welcomeTo(tenantName) }}
-              </span>
-              <h2 class="text-4xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight tracking-tight">
-                {{ slide.title }}
-              </h2>
-              <p class="text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-white/85 max-w-lg leading-relaxed line-clamp-2 md:line-clamp-none">
-                {{ slide.subtitle }}
-              </p>
-              <NuxtLink
-                :to="slideTo(slide.buttonHref)"
-                class="group inline-flex items-center gap-2 px-7 py-3.5 md:px-9 md:py-4 bg-white text-[#2E1E20] font-bold rounded-full hover:bg-[#F3E7D8] transition-all shadow-lg text-sm md:text-base"
+              {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
+              <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" />
+            </NuxtLink>
+          </div>
+
+          <!-- Image Column (arched/organic frame) -->
+          <div
+            class="order-1 relative"
+            :class="index % 2 === 0 ? 'lg:order-2' : 'lg:order-1'"
+          >
+            <div class="absolute -inset-4 md:-inset-6 rounded-tl-[120px] rounded-tr-3xl rounded-br-[120px] rounded-bl-3xl bg-[#C9A24B]/15 -z-10" />
+            <div class="relative aspect-[4/5] lg:aspect-[3/4] rounded-tl-[120px] rounded-tr-3xl rounded-br-[120px] rounded-bl-3xl overflow-hidden border border-[#C9A24B]/35 shadow-xl">
+              <img
+                :src="slide.imageUrl"
+                class="w-full h-full object-cover"
+                :alt="slide.title"
               >
-                {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
-                <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180" />
-              </NuxtLink>
+              <div class="absolute inset-0 bg-gradient-to-t from-[#2E1E20]/25 via-transparent to-transparent" />
             </div>
           </div>
         </div>
       </div>
 
       <!-- Arrows -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 end-8 z-20 gap-4">
+      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 end-8 lg:end-10 z-20 gap-4">
         <button
-          class="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white hover:text-[#2E1E20] transition-all backdrop-blur-sm"
+          class="w-12 h-12 rounded-full border border-[#C9A24B]/50 bg-[#FFFDF9]/80 backdrop-blur-sm flex items-center justify-center text-[#2E1E20] hover:bg-[#2E1E20] hover:text-white hover:border-[#2E1E20] transition-all"
           @click="prevSlide"
         >
           <Icon name="lucide:chevron-left" class="w-5 h-5" />
         </button>
         <button
-          class="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center text-white hover:bg-white hover:text-[#2E1E20] transition-all backdrop-blur-sm"
+          class="w-12 h-12 rounded-full border border-[#C9A24B]/50 bg-[#FFFDF9]/80 backdrop-blur-sm flex items-center justify-center text-[#2E1E20] hover:bg-[#2E1E20] hover:text-white hover:border-[#2E1E20] transition-all"
           @click="nextSlide"
         >
           <Icon name="lucide:chevron-right" class="w-5 h-5" />
@@ -167,20 +177,20 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 start-6 md:start-8 z-20 flex space-x-2 rtl:space-x-reverse">
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 start-6 md:start-10 z-20 flex space-x-2 rtl:space-x-reverse">
         <button
           v-for="(slide, index) in heroSlides"
           :key="index"
           class="h-1 rounded-full transition-all duration-300"
-          :class="index === currentSlide ? 'bg-[#C9A24B] w-8' : 'bg-white/40 w-4 hover:bg-white/60'"
+          :class="index === currentSlide ? 'bg-[#C9A24B] w-8' : 'bg-[#2E1E20]/20 w-4 hover:bg-[#2E1E20]/40'"
           @click="currentSlide = index"
         />
       </div>
-    </div>
+    </section>
 
-    <!-- Categories Section (Horizontal Scroll) -->
+    <!-- Categories Section (Static Curated Grid) -->
     <section v-if="sections.browseByCategory.enabled" class="py-12 md:py-20 bg-[#FAF3EA]">
-      <div class="mb-8 md:mb-10 px-6 max-w-7xl mx-auto flex items-end justify-between">
+      <div class="mb-8 md:mb-10 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div class="max-w-2xl">
           <p class="text-xs font-bold text-brand-700 tracking-[0.25em] uppercase mb-3">
             {{ sections.browseByCategory.eyebrow }}
@@ -189,74 +199,53 @@ const displayedProducts = computed(() => {
             {{ sections.browseByCategory.title }}
           </h2>
         </div>
-
-        <!-- Scroll Arrows -->
-        <div class="hidden md:flex gap-3">
-          <button
-            class="w-10 h-10 rounded-full bg-[#FFFDF9] shadow-sm border border-[#C9A24B]/35 flex items-center justify-center text-[#2E1E20] hover:border-brand-500 hover:text-brand-700 transition-colors"
-            onclick="document.getElementById('cat-scroll').scrollBy({left: -350, behavior: 'smooth'})"
-          >
-            <Icon name="lucide:chevron-left" class="w-5 h-5" />
-          </button>
-          <button
-            class="w-10 h-10 rounded-full bg-[#FFFDF9] shadow-sm border border-[#C9A24B]/35 flex items-center justify-center text-[#2E1E20] hover:border-brand-500 hover:text-brand-700 transition-colors"
-            onclick="document.getElementById('cat-scroll').scrollBy({left: 350, behavior: 'smooth'})"
-          >
-            <Icon name="lucide:chevron-right" class="w-5 h-5" />
-          </button>
-        </div>
       </div>
 
-      <div class="relative w-full">
-        <div
-          id="cat-scroll"
-          class="flex gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 md:px-6 max-w-7xl mx-auto scrollbar-hide"
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <NuxtLink
+          v-for="(cat) in categories"
+          :key="cat.slug"
+          :to="`/category/${cat.slug}`"
+          class="h-56 sm:h-64 md:h-72 rounded-tl-[36px] rounded-tr-lg rounded-br-[36px] rounded-bl-lg p-5 md:p-6 flex flex-col justify-end items-start hover:shadow-xl transition-all duration-300 relative overflow-hidden group border border-[#C9A24B]/30"
+          :class="cat.className"
         >
-          <NuxtLink
-            v-for="(cat) in categories"
-            :key="cat.slug"
-            :to="`/category/${cat.slug}`"
-            class="snap-start flex-shrink-0 w-48 h-64 md:w-64 md:h-80 lg:w-80 lg:h-96 rounded-[24px] p-6 md:p-8 flex flex-col justify-end items-start hover:shadow-xl transition-all duration-300 relative overflow-hidden group border border-[#C9A24B]/30"
-            :class="cat.className"
-          >
-            <!-- Background Image -->
-            <div class="absolute inset-0">
-              <img
-                v-if="cat.imageUrl"
-                :src="cat.imageUrl"
-                :alt="categoryDisplayTitle(cat)"
-                class="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
-              >
-              <div
-                v-else
-                class="w-full h-full bg-gradient-to-br from-white/40 via-white/10 to-transparent"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-[#2E1E20]/50 via-[#2E1E20]/10 to-transparent" />
-            </div>
+          <!-- Background Image -->
+          <div class="absolute inset-0">
+            <img
+              v-if="cat.imageUrl"
+              :src="cat.imageUrl"
+              :alt="categoryDisplayTitle(cat)"
+              class="w-full h-full object-cover opacity-80 transition-transform duration-700 group-hover:scale-105"
+            >
+            <div
+              v-else
+              class="w-full h-full bg-gradient-to-br from-white/40 via-white/10 to-transparent"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-[#2E1E20]/50 via-[#2E1E20]/10 to-transparent" />
+          </div>
 
-            <!-- Background Decoration (Circle) -->
-            <div class="absolute -top-10 -end-10 w-32 h-32 md:w-40 md:h-40 rounded-full bg-[#C9A24B]/25 blur-2xl group-hover:scale-150 transition-transform duration-700" />
+          <!-- Background Decoration (Circle) -->
+          <div class="absolute -top-10 -end-10 w-32 h-32 md:w-40 md:h-40 rounded-full bg-[#C9A24B]/25 blur-2xl group-hover:scale-150 transition-transform duration-700" />
 
-            <div class="z-10 relative transform transition-transform duration-300 group-hover:-translate-y-1 bg-[#FFFDF9]/90 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-sm border border-[#C9A24B]/25">
-              <h3 class="text-xl md:text-2xl font-bold text-[#2E1E20] mb-1 group-hover:text-brand-700 transition-colors">
-                {{ categoryDisplayTitle(cat) }}
-              </h3>
-                <p class="text-[#6B5850] font-medium text-sm md:text-base flex items-center gap-2">
-                  {{ storefrontContent.common.productsCount(cat.itemCount) }}
-                  <span class="w-8 h-px bg-[#C9A24B]/60 group-hover:w-16 group-hover:bg-brand-600 transition-all hidden md:block" />
-                </p>
-            </div>
+          <div class="z-10 relative transform transition-transform duration-300 group-hover:-translate-y-1 bg-[#FFFDF9]/90 backdrop-blur-sm px-3.5 py-2.5 md:px-4 md:py-3 rounded-tl-xl rounded-br-xl shadow-sm border border-[#C9A24B]/25">
+            <h3 class="text-lg md:text-2xl font-bold text-[#2E1E20] mb-1 group-hover:text-brand-700 transition-colors">
+              {{ categoryDisplayTitle(cat) }}
+            </h3>
+              <p class="text-[#6B5850] font-medium text-xs md:text-base flex items-center gap-2">
+                {{ storefrontContent.common.productsCount(cat.itemCount) }}
+                <span class="w-8 h-px bg-[#C9A24B]/60 group-hover:w-16 group-hover:bg-brand-600 transition-all hidden md:block" />
+              </p>
+          </div>
 
-            <!-- Action Icon -->
-            <div class="absolute top-4 end-4 md:top-6 md:end-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/85 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-              <Icon name="lucide:arrow-right" class="w-4 h-4 md:w-5 md:h-5 text-[#2E1E20] rtl:rotate-180" />
-            </div>
-          </NuxtLink>
-        </div>
+          <!-- Action Icon -->
+          <div class="absolute top-4 end-4 md:top-6 md:end-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/85 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
+            <Icon name="lucide:arrow-right" class="w-4 h-4 md:w-5 md:h-5 text-[#2E1E20] rtl:rotate-180" />
+          </div>
+        </NuxtLink>
       </div>
     </section>
 
-    <!-- Featured Products -->
+    <!-- Featured Products (Static Curated Grid) -->
     <section v-if="sections.newArrivals.enabled" class="py-12 md:py-20 bg-[#FFFDF9] border-y border-[#C9A24B]/20">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8 md:mb-10">
@@ -268,40 +257,32 @@ const displayedProducts = computed(() => {
           </h2>
         </div>
 
-        <!-- Skeleton Loading - Horizontal -->
+        <!-- Skeleton Loading -->
         <div
           v-if="pending"
-          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
         >
           <div
             v-for="i in 4"
             :key="i"
-            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse"
+            class="animate-pulse"
           >
-            <div class="bg-[#F3E7D8] rounded-[20px] h-64 md:h-80 mb-4" />
+            <div class="bg-[#F3E7D8] rounded-tl-[36px] rounded-tr-lg rounded-br-[36px] rounded-bl-lg aspect-[3/4] mb-4" />
             <div class="h-4 bg-[#F3E7D8] rounded-full w-3/4 mb-3" />
             <div class="h-4 bg-[#F3E7D8] rounded-full w-1/3" />
           </div>
         </div>
 
-        <!-- Horizontal Scrolling Container -->
+        <!-- Curated Grid -->
         <div
           v-else
-          ref="featuredScrollContainer"
-          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
-          style="scroll-behavior: auto;"
-          @mouseenter="isHoveringFeatured = true"
-          @mouseleave="isHoveringFeatured = false"
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
         >
-          <div
-            v-for="(product, index) in featuredInfiniteList"
-            :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
-          >
-            <ProductCard
-              :product="product"
-            />
-          </div>
+          <ProductCard
+            v-for="product in featuredProducts"
+            :key="product.id"
+            :product="product"
+          />
         </div>
 
         <div class="mt-10 text-center">
@@ -315,7 +296,7 @@ const displayedProducts = computed(() => {
       </div>
     </section>
 
-    <!-- Best Sellers -->
+    <!-- Best Sellers (Static Curated Grid) -->
     <section v-if="sections.bestSellers.enabled" class="py-12 md:py-20 bg-[#FAF3EA]">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex items-center justify-between mb-8 md:mb-10">
@@ -340,22 +321,15 @@ const displayedProducts = computed(() => {
           No best sellers yet.
         </div>
 
-        <div v-else
-          ref="bestSellersScrollContainer"
-          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
-          style="scroll-behavior: auto;"
-          @mouseenter="isHoveringBestSellers = true"
-          @mouseleave="isHoveringBestSellers = false"
+        <div
+          v-else
+          class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6"
         >
-          <div
-            v-for="(product, index) in bestSellersInfiniteList"
-            :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
-          >
-            <ProductCard
-             :product="product"
-            />
-           </div>
+          <ProductCard
+            v-for="product in bestSellersDisplayed"
+            :key="product.id"
+            :product="product"
+          />
         </div>
 
         <div class="mt-10 text-center sm:hidden">
