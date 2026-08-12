@@ -138,6 +138,11 @@ void main() {
 
     expect(tester.takeException(), isNull);
 
+    // At this width the cart lines live in the bottom sheet behind the floating
+    // summary bar, so open it before asserting on a cart line.
+    await tester.tap(find.byKey(const ValueKey('pos-mobile-cart-summary')));
+    await tester.pumpAndSettle();
+
     final priceLabel = tenantCurrencyFormatter(
       StoreSettings.empty,
     ).format(2450);
