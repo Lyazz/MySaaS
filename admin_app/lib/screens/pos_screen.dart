@@ -11,6 +11,7 @@ import '../models/customer.dart';
 import '../models/product.dart';
 import '../models/pos_models.dart';
 import '../providers/pos_provider.dart';
+import '../providers/cash_provider.dart';
 import '../providers/customers_provider.dart';
 import '../providers/store_settings_provider.dart';
 import '../services/api_service.dart';
@@ -77,6 +78,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       ref.read(posProvider.notifier).fetchCategories();
       ref.read(posProvider.notifier).fetchProducts();
       ref.read(customersProvider.notifier).fetchCustomers(limit: 200);
+      // Checkout attaches the sale to the open cashbox, so the cash state has
+      // to be loaded before the first sale. Reads through the repository cache
+      // and swallows its own errors, so this is safe offline.
+      ref.read(cashProvider.notifier).fetchCashboxes();
     });
   }
 
