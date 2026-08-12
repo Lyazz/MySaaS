@@ -173,7 +173,8 @@ class OfflineBanner extends ConsumerWidget {
                     ),
                     const SizedBox(width: 8),
                     FilledButton(
-                      onPressed: syncState.failed == 0
+                      onPressed: syncState.failed == 0 &&
+                              syncState.rejected == 0
                           ? null
                           : () async {
                               await service.retryFailedOperations();
