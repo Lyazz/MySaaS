@@ -196,6 +196,9 @@ class SyncService {
 
   static const int _maxRetries = 5;
   static const int _batchSize = 50;
+
+  /// How long to wait before sweeping rows left `pending` after a pass.
+  static const Duration _idleSweepDelay = Duration(seconds: 5);
   static const Map<String, Set<String>> _supportedOperations = {
     'sale': {'create'},
     'customer': {'create', 'update'},
@@ -256,11 +259,51 @@ class SyncService {
   void initialize(ApiService apiService, {required AppMode mode}) {
     _apiService = apiService;
     _mode = mode;
-    _emitState();
+    unawaited(_bootstrap());
+  }
+
+  /// Recovers work stranded by a crash before reporting state or syncing.
+  Future<void> _bootstrap() async {
+    await _reclaimStrandedOperations();
+    await _emitState();
     if (_mode.allowsNetworkRequests) {
       _ensureConnectivityListener();
-      _scheduleNextRetry();
-      _checkAndSync();
+      await _scheduleNextRetry();
+      unawaited(_checkAndSync());
+    }
+  }
+
+  /// Moves rows left in [SyncStatus.syncing] back to [SyncStatus.pending],
+  /// returning how many were recovered.
+  ///
+  /// A row only reaches `syncing` while an attempt is in flight. If the process
+  /// dies mid-attempt (crash, force close, OS kill) nothing ever moves it on,
+  /// and because the sync pass only selects `pending`/`failed` rows the queued
+  /// write would be stranded forever — invisible in the UI and never retried.
+  ///
+  /// Only safe while no attempt of ours is running, so it no-ops if a pass is
+  /// already in progress rather than reclaiming a live attempt.
+  Future<int> _reclaimStrandedOperations({bool force = false}) async {
+    if (_isSyncing && !force) return 0;
+    try {
+      final db = await _dbService.database;
+      return await db.update(
+        'sync_queue',
+        {
+          'status': SyncStatus.pending.name,
+          'lastError': null,
+          'nextRetryAt': null,
+        },
+        where: 'tenantId = ? AND workspaceId = ? AND status = ?',
+        whereArgs: [
+          TenantModeService().activeTenantId,
+          _activeWorkspaceId,
+          SyncStatus.syncing.name,
+        ],
+      );
+    } catch (error) {
+      debugPrint('SyncService: failed to reclaim stranded operations: $error');
+      return 0;
     }
   }
 
@@ -320,6 +363,10 @@ class SyncService {
     final tenantId = TenantModeService().activeTenantId;
     final workspaceId = _activeWorkspaceId;
     final db = await _dbService.database;
+    // `rejected` is included: it is terminal for the automatic loop, but a user
+    // asking to retry is the manual correction path out of it. `conflicted` is
+    // deliberately excluded — replaying it would silently overwrite the remote
+    // change that caused the conflict.
     await db.update(
       'sync_queue',
       {
@@ -328,8 +375,13 @@ class SyncService {
         'lastError': null,
         'nextRetryAt': null,
       },
-      where: 'tenantId = ? AND workspaceId = ? AND status = ?',
-      whereArgs: [tenantId, workspaceId, SyncStatus.failed.name],
+      where: 'tenantId = ? AND workspaceId = ? AND status IN (?, ?)',
+      whereArgs: [
+        tenantId,
+        workspaceId,
+        SyncStatus.failed.name,
+        SyncStatus.rejected.name,
+      ],
     );
     await _emitState();
     if (_mode.allowsNetworkRequests) {
@@ -383,7 +435,12 @@ class SyncService {
     return _supportedOperations[entityType]?.contains(action) == true;
   }
 
-  Future<void> _checkAndSync() async {
+  /// [pullRemote] draws down remote changes and refreshes the supplemental
+  /// domains after the outbox drains. Sweeps that exist only to re-attempt
+  /// queued writes pass false: they can fire every few seconds, and a full pull
+  /// plus twelve domain refreshes on each one would be a lot of traffic for no
+  /// new information.
+  Future<void> _checkAndSync({bool pullRemote = true}) async {
     if (_isSyncing || _apiService == null || !_mode.allowsNetworkRequests) {
       return;
     }
@@ -398,6 +455,10 @@ class SyncService {
     _retryTimer = null;
     await _emitState(syncing: true);
     try {
+      // `force` is correct here: we just took the `_isSyncing` guard, and it
+      // was false a moment ago, so any `syncing` row is left over from a
+      // previous process that died rather than a live attempt.
+      await _reclaimStrandedOperations(force: true);
       final tenantId = TenantModeService().activeTenantId;
       final workspaceId = _activeWorkspaceId;
       final db = await _dbService.database;
@@ -414,7 +475,10 @@ class SyncService {
           _maxRetries,
           DateTime.now().toIso8601String(),
         ],
-        orderBy: 'COALESCE(nextRetryAt, createdAt) ASC, createdAt ASC',
+        // Strict FIFO. `nextRetryAt` gates *eligibility* in the WHERE clause;
+        // ordering by it would push a retried create behind writes queued after
+        // it, so a dependent update could reach the server before its parent.
+        orderBy: 'createdAt ASC, id ASC',
         limit: _batchSize,
       );
 
@@ -423,7 +487,7 @@ class SyncService {
           SyncOperation.fromMap(opMap.cast<String, dynamic>()),
         );
       }
-      if (tenantId.trim().isNotEmpty) {
+      if (pullRemote && tenantId.trim().isNotEmpty) {
         await _pullRemoteChanges(tenantId);
         if (!disableSupplementalRefreshForTests) {
           await _refreshSupplementalDomains(tenantId);
@@ -458,6 +522,22 @@ class SyncService {
         throw SyncUnsupportedOperation(op.entityType, op.action);
       }
       final withResolvedAliases = await _resolveOperationAliases(op);
+      final blockedBy = await _findBlockingDependency(withResolvedAliases);
+      if (blockedBy != null) {
+        // Not a failure: hand the row back to the queue untouched so it is
+        // retried once its parent create has synced. Burning a retry here
+        // would eventually strand the write.
+        await db.update(
+          'sync_queue',
+          {'status': SyncStatus.pending.name},
+          where: 'id = ? AND tenantId = ? AND workspaceId = ?',
+          whereArgs: [op.id, op.tenantId, op.workspaceId],
+        );
+        debugPrint(
+          'SyncService: deferring ${op.entityType}:${op.action} — $blockedBy',
+        );
+        return;
+      }
       final resolved = await _processImagesInPayload(withResolvedAliases);
       final conflict = await _preflightConflictCheck(resolved);
       if (conflict != null) {
@@ -481,8 +561,8 @@ class SyncService {
             'lastError': e.toString(),
             'nextRetryAt': null,
           },
-          where: 'id = ? AND tenantId = ?',
-          whereArgs: [op.id, op.tenantId],
+          where: 'id = ? AND tenantId = ? AND workspaceId = ?',
+          whereArgs: [op.id, op.tenantId, op.workspaceId],
         );
         await _markLocalOperationConflicted(op);
       } else if (disposition == _SyncFailureDisposition.rejected) {
@@ -574,72 +654,83 @@ class SyncService {
       orderBy: 'nextRetryAt ASC',
       limit: 1,
     );
-    if (rows.isEmpty) return;
+    final nextRetryAt = rows.isEmpty
+        ? null
+        : SyncOperation._tryParseDateTime(rows.first['nextRetryAt']);
 
-    final nextRetryAt = SyncOperation._tryParseDateTime(
-      rows.first['nextRetryAt'],
-    );
-    if (nextRetryAt == null) return;
+    var delay = nextRetryAt?.difference(DateTime.now());
+    // A wake driven by a failed row's backoff is a real retry, so it pulls.
+    var pullRemote = delay != null;
 
-    final delay = nextRetryAt.difference(DateTime.now());
+    // A pass can end with rows still `pending`: work deferred behind an
+    // unsynced parent, or a queue longer than `_batchSize`. Those rows have no
+    // `nextRetryAt` of their own, so without this they would sit untouched
+    // until connectivity happened to flap. Such a sweep only needs to drain the
+    // outbox — it carries no reason to re-pull remote state.
+    if (delay == null || delay > _idleSweepDelay) {
+      final pending =
+          Sqflite.firstIntValue(
+            await db.rawQuery(
+              'SELECT COUNT(*) FROM sync_queue WHERE tenantId = ? AND workspaceId = ? AND status = ?',
+              [tenantId, workspaceId, SyncStatus.pending.name],
+            ),
+          ) ??
+          0;
+      if (pending > 0) {
+        delay = _idleSweepDelay;
+        pullRemote = false;
+      }
+    }
+
+    if (delay == null) return;
     if (delay <= Duration.zero) {
-      _checkAndSync();
+      unawaited(_checkAndSync(pullRemote: pullRemote));
       return;
     }
-    _retryTimer = Timer(delay, _checkAndSync);
+    _retryTimer = Timer(delay, () => _checkAndSync(pullRemote: pullRemote));
   }
+
+  /// Payload fields that carry a reference to another syncable entity, keyed by
+  /// the entity type that owns the referenced id. Used both to rewrite local
+  /// ids into remote ids and to detect references that cannot be sent yet.
+  static const Map<String, Map<String, String>> _dependencyFields = {
+    'order': {'id': 'order'},
+    'user': {'staffRoleId': 'staffRole', 'cashboxId': 'cashbox'},
+    'sale': {'customerId': 'customer', 'orderId': 'order'},
+    'customerPayment': {'customerId': 'customer', 'saleId': 'sale'},
+    'purchase': {
+      'id': 'purchase',
+      'purchaseId': 'purchase',
+      'supplierId': 'supplier',
+    },
+    'cashSession': {'cashboxId': 'cashbox', 'sessionId': 'cashSession'},
+    'cashTransaction': {
+      'cashboxId': 'cashbox',
+      'sessionId': 'cashSession',
+      'customerId': 'customer',
+      'supplierId': 'supplier',
+      'saleId': 'sale',
+      'orderId': 'order',
+      'purchaseOrderId': 'purchase',
+    },
+  };
 
   Future<SyncOperation> _resolveOperationAliases(SyncOperation op) async {
     final payload = Map<String, dynamic>.from(op.payload);
     var changed = false;
 
-    Future<void> resolveField(
-      String field,
-      String entityType, {
-      String? nestedPath,
-    }) async {
-      final current = payload[field]?.toString().trim();
-      if (current == null || current.isEmpty) return;
-      final resolved = await _resolveEntityAlias(entityType, current);
-      if (resolved == current) return;
-      payload[field] = resolved;
+    final fields = _dependencyFields[op.entityType] ?? const <String, String>{};
+    for (final entry in fields.entries) {
+      final current = payload[entry.key]?.toString().trim();
+      if (current == null || current.isEmpty) continue;
+      final resolved = await _resolveEntityAlias(
+        entry.value,
+        current,
+        tenantId: op.tenantId,
+      );
+      if (resolved == current) continue;
+      payload[entry.key] = resolved;
       changed = true;
-    }
-
-    switch (op.entityType) {
-      case 'order':
-        await resolveField('id', 'order');
-        break;
-      case 'user':
-        await resolveField('staffRoleId', 'staffRole');
-        await resolveField('cashboxId', 'cashbox');
-        break;
-      case 'sale':
-        await resolveField('customerId', 'customer');
-        await resolveField('orderId', 'order');
-        break;
-      case 'customerPayment':
-        await resolveField('customerId', 'customer');
-        await resolveField('saleId', 'sale');
-        break;
-      case 'purchase':
-        await resolveField('id', 'purchase');
-        await resolveField('purchaseId', 'purchase');
-        await resolveField('supplierId', 'supplier');
-        break;
-      case 'cashSession':
-        await resolveField('cashboxId', 'cashbox');
-        await resolveField('sessionId', 'cashSession');
-        break;
-      case 'cashTransaction':
-        await resolveField('cashboxId', 'cashbox');
-        await resolveField('sessionId', 'cashSession');
-        await resolveField('customerId', 'customer');
-        await resolveField('supplierId', 'supplier');
-        await resolveField('saleId', 'sale');
-        await resolveField('orderId', 'order');
-        await resolveField('purchaseOrderId', 'purchase');
-        break;
     }
 
     if (!changed) return op;
@@ -669,8 +760,93 @@ class SyncService {
     );
   }
 
-  Future<String> _resolveEntityAlias(String entityType, String id) async {
-    final tenantId = TenantModeService().activeTenantId;
+  /// Returns a description of the dependency blocking [op], or null if it can
+  /// be sent now.
+  ///
+  /// After alias resolution a reference that still points at a local id means
+  /// the parent entity does not exist on the server yet. Sending it anyway
+  /// draws a 400/404/422, which [_classifySyncFailure] treats as `rejected` —
+  /// a terminal state that silently drops the write. So if some other queued
+  /// operation is still going to create that entity, defer instead of sending.
+  Future<String?> _findBlockingDependency(SyncOperation op) async {
+    final fields = _dependencyFields[op.entityType] ?? const <String, String>{};
+    if (fields.isEmpty) return null;
+
+    for (final entry in fields.entries) {
+      // A create's own `id` cannot block it: `_hasPendingCreateFor` excludes
+      // the operation being processed. That keeps the genuine case working —
+      // an `order:updateStatus` on an order whose `order:create` is still
+      // queued must wait for it.
+      final value = op.payload[entry.key]?.toString().trim();
+      if (value == null || value.isEmpty) continue;
+      if (await _hasPendingCreateFor(entry.value, value, op)) {
+        return '${entry.value} "$value" has not synced yet';
+      }
+    }
+    return null;
+  }
+
+  /// Actions that bring an entity into existence server-side. Only these can
+  /// block a dependent operation — matching on *any* operation carrying the
+  /// same id would make two queued updates of one entity block each other,
+  /// deadlocking both.
+  static const Set<String> _creatingActions = {'create', 'createDraft', 'open'};
+
+  /// True when a non-terminal queued operation is still going to create the
+  /// [entityType] row identified locally by [localId].
+  ///
+  /// Scoped to [op]'s own tenant and workspace, and excluding [op] itself so an
+  /// operation whose own local id appears in one of its reference fields never
+  /// blocks itself.
+  Future<bool> _hasPendingCreateFor(
+    String entityType,
+    String localId,
+    SyncOperation op,
+  ) async {
+    final actions = _creatingActions.toList();
+    final db = await _dbService.database;
+    final rows = await db.query(
+      'sync_queue',
+      columns: ['payload'],
+      where:
+          'tenantId = ? AND workspaceId = ? AND entityType = ? AND id != ? '
+          'AND action IN (${List.filled(actions.length, '?').join(', ')}) '
+          'AND status IN (?, ?, ?)',
+      whereArgs: [
+        op.tenantId,
+        op.workspaceId,
+        entityType,
+        op.id,
+        ...actions,
+        SyncStatus.pending.name,
+        SyncStatus.failed.name,
+        SyncStatus.syncing.name,
+      ],
+    );
+
+    for (final row in rows) {
+      final Map<String, dynamic> payload;
+      try {
+        payload = jsonDecode(row['payload'] as String) as Map<String, dynamic>;
+      } catch (_) {
+        continue;
+      }
+      final candidate = (payload['offlineId'] ?? payload['id'])
+          ?.toString()
+          .trim();
+      if (candidate != null && candidate == localId) return true;
+    }
+    return false;
+  }
+
+  /// Scoped by the operation's own [tenantId] rather than the ambient active
+  /// tenant: a tenant switch mid-pass must never resolve one tenant's local id
+  /// against another tenant's alias table.
+  Future<String> _resolveEntityAlias(
+    String entityType,
+    String id, {
+    required String tenantId,
+  }) async {
     final db = await _dbService.database;
     final rows = await db.query(
       'entity_aliases',
@@ -1753,8 +1929,11 @@ class SyncService {
       if (serverTime != null && serverTime.trim().isNotEmpty) {
         await _writeMetadata(tenantId, 'lastPullAt', serverTime);
       }
-    } catch (_) {
-      // Pull failures must not block queued writes; the next connectivity tick retries.
+    } catch (error) {
+      // Pull failures must not block queued writes; the next connectivity tick
+      // retries. Logged rather than swallowed so a persistently failing pull is
+      // diagnosable instead of looking like an idle sync.
+      debugPrint('SyncService: remote pull failed: $error');
     }
   }
 
@@ -1893,6 +2072,18 @@ class SyncService {
     final data = _asMap(response.data);
     if (data == null) return;
     final db = await _dbService.database;
+    // Same guard every other refresher applies: an unsynced local edit must not
+    // be overwritten by the server copy. `updateSettings` writes the row as
+    // `pending` before queueing its patch, so without this a patch waiting on a
+    // retry would have the user's visible edit silently reverted.
+    if (await _markConflictIfLocalDirty(
+      db,
+      'store_settings',
+      tenantId,
+      'singleton_$tenantId',
+    )) {
+      return;
+    }
     await db.insert('store_settings', {
       'id': 'singleton_$tenantId',
       'tenantId': tenantId,
