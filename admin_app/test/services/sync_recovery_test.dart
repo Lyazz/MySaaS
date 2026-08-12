@@ -33,6 +33,7 @@ void main() {
   var productCreateStatus = 200;
   var supplierCreateStatus = 200;
   var supplierCounter = 0;
+  Map<String, dynamic> storeSettingsResponse = const {};
 
   setUpAll(() async {
     sqfliteFfiInit();
@@ -152,6 +153,17 @@ void main() {
             return;
           }
 
+          if (path == '/admin/store-settings' && options.method == 'GET') {
+            handler.resolve(
+              Response(
+                requestOptions: options,
+                statusCode: 200,
+                data: storeSettingsResponse,
+              ),
+            );
+            return;
+          }
+
           if (path == '/admin/sync/pull') {
             handler.resolve(
               Response(
@@ -179,6 +191,7 @@ void main() {
     productCreateStatus = 200;
     supplierCreateStatus = 200;
     supplierCounter = 0;
+    storeSettingsResponse = const {};
     connectivity.setResults(const [ConnectivityResult.none], emit: false);
     await tempDbDir.create(recursive: true);
     await DatabaseService().resetForTest();
@@ -316,6 +329,37 @@ void main() {
           (await (await DatabaseService().database).query('sync_queue')).isEmpty,
       reason: 'queue to drain',
     );
+  });
+
+  test('a refresh does not overwrite an unsynced local store settings edit', (
+  ) async {
+    // The supplemental refresh is what we are exercising here.
+    SyncService.disableSupplementalRefreshForTests = false;
+    addTearDown(() => SyncService.disableSupplementalRefreshForTests = true);
+    storeSettingsResponse = {'name': 'Server Name', 'slug': 'server-slug'};
+
+    // `patchStoreSettings` writes the row as `pending` before queueing its
+    // patch, so this is the state between a local edit and a successful sync.
+    final db = await DatabaseService().database;
+    await db.insert('store_settings', {
+      'id': 'singleton_tenant-1',
+      'tenantId': 'tenant-1',
+      'name': 'Local Edit',
+      'slug': 'local-slug',
+      'syncStatus': 'pending',
+    });
+
+    connectivity.setResults(const [ConnectivityResult.wifi], emit: false);
+    SyncService().initialize(api, mode: AppMode.hybrid);
+
+    await _waitFor(() async {
+      final rows = await db.query('store_settings');
+      return rows.isNotEmpty && rows.first['syncStatus'] != 'pending';
+    }, reason: 'the refresh pass to reach store settings');
+
+    final row = (await db.query('store_settings')).single;
+    expect(row['name'], 'Local Edit', reason: 'local edit must survive');
+    expect(row['syncStatus'], 'conflicted');
   });
 
   test('a rejected operation can be recovered by an explicit retry', () async {

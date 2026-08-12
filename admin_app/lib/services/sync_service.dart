@@ -435,7 +435,12 @@ class SyncService {
     return _supportedOperations[entityType]?.contains(action) == true;
   }
 
-  Future<void> _checkAndSync() async {
+  /// [pullRemote] draws down remote changes and refreshes the supplemental
+  /// domains after the outbox drains. Sweeps that exist only to re-attempt
+  /// queued writes pass false: they can fire every few seconds, and a full pull
+  /// plus twelve domain refreshes on each one would be a lot of traffic for no
+  /// new information.
+  Future<void> _checkAndSync({bool pullRemote = true}) async {
     if (_isSyncing || _apiService == null || !_mode.allowsNetworkRequests) {
       return;
     }
@@ -482,7 +487,7 @@ class SyncService {
           SyncOperation.fromMap(opMap.cast<String, dynamic>()),
         );
       }
-      if (tenantId.trim().isNotEmpty) {
+      if (pullRemote && tenantId.trim().isNotEmpty) {
         await _pullRemoteChanges(tenantId);
         if (!disableSupplementalRefreshForTests) {
           await _refreshSupplementalDomains(tenantId);
@@ -654,11 +659,14 @@ class SyncService {
         : SyncOperation._tryParseDateTime(rows.first['nextRetryAt']);
 
     var delay = nextRetryAt?.difference(DateTime.now());
+    // A wake driven by a failed row's backoff is a real retry, so it pulls.
+    var pullRemote = delay != null;
 
     // A pass can end with rows still `pending`: work deferred behind an
     // unsynced parent, or a queue longer than `_batchSize`. Those rows have no
     // `nextRetryAt` of their own, so without this they would sit untouched
-    // until connectivity happened to flap.
+    // until connectivity happened to flap. Such a sweep only needs to drain the
+    // outbox — it carries no reason to re-pull remote state.
     if (delay == null || delay > _idleSweepDelay) {
       final pending =
           Sqflite.firstIntValue(
@@ -668,15 +676,18 @@ class SyncService {
             ),
           ) ??
           0;
-      if (pending > 0) delay = _idleSweepDelay;
+      if (pending > 0) {
+        delay = _idleSweepDelay;
+        pullRemote = false;
+      }
     }
 
     if (delay == null) return;
     if (delay <= Duration.zero) {
-      unawaited(_checkAndSync());
+      unawaited(_checkAndSync(pullRemote: pullRemote));
       return;
     }
-    _retryTimer = Timer(delay, _checkAndSync);
+    _retryTimer = Timer(delay, () => _checkAndSync(pullRemote: pullRemote));
   }
 
   /// Payload fields that carry a reference to another syncable entity, keyed by
@@ -712,7 +723,11 @@ class SyncService {
     for (final entry in fields.entries) {
       final current = payload[entry.key]?.toString().trim();
       if (current == null || current.isEmpty) continue;
-      final resolved = await _resolveEntityAlias(entry.value, current);
+      final resolved = await _resolveEntityAlias(
+        entry.value,
+        current,
+        tenantId: op.tenantId,
+      );
       if (resolved == current) continue;
       payload[entry.key] = resolved;
       changed = true;
@@ -758,13 +773,13 @@ class SyncService {
     if (fields.isEmpty) return null;
 
     for (final entry in fields.entries) {
-      // Self-reference (a create's own `id`) is handled by `excludeId`, so a
-      // self-referencing field can never block its own operation. That keeps
-      // the genuine case working: an `order:updateStatus` on an order whose
-      // `order:create` is still queued must wait for it.
+      // A create's own `id` cannot block it: `_hasPendingCreateFor` excludes
+      // the operation being processed. That keeps the genuine case working —
+      // an `order:updateStatus` on an order whose `order:create` is still
+      // queued must wait for it.
       final value = op.payload[entry.key]?.toString().trim();
       if (value == null || value.isEmpty) continue;
-      if (await _hasPendingCreateFor(entry.value, value, excludeId: op.id)) {
+      if (await _hasPendingCreateFor(entry.value, value, op)) {
         return '${entry.value} "$value" has not synced yet';
       }
     }
@@ -779,13 +794,15 @@ class SyncService {
 
   /// True when a non-terminal queued operation is still going to create the
   /// [entityType] row identified locally by [localId].
-  /// [excludeId] is the operation being processed, so an op whose own local id
-  /// appears in one of its reference fields never blocks itself.
+  ///
+  /// Scoped to [op]'s own tenant and workspace, and excluding [op] itself so an
+  /// operation whose own local id appears in one of its reference fields never
+  /// blocks itself.
   Future<bool> _hasPendingCreateFor(
     String entityType,
-    String localId, {
-    required String excludeId,
-  }) async {
+    String localId,
+    SyncOperation op,
+  ) async {
     final actions = _creatingActions.toList();
     final db = await _dbService.database;
     final rows = await db.query(
@@ -796,10 +813,10 @@ class SyncService {
           'AND action IN (${List.filled(actions.length, '?').join(', ')}) '
           'AND status IN (?, ?, ?)',
       whereArgs: [
-        TenantModeService().activeTenantId,
-        _activeWorkspaceId,
+        op.tenantId,
+        op.workspaceId,
         entityType,
-        excludeId,
+        op.id,
         ...actions,
         SyncStatus.pending.name,
         SyncStatus.failed.name,
@@ -822,8 +839,14 @@ class SyncService {
     return false;
   }
 
-  Future<String> _resolveEntityAlias(String entityType, String id) async {
-    final tenantId = TenantModeService().activeTenantId;
+  /// Scoped by the operation's own [tenantId] rather than the ambient active
+  /// tenant: a tenant switch mid-pass must never resolve one tenant's local id
+  /// against another tenant's alias table.
+  Future<String> _resolveEntityAlias(
+    String entityType,
+    String id, {
+    required String tenantId,
+  }) async {
     final db = await _dbService.database;
     final rows = await db.query(
       'entity_aliases',
@@ -1906,8 +1929,11 @@ class SyncService {
       if (serverTime != null && serverTime.trim().isNotEmpty) {
         await _writeMetadata(tenantId, 'lastPullAt', serverTime);
       }
-    } catch (_) {
-      // Pull failures must not block queued writes; the next connectivity tick retries.
+    } catch (error) {
+      // Pull failures must not block queued writes; the next connectivity tick
+      // retries. Logged rather than swallowed so a persistently failing pull is
+      // diagnosable instead of looking like an idle sync.
+      debugPrint('SyncService: remote pull failed: $error');
     }
   }
 
@@ -2046,6 +2072,18 @@ class SyncService {
     final data = _asMap(response.data);
     if (data == null) return;
     final db = await _dbService.database;
+    // Same guard every other refresher applies: an unsynced local edit must not
+    // be overwritten by the server copy. `updateSettings` writes the row as
+    // `pending` before queueing its patch, so without this a patch waiting on a
+    // retry would have the user's visible edit silently reverted.
+    if (await _markConflictIfLocalDirty(
+      db,
+      'store_settings',
+      tenantId,
+      'singleton_$tenantId',
+    )) {
+      return;
+    }
     await db.insert('store_settings', {
       'id': 'singleton_$tenantId',
       'tenantId': tenantId,
