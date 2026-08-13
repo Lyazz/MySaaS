@@ -30,6 +30,7 @@ void main() {
   final supplierBodies = <Map<String, dynamic>>[];
   final purchaseBodies = <Map<String, dynamic>>[];
   final orderPatchBodies = <Map<String, dynamic>>[];
+  final customerRequests = <String>[];
   var productCreateStatus = 200;
   var supplierCreateStatus = 200;
   var supplierCounter = 0;
@@ -153,6 +154,23 @@ void main() {
             return;
           }
 
+          if (path.startsWith('/admin/customers/')) {
+            customerRequests.add('${options.method} $path');
+            // Mirrors the backend router, which exposes only patch('/:id').
+            if (options.method != 'PATCH') {
+              handler.reject(_error(options, 404, 'Not found'));
+              return;
+            }
+            handler.resolve(
+              Response(
+                requestOptions: options,
+                statusCode: 200,
+                data: {'id': path.split('/').last, 'name': 'Renamed'},
+              ),
+            );
+            return;
+          }
+
           if (path == '/admin/store-settings' && options.method == 'GET') {
             handler.resolve(
               Response(
@@ -188,6 +206,7 @@ void main() {
     supplierBodies.clear();
     purchaseBodies.clear();
     orderPatchBodies.clear();
+    customerRequests.clear();
     productCreateStatus = 200;
     supplierCreateStatus = 200;
     supplierCounter = 0;
@@ -360,6 +379,27 @@ void main() {
     final row = (await db.query('store_settings')).single;
     expect(row['name'], 'Local Edit', reason: 'local edit must survive');
     expect(row['syncStatus'], 'conflicted');
+  });
+
+  test('a customer edit is sent as PATCH, the only verb the API exposes', (
+  ) async {
+    await SyncService().enqueueOperation(
+      entityType: 'customer',
+      action: 'update',
+      payload: {'id': 'customer-1', 'name': 'Renamed'},
+    );
+
+    connectivity.setResults(const [ConnectivityResult.wifi], emit: false);
+    SyncService().initialize(api, mode: AppMode.hybrid);
+
+    final db = await DatabaseService().database;
+    await _waitFor(
+      () async => (await db.query('sync_queue')).isEmpty,
+      reason: 'the customer edit to sync and leave the queue',
+    );
+
+    // A PUT here 404s, and 404 is terminal, so the edit was silently dropped.
+    expect(customerRequests, ['PATCH /admin/customers/customer-1']);
   });
 
   test('a rejected operation can be recovered by an explicit retry', () async {
