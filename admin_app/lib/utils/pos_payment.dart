@@ -68,6 +68,29 @@ class PosPaymentBreakdown {
 
   bool get isSettled => isValid && remaining <= epsilon;
 
+  /// True when the sale is settled with both card and cash.
+  bool get isSplit => cardAmount > epsilon && cashApplied > epsilon;
+
+  /// The single method to record against the sale's cash-ledger entry.
+  ///
+  /// The backend stores one method per transaction (`CASH | CARD | TRANSFER |
+  /// OTHER`), so a split sale cannot be represented faithfully. The larger
+  /// share wins as the least-wrong summary, and [ledgerNote] carries the full
+  /// breakdown so the detail is not lost.
+  String get ledgerMethod {
+    if (cardAmount <= epsilon) return 'CASH';
+    if (cashApplied <= epsilon) return 'CARD';
+    return cardAmount >= cashApplied ? 'CARD' : 'CASH';
+  }
+
+  /// Human-readable note for the ledger entry; spells out a split so the
+  /// single [ledgerMethod] above is not mistaken for the whole story.
+  String get ledgerNote {
+    if (!isSplit) return 'POS sale payment';
+    return 'POS split payment: card ${cardAmount.toStringAsFixed(2)} '
+        '+ cash ${cashApplied.toStringAsFixed(2)}';
+  }
+
   List<PosPaymentLine> get lines {
     final items = <PosPaymentLine>[];
     if (cardAmount > 0) {

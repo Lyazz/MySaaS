@@ -955,7 +955,11 @@ class SyncService {
           )).data;
         }
         if (op.action == 'update') {
-          return (await client.put(
+          // PATCH, not PUT: the customers router exposes only
+          // `patch('/:id')`, so a PUT 404s. A 404 classifies as `rejected`,
+          // which is terminal — every customer edit made in the app was
+          // discarded while the local row kept showing the new value.
+          return (await client.patch(
             '/admin/customers/$id',
             data: op.payload,
           )).data;

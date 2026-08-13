@@ -43,3 +43,10 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Golden-test failure diagnostics. Written by flutter_test whenever a golden
+# mismatches, so any failing golden run dirties the tree. Regenerated on
+# demand and never useful in version control — the goldens themselves, under
+# test/goldens/, stay tracked.
+test/failures/
+test/**/failures/

@@ -559,6 +559,67 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     };
   }
 
+  /// Flips a product between active and draft.
+  ///
+  /// The switch previously had an empty handler, so it animated, sent nothing,
+  /// and snapped back on the next rebuild.
+  Future<void> _setProductActive(Product product, bool isActive) async {
+    try {
+      await ref.read(productsProvider.notifier).updateProduct(product.id, {
+        'isActive': isActive,
+      });
+    } catch (_) {
+      if (!mounted) return;
+      // The list refetches on failure, so the switch already shows the true
+      // value again; this only explains why it moved back.
+      AppToasts.show(
+        context,
+        'admin.common.error'.tr(),
+        type: AppToastType.error,
+      );
+    }
+  }
+
+  /// Confirms before deleting, and surfaces the server's reason when it
+  /// refuses. Previously this fired immediately on tap and swallowed the error.
+  Future<void> _confirmDeleteProduct(Product product) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('admin.pages.products.index.deleteModal.title'.tr()),
+        content: Text(
+          'admin.pages.products.index.deleteModal.message'.tr(
+            namedArgs: {'title': product.title},
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('admin.common.cancel'.tr()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.red),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('admin.common.delete'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(productsProvider.notifier).deleteProduct(product.id);
+    } catch (error) {
+      if (!mounted) return;
+      // The backend answers 409 when the product is referenced by sales or
+      // purchase orders, which is the one case worth naming explicitly.
+      final message = error.toString().contains('409')
+          ? 'admin.pages.products.index.deleteModal.errorHasTransactions'.tr()
+          : 'admin.pages.products.index.deleteModal.error'.tr();
+      AppToasts.show(context, message, type: AppToastType.error);
+    }
+  }
+
   void _showComingSoon(String feature) {
     AppToasts.show(
       context,
@@ -1204,10 +1265,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       value: product.isActive,
                       activeThumbColor: Colors.white,
                       activeTrackColor: const Color(0xFF84CC16), // Lime-500
-                      onChanged: (val) {
-                        // Assuming you have a method to toggle status in the provider
-                        // ref.read(productsProvider.notifier).toggleStatus(product.id, val);
-                      },
+                      onChanged: (val) => _setProductActive(product, val),
                     ),
                   ),
                   const SizedBox(width: 2),
@@ -1356,9 +1414,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     tooltip: 'admin.common.delete'.tr(),
                     icon: LucideIcons.trash2,
                     isDanger: true,
-                    onPressed: () => ref
-                        .read(productsProvider.notifier)
-                        .deleteProduct(product.id),
+                    onPressed: () => _confirmDeleteProduct(product),
                   ),
                 ],
               ),

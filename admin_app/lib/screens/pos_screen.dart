@@ -11,6 +11,7 @@ import '../models/customer.dart';
 import '../models/product.dart';
 import '../models/pos_models.dart';
 import '../providers/pos_provider.dart';
+import '../providers/cash_provider.dart';
 import '../providers/customers_provider.dart';
 import '../providers/store_settings_provider.dart';
 import '../services/api_service.dart';
@@ -18,6 +19,7 @@ import '../theme/app_theme.dart';
 import '../utils/barcode_scanner.dart';
 import '../utils/debouncer.dart';
 import '../utils/image_storage_manager.dart';
+import '../utils/pos_grid.dart';
 import '../utils/pos_payment.dart';
 import '../utils/tenant_currency.dart';
 import '../widgets/numpad_widget.dart';
@@ -76,6 +78,10 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       ref.read(posProvider.notifier).fetchCategories();
       ref.read(posProvider.notifier).fetchProducts();
       ref.read(customersProvider.notifier).fetchCustomers(limit: 200);
+      // Checkout attaches the sale to the open cashbox, so the cash state has
+      // to be loaded before the first sale. Reads through the repository cache
+      // and swallows its own errors, so this is safe offline.
+      ref.read(cashProvider.notifier).fetchCashboxes();
     });
   }
 
@@ -1469,15 +1475,11 @@ class _PosScreenState extends ConsumerState<PosScreen> {
     required bool isMobile,
     required int preferred,
   }) {
-    final minTileWidth = isMobile ? 154.0 : 132.0;
-    final maxByWidth = (width / minTileWidth).floor().clamp(1, 8);
-    if (width < 360) return 1;
-    if (isMobile) {
-      final safePreferred = preferred.clamp(1, 2);
-      return safePreferred.clamp(1, maxByWidth);
-    }
-    // Desktop/tablet should follow cashier-selected density directly.
-    return preferred.clamp(2, 8);
+    return posAdaptiveGridColumns(
+      width: width,
+      isMobile: isMobile,
+      preferred: preferred,
+    );
   }
 
   double _productGridChildAspectRatio(
@@ -2996,19 +2998,26 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 padding: const EdgeInsetsDirectional.fromSTEB(12, 10, 12, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      product.title,
-                      style: TextStyle(
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13.5,
-                        height: 1.25,
-                        color: outOfStock ? textMuted : textPrimary,
+                    // Flexible rather than a fixed two-line block: the tile's
+                    // height comes from an estimate in
+                    // `_productGridChildAspectRatio`, and when a font's real
+                    // metrics run taller than that estimate the title gives up
+                    // a line instead of overflowing the card.
+                    Flexible(
+                      child: Text(
+                        product.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w700,
+                          fontSize: 13.5,
+                          height: 1.25,
+                          color: outOfStock ? textMuted : textPrimary,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                    const Spacer(),
                     Text(
                       tenantCurrencyFormatter(settings).format(product.price),
                       key: ValueKey('pos-product-price-${product.id}'),
@@ -4159,6 +4168,7 @@ class _PosScreenState extends ConsumerState<PosScreen> {
       child: Material(
         color: Colors.transparent,
         child: InkWell(
+          key: const ValueKey('pos-mobile-cart-summary'),
           onTap: () => _showMobileCartSheet(context, posState),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
@@ -4233,21 +4243,33 @@ class _PosScreenState extends ConsumerState<PosScreen> {
                 const SizedBox(width: 10),
                 Icon(LucideIcons.chevronUp, size: 16, color: textMuted),
                 const SizedBox(width: 6),
-                AnimatedSwitcher(
-                  duration: const Duration(milliseconds: 300),
-                  transitionBuilder: (child, animation) =>
-                      FadeTransition(opacity: animation, child: child),
-                  child: Text(
-                    tenantCurrencyFormatter(
-                      ref.watch(storeSettingsProvider).settings,
-                    ).format(posState.total),
-                    key: ValueKey(posState.total),
-                    textAlign: TextAlign.end,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.primary,
-                      fontSize: 17,
-                      fontWeight: FontWeight.w900,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                // The total is the one thing on this bar that must stay fully
+                // legible, so it scales down instead of ellipsising: a
+                // truncated price is worse than a smaller one. Flexible lets a
+                // long currency (narrow phones, high totals, AR/FR formats)
+                // give ground rather than overflow the bar.
+                Flexible(
+                  child: AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 300),
+                    transitionBuilder: (child, animation) =>
+                        FadeTransition(opacity: animation, child: child),
+                    child: FittedBox(
+                      key: ValueKey(posState.total),
+                      fit: BoxFit.scaleDown,
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: Text(
+                        tenantCurrencyFormatter(
+                          ref.watch(storeSettingsProvider).settings,
+                        ).format(posState.total),
+                        textAlign: TextAlign.end,
+                        maxLines: 1,
+                        style: TextStyle(
+                          color: Theme.of(context).colorScheme.primary,
+                          fontSize: 17,
+                          fontWeight: FontWeight.w900,
+                          fontFeatures: [FontFeature.tabularFigures()],
+                        ),
+                      ),
                     ),
                   ),
                 ),

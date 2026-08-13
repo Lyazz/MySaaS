@@ -11,7 +11,9 @@ import '../repositories/product_repository.dart'; // NEW
 import '../repositories/category_repository.dart'; // NEW
 import '../repositories/pos_sale_repository.dart'; // NEW
 import '../providers/printer_profiles_provider.dart'; // NEW - Assuming this path
+import '../providers/cash_provider.dart';
 import '../providers/store_settings_provider.dart';
+import '../utils/pos_cashbox.dart';
 import '../utils/pos_payment.dart';
 import '../utils/tenant_currency.dart';
 import '../services/sync_service.dart';
@@ -620,6 +622,11 @@ class PosNotifier extends Notifier<PosState> {
         }
       }
 
+      // The sale's cash-ledger entry is attached to this cashbox server-side.
+      // Without it every POS sale posts unattributed and never shows against
+      // the cashier's open session.
+      final cashboxId = resolvePosCashboxId(ref.read(cashProvider).cashboxes);
+
       final payload = {
         'items': current.cart
             .map(
@@ -635,10 +642,17 @@ class PosNotifier extends Notifier<PosState> {
         'subtotal': subtotal,
         'discountAmount': discountAmount,
         'total': total,
+        if (cashboxId != null) 'cashboxId': cashboxId,
         if (current.discount != null)
           'discount': current.discount!.toJson(subtotal),
         if (paymentBreakdown != null)
           'payment': {
+            // `method`/`note` are the fields the backend actually reads; it
+            // defaults to CASH when `method` is absent, which recorded every
+            // card sale as cash. The richer fields below are kept for the
+            // local record and for a backend that can accept them later.
+            'method': paymentBreakdown.ledgerMethod,
+            'note': paymentBreakdown.ledgerNote,
             'total': total,
             'cardAmount': paymentBreakdown.cardAmount,
             'cashReceived': paymentBreakdown.cashReceived,
