@@ -283,4 +283,97 @@ void main() {
       expect(find.text('Orders'), findsWidgets);
     },
   );
+
+  testWidgets(
+    'router keeps a freshly registered owner on the confirmation panel',
+    (tester) async {
+      // A tenant is created in offline mode, so the owner lands in local-only
+      // mode the moment registration succeeds. The register route must survive
+      // that so the "account created" panel is readable.
+      final user = User(
+        id: 'owner-1',
+        email: 'owner@example.com',
+        role: 'owner',
+        isSuperAdmin: false,
+        tenantId: 'tenant-1',
+      );
+      final container = _buildContainer(
+        bootstrap: BootstrapConfig(
+          apiBaseUrl: 'https://api.example.com',
+          mode: AppMode.offlineOnly,
+          subscriptionTier: SubscriptionTier.offlineOnly,
+          tenantId: 'tenant-1',
+          authToken: 'token-123',
+          userJson: user.toJson(),
+        ),
+        authState: AuthState(
+          user: user,
+          token: 'token-123',
+          mode: AppMode.offlineOnly,
+          subscriptionTier: SubscriptionTier.offlineOnly,
+        ),
+      );
+      addTearDown(container.dispose);
+
+      final router = container.read(routerProvider);
+      router.go('/register');
+
+      await _pumpRouterApp(tester, container: container, router: router);
+
+      expect(_locationOf(router), '/register');
+    },
+  );
+
+  testWidgets('router sends a signed-out local-only install away from register', (
+    tester,
+  ) async {
+    // The dashboard is the redirect target, so give it a desktop-sized surface.
+    await tester.binding.setSurfaceSize(const Size(1600, 1200));
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    final container = _buildContainer(
+      bootstrap: const BootstrapConfig(
+        apiBaseUrl: 'https://api.example.com',
+        mode: AppMode.offlineOnly,
+        subscriptionTier: SubscriptionTier.offlineOnly,
+        tenantId: 'tenant-1',
+      ),
+      authState: const AuthState(
+        mode: AppMode.offlineOnly,
+        subscriptionTier: SubscriptionTier.offlineOnly,
+      ),
+    );
+    addTearDown(container.dispose);
+
+    final router = container.read(routerProvider);
+    router.go('/register');
+
+    await _pumpRouterApp(tester, container: container, router: router);
+
+    expect(_locationOf(router), '/');
+  });
+
+  testWidgets('reading the router twice returns the same instance', (
+    tester,
+  ) async {
+    // The router used to be rebuilt on every auth change, which reset
+    // navigation to the initial location.
+    final container = _buildContainer(
+      bootstrap: const BootstrapConfig(
+        apiBaseUrl: 'https://api.example.com',
+        mode: AppMode.online,
+        subscriptionTier: SubscriptionTier.online,
+        tenantId: 'tenant-1',
+      ),
+      authState: const AuthState(mode: AppMode.online),
+    );
+    addTearDown(container.dispose);
+
+    expect(
+      identical(container.read(routerProvider), container.read(routerProvider)),
+      isTrue,
+    );
+  });
 }
