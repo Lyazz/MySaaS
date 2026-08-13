@@ -215,8 +215,9 @@ class SyncService {
     'storeSettings': {'patch'},
     'contactInfo': {'create', 'update', 'delete'},
     'customerPayment': {'create'},
-    'receiptLayout': {'create', 'update', 'delete'},
-    'printerProfile': {'create', 'update', 'delete'},
+    // printerProfile / receiptLayout are deliberately absent: they describe
+    // hardware attached to this one terminal, they have no table or route on
+    // the server, and every queued operation used to 404 into `rejected`.
     'staffRole': {'create', 'update', 'delete'},
     'cashbox': {'create', 'update'},
     'cashSession': {'open', 'close'},
@@ -250,6 +251,8 @@ class SyncService {
   Timer? _retryTimer;
   ApiService? _apiService;
   bool _isSyncing = false;
+  /// Completes when the in-flight sync pass finishes; null when idle.
+  Future<void>? _activePass;
   AppMode _mode = AppMode.online;
 
   String get _activeWorkspaceId => TenantModeService().activeWorkspaceId ?? '';
@@ -307,12 +310,27 @@ class SyncService {
     }
   }
 
-  void reset() {
+  /// Detaches the service from its API handle and stops future work.
+  ///
+  /// Awaits a pass that is already running rather than returning immediately:
+  /// callers reset in order to tear the database down — logout, tenant switch,
+  /// reprovisioning — and a pass mid-flight still holds it. Clearing
+  /// `_isSyncing` up front also used to release the guard under a live pass,
+  /// letting a second one start against the workspace being torn down.
+  Future<void> reset() async {
     _apiService = null;
-    _isSyncing = false;
     _retryTimer?.cancel();
     _retryTimer = null;
-    _emitState();
+    final pass = _activePass;
+    if (pass != null) {
+      try {
+        await pass;
+      } catch (_) {
+        // The pass logs its own failures; reset only cares that it stopped.
+      }
+    }
+    _isSyncing = false;
+    await _emitState();
   }
 
   void _ensureConnectivityListener() {
@@ -451,6 +469,8 @@ class SyncService {
     }
 
     _isSyncing = true;
+    final passDone = Completer<void>();
+    _activePass = passDone.future;
     _retryTimer?.cancel();
     _retryTimer = null;
     await _emitState(syncing: true);
@@ -498,6 +518,8 @@ class SyncService {
       debugPrint('$stackTrace');
     } finally {
       _isSyncing = false;
+      _activePass = null;
+      if (!passDone.isCompleted) passDone.complete();
       await _scheduleNextRetry();
       await _emitState();
     }
@@ -641,7 +663,19 @@ class SyncService {
     _retryTimer?.cancel();
     _retryTimer = null;
     if (_apiService == null || !_mode.allowsNetworkRequests) return;
+    // Scheduling only decides when to wake up next. It runs from the `finally`
+    // of a sync pass, so it can be reading the queue exactly as a logout or
+    // tenant switch closes the database underneath it. A failure here must not
+    // escape as an unhandled async error — skipping one wake-up is harmless,
+    // and the next connectivity change or enqueue schedules another.
+    try {
+      await _scheduleNextRetryUnguarded();
+    } catch (error) {
+      debugPrint('SyncService: could not schedule next retry: $error');
+    }
+  }
 
+  Future<void> _scheduleNextRetryUnguarded() async {
     final tenantId = TenantModeService().activeTenantId;
     final workspaceId = _activeWorkspaceId;
     final db = await _dbService.database;
@@ -1106,42 +1140,6 @@ class SyncService {
             data: op.payload,
             options: opts,
           )).data;
-        }
-        break;
-      case 'receiptLayout':
-        if (op.action == 'create') {
-          return (await client.post(
-            '/admin/receipt-layouts',
-            data: op.payload,
-            options: opts,
-          )).data;
-        }
-        if (op.action == 'update') {
-          return (await client.put(
-            '/admin/receipt-layouts/$id',
-            data: op.payload,
-          )).data;
-        }
-        if (op.action == 'delete') {
-          return (await client.delete('/admin/receipt-layouts/$id')).data;
-        }
-        break;
-      case 'printerProfile':
-        if (op.action == 'create') {
-          return (await client.post(
-            '/admin/printer-profiles',
-            data: op.payload,
-            options: opts,
-          )).data;
-        }
-        if (op.action == 'update') {
-          return (await client.put(
-            '/admin/printer-profiles/$id',
-            data: op.payload,
-          )).data;
-        }
-        if (op.action == 'delete') {
-          return (await client.delete('/admin/printer-profiles/$id')).data;
         }
         break;
       case 'staffRole':
@@ -1950,8 +1948,6 @@ class SyncService {
       () => _refreshPurchases(tenantId),
       () => _refreshStoreSettings(tenantId),
       () => _refreshContactInfos(tenantId),
-      () => _refreshPrinterProfiles(tenantId),
-      () => _refreshReceiptLayouts(tenantId),
       () => _refreshCashboxes(tenantId),
       () => _refreshCashSessions(tenantId),
       () => _refreshCashTransactions(tenantId),
@@ -1960,6 +1956,12 @@ class SyncService {
     ];
 
     for (final refresh in refreshers) {
+      // Re-checked every iteration, not just once up front: the loop awaits ten
+      // round trips, and a logout or tenant switch part-way through clears
+      // `_apiService`. Each refresher dereferences it with `!`, so continuing
+      // would throw a null-check error per remaining domain and keep writing
+      // the previous tenant's data into a database that is being torn down.
+      if (_apiService == null || !_mode.allowsNetworkRequests) return;
       try {
         await refresh();
       } catch (error, stackTrace) {
@@ -2148,88 +2150,6 @@ class SyncService {
           'href': info['href']?.toString(),
           'createdAt': info['createdAt']?.toString(),
           'updatedAt': info['updatedAt']?.toString(),
-          'syncStatus': SyncStatus.synced.name,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
-      }
-    });
-  }
-
-  Future<void> _refreshPrinterProfiles(String tenantId) async {
-    final response = await _apiService!.client.get('/admin/settings/printers');
-    final rows = _asList(response.data);
-    final db = await _dbService.database;
-    await db.transaction((txn) async {
-      await txn.delete(
-        'printer_profiles',
-        where: "tenantId = ? AND syncStatus = 'synced'",
-        whereArgs: [tenantId],
-      );
-      for (final raw in rows.whereType<Map>()) {
-        final profile = raw.cast<String, dynamic>();
-        final id = _string(profile['id']);
-        if (id.isEmpty) continue;
-        if (await _markConflictIfLocalDirty(
-          txn,
-          'printer_profiles',
-          tenantId,
-          id,
-        )) {
-          continue;
-        }
-        await txn.insert('printer_profiles', {
-          'id': id,
-          'tenantId': tenantId,
-          'name': _string(profile['name']),
-          'transport': _int(profile['transport']),
-          'connectionParams': jsonEncode(
-            _asMap(profile['connectionParams']) ?? const {},
-          ),
-          'capabilityParams': jsonEncode(
-            _asMap(profile['capabilityParams']) ?? const {},
-          ),
-          'syncStatus': SyncStatus.synced.name,
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
-      }
-    });
-  }
-
-  Future<void> _refreshReceiptLayouts(String tenantId) async {
-    final response = await _apiService!.client.get(
-      '/admin/settings/receipt_layouts',
-    );
-    final rows = _asList(response.data);
-    final db = await _dbService.database;
-    await db.transaction((txn) async {
-      await txn.delete(
-        'receipt_layouts',
-        where: "tenantId = ? AND syncStatus = 'synced'",
-        whereArgs: [tenantId],
-      );
-      for (final raw in rows.whereType<Map>()) {
-        final layout = raw.cast<String, dynamic>();
-        final id = _string(layout['id']);
-        if (id.isEmpty) continue;
-        if (await _markConflictIfLocalDirty(
-          txn,
-          'receipt_layouts',
-          tenantId,
-          id,
-        )) {
-          continue;
-        }
-        await txn.insert('receipt_layouts', {
-          'id': id,
-          'tenantId': tenantId,
-          'name': _string(layout['name']),
-          'showLogo': layout['showLogo'] == true ? 1 : 0,
-          'showHeader': layout['showHeader'] == true ? 1 : 0,
-          'headerText': layout['headerText']?.toString(),
-          'showDate': layout['showDate'] == true ? 1 : 0,
-          'showOrderNumber': layout['showOrderNumber'] == true ? 1 : 0,
-          'showCustomerInfo': layout['showCustomerInfo'] == true ? 1 : 0,
-          'showFooter': layout['showFooter'] == true ? 1 : 0,
-          'footerText': layout['footerText']?.toString(),
-          'showTaxBreakdown': layout['showTaxBreakdown'] == true ? 1 : 0,
           'syncStatus': SyncStatus.synced.name,
         }, conflictAlgorithm: ConflictAlgorithm.replace);
       }

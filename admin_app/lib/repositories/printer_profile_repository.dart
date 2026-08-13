@@ -91,11 +91,6 @@ class PrinterProfileRepository {
       'syncStatus': SyncStatus.pending.name,
     });
 
-    await _syncService.enqueueOperation(
-      entityType: 'printerProfile',
-      action: 'create',
-      payload: newProfile.toMap(),
-    );
 
     return newProfile;
   }
@@ -116,26 +111,17 @@ class PrinterProfileRepository {
       whereArgs: [profile.id, _tid],
     );
 
-    await _syncService.enqueueOperation(
-      entityType: 'printerProfile',
-      action: 'update',
-      payload: profile.toMap(),
-    );
   }
 
   Future<void> deleteProfile(String id) async {
     final db = await _dbService.database;
-    await db.update(
+    // Deletes outright. This used to only flag the row and leave the
+    // actual removal to a sync round-trip that has no endpoint behind
+    // it, so deleted entries came back on the next read.
+    await db.delete(
       'printer_profiles',
-      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
-    );
-
-    await _syncService.enqueueOperation(
-      entityType: 'printerProfile',
-      action: 'delete',
-      payload: {'id': id},
     );
   }
 }

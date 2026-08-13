@@ -219,11 +219,11 @@ void main() {
       tenantId: 'tenant-1',
       workspaceId: 'workspace-1',
     );
-    SyncService().reset();
+    await SyncService().reset();
   });
 
   tearDown(() async {
-    SyncService().reset();
+    await SyncService().reset();
     await DatabaseService().resetForTest();
   });
 
@@ -392,10 +392,11 @@ void main() {
     connectivity.setResults(const [ConnectivityResult.wifi], emit: false);
     SyncService().initialize(api, mode: AppMode.hybrid);
 
-    final db = await DatabaseService().database;
+    // Assert on the request itself rather than on the queue draining: the verb
+    // is what is under test.
     await _waitFor(
-      () async => (await db.query('sync_queue')).isEmpty,
-      reason: 'the customer edit to sync and leave the queue',
+      () async => customerRequests.isNotEmpty,
+      reason: 'the customer edit to reach the API',
     );
 
     // A PUT here 404s, and 404 is terminal, so the edit was silently dropped.

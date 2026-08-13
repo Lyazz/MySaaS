@@ -65,8 +65,16 @@ class IntegrationsNotifier extends Notifier<IntegrationsState> {
     }
   }
 
-  Future<void> save(String provider, Map<String, dynamic> config) async {
-    final updated = await _repo.saveIntegration(provider, config);
+  Future<void> save(
+    String provider,
+    Map<String, dynamic> config, {
+    required bool isActive,
+  }) async {
+    final updated = await _repo.saveIntegration(
+      provider,
+      config,
+      isActive: isActive,
+    );
     if (provider == 'facebook') {
       state = state.copyWith(facebook: updated);
     } else if (provider == 'telegram') {
