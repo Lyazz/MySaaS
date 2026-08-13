@@ -812,7 +812,8 @@
           "send": "Send Code",
           "verify": "Verify Code",
           "placeholderNotice": "OTP code sent.",
-          "verified": "Phone confirmed."
+          "verified": "Phone confirmed.",
+          "resend": "Resend"
         },
         "password": {
           "label": "Password"
@@ -827,7 +828,13 @@
         },
         "haveAccount": "Already have an account?",
         "logIn": "Log in",
-        "forgotPassword": "Forgot password?"
+        "forgotPassword": "Forgot password?",
+        "passwordStrength": {
+          "weak": "Weak",
+          "fair": "Fair",
+          "good": "Good",
+          "strong": "Strong"
+        }
       },
       "success": {
         "title": "You're in!",
@@ -845,7 +852,8 @@
         "phoneRestricted": "Registration is currently unavailable.",
         "otpRequired": "Enter the OTP code.",
         "otpSendFirst": "Send OTP code first.",
-        "otpVerifyFirst": "Verify OTP before creating your account."
+        "otpVerifyFirst": "Verify OTP before creating your account.",
+        "otpInvalid": "Enter the {length}-digit code."
       },
       "social": {
         "divider": "or continue with",
@@ -867,6 +875,40 @@
         "sent": "Request Saved (Placeholder)"
       },
       "backToLogin": "Back to login"
+    },
+    "errors": {
+      "offlineMode": "This device runs in local-only mode, so it cannot reach the server. Activate an online workspace to sign in.",
+      "cancelled": "The request was cancelled. Please try again.",
+      "noConnection": "No connection to the server. Check your internet and try again.",
+      "timeout": "The server took too long to respond. Please try again.",
+      "badCertificate": "Could not establish a secure connection to the server.",
+      "invalidRequest": "Some of the information you entered is not valid.",
+      "forbidden": "This account is not allowed to perform this action.",
+      "notFound": "The server could not find what was requested.",
+      "conflict": "That information is already in use.",
+      "server": "The server ran into a problem. Please try again in a moment.",
+      "unknown": "Something went wrong. Please try again.",
+      "invalidResponse": "The server sent an unexpected response.",
+      "superAdmin": "Super-admin accounts must use the web super-admin console.",
+      "sessionExpired": "Your session has expired. Please sign in again."
+    },
+    "validation": {
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Password is required.",
+      "confirmPasswordRequired": "Confirm your password.",
+      "companyNameRequired": "Company name is required.",
+      "slugRequired": "Store URL is required.",
+      "slugInvalid": "Use lowercase letters, numbers, and hyphens only."
+    },
+    "common": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "switchToLight": "Switch to light mode",
+      "switchToDark": "Switch to dark mode"
+    },
+    "social": {
+      "comingSoon": "Social sign-in is coming soon."
     }
   },
   "pricing": {

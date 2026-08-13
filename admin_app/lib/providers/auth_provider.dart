@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../app_config.dart';
@@ -11,6 +12,8 @@ import '../services/device_info_service.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
 import '../services/workspace_data_cleaner.dart';
+import '../utils/algerian_phone.dart';
+import '../utils/auth_error.dart';
 
 class User {
   final String id;
@@ -99,13 +102,18 @@ class AuthState {
     List<String>? staffPermissions,
     bool? isLoading,
     String? error,
+    bool clearUser = false,
+    bool clearToken = false,
+    bool clearStaffRole = false,
   }) {
+    // `error` is intentionally not `??`-merged: every state transition states
+    // its own error, so a successful step clears the previous failure.
     return AuthState(
-      user: user ?? this.user,
-      token: token ?? this.token,
+      user: clearUser ? null : (user ?? this.user),
+      token: clearToken ? null : (token ?? this.token),
       mode: mode ?? this.mode,
       subscriptionTier: subscriptionTier ?? this.subscriptionTier,
-      staffRole: staffRole ?? this.staffRole,
+      staffRole: clearStaffRole ? null : (staffRole ?? this.staffRole),
       staffPermissions: staffPermissions ?? this.staffPermissions,
       isLoading: isLoading ?? this.isLoading,
       error: error,
@@ -155,9 +163,16 @@ class AuthNotifier extends Notifier<AuthState> {
     return initial;
   }
 
+  /// Signs in with email + password.
+  ///
+  /// Throws an [AuthFailure] carrying a message that is safe to render as-is.
   Future<void> login(String email, String password) async {
+    final normalizedEmail = email.trim().toLowerCase();
     state = state.copyWith(isLoading: true, error: null);
+
     try {
+      _assertNetworkAllowed();
+
       final apiService = ref.read(apiProvider);
       final deviceInfo = DeviceInfoService();
 
@@ -168,8 +183,8 @@ class AuthNotifier extends Notifier<AuthState> {
         hardwareId = await deviceInfo.getHardwareId();
         deviceName = deviceInfo.getDeviceDisplayName();
         devicePlatform = deviceInfo.getPlatformType();
-      } catch (e) {
-        // Fallback or ignore if device info fails (e.g. web unsupported)
+      } catch (_) {
+        // Device identity is optional — it only drives POS auto-activation.
         hardwareId = null;
         deviceName = null;
         devicePlatform = null;
@@ -178,7 +193,7 @@ class AuthNotifier extends Notifier<AuthState> {
       final response = await apiService.client.post(
         '/login',
         data: {
-          'email': email,
+          'email': normalizedEmail,
           'password': password,
           if (hardwareId != null) 'hardwareId': hardwareId,
           if (deviceName != null) 'deviceName': deviceName,
@@ -188,15 +203,18 @@ class AuthNotifier extends Notifier<AuthState> {
 
       await _applyAuthResponse(
         payload: (response.data as Map?)?.cast<String, dynamic>(),
-        fallbackEmail: email,
+        fallbackEmail: normalizedEmail,
         rejectSuperAdmin: true,
       );
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-      rethrow;
+    } catch (error) {
+      throw _fail(error);
     }
   }
 
+  /// Creates a tenant + owner account and signs the new owner in.
+  ///
+  /// Returns the created tenant name when the API reports one. Throws an
+  /// [AuthFailure] on any failure.
   Future<String?> register({
     required String name,
     required String slug,
@@ -205,23 +223,30 @@ class AuthNotifier extends Notifier<AuthState> {
     required String phone,
   }) async {
     state = state.copyWith(isLoading: true, error: null);
+
     try {
+      _assertNetworkAllowed();
+
       final apiService = ref.read(apiProvider);
+      // Send the same shape the backend normalizes to, so a number typed as
+      // `05 40 80 14 36` is not rejected for formatting reasons.
+      final normalizedPhone = AlgerianPhone.tryNormalize(phone) ?? phone.trim();
+
       final response = await apiService.client.post(
         '/register',
         data: {
-          'name': name,
-          'slug': slug,
-          'email': email,
+          'name': name.trim(),
+          'slug': slug.trim().toLowerCase(),
+          'email': email.trim().toLowerCase(),
           'password': password,
-          'phone': phone,
+          'phone': normalizedPhone,
         },
       );
 
       final payload = (response.data as Map?)?.cast<String, dynamic>();
       await _applyAuthResponse(
         payload: payload,
-        fallbackEmail: email,
+        fallbackEmail: email.trim().toLowerCase(),
         rejectSuperAdmin: false,
       );
       final tenantRaw = payload?['tenant'];
@@ -233,10 +258,26 @@ class AuthNotifier extends Notifier<AuthState> {
         }
       }
       return null;
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-      rethrow;
+    } catch (error) {
+      throw _fail(error);
     }
+  }
+
+  /// Local-only installs never reach the API, so fail fast with an explanation
+  /// instead of letting the offline guard surface a cancelled request.
+  void _assertNetworkAllowed() {
+    if (state.mode.allowsNetworkRequests) return;
+    throw AuthFailure(
+      AuthErrorKind.offlineMode,
+      'auth.errors.offlineMode'.tr(),
+    );
+  }
+
+  /// Records [error] on the state and returns the failure to rethrow.
+  AuthFailure _fail(Object error) {
+    final failure = AuthErrorMapper.toFailure(error);
+    state = state.copyWith(isLoading: false, error: failure.message);
+    return failure;
   }
 
   Future<void> _applyAuthResponse({
@@ -244,43 +285,49 @@ class AuthNotifier extends Notifier<AuthState> {
     required String fallbackEmail,
     required bool rejectSuperAdmin,
   }) async {
-    if (payload == null || payload['token'] == null) {
-      throw Exception('Invalid response from server');
+    final body = payload ?? const <String, dynamic>{};
+    final token = body['token']?.toString().trim() ?? '';
+    if (token.isEmpty) {
+      throw AuthFailure(
+        AuthErrorKind.unknown,
+        'auth.errors.invalidResponse'.tr(),
+      );
     }
 
     final apiService = ref.read(apiProvider);
-    final token = payload['token'].toString();
-    final activationToken = payload['activationToken']?.toString();
-    final rawUser = (payload['user'] as Map?)?.cast<String, dynamic>();
+    final activationToken = body['activationToken']?.toString();
+    final rawUser = (body['user'] as Map?)?.cast<String, dynamic>();
     final user = User.fromJson(rawUser ?? {'id': '', 'email': fallbackEmail});
 
     if (rejectSuperAdmin && user.isSuperAdmin) {
       apiService.setToken(null);
+      final message = 'auth.errors.superAdmin'.tr();
+      // clearToken/clearUser are required here: the `??` merge in copyWith
+      // would otherwise keep the rejected session on the state.
       state = state.copyWith(
         isLoading: false,
-        token: null,
-        user: null,
-        subscriptionTier: state.subscriptionTier,
-        staffRole: null,
+        clearToken: true,
+        clearUser: true,
+        clearStaffRole: true,
         staffPermissions: const [],
-        error: 'Super-admin accounts must use the web super-admin console.',
+        error: message,
       );
       await AppStorage.clearAuthSession();
-      throw Exception(state.error);
+      throw AuthFailure(AuthErrorKind.forbidden, message, statusCode: 403);
     }
 
-    final rawStaffRole = (payload['staffRole'] as Map?)
+    final rawStaffRole = (body['staffRole'] as Map?)
         ?.cast<String, dynamic>();
     final staffRole = rawStaffRole != null
         ? StaffRoleInfo.fromJson(rawStaffRole)
         : null;
-    final staffPermissionsRaw = payload['staffPermissions'];
+    final staffPermissionsRaw = body['staffPermissions'];
     final staffPermissions = (staffPermissionsRaw is List)
         ? staffPermissionsRaw.map((e) => e.toString()).toList()
         : <String>[];
 
     final runtime = _resolveTenantRuntime(
-      payload['tenant'],
+      body['tenant'],
       fallbackMode: state.mode,
       fallbackTier: state.subscriptionTier,
     );

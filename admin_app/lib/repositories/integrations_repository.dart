@@ -24,12 +24,15 @@ class IntegrationsRepository {
 
   Future<Integration> saveIntegration(
     String provider,
-    Map<String, dynamic> config,
-  ) async {
+    Map<String, dynamic> config, {
+    required bool isActive,
+  }) async {
     try {
+      // The endpoint destructures `{ config, isActive }`; posting the config
+      // map flat left the server with `config: undefined`.
       final res = await _apiService.client.post(
         '/admin/integrations/$provider',
-        data: config,
+        data: {'config': config, 'isActive': isActive},
       );
       final data = res.data;
       return Integration.fromJson(

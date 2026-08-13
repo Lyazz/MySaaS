@@ -1,6 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 
@@ -17,8 +16,14 @@ final apiProvider = Provider<ApiService>((ref) {
   api.client.interceptors.add(
     InterceptorsWrapper(
       onError: (DioException error, ErrorInterceptorHandler handler) {
-        if (error.response?.statusCode == 401) {
-          // Token expired or invalid, force logout
+        if (error.response?.statusCode == 401 &&
+            !ApiService.isUnauthenticatedPath(error.requestOptions.path) &&
+            api.hasToken) {
+          // An authenticated call came back 401: the session is gone, so drop
+          // it. Unauthenticated endpoints are excluded on purpose — a failed
+          // sign-in attempt answers 401 too, and logging out there would wipe
+          // the provisioned local workspace just because someone mistyped
+          // their password.
           ref.read(authProvider.notifier).logout();
         }
         handler.next(error);
@@ -31,6 +36,19 @@ final apiProvider = Provider<ApiService>((ref) {
 
 class ApiService {
   static final String _defaultBaseUrl = 'https://swekly.com/api';
+
+  /// Endpoints that are reachable without a session. A 401 from one of these
+  /// means "these credentials are wrong", never "your session expired".
+  static const Set<String> unauthenticatedPaths = {
+    '/login',
+    '/register',
+    '/provisioning/activate',
+  };
+
+  static bool isUnauthenticatedPath(String path) {
+    final normalized = path.trim().split('?').first;
+    return unauthenticatedPaths.contains(normalized);
+  }
 
   final Dio _dio = Dio(
     BaseOptions(
@@ -70,8 +88,29 @@ class ApiService {
       ),
     );
 
-    _dio.interceptors.add(
-      LogInterceptor(responseBody: true, requestBody: true),
+    // Request/response bodies carry passwords, JWTs and activation tokens.
+    // Log them in debug builds only, and mask the sensitive values even there.
+    if (kDebugMode) {
+      _dio.interceptors.add(
+        LogInterceptor(
+          responseBody: true,
+          requestBody: true,
+          logPrint: (Object object) => debugPrint(redactSecrets('$object')),
+        ),
+      );
+    }
+  }
+
+  static final RegExp _secretPattern = RegExp(
+    r'((?:password|passwordhash|token|activationtoken|authorization)"?\s*[:=]\s*)("?)([^,}\]"\n]+)',
+    caseSensitive: false,
+  );
+
+  /// Masks credential-looking values inside a log line.
+  static String redactSecrets(String line) {
+    return line.replaceAllMapped(
+      _secretPattern,
+      (match) => '${match[1]}${match[2]}***',
     );
   }
 
@@ -129,9 +168,12 @@ class ApiService {
     return origin.resolve('/$trimmed').toString();
   }
 
+  /// Whether an `Authorization` header is currently attached.
+  bool get hasToken => _dio.options.headers.containsKey('Authorization');
+
   void setToken(String? token) {
-    if (token != null) {
-      _dio.options.headers['Authorization'] = 'Bearer $token';
+    if (token != null && token.trim().isNotEmpty) {
+      _dio.options.headers['Authorization'] = 'Bearer ${token.trim()}';
     } else {
       _dio.options.headers.remove('Authorization');
     }

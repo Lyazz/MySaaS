@@ -1,15 +1,25 @@
 import 'dart:ui';
 
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../providers/auth_provider.dart';
-import '../providers/settings_provider.dart';
-import '../providers/workspace_provider.dart';
-import 'package:easy_localization/easy_localization.dart';
+import '../utils/auth_error.dart';
+import '../widgets/auth/auth_palette.dart';
+import '../widgets/auth/auth_widgets.dart';
+import '../widgets/language_switcher_button.dart';
+
+/// Optional developer conveniences, e.g.
+/// `flutter run --dart-define=DEV_LOGIN_EMAIL=owner@example.com`.
+/// Empty by default so no credentials ship inside the app.
+const String _devLoginEmail = String.fromEnvironment('DEV_LOGIN_EMAIL');
+const String _devLoginPassword = String.fromEnvironment('DEV_LOGIN_PASSWORD');
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -19,34 +29,47 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
+  static final RegExp _emailRegex = RegExp(r'^[^\s@]+@[^\s@]+\.[^\s@]+$');
+
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _passwordFocus = FocusNode();
 
   bool _isLoading = false;
+  bool _submitted = false;
   String? _errorMessage;
 
   @override
   void initState() {
     super.initState();
 
-    assert(() {
-      _emailController.text = 'admin@test.com';
-      _passwordController.text = 'password';
-      return true;
-    }());
+    if (kDebugMode) {
+      _emailController.text = _devLoginEmail;
+      _passwordController.text = _devLoginPassword;
+    }
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
+    _passwordFocus.dispose();
     super.dispose();
   }
 
-  Future<void> _handleLogin() async {
-    if (!_formKey.currentState!.validate()) return;
+  void _clearError() {
+    if (_errorMessage == null) return;
+    setState(() => _errorMessage = null);
+  }
 
+  Future<void> _handleLogin() async {
+    // Surface field errors from the first failed attempt onwards.
+    if (!_submitted) setState(() => _submitted = true);
+    if (!(_formKey.currentState?.validate() ?? false)) return;
+    if (_isLoading) return;
+
+    FocusScope.of(context).unfocus();
     setState(() {
       _isLoading = true;
       _errorMessage = null;
@@ -57,27 +80,86 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           .read(authProvider.notifier)
           .login(_emailController.text.trim(), _passwordController.text);
 
-      if (mounted) {
-        context.go('/');
-      }
-    } catch (e) {
       if (!mounted) return;
-      setState(() {
-        _errorMessage = e.toString().replaceAll('Exception: ', '');
-      });
+      TextInput.finishAutofillContext();
+      context.go('/');
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _errorMessage = AuthErrorMapper.messageFor(error));
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showForgotPasswordSheet() {
+    final palette = AuthPalette.of(context);
+
+    showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        backgroundColor: palette.cardBackground,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: palette.cardBorder),
+        ),
+        title: Text(
+          'auth.forgotPassword.title'.tr(),
+          style: GoogleFonts.outfit(
+            color: palette.primaryText,
+            fontWeight: FontWeight.w700,
+            fontSize: 20,
+          ),
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'auth.forgotPassword.subtitle'.tr(),
+              style: GoogleFonts.dmSans(
+                color: palette.secondaryText,
+                fontSize: 14,
+                height: 1.45,
+              ),
+            ),
+            const SizedBox(height: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0x55F59E0B)),
+                color: const Color(0x22F59E0B),
+              ),
+              child: Text(
+                'auth.forgotPassword.placeholderNotice'.tr(),
+                style: GoogleFonts.dmSans(
+                  color: AuthPalette.warningText,
+                  fontSize: 13,
+                  height: 1.4,
+                ),
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(
+              'auth.forgotPassword.backToLogin'.tr(),
+              style: GoogleFonts.dmSans(
+                color: palette.brand,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final palette = _AuthPalette.fromTheme(isDark: isDark);
+    final palette = AuthPalette.of(context);
 
     return Scaffold(
       backgroundColor: palette.pageBackground,
@@ -129,12 +211,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ],
       ),
-      floatingActionButton: _HoverScale(
+      floatingActionButton: HoverScale(
         child: FloatingActionButton.extended(
+          heroTag: 'login-offline-activation',
           onPressed: () => context.go('/activate?mode=offline'),
           backgroundColor: palette.glassBackground,
           icon: Icon(LucideIcons.wifiOff, color: palette.primaryText, size: 18),
-          label: Text( 'app.offline_activation'.tr(),
+          label: Text(
+            'app.offline_activation'.tr(),
             style: GoogleFonts.dmSans(
               color: palette.primaryText,
               fontWeight: FontWeight.w600,
@@ -145,7 +229,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     );
   }
 
-  Widget _buildHeroPanel(_AuthPalette palette) {
+  Widget _buildHeroPanel(AuthPalette palette) {
     return Container(
       decoration: BoxDecoration(
         color: palette.cardBackground,
@@ -156,7 +240,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildBadge('ADMIN CONTROL CENTER', palette),
+          AuthBadge(
+            palette: palette,
+            label: 'auth.login.hero.panel.badge'.tr().toUpperCase(),
+          ),
           const SizedBox(height: 22),
           Text.rich(
             TextSpan(
@@ -168,16 +255,17 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 color: palette.primaryText,
               ),
               children: [
-                const TextSpan(text: 'Welcome back,\n'),
+                TextSpan(text: '${'auth.login.hero.welcomeBack'.tr()},\n'),
                 TextSpan(
-                  text: 'app.builder'.tr(),
+                  text: 'auth.login.hero.builder'.tr(),
                   style: TextStyle(color: palette.brand),
                 ),
               ],
             ),
           ),
           const SizedBox(height: 16),
-          Text( 'app.your_dashboard_is_ready_contin'.tr(),
+          Text(
+            'auth.login.hero.subtitle'.tr(),
             style: GoogleFonts.dmSans(
               fontSize: 16,
               color: palette.secondaryText,
@@ -185,7 +273,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          _HoverScale(
+          HoverScale(
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -213,7 +301,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text( 'auth.login.hero.carousel.revenue.title'.tr(),
+                        Text(
+                          'auth.login.hero.feature.title'.tr(),
                           style: GoogleFonts.dmSans(
                             color: palette.primaryText,
                             fontWeight: FontWeight.w600,
@@ -221,7 +310,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 4),
-                        Text( 'app.real_time_insights_into_store'.tr(),
+                        Text(
+                          'auth.login.hero.feature.description'.tr(),
                           style: GoogleFonts.dmSans(
                             color: palette.secondaryText,
                             fontSize: 13,
@@ -237,11 +327,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           const Spacer(),
           _AnimatedChartBars(palette: palette),
           const SizedBox(height: 18),
-          Text( 'app.2026_swekly_inc'.tr(),
-            style: GoogleFonts.dmSans(
-              color: palette.secondaryText,
-              fontSize: 12,
+          Text(
+            'auth.login.hero.copyright'.tr(
+              namedArgs: {'year': DateTime.now().year.toString()},
             ),
+            style: GoogleFonts.dmSans(color: palette.secondaryText, fontSize: 12),
           ),
         ],
       ),
@@ -250,7 +340,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Widget _buildFormPanel(
     BuildContext context,
-    _AuthPalette palette, {
+    AuthPalette palette, {
     required bool isDesktop,
   }) {
     return Align(
@@ -266,448 +356,177 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           padding: const EdgeInsets.all(28),
           child: Form(
             key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Row(
-                  children: [
-                    _buildLogoMark(palette),
-                    const Spacer(),
-                    _buildThemeToggle(context, palette),
-                  ],
-                ),
-                const SizedBox(height: 22),
-                Text( 'auth.login.form.title'.tr(),
-                  style: GoogleFonts.outfit(
-                    fontSize: 34,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: -0.8,
-                    color: palette.primaryText,
+            autovalidateMode: _submitted
+                ? AutovalidateMode.onUserInteraction
+                : AutovalidateMode.disabled,
+            child: AutofillGroup(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Row(
+                    children: [
+                      AuthLogoMark(palette: palette),
+                      const Spacer(),
+                      const LanguageSwitcherButton(compact: true),
+                      const SizedBox(width: 8),
+                      AuthThemeToggle(palette: palette),
+                    ],
                   ),
-                  textAlign: isDesktop ? TextAlign.left : TextAlign.center,
-                ),
-
-                const SizedBox(height: 22),
-
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildSocialButton(
-                        palette,
-                        icon: Icons.public,
-                        label: 'app.google'.tr(),
-                      ),
+                  const SizedBox(height: 22),
+                  Text(
+                    'auth.login.form.title'.tr(),
+                    style: GoogleFonts.outfit(
+                      fontSize: 34,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -0.8,
+                      color: palette.primaryText,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildSocialButton(
-                        palette,
-                        icon: Icons.facebook,
-                        label: 'admin.contactInfosForm.kinds.facebook.label'.tr(),
-                      ),
+                    textAlign: isDesktop ? TextAlign.left : TextAlign.center,
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'auth.login.form.subtitle'.tr(),
+                    style: GoogleFonts.dmSans(
+                      fontSize: 14,
+                      color: palette.secondaryText,
                     ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildSocialButton(
-                        palette,
-                        icon: LucideIcons.apple,
-                        label: 'app.apple'.tr(),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: palette.cardBorder)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8),
-                      child: Text( 'auth.register.social.divider'.tr(),
-                        style: GoogleFonts.dmSans(
-                          fontSize: 11,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 1.5,
-                          color: palette.secondaryText,
+                    textAlign: isDesktop ? TextAlign.left : TextAlign.center,
+                  ),
+                  const SizedBox(height: 22),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: AuthSocialButton(
+                          palette: palette,
+                          icon: Icons.public,
+                          label: 'app.google'.tr(),
                         ),
                       ),
-                    ),
-                    Expanded(child: Divider(color: palette.cardBorder)),
-                  ],
-                ),
-                const SizedBox(height: 18),
-                _buildInput(
-                  palette,
-                  label: 'auth.login.form.email.label'.tr(),
-                  hint: 'name@company.com',
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 14),
-                _buildInput(
-                  palette,
-                  label: 'auth.login.form.password.label'.tr(),
-                  hint: '••••••••',
-                  controller: _passwordController,
-                  obscureText: true,
-                  trailingLabel: 'Forgot password?',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your password';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 18),
-                if (_errorMessage != null) ...[
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: const Color(0x44EF4444)),
-                      color: const Color(0x22EF4444),
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(
-                          LucideIcons.alertCircle,
-                          color: Color(0xFFFCA5A5),
-                          size: 18,
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: AuthSocialButton(
+                          palette: palette,
+                          icon: Icons.facebook,
+                          label: 'admin.contactInfosForm.kinds.facebook.label'
+                              .tr(),
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: Text(
-                            _errorMessage!,
-                            style: GoogleFonts.dmSans(
-                              color: const Color(0xFFFCA5A5),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 13,
-                            ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: AuthSocialButton(
+                          palette: palette,
+                          icon: LucideIcons.apple,
+                          label: 'app.apple'.tr(),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  Row(
+                    children: [
+                      Expanded(child: Divider(color: palette.cardBorder)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
+                        child: Text(
+                          'auth.login.social.divider'.tr(),
+                          style: GoogleFonts.dmSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.5,
+                            color: palette.secondaryText,
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-                _buildSubmitButton(
-                  palette,
-                  label: _isLoading ? 'Signing in...' : 'Sign in',
-                  icon: _isLoading ? null : LucideIcons.arrowRight,
-                  loading: _isLoading,
-                  onTap: _isLoading ? null : _handleLogin,
-                ),
-                const SizedBox(height: 14),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    Text(
-                      'Don\'t have an account? ',
-                      style: GoogleFonts.dmSans(
-                        color: palette.secondaryText,
-                        fontSize: 14,
                       ),
-                    ),
-                    InkWell(
-                      onTap: () => context.go('/register'),
-                      child: Text( 'auth.login.form.startFree'.tr(),
+                      Expanded(child: Divider(color: palette.cardBorder)),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  AuthTextField(
+                    key: const Key('login-email-input'),
+                    palette: palette,
+                    label: 'auth.login.form.email.label'.tr(),
+                    // The shared translation carries a vue-i18n `{'@'}` escape
+                    // that easy_localization renders literally, so keep the
+                    // placeholder inline here.
+                    hint: 'name@company.com',
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    autofillHints: const [AutofillHints.username],
+                    textInputAction: TextInputAction.next,
+                    enabled: !_isLoading,
+                    onChanged: (_) => _clearError(),
+                    onFieldSubmitted: (_) => _passwordFocus.requestFocus(),
+                    validator: _validateEmail,
+                  ),
+                  const SizedBox(height: 14),
+                  AuthTextField(
+                    key: const Key('login-password-input'),
+                    palette: palette,
+                    focusNode: _passwordFocus,
+                    label: 'auth.login.form.password.label'.tr(),
+                    hint: '••••••••',
+                    controller: _passwordController,
+                    obscureText: true,
+                    autofillHints: const [AutofillHints.password],
+                    textInputAction: TextInputAction.done,
+                    enabled: !_isLoading,
+                    onChanged: (_) => _clearError(),
+                    onFieldSubmitted: (_) => _handleLogin(),
+                    validator: _validatePassword,
+                    trailing: InkWell(
+                      key: const Key('login-forgot-password'),
+                      onTap: _showForgotPasswordSheet,
+                      child: Text(
+                        'auth.login.form.password.forgot'.tr(),
                         style: GoogleFonts.dmSans(
                           color: palette.brand,
-                          fontSize: 14,
+                          fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildThemeToggle(BuildContext context, _AuthPalette palette) {
-    final mode = ref.watch(settingsProvider).themeMode;
-    final isDark =
-        mode == ThemeMode.dark ||
-        (mode == ThemeMode.system &&
-            MediaQuery.platformBrightnessOf(context) == Brightness.dark);
-
-    return Tooltip(
-      message: isDark ? 'Switch to light mode' : 'Switch to dark mode',
-      child: InkWell(
-        onTap: () => ref.read(settingsProvider.notifier).toggleTheme(),
-        borderRadius: BorderRadius.circular(12),
-        child: Container(
-          width: 38,
-          height: 38,
-          decoration: BoxDecoration(
-            color: palette.glassBackground,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: palette.cardBorder),
-          ),
-          child: Icon(
-            isDark ? LucideIcons.sun : LucideIcons.moon,
-            size: 18,
-            color: palette.primaryText,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogoMark(_AuthPalette palette) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 34,
-          height: 34,
-          decoration: BoxDecoration(
-            color: palette.brand,
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: const Icon(
-            LucideIcons.store,
-            size: 18,
-            color: Color(0xFF05070A),
-          ),
-        ),
-        const SizedBox(width: 10),
-        Text( 'app.swekly'.tr(),
-          style: GoogleFonts.dmSans(
-            color: palette.primaryText,
-            fontSize: 18,
-            fontWeight: FontWeight.w700,
-            letterSpacing: -0.3,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBadge(String label, _AuthPalette palette) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-      decoration: BoxDecoration(
-        color: palette.glassBackground,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: palette.cardBorder),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(
-              color: palette.brand,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 7),
-          Text(
-            label,
-            style: GoogleFonts.dmSans(
-              color: palette.secondaryText,
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              letterSpacing: 1.2,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSocialButton(
-    _AuthPalette palette, {
-    required IconData icon,
-    required String label,
-  }) {
-    return _HoverScale(
-      child: Container(
-        height: 40,
-        decoration: BoxDecoration(
-          color: palette.glassBackground,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: palette.cardBorder),
-        ),
-        child: Center(
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(icon, size: 16, color: palette.secondaryText),
-              const SizedBox(width: 6),
-              Text(
-                label,
-                style: GoogleFonts.dmSans(
-                  color: palette.secondaryText,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInput(
-    _AuthPalette palette, {
-    required String label,
-    required String hint,
-    required TextEditingController controller,
-    TextInputType? keyboardType,
-    bool obscureText = false,
-    String? trailingLabel,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              label,
-              style: GoogleFonts.dmSans(
-                color: palette.secondaryText,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                letterSpacing: 1.1,
-              ),
-            ),
-            if (trailingLabel != null)
-              Text(
-                trailingLabel,
-                style: GoogleFonts.dmSans(
-                  color: palette.brand,
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-          ],
-        ),
-        const SizedBox(height: 7),
-        TextFormField(
-          controller: controller,
-          keyboardType: keyboardType,
-          obscureText: obscureText,
-          validator: validator,
-          style: GoogleFonts.dmSans(
-            color: palette.primaryText,
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-          ),
-          decoration: InputDecoration(
-            hintText: hint,
-            hintStyle: GoogleFonts.dmSans(
-              color: palette.mutedText,
-              fontSize: 14,
-            ),
-            filled: true,
-            fillColor: palette.inputBackground,
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 14,
-              vertical: 12,
-            ),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: palette.inputBorder),
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: palette.inputBorder),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: palette.brand, width: 1.3),
-            ),
-            errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFFEF4444)),
-            ),
-            focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(
-                color: Color(0xFFEF4444),
-                width: 1.3,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildSubmitButton(
-    _AuthPalette palette, {
-    required String label,
-    required bool loading,
-    required VoidCallback? onTap,
-    IconData? icon,
-  }) {
-    return _HoverScale(
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(13),
-          child: Ink(
-            height: 46,
-            decoration: BoxDecoration(
-              color: onTap == null
-                  ? palette.brand.withValues(alpha: 0.55)
-                  : palette.brand,
-              borderRadius: BorderRadius.circular(13),
-              border: Border.all(color: palette.brand.withValues(alpha: 0.5)),
-              boxShadow: [
-                BoxShadow(
-                  color: palette.brand.withValues(alpha: 0.28),
-                  blurRadius: 26,
-                  spreadRadius: -8,
-                ),
-              ],
-            ),
-            child: Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (loading)
-                    const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Color(0xFF05070A),
-                      ),
-                    ),
-                  if (loading) const SizedBox(width: 8),
-                  Text(
-                    label,
-                    style: GoogleFonts.dmSans(
-                      color: const Color(0xFF05070A),
-                      fontWeight: FontWeight.w700,
-                      fontSize: 14,
-                    ),
                   ),
-                  if (!loading && icon != null) ...[
-                    const SizedBox(width: 8),
-                    Icon(icon, size: 16, color: const Color(0xFF05070A)),
+                  const SizedBox(height: 18),
+                  if (_errorMessage != null) ...[
+                    AuthErrorBanner(message: _errorMessage!),
+                    const SizedBox(height: 16),
                   ],
+                  AuthSubmitButton(
+                    key: const Key('login-submit'),
+                    palette: palette,
+                    label: _isLoading
+                        ? 'auth.login.form.submit.signingIn'.tr()
+                        : 'auth.login.form.submit.signIn'.tr(),
+                    icon: _isLoading ? null : LucideIcons.arrowRight,
+                    loading: _isLoading,
+                    onTap: _isLoading ? null : _handleLogin,
+                  ),
+                  const SizedBox(height: 14),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    crossAxisAlignment: WrapCrossAlignment.center,
+                    children: [
+                      Text(
+                        '${'auth.login.form.noAccount'.tr()} ',
+                        style: GoogleFonts.dmSans(
+                          color: palette.secondaryText,
+                          fontSize: 14,
+                        ),
+                      ),
+                      InkWell(
+                        key: const Key('login-go-register'),
+                        onTap: () => context.go('/register'),
+                        child: Text(
+                          'auth.login.form.startFree'.tr(),
+                          style: GoogleFonts.dmSans(
+                            color: palette.brand,
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),
@@ -716,86 +535,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
     );
   }
-}
 
-class _AuthPalette {
-  final Color pageBackground;
-  final Gradient pageGradient;
-  final Color blobPrimary;
-  final Color blobSecondary;
-  final Color cardBackground;
-  final Color glassBackground;
-  final Color cardBorder;
-  final Color primaryText;
-  final Color secondaryText;
-  final Color mutedText;
-  final Color inputBackground;
-  final Color inputBorder;
-  final Color brand;
-
-  const _AuthPalette({
-    required this.pageBackground,
-    required this.pageGradient,
-    required this.blobPrimary,
-    required this.blobSecondary,
-    required this.cardBackground,
-    required this.glassBackground,
-    required this.cardBorder,
-    required this.primaryText,
-    required this.secondaryText,
-    required this.mutedText,
-    required this.inputBackground,
-    required this.inputBorder,
-    required this.brand,
-  });
-
-  factory _AuthPalette.fromTheme({required bool isDark}) {
-    if (isDark) {
-      return _AuthPalette(
-        pageBackground: const Color(0xFF060A14),
-        pageGradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF050816), Color(0xFF0B1220), Color(0xFF080C16)],
-        ),
-        blobPrimary: const Color(0xFF16D5B3).withValues(alpha: 0.24),
-        blobSecondary: const Color(0xFF3559FF).withValues(alpha: 0.2),
-        cardBackground: const Color(0xD90F1424),
-        glassBackground: const Color(0x14FFFFFF),
-        cardBorder: const Color(0x1AFFFFFF),
-        primaryText: const Color(0xFFE7ECEE),
-        secondaryText: const Color(0xFF8A959C),
-        mutedText: const Color(0xFF4F5A60),
-        inputBackground: const Color(0x1AFFFFFF),
-        inputBorder: const Color(0x26FFFFFF),
-        brand: const Color(0xFFC6F432),
-      );
+  String? _validateEmail(String? value) {
+    final email = value?.trim() ?? '';
+    if (email.isEmpty) return 'auth.validation.emailRequired'.tr();
+    if (!_emailRegex.hasMatch(email)) {
+      return 'auth.validation.emailInvalid'.tr();
     }
+    return null;
+  }
 
-    return _AuthPalette(
-      pageBackground: const Color(0xFFF2F7FF),
-      pageGradient: const LinearGradient(
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-        colors: [Color(0xFFF7FAFF), Color(0xFFF0F5FD), Color(0xFFE9F0F8)],
-      ),
-      blobPrimary: const Color(0xFF84A60D).withValues(alpha: 0.15),
-      blobSecondary: const Color(0xFF16D5B3).withValues(alpha: 0.13),
-      cardBackground: const Color(0xF8FBFDFF),
-      glassBackground: const Color(0xFFF2F6FB),
-      cardBorder: const Color(0x1F0F172A),
-      primaryText: const Color(0xFF0F172A),
-      secondaryText: const Color(0xFF475569),
-      mutedText: const Color(0xFF94A3B8),
-      inputBackground: const Color(0xFFF3F7FB),
-      inputBorder: const Color(0x240F172A),
-      brand: const Color(0xFFC6F432),
-    );
+  String? _validatePassword(String? value) {
+    if ((value ?? '').isEmpty) return 'auth.validation.passwordRequired'.tr();
+    return null;
   }
 }
 
 class _AnimatedBlobBackdrop extends StatefulWidget {
-  final _AuthPalette palette;
+  final AuthPalette palette;
   const _AnimatedBlobBackdrop({required this.palette});
 
   @override
@@ -922,7 +679,7 @@ class _AnimatedEntranceState extends State<_AnimatedEntrance>
 }
 
 class _AnimatedChartBars extends StatefulWidget {
-  final _AuthPalette palette;
+  final AuthPalette palette;
   const _AnimatedChartBars({required this.palette});
 
   @override
@@ -981,32 +738,6 @@ class _AnimatedChartBarsState extends State<_AnimatedChartBars>
           ),
         );
       }),
-    );
-  }
-}
-
-class _HoverScale extends StatefulWidget {
-  final Widget child;
-  const _HoverScale({required this.child});
-
-  @override
-  State<_HoverScale> createState() => _HoverScaleState();
-}
-
-class _HoverScaleState extends State<_HoverScale> {
-  bool _isHovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _isHovered = true),
-      onExit: (_) => setState(() => _isHovered = false),
-      child: AnimatedScale(
-        scale: _isHovered ? 1.03 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        curve: Curves.easeOutQuart,
-        child: widget.child,
-      ),
     );
   }
 }

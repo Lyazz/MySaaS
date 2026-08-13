@@ -61,6 +61,7 @@ class IntegrationsScreen extends ConsumerWidget {
                       key: 'accessToken',
                       label: 'app.conversion_api_token'.tr(),
                       hint: 'EAA...',
+                      required: false,
                     ),
                   ],
                 ),
@@ -101,7 +102,17 @@ class _FieldDef {
   final String label;
   final String hint;
 
-  const _FieldDef({required this.key, required this.label, required this.hint});
+  /// Mirrors the backend's validation: it rejects an integration saved as
+  /// active while a required credential is blank, so the UI derives
+  /// `isActive` from exactly these fields instead of always sending true.
+  final bool required;
+
+  const _FieldDef({
+    required this.key,
+    required this.label,
+    required this.hint,
+    this.required = true,
+  });
 }
 
 class _IntegrationCard extends ConsumerStatefulWidget {
@@ -154,14 +165,22 @@ class _IntegrationCardState extends ConsumerState<_IntegrationCard> {
   Future<void> _save() async {
     setState(() => _saving = true);
     try {
+      // The API reads `{config, isActive}`. This used to post the fields flat
+      // with `isActive` alongside them, so the server saw `config: undefined`
+      // and rejected every save with 400 — the screen could never persist an
+      // integration.
       final config = {
         for (final f in widget.configFields)
           f.key: _controllers[f.key]!.text.trim(),
-        'isActive': true,
       };
+      // Clearing the required fields is how the user turns an integration off;
+      // sending active-with-blank-credentials would just be refused.
+      final isActive = widget.configFields
+          .where((f) => f.required)
+          .every((f) => (config[f.key] ?? '').isNotEmpty);
       await ref
           .read(integrationsProvider.notifier)
-          .save(widget.integration.provider, config);
+          .save(widget.integration.provider, config, isActive: isActive);
       if (mounted) {
         AppToasts.show(context, '${widget.name} saved');
         setState(() => _expanded = false);

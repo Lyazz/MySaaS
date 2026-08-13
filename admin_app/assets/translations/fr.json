@@ -699,6 +699,28 @@
           "orders": "Commandes, produits et livraison au même endroit",
           "workspace": "Un espace clair pour votre équipe",
           "performance": "Une vue rapide sur les résultats du jour"
+        },
+        "carousel": {
+          "revenue": {
+            "title": "Suivi du chiffre d'affaires",
+            "description": "Des informations en temps réel sur les performances de votre boutique."
+          },
+          "orders": {
+            "title": "Gestion des commandes",
+            "description": "Traitez, suivez et honorez les commandes clients en toute simplicité."
+          },
+          "catalog": {
+            "title": "Catalogue produits",
+            "description": "Gérez les variantes, le stock et les prix depuis un seul endroit."
+          },
+          "shipping": {
+            "title": "Expédition intelligente",
+            "description": "Expédition automatique vers plus de 50 transporteurs avec suivi en temps réel."
+          },
+          "analytics": {
+            "title": "Analyses approfondies",
+            "description": "Suivez les tunnels de vente, les taux de conversion et le comportement client."
+          }
         }
       },
       "form": {
@@ -790,7 +812,8 @@
           "send": "Envoyer le code",
           "verify": "Vérifier le code",
           "placeholderNotice": "Code OTP envoyé.",
-          "verified": "Téléphone confirmé."
+          "verified": "Téléphone confirmé.",
+          "resend": "Renvoyer"
         },
         "password": {
           "label": "Mot de passe"
@@ -805,7 +828,13 @@
         },
         "haveAccount": "Vous avez déjà un compte ?",
         "logIn": "Se connecter",
-        "forgotPassword": "Mot de passe oublié ?"
+        "forgotPassword": "Mot de passe oublié ?",
+        "passwordStrength": {
+          "weak": "Faible",
+          "fair": "Moyen",
+          "good": "Bon",
+          "strong": "Fort"
+        }
       },
       "success": {
         "title": "C’est bon !",
@@ -823,7 +852,8 @@
         "phoneRestricted": "L’inscription est actuellement indisponible.",
         "otpRequired": "Entrez le code OTP.",
         "otpSendFirst": "Envoyez d’abord le code OTP.",
-        "otpVerifyFirst": "Vérifiez l’OTP avant de créer votre compte."
+        "otpVerifyFirst": "Vérifiez l’OTP avant de créer votre compte.",
+        "otpInvalid": "Saisissez le code à {length} chiffres."
       },
       "social": {
         "divider": "ou continuer avec",
@@ -845,6 +875,40 @@
         "sent": "Demande enregistrée (placeholder)"
       },
       "backToLogin": "Retour à la connexion"
+    },
+    "errors": {
+      "offlineMode": "Cet appareil fonctionne en mode local uniquement et ne peut pas joindre le serveur. Activez un espace de travail en ligne pour vous connecter.",
+      "cancelled": "La requête a été annulée. Veuillez réessayer.",
+      "noConnection": "Aucune connexion au serveur. Vérifiez votre connexion Internet et réessayez.",
+      "timeout": "Le serveur a mis trop de temps à répondre. Veuillez réessayer.",
+      "badCertificate": "Impossible d'établir une connexion sécurisée avec le serveur.",
+      "invalidRequest": "Certaines informations saisies ne sont pas valides.",
+      "forbidden": "Ce compte n'est pas autorisé à effectuer cette action.",
+      "notFound": "Le serveur n'a pas trouvé l'élément demandé.",
+      "conflict": "Ces informations sont déjà utilisées.",
+      "server": "Le serveur a rencontré un problème. Veuillez réessayer dans un instant.",
+      "unknown": "Une erreur s'est produite. Veuillez réessayer.",
+      "invalidResponse": "Le serveur a renvoyé une réponse inattendue.",
+      "superAdmin": "Les comptes super-admin doivent utiliser la console super-admin web.",
+      "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+    },
+    "validation": {
+      "emailRequired": "L'e-mail est obligatoire.",
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "passwordRequired": "Le mot de passe est obligatoire.",
+      "confirmPasswordRequired": "Confirmez votre mot de passe.",
+      "companyNameRequired": "Le nom de l'entreprise est obligatoire.",
+      "slugRequired": "L'URL de la boutique est obligatoire.",
+      "slugInvalid": "Utilisez uniquement des lettres minuscules, des chiffres et des tirets."
+    },
+    "common": {
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "switchToLight": "Passer en mode clair",
+      "switchToDark": "Passer en mode sombre"
+    },
+    "social": {
+      "comingSoon": "La connexion via les réseaux sociaux arrive bientôt."
     }
   },
   "pricing": {

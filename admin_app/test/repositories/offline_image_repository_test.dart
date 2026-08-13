@@ -61,7 +61,7 @@ void main() {
       tenantId: 'tenant-1',
       workspaceId: 'workspace-1',
     );
-    SyncService().reset();
+    await SyncService().reset();
     SyncService().initialize(
       ApiService(baseUrl: 'http://localhost:3000/api'),
       mode: AppMode.offlineOnly,
@@ -69,7 +69,7 @@ void main() {
   });
 
   tearDown(() async {
-    SyncService().reset();
+    await SyncService().reset();
     await DatabaseService().resetForTest();
   });
 

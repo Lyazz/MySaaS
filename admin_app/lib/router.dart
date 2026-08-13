@@ -113,12 +113,28 @@ String _firstAllowedPath(List<String> permissions) {
   return '/orders';
 }
 
+/// Rebuilds the router's redirect when auth or provisioning state changes.
+///
+/// The router is built once and refreshed through this listenable instead of
+/// being recreated on every state change. Recreating it swapped in a new
+/// `GoRouter` that restarted at `initialLocation`, so signing in or registering
+/// threw away the current route — which is why the "account created" panel on
+/// the register screen was never visible.
+class _RouterRefresh extends ChangeNotifier {
+  void refresh() => notifyListeners();
+}
+
 final routerProvider = Provider<GoRouter>((ref) {
-  final authState = ref.watch(authProvider);
-  final bootstrap = ref.watch(bootstrapProvider);
-  return GoRouter(
+  final refresh = _RouterRefresh();
+  ref.listen(authProvider, (_, _) => refresh.refresh());
+  ref.listen(bootstrapProvider, (_, _) => refresh.refresh());
+
+  final router = GoRouter(
     initialLocation: '/',
+    refreshListenable: refresh,
     redirect: (context, state) {
+      final authState = ref.read(authProvider);
+      final bootstrap = ref.read(bootstrapProvider);
       final path = state.uri.path;
       final isLoggedIn = authState.isAuthenticated;
       final mode = authState.mode;
@@ -144,7 +160,12 @@ final routerProvider = Provider<GoRouter>((ref) {
 
       // Local-only runtime skips auth, but hosted feature locks are tier-driven.
       if (mode.skipsAuthentication) {
-        if (isLoginRoute || isRegisterRoute) return '/';
+        if (isLoginRoute) return '/';
+        // A tenant is created in offline mode, so the owner is already in
+        // local-only mode by the time registration succeeds. Keep them on
+        // /register so the confirmation panel can be read and dismissed;
+        // anyone who is not signed in still gets bounced to the dashboard.
+        if (isRegisterRoute && !isLoggedIn) return '/';
         if (lockedFeature != null &&
             FeatureAccess.isLockedForTier(subscriptionTier, lockedFeature)) {
           return '/locked/${lockedFeature.name}';
@@ -549,4 +570,11 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
     ],
   );
+
+  ref.onDispose(() {
+    router.dispose();
+    refresh.dispose();
+  });
+
+  return router;
 });
