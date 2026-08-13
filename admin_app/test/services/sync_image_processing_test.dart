@@ -402,11 +402,11 @@ void main() {
       tenantId: 'tenant-1',
       workspaceId: 'workspace-1',
     );
-    SyncService().reset();
+    await SyncService().reset();
   });
 
   tearDown(() async {
-    SyncService().reset();
+    await SyncService().reset();
     await DatabaseService().resetForTest();
   });
 

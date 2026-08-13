@@ -131,11 +131,6 @@ class ReceiptLayoutRepository {
       'syncStatus': SyncStatus.pending.name,
     });
 
-    await _syncService.enqueueOperation(
-      entityType: 'receiptLayout',
-      action: 'create',
-      payload: newLayout.toMap(),
-    );
 
     return newLayout;
   }
@@ -171,26 +166,17 @@ class ReceiptLayoutRepository {
       whereArgs: [layout.id, _tid],
     );
 
-    await _syncService.enqueueOperation(
-      entityType: 'receiptLayout',
-      action: 'update',
-      payload: layout.toMap(),
-    );
   }
 
   Future<void> deleteLayout(String id) async {
     final db = await _dbService.database;
-    await db.update(
+    // Deletes outright. This used to only flag the row and leave the
+    // actual removal to a sync round-trip that has no endpoint behind
+    // it, so deleted entries came back on the next read.
+    await db.delete(
       'receipt_layouts',
-      {'syncStatus': SyncStatus.pending.name},
       where: 'id = ? AND tenantId = ?',
       whereArgs: [id, _tid],
-    );
-
-    await _syncService.enqueueOperation(
-      entityType: 'receiptLayout',
-      action: 'delete',
-      payload: {'id': id},
     );
   }
 }

@@ -24,6 +24,60 @@ class _ChecklistItem {
   );
 }
 
+/// Builds the checklist from the endpoint's response.
+///
+/// The API answers with a flat object of booleans
+/// (`{hasLogo, hasProducts, hasCategories, hasDelivery, isPublished, ...}`),
+/// not a list of items. This screen used to look only for a `List` or an
+/// `items` array, so it always rendered an empty 0-of-0 checklist. The item
+/// set and order mirror the web admin's Getting Started card.
+List<_ChecklistItem> _parseChecklist(dynamic raw) {
+  // Tolerate a future list-shaped response rather than silently emptying again.
+  if (raw is List) {
+    return raw
+        .whereType<Map>()
+        .map((e) => _ChecklistItem.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+  if (raw is! Map) return const [];
+  final data = Map<String, dynamic>.from(raw);
+  if (data['items'] is List) {
+    return (data['items'] as List)
+        .whereType<Map>()
+        .map((e) => _ChecklistItem.fromJson(Map<String, dynamic>.from(e)))
+        .toList();
+  }
+
+  bool flag(String key) => data[key] == true;
+  return [
+    _ChecklistItem(
+      id: 'logo',
+      label: 'admin.pages.gettingStarted.items.logo'.tr(),
+      done: flag('hasLogo'),
+    ),
+    _ChecklistItem(
+      id: 'product',
+      label: 'admin.pages.gettingStarted.items.product'.tr(),
+      done: flag('hasProducts'),
+    ),
+    _ChecklistItem(
+      id: 'category',
+      label: 'admin.pages.gettingStarted.items.category'.tr(),
+      done: flag('hasCategories'),
+    ),
+    _ChecklistItem(
+      id: 'delivery',
+      label: 'admin.pages.gettingStarted.items.delivery'.tr(),
+      done: flag('hasDelivery'),
+    ),
+    _ChecklistItem(
+      id: 'publish',
+      label: 'admin.pages.gettingStarted.items.publish'.tr(),
+      done: flag('isPublished'),
+    ),
+  ];
+}
+
 class OnboardingScreen extends ConsumerStatefulWidget {
   const OnboardingScreen({super.key});
 
@@ -53,17 +107,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         '/admin/store-settings/onboarding-checklist',
       );
       final raw = res.data;
-      final list = raw is List
-          ? raw
-          : (raw is Map && raw['items'] is List ? raw['items'] : []);
       setState(() {
-        _items = list
-            .whereType<Map>()
-            .map(
-              (e) =>
-                  _ChecklistItem.fromJson(Map<String, dynamic>.from(e as Map)),
-            )
-            .toList();
+        _items = _parseChecklist(raw);
         _loading = false;
       });
     } catch (e) {
