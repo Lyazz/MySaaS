@@ -1,5 +1,5 @@
 <template>
-  <div class="admin-shell h-screen overflow-hidden flex" style="background: var(--admin-content-bg); font-family: 'DM Sans', system-ui, sans-serif;" :style="adminStyle">
+  <div class="admin-shell h-[100dvh] overflow-hidden flex" style="background: var(--admin-content-bg); font-family: 'DM Sans', system-ui, sans-serif;" :style="adminStyle">
 
     <!-- Mobile Backdrop -->
     <div
