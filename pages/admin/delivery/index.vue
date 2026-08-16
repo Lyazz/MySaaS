@@ -215,6 +215,40 @@
             </div>
 
             <div
+              v-if="selectedProvider.provider === 'MAYSTRO'"
+              class="rounded-xl p-4 space-y-3"
+              style="background: var(--surface-2); border: 1px solid var(--surface-border)"
+            >
+              <div>
+                <h4 class="text-sm font-semibold" style="color: var(--text-primary)">
+                  Resync Maystro products
+                </h4>
+                <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+                  Fixes products that Maystro accepted but never assigned a product ID to. This is a
+                  common cause of "Inconsistent products (missing products)" errors when pushing an order.
+                  Safe to run any time.
+                </p>
+              </div>
+              <div class="flex items-center gap-3">
+                <button
+                  type="button"
+                  class="ui-btn ui-btn--secondary ui-btn--sm"
+                  :disabled="resyncingProducts || !selectedProvider.account?.isActive"
+                  @click="resyncMaystroProducts"
+                >
+                  {{ resyncingProducts ? 'Resyncing…' : 'Resync products' }}
+                </button>
+                <p
+                  v-if="resyncMessage"
+                  class="text-sm"
+                  :class="resyncMessageKind === 'error' ? 'text-red-600' : 'text-emerald-700'"
+                >
+                  {{ resyncMessage }}
+                </p>
+              </div>
+            </div>
+
+            <div
               v-if="selectedProvider.provider === 'YALIDINE'"
               class="rounded-xl p-4 space-y-4"
               style="background: var(--surface-2); border: 1px solid var(--surface-border)"
@@ -692,6 +726,9 @@ const accountConfigDraft = ref<Record<string, string>>({})
 const clearSecrets = ref<Record<string, boolean>>({})
 const accountMessage = ref<string | null>(null)
 const accountMessageKind = ref<'success' | 'error'>('success')
+const resyncingProducts = ref(false)
+const resyncMessage = ref<string | null>(null)
+const resyncMessageKind = ref<'success' | 'error'>('success')
 const clientOrigin = ref('')
 const yalidineWebhookCopyMessage = ref('')
 const platformBaseDomain = usePlatformBaseDomain()
@@ -993,6 +1030,30 @@ const credentialPlaceholder = (provider: DeliveryProviderAdminView, field: Provi
 const clearSecret = (key: string) => {
   clearSecrets.value[key] = true
   accountConfigDraft.value[key] = ''
+}
+
+async function resyncMaystroProducts() {
+  if (resyncingProducts.value) return
+  resyncingProducts.value = true
+  resyncMessage.value = null
+
+  try {
+    const result = await $fetch<{ fixed: number; skipped: number }>(
+      '/api/admin/delivery/providers/MAYSTRO/resync-products',
+      {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      }
+    )
+    resyncMessageKind.value = 'success'
+    resyncMessage.value = `Done: ${result?.fixed ?? 0} product(s) fixed, ${result?.skipped ?? 0} skipped.`
+  } catch (e: any) {
+    console.error('Failed to resync Maystro products', e)
+    resyncMessageKind.value = 'error'
+    resyncMessage.value = e?.data?.statusMessage || 'Failed to resync products.'
+  } finally {
+    resyncingProducts.value = false
+  }
 }
 
 async function copyYalidineWebhookUrl() {
