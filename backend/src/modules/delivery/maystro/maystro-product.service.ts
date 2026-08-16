@@ -70,26 +70,28 @@ export class MaystroProductService {
                 // If the product already exists remotely (e.g., retried request or manual creation),
                 // we should find it by searching and link it.
                 try {
-                    let match = null
+                    let idMatch: any = null
+                    let descMatch: any = null
                     let nextPath = '/stock/products/'
                     let queryParams: any = { store: input.storeId, search: input.logisticalDescription }
 
                     // Fetch pages until we find the matching product
-                    while (nextPath && !match) {
+                    while (nextPath && !idMatch) {
                         const searchRes = await client.request<any>({
                             method: 'GET',
                             path: nextPath,
                             params: queryParams
                         })
-                        
-                        const products = Array.isArray(searchRes) ? searchRes : (searchRes?.results || [])
-                        match = products.find(
-                            (p: any) =>
-                                p.product_id === productId ||
-                                p.logistical_description?.toLowerCase() === input.logisticalDescription.toLowerCase()
-                        )
 
-                        if (match) break
+                        const products = Array.isArray(searchRes) ? searchRes : (searchRes?.results || [])
+                        idMatch = products.find((p: any) => p.product_id === productId)
+                        if (!descMatch) {
+                            descMatch = products.find(
+                                (p: any) => p.logistical_description?.toLowerCase() === input.logisticalDescription.toLowerCase()
+                            )
+                        }
+
+                        if (idMatch) break
 
                         if (searchRes?.next && typeof searchRes.next === 'string') {
                             const apiIndex = searchRes.next.indexOf('/api')
@@ -102,6 +104,63 @@ export class MaystroProductService {
                         } else {
                             nextPath = ''
                         }
+                    }
+
+                    // An exact product_id match is always safe to link — it's genuinely this product.
+                    // A description-only match may belong to a *different* local product that happens to
+                    // share the same name (e.g. two variants both called "الفاصلة"). Stealing it would
+                    // repoint that other product's remote product_id out from under it, breaking its own
+                    // order pushes later. Only reuse a description match if it isn't already owned by
+                    // another local product's SYNCED mapping.
+                    let match = idMatch
+                    if (!match && descMatch) {
+                        const ownedByOther = await this.prisma.maystroProductMapping.findFirst({
+                            where: {
+                                tenantId: input.tenantId,
+                                maystroUuid: descMatch.id,
+                                localProductId: { not: input.localProductId },
+                                syncStatus: 'SYNCED'
+                            }
+                        })
+                        if (ownedByOther) {
+                            // Name collision with a different local product (e.g. two variants sharing
+                            // the same display name). Create a genuinely new Maystro product instead of
+                            // stealing the other one's link — disambiguate the description so Maystro
+                            // accepts it as distinct.
+                            const disambiguated = `${input.logisticalDescription} (${productId.slice(-6)})`
+                            const created = await client.request<MaystroProduct>({
+                                method: 'POST',
+                                path: '/stock/products/',
+                                data: {
+                                    store: input.storeId,
+                                    logistical_description: disambiguated,
+                                    product_id: productId
+                                }
+                            })
+
+                            await this.prisma.maystroProductMapping.upsert({
+                                where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                                create: {
+                                    tenantId: input.tenantId,
+                                    localProductId: input.localProductId,
+                                    maystroProductId: created.product_id || productId,
+                                    maystroUuid: created.id,
+                                    syncStatus: 'SYNCED',
+                                    lastSyncedAt: new Date(),
+                                    lastError: null
+                                },
+                                update: {
+                                    maystroProductId: created.product_id || productId,
+                                    maystroUuid: created.id,
+                                    syncStatus: 'SYNCED',
+                                    lastSyncedAt: new Date(),
+                                    lastError: null
+                                }
+                            })
+
+                            return created
+                        }
+                        match = descMatch
                     }
 
                     if (!match) {
