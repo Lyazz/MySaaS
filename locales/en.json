@@ -1042,7 +1042,8 @@
     "nav": {
       "home": "Home",
       "shop": "Shop",
-      "contact": "Contact"
+      "contact": "Contact",
+      "categories": "Categories"
     },
     "cart": {
       "label": "Cart",
@@ -1308,6 +1309,14 @@
     },
     "announcement": {
       "dismissAria": "Dismiss announcement"
+    },
+    "templates": {
+      "wellness": {
+        "home": {
+          "curatedSelection": "Curated selection",
+          "shopCollection": "Shop the collection"
+        }
+      }
     }
   },
   "admin": {

@@ -87,43 +87,43 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="bg-stone-50 min-h-screen py-10 font-wellness text-stone-700">
+  <div class="bg-wl-paper min-h-screen py-10 font-wellness text-wl-ink">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Breadcrumb -->
-      <nav class="flex items-center text-sm text-stone-500 mb-8 animate-fade-in-up font-wellness">
+      <nav class="flex items-center wl-label text-wl-muted mb-8">
         <NuxtLink
           to="/"
-          class="hover:text-brand-700 transition-colors italic"
+          class="hover:text-wl-ink transition-colors"
         >
           Home
         </NuxtLink>
-        <span class="mx-3 text-stone-300">/</span>
+        <span class="mx-2 text-wl-ruleStrong">/</span>
         <NuxtLink
           to="/products"
-          class="hover:text-brand-700 transition-colors italic"
+          class="hover:text-wl-ink transition-colors"
         >
           Shop
         </NuxtLink>
-        <span class="mx-3 text-stone-300">/</span>
-        <span class="font-medium text-stone-900 truncate max-w-xs">{{ product?.title }}</span>
+        <span class="mx-2 text-wl-ruleStrong">/</span>
+        <span class="text-wl-ink truncate max-w-xs">{{ product?.title }}</span>
       </nav>
 
-      <div class="lg:grid lg:grid-cols-12 lg:gap-16 items-start">
+      <div class="lg:grid lg:grid-cols-12 lg:gap-14 items-start">
         <!-- Gallery Section (Left - 7 cols) -->
         <div class="lg:col-span-7">
              <ProductGallery :images="images" :title="product?.title" />
         </div>
 
         <!-- Product Info Section (Right - 5 cols) -->
-        <div class="lg:col-span-5 flex flex-col gap-10 sticky top-24">
-            <ProductDetails 
-                :product="product" 
-                :current-price="currentPrice" 
-                v-model:selected-options="selectedOptions" 
+        <div class="lg:col-span-5 flex flex-col gap-8 lg:sticky lg:top-28">
+            <ProductDetails
+                :product="product"
+                :current-price="currentPrice"
+                v-model:selected-options="selectedOptions"
             />
 
-            <div class="p-6 bg-white rounded-3xl border border-stone-100 shadow-sm">
-                <ProductOrderForm 
+            <div class="p-6 bg-wl-card border border-wl-rule">
+                <ProductOrderForm
                     :product="product"
                     :current-variant="currentVariant"
                     :current-price="currentPrice"
@@ -131,40 +131,24 @@ onUnmounted(() => {
                     :active-image="cartImage"
                 />
             </div>
-            
+
         </div>
 
         <!-- Full Description (Rich Text) -->
-        <div
-            class="mt-20 col-span-12 max-w-4xl mx-auto animate-fade-in-up"
-            style="animation-delay: 0.2s"
-        >
-       
-
-            <SafeRichText 
-            v-if="product?.description" 
-            class="prose prose-stone prose-lg text-stone-600 max-w-none leading-relaxed bg-white/50 backdrop-blur rounded-[3rem] p-10 md:p-16 shadow-sm border border-stone-100"
-            :html="product.description"
+        <div class="mt-20 col-span-12 max-w-4xl mx-auto w-full">
+            <SafeRichText
+              v-if="product?.description"
+              class="prose prose-stone text-wl-muted max-w-none leading-relaxed bg-wl-card border border-wl-rule p-8 md:p-12"
+              :html="product.description"
             />
             <div
-            v-else
-            class="prose prose-stone prose-lg text-stone-600 max-w-none leading-relaxed bg-white/50 backdrop-blur rounded-[3rem] p-10 md:p-16 shadow-sm border border-stone-100 text-center italic"
+              v-else
+              class="prose prose-stone text-wl-muted max-w-none leading-relaxed bg-wl-card border border-wl-rule p-8 md:p-12 text-center"
             >
-            <p>{{ storefrontContent.product.descriptionFallback }}</p>
+              <p>{{ storefrontContent.product.descriptionFallback }}</p>
             </div>
         </div>
         </div>
     </div>
   </div>
 </template>
-
-<style scoped>
-.animate-fade-in-up {
-    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-</style>

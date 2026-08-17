@@ -25,7 +25,7 @@ Future<void> adminNotificationBackgroundHandler(RemoteMessage message) async {
 }
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
-  final service = NotificationService(ref.read(apiProvider));
+  final service = NotificationService(() => ref.read(apiProvider));
   ref.onDispose(() {
     unawaited(service.dispose());
   });
@@ -34,7 +34,7 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 
 class NotificationService {
   NotificationService(
-    this._apiService, {
+    this._apiServiceResolver, {
     DeviceInfoService? deviceInfoService,
     FlutterLocalNotificationsPlugin? localNotifications,
     http.Client? httpClient,
@@ -46,7 +46,14 @@ class NotificationService {
        _httpClient = httpClient,
        _localNotificationSink = localNotificationSink;
 
-  final ApiService _apiService;
+  /// `apiProvider` is rebuilt into a brand-new [ApiService]/Dio client on
+  /// every login, logout and `refreshMe()` (they all replace
+  /// `bootstrapProvider`'s state). Resolving it lazily on every call — rather
+  /// than capturing one instance at construction — keeps this service from
+  /// pinning to a stale, unauthenticated (or previous-session) Dio client
+  /// after a logout/login cycle that doesn't restart the app.
+  final ApiService Function() _apiServiceResolver;
+  ApiService get _apiService => _apiServiceResolver();
   final DeviceInfoService _deviceInfoService;
   final FlutterLocalNotificationsPlugin _localNotifications;
   final Future<void> Function(

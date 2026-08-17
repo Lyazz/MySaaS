@@ -63,15 +63,8 @@ const mainImage = computed(() => {
     return '/blank.svg?v=2'
 })
 
-// TODO: Replace with real discount logic when available in backend
-const discount = 0 
-
-
-const isNew = computed(() => {
-    // Logic for "New" badge, e.g. created within last 30 days
-    // For now, random or based on ID if we had that info, defaulting to false or passed prop
-    return false 
-})
+// Struck-through original only when a promotion actually lowers the price
+const hasPromoSaving = computed(() => isPromoValid.value && displayPrice.value < originalPrice.value)
 
 const LOW_STOCK_THRESHOLD = 5
 const isOutOfStock = computed(() => Number(props.product.stock ?? 0) <= 0)
@@ -105,20 +98,20 @@ async function handleAddToCart() {
 </script>
 
 <template>
-  <div 
+  <div
     class="group relative"
     :class="[
-      viewMode === 'list' 
-        ? 'flex flex-row items-start gap-8 p-4 hover:bg-stone-50 rounded-3xl transition-colors duration-300' 
-        : 'flex flex-col gap-4'
+      viewMode === 'list'
+        ? 'flex flex-row items-start gap-8 py-6 border-b border-wl-rule'
+        : 'flex flex-col'
     ]"
   >
-    <!-- Image Card -->
-    <div 
-      class="relative overflow-hidden rounded-[2rem] bg-stone-100"
+    <!-- Specimen window -->
+    <div
+      class="relative overflow-hidden bg-wl-card border border-wl-rule"
       :class="[
-        viewMode === 'list' 
-          ? 'w-48 h-60 flex-shrink-0' 
+        viewMode === 'list'
+          ? 'w-40 h-48 flex-shrink-0'
           : 'w-full aspect-[4/5]'
       ]"
     >
@@ -134,54 +127,47 @@ async function handleAddToCart() {
         >
       </NuxtLink>
         
-      <!-- Subtle Overlay on Hover -->
-      <div v-if="viewMode !== 'list'" class="absolute inset-0 bg-stone-900/0 group-hover:bg-stone-900/5 transition-colors duration-500 pointer-events-none" />
-
-      <!-- Badges (Top Left - Minimal Pill) -->
-      <div class="absolute top-4 start-4 flex flex-col gap-2 items-start z-10">
-        <span
-          v-if="isNew"
-          class="px-3 py-1 bg-white/90 backdrop-blur text-emerald-800 text-xs font-medium uppercase tracking-wider rounded-full shadow-sm"
-        >{{ storefrontContent.badges.new }}</span>
-        <span
-          v-if="discount > 0"
-          class="px-3 py-1 bg-white/90 backdrop-blur text-stone-600 text-xs font-medium uppercase tracking-wider rounded-full shadow-sm"
-        >-{{ discount }}%</span>
+      <!-- Stamps (top start) -->
+      <div class="absolute top-3 start-3 flex flex-col gap-1.5 items-start z-10">
         <span
           v-if="isClearanceEligible"
-          class="px-3 py-1 bg-amber-600 text-white text-xs font-medium uppercase tracking-wider rounded-full shadow-sm"
+          class="wl-label px-2 py-1 bg-wl-ink text-wl-paper"
         >{{ t('storefront.clearance.badge') }}</span>
+        <span
+          v-if="isOutOfStock"
+          class="wl-label px-2 py-1 bg-wl-paper text-wl-muted border border-wl-rule"
+        >{{ storefrontContent.productForm.stock.outOfStock }}</span>
       </div>
 
-      <!-- Quick Actions (Bottom Center - Fade Up) -->
-       <div 
-        class="absolute inset-x-0 bottom-4 flex justify-center gap-3 transition-all duration-500 pointer-events-none"
-        :class="[ viewMode !== 'list' ? 'translate-y-10 opacity-0 group-hover:translate-y-0 group-hover:opacity-100' : 'hidden' ]"
+      <!-- Quick Actions (fade up) -->
+       <div
+        class="absolute inset-x-0 bottom-0 flex justify-center gap-px p-3 transition-all duration-300 pointer-events-none"
+        :class="[ viewMode !== 'list' ? 'translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 focus-within:translate-y-0 focus-within:opacity-100' : 'hidden' ]"
       >
          <StorefrontSharedFavoriteButton
             :product-id="product.id"
-            button-class="pointer-events-auto h-11 w-11 bg-white rounded-full flex items-center justify-center hover:bg-red-50 shadow-soft transition-colors"
-            icon-class="w-5 h-5"
-            inactive-class="text-stone-700"
-            active-class="text-red-600"
+            button-class="pointer-events-auto h-10 w-10 bg-wl-card border border-wl-rule flex items-center justify-center hover:bg-wl-paper transition-colors"
+            icon-class="w-4 h-4"
+            inactive-class="text-wl-ink"
+            active-class="text-red-700"
          />
 
          <button
-            class="pointer-events-auto h-11 w-11 bg-white rounded-full flex items-center justify-center text-stone-700 hover:text-brand-700 hover:bg-stone-50 shadow-soft transition-colors" 
+            class="pointer-events-auto h-10 w-10 bg-wl-card border border-wl-rule border-s-0 flex items-center justify-center text-wl-ink hover:bg-wl-paper transition-colors"
             :title="storefrontContent.actions.quickView"
             @click.prevent="$emit('quick-view', product)"
          >
-             <Icon name="lucide:eye" class="w-5 h-5" />
+             <Icon name="lucide:eye" class="w-4 h-4" />
          </button>
 
          <button
            v-if="storeSettings?.cartEnabled !== false"
            :disabled="isOutOfStock || !product.isActive"
-           class="pointer-events-auto h-11 w-11 bg-brand-700 text-white rounded-full flex items-center justify-center hover:bg-brand-800 shadow-soft transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+           class="pointer-events-auto h-10 w-10 bg-wl-ink text-wl-paper flex items-center justify-center hover:bg-brand-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
            :title="storefrontContent.actions.addToCart"
            @click.prevent="handleAddToCart"
          >
-           <Icon name="lucide:plus" class="w-5 h-5" />
+           <Icon name="lucide:plus" class="w-4 h-4" />
          </button>
       </div>
     
@@ -197,68 +183,79 @@ async function handleAddToCart() {
       </div>
     </div>
 
-    <!-- Details -->
-    <div 
+    <!-- The label: name, rule, data row -->
+    <div
       :class="[
-        viewMode === 'list' 
-          ? 'flex-1 py-2' 
-          : 'flex flex-col items-center text-center px-1'
+        viewMode === 'list'
+          ? 'flex-1 min-w-0'
+          : 'flex flex-col pt-4'
       ]"
     >
       <div v-if="viewMode === 'list'" class="mb-2">
-         <span class="text-xs font-bold tracking-widest text-stone-400 uppercase">{{ storefrontContent.common.collection }}</span>
+         <span class="wl-label text-wl-muted">{{ storefrontContent.common.collection }}</span>
       </div>
 
       <NuxtLink
         :to="`/product/${product.slug}`"
-        class="block group-hover:text-brand-700 transition-colors duration-300"
+        class="block"
       >
-        
-<h3 
-          class="font-wellness text-stone-900 leading-snug"
-          :class="[ viewMode === 'list' ? 'text-2xl mb-3' : 'text-lg' ]"
+        <h3
+          class="wl-display-sm text-wl-ink leading-snug"
+          :class="[ viewMode === 'list' ? 'text-2xl mb-3' : 'text-[1.0625rem]' ]"
         >
-          {{ product.title }}
+          <span class="wl-underline">{{ product.title }}</span>
         </h3>
       </NuxtLink>
 
-      <p v-if="viewMode === 'list'" class="text-stone-500 mb-6 max-w-2xl leading-relaxed font-light">
+      <p v-if="viewMode === 'list'" class="text-wl-muted mb-6 max-w-2xl leading-relaxed text-sm">
         {{ product.description || storefrontContent.product.descriptionFallback }}
       </p>
 
-      <div 
-        class="flex items-center gap-3" 
-        :class="[ viewMode === 'list' ? '' : 'justify-center mt-2' ]"
+      <!-- Data row: price reads against stock state across a hairline -->
+      <div
+        class="flex items-baseline justify-between gap-3 border-t border-wl-rule pt-2.5"
+        :class="[ viewMode === 'list' ? 'mt-0 max-w-sm' : 'mt-3' ]"
       >
-        <span class="font-medium text-stone-600" :class="[viewMode === 'list' ? 'text-lg' : 'text-sm']">
-            {{ formatAmount(product.price) }} {{ currencyCode }}
-        </span>
+        <div class="flex items-baseline gap-2 min-w-0">
+          <span class="wl-num font-medium text-wl-ink" :class="[viewMode === 'list' ? 'text-lg' : 'text-sm']">
+              {{ formatAmount(displayPrice) }} {{ currencyCode }}
+          </span>
+          <span
+            v-if="hasPromoSaving"
+            class="wl-num text-xs text-wl-muted line-through decoration-wl-ruleStrong"
+          >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
+        </div>
+
         <span
-          v-if="originalPrice"
-          class="text-xs text-stone-400 line-through decoration-stone-300"
-        >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
+          v-if="isLowStock"
+          class="wl-label text-brand-700 flex-shrink-0"
+        >{{ storefrontContent.productForm.stock.lowStock(product.stock) }}</span>
+        <span
+          v-else-if="!isOutOfStock"
+          class="wl-label text-wl-muted flex-shrink-0"
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
-      
+
       <!-- List View Extra Actions -->
-       <div v-if="viewMode === 'list'" class="mt-6 flex gap-4">
-          <button 
+       <div v-if="viewMode === 'list'" class="mt-6 flex gap-2">
+          <button
              v-if="storeSettings?.cartEnabled !== false"
              :disabled="product.stock === 0"
-             class="px-8 py-3 rounded-full bg-brand-700 text-white text-sm font-medium hover:bg-brand-800 transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+             class="px-7 py-3 bg-wl-ink text-wl-paper wl-label hover:bg-brand-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
              @click.prevent="handleAddToCart"
           >
              {{ storefrontContent.actions.addToCart }}
           </button>
           <StorefrontSharedFavoriteButton
             :product-id="product.id"
-            button-class="px-5 py-3 rounded-full border border-stone-200 text-sm font-medium hover:bg-stone-50 transition-colors"
+            button-class="px-4 py-3 border border-wl-rule hover:bg-wl-card transition-colors flex items-center"
             icon-class="w-4 h-4"
-            inactive-class="text-stone-600"
-            active-class="text-red-600"
+            inactive-class="text-wl-muted"
+            active-class="text-red-700"
           />
        </div>
     </div>
-    
+
     <!-- Success Toast -->
     <Transition
       enter-active-class="transform ease-out duration-300 transition"
@@ -270,13 +267,13 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-6 end-6 z-50 bg-stone-900 text-stone-50 px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 border border-stone-800"
+        class="fixed bottom-6 end-6 z-50 bg-wl-card text-wl-ink border border-wl-ink px-6 py-4 shadow-lg flex items-center gap-4"
       >
-        <div class="w-6 h-6 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
-          <Icon name="lucide:check" class="w-4 h-4" />
+        <div class="w-6 h-6 border border-wl-ruleStrong text-wl-ink flex items-center justify-center shrink-0">
+          <Icon name="lucide:check" class="w-3.5 h-3.5" />
         </div>
         <div>
-          <div class="font-medium text-sm">{{ successTitle }}</div>
+          <div class="wl-label">{{ successTitle }}</div>
         </div>
       </div>
     </Transition>

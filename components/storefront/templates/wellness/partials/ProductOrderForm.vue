@@ -477,29 +477,29 @@ const handleAddToCart = async () => {
 <template>
     <div>
         <!-- Quantity Selector (Global for both COD and Cart) -->
-        <div class="flex items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-6">
+        <div class="flex items-center justify-between p-4 bg-wl-card border border-wl-rule mb-6">
             <div class="flex flex-col gap-0.5">
-                <span class="font-semibold text-slate-700">{{ storefrontContent.productForm.quantity.label }}</span>
-                <span v-if="product?.isActive === false" class="text-xs font-semibold text-slate-500">{{ storefrontContent.productForm.stock.unavailable }}</span>
+                <span class="wl-label text-wl-ink">{{ storefrontContent.productForm.quantity.label }}</span>
+                <span v-if="product?.isActive === false" class="wl-label text-wl-muted">{{ storefrontContent.productForm.stock.unavailable }}</span>
                 <span v-else-if="isOutOfStock" class="text-xs font-semibold text-red-700">{{ storefrontContent.productForm.stock.outOfStock }}</span>
                 <span v-else-if="isLowStock" class="text-xs font-semibold text-amber-700">
                     {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
                 </span>
                 <span v-else class="text-xs font-semibold text-emerald-700">{{ storefrontContent.product.inStock }}</span>
             </div>
-            <div class="flex items-center bg-slate-50 rounded-xl shadow-inner border border-slate-200 p-1">
+            <div class="flex items-center border border-wl-rule">
                 <button 
                     type="button"
-                    class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    class="w-10 h-10 flex items-center justify-center text-wl-muted hover:text-wl-ink hover:bg-wl-paper transition-colors"
                     :disabled="!canPurchase || quantity <= 1"
                     @click="decrementQuantity"
                 >
                     <Icon name="lucide:minus" class="w-4 h-4" />
                 </button>
-                <span class="w-12 text-center font-bold text-slate-900">{{ quantity }}</span>
+                <span class="w-12 text-center wl-num font-medium text-wl-ink border-x border-wl-rule leading-10">{{ quantity }}</span>
                 <button 
                     type="button"
-                    class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    class="w-10 h-10 flex items-center justify-center text-wl-muted hover:text-wl-ink hover:bg-wl-paper transition-colors"
                     :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
                     @click="incrementQuantity"
                 >
@@ -518,7 +518,7 @@ const handleAddToCart = async () => {
 
         <div
             v-if="isClearanceEligible"
-            class="flex items-center gap-2 px-4 py-3 mb-6 rounded-xl border border-amber-200 bg-amber-50 text-amber-800 text-xs font-semibold shadow-sm"
+            class="flex items-center gap-2 px-4 py-3 mb-6 border border-amber-300 bg-amber-50 text-amber-900 wl-label"
         >
             <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
             <span v-if="clearance.remainingForNextThreshold.value > 0">
@@ -531,134 +531,125 @@ const handleAddToCart = async () => {
         <div
             v-if="codEnabled"
             data-test="cod-order-card"
-            class="bg-white rounded-3xl p-6 md:p-8 shadow-soft border border-slate-100 relative overflow-hidden"
+            class="bg-wl-card p-6 md:p-8 border border-wl-rule relative overflow-hidden"
         >
             <div class="absolute top-0 start-0 w-full h-1 bg-gradient-to-r from-brand-400 to-brand-600" />
             
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shadow-sm ring-1 ring-brand-100">
+                <div class="w-10 h-10 border border-wl-rule flex items-center justify-center text-wl-muted">
                 <Icon name="lucide:banknote" class="w-5 h-5" />
                 </div>
                 <div>
-                <h3 class="font-wellness font-bold text-slate-900 text-xl leading-none">{{ storefrontContent.productForm.cod.title }}</h3>
-                <span class="text-xs text-slate-500 font-medium">{{ storefrontContent.productForm.cod.badge }}</span>
+                <h3 class="wl-display-sm text-wl-ink text-xl leading-none">{{ storefrontContent.productForm.cod.title }}</h3>
+                <span class="wl-label text-wl-muted">{{ storefrontContent.productForm.cod.badge }}</span>
                 </div>
             </div>
             
             <form class="space-y-5" @submit.prevent="handleOrderSubmit">
                 <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.fullName.label }}</label>
                 <input 
                     v-model="quickForm.fullName"
                     type="text" 
                     :placeholder="storefrontContent.checkout.form.fullName.placeholder" 
-                    class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                    class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                     :class="{ 'animate-attention': !quickForm.fullName }"
                 >
                 </div>
                 
                 <div class="space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.phone.label }}</label>
+                <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.phone.label }}</label>
                 <input
                     v-model="quickForm.phone"
                     type="tel"
                     :placeholder="storefrontContent.checkout.form.phone.placeholder"
-                    class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                    class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                 >
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                     <WilayaField
                         v-model="quickForm.wilaya"
-                        input-class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
+                        input-class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none appearance-none cursor-pointer"
                         :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
                       />
                 </div>
                 <div class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.commune.label }}</label>
                     <CommuneField
                         v-model="quickForm.commune"
                         :wilaya-code="quickForm.wilaya"
                         :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                        :input-class="'block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
-                        :select-class="'block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
+                        :input-class="'block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none'"
+                        :select-class="'block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none'"
                     />
                 </div>
                 </div>
 
                 <div v-if="!hideOptionalAddress" class="space-y-2">
-                    <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input
                         v-model="quickForm.address"
                         type="text"
                         :placeholder="storefrontContent.checkout.form.address.placeholder"
-                        class="block w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                        class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                     >
                 </div>
                 <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
-                    <label class="block text-sm font-semibold text-slate-700 ms-1">
+                    <label class="block wl-label text-wl-muted">
                         {{ storefrontContent.checkout.sections.deliveryOptions }}
                     </label>
                     <div 
                         v-for="option in deliveryOptions"
                         :key="option.id"
-                        class="cursor-pointer relative rounded-2xl p-4 border-2 transition-all duration-300 group hover:scale-[1.005]"
+                        class="cursor-pointer relative p-4 border transition-colors duration-200 group"
                         :class="quickForm.selectedDeliveryOption === option.id 
-                        ? 'border-brand-500 bg-brand-50/50 shadow-md' 
-                        : 'border-slate-100 hover:border-brand-200 hover:shadow-sm'"
+                        ? 'border-wl-ink bg-wl-paper' : 'border-wl-rule hover:border-wl-ruleStrong'"
                         @click="quickForm.selectedDeliveryOption = option.id"
                     >
                         <div class="flex items-center gap-4">
                         <div 
-                            class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
-                            :class="quickForm.selectedDeliveryOption === option.id 
-                            ? `bg-${option.color}-100` 
-                            : 'bg-slate-100 group-hover:bg-slate-200'"
+                            class="w-11 h-11 border flex items-center justify-center flex-shrink-0 transition-colors duration-200"
+                            :class="quickForm.selectedDeliveryOption === option.id ? 'bg-wl-ink border-wl-ink text-wl-paper' : 'bg-wl-card border-wl-rule text-wl-muted'"
                         >
                             <Icon 
                             :name="option.icon" 
                             class="w-7 h-7 transition-colors duration-300"
-                            :class="quickForm.selectedDeliveryOption === option.id 
-                                ? `text-${option.color}-600` 
-                                : 'text-slate-400 group-hover:text-slate-600'"
                             />
                         </div>
                         
                         <div class="flex-1 min-w-0">
                             <div class="flex items-center gap-2 mb-1">
-                            <h4 class="font-bold text-slate-900 text-sm">
+                            <h4 class="wl-display-sm text-wl-ink text-base">
                                 {{ option.providerLabel }}
                             </h4>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                                :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
-                            >
+                            <span class="wl-label text-wl-muted">
                                 {{ option.modeLabel }}
                             </span>
                             </div>
-                            <p class="text-xs text-slate-500 leading-relaxed">
+                            <p class="text-xs text-wl-muted leading-relaxed">
                             {{ option.description }}
                             </p>
                         </div>
                         
                         <div class="flex items-center gap-3 flex-shrink-0">
                             <div class="text-end">
-                            <div class="font-bold text-brand-600 text-base">
+                            <div class="wl-num font-medium text-wl-ink text-sm">
                                 {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                             </div>
                             </div>
                             <span
-                            class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
+                            class="block w-5 h-5 border transition-colors duration-200 flex-shrink-0"
                             :class="quickForm.selectedDeliveryOption === option.id 
-                                ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
-                                : 'border-slate-300'"
+                                ? 'border-wl-ink bg-wl-ink' : 'border-wl-ruleStrong'"
                             >
                             <span 
                                 v-if="quickForm.selectedDeliveryOption === option.id"
-                                class="block w-full h-full rounded-full flex items-center justify-center"
+                                class="block w-full h-full flex items-center justify-center"
                             >
-                                <Icon name="lucide:check" class="w-3 h-3 text-white" />
+                                <Icon name="lucide:check" class="w-3 h-3 text-wl-paper" />
                             </span>
                             </span>
                         </div>
@@ -669,12 +660,12 @@ const handleAddToCart = async () => {
                         v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
                         class="space-y-2 mt-4"
                     >
-                        <label class="block text-sm font-semibold text-slate-700 ms-1">
+                        <label class="block wl-label text-wl-muted">
                             {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
                         </label>
                         <div
                             v-if="pickupPointsLoading"
-                            class="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
+                            class="flex items-center gap-2 px-4 py-3 border border-wl-rule bg-wl-paper text-sm text-wl-muted"
                         >
                             <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
                             Loading…
@@ -682,28 +673,28 @@ const handleAddToCart = async () => {
                         <template v-else>
                             <div
                                 v-if="stopDeskName"
-                                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
+                                class="flex items-center gap-2 px-4 py-2.5 border border-wl-rule bg-wl-paper text-sm text-wl-muted"
                             >
-                                <Icon name="lucide:building-2" class="w-4 h-4 text-slate-400 shrink-0" />
+                                <Icon name="lucide:building-2" class="w-4 h-4 text-wl-muted shrink-0" />
                                 <span>{{ stopDeskName }}</span>
                             </div>
                             <div
                                 v-if="isMaystroPickup && quickForm.pickupPoint"
-                                class="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50"
+                                class="flex items-center gap-3 px-4 py-3 border border-wl-ink bg-wl-paper"
                             >
                                 <Icon name="lucide:map-pin" class="w-4 h-4 text-blue-600 shrink-0" />
-                                <span class="text-sm font-semibold text-slate-900">
+                                <span class="text-sm font-medium text-wl-ink">
                                     {{ quickForm.pickupPoint }}
                                 </span>
                             </div>
                         </template>
-                        <p v-if="pickupPointsError" class="text-xs text-amber-700">
+                        <p v-if="pickupPointsError" class="text-xs text-amber-800">
                             {{ pickupPointsError }}
                         </p>
                     </div>
                 </div>
-                <div v-else class="mt-6 px-4 py-3 border border-dashed border-slate-200 text-center text-xs text-slate-400">
-                    <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-slate-300" />
+                <div v-else class="mt-6 px-4 py-3 border border-dashed border-wl-rule text-center text-xs text-wl-muted">
+                    <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-wl-muted" />
                     {{ storefrontContent.checkout.help.deliveryOptions }}
                 </div>
 
@@ -711,27 +702,27 @@ const handleAddToCart = async () => {
 
                 <div
                     v-if="orderError"
-                    class="p-3 rounded-xl border border-red-200 bg-red-50 text-red-700 text-sm"
+                    class="p-3 border border-red-300 bg-red-50 text-red-900 text-sm"
                 >
                     {{ orderError }}
                 </div>
 
                 <!-- Clearance discount -->
                 <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between py-2 text-sm">
-                    <span class="text-amber-700 uppercase tracking-wider text-xs font-bold">{{ t('storefront.clearance.discountLine') }}</span>
-                    <span class="font-medium text-amber-700">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
+                    <span class="wl-label text-amber-800">{{ t('storefront.clearance.discountLine') }}</span>
+                    <span class="wl-num font-medium text-amber-800">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
                 </div>
 
                 <!-- Total Price Display -->
-                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-100">
-                    <span class="text-slate-600 font-medium">{{ storefrontContent.productForm.totalPrice }}</span>
-                    <span class="text-xl font-bold text-brand-600">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
+                <div class="flex items-center justify-between p-4 bg-wl-paper border border-wl-rule">
+                    <span class="wl-label text-wl-muted">{{ storefrontContent.productForm.totalPrice }}</span>
+                    <span class="wl-num wl-display text-xl text-wl-ink">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
                 </div>
 
                 <button 
                 type="submit"
                 :disabled="orderSubmitting || !canPurchase"
-                class="w-full h-14 bg-slate-900 hover:bg-brand-600 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold text-lg rounded-xl shadow-lg shadow-slate-900/20 hover:shadow-brand-600/30 transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
+                class="w-full h-14 bg-wl-ink hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed text-wl-paper wl-label transition-colors flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
                 >
                 <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
                     <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
@@ -739,7 +730,7 @@ const handleAddToCart = async () => {
                 </span>
                             
                 <div v-if="orderSubmitting" class="absolute inset-0 flex items-center justify-center">
-                    <Icon name="lucide:loader-2" class="animate-spin h-6 w-6 text-white" />
+                    <Icon name="lucide:loader-2" class="animate-spin h-5 w-5 text-wl-paper" />
                 </div>
                 </button>
             </form>
@@ -750,7 +741,7 @@ const handleAddToCart = async () => {
             <button 
                 type="button"
                 :disabled="addToCartSubmitting || !canPurchase"
-                class="w-full h-14 bg-white border-2 border-slate-900 text-slate-900 hover:bg-slate-50 font-bold text-lg rounded-xl transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
+                class="w-full h-14 bg-wl-card border border-wl-ink text-wl-ink hover:bg-wl-paper wl-label transition-colors flex items-center justify-center gap-3"
                 @click="handleAddToCart"
             >
                     <Icon name="lucide:handbag" class="w-5 h-5" />
@@ -769,14 +760,14 @@ const handleAddToCart = async () => {
         >
         <div
             v-if="showSuccess"
-            class="fixed bottom-4 end-4 z-50 bg-slate-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 border border-slate-700/50 backdrop-blur-md bg-slate-900/95"
+            class="fixed bottom-4 end-4 z-50 bg-wl-card text-wl-ink border border-wl-ink px-6 py-4 shadow-lg flex items-center gap-4"
         >
-            <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0">
+            <div class="w-7 h-7 border border-wl-ruleStrong flex items-center justify-center text-wl-ink shrink-0">
             <Icon name="lucide:check" class="w-5 h-5" />
             </div>
             <div>
-            <div class="font-bold">{{ successTitle }}</div>
-            <div class="text-xs text-slate-300">{{ successMessage }}</div>
+            <div class="wl-label">{{ successTitle }}</div>
+            <div class="text-xs text-wl-muted">{{ successMessage }}</div>
             </div>
         </div>
         </Transition>
@@ -789,7 +780,7 @@ const handleAddToCart = async () => {
 }
 
 @keyframes attentionCaptivate {
-    0%, 100% { border-color: #e2e8f0; box-shadow: 0 0 0 0 rgba(0,0,0,0); transform: scale(1); background-color: white; }
+    0%, 100% { border-color: #D4D5CB; box-shadow: 0 0 0 0 rgba(0,0,0,0); transform: scale(1); background-color: #FCFCF9; }
     50% { border-color: var(--brand); box-shadow: 0 0 20px -5px color-mix(in srgb, var(--brand), transparent 50%); transform: scale(1.02); background-color: color-mix(in srgb, var(--brand), white 98%); }
 }
 </style>

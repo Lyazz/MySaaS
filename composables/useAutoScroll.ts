@@ -11,11 +11,21 @@ export function useAutoScroll(productsSource: Ref<any[]>, options = { speed: 1.5
         return [...products, ...products, ...products]
     })
 
+    const prefersReducedMotion = () =>
+        typeof window !== 'undefined'
+        && typeof window.matchMedia === 'function'
+        && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
     const startAutoScroll = () => {
         // Stop any existing interval
         stopAutoScroll()
 
         if (!scrollContainer.value) {
+            return
+        }
+
+        // Leave the rail as a plain scroller for readers who opted out of motion
+        if (prefersReducedMotion()) {
             return
         }
 

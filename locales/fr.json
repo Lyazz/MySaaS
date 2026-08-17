@@ -1028,7 +1028,8 @@
     "nav": {
       "home": "Accueil",
       "shop": "Boutique",
-      "contact": "Contact"
+      "contact": "Contact",
+      "categories": "Catégories"
     },
     "cart": {
       "label": "Panier",
@@ -1294,6 +1295,14 @@
     },
     "announcement": {
       "dismissAria": "Fermer l’annonce"
+    },
+    "templates": {
+      "wellness": {
+        "home": {
+          "curatedSelection": "Notre sélection",
+          "shopCollection": "Voir la collection"
+        }
+      }
     }
   },
   "admin": {

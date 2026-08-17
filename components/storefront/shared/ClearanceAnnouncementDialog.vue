@@ -1,4 +1,9 @@
 <script setup lang="ts">
+// Optional per-template hook. The dialog teleports to <body>, so it escapes any
+// theme wrapper; templates pass a class here to style it. Empty by default, so
+// templates that pass nothing render exactly as before.
+withDefaults(defineProps<{ rootClass?: string }>(), { rootClass: '' })
+
 const dialog = useClearanceAnnouncementDialog()
 const storeSettings = useState<any>('storeSettings')
 const { t } = useI18n({ useScope: 'global' })
@@ -35,6 +40,7 @@ onMounted(() => {
       <div
         v-if="dialog.isVisible.value"
         class="cl-backdrop fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-5"
+        :class="rootClass"
         @click.self="dialog.dismiss()"
       >
         <Transition name="cl-panel" appear>

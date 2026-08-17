@@ -36,7 +36,6 @@ const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/prod
 const currentSlide = ref(0)
 const hasMultipleSlides = computed(() => heroSlides.value.length > 1)
 const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length }
-const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
 // Auto-advance slider
 let slideInterval: any
@@ -77,44 +76,26 @@ const { data: categoriesData } = await useFetch<any[]>(categoriesUrl, {
     headers: useTenantApiHeaders()
 })
 
-// Map categories to view model with visual properties
-const categories = computed(() => {
-    if (!categoriesData.value) return []
-    
-    return categoriesData.value.map((cat, index) => {
-        // Simple visual pattern based on index
-        const colors = ['bg-orange-50', 'bg-blue-50', 'bg-green-50', 'bg-brand-50']
-        const colorClass = colors[index % colors.length]
-        
-        return {
-            ...cat,
-            itemCount: cat._count?.products || 0,
-            className: `${colorClass}`
-        }
-    })
-})
-
-// Check if we have any displayed products
-const displayedProducts = computed(() => {
-    if (props.featuredProducts && props.featuredProducts.length > 0) {
-        return props.featuredProducts
-    }
-    return [] 
-})
+const categories = computed(() =>
+    (categoriesData.value || []).map((cat) => ({
+        ...cat,
+        itemCount: cat._count?.products || 0
+    }))
+)
 </script>
 
 <template>
-  <div class="bg-stone-50 min-h-screen pb-24 font-wellness text-stone-700">
-    <!-- Hero Slider (Editorial Style) -->
-    <div class="relative w-full h-[600px] md:h-[700px] overflow-hidden group"
+  <div class="bg-wl-paper min-h-screen font-wellness text-wl-ink">
+    <!-- Hero: a paper label applied over the tenant's image -->
+    <div class="relative w-full h-[560px] md:h-[680px] overflow-hidden bg-wl-card"
       @touchstart.passive="pauseSlideAutoplay"
       @touchend.passive="resumeSlideAutoplay"
     >
       <!-- Slides -->
-      <div 
-        v-for="(slide, index) in heroSlides" 
+      <div
+        v-for="(slide, index) in heroSlides"
         :key="index"
-        class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
+        class="absolute inset-0 transition-opacity duration-700 ease-in-out"
         :class="index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'"
       >
         <img
@@ -122,140 +103,129 @@ const displayedProducts = computed(() => {
           class="w-full h-full object-cover"
           :alt="slide.title"
         >
-        <!-- Gradient Overlay -->
-        <div class="absolute inset-0 bg-black/20" /> 
-        
-        <!-- Gradient Overlay -->
-        <div class="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-stone-900/80 via-stone-900/40 to-transparent" />
-        
-        <!-- Content (Editorial Overlay) -->
-        <div class="absolute inset-0 flex items-end justify-start p-8 md:p-16">
-             <div 
-               class="max-w-xl w-full text-start transform transition-all duration-1000 delay-300"
-               :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
+        <!-- Content sits on its own stock, so contrast never depends on the photo -->
+        <div class="absolute inset-0 flex items-end justify-start p-4 sm:p-8 md:p-14">
+             <div
+               class="max-w-md w-full bg-wl-card border border-wl-rule p-7 sm:p-9 text-start transition-all duration-700 delay-150"
+               :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'"
              >
-                <div class="inline-flex items-center gap-2 mb-6">
-                    <span class="inline-block w-8 h-[2px] bg-brand-400"></span>
-                    <span class="text-brand-300 text-sm font-bold uppercase tracking-widest">{{ storefrontContent.home.welcomeTo(tenantName) }}</span>
+                <div class="flex items-center gap-3 mb-5">
+                    <span class="inline-block w-8 h-px bg-wl-ruleStrong"></span>
+                    <span class="wl-label text-wl-muted">{{ storefrontContent.home.welcomeTo(tenantName) }}</span>
                 </div>
-                
-                <h2 class="font-wellness text-5xl md:text-6xl lg:text-7xl text-white mb-6 leading-none drop-shadow-md">
+
+                <h2 class="wl-display text-[2.25rem] sm:text-5xl text-wl-ink mb-5 leading-[0.98]">
                   {{ slide.title }}
                 </h2>
-                
-                <p class="text-stone-100/90 text-lg md:text-xl font-light leading-relaxed mb-10 max-w-lg drop-shadow-sm">
+
+                <p class="text-wl-muted text-base leading-relaxed mb-8">
                   {{ slide.subtitle }}
                 </p>
 
                 <NuxtLink
                   :to="slideTo(slide.buttonHref)"
-                  class="group inline-flex items-center gap-3 px-8 py-4 bg-white text-stone-900 font-medium rounded-full hover:bg-brand-50 transition-all shadow-lg hover:shadow-xl hover:-translate-y-1"
+                  class="group/cta inline-flex items-center gap-3 px-8 py-4 bg-wl-ink text-wl-paper wl-label hover:bg-brand-700 transition-colors"
                 >
                   {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
-                  <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover/cta:translate-x-1" />
                 </NuxtLink>
              </div>
         </div>
       </div>
 
-      <!-- Navigation Sprinkles -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-10 end-10 z-20 flex space-x-3 rtl:space-x-reverse">
-        <button 
-          v-for="(slide, index) in heroSlides" 
-          :key="index" 
-          class="h-2 rounded-full transition-all duration-300 backdrop-blur-md"
-          :class="index === currentSlide ? 'bg-white w-12' : 'bg-white/30 w-3 hover:bg-white/60'"
+      <!-- Slide index, on its own chip so it stays legible over any photo -->
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 end-4 sm:end-8 md:end-14 z-20 flex items-center gap-2.5 rtl:flex-row-reverse bg-wl-card border border-wl-rule px-3 py-2.5">
+        <button
+          v-for="(slide, index) in heroSlides"
+          :key="index"
+          class="h-px transition-all duration-300"
+          :class="index === currentSlide ? 'bg-wl-ink w-8' : 'bg-wl-ruleStrong w-4 hover:bg-wl-muted'"
+          :aria-label="slide.title"
+          :aria-current="index === currentSlide"
           @click="currentSlide = index"
         />
       </div>
     </div>
 
-    <!-- Categories Section (Organic Cards) -->
-    <section v-if="sections.browseByCategory.enabled" class="py-20 bg-stone-100">
-      <div class="max-w-7xl mx-auto px-6">
-        <div class="text-center mb-12">
-            <h2 class="font-wellness text-3xl md:text-4xl text-stone-900 mb-3">{{ sections.browseByCategory.title }}</h2>
-            <p class="text-stone-500 font-light">{{ sections.browseByCategory.eyebrow }}</p>
+    <!-- Categories: specimen jars, each with its plate -->
+    <section v-if="sections.browseByCategory.enabled" class="py-20 md:py-24 bg-wl-paper">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="wl-ruled wl-ruled--start mb-10">
+            <h2 class="wl-display text-3xl md:text-[2.5rem] text-wl-ink leading-none flex-shrink-0">{{ sections.browseByCategory.title }}</h2>
+            <p class="wl-label text-wl-muted flex-shrink-0">{{ sections.browseByCategory.eyebrow }}</p>
         </div>
-         
-        <div class="relative w-full">
-           <!-- Scroll Controls -->
-           <div class="flex justify-end gap-2 mb-4 md:hidden">
-              <!-- Mobile arrows if needed, usually hiding scrollbar is enough -->
-           </div>
 
-           <div
-             class="flex gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 md:justify-center scrollbar-hide"
-           >
-             <NuxtLink 
-               v-for="(cat) in categories" 
-               :key="cat.slug" 
-               :to="`/category/${cat.slug}`"
-               class="snap-center flex-shrink-0 w-64 h-80 rounded-[4rem] relative overflow-hidden group hover:shadow-2xl transition-all duration-500"
-             >
-                <img
-                  v-if="cat.imageUrl"
-                  :src="cat.imageUrl"
-                  :alt="categoryDisplayTitle(cat)"
-                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                >
-                <div v-else class="w-full h-full bg-stone-200" />
-                
-                <!-- Overlay -->
-                <div class="absolute inset-0 bg-black/20 group-hover:bg-black/10 transition-colors" />
+        <div
+          class="flex gap-4 overflow-x-auto snap-x snap-mandatory pb-4 wl-scrollbar-hide"
+        >
+          <NuxtLink
+            v-for="(cat) in categories"
+            :key="cat.slug"
+            :to="`/category/${cat.slug}`"
+            class="snap-start flex-shrink-0 w-56 sm:w-64 group"
+          >
+            <div class="relative w-full h-72 overflow-hidden border border-wl-rule bg-wl-card">
+              <img
+                v-if="cat.imageUrl"
+                :src="cat.imageUrl"
+                :alt="categoryDisplayTitle(cat)"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
+              >
+              <div v-else class="w-full h-full bg-wl-card" />
+              <div class="absolute inset-0 bg-wl-ink/10 group-hover:bg-wl-ink/0 transition-colors duration-500" />
+            </div>
 
-                <!-- Label -->
-                <div class="absolute inset-x-0 bottom-0 p-6 text-center">
-                    <div class="bg-white/95 backdrop-blur px-6 py-4 rounded-3xl shadow-lg">
-                        <h3 class="font-wellness text-xl text-stone-900">{{ categoryDisplayTitle(cat) }}</h3>
-                        <p class="text-xs text-stone-500 mt-1 uppercase tracking-wider">{{ storefrontContent.common.productsCount(cat.itemCount) }}</p>
-                    </div>
-                </div>
-             </NuxtLink>
-           </div>
+            <!-- Plate -->
+            <div class="flex items-baseline justify-between gap-3 border-t border-wl-rule pt-2.5 mt-3">
+              <h3 class="wl-display-sm text-base text-wl-ink truncate">
+                <span class="wl-underline">{{ categoryDisplayTitle(cat) }}</span>
+              </h3>
+              <p class="wl-label wl-num text-wl-muted flex-shrink-0">{{ storefrontContent.common.productsCount(cat.itemCount) }}</p>
+            </div>
+          </NuxtLink>
         </div>
       </div>
     </section>
 
-    <!-- Featured Products (Clean Grid/Slide) -->
-    <section v-if="sections.newArrivals.enabled" class="py-24 bg-white">
+    <!-- Featured -->
+    <section v-if="sections.newArrivals.enabled" class="py-20 md:py-24 bg-wl-card border-t border-wl-rule">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex flex-col md:flex-row items-end justify-between mb-12 gap-6">
-          <div class="max-w-xl">
-             <span class="text-brand-700 text-sm font-bold uppercase tracking-widest mb-2 block">{{ t('storefront.templates.wellness.home.curatedSelection') }}</span>
-             <h2 class="font-wellness text-3xl md:text-4xl text-stone-900 leading-tight">
-               {{ sections.newArrivals.title }}
-             </h2>
+        <div class="mb-10">
+          <span class="wl-label text-wl-muted mb-3 block max-w-full">{{ t('storefront.templates.wellness.home.curatedSelection') }}</span>
+          <div class="wl-ruled wl-ruled--start">
+            <h2 class="wl-display text-3xl md:text-[2.5rem] text-wl-ink leading-none flex-shrink-0">
+              {{ sections.newArrivals.title }}
+            </h2>
+            <NuxtLink
+              to="/products"
+              class="hidden md:inline-flex items-center gap-2 wl-label text-wl-ink flex-shrink-0 group/all"
+            >
+              <span class="wl-underline">{{ t('storefront.templates.wellness.home.shopCollection') }}</span>
+              <Icon name="lucide:arrow-right" class="w-3.5 h-3.5 transition-transform group-hover/all:translate-x-1" />
+            </NuxtLink>
           </div>
-          
-          <NuxtLink
-            to="/products"
-            class="hidden md:inline-flex items-center gap-2 text-stone-500 hover:text-brand-700 transition-colors border-b border-transparent hover:border-brand-700 pb-0.5"
-          >
-            {{ t('storefront.templates.wellness.home.shopCollection') }} <Icon name="lucide:arrow-right" class="w-4 h-4" />
-          </NuxtLink>
         </div>
 
         <!-- Horizontal Scrolling Container -->
         <div
           ref="featuredScrollContainer"
-          class="flex gap-8 overflow-x-auto pb-12 scrollbar-hide"
+          class="flex gap-6 overflow-x-auto pb-4 wl-scrollbar-hide"
           @mouseenter="isHoveringFeatured = true"
           @mouseleave="isHoveringFeatured = false"
         >
           <div
             v-for="(product, index) in featuredInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-1rem)] sm:w-72 md:w-80"
+            class="flex-shrink-0 w-[calc(60%-0.75rem)] sm:w-64 md:w-72"
           >
             <ProductCard :product="product" />
           </div>
         </div>
-            
-        <div class="mt-8 text-center md:hidden">
+
+        <div class="mt-10 md:hidden">
           <NuxtLink
             to="/products"
-            class="btn-outline"
+            class="w-full inline-flex items-center justify-center px-8 py-4 border border-wl-ink text-wl-ink wl-label hover:bg-wl-ink hover:text-wl-paper transition-colors"
           >
             View all products
           </NuxtLink>
@@ -263,33 +233,34 @@ const displayedProducts = computed(() => {
       </div>
     </section>
 
-    <!-- Best Sellers (Darker Warm Background) -->
-    <section v-if="sections.bestSellers.enabled" class="py-24 bg-[#EBEBE8]">
+    <!-- Best Sellers -->
+    <section v-if="sections.bestSellers.enabled" class="py-20 md:py-24 bg-wl-paper border-t border-wl-rule">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
-           <span class="w-12 h-1 bg-brand-700 block mx-auto mb-6 rounded-full" />
-           <h2 class="font-wellness text-3xl md:text-5xl text-stone-900 mb-6">
+        <div class="mb-10">
+          <div class="wl-ruled wl-ruled--start mb-4">
+            <h2 class="wl-display text-3xl md:text-[2.5rem] text-wl-ink leading-none flex-shrink-0">
               {{ sections.bestSellers.title }}
             </h2>
-            <p class="text-stone-600 max-w-2xl mx-auto text-lg font-light leading-relaxed">
-               {{ sections.bestSellers.eyebrow || 'Our most loved remedies and rituals, chosen by you.' }}
-            </p>
+          </div>
+          <p class="text-wl-muted max-w-xl leading-relaxed">
+             {{ sections.bestSellers.eyebrow || 'Our most loved remedies and rituals, chosen by you.' }}
+          </p>
         </div>
 
-        <div v-if="bestSellersDisplayed.length === 0" class="text-center text-stone-500 py-12">
+        <div v-if="bestSellersDisplayed.length === 0" class="border border-wl-rule bg-wl-card py-16 text-center wl-label text-wl-muted">
           Coming soon.
         </div>
 
-        <div v-else 
+        <div v-else
           ref="bestSellersScrollContainer"
-          class="flex gap-8 overflow-x-auto pb-12 scrollbar-hide"
+          class="flex gap-6 overflow-x-auto pb-4 wl-scrollbar-hide"
           @mouseenter="isHoveringBestSellers = true"
           @mouseleave="isHoveringBestSellers = false"
         >
           <div
             v-for="(product, index) in bestSellersInfiniteList"
             :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-1rem)] sm:w-72 md:w-80"
+            class="flex-shrink-0 w-[calc(60%-0.75rem)] sm:w-64 md:w-72"
           >
             <ProductCard :product="product" />
            </div>

@@ -5,7 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   test('builds notification stream URL from API base URL', () {
     final service = NotificationService(
-      ApiService(baseUrl: 'https://tenant.swekly.com/api'),
+      () => ApiService(baseUrl: 'https://tenant.swekly.com/api'),
     );
 
     expect(
@@ -16,7 +16,7 @@ void main() {
 
   test('opens explicit notification route', () {
     final service = NotificationService(
-      ApiService(baseUrl: 'https://tenant.swekly.com/api'),
+      () => ApiService(baseUrl: 'https://tenant.swekly.com/api'),
     );
     final openedRoutes = <String>[];
     service.setRouteHandler(openedRoutes.add);
@@ -31,7 +31,7 @@ void main() {
 
   test('falls back to order detail route when route is missing', () {
     final service = NotificationService(
-      ApiService(baseUrl: 'https://tenant.swekly.com/api'),
+      () => ApiService(baseUrl: 'https://tenant.swekly.com/api'),
     );
     final openedRoutes = <String>[];
     service.setRouteHandler(openedRoutes.add);
@@ -44,7 +44,7 @@ void main() {
   test('incoming SSE event displays a local notification payload', () async {
     final shown = <Map<String, Object>>[];
     final service = NotificationService(
-      ApiService(baseUrl: 'https://tenant.swekly.com/api'),
+      () => ApiService(baseUrl: 'https://tenant.swekly.com/api'),
       localNotificationSink: (title, body, data) async {
         shown.add({'title': title, 'body': body, 'data': data});
       },

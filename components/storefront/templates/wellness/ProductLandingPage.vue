@@ -96,17 +96,17 @@ onUnmounted(() => {
 
 <template>
   <div
-    class="bg-slate-50 min-h-screen py-6 font-wellness pb-24 md:pb-10 overflow-x-hidden w-full"
+    class="bg-wl-paper min-h-screen py-6 font-wellness pb-24 md:pb-10 overflow-x-hidden w-full text-wl-ink"
   >
     <!-- Description Section (Raw & Full Width & No Margins) -->
     <div class="w-full mb-8 animate-fade-in-up">
       <SafeRichText
         v-if="product?.description"
-        class="prose prose-lg md:prose-xl prose-img:rounded-xl prose-img:w-full prose-img:shadow-sm max-w-none text-slate-800"
+        class="prose prose-stone prose-lg md:prose-xl prose-img:w-full max-w-none text-wl-ink"
         :html="product.description"
       />
       <!-- Fallback Description -->
-      <p v-else class="text-slate-600 text-lg leading-relaxed px-4">
+      <p v-else class="text-wl-muted text-lg leading-relaxed px-4">
         Experience premium quality with our latest collection.
       </p>
     </div>
@@ -146,20 +146,20 @@ onUnmounted(() => {
     <!-- Mobile Sticky Bottom Bar (Optional, for Landing Pages) -->
     <div
       v-if="cartEnabled"
-      class="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-slate-100 md:hidden z-40 flex items-center justify-between shadow-[0_-5px_15px_rgba(0,0,0,0.05)]"
+      class="fixed bottom-0 left-0 w-full p-4 bg-wl-card border-t border-wl-ruleStrong md:hidden z-40 flex items-center justify-between"
     >
       <div class="flex flex-col">
-        <span class="text-xs text-slate-500 font-medium">{{
+        <span class="wl-label text-wl-muted">{{
           storefrontContent.productForm.totalPrice
         }}</span>
-        <span class="font-bold text-brand-600 text-lg">{{
+        <span class="wl-num wl-display-sm text-wl-ink text-lg">{{
           formatPrice(Number(product?.price || 0))
         }}</span>
       </div>
       <!-- Scroll to Form or Add to Cart? For simplicity, scroll to top or just have a CTA -->
       <button
         onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-        class="bg-brand-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-brand-700 transition-colors shadow-lg shadow-brand-500/20"
+        class="bg-wl-ink text-wl-paper px-8 py-3.5 wl-label hover:bg-brand-700 transition-colors"
       >
         {{ storefrontContent.actions.orderNow }}
       </button>

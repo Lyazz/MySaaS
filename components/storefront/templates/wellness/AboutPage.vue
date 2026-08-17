@@ -9,14 +9,14 @@ useTenantSeo({
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto px-4 py-12">
-    <h1 class="text-4xl font-wellness font-bold text-slate-900 mb-4">
+  <div class="bg-wl-paper font-wellness text-wl-ink"><div class="max-w-3xl mx-auto px-4 py-16">
+    <h1 class="wl-display text-4xl text-wl-ink mb-5">
       About {{ tenantName }}
     </h1>
-    <p class="text-slate-600 leading-relaxed">
+    <p class="text-wl-muted leading-relaxed">
       Welcome to {{ tenantName }}. This page is part of your tenant storefront template and can be customized from the
       onboarding wizard.
     </p>
-  </div>
+  </div></div>
 </template>
 

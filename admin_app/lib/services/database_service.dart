@@ -3,10 +3,90 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path/path.dart';
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
 import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import 'tenant_mode_service.dart';
+
+/// `sqflite_sqlcipher`'s `openDatabase`/`getDatabasesPath`/`deleteDatabase`
+/// always go through a hardcoded method-channel factory (see
+/// `factory_sql_cipher_impl.dart` — its `databaseFactory` getter has no
+/// setter, so it can't be swapped globally like plain `sqflite` allows).
+/// That factory only has native implementations for Android, iOS and macOS.
+/// On Windows there is no plugin behind the channel, so every call throws
+/// `MissingPluginException`. We route Windows through the FFI factory
+/// directly at each call site instead.
+///
+/// NOTE: the FFI factory wraps plain SQLite, not SQLCipher — the encryption
+/// key is silently unused on Windows, so the local database is **not
+/// encrypted at rest there** (Android/iOS/macOS are unaffected). This is a
+/// deliberate, tracked gap — see admin_app/CLAUDE.md "Storage and Security".
+bool _ffiInitialized = false;
+
+void _ensureFfiInitialized() {
+  if (_ffiInitialized) return;
+  sqflite_ffi.sqfliteFfiInit();
+  _ffiInitialized = true;
+}
+
+Future<String> _getDatabasesPathCrossPlatform() {
+  if (Platform.isWindows) {
+    _ensureFfiInitialized();
+    return sqflite_ffi.databaseFactoryFfi.getDatabasesPath();
+  }
+  return getDatabasesPath();
+}
+
+Future<Database> _openDatabaseCrossPlatform(
+  String path, {
+  int? version,
+  OnDatabaseConfigureFn? onConfigure,
+  OnDatabaseCreateFn? onCreate,
+  OnDatabaseVersionChangeFn? onUpgrade,
+  OnDatabaseVersionChangeFn? onDowngrade,
+  OnDatabaseOpenFn? onOpen,
+  String? password,
+  bool readOnly = false,
+  bool singleInstance = true,
+}) {
+  if (Platform.isWindows) {
+    _ensureFfiInitialized();
+    return sqflite_ffi.databaseFactoryFfi.openDatabase(
+      path,
+      options: sqflite_ffi.OpenDatabaseOptions(
+        version: version,
+        onConfigure: onConfigure,
+        onCreate: onCreate,
+        onUpgrade: onUpgrade,
+        onDowngrade: onDowngrade,
+        onOpen: onOpen,
+        readOnly: readOnly,
+        singleInstance: singleInstance,
+      ),
+    );
+  }
+  return openDatabase(
+    path,
+    version: version,
+    onConfigure: onConfigure,
+    onCreate: onCreate,
+    onUpgrade: onUpgrade,
+    onDowngrade: onDowngrade,
+    onOpen: onOpen,
+    password: password,
+    readOnly: readOnly,
+    singleInstance: singleInstance,
+  );
+}
+
+Future<void> _deleteDatabaseCrossPlatform(String path) {
+  if (Platform.isWindows) {
+    _ensureFfiInitialized();
+    return sqflite_ffi.databaseFactoryFfi.deleteDatabase(path);
+  }
+  return deleteDatabase(path);
+}
 
 typedef DatabaseOpener =
     Future<Database> Function(
@@ -37,7 +117,8 @@ class DatabaseService {
   static const _workspaceDbDirectory = 'tenant_workspace_dbs';
 
   @visibleForTesting
-  static Future<String> Function() databasesPathProvider = getDatabasesPath;
+  static Future<String> Function() databasesPathProvider =
+      _getDatabasesPathCrossPlatform;
 
   @visibleForTesting
   static DatabaseOpener databaseOpener = _defaultDatabaseOpener;
@@ -94,7 +175,7 @@ class DatabaseService {
     bool readOnly = false,
     bool singleInstance = true,
   }) {
-    return openDatabase(
+    return _openDatabaseCrossPlatform(
       path,
       version: version,
       onConfigure: onConfigure,
@@ -983,7 +1064,7 @@ class DatabaseService {
       _openNamespaceKey = null;
     }
     final path = await _resolveDatabasePath(namespaceKey);
-    await deleteDatabase(path);
+    await _deleteDatabaseCrossPlatform(path);
     await _secureStorage.delete(key: _encryptionKeyForNamespace(namespaceKey));
   }
 
@@ -1004,7 +1085,7 @@ class DatabaseService {
 
   @visibleForTesting
   static void resetTestOverrides() {
-    databasesPathProvider = getDatabasesPath;
+    databasesPathProvider = _getDatabasesPathCrossPlatform;
     databaseOpener = _defaultDatabaseOpener;
     nowProvider = DateTime.now;
   }

@@ -22,11 +22,11 @@ const hideOptionalAddress = computed(() => storeSettings.value?.hideOptionalAddr
 const availableProviders = computed(() => {
   const allowed = storeSettings.value?.allowedDeliveryProviders || ['SELF']
   const providerMeta = {
-    MAYSTRO: { label: 'Maystro', icon: 'lucide:truck', color: 'emerald' },
-    YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
-    ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
-    ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
-    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'lime' }
+    MAYSTRO: { label: 'Maystro', icon: 'lucide:truck' },
+    YALIDINE: { label: 'Yalidine', icon: 'lucide:package' },
+    ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send' },
+    ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap' },
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike' }
   }
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
@@ -58,7 +58,6 @@ const deliveryOptions = computed(() => {
       mode: 'home',
       modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery,
       icon: provider.icon,
-      color: provider.color,
       price: homePrice,
       description: storefrontContent.value.checkout.delivery.description.homeDelivery
     })
@@ -71,7 +70,6 @@ const deliveryOptions = computed(() => {
       mode: 'pickup',
       modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint,
       icon: provider.icon,
-      color: provider.color,
       price: officePrice,
       description: storefrontContent.value.checkout.delivery.description.pickupPoint
     })
@@ -86,7 +84,6 @@ const deliveryOptions = computed(() => {
       mode: 'store',
       modeLabel: storefrontContent.value.checkout.delivery.mode.storePickup,
       icon: 'lucide:store',
-      color: 'green',
       price: 'FREE',
       description: storefrontContent.value.checkout.delivery.description.storePickup
     })
@@ -315,26 +312,28 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <div class="min-h-screen bg-stone-50 py-12 font-wellness text-stone-700">
+  <div class="min-h-screen bg-wl-paper py-12 md:py-16 font-wellness text-wl-ink">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
+
       <!-- Loading State -->
-      <div v-if="submitting" class="fixed inset-0 bg-stone-50/80 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
-         <div class="w-16 h-16 border-4 border-stone-200 border-t-brand-600 rounded-full animate-spin mb-4"></div>
-         <p class="text-stone-600 font-wellness text-lg animate-pulse">{{ storefrontContent.checkout.actions.placingOrder }}</p>
+      <div v-if="submitting" class="fixed inset-0 bg-wl-paper/90 backdrop-blur-sm z-50 flex flex-col items-center justify-center">
+         <div class="w-10 h-10 border border-wl-rule border-t-wl-ink rounded-full animate-spin mb-5"></div>
+         <p class="wl-label text-wl-muted">{{ storefrontContent.checkout.actions.placingOrder }}</p>
       </div>
 
       <!-- Header -->
-      <div class="mb-10 text-center">
-        <h1 class="text-4xl font-wellness font-bold text-stone-900 mb-2">
-          {{ storefrontContent.checkout.title }}
-        </h1>
-        <p class="text-stone-500">
-          {{ storefrontContent.checkout.secureTransaction }}
-        </p>
+      <div class="mb-10">
+        <div class="wl-ruled wl-ruled--start">
+          <h1 class="wl-display text-3xl md:text-[2.5rem] text-wl-ink leading-none flex-shrink-0">
+            {{ storefrontContent.checkout.title }}
+          </h1>
+          <p class="wl-label text-wl-muted flex-shrink-0 hidden sm:block">
+            {{ storefrontContent.checkout.secureTransaction }}
+          </p>
+        </div>
         <div
           v-if="!cartEnabled"
-          class="mt-4 inline-block rounded-full border border-amber-200 bg-amber-50 text-amber-900 text-sm px-6 py-2"
+          class="mt-5 inline-block border border-amber-300 bg-amber-50 text-amber-900 wl-label px-5 py-2.5"
         >
           {{ storefrontContent.checkout.disabled }}
         </div>
@@ -347,54 +346,54 @@ async function handleSubmit() {
           <form @submit.prevent="handleSubmit" class="space-y-8">
             
             <!-- Personal Info -->
-            <div class="bg-white rounded-[2rem] shadow-sm border border-stone-100 p-8">
-              <h2 class="text-xl font-wellness text-stone-900 mb-6 flex items-center gap-3">
-                 <span class="flex items-center justify-center w-8 h-8 rounded-full bg-stone-100 text-stone-600 text-sm font-bold">1</span>
+            <div class="bg-wl-card border border-wl-rule p-6 sm:p-8">
+              <h2 class="wl-label text-wl-ink mb-6 flex items-center gap-3 pb-4 border-b border-wl-rule">
+                 <span class="wl-num flex items-center justify-center w-6 h-6 border border-wl-ruleStrong text-wl-muted">1</span>
                  Contact Information
               </h2>
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
                  <div class="col-span-2 md:col-span-1 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.fullName.label }}</label>
                     <input
                       v-model="form.fullName"
                       type="text"
-                      class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                      class="w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                     :placeholder="storefrontContent.checkout.form.fullName.placeholder"
                     >
                  </div>
                  <div class="col-span-2 md:col-span-1 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ms-1">{{ storefrontContent.checkout.form.phone.label }}</label>
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.phone.label }}</label>
                     <input
                       v-model="form.phone"
                       type="tel"
-                      class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                      class="w-full h-12 border border-wl-rule bg-wl-paper px-4 wl-num text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                     :placeholder="storefrontContent.checkout.form.phone.placeholder"
                     >
                  </div>
                  <div class="col-span-2 md:col-span-1 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                     <WilayaField
                         v-model="form.wilaya"
-                        input-class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
+                        input-class="w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none appearance-none cursor-pointer"
                         :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
                       />
                  </div>
-	                 <div class="col-span-2 md:col-span-1 space-y-2">
-	                    <label class="block text-sm font-medium text-stone-700 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
-	                    <CommuneField
-	                      v-model="form.commune"
-	                      :wilaya-code="form.wilaya"
-	                      :placeholder="storefrontContent.checkout.form.commune.placeholder"
-	                      :input-class="'w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
-	                      :select-class="'w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
-	                    />
-	                 </div>
+                 <div class="col-span-2 md:col-span-1 space-y-2">
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.commune.label }}</label>
+                    <CommuneField
+                      v-model="form.commune"
+                      :wilaya-code="form.wilaya"
+                      :placeholder="storefrontContent.checkout.form.commune.placeholder"
+                      :input-class="'w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none'"
+                      :select-class="'w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none'"
+                    />
+                 </div>
                  <div v-if="!hideOptionalAddress" class="col-span-2 space-y-2">
-                    <label class="block text-sm font-medium text-stone-700 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
+                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.address.label }}</label>
                     <input
                       v-model="form.address"
                       type="text"
-                      class="w-full h-12 rounded-xl border border-stone-200 bg-stone-50 px-4 text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                      class="w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                     :placeholder="storefrontContent.checkout.form.address.placeholder"
                     >
                  </div>
@@ -402,87 +401,84 @@ async function handleSubmit() {
             </div>
 
             <!-- Delivery Options -->
-            <div v-if="form.wilaya && form.commune" class="bg-white rounded-[2rem] shadow-sm border border-stone-100 p-8">
-               <h2 class="text-xl font-wellness text-stone-900 mb-6 flex items-center gap-3">
-                 <span class="flex items-center justify-center w-8 h-8 rounded-full bg-stone-100 text-stone-600 text-sm font-bold">2</span>
+            <div v-if="form.wilaya && form.commune" class="bg-wl-card border border-wl-rule p-6 sm:p-8">
+               <h2 class="wl-label text-wl-ink mb-6 flex items-center gap-3 pb-4 border-b border-wl-rule">
+                 <span class="wl-num flex items-center justify-center w-6 h-6 border border-wl-ruleStrong text-wl-muted">2</span>
                  {{ storefrontContent.checkout.sections.deliveryOptions }}
               </h2>
-               <div class="space-y-4">
+               <div class="-space-y-px">
                   <div
                     v-for="option in deliveryOptions"
                     :key="option.id"
-                    class="cursor-pointer relative rounded-2xl p-4 border transition-all duration-300 group hover:shadow-md"
-                    :class="form.selectedDeliveryOption === option.id 
-                      ? 'border-brand-500 bg-brand-50/30' 
-                      : 'border-stone-200 hover:border-brand-300 bg-white'"
+                    class="cursor-pointer relative p-4 border transition-colors duration-200 group"
+                    :class="form.selectedDeliveryOption === option.id
+                      ? 'border-wl-ink bg-wl-paper z-10'
+                      : 'border-wl-rule hover:border-wl-ruleStrong bg-transparent'"
                     @click="form.selectedDeliveryOption = option.id"
                   >
                     <div class="flex items-center gap-4">
                        <!-- Icon -->
-                       <div 
-                         class="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
-                         :class="form.selectedDeliveryOption === option.id ? `bg-${option.color}-100 text-${option.color}-700` : 'bg-stone-100 text-stone-400 group-hover:text-stone-600'"
+                       <div
+                         class="w-10 h-10 border flex items-center justify-center flex-shrink-0 transition-colors duration-200"
+                         :class="form.selectedDeliveryOption === option.id ? 'border-wl-ink bg-wl-ink text-wl-paper' : 'border-wl-rule text-wl-muted'"
                        >
-                         <Icon :name="option.icon" class="w-6 h-6" />
+                         <Icon :name="option.icon" class="w-4 h-4" />
                        </div>
 
                        <!-- Details -->
                        <div class="flex-1 min-w-0">
-                          <div class="flex items-center gap-2 mb-1">
-                             <h4 class="font-bold text-stone-900 text-sm">{{ option.providerLabel }}</h4>
-                             <span 
-                               class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                               :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'"
-                             >
+                          <div class="flex items-center gap-2.5 mb-1">
+                             <h4 class="wl-display-sm text-wl-ink text-base">{{ option.providerLabel }}</h4>
+                             <span class="wl-label text-wl-muted">
                                {{ option.modeLabel }}
                              </span>
                           </div>
-                          <p class="text-xs text-stone-500">{{ option.description }}</p>
+                          <p class="text-xs text-wl-muted">{{ option.description }}</p>
                        </div>
 
                        <!-- Price & Check -->
-                       <div class="flex items-center gap-4">
-                          <div class="font-bold text-brand-700 text-sm">
+                       <div class="flex items-center gap-4 flex-shrink-0">
+                          <div class="wl-num font-medium text-wl-ink text-sm">
                              {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                           </div>
                           <div
-                            class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all"
-                            :class="form.selectedDeliveryOption === option.id ? 'border-brand-600 bg-brand-600' : 'border-stone-300'"
+                            class="w-5 h-5 border flex items-center justify-center transition-colors"
+                            :class="form.selectedDeliveryOption === option.id ? 'border-wl-ink bg-wl-ink' : 'border-wl-ruleStrong'"
                           >
-                             <Icon v-if="form.selectedDeliveryOption === option.id" name="lucide:check" class="w-3.5 h-3.5 text-white" />
+                             <Icon v-if="form.selectedDeliveryOption === option.id" name="lucide:check" class="w-3 h-3 text-wl-paper" />
                           </div>
                        </div>
                     </div>
-                    <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)" class="mt-3 pt-3 border-t border-stone-100">
-                      <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-stone-500">
+                    <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)" class="mt-3 pt-3 border-t border-wl-rule">
+                      <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-wl-muted">
                         <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
                         Loading...
                       </div>
                       <template v-else>
-                        <div v-if="stopDeskName" class="flex items-center gap-2 text-xs text-stone-400">
-                          <Icon name="lucide:building-2" class="w-3 h-3 text-stone-300 flex-shrink-0" />
+                        <div v-if="stopDeskName" class="flex items-center gap-2 text-xs text-wl-muted">
+                          <Icon name="lucide:building-2" class="w-3 h-3 flex-shrink-0" />
                           <span>{{ stopDeskName }}</span>
                         </div>
                         <div v-if="form.pickupPoint" class="flex items-center gap-2 text-xs mt-1">
-                          <Icon name="lucide:map-pin" class="w-3 h-3 text-brand-600" />
-                          <span class="font-semibold text-stone-800">{{ form.pickupPoint }}</span>
+                          <Icon name="lucide:map-pin" class="w-3 h-3 text-wl-ink" />
+                          <span class="font-medium text-wl-ink">{{ form.pickupPoint }}</span>
                         </div>
                       </template>
-                      <p v-if="pickupPointsError" class="text-xs text-amber-600 mt-1">{{ pickupPointsError }}</p>
+                      <p v-if="pickupPointsError" class="text-xs text-amber-800 mt-1">{{ pickupPointsError }}</p>
                     </div>
                   </div>
                </div>
             </div>
-            <div v-else class="bg-white rounded-[2rem] shadow-sm border border-stone-100 p-8 text-center text-sm text-stone-400">
-              <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-stone-300" />
+            <div v-else class="bg-wl-card border border-wl-rule p-8 text-center text-sm text-wl-muted">
+              <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-3 text-wl-muted" />
               {{ storefrontContent.checkout.help.deliveryOptions }}
             </div>
 
             <div
               v-if="errorMessage"
-              class="rounded-xl border border-red-200 bg-red-50 text-red-800 text-sm px-4 py-3 flex items-start gap-3"
+              class="border border-red-300 bg-red-50 text-red-900 text-sm px-4 py-3.5 flex items-start gap-3"
             >
-              <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <Icon name="lucide:alert-circle" class="w-4 h-4 text-red-700 flex-shrink-0 mt-0.5" />
               <span class="font-medium">{{ errorMessage }}</span>
             </div>
 
@@ -490,17 +486,17 @@ async function handleSubmit() {
             <button
                type="submit"
                :disabled="submitting || cartStore.items.length === 0 || !hasRequiredFields"
-               class="w-full flex items-center justify-center rounded-full border border-transparent bg-stone-900 px-8 py-5 text-base font-bold text-white shadow-lg hover:bg-brand-700 hover:shadow-xl focus:outline-none focus:ring-2 focus:ring-brand-500 focus:ring-offset-2 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed hover:-translate-y-0.5"
+               class="w-full flex items-center justify-center bg-wl-ink px-8 py-5 wl-label text-wl-paper hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wl-ink focus-visible:ring-offset-2 focus-visible:ring-offset-wl-paper transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
                <span v-if="submitting" class="flex items-center gap-2">
-                 <Icon name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+                 <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin" />
                  {{ storefrontContent.checkout.actions.placingOrder }}
                </span>
-               <span v-else>
-                 {{ storefrontContent.checkout.actions.placeOrder }} • {{ formatCurrency(grandTotal) }}
+               <span v-else class="flex items-center gap-2">
+                 {{ storefrontContent.checkout.actions.placeOrder }} <span class="text-wl-paper/50">•</span> <span class="wl-num">{{ formatCurrency(grandTotal) }}</span>
                </span>
             </button>
-            <p class="text-center text-xs text-stone-400 mt-2 flex items-center justify-center gap-1">
+            <p class="text-center wl-label text-wl-muted mt-3 flex items-center justify-center gap-1.5">
                <Icon name="lucide:lock" class="w-3 h-3" />
                {{ storefrontContent.checkout.secureTransaction }}
             </p>
@@ -508,74 +504,72 @@ async function handleSubmit() {
         </section>
 
         <!-- Order Summary Sidebar -->
-        <section class="mt-16 bg-white rounded-[2.5rem] shadow-lg border border-stone-100 px-8 py-10 lg:col-span-5 lg:mt-0 lg:sticky lg:top-8">
-           <div class="flex items-center justify-between mb-8 pb-6 border-b border-stone-100">
-             <h2 class="text-2xl font-wellness text-stone-900">{{ storefrontContent.checkout.orderSummaryTitle }}</h2>
-             <span class="bg-brand-50 text-brand-700 px-3 py-1 rounded-full text-sm font-bold">
+        <section class="mt-12 bg-wl-card border border-wl-rule px-6 sm:px-7 py-7 lg:col-span-5 lg:mt-0 lg:sticky lg:top-24">
+           <div class="flex items-center justify-between gap-3 mb-6 pb-4 border-b border-wl-rule">
+             <h2 class="wl-label text-wl-ink">{{ storefrontContent.checkout.sections.orderSummary }}</h2>
+             <span class="wl-label wl-num text-wl-muted">
                {{ storefrontContent.checkout.itemsInCart(cartStore.itemCount) }}
              </span>
            </div>
 
-           <ul role="list" class="space-y-6 mb-8 max-h-96 overflow-y-auto pe-2 scrollbar-thin scrollbar-thumb-stone-200">
-              <li v-for="item in cartStore.items" :key="item.variantId" class="flex py-2">
-                 <div class="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl border border-stone-100 bg-stone-50">
+           <ul role="list" class="mb-6 max-h-96 overflow-y-auto">
+              <li v-for="item in cartStore.items" :key="item.variantId" class="flex py-4 border-b border-wl-rule/60 last:border-0">
+                 <div class="h-16 w-16 flex-shrink-0 overflow-hidden border border-wl-rule bg-wl-paper">
                     <img :src="item.image" :alt="item.title" class="h-full w-full object-cover object-center">
                  </div>
-                 <div class="ms-4 flex flex-1 flex-col">
+                 <div class="ms-4 flex flex-1 flex-col min-w-0">
                     <div>
-                       <div class="flex justify-between text-base font-medium text-stone-900">
-                          <h3 class="line-clamp-1 me-2 px-1">{{ item.title }}</h3>
-                          <p class="font-wellness text-sm">{{ formatCurrency(item.price) }}</p>
+                       <div class="flex justify-between gap-3 text-wl-ink">
+                          <h3 class="wl-display-sm text-sm line-clamp-1">{{ item.title }}</h3>
+                          <p class="wl-num text-sm flex-shrink-0">{{ formatCurrency(item.price) }}</p>
                        </div>
-                       <p class="mt-1 text-sm text-stone-500">{{ item.variantName || storefrontContent.cart.item.standardItem }}</p>
+                       <p class="mt-1 wl-label text-wl-muted">{{ item.variantName || storefrontContent.cart.item.standardItem }}</p>
                     </div>
-                    <div class="flex flex-1 items-end justify-between text-sm">
-                       <p class="text-stone-500">{{ storefrontContent.checkout.summary.quantityShort }} {{ item.quantity }}</p>
+                    <div class="flex flex-1 items-end justify-between">
+                       <p class="wl-label wl-num text-wl-muted">{{ storefrontContent.checkout.summary.quantityShort }} {{ item.quantity }}</p>
                     </div>
                  </div>
               </li>
            </ul>
 
            <!-- Coupon -->
-            <div class="bg-stone-50 p-4 rounded-xl border border-stone-200 mb-6">
-              <div class="flex justify-between items-center mb-2">
-                <div class="flex items-center gap-2">
-                  <Icon name="lucide:ticket" class="w-4 h-4 text-brand-600" />
-                  <span class="text-sm font-medium text-stone-700">{{ storefrontContent.checkout.coupon.title }}</span>
-                </div>
+            <div class="border-t border-wl-rule pt-5 mb-5">
+              <div class="flex items-center gap-2 mb-2.5">
+                <Icon name="lucide:ticket" class="w-3.5 h-3.5 text-wl-muted" />
+                <span class="wl-label text-wl-muted">{{ storefrontContent.checkout.coupon.title }}</span>
               </div>
-              <div class="flex gap-2">
+              <div class="flex">
                 <input
                   v-model="couponCode"
                   type="text"
                   :placeholder="storefrontContent.checkout.coupon.placeholder"
-                  class="flex-1 h-10 rounded-lg border border-stone-200 bg-white px-3 text-sm text-stone-900 placeholder:text-stone-400 focus:border-brand-500 focus:ring-1 focus:ring-brand-500 transition-all outline-none"
+                  class="flex-1 min-w-0 h-11 border border-wl-rule bg-wl-paper px-3 text-sm text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                 >
-                <button class="px-4 h-10 bg-stone-800 hover:bg-brand-700 text-white font-medium text-sm rounded-lg transition-all">
+                <button class="px-5 h-11 bg-wl-ink hover:bg-brand-700 text-wl-paper wl-label transition-colors flex-shrink-0">
                   {{ storefrontContent.actions.apply }}
                 </button>
               </div>
             </div>
 
-           <div class="border-t border-stone-100 pt-6 space-y-4">
-              <div class="flex items-center justify-between text-sm">
-                 <dt class="text-stone-600">{{ storefrontContent.cart.summary.subtotal }}</dt>
-                 <dd class="font-medium text-stone-900">{{ formatCurrency(cartStore.total) }}</dd>
+           <div class="border-t border-wl-rule pt-5 space-y-3.5">
+              <div class="flex items-center justify-between gap-4 text-sm">
+                 <dt class="text-wl-muted">{{ storefrontContent.cart.summary.subtotal }}</dt>
+                 <dd class="wl-num font-medium text-wl-ink">{{ formatCurrency(cartStore.total) }}</dd>
               </div>
-              <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between text-sm">
-                 <dt class="text-amber-700 font-medium">{{ t('storefront.clearance.discountLine') }}</dt>
-                 <dd class="font-medium text-amber-700">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+              <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between gap-4 text-sm">
+                 <dt class="text-amber-800 font-medium">{{ t('storefront.clearance.discountLine') }}</dt>
+                 <dd class="wl-num font-medium text-amber-800">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
               </div>
-              <div v-if="selectedDelivery" class="flex items-center justify-between text-sm">
-                 <dt class="text-stone-600 flex items-center gap-1">
+              <div v-if="selectedDelivery" class="flex items-center justify-between gap-4 text-sm">
+                 <dt class="text-wl-muted flex items-baseline gap-1.5 min-w-0">
                    Shipping
-                   <span class="text-xs text-stone-400">({{ selectedDelivery.providerLabel }})</span>
+                   <span class="wl-label text-wl-muted/70 truncate">{{ selectedDelivery.providerLabel }}</span>
                  </dt>
-                 <dd class="font-medium text-brand-700">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</dd>
+                 <dd class="wl-num font-medium text-wl-ink flex-shrink-0">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</dd>
               </div>
-              <div class="flex items-center justify-between border-t border-stone-100 pt-4">
-                 <dt class="text-xl font-wellness text-stone-900">{{ storefrontContent.cart.summary.total }}</dt>
-                 <dd class="text-xl font-wellness text-stone-900">{{ formatCurrency(grandTotal) }}</dd>
+              <div class="flex items-baseline justify-between gap-4 border-t border-wl-ruleStrong pt-4 mt-4">
+                 <dt class="wl-label text-wl-ink">{{ storefrontContent.cart.summary.total }}</dt>
+                 <dd class="wl-num wl-display text-2xl text-wl-ink">{{ formatCurrency(grandTotal) }}</dd>
               </div>
            </div>
         </section>

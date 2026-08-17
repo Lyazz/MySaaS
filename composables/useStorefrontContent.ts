@@ -43,7 +43,8 @@ export function useStorefrontContent() {
     nav: {
       home: i18n.t('storefront.nav.home'),
       shop: i18n.t('storefront.nav.shop'),
-      contact: i18n.t('storefront.nav.contact')
+      contact: i18n.t('storefront.nav.contact'),
+      categories: i18n.t('storefront.nav.categories')
     },
     cart: {
       label: i18n.t('storefront.cart.label'),
@@ -77,7 +78,6 @@ export function useStorefrontContent() {
     },
     checkout: {
       title: i18n.t('storefront.checkout.title'),
-      orderSummaryTitle: i18n.t('storefront.checkout.orderSummaryTitle'),
       disabled: i18n.t('storefront.checkout.disabled'),
       disabledShort: i18n.t('storefront.checkout.disabledShort'),
       required: i18n.t('storefront.checkout.required'),

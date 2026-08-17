@@ -23,7 +23,11 @@ export default {
                 food: ['Nunito', 'sans-serif'],
                 cyber: ['Orbitron', 'sans-serif'],
                 jetbrains: ['JetBrains Mono', 'monospace'],
-                wellness: ['Solway', 'serif'],
+                // Wellness (apothecary): Archivo carries UI + body, Fraunces is the
+                // display voice, Archivo Narrow sets the label/data microtype.
+                wellness: ['Archivo', 'system-ui', 'sans-serif'],
+                wellnessDisplay: ['Fraunces', 'Solway', 'serif'],
+                wellnessLabel: ['Archivo Narrow', 'Archivo', 'sans-serif'],
                 cinematic: ['Geist', 'system-ui', 'sans-serif'],
                 cinematicDisplay: ['Geist', 'system-ui', 'sans-serif'],
             },
@@ -69,6 +73,17 @@ export default {
                 },
                 slate: {
                     850: '#151e2e', // Custom deep slate
+                },
+                // Wellness apothecary neutrals. Light only — the template has no
+                // dark surfaces. Fixed on purpose: the tenant's --brand stays an
+                // accent so any brand colour works on top.
+                wl: {
+                    paper: '#F1F2EC',    // page ground, label stock with a green cast
+                    card: '#FCFCF9',     // raised surfaces: header, footer, cards
+                    ink: '#1B1A16',      // primary type, solid buttons
+                    muted: '#6E6E62',    // secondary type, units
+                    rule: '#D4D5CB',     // the hairline everything is built on
+                    ruleStrong: '#B6B7AA',
                 },
                 lime: {
                     neon: '#C6F432',

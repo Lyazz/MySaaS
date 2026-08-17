@@ -1046,7 +1046,8 @@
     "nav": {
       "home": "الرئيسية",
       "shop": "المتجر",
-      "contact": "اتصل بنا"
+      "contact": "اتصل بنا",
+      "categories": "الفئات"
     },
     "cart": {
       "label": "السلة",
@@ -1312,6 +1313,14 @@
     },
     "announcement": {
       "dismissAria": "إغلاق الإعلان"
+    },
+    "templates": {
+      "wellness": {
+        "home": {
+          "curatedSelection": "مختاراتنا",
+          "shopCollection": "تسوق المجموعة"
+        }
+      }
     }
   },
   "admin": {
