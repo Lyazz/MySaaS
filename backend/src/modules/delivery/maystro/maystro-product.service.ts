@@ -235,6 +235,18 @@ export class MaystroProductService {
                 }
             })
 
+            // The remote row at this UUID may have been reassigned to a different local
+            // product by an older bug (or by another sync racing concurrently). Blindly
+            // adopting whatever product_id Maystro returns would silently attach this local
+            // product to someone else's remote row. If it no longer matches, don't trust the
+            // link — force a fresh, dedicated product on the next sync attempt instead.
+            if (updated.product_id && updated.product_id !== productId) {
+                throw new MaystroIntegrationError({
+                    statusCode: 409,
+                    statusMessage: `Maystro product ${existing.maystroUuid} is now linked to a different product (expected ${productId}, got ${updated.product_id})`
+                })
+            }
+
             await this.prisma.maystroProductMapping.update({
                 where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
                 data: {
