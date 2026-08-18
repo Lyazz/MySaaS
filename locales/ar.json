@@ -1392,7 +1392,13 @@
       "moveDown": "تحريك للأسفل",
       "amount": "المبلغ",
       "paid": "مدفوع",
-      "remaining": "المتبقي"
+      "remaining": "المتبقي",
+      "discardChangesTitle": "تجاهل التغييرات؟",
+      "discardChangesMessage": "ستفقد تغييراتك غير المحفوظة في هذه الصفحة.",
+      "keepEditing": "متابعة التحرير",
+      "leaveTitle": "المغادرة بدون حفظ؟",
+      "leaveMessage": "لديك تغييرات غير محفوظة. ستفقد إذا غادرت هذه الصفحة.",
+      "leaveConfirm": "مغادرة الصفحة"
     },
     "confirmModal": {
       "defaults": {
@@ -2093,8 +2099,37 @@
       },
       "templates": {
         "title": "قالب المتجر",
-        "subtitle": "اختر التخطيط الأنسب لعلامتك.",
-        "quickView": "عرض سريع",
+        "subtitle": "كل قالب يحدد خطوط متجرك وألوانه وأشكاله. جرّب أي قالب على متجرك قبل التبديل.",
+        "quickView": "معاينة",
+        "searchPlaceholder": "ابحث عن قالب",
+        "previewStore": "عرض المتجر",
+        "previewNeedsSlug": "احفظ عنوان متجرك أولاً لمعاينة القوالب.",
+        "liveNow": "مباشر",
+        "selected": "محدد",
+        "pending": "سيتم التبديل إلى {name} عند الحفظ",
+        "bestFor": "مناسب لـ",
+        "sampleBrand": "متجرك",
+        "sampleTagline": "وصل حديثاً",
+        "emptyTitle": "لا يوجد قالب يطابق البحث.",
+        "emptyAction": "مسح المرشحات",
+        "categories": {
+          "all": "الكل",
+          "classic": "كلاسيكي",
+          "minimalist": "بسيط",
+          "bold": "جريء",
+          "tech": "تقني",
+          "luxury": "فاخر",
+          "elegant": "أنيق"
+        },
+        "moods": {
+          "dark": "داكن",
+          "light": "فاتح"
+        },
+        "voices": {
+          "serif": "مذيّل",
+          "sans": "غير مذيّل",
+          "display": "عريض"
+        },
         "options": {
           "classic": {
             "label": "كلاسيكي",
@@ -2252,7 +2287,10 @@
         "team": "الفريق والأدوار",
         "billing": "الاشتراك",
         "maintenance": "وضع الصيانة"
-      }
+      },
+      "searchPlaceholder": "ابحث في الإعدادات",
+      "noResults": "لا يوجد إعداد يطابق «{query}»",
+      "browse": "تصفح الإعدادات"
     },
     "roles": {
       "owner": "المالك",

@@ -296,7 +296,9 @@ import LocaleSwitcher from '~/components/LocaleSwitcher.vue'
 import AdminThemeToggle from '~/components/admin/AdminThemeToggle.vue'
 import AdminNotificationsButton from '~/components/admin/AdminNotificationsButton.vue'
 import {
+  SETTINGS_NAV_GROUPS,
   adminPathToResource,
+  findActiveSettingsNav,
   hasSettingsHubAccess,
   type AdminRole
 } from '~/shared/admin/settings-navigation'
@@ -406,6 +408,16 @@ const adminStyle = computed(() => {
 })
 
 const pageTitle = computed(() => {
+  // Settings pages host several destinations behind one route file, so the
+  // topbar takes its name from the nav entry the user actually opened rather
+  // than the page's static meta title.
+  const activeSettings = findActiveSettingsNav(SETTINGS_NAV_GROUPS, {
+    path: route.path,
+    query: route.query as Record<string, string | undefined>,
+    hash: route.hash
+  })
+  if (activeSettings) return t(activeSettings.item.labelKey)
+
   const metaTitleKey = route.meta.titleKey as string | undefined
   if (metaTitleKey) return t(metaTitleKey)
   const metaTitle = route.meta.title as string | undefined

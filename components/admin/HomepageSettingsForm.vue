@@ -1,17 +1,16 @@
 <template>
   <div class="homepage-form">
     <SettingsPageHeader
-      :eyebrow="t('admin.nav.storefront') || 'Storefront'"
       :title="t('admin.pages.settings.homepage.title') || 'Homepage'"
       :subtitle="t('admin.homepageSettingsForm.subtitle')"
     />
 
     <SettingsAnchorTabs :tabs="tabs" :active-id="activeTab" @select="activeTab = $event" />
 
-    <div v-if="message.text" class="status-toast" :class="message.type">
-      <Icon :name="message.type === 'success' ? 'lucide:check-circle-2' : 'lucide:alert-triangle'" class="w-4 h-4" />
-      {{ message.text }}
-    </div>
+    <SettingsStatus
+      :message="message.text"
+      :type="message.type || 'success'"
+    />
 
     <form @submit.prevent="save" class="homepage-sections">
       <SettingsSection
@@ -48,6 +47,7 @@ import { useAuthStore } from '~/stores/auth'
 import HomeHeroSection from './homepage/HomeHeroSection.vue'
 import HomeFeatureSection from './homepage/HomeFeatureSection.vue'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
+import SettingsStatus from './settings/SettingsStatus.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 import SettingsSaveBar from './settings/SettingsSaveBar.vue'
 import SettingsAnchorTabs from './settings/SettingsAnchorTabs.vue'
@@ -117,9 +117,7 @@ async function save() {
 }
 
 function reset() {
-  if (confirm(t('admin.common.confirmDiscard') || t('admin.appearanceSettingsForm.confirm.discard'))) {
-    fetchHomepageSettings()
-  }
+  fetchHomepageSettings()
 }
 
 function setupScrollSpy() {
@@ -152,32 +150,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.homepage-form {
-  padding-bottom: 120px;
-}
-
-.status-toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.status-toast.success {
-  background: rgba(34, 197, 94, 0.12);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-}
-
-.status-toast.error {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-}
 
 .homepage-sections {
   display: flex;

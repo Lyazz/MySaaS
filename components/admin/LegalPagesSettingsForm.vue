@@ -1,17 +1,14 @@
 <template>
   <div class="legal-form">
     <SettingsPageHeader
-      :eyebrow="t('admin.nav.storefront') || 'Storefront'"
       :title="t('admin.nav.legalPages') || 'Legal pages'"
       :subtitle="'Configure terms, privacy, returns, and contact pages in FR / EN / AR. Footer links only appear when enabled.'"
     />
 
-    <Transition name="status-fade">
-      <div v-if="successMessage || errorMessage" class="status-toast" :class="errorMessage ? 'error' : 'success'">
-        <Icon :name="errorMessage ? 'lucide:alert-triangle' : 'lucide:check-circle-2'" class="w-4 h-4" />
-        {{ successMessage || errorMessage }}
-      </div>
-    </Transition>
+    <SettingsStatus
+      :message="successMessage || errorMessage"
+      :type="errorMessage ? 'error' : 'success'"
+    />
 
     <div class="legal-pages">
       <SettingsSection
@@ -76,6 +73,7 @@ import { useAuthStore } from '~/stores/auth'
 import BaseToggle from '~/components/ui/BaseToggle.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
+import SettingsStatus from './settings/SettingsStatus.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 import SettingsSaveBar from './settings/SettingsSaveBar.vue'
 import {
@@ -199,42 +197,6 @@ onMounted(load)
 </script>
 
 <style scoped>
-.legal-form {
-  padding-bottom: 80px;
-}
-
-.status-toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.status-toast.success {
-  background: rgba(16, 185, 129, 0.14);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
-}
-
-.status-toast.error {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-}
-
-.status-fade-enter-active,
-.status-fade-leave-active {
-  transition: opacity .2s ease;
-}
-
-.status-fade-enter-from,
-.status-fade-leave-to {
-  opacity: 0;
-}
 
 .legal-pages {
   display: grid;
@@ -298,46 +260,6 @@ onMounted(load)
 .lang-code {
   font-size: 10.5px;
   color: var(--text-muted);
-}
-
-.field {
-  margin-bottom: 10px;
-}
-
-.field:last-child {
-  margin-bottom: 0;
-}
-
-.field-label {
-  display: block;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  margin-bottom: 6px;
-}
-
-.field-input,
-.field-textarea {
-  width: 100%;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-2);
-  color: var(--text-primary);
-  border-radius: 10px;
-  font-size: 12.5px;
-  line-height: 1.45;
-  padding: 9px 10px;
-}
-
-.field-input:focus,
-.field-textarea:focus {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.18);
-}
-
-.field-textarea {
-  resize: vertical;
-  min-height: 140px;
 }
 
 @media (max-width: 1100px) {

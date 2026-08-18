@@ -128,7 +128,7 @@ describe('Loyalty points flows', () => {
             .set('X-Forwarded-Host', host)
             .send({
                 customerName: 'Loyalty Customer',
-                customerPhone: '+XX X XXX XXXX',
+                customerPhone: '0550123456',
                 customerAddress: 'Hydra',
                 shippingAmount: 20,
                 shippingCurrency: 'DZD',
@@ -215,7 +215,9 @@ describe('Loyalty points flows', () => {
             })
 
         expect(response.status).toBe(200)
-        expect(response.body.availablePoints).toBe(150)
+        // Balance after the previous test's flow: 200 seed + 8 earned - 50 consumed = 158,
+        // minus this call's own 50-point reservation preview = 108.
+        expect(response.body.availablePoints).toBe(108)
         expect(response.body.pendingRedeemPoints).toBe(50)
         expect(response.body.basePointsToEarn).toBe(2)
         expect(response.body.productPointsToEarn).toBe(6)

@@ -1,22 +1,20 @@
 <template>
   <div class="functional-form">
     <SettingsPageHeader
-      :eyebrow="t('admin.nav.storefront') || 'Storefront'"
       :title="pageTitle"
       :subtitle="pageSubtitle"
     />
 
-    <Transition name="status-fade">
-      <div v-if="successMessage || errorMessage" class="status-toast" :class="errorMessage ? 'error' : 'success'">
-        <Icon :name="errorMessage ? 'lucide:alert-triangle' : 'lucide:check-circle-2'" class="w-4 h-4" />
-        {{ successMessage || errorMessage }}
-      </div>
-    </Transition>
+    <SettingsStatus
+      :message="successMessage || errorMessage"
+      :type="errorMessage ? 'error' : 'success'"
+    />
 
     <form @submit.prevent="save" class="functional-sections">
       <!-- Features -->
       <SettingsSection
         v-show="visibleAnchors.includes('features')"
+        :bare="isSoleSection"
         anchor-id="features"
         icon="lucide:toggle-right"
         :title="t('admin.functionalSettingsForm.features.title')"
@@ -70,6 +68,7 @@
       <!-- Checkout rules -->
       <SettingsSection
         v-show="visibleAnchors.includes('checkout')"
+        :bare="isSoleSection"
         anchor-id="checkout"
         icon="lucide:credit-card"
         :title="t('admin.functionalSettingsForm.checkoutRules.title') || 'Checkout rules'"
@@ -142,6 +141,7 @@
       <!-- Messaging -->
       <SettingsSection
         v-show="visibleAnchors.includes('messaging')"
+        :bare="isSoleSection"
         anchor-id="messaging"
         icon="lucide:message-square"
         :title="t('admin.functionalSettingsForm.messaging.title')"
@@ -179,6 +179,7 @@
       <!-- Sales invoices -->
       <SettingsSection
         v-show="visibleAnchors.includes('invoices')"
+        :bare="isSoleSection"
         anchor-id="invoices"
         icon="lucide:receipt-text"
         :title="t('admin.functionalSettingsForm.invoices.title')"
@@ -246,6 +247,7 @@
       <!-- Announcement bar -->
       <SettingsSection
         v-show="visibleAnchors.includes('announcement')"
+        :bare="isSoleSection"
         anchor-id="announcement"
         icon="lucide:megaphone"
         :title="t('admin.appearanceSettingsForm.announcement.title')"
@@ -285,6 +287,7 @@
       <!-- Loyalty -->
       <SettingsSection
         v-show="visibleAnchors.includes('loyalty')"
+        :bare="isSoleSection"
         anchor-id="loyalty"
         icon="lucide:badge-percent"
         :title="t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty points'"
@@ -332,6 +335,7 @@
       <!-- Clearance (destockage) -->
       <SettingsSection
         v-show="visibleAnchors.includes('clearance')"
+        :bare="isSoleSection"
         anchor-id="clearance"
         icon="lucide:package-open"
         :title="t('admin.functionalSettingsForm.clearance.title') || 'Clearance (destockage)'"
@@ -400,6 +404,7 @@
       <!-- Fraud prevention -->
       <SettingsSection
         v-show="visibleAnchors.includes('fraud')"
+        :bare="isSoleSection"
         anchor-id="fraud"
         icon="lucide:shield-ban"
         :title="t('admin.functionalSettingsForm.fraud.title') || 'Fraud prevention'"
@@ -458,6 +463,7 @@
       <!-- Currency -->
       <SettingsSection
         v-show="visibleAnchors.includes('currency')"
+        :bare="isSoleSection"
         anchor-id="currency"
         icon="lucide:dollar-sign"
         :title="t('admin.functionalSettingsForm.currency.title')"
@@ -480,6 +486,7 @@
       <!-- Maintenance mode -->
       <SettingsSection
         v-show="visibleAnchors.includes('maintenance')"
+        :bare="isSoleSection"
         anchor-id="maintenance"
         icon="lucide:power-off"
         :title="t('admin.functionalSettingsForm.maintenance.title') || 'Maintenance mode'"
@@ -525,6 +532,7 @@
       <!-- Localization -->
       <SettingsSection
         v-show="visibleAnchors.includes('localization')"
+        :bare="isSoleSection"
         anchor-id="localization"
         icon="lucide:languages"
         :title="t('admin.functionalSettingsForm.localization.title')"
@@ -574,8 +582,10 @@ import { useAuthStore } from '~/stores/auth'
 import BaseToggle from '~/components/ui/BaseToggle.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
+import SettingsStatus from './settings/SettingsStatus.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 import SettingsSaveBar from './settings/SettingsSaveBar.vue'
+import { SETTINGS_NAV_GROUPS } from '~/shared/admin/settings-navigation'
 
 const props = withDefaults(defineProps<{ section?: string }>(), { section: 'checkout' })
 
@@ -595,48 +605,33 @@ const SECTION_GROUPS: Record<string, string[]> = {
 }
 
 const visibleAnchors = computed(() => SECTION_GROUPS[props.section] || SECTION_GROUPS.checkout)
+// Most sections are shown alone; only Checkout pairs two of them, and there
+// the per-section headings are what tells them apart.
+const isSoleSection = computed(() => visibleAnchors.value.length === 1)
 
-const SECTION_TITLES: Record<string, () => { title: string; subtitle: string }> = {
-  checkout: () => ({
-    title: t('admin.settingsNav.items.checkout') || 'Checkout & Cart',
-    subtitle: t('admin.functionalSettingsForm.checkoutRules.subtitle') || 'Order conditions and checkout behavior.'
-  }),
-  fraud: () => ({
-    title: t('admin.functionalSettingsForm.fraud.title') || 'Fraud prevention',
-    subtitle: t('admin.functionalSettingsForm.fraud.subtitle') || 'Block fake orders from blacklisted contacts and throttle duplicate orders.'
-  }),
-  loyalty: () => ({
-    title: t('admin.functionalSettingsForm.loyalty.title') || 'Loyalty points',
-    subtitle: t('admin.functionalSettingsForm.loyalty.subtitle') || 'Configure points calculation and redemption rules.'
-  }),
-  clearance: () => ({
-    title: t('admin.functionalSettingsForm.clearance.title') || 'Clearance (destockage)',
-    subtitle: t('admin.functionalSettingsForm.clearance.subtitle') || 'Reward customers who buy in bulk from your clearance products.'
-  }),
-  invoices: () => ({
-    title: t('admin.functionalSettingsForm.invoices.title'),
-    subtitle: t('admin.functionalSettingsForm.invoices.subtitle')
-  }),
-  announcement: () => ({
-    title: t('admin.appearanceSettingsForm.announcement.title'),
-    subtitle: t('admin.appearanceSettingsForm.announcement.subtitle')
-  }),
-  messaging: () => ({
-    title: t('admin.functionalSettingsForm.messaging.title'),
-    subtitle: t('admin.functionalSettingsForm.messaging.subtitle')
-  }),
-  maintenance: () => ({
-    title: t('admin.functionalSettingsForm.maintenance.title') || 'Maintenance mode',
-    subtitle: t('admin.functionalSettingsForm.maintenance.subtitle') || 'Temporarily close your storefront to customers.'
-  }),
-  localization: () => ({
-    title: t('admin.settingsNav.items.localization') || 'Currency & Language',
-    subtitle: t('admin.functionalSettingsForm.currency.subtitle')
-  })
+// Section headings come from the nav, so a destination is called the same
+// thing in the sidebar, the topbar and the page title. Only the descriptive
+// line below it is section-specific.
+const SECTION_LABEL_KEYS: Record<string, string> = Object.fromEntries(
+  SETTINGS_NAV_GROUPS.flatMap((group) => group.items.map((item) => [item.key, item.labelKey]))
+)
+
+const SECTION_SUBTITLES: Record<string, () => string> = {
+  checkout: () => t('admin.functionalSettingsForm.checkoutRules.subtitle'),
+  fraud: () => t('admin.functionalSettingsForm.fraud.subtitle'),
+  loyalty: () => t('admin.functionalSettingsForm.loyalty.subtitle'),
+  clearance: () => t('admin.functionalSettingsForm.clearance.subtitle'),
+  invoices: () => t('admin.functionalSettingsForm.invoices.subtitle'),
+  announcement: () => t('admin.appearanceSettingsForm.announcement.subtitle'),
+  messaging: () => t('admin.functionalSettingsForm.messaging.subtitle'),
+  maintenance: () => t('admin.functionalSettingsForm.maintenance.subtitle'),
+  localization: () => t('admin.functionalSettingsForm.currency.subtitle')
 }
 
-const pageTitle = computed(() => (SECTION_TITLES[props.section] || SECTION_TITLES.checkout)().title)
-const pageSubtitle = computed(() => (SECTION_TITLES[props.section] || SECTION_TITLES.checkout)().subtitle)
+const pageTitle = computed(() =>
+  t(SECTION_LABEL_KEYS[props.section] || SECTION_LABEL_KEYS.checkout)
+)
+const pageSubtitle = computed(() => (SECTION_SUBTITLES[props.section] || SECTION_SUBTITLES.checkout)())
 
 const loading = ref(false)
 const saving = ref(false)
@@ -857,9 +852,7 @@ const save = async () => {
 }
 
 const reset = () => {
-  if (confirm(t('admin.functionalSettingsForm.confirm.discard'))) {
-    fetchSettings()
-  }
+  fetchSettings()
 }
 
 const onCountryChange = () => {
@@ -888,130 +881,11 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.functional-form {
-  padding-bottom: 120px;
-}
-
-.status-toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.status-toast.success {
-  background: rgba(34, 197, 94, 0.12);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-}
-
-.status-toast.error {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-}
-
-.status-fade-enter-from,
-.status-fade-leave-to {
-  opacity: 0;
-  transform: translateY(-4px);
-}
-
-.status-fade-enter-active,
-.status-fade-leave-active {
-  transition: all 0.18s ease;
-}
 
 .functional-sections {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-/* Toggle list */
-.toggle-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 14px;
-  padding: 14px 16px;
-  background: var(--surface-1);
-  border: 1px solid var(--surface-border);
-  border-radius: 12px;
-  transition: border-color 0.15s ease;
-}
-
-.toggle-row:hover {
-  border-color: color-mix(in srgb, var(--surface-border) 70%, var(--text-muted));
-}
-
-.toggle-row-disabled {
-  opacity: 0.5;
-}
-
-.toggle-row-info {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  flex: 1;
-  min-width: 0;
-}
-
-.toggle-row-flex {
-  flex: 1;
-  min-width: 0;
-}
-
-.toggle-row-icon {
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  background: var(--surface-3);
-  border: 1px solid var(--surface-border);
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.toggle-row-title {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-primary);
-  letter-spacing: -0.01em;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.toggle-row-soon {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  border-radius: 999px;
-  background: var(--surface-3);
-  color: var(--text-muted);
-}
-
-.toggle-row-subtitle {
-  margin-top: 3px;
-  font-size: 11.5px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
 }
 
 .toggle-row-input {
@@ -1077,66 +951,6 @@ onMounted(() => {
 .reveal-leave-active {
   transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   overflow: hidden;
-}
-
-/* Fields */
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-@media (max-width: 720px) {
-  .field-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.field-label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.field-hint {
-  margin-top: 6px;
-  font-size: 11.5px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
-}
-
-.field-input {
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: 9px;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-1);
-  color: var(--text-primary);
-  font-size: 13px;
-  transition: all 0.15s ease;
-}
-
-.field-input:focus {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.18);
-}
-
-.field-input-narrow {
-  max-width: 200px;
-}
-
-.field-suffix-text {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text-muted);
-  font-family: ui-monospace, monospace;
 }
 
 /* Languages grid */

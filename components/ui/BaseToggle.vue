@@ -11,8 +11,8 @@
     <span class="sr-only">{{ srLabel }}</span>
     <span
       aria-hidden="true"
-      class="pointer-events-none inline-block h-[18px] w-[18px] transform rounded-full bg-[color:var(--surface-1)] shadow-sm ring-0 transition duration-200 ease-in-out"
-      :class="[modelValue ? 'translate-x-[22px]' : 'translate-x-0.5']"
+      class="base-toggle-thumb pointer-events-none inline-block h-[18px] w-[18px] rounded-full bg-[color:var(--surface-1)] shadow-sm ring-0 transition-transform duration-200 ease-in-out"
+      :class="{ 'is-on': modelValue }"
     />
   </button>
 </template>
@@ -44,3 +44,21 @@ function toggle() {
   emit('update:modelValue', !props.modelValue)
 }
 </script>
+<style scoped>
+/*
+ * `translateX` is physical, so a hard-coded positive offset pushes the thumb
+ * off the left edge under RTL. Mirror the sign with the document direction.
+ */
+.base-toggle-thumb {
+  --thumb-offset: 2px;
+  transform: translateX(var(--thumb-offset));
+}
+
+.base-toggle-thumb.is-on {
+  --thumb-offset: 22px;
+}
+
+:global([dir='rtl']) .base-toggle-thumb {
+  transform: translateX(calc(var(--thumb-offset) * -1));
+}
+</style>

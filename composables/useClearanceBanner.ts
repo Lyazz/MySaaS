@@ -1,7 +1,11 @@
 export const useClearanceBanner = () => {
     const storeSettings = useState<any>('storeSettings')
 
-    const isVisible = useState<boolean>('clearance-banner-visible', () => true)
+    // Dismissal is stored in a session cookie so it's readable during SSR
+    // (avoids a flash of the banner on refresh) and persists across reloads
+    // until the browser session ends.
+    const dismissed = useCookie<boolean>('clearance-banner-dismissed', { default: () => false })
+    const isVisible = computed(() => !dismissed.value)
 
     const isEnabled = computed(() =>
         Boolean(storeSettings.value?.clearanceEnabled) && Boolean(storeSettings.value?.clearanceBannerEnabled)
@@ -11,11 +15,11 @@ export const useClearanceBanner = () => {
     const text = computed<string | null>(() => storeSettings.value?.clearanceBannerText || null)
 
     const dismiss = () => {
-        isVisible.value = false
+        dismissed.value = true
     }
 
     const show = () => {
-        isVisible.value = true
+        dismissed.value = false
     }
 
     return {

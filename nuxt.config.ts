@@ -86,6 +86,7 @@ export default defineNuxtConfig({
   },
   css: [
     '~/assets/css/main.css',
+    '~/assets/css/admin-settings.css',
     'driver.js/dist/driver.css',
     '~/assets/css/driver-theme.css',
   ],

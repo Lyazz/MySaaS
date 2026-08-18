@@ -161,3 +161,104 @@ export function filterSettingsNavForRole(
     }))
     .filter((group) => group.items.length > 0)
 }
+
+/**
+ * Where the user currently is, in the shape the sidebar needs. Kept as a plain
+ * object (rather than a vue-router RouteLocation) so the matching below stays
+ * pure and testable.
+ */
+export type SettingsNavLocation = {
+  path: string
+  query?: Record<string, string | undefined | null>
+  hash?: string
+}
+
+// Pages that render one of several sections chosen by `?section=`. Landing on
+// the page with no query means the first section, so the nav has to treat a
+// missing query and the default value as the same place.
+export const SETTINGS_DEFAULT_SECTION: Record<string, string> = {
+  '/admin/settings/functional': 'checkout'
+}
+
+/** Splits `/admin/settings/functional?section=fraud` into its three parts. */
+export function parseSettingsNavTarget(to: string) {
+  const [pathAndQuery = '', hash = ''] = to.split('#')
+  const [path = '', queryString = ''] = pathAndQuery.split('?')
+  const section = new URLSearchParams(queryString).get('section')
+  return { path, section, hash: hash ? `#${hash}` : '' }
+}
+
+export function isSettingsNavItemActive(item: SettingsNavItem, location: SettingsNavLocation) {
+  const target = parseSettingsNavTarget(item.to)
+  if (location.path !== target.path) return false
+
+  const currentHash = location.hash || ''
+  const defaultSection = SETTINGS_DEFAULT_SECTION[target.path]
+  const currentSection = (location.query?.section as string | undefined) || defaultSection
+
+  if (target.section) return currentSection === target.section
+  if (defaultSection && !target.hash) return currentSection === defaultSection
+  if (target.hash) return currentHash === target.hash
+  return !currentHash
+}
+
+export function findActiveSettingsNav(groups: SettingsNavGroup[], location: SettingsNavLocation) {
+  for (const group of groups) {
+    const item = group.items.find((candidate) => isSettingsNavItemActive(candidate, location))
+    if (item) return { group, item }
+  }
+  return null
+}
+
+export type SettingsSearchEntry = {
+  key: string
+  to: string
+  icon: string
+  groupId: string
+  /** Translated item label. */
+  label: string
+  /** Translated group label, shown as the result's breadcrumb. */
+  groupLabel: string
+  /** Extra translated words that should match, e.g. section field names. */
+  keywords?: string[]
+}
+
+function normalizeSearchTerm(value: string) {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    // Strip combining marks so "e" finds "é" and Arabic diacritics are ignored.
+    .replace(/[\u0300-\u036f\u064b-\u0652]/g, '')
+    .trim()
+}
+
+/**
+ * Ranks settings destinations against a query. Label matches beat group and
+ * keyword matches, and a prefix match beats a match in the middle of a word, so
+ * typing "dom" puts Domains first rather than whatever merely mentions it.
+ */
+export function matchSettingsEntries(entries: SettingsSearchEntry[], query: string) {
+  const term = normalizeSearchTerm(query)
+  if (!term) return []
+
+  const scored: Array<{ entry: SettingsSearchEntry; score: number }> = []
+
+  for (const entry of entries) {
+    const label = normalizeSearchTerm(entry.label)
+    const group = normalizeSearchTerm(entry.groupLabel)
+    const keywords = (entry.keywords || []).map(normalizeSearchTerm)
+
+    let score = 0
+    if (label.startsWith(term)) score = 100
+    else if (label.includes(term)) score = 70
+    else if (keywords.some((word) => word.startsWith(term))) score = 50
+    else if (keywords.some((word) => word.includes(term))) score = 40
+    else if (group.includes(term)) score = 20
+
+    if (score > 0) scored.push({ entry, score })
+  }
+
+  return scored
+    .sort((a, b) => b.score - a.score || a.entry.label.localeCompare(b.entry.label))
+    .map(({ entry }) => entry)
+}

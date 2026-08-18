@@ -3,7 +3,10 @@
     :id="anchorId"
     class="settings-section"
   >
-    <div class="settings-section-head">
+    <div
+      v-if="!bare"
+      class="settings-section-head"
+    >
       <div class="settings-section-titles">
         <div class="settings-section-title-row">
           <Icon
@@ -41,6 +44,11 @@ defineProps<{
   subtitle?: string
   icon?: string
   anchorId?: string
+  /**
+   * Hides the section's own heading. Use when the section is the only thing on
+   * the page and the page header already says the same words.
+   */
+  bare?: boolean
 }>()
 </script>
 
@@ -50,8 +58,16 @@ defineProps<{
   border: 1px solid var(--surface-border);
   border-radius: 16px;
   padding: 28px;
-  scroll-margin-top: 80px;
+  /* Clears the sticky section bar when an anchor link jumps here. */
+  scroll-margin-top: 96px;
   transition: border-color 0.2s ease;
+}
+
+@media (max-width: 640px) {
+  .settings-section {
+    padding: 18px 16px;
+    border-radius: 14px;
+  }
 }
 
 .settings-section:hover {
@@ -64,9 +80,16 @@ defineProps<{
   justify-content: space-between;
   align-items: flex-start;
   gap: 16px;
-  margin-bottom: 24px;
-  padding-bottom: 18px;
-  border-bottom: 1px solid var(--surface-border);
+  margin-block-end: 24px;
+  padding-block-end: 18px;
+  border-block-end: 1px solid var(--surface-border);
+}
+
+@media (max-width: 640px) {
+  .settings-section-head {
+    margin-block-end: 18px;
+    padding-block-end: 14px;
+  }
 }
 
 .settings-section-titles {

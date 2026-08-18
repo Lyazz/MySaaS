@@ -1388,7 +1388,13 @@
       "moveDown": "Move down",
       "amount": "Amount",
       "paid": "Paid",
-      "remaining": "Remaining"
+      "remaining": "Remaining",
+      "discardChangesTitle": "Discard changes?",
+      "discardChangesMessage": "Your unsaved changes on this page will be lost.",
+      "keepEditing": "Keep editing",
+      "leaveTitle": "Leave without saving?",
+      "leaveMessage": "You have unsaved changes. They'll be lost if you leave this page.",
+      "leaveConfirm": "Leave page"
     },
     "confirmModal": {
       "defaults": {
@@ -2089,8 +2095,37 @@
       },
       "templates": {
         "title": "Store template",
-        "subtitle": "Choose the layout that best fits your brand.",
-        "quickView": "Quick view",
+        "subtitle": "Every theme sets your storefront's typography, colour and shape. Preview any of them on your own store before you switch.",
+        "quickView": "Preview",
+        "searchPlaceholder": "Search themes",
+        "previewStore": "Preview storefront",
+        "previewNeedsSlug": "Save your store address first to preview a theme.",
+        "liveNow": "Live",
+        "selected": "Selected",
+        "pending": "Switching to {name} when you save",
+        "bestFor": "Best for",
+        "sampleBrand": "Your store",
+        "sampleTagline": "New arrivals",
+        "emptyTitle": "No theme matches that search.",
+        "emptyAction": "Clear filters",
+        "categories": {
+          "all": "All",
+          "classic": "Classic",
+          "minimalist": "Minimal",
+          "bold": "Bold",
+          "tech": "Tech",
+          "luxury": "Luxury",
+          "elegant": "Elegant"
+        },
+        "moods": {
+          "dark": "Dark",
+          "light": "Light"
+        },
+        "voices": {
+          "serif": "Serif",
+          "sans": "Sans serif",
+          "display": "Display"
+        },
         "options": {
           "classic": {
             "label": "Classic Shop",
@@ -2250,7 +2285,10 @@
         "team": "Team & roles",
         "billing": "Billing",
         "maintenance": "Maintenance mode"
-      }
+      },
+      "searchPlaceholder": "Search settings",
+      "noResults": "Nothing matches “{query}”",
+      "browse": "Browse settings"
     },
     "roles": {
       "owner": "Owner",

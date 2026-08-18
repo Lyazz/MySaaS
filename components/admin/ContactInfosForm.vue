@@ -1,7 +1,6 @@
 <template>
   <div class="contact-form">
     <SettingsPageHeader
-      :eyebrow="t('admin.nav.storefront') || 'Storefront'"
       :title="t('admin.contactInfosForm.title')"
       :subtitle="t('admin.contactInfosForm.subtitle')"
     >
@@ -18,10 +17,10 @@
       </template>
     </SettingsPageHeader>
 
-    <div v-if="errorMessage" class="status-toast error">
-      <Icon name="lucide:alert-triangle" class="w-4 h-4" />
-      {{ errorMessage }}
-    </div>
+    <SettingsStatus
+      :message="errorMessage"
+      type="error"
+    />
 
     <SettingsSection
       icon="lucide:phone"
@@ -50,27 +49,27 @@
           </div>
 
           <div class="contact-grid">
-            <div class="contact-field contact-field-type">
-              <label class="contact-label">{{ t('admin.contactInfosForm.fields.type') }}</label>
-              <select v-model="draft.kind" class="contact-input">
+            <div class="field contact-field-type">
+              <label class="field-label">{{ t('admin.contactInfosForm.fields.type') }}</label>
+              <select v-model="draft.kind" class="field-input">
                 <option v-for="d in kindDefs" :key="d.kind" :value="d.kind">{{ d.label }}</option>
               </select>
             </div>
-            <div class="contact-field">
-              <label class="contact-label">{{ t('admin.contactInfosForm.fields.labelOptional') }}</label>
+            <div class="field">
+              <label class="field-label">{{ t('admin.contactInfosForm.fields.labelOptional') }}</label>
               <input
                 v-model="draft.label"
                 type="text"
-                class="contact-input"
+                class="field-input"
                 :placeholder="t('admin.contactInfosForm.fields.labelPlaceholder')"
               >
             </div>
-            <div class="contact-field">
-              <label class="contact-label">{{ t('admin.contactInfosForm.fields.value') }}</label>
+            <div class="field">
+              <label class="field-label">{{ t('admin.contactInfosForm.fields.value') }}</label>
               <input
                 v-model="draft.value"
                 type="text"
-                class="contact-input"
+                class="field-input"
                 :placeholder="kindDef(draft.kind).placeholder"
               >
             </div>
@@ -144,14 +143,14 @@
               <input
                 v-model="item.label"
                 type="text"
-                class="contact-input"
+                class="field-input"
                 :placeholder="t('admin.contactInfosForm.fields.labelOptional')"
                 @blur="saveItem(item)"
               >
               <input
                 v-model="item.value"
                 type="text"
-                class="contact-input"
+                class="field-input"
                 :placeholder="kindDef(item.kind).placeholder"
                 @blur="saveItem(item)"
               >
@@ -201,6 +200,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
+import SettingsStatus from './settings/SettingsStatus.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 import {
   CONTACT_INFO_KIND_DEFS,
@@ -350,25 +350,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.contact-form {
-  padding-bottom: 80px;
-}
-
-.header-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-  border-radius: 10px;
-  border: 1px solid var(--surface-border);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-  background: var(--surface-2);
-  color: var(--text-secondary);
-}
 
 .header-action-primary {
   background: var(--brand);
@@ -378,28 +359,6 @@ onMounted(() => {
 
 .header-action-primary:hover:not(:disabled) {
   background: color-mix(in srgb, var(--brand) 88%, #fff);
-}
-
-.header-action:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.status-toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.status-toast.error {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
 }
 
 .contact-count {
@@ -508,36 +467,6 @@ onMounted(() => {
   .contact-grid {
     grid-template-columns: 1fr;
   }
-}
-
-.contact-field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-  min-width: 0;
-}
-
-.contact-label {
-  font-size: 11.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.contact-input {
-  width: 100%;
-  padding: 9px 12px;
-  border-radius: 9px;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-1);
-  color: var(--text-primary);
-  font-size: 13px;
-  transition: all 0.15s ease;
-}
-
-.contact-input:focus {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.18);
 }
 
 /* Preview */

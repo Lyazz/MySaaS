@@ -1,17 +1,14 @@
 <template>
   <div class="domain-form">
     <SettingsPageHeader
-      :eyebrow="t('admin.nav.storefront') || 'Storefront'"
       :title="t('admin.pages.settings.domains.title') || 'Domain settings'"
       :subtitle="t('admin.pages.settings.domains.subtitle') || 'Connect a bought domain to this storefront with a CNAME record.'"
     />
 
-    <Transition name="status-fade">
-      <div v-if="successMessage || errorMessage" class="status-toast" :class="errorMessage ? 'error' : 'success'">
-        <Icon :name="errorMessage ? 'lucide:alert-triangle' : 'lucide:check-circle-2'" class="w-4 h-4" />
-        {{ successMessage || errorMessage }}
-      </div>
-    </Transition>
+    <SettingsStatus
+      :message="successMessage || errorMessage"
+      :type="errorMessage ? 'error' : 'success'"
+    />
 
     <div class="domain-sections">
       <SettingsSection
@@ -125,6 +122,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
+import SettingsStatus from './settings/SettingsStatus.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 
 type TenantDomain = {
@@ -238,27 +236,6 @@ onMounted(loadDomains)
 .domain-sections {
   display: grid;
   gap: 20px;
-}
-
-.status-toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 18px;
-  padding: 10px 14px;
-  border-radius: 12px;
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.status-toast.success {
-  background: rgba(34, 197, 94, 0.12);
-  color: #16a34a;
-}
-
-.status-toast.error {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
 }
 
 .domain-add {

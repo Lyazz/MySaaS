@@ -1374,7 +1374,13 @@
       "moveDown": "Descendre",
       "amount": "Montant",
       "paid": "Payé",
-      "remaining": "Reste à payer"
+      "remaining": "Reste à payer",
+      "discardChangesTitle": "Annuler les modifications ?",
+      "discardChangesMessage": "Vos modifications non enregistrées sur cette page seront perdues.",
+      "keepEditing": "Continuer à modifier",
+      "leaveTitle": "Quitter sans enregistrer ?",
+      "leaveMessage": "Vous avez des modifications non enregistrées. Elles seront perdues si vous quittez cette page.",
+      "leaveConfirm": "Quitter la page"
     },
     "confirmModal": {
       "defaults": {
@@ -2075,8 +2081,37 @@
       },
       "templates": {
         "title": "Modèle de boutique",
-        "subtitle": "Choisissez la mise en page qui correspond le mieux à votre marque.",
-        "quickView": "Aperçu rapide",
+        "subtitle": "Chaque thème définit la typographie, les couleurs et les formes de votre boutique. Testez-en un sur votre propre boutique avant de changer.",
+        "quickView": "Aperçu",
+        "searchPlaceholder": "Rechercher un thème",
+        "previewStore": "Voir la boutique",
+        "previewNeedsSlug": "Enregistrez d'abord l'adresse de votre boutique pour voir un aperçu.",
+        "liveNow": "En ligne",
+        "selected": "Sélectionné",
+        "pending": "Passera à {name} à l'enregistrement",
+        "bestFor": "Idéal pour",
+        "sampleBrand": "Votre boutique",
+        "sampleTagline": "Nouveautés",
+        "emptyTitle": "Aucun thème ne correspond à cette recherche.",
+        "emptyAction": "Réinitialiser les filtres",
+        "categories": {
+          "all": "Tous",
+          "classic": "Classique",
+          "minimalist": "Minimal",
+          "bold": "Audacieux",
+          "tech": "Tech",
+          "luxury": "Luxe",
+          "elegant": "Élégant"
+        },
+        "moods": {
+          "dark": "Sombre",
+          "light": "Clair"
+        },
+        "voices": {
+          "serif": "Serif",
+          "sans": "Sans serif",
+          "display": "Display"
+        },
         "options": {
           "classic": {
             "label": "Classique",
@@ -2234,7 +2269,10 @@
         "team": "Équipe & rôles",
         "billing": "Abonnement",
         "maintenance": "Mode maintenance"
-      }
+      },
+      "searchPlaceholder": "Rechercher un paramètre",
+      "noResults": "Aucun paramètre ne correspond à « {query} »",
+      "browse": "Parcourir les paramètres"
     },
     "roles": {
       "owner": "Propriétaire",

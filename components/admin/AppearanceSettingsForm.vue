@@ -2,7 +2,6 @@
   <div class="appearance-form">
     <SettingsPageHeader
       data-tour="settings-appearance-tab"
-      :eyebrow="t('admin.nav.storefront') || 'Storefront'"
       :title="t('admin.pages.settings.appearance.title') || 'Appearance'"
       :subtitle="t('admin.pages.settings.appearance.subtitle') || 'Manage your store identity, brand assets, and storefront template.'"
     >
@@ -12,7 +11,7 @@
           :href="previewUrl"
           target="_blank"
           rel="noopener noreferrer"
-          class="header-action header-action-secondary"
+          class="header-action"
         >
           <Icon
             name="lucide:external-link"
@@ -35,17 +34,10 @@
       </template>
     </SettingsPageHeader>
 
-    <div
-      v-if="message.text"
-      class="status-toast"
-      :class="message.type"
-    >
-      <Icon
-        :name="message.type === 'success' ? 'lucide:check-circle-2' : 'lucide:alert-triangle'"
-        class="w-4 h-4"
-      />
-      {{ message.text }}
-    </div>
+    <SettingsStatus
+      :message="message.text"
+      :type="message.type || 'success'"
+    />
 
     <div class="appearance-sections">
       <!-- Identity -->
@@ -201,146 +193,216 @@
         :subtitle="t('admin.appearanceSettingsForm.templates.subtitle')"
       >
         <template #aside>
-          <div class="template-search">
+          <div class="tpl-search">
             <Icon
               name="lucide:search"
-              class="template-search-icon"
+              class="tpl-search-icon"
             />
             <input
               v-model="searchQuery"
-              type="text"
-              :placeholder="t('admin.common.search') || 'Search templates'"
-              class="template-search-input"
+              type="search"
+              :placeholder="t('admin.appearanceSettingsForm.templates.searchPlaceholder')"
+              :aria-label="t('admin.appearanceSettingsForm.templates.searchPlaceholder')"
+              class="tpl-search-input"
             >
           </div>
         </template>
 
-        <div class="template-filters">
-          <button
-            v-for="cat in categories"
-            :key="cat"
-            type="button"
-            class="template-filter"
-            :class="{ 'is-active': selectedCategory === cat }"
-            @click="selectedCategory = cat"
+        <!--
+          What is published right now, stated plainly. Merchants switch template
+          and forget they never saved; this strip is where they find out, and it
+          carries the one link to the real storefront (the old preview button
+          only appeared on hover, so touch users never saw it at all).
+        -->
+        <div class="tpl-live">
+          <span
+            class="tpl-live-chip"
+            :style="plateVars(liveTemplate)"
           >
-            {{ cat }}
+            <span
+              class="tpl-live-chip-letter"
+              :style="{ fontFamily: liveTemplate.display }"
+            >{{ brandInitial }}</span>
+          </span>
+          <div class="tpl-live-text">
+            <p class="tpl-live-label">
+              {{ t('admin.appearanceSettingsForm.templates.liveNow') }}
+            </p>
+            <p class="tpl-live-name">
+              {{ templateLabel(liveTemplate) }}
+            </p>
+          </div>
+          <p
+            v-if="pendingTemplate"
+            class="tpl-live-pending"
+          >
+            <Icon
+              name="lucide:arrow-right"
+              class="tpl-live-pending-arrow"
+            />
+            {{ t('admin.appearanceSettingsForm.templates.pending', { name: templateLabel(pendingTemplate) }) }}
+          </p>
+          <button
+            type="button"
+            class="settings-btn tpl-live-action"
+            :disabled="!previewUrl"
+            :title="previewUrl ? undefined : t('admin.appearanceSettingsForm.templates.previewNeedsSlug')"
+            @click="openQuickView(form.templateKey)"
+          >
+            <Icon
+              name="lucide:monitor-play"
+              class="w-4 h-4"
+            />
+            {{ t('admin.appearanceSettingsForm.templates.previewStore') }}
           </button>
         </div>
 
-        <div class="template-grid">
+        <div class="tpl-filters">
           <button
-            v-for="tpl in filteredTemplates"
-            :key="tpl.key"
+            v-for="cat in categories"
+            :key="cat.value"
             type="button"
-            class="template-card"
+            class="tpl-filter"
+            :class="{ 'is-active': selectedCategory === cat.value }"
+            :aria-pressed="selectedCategory === cat.value"
+            @click="selectedCategory = cat.value"
+          >
+            {{ cat.label }}
+            <span class="tpl-filter-count">{{ cat.count }}</span>
+          </button>
+        </div>
+
+        <!--
+          A radiogroup, not a row of buttons: picking a template is one exclusive
+          choice, and arrow keys have to walk the grid for keyboard users.
+        -->
+        <div
+          v-if="filteredTemplates.length"
+          class="tpl-grid"
+          role="radiogroup"
+          :aria-label="t('admin.appearanceSettingsForm.templates.title')"
+        >
+          <div
+            v-for="(tpl, index) in filteredTemplates"
+            :key="tpl.key"
+            :ref="el => setCardRef(el, index)"
+            role="radio"
+            :aria-checked="form.templateKey === tpl.key"
+            :tabindex="cardTabIndex(tpl, index)"
+            class="tpl-card"
             :class="{ 'is-selected': form.templateKey === tpl.key }"
             @click="form.templateKey = tpl.key"
+            @keydown="onCardKeydown($event, index)"
           >
-            <span
-              v-if="form.templateKey === tpl.key"
-              class="template-card-badge"
-            >
-              <Icon
-                name="lucide:check"
-                class="w-3.5 h-3.5"
-              />
-            </span>
-
+            <!--
+              The specimen: the merchant's own store name set in the template's
+              real display face, over the template's real surfaces, with the
+              shelf drawn at its real corner radius. Every value here comes from
+              the template's own tokens — nothing is invented for the thumbnail.
+            -->
             <div
-              class="template-card-preview"
-              :style="{ background: tpl.bg, '--accent': templateAccent(tpl), '--card-bg': tpl.cardBg, '--border': tpl.border }"
+              class="tpl-plate"
+              :style="plateVars(tpl)"
+              aria-hidden="true"
             >
-              <div class="template-card-accent" />
-              <div
-                class="template-card-mockup"
-                :style="{ background: tpl.cardBg, borderRadius: tpl.radius, borderColor: tpl.border }"
-              >
-                <div
-                  class="template-card-mockup-img"
-                  :style="{ background: tpl.imgBg }"
-                >
-                  <span>{{ tpl.emoji }}</span>
-                </div>
-                <div
-                  class="template-card-mockup-body"
-                  :style="{ fontFamily: tpl.fontStyle }"
-                >
-                  <p
-                    class="template-card-mockup-name"
-                    :style="{ color: tpl.textColor }"
-                  >
-                    {{ tpl.sampleDesc }}
-                  </p>
-                  <p
-                    class="template-card-mockup-price"
-                    :style="{ color: templateAccent(tpl) }"
-                  >
-                    {{ tpl.samplePrice }}
-                  </p>
-                  <span
-                    class="template-card-mockup-cta"
-                    :style="{ background: templateAccent(tpl), color: tpl.btnText, borderRadius: tpl.radius }"
-                  >BUY</span>
-                </div>
+              <div class="tpl-plate-bar">
+                <span class="tpl-plate-mark" />
+                <span class="tpl-plate-links">
+                  <i /><i /><i />
+                </span>
               </div>
 
-              <div class="template-card-overlay">
+              <div class="tpl-plate-hero">
+                <p
+                  class="tpl-plate-brand"
+                  :style="brandStyle(tpl)"
+                >
+                  {{ brandName }}
+                </p>
+                <p class="tpl-plate-tagline">
+                  {{ t('admin.appearanceSettingsForm.templates.sampleTagline') }}
+                </p>
+              </div>
+
+              <div class="tpl-plate-shelf">
                 <span
-                  class="template-card-preview-btn"
+                  v-for="i in 3"
+                  :key="i"
+                  class="tpl-plate-tile"
+                />
+              </div>
+              <span class="tpl-plate-cta" />
+            </div>
+
+            <div class="tpl-body">
+              <div class="tpl-body-head">
+                <p class="tpl-name">
+                  {{ templateLabel(tpl) }}
+                </p>
+                <span
+                  v-if="form.templateKey === tpl.key"
+                  class="tpl-check"
+                >
+                  <Icon
+                    name="lucide:check"
+                    class="w-3 h-3"
+                  />
+                  {{ tpl.key === savedTemplateKey
+                    ? t('admin.appearanceSettingsForm.templates.liveNow')
+                    : t('admin.appearanceSettingsForm.templates.selected') }}
+                </span>
+              </div>
+
+              <p class="tpl-desc">
+                {{ templateText(tpl, 'description') }}
+              </p>
+
+              <p class="tpl-fit">
+                <span class="tpl-fit-label">{{ t('admin.appearanceSettingsForm.templates.bestFor') }}</span>
+                {{ templateText(tpl, 'storeTypes') }}
+              </p>
+
+              <div class="tpl-foot">
+                <div class="tpl-traits">
+                  <span class="tpl-trait">{{ t('admin.appearanceSettingsForm.templates.moods.' + tpl.mood) }}</span>
+                  <span class="tpl-trait">{{ t('admin.appearanceSettingsForm.templates.voices.' + tpl.voice) }}</span>
+                </div>
+                <button
+                  type="button"
+                  class="tpl-preview-btn"
+                  :disabled="!previewUrl"
+                  :title="previewUrl ? undefined : t('admin.appearanceSettingsForm.templates.previewNeedsSlug')"
                   @click.stop="openQuickView(tpl.key)"
                 >
                   <Icon
                     name="lucide:eye"
                     class="w-3.5 h-3.5"
                   />
-                  {{ t('admin.appearanceSettingsForm.templates.quickView') || 'Quick view' }}
-                </span>
+                  {{ t('admin.appearanceSettingsForm.templates.quickView') }}
+                </button>
               </div>
             </div>
-
-            <div class="template-card-meta">
-              <div class="template-card-meta-row">
-                <p class="template-card-name">
-                  {{ tpl.label }}
-                </p>
-                <span class="template-card-category">{{ tpl.category }}</span>
-              </div>
-              <p class="template-card-desc">
-                {{ tpl.storeTypes }}
-              </p>
-              <div class="template-card-pills">
-                <span
-                  class="template-card-pill template-card-pill-color"
-                  :style="{ '--c': templateAccent(tpl) }"
-                >
-                  <span
-                    class="template-card-pill-dot"
-                    :style="{ background: templateAccent(tpl) }"
-                  />
-                  {{ templateAccent(tpl).toUpperCase() }}
-                </span>
-                <span class="template-card-pill">
-                  <Icon
-                    name="lucide:type"
-                    class="w-3 h-3"
-                  />
-                  {{ tpl.fontName }}
-                </span>
-              </div>
-            </div>
-          </button>
+          </div>
         </div>
 
         <div
-          v-if="filteredTemplates.length === 0"
-          class="template-empty"
+          v-else
+          class="tpl-empty"
         >
           <Icon
             name="lucide:search-x"
-            class="template-empty-icon"
+            class="tpl-empty-icon"
           />
-          <p>{{ t('admin.common.noResults') || 'No templates match your search' }}</p>
+          <p class="tpl-empty-title">
+            {{ t('admin.appearanceSettingsForm.templates.emptyTitle') }}
+          </p>
+          <button
+            type="button"
+            class="settings-btn"
+            @click="clearFilters"
+          >
+            {{ t('admin.appearanceSettingsForm.templates.emptyAction') }}
+          </button>
         </div>
       </SettingsSection>
     </div>
@@ -369,7 +431,7 @@
                   class="w-4 h-4"
                   style="color: var(--text-muted)"
                 />
-                <h3>{{ t('admin.appearanceSettingsForm.templates.quickView') || 'Quick preview' }}</h3>
+                <h3>{{ quickViewTemplateName }}</h3>
               </div>
               <button
                 class="quick-view-close"
@@ -411,6 +473,7 @@ import { useAuthStore } from '~/stores/auth'
 import SettingsPageHeader from './settings/SettingsPageHeader.vue'
 import SettingsSection from './settings/SettingsSection.vue'
 import SettingsSaveBar from './settings/SettingsSaveBar.vue'
+import SettingsStatus from './settings/SettingsStatus.vue'
 import BrandImageField from './settings/BrandImageField.vue'
 import { normalizeHexColor } from '~/shared/storefront/template-brand'
 
@@ -439,34 +502,206 @@ const form = reactive({
 const initialFormString = ref(JSON.stringify(form))
 const isDirty = computed(() => initialFormString.value !== JSON.stringify(form))
 
-const categories = ['All', 'Minimalist', 'Bold', 'Tech', 'Luxury', 'Classic']
-const selectedCategory = ref('All')
+/*
+ * The storefront themes, described by the tokens the picker actually paints
+ * with: surfaces, ink, accent, corner radius and the real display face. The
+ * thumbnails are drawn from these values rather than from screenshots, so a
+ * theme can never drift away from the way it is advertised here.
+ *
+ * `mood` and `voice` are the two things a merchant can reason about at a
+ * glance (is it dark? is it a serif?) and drive the trait tags.
+ */
+type StoreTemplate = {
+  key: string
+  category: string
+  mood: 'dark' | 'light'
+  voice: 'serif' | 'sans' | 'display'
+  display: string
+  color: string
+  bg: string
+  surface: string
+  border: string
+  ink: string
+  inkSoft: string
+  radius: string
+}
+
+const templates: StoreTemplate[] = [
+  { key: 'classic', category: 'classic', mood: 'light', voice: 'serif', display: "'Alice', serif", color: '#0f172a', bg: '#f8fafc', surface: '#ffffff', border: '#e2e8f0', ink: '#0f172a', inkSoft: '#64748b', radius: '4px' },
+  { key: 'modern', category: 'minimalist', mood: 'light', voice: 'sans', display: "'Outfit', system-ui, sans-serif", color: '#0d9488', bg: '#f8fafc', surface: '#ffffff', border: '#e2e8f0', ink: '#0f172a', inkSoft: '#64748b', radius: '8px' },
+  { key: 'street', category: 'bold', mood: 'light', voice: 'display', display: "'Anton', sans-serif", color: '#facc15', bg: '#ffffff', surface: '#ffffff', border: '#111111', ink: '#000000', inkSoft: '#52525b', radius: '0px' },
+  { key: 'cozy', category: 'minimalist', mood: 'light', voice: 'sans', display: "'Nunito', sans-serif", color: '#a4c3b2', bg: '#f5f2ea', surface: '#fffdf8', border: '#e0dccf', ink: '#3f3a33', inkSoft: '#736a5e', radius: '16px' },
+  { key: 'cyber', category: 'tech', mood: 'dark', voice: 'display', display: "'Orbitron', sans-serif", color: '#f43f5e', bg: '#0d0515', surface: '#1a0a2e', border: '#3b1d63', ink: '#f5e9ff', inkSoft: '#a78bd0', radius: '4px' },
+  { key: 'stationnery', category: 'minimalist', mood: 'light', voice: 'serif', display: "'Merriweather', serif", color: '#334155', bg: '#fdfbf7', surface: '#ffffff', border: '#d9d2c5', ink: '#1e293b', inkSoft: '#7c7365', radius: '2px' },
+  { key: 'food', category: 'bold', mood: 'light', voice: 'sans', display: "'Nunito', sans-serif", color: '#ea580c', bg: '#f5f5f4', surface: '#ffffff', border: '#e7e5e4', ink: '#292524', inkSoft: '#66605b', radius: '12px' },
+  { key: 'wellness', category: 'minimalist', mood: 'light', voice: 'serif', display: "'Fraunces', serif", color: '#84cc16', bg: '#f1f2ec', surface: '#fcfcf9', border: '#d4d5cb', ink: '#1b1a16', inkSoft: '#6b6c61', radius: '0px' },
+  { key: 'playful', category: 'bold', mood: 'light', voice: 'sans', display: "'Nunito', sans-serif", color: '#9333ea', bg: '#faf5ff', surface: '#ffffff', border: '#e9d5ff', ink: '#3b0764', inkSoft: '#7e5aa6', radius: '20px' },
+  { key: 'activewear', category: 'tech', mood: 'dark', voice: 'display', display: "'Teko', sans-serif", color: '#eab308', bg: '#000000', surface: '#111111', border: '#2a2a2a', ink: '#f5f5f5', inkSoft: '#9ca3af', radius: '0px' },
+  { key: 'arena', category: 'tech', mood: 'dark', voice: 'sans', display: "'Outfit', system-ui, sans-serif", color: '#00b8fc', bg: '#030508', surface: '#0b0f14', border: '#133246', ink: '#e2e8f0', inkSoft: '#7d93a6', radius: '6px' },
+  { key: 'chrono', category: 'luxury', mood: 'dark', voice: 'serif', display: "'Cormorant Garamond', serif", color: '#a67c52', bg: '#0e1117', surface: '#131720', border: 'rgba(212,197,169,0.22)', ink: '#e8e0d5', inkSoft: '#9a9082', radius: '2px' },
+  { key: 'maison', category: 'luxury', mood: 'light', voice: 'serif', display: "'Fraunces', serif", color: '#0b4a25', bg: '#fbf3e6', surface: '#fff9ea', border: 'rgba(196,163,105,0.55)', ink: '#1d2419', inkSoft: '#5f6555', radius: '28px' },
+  { key: 'nour', category: 'elegant', mood: 'light', voice: 'serif', display: "'Marcellus', serif", color: '#7a3b46', bg: '#faf3ea', surface: '#fffdf9', border: 'rgba(201,162,75,0.4)', ink: '#2e1e20', inkSoft: '#725d57', radius: '20px' }
+]
+
+/*
+ * Three of the display faces (Teko, Cormorant, Marcellus) only ship inside the
+ * storefront themes that use them, so the admin has to ask for them itself —
+ * otherwise those three specimens silently fall back and misrepresent the theme.
+ */
+useHead({
+  link: [{
+    rel: 'stylesheet',
+    href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Marcellus&family=Teko:wght@400;500;600&display=swap'
+  }]
+})
+
+const selectedCategory = ref('all')
 const searchQuery = ref('')
+
+/*
+ * Derived from the templates themselves. The old hard-coded list was missing
+ * `Elegant`, which left Nour unreachable behind every filter but "All".
+ */
+const categories = computed(() => {
+  const seen: string[] = []
+  for (const tpl of templates) {
+    if (!seen.includes(tpl.category)) seen.push(tpl.category)
+  }
+  return [
+    { value: 'all', label: t('admin.appearanceSettingsForm.templates.categories.all'), count: templates.length },
+    ...seen.map(value => ({
+      value,
+      label: t('admin.appearanceSettingsForm.templates.categories.' + value),
+      count: templates.filter(tpl => tpl.category === value).length
+    }))
+  ]
+})
+
+function templateText(tpl: StoreTemplate, field: 'label' | 'description' | 'storeTypes') {
+  return t('admin.appearanceSettingsForm.templates.options.' + tpl.key + '.' + field)
+}
+
+function templateLabel(tpl: StoreTemplate) {
+  return templateText(tpl, 'label')
+}
+
+const filteredTemplates = computed(() => {
+  const q = searchQuery.value.trim().toLowerCase()
+  return templates.filter((tpl) => {
+    if (selectedCategory.value !== 'all' && tpl.category !== selectedCategory.value) return false
+    if (!q) return true
+    return [
+      templateLabel(tpl),
+      templateText(tpl, 'description'),
+      templateText(tpl, 'storeTypes'),
+      t('admin.appearanceSettingsForm.templates.categories.' + tpl.category)
+    ].some(value => value.toLowerCase().includes(q))
+  })
+})
+
+
+const filteredHasSelection = computed(() =>
+  filteredTemplates.value.some(tpl => tpl.key === form.templateKey)
+)
+
+function clearFilters() {
+  selectedCategory.value = 'all'
+  searchQuery.value = ''
+}
+
+/* What is published (savedTemplateKey) versus what is merely picked (form). */
+const savedTemplateKey = ref('classic')
+
+function templateByKey(key: string) {
+  return templates.find(tpl => tpl.key === key) || templates[0]
+}
+
+const liveTemplate = computed(() => templateByKey(savedTemplateKey.value))
+
+const quickViewTemplateName = computed(() =>
+  quickViewKey.value
+    ? templateLabel(templateByKey(quickViewKey.value))
+    : t('admin.appearanceSettingsForm.templates.quickView')
+)
+
+const pendingTemplate = computed(() =>
+  form.templateKey === savedTemplateKey.value ? null : templateByKey(form.templateKey)
+)
+
+/* The store's own name is the specimen text; fall back before settings load. */
+const brandName = computed(() =>
+  form.name.trim() || t('admin.appearanceSettingsForm.templates.sampleBrand')
+)
+
+const brandInitial = computed(() => Array.from(brandName.value)[0] || 'S')
+
+function plateVars(tpl: StoreTemplate) {
+  return {
+    '--tpl-bg': tpl.bg,
+    '--tpl-surface': tpl.surface,
+    '--tpl-border': tpl.border,
+    '--tpl-ink': tpl.ink,
+    '--tpl-ink-soft': tpl.inkSoft,
+    '--tpl-accent': templateAccent(tpl),
+    '--tpl-radius': tpl.radius
+  }
+}
+
+/* Long store names shrink rather than truncate — the whole name is the point. */
+function brandStyle(tpl: StoreTemplate) {
+  const length = brandName.value.length
+  const size = length > 22 ? 14 : length > 16 ? 17 : length > 10 ? 20 : 24
+  return { fontFamily: tpl.display, '--tpl-brand-size': size + 'px' }
+}
+
+/* ── Radiogroup keyboard handling ───────────────────────────────────── */
+
+const cardRefs = ref<HTMLElement[]>([])
+
+function setCardRef(el: unknown, index: number) {
+  if (el instanceof HTMLElement) cardRefs.value[index] = el
+}
+
+/*
+ * Exactly one card is in the tab order. Normally that is the selected one, but
+ * when a filter hides it the group would become unreachable, so the first card
+ * takes over.
+ */
+function cardTabIndex(tpl: StoreTemplate, index: number) {
+  if (form.templateKey === tpl.key) return 0
+  return index === 0 && !filteredHasSelection.value ? 0 : -1
+}
+
+function onCardKeydown(event: KeyboardEvent, index: number) {
+  const list = filteredTemplates.value
+  if (event.key === ' ' || event.key === 'Enter') {
+    event.preventDefault()
+    form.templateKey = list[index].key
+    return
+  }
+  /* Horizontal arrows follow reading order, so they flip under Arabic. */
+  const inline = typeof document !== 'undefined' && document.dir === 'rtl' ? -1 : 1
+  let step = 0
+  if (event.key === 'ArrowDown') step = 1
+  else if (event.key === 'ArrowUp') step = -1
+  else if (event.key === 'ArrowRight') step = inline
+  else if (event.key === 'ArrowLeft') step = -inline
+  if (!step) return
+  event.preventDefault()
+  const next = (index + step + list.length) % list.length
+  form.templateKey = list[next].key
+  nextTick(() => cardRefs.value[next]?.focus())
+}
 
 const showQuickView = ref(false)
 const quickViewUrl = ref('')
+const quickViewKey = ref('')
 const baseDomain = ref('')
 
 const previewUrl = computed(() => {
   if (!form.slug || !baseDomain.value) return null
   const protocol = typeof window !== 'undefined' ? window.location.protocol : 'http:'
   return `${protocol}//${form.slug}.${baseDomain.value}`
-})
-
-const filteredTemplates = computed(() => {
-  let list = templates.value
-  if (selectedCategory.value !== 'All') {
-    list = list.filter(t => t.category === selectedCategory.value)
-  }
-  const q = searchQuery.value.trim().toLowerCase()
-  if (q) {
-    list = list.filter(t =>
-      t.label.toLowerCase().includes(q) ||
-      t.storeTypes?.toLowerCase().includes(q) ||
-      t.fontName.toLowerCase().includes(q)
-    )
-  }
-  return list
 })
 
 onMounted(() => {
@@ -482,22 +717,6 @@ onMounted(() => {
   fetchSettings()
 })
 
-const templates = computed(() => [
-  { key: 'classic', label: 'Classic', category: 'Classic', storeTypes: t('admin.appearanceSettingsForm.templates.options.classic.storeTypes'), fontName: 'Alice', fontStyle: "'Alice', serif", color: '#0f172a', bg: '#f8fafc', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)', border: '#e2e8f0', textColor: '#0f172a', btnText: '#ffffff', radius: '4px', emoji: '🖼️', sampleDesc: 'Élégant', samplePrice: '189 €' },
-  { key: 'modern', label: 'Modern', category: 'Minimalist', storeTypes: t('admin.appearanceSettingsForm.templates.options.modern.storeTypes'), fontName: 'Outfit', fontStyle: "'Outfit', system-ui, sans-serif", color: '#0D9488', bg: '#f8fafc', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#CCFBF1,#99F6E4)', border: '#e2e8f0', textColor: '#475569', btnText: '#ffffff', radius: '8px', emoji: '🛍️', sampleDesc: 'Minimaliste', samplePrice: '129 €' },
-  { key: 'street', label: 'Street', category: 'Bold', storeTypes: t('admin.appearanceSettingsForm.templates.options.street.storeTypes'), fontName: 'Anton', fontStyle: "'Anton', sans-serif", color: '#FACC15', bg: '#ffffff', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#fef9c3,#fde68a)', border: '#FACC15', textColor: '#000000', btnText: '#000000', radius: '0px', emoji: '👟', sampleDesc: 'Limited drop', samplePrice: '99 €' },
-  { key: 'cozy', label: 'Cozy', category: 'Minimalist', storeTypes: t('admin.appearanceSettingsForm.templates.options.cozy.storeTypes'), fontName: 'Nunito', fontStyle: "'Nunito', sans-serif", color: '#A4C3B2', bg: '#F5F2EA', cardBg: '#F5F2EA', imgBg: 'linear-gradient(135deg,#d1fae5,#bbf7d0)', border: '#e8f0eb', textColor: '#475569', btnText: '#ffffff', radius: '16px', emoji: '🕯️', sampleDesc: 'Doux', samplePrice: '24 €' },
-  { key: 'cyber', label: 'Cyber', category: 'Tech', storeTypes: t('admin.appearanceSettingsForm.templates.options.cyber.storeTypes'), fontName: 'Orbitron', fontStyle: "'Orbitron', sans-serif", color: '#F43F5E', bg: '#0d0515', cardBg: '#1a0a2e', imgBg: 'linear-gradient(135deg,#2d1b5e,#1a0a2e)', border: '#F43F5E', textColor: '#e9d5ff', btnText: '#ffffff', radius: '4px', emoji: '🤖', sampleDesc: 'Next-gen', samplePrice: '499 €' },
-  { key: 'stationnery', label: 'Stationery', category: 'Minimalist', storeTypes: t('admin.appearanceSettingsForm.templates.options.stationnery.storeTypes'), fontName: 'Merriweather', fontStyle: "'Merriweather', serif", color: '#334155', bg: '#fdfbf7', cardBg: '#fdfbf7', imgBg: 'linear-gradient(135deg,#f8fafc,#e2e8f0)', border: '#cbd5e1', textColor: '#1e293b', btnText: '#fdfbf7', radius: '2px', emoji: '📓', sampleDesc: 'Élégance', samplePrice: '18 €' },
-  { key: 'food', label: 'Food', category: 'Bold', storeTypes: t('admin.appearanceSettingsForm.templates.options.food.storeTypes'), fontName: 'Nunito', fontStyle: "'Nunito', sans-serif", color: '#ea580c', bg: '#f5f5f4', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#ffedd5,#fed7aa)', border: '#e7e5e4', textColor: '#292524', btnText: '#ffffff', radius: '12px', emoji: '🍕', sampleDesc: 'Saveurs', samplePrice: '14 €' },
-  { key: 'wellness', label: 'Wellness', category: 'Minimalist', storeTypes: t('admin.appearanceSettingsForm.templates.options.wellness.storeTypes'), fontName: 'Fraunces', fontStyle: "'Fraunces', 'Solway', serif", color: '#84CC16', bg: '#F1F2EC', cardBg: '#FCFCF9', imgBg: 'linear-gradient(135deg,#E3E4DA,#D4D5CB)', border: '#D4D5CB', textColor: '#1B1A16', btnText: '#F1F2EC', radius: '0px', emoji: '🌿', sampleDesc: 'Bio', samplePrice: '22 €' },
-  { key: 'playful', label: 'Playful', category: 'Bold', storeTypes: t('admin.appearanceSettingsForm.templates.options.playful.storeTypes'), fontName: 'Nunito', fontStyle: "'Nunito', sans-serif", color: '#9333EA', bg: '#faf5ff', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#f3e8ff,#e9d5ff)', border: '#e9d5ff', textColor: '#334155', btnText: '#ffffff', radius: '20px', emoji: '🧸', sampleDesc: 'Toys & Fun', samplePrice: '15 €' },
-  { key: 'activewear', label: 'Activewear', category: 'Tech', storeTypes: t('admin.appearanceSettingsForm.templates.options.activewear.storeTypes'), fontName: 'Teko', fontStyle: "'Teko', sans-serif", color: '#EAB308', bg: '#000000', cardBg: '#111111', imgBg: 'linear-gradient(135deg,#1f2937,#000000)', border: '#333333', textColor: '#d1d5db', btnText: '#000000', radius: '0px', emoji: '⚡', sampleDesc: 'Performance', samplePrice: '89 €' },
-  { key: 'arena', label: 'Arena Performance', category: 'Tech', storeTypes: t('admin.appearanceSettingsForm.templates.options.arena.storeTypes'), fontName: 'Outfit', fontStyle: "'Outfit', system-ui, sans-serif", color: '#00B8FC', bg: '#030508', cardBg: '#0B0F14', imgBg: 'linear-gradient(135deg,#111820,#030508)', border: '#133246', textColor: '#E2E8F0', btnText: '#02060A', radius: '6px', emoji: '🎮', sampleDesc: 'Esports', samplePrice: '399 €' },
-  { key: 'chrono', label: 'Chrono Luxe', category: 'Luxury', storeTypes: t('admin.appearanceSettingsForm.templates.options.chrono.storeTypes'), fontName: 'Cormorant', fontStyle: "'Cormorant Garamond', serif", color: '#A67C52', bg: '#0E1117', cardBg: '#131720', imgBg: 'linear-gradient(135deg,#1A1F2E,#0B0E16)', border: 'rgba(212,197,169,0.18)', textColor: '#E8E0D5', btnText: '#ffffff', radius: '2px', emoji: '⌚', sampleDesc: 'Luxury', samplePrice: '3 500 €' },
-  { key: 'maison', label: 'Pistachio', category: 'Luxury', storeTypes: 'Premium · Food · Art de vivre', fontName: 'Fraunces', fontStyle: "'Fraunces', serif", color: '#0B4A25', bg: '#FBF3E6', cardBg: '#FFF9EA', imgBg: 'linear-gradient(135deg,#F7E4BD,#E4C58F)', border: 'rgba(228,197,143,0.52)', textColor: '#1D2419', btnText: '#FFF9EA', radius: '28px', emoji: '🌰', sampleDesc: 'Pistachio Luxe', samplePrice: '2 800 DA' },
-  { key: 'nour', label: 'Nour Élégance', category: 'Elegant', storeTypes: t('admin.appearanceSettingsForm.templates.options.nour.storeTypes'), fontName: 'Marcellus', fontStyle: "'Marcellus', serif", color: '#7A3B46', bg: '#FAF3EA', cardBg: '#FFFDF9', imgBg: 'linear-gradient(135deg,#F3E1D6,#E8C9B8)', border: 'rgba(201,162,75,0.35)', textColor: '#2E1E20', btnText: '#FFFDF9', radius: '20px', emoji: '🧕', sampleDesc: 'Modest Luxe', samplePrice: '4 500 DA' }
-])
 
 function handleSlugInput(e: Event) {
   const target = e.target as HTMLInputElement
@@ -525,7 +744,12 @@ function showMessage(type: 'success' | 'error', text: string) {
 }
 
 function openQuickView(key: string) {
-  quickViewUrl.value = previewUrl.value ? `${previewUrl.value}?template=${key}` : ''
+  if (!previewUrl.value) {
+    showMessage('error', t('admin.appearanceSettingsForm.templates.previewNeedsSlug'))
+    return
+  }
+  quickViewKey.value = key
+  quickViewUrl.value = `${previewUrl.value}?template=${key}`
   showQuickView.value = true
 }
 
@@ -537,7 +761,7 @@ function mockAiGenerate() {
   loading.value = true
   setTimeout(() => {
     form.primaryColor = presetColors[Math.floor(Math.random() * presetColors.length)]
-    form.templateKey = templates.value[Math.floor(Math.random() * templates.value.length)].key
+    form.templateKey = templates[Math.floor(Math.random() * templates.length)].key
     loading.value = false
     showMessage('success', t('admin.appearanceSettingsForm.brandAssets.logo.magicSuccess') || 'Magic identity applied.')
   }, 1000)
@@ -552,6 +776,7 @@ function updateForm(data: any) {
   form.primaryColor = data.primaryColor || '#C6F432'
   form.useBrandColor = data.useBrandColor === true
   form.templateKey = data.templateKey || 'classic'
+  savedTemplateKey.value = form.templateKey
   initialFormString.value = JSON.stringify(form)
 }
 
@@ -599,41 +824,11 @@ async function save() {
 }
 
 function reset() {
-  if (confirm(t('admin.appearanceSettingsForm.confirm.discard'))) {
-    fetchSettings()
-  }
+  fetchSettings()
 }
 </script>
 
 <style scoped>
-.appearance-form {
-  padding-bottom: 120px;
-}
-
-/* Header actions */
-.header-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 14px;
-  font-size: 12.5px;
-  font-weight: 600;
-  border-radius: 10px;
-  border: 1px solid var(--surface-border);
-  cursor: pointer;
-  transition: all 0.15s ease;
-  white-space: nowrap;
-}
-
-.header-action-secondary {
-  background: var(--surface-2);
-  color: var(--text-secondary);
-}
-
-.header-action-secondary:hover {
-  background: var(--nav-hover-bg);
-  color: var(--text-primary);
-}
 
 .header-action-magic {
   background: linear-gradient(135deg, rgba(139, 92, 246, 0.18), rgba(217, 70, 239, 0.18));
@@ -651,106 +846,10 @@ function reset() {
   cursor: not-allowed;
 }
 
-/* Status toast */
-.status-toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 8px 14px;
-  border-radius: 10px;
-  font-size: 12.5px;
-  font-weight: 500;
-  margin-bottom: 16px;
-}
-
-.status-toast.success {
-  background: rgba(34, 197, 94, 0.12);
-  color: #4ade80;
-  border: 1px solid rgba(34, 197, 94, 0.25);
-}
-
-.status-toast.error {
-  background: rgba(239, 68, 68, 0.12);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.25);
-}
-
 .appearance-sections {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-/* Fields */
-.field-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
-}
-
-@media (max-width: 720px) {
-  .field-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.field-label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: -0.005em;
-}
-
-.field-input {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-1);
-  color: var(--text-primary);
-  font-size: 13.5px;
-  transition: all 0.15s ease;
-}
-
-.field-input:focus {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.18);
-}
-
-.field-input-group {
-  display: flex;
-}
-
-.field-input-group-main {
-  border-top-right-radius: 0;
-  border-bottom-right-radius: 0;
-  border-right: none;
-}
-
-.field-input-group-suffix {
-  display: inline-flex;
-  align-items: center;
-  padding: 0 12px;
-  background: var(--surface-3);
-  border: 1px solid var(--surface-border);
-  border-top-right-radius: 10px;
-  border-bottom-right-radius: 10px;
-  font-size: 13px;
-  color: var(--text-tertiary);
-  font-family: ui-monospace, monospace;
-}
-
-.field-hint {
-  font-size: 11.5px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
 }
 
 /* Brand rows */
@@ -960,50 +1059,148 @@ function reset() {
   box-shadow: 0 0 0 2px var(--surface-1), 0 0 0 4px var(--brand);
 }
 
-/* Templates */
-.template-search {
+/* ── Template picker ───────────────────────────────────────────────────
+ *
+ * Fourteen storefront themes, each with its own palette and typeface, laid out
+ * inside a dark admin. The frame is therefore kept deliberately quiet — hairline
+ * borders, one neutral surface, no shadows of its own — so the only saturated
+ * colour on screen is the templates' and the lime selection ring. Every plate
+ * paints itself from --tpl-* custom properties set inline from the template's
+ * real design tokens.
+ */
+
+.tpl-search {
   position: relative;
-  display: flex;
-  align-items: center;
-  width: 240px;
-  max-width: 100%;
+  width: min(260px, 100%);
 }
 
-.template-search-icon {
+.tpl-search-icon {
   position: absolute;
-  left: 10px;
-  width: 14px;
-  height: 14px;
+  inset-inline-start: 11px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 15px;
+  height: 15px;
   color: var(--text-muted);
   pointer-events: none;
 }
 
-.template-search-input {
+.tpl-search-input {
   width: 100%;
-  padding: 8px 10px 8px 32px;
-  font-size: 12.5px;
-  border-radius: 9px;
+  padding: 9px 12px;
+  padding-inline-start: 34px;
+  border-radius: 10px;
   border: 1px solid var(--surface-border);
   background: var(--surface-1);
   color: var(--text-primary);
-  transition: all 0.15s ease;
+  font-family: inherit;
+  font-size: 13px;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.template-search-input:focus {
+.tpl-search-input::placeholder {
+  color: var(--text-muted);
+}
+
+.tpl-search-input:focus {
   outline: none;
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.16);
+  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.18);
 }
 
-.template-filters {
+/* ── Live strip ─────────────────────────────────────────────────────── */
+
+.tpl-live {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  padding: 12px 14px;
+  margin-block-end: 20px;
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  background: var(--surface-1);
+}
+
+/* A one-letter specimen of the published theme: same trick as the cards. */
+.tpl-live-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  border: 1px solid var(--tpl-border);
+  background: var(--tpl-bg);
+  overflow: hidden;
+}
+
+.tpl-live-chip-letter {
+  font-size: 19px;
+  line-height: 1;
+  color: var(--tpl-accent);
+}
+
+.tpl-live-text {
+  min-width: 0;
+}
+
+.tpl-live-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.tpl-live-name {
+  margin-block-start: 2px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.tpl-live-pending {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.tpl-live-pending-arrow {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  color: var(--text-muted);
+}
+
+[dir='rtl'] .tpl-live-pending-arrow {
+  transform: scaleX(-1);
+}
+
+.tpl-live-action {
+  margin-inline-start: auto;
+}
+
+/* ── Filters ────────────────────────────────────────────────────────── */
+
+.tpl-filters {
   display: flex;
   gap: 6px;
-  margin-bottom: 18px;
   flex-wrap: wrap;
+  margin-block-end: 18px;
 }
 
-.template-filter {
-  padding: 6px 12px;
+.tpl-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px 6px 12px;
+  font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   border-radius: 999px;
@@ -1011,252 +1208,341 @@ function reset() {
   background: var(--surface-1);
   color: var(--text-secondary);
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.template-filter:hover {
+.tpl-filter:hover {
   background: var(--nav-hover-bg);
   color: var(--text-primary);
 }
 
-.template-filter.is-active {
+.tpl-filter.is-active {
   background: var(--text-primary);
-  color: var(--surface-1);
   border-color: var(--text-primary);
+  color: var(--surface-1);
 }
 
-.template-grid {
+.tpl-filter-count {
+  font-size: 10.5px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-tertiary);
+}
+
+.tpl-filter.is-active .tpl-filter-count {
+  background: rgba(0, 0, 0, 0.16);
+  color: inherit;
+}
+
+/* ── Grid + card ────────────────────────────────────────────────────── */
+
+.tpl-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(268px, 100%), 1fr));
   gap: 16px;
 }
 
-.template-card {
+.tpl-card {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--surface-1);
-  border: 2px solid var(--surface-border);
+  border: 1px solid var(--surface-border);
   border-radius: 14px;
+  background: var(--surface-1);
   overflow: hidden;
   cursor: pointer;
-  transition: all 0.2s ease;
-  text-align: left;
-  font-family: inherit;
+  transition: border-color 0.18s ease, transform 0.18s ease, box-shadow 0.18s ease;
 }
 
-.template-card:hover {
+.tpl-card:hover {
+  border-color: var(--surface-border-hover);
   transform: translateY(-2px);
-  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
-  border-color: color-mix(in srgb, var(--surface-border) 50%, var(--text-muted));
 }
 
-.template-card.is-selected {
+.tpl-card.is-selected {
   border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.16), 0 12px 32px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 0 0 2px rgba(var(--brand-rgb) / 0.28);
 }
 
-.template-card-badge {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 5;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  background: var(--brand);
-  color: #0a0a0a;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 14px rgba(var(--brand-rgb) / 0.4);
-}
+/* ── The specimen plate ─────────────────────────────────────────────── */
 
-.template-card-preview {
+.tpl-plate {
   position: relative;
-  height: 180px;
+  height: 176px;
+  padding: 12px 14px 14px;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  flex-direction: column;
+  background: var(--tpl-bg);
+  border-block-end: 1px solid var(--surface-border);
   overflow: hidden;
 }
 
-.template-card-accent {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
+.tpl-plate-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding-block-end: 9px;
+  border-block-end: 1px solid var(--tpl-border);
+}
+
+.tpl-plate-mark {
+  width: 14px;
+  height: 5px;
+  border-radius: 999px;
+  background: var(--tpl-accent);
+}
+
+.tpl-plate-links {
+  display: flex;
+  gap: 5px;
+}
+
+.tpl-plate-links i {
+  width: 12px;
   height: 3px;
-  background: var(--accent);
+  border-radius: 999px;
+  background: var(--tpl-ink-soft);
+  opacity: 0.5;
 }
 
-.template-card-mockup {
-  width: 132px;
-  background: var(--card-bg);
-  border: 1px solid var(--border);
-  overflow: hidden;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
-}
-
-.template-card-mockup-img {
-  height: 72px;
+.tpl-plate-hero {
+  flex: 1;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 26px;
+  gap: 5px;
+  min-width: 0;
+  text-align: center;
+  padding-block: 4px;
 }
 
-.template-card-mockup-body {
-  padding: 8px 9px 9px;
-}
-
-.template-card-mockup-name {
-  font-size: 10px;
-  font-weight: 600;
-  line-height: 1.2;
+/*
+ * The signature. The merchant's own store name, in the template's real display
+ * face — 14 cards become 14 readings of their brand rather than 14 tinted
+ * rectangles. Size is set inline and shrinks with the name's length.
+ */
+.tpl-plate-brand {
+  max-width: 100%;
+  font-size: var(--tpl-brand-size, 22px);
+  line-height: 1.1;
+  color: var(--tpl-ink);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.template-card-mockup-price {
-  font-size: 10px;
-  font-weight: 700;
-  margin-top: 2px;
+.tpl-plate-tagline {
+  font-size: 8.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--tpl-ink-soft);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
 }
 
-.template-card-mockup-cta {
-  display: block;
-  text-align: center;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 4px 0;
-  margin-top: 6px;
-}
-
-.template-card-overlay {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(2px);
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.template-card:hover .template-card-overlay {
-  opacity: 1;
-}
-
-.template-card-preview-btn {
-  display: inline-flex;
-  align-items: center;
+/*
+ * The shelf shows the two things a still image can honestly show about layout:
+ * the template's corner radius and how heavy its card borders are.
+ */
+.tpl-plate-shelf {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 6px;
-  padding: 8px 14px;
-  background: white;
-  color: #0a0a0a;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 999px;
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  transform: translateY(6px);
-  transition: transform 0.2s ease;
 }
 
-.template-card:hover .template-card-preview-btn {
-  transform: translateY(0);
+.tpl-plate-tile {
+  height: 30px;
+  border-radius: var(--tpl-radius);
+  border: 1px solid var(--tpl-border);
+  background: var(--tpl-surface);
 }
 
-.template-card-meta {
-  padding: 12px 14px;
-  background: var(--surface-2);
-  border-top: 1px solid var(--surface-border);
+.tpl-plate-cta {
+  height: 8px;
+  width: 46%;
+  margin-block-start: 7px;
+  margin-inline: auto;
+  border-radius: var(--tpl-radius);
+  background: var(--tpl-accent);
+}
+
+/* ── Card body ──────────────────────────────────────────────────────── */
+
+.tpl-body {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 7px;
+  padding: 13px 14px 14px;
 }
 
-.template-card-meta-row {
+.tpl-body-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 8px;
 }
 
-.template-card-name {
-  font-size: 13px;
+.tpl-name {
+  font-size: 13.5px;
   font-weight: 600;
   color: var(--text-primary);
   letter-spacing: -0.01em;
-}
-
-.template-card-category {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.template-card-desc {
-  font-size: 11px;
-  color: var(--text-tertiary);
-  line-height: 1.4;
-  white-space: nowrap;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
-.template-card-pills {
+.tpl-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--brand);
+  color: var(--brand-contrast);
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.tpl-desc {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tpl-fit {
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--text-secondary);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.tpl-fit-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.tpl-fit-label::after {
+  content: ' · ';
+}
+
+.tpl-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-block-start: auto;
+  padding-block-start: 11px;
+  border-block-start: 1px solid var(--surface-border);
+}
+
+.tpl-traits {
   display: flex;
   gap: 5px;
   flex-wrap: wrap;
-  margin-top: 2px;
 }
 
-.template-card-pill {
+.tpl-trait {
+  padding: 2.5px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--surface-border);
+  font-size: 10.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.tpl-preview-btn {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 10px;
-  font-weight: 500;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-1);
+  gap: 5px;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  font-family: inherit;
+  font-size: 11.5px;
+  font-weight: 600;
   color: var(--text-secondary);
-  font-family: ui-monospace, monospace;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
 }
 
-.template-card-pill-color {
-  background: color-mix(in srgb, var(--c) 12%, transparent);
-  border-color: color-mix(in srgb, var(--c) 32%, transparent);
-  color: var(--c);
+.tpl-preview-btn:hover:not(:disabled) {
+  background: var(--nav-hover-bg);
+  border-color: var(--surface-border);
+  color: var(--text-primary);
 }
 
-.template-card-pill-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+.tpl-preview-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
-.template-empty {
+/* ── Empty state ────────────────────────────────────────────────────── */
+
+.tpl-empty {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 60px 20px;
-  color: var(--text-tertiary);
-  font-size: 13px;
+  gap: 10px;
+  padding: 48px 20px;
+  border: 1px dashed var(--surface-border);
+  border-radius: 14px;
+  text-align: center;
 }
 
-.template-empty-icon {
-  width: 32px;
-  height: 32px;
+.tpl-empty-icon {
+  width: 26px;
+  height: 26px;
   color: var(--text-muted);
+}
+
+.tpl-empty-title {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+@media (pointer: coarse) {
+  .tpl-preview-btn {
+    min-height: 44px;
+    padding: 10px 12px;
+  }
+
+  .tpl-filter {
+    min-height: 44px;
+  }
+}
+
+/* Narrow: the strip stacks, so the action stops hugging the inline end. */
+@media (max-width: 520px) {
+  .tpl-live-action {
+    margin-inline-start: 0;
+    width: 100%;
+  }
+
+  .tpl-live-pending {
+    width: 100%;
+  }
 }
 
 /* Quick view modal */
