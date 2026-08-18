@@ -15,9 +15,9 @@ const metaPixel = useMetaPixel()
 const productDetailRoute = computed(() => /^\/(?:product|p)\//.test(route.path))
 
 useHead(() => {
-  if (!pixelScriptEnabled.value) return {}
-  return {
-    script: [
+  const head: Record<string, any> = {}
+  if (pixelScriptEnabled.value) {
+    head.script = [
       {
         key: 'facebook-pixel-loader',
         src: '/api/pixel/facebook.js',
@@ -25,6 +25,15 @@ useHead(() => {
       }
     ]
   }
+  if (pixelNoscriptEnabled.value) {
+    head.noscript = [
+      {
+        key: 'facebook-pixel-noscript',
+        innerHTML: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${facebookPixelId.value}&ev=PageView&noscript=1" alt="">`
+      }
+    ]
+  }
+  return head
 })
 
 watch(
@@ -42,14 +51,5 @@ watch(
   <component :is="StoreShell" :hide-navigation="false" :mobile-header-hidden="true" :hide-announcement-bar="true">
     <slot />
     <StorefrontSharedProductCardVariantModalHost />
-    <noscript v-if="pixelNoscriptEnabled">
-      <img
-        height="1"
-        width="1"
-        style="display:none"
-        :src="`https://www.facebook.com/tr?id=${facebookPixelId}&ev=PageView&noscript=1`"
-        alt=""
-      >
-    </noscript>
   </component>
 </template>
