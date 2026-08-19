@@ -329,6 +329,102 @@ onMounted(() => {
   animation: none !important;
 }
 
+/* ------------------------------------------------------------------
+   Shared storefront pages (order success, order confirmation, category
+   index, legal pages) render inside this theme but are not template-owned,
+   so they arrive in a generic gray/slate palette with soft radii.
+
+   No wellness file uses gray/zinc/neutral, bare `shadow`, or any radius
+   other than rounded-full. So every selector below can only ever match
+   markup that came from a shared page — which is exactly the intent.
+   The other templates never see these rules.
+   ------------------------------------------------------------------ */
+
+/* Grounds and surfaces */
+.wl-root .bg-gray-50,
+.wl-root .bg-slate-50,
+.wl-root .bg-slate-100,
+.wl-root .bg-gray-100 { background-color: #F1F2EC; }
+.wl-root .bg-white { background-color: #FCFCF9; }
+
+/* Ink */
+.wl-root .text-gray-900,
+.wl-root .text-slate-900,
+.wl-root .text-gray-800,
+.wl-root .text-slate-800,
+.wl-root .text-gray-700,
+.wl-root .text-slate-700 { color: #1B1A16; }
+
+/* Secondary text */
+.wl-root .text-gray-600,
+.wl-root .text-gray-500,
+.wl-root .text-gray-400,
+.wl-root .text-slate-600,
+.wl-root .text-slate-500,
+.wl-root .text-slate-400 { color: #6E6E62; }
+
+/* Rules */
+.wl-root .border-gray-100,
+.wl-root .border-gray-200,
+.wl-root .border-gray-300,
+.wl-root .border-slate-100,
+.wl-root .border-slate-200,
+.wl-root .border-slate-300 { border-color: #D4D5CB; }
+.wl-root .divide-gray-200 > :not([hidden]) ~ :not([hidden]),
+.wl-root .divide-slate-200 > :not([hidden]) ~ :not([hidden]) { border-color: #D4D5CB; }
+
+/*
+  Square everything except rounded-full: wellness itself only ever uses
+  rounded-full, and only for things that are genuinely circular.
+*/
+.wl-root :is(.rounded, .rounded-sm, .rounded-md, .rounded-lg, .rounded-xl, .rounded-2xl, .rounded-3xl) {
+  border-radius: 0;
+}
+
+/* Wellness uses shadow-lg / shadow-2xl deliberately; bare shadow is foreign. */
+.wl-root :is(.shadow, .shadow-sm) {
+  box-shadow: none;
+}
+/* A shared card with no shadow needs its edge back. */
+.wl-root .bg-white.shadow,
+.wl-root .bg-white.shadow-sm {
+  border: 1px solid #D4D5CB;
+}
+
+/* Headings on shared pages take the display voice; wellness ones already have it. */
+.wl-root main :is(h1, h2):not([class*="wl-display"]) {
+  font-family: 'Fraunces', 'Solway', Georgia, serif;
+  font-variation-settings: 'opsz' 90;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+}
+
+/* Order ids and reference codes read as label data. */
+.wl-root main .font-mono {
+  font-family: 'Archivo Narrow', 'Archivo', sans-serif;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+/* Generic success/status chips: keep the semantic hue, drop the pill. */
+.wl-root :is(.bg-green-100, .bg-emerald-100) { background-color: #F1F2EC; }
+.wl-root :is(.text-green-600, .text-green-700, .text-emerald-600) { color: #1B1A16; }
+/*
+  Round badges on shared pages become plates. Keyed off a background this
+  theme has already remapped, so wellness's own circles (the checkout
+  spinner) keep their radius.
+*/
+.wl-root :is(.bg-green-100, .bg-emerald-100, .bg-gray-50, .bg-gray-100, .bg-slate-50, .bg-slate-100).rounded-full {
+  border-radius: 0;
+  border: 1px solid #D4D5CB;
+}
+/* Translucent chips laid over imagery on shared pages get the same treatment. */
+.wl-root main :is([class*="bg-white/"], .bg-white).rounded-full {
+  border-radius: 0;
+  background-color: #FCFCF9;
+  border: 1px solid #D4D5CB;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .wl-root *,
   .wl-root *::before,

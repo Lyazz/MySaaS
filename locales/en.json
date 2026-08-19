@@ -1000,6 +1000,24 @@
           "visitUs": "Visit Us"
         },
         "addressPlaceholder": "123 Store St, City, Country"
+      },
+      "categories": {
+        "title": "Categories",
+        "subtitle": "Browse every collection in the store.",
+        "card": {
+          "viewCollection": "View collection"
+        },
+        "empty": {
+          "title": "No categories yet",
+          "subtitle": "Categories appear here as soon as they are added."
+        },
+        "errors": {
+          "loadFailed": "Categories could not be loaded. Refresh the page to try again."
+        },
+        "seo": {
+          "title": "Categories",
+          "description": "Browse every collection in the store."
+        }
       }
     },
     "home": {

@@ -986,6 +986,24 @@
           "visitUs": "Rendez-nous visite"
         },
         "addressPlaceholder": "123 rue du Magasin, Ville, Pays"
+      },
+      "categories": {
+        "title": "Catégories",
+        "subtitle": "Parcourez toutes les collections de la boutique.",
+        "card": {
+          "viewCollection": "Voir la collection"
+        },
+        "empty": {
+          "title": "Aucune catégorie",
+          "subtitle": "Les catégories apparaîtront ici dès leur ajout."
+        },
+        "errors": {
+          "loadFailed": "Impossible de charger les catégories. Actualisez la page pour réessayer."
+        },
+        "seo": {
+          "title": "Catégories",
+          "description": "Parcourez toutes les collections de la boutique."
+        }
       }
     },
     "home": {
