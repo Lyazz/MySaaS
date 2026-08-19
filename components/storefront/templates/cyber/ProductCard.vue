@@ -77,6 +77,7 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: Number(props.product.price),
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: primaryImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
