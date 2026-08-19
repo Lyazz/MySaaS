@@ -192,6 +192,10 @@ import CyberProductLandingPage from './cyber/ProductLandingPage.vue'
 import StationneryProductLandingPage from './stationnery/ProductLandingPage.vue'
 import FoodProductLandingPage from './food/ProductLandingPage.vue'
 import WellnessProductLandingPage from './wellness/ProductLandingPage.vue'
+
+// Wishlist: only wellness defines its own; everything else keeps the shared one.
+import WishlistDefault from '~/components/storefront/shared/WishlistDefault.vue'
+import WellnessWishlist from './wellness/Wishlist.vue'
 import PlayfulProductLandingPage from './playful/ProductLandingPage.vue'
 import ActivewearProductLandingPage from './activewear/ProductLandingPage.vue'
 
@@ -412,3 +416,20 @@ export const selectTemplate = (
   const resolved = resolveTemplateKey(key)
   return templates[resolved]
 }
+
+export const wishlistTemplates = {
+  classic: WishlistDefault,
+  modern: WishlistDefault,
+  street: WishlistDefault,
+  cozy: WishlistDefault,
+  cyber: WishlistDefault,
+  stationnery: WishlistDefault,
+  food: WishlistDefault,
+  wellness: WellnessWishlist,
+  playful: WishlistDefault,
+  activewear: WishlistDefault,
+  chrono: WishlistDefault,
+  maison: WishlistDefault,
+  arena: WishlistDefault,
+  nour: WishlistDefault
+} as const
