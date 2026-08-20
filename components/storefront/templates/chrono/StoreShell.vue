@@ -394,6 +394,7 @@ const props = defineProps<{
 
           <div class="pt-8 border-t text-center text-xs" style="border-color: rgba(212,197,169,0.08); color: #4A4540;">
             {{ storefrontContent.footer.copyright(tenantName) }}
+            <div class="mt-2"><StorefrontSharedPoweredBy /></div>
           </div>
         </div>
       </footer>

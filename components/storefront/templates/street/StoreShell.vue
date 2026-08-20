@@ -326,6 +326,7 @@ const currentYear = new Date().getFullYear()
 
           <div class="pt-8 border-t-2 border-gray-800 text-center font-mono text-xs text-gray-500 uppercase">
             {{ storefrontContent.footer.copyright(tenantName) }}
+            <div class="mt-2 normal-case"><StorefrontSharedPoweredBy /></div>
           </div>
         </div>
       </footer>

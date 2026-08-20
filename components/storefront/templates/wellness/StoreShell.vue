@@ -444,6 +444,7 @@ defineProps<{
           <!-- Bottom -->
           <div class="pt-8 border-t border-wl-rule flex flex-col md:flex-row justify-between items-center gap-4 wl-label !tracking-[0.12em] text-wl-muted">
             <div>{{ storefrontContent.footer.copyright(tenantName) }}</div>
+            <StorefrontSharedPoweredBy />
           </div>
         </div>
       </footer>

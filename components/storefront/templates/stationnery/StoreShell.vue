@@ -446,6 +446,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
           <div class="pt-8 border-t border-navy-800 text-center text-xs text-slate-500">
             {{ storefrontContent.footer.copyright(tenantName) }}
+            <div class="mt-2"><StorefrontSharedPoweredBy /></div>
           </div>
         </div>
       </footer>

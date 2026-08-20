@@ -372,6 +372,7 @@ watch(searchQuery, async (q) => {
           <div class="shell-footer__bottom">
             <span>{{ storefrontContent.footer.copyright(tenantName) }}</span>
             <span>Atelier · Algérie</span>
+            <StorefrontSharedPoweredBy />
           </div>
         </div>
       </footer>

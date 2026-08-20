@@ -432,6 +432,7 @@ const props = defineProps<{
 
           <div class="pt-8 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4 text-xs text-slate-400">
             <p>{{ storefrontContent.footer.copyright(tenantName) }}</p>
+            <StorefrontSharedPoweredBy />
           </div>
         </div>
       </footer>

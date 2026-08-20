@@ -467,6 +467,7 @@ watch(isSearchOpen, (open) => {
 
           <div class="pt-8 border-t border-[#C9A24B]/20 text-center text-xs text-[#E9DCCB]/50">
             {{ storefrontContent.footer.copyright(tenantName) }}
+            <div class="mt-2"><StorefrontSharedPoweredBy /></div>
           </div>
         </div>
       </footer>
