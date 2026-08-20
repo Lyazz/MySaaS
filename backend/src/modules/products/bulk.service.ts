@@ -199,59 +199,115 @@ const buildUniqueSlug = async (tenantId: string, base: string) => {
     return `${root}-${Date.now()}`
 }
 
-const parseDelimitedValues = (raw: string): string[] => {
-    return Array.from(
-        new Set(
-            raw
-                .split('|')
-                .map((v) => v.trim())
-                .filter(Boolean)
-        )
-    )
+// Preserves position and duplicates (no dedup) — needed to keep categoryTitles[i] aligned with
+// categorySlugs[i] for the same category reference.
+const splitPipeListPositional = (raw: string): string[] =>
+    raw.trim() ? raw.split('|').map((v) => v.trim()) : []
+
+type CategoryRef = { id?: string; slug?: string; title?: string }
+
+const buildCategoryRefs = (idsCell: string, slugsCell: string, titlesCell: string): CategoryRef[] => {
+    const ids = splitPipeListPositional(idsCell)
+    const slugs = splitPipeListPositional(slugsCell)
+    const titles = splitPipeListPositional(titlesCell)
+    const length = Math.max(ids.length, slugs.length, titles.length)
+
+    const refs: CategoryRef[] = []
+    for (let i = 0; i < length; i++) {
+        const id = ids[i] || undefined
+        const slug = slugs[i] || undefined
+        const title = titles[i] || undefined
+        if (id || slug) refs.push({ id, slug, title })
+    }
+    return refs
+}
+
+const humanizeSlug = (slug: string): string => {
+    const words = slug
+        .replace(/[-_]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+    if (words.length === 0) return slug
+    return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
 }
 
 type CategoryResolution = {
     categoryIds: string[]
     unmatchedIds: string[]
     unmatchedSlugs: string[]
+    createdSlugs: string[]
 }
 
-// Unmatched ids/slugs are dropped (not thrown) rather than failing the row: a category id from the
-// exporting tenant will never exist in a different tenant's category table, so importing a catalog
-// into a new store must still succeed — just without that category assignment.
+// Resolves each category reference against the *destination* tenant's categories, matching by id
+// first, then by slug. A reference with a slug that matches nothing gets a brand-new category
+// created for it (when allowCreate is true) — using the reference's title if the CSV carried one,
+// otherwise a title derived from the slug — so importing/migrating a catalog into a new store
+// doesn't require pre-creating categories by hand. A reference with only an id (no slug) can't be
+// created meaningfully and is reported as unmatched instead, same as when allowCreate is false.
 const resolveCategoryIdsForImport = async (
     tenantId: string,
-    rawIds: string[],
-    rawSlugs: string[]
+    refs: CategoryRef[],
+    allowCreate: boolean
 ): Promise<CategoryResolution> => {
-    let resolvedByIds: string[] = []
-    let unmatchedIds: string[] = []
-    if (rawIds.length > 0) {
-        const found = await prisma.category.findMany({
-            where: { tenantId, id: { in: rawIds } },
-            select: { id: true }
-        })
-        const foundSet = new Set(found.map((item) => item.id))
-        resolvedByIds = rawIds.filter((id) => foundSet.has(id))
-        unmatchedIds = rawIds.filter((id) => !foundSet.has(id))
-    }
+    const candidateIds = Array.from(new Set(refs.map((r) => r.id).filter((v): v is string => Boolean(v))))
+    const candidateSlugs = Array.from(new Set(refs.map((r) => r.slug).filter((v): v is string => Boolean(v))))
 
-    let resolvedBySlugs: string[] = []
-    let unmatchedSlugs: string[] = []
-    if (rawSlugs.length > 0) {
-        const found = await prisma.category.findMany({
-            where: { tenantId, slug: { in: rawSlugs } },
+    const foundById = candidateIds.length
+        ? await prisma.category.findMany({ where: { tenantId, id: { in: candidateIds } }, select: { id: true } })
+        : []
+    const idSet = new Set(foundById.map((c) => c.id))
+
+    const foundBySlug = candidateSlugs.length
+        ? await prisma.category.findMany({
+            where: { tenantId, slug: { in: candidateSlugs } },
             select: { id: true, slug: true }
         })
-        const bySlug = new Map(found.map((item) => [item.slug, item.id]))
-        resolvedBySlugs = rawSlugs.filter((slug) => bySlug.has(slug)).map((slug) => bySlug.get(slug)!)
-        unmatchedSlugs = rawSlugs.filter((slug) => !bySlug.has(slug))
+        : []
+    const slugMap = new Map(foundBySlug.map((c) => [c.slug, c.id]))
+
+    const resolvedIds: string[] = []
+    const unmatchedIds: string[] = []
+    const unmatchedSlugs: string[] = []
+    const createdSlugs: string[] = []
+
+    for (const ref of refs) {
+        if (ref.id && idSet.has(ref.id)) {
+            resolvedIds.push(ref.id)
+            continue
+        }
+
+        if (ref.slug) {
+            const existingId = slugMap.get(ref.slug)
+            if (existingId) {
+                resolvedIds.push(existingId)
+                continue
+            }
+
+            if (!allowCreate) {
+                unmatchedSlugs.push(ref.slug)
+                continue
+            }
+
+            const created = await prisma.category.upsert({
+                where: { tenantId_slug: { tenantId, slug: ref.slug } },
+                update: {},
+                create: { tenantId, slug: ref.slug, title: ref.title?.trim() || humanizeSlug(ref.slug) }
+            })
+            slugMap.set(ref.slug, created.id)
+            resolvedIds.push(created.id)
+            createdSlugs.push(ref.slug)
+            continue
+        }
+
+        if (ref.id) unmatchedIds.push(ref.id)
     }
 
     return {
-        categoryIds: Array.from(new Set([...resolvedByIds, ...resolvedBySlugs])),
-        unmatchedIds,
-        unmatchedSlugs
+        categoryIds: Array.from(new Set(resolvedIds)),
+        unmatchedIds: Array.from(new Set(unmatchedIds)),
+        unmatchedSlugs: Array.from(new Set(unmatchedSlugs)),
+        createdSlugs: Array.from(new Set(createdSlugs))
     }
 }
 
@@ -283,8 +339,10 @@ export class BulkProductsService {
             'stock',
             'categoryId',
             'categorySlug',
+            'categoryTitle',
             'categoryIds',
             'categorySlugs',
+            'categoryTitles',
             'description',
             'miniDescription',
             'images'
@@ -296,6 +354,7 @@ export class BulkProductsService {
                 .filter((category: any) => category?.id)
             const categoryIds = categories.map((category: any) => category.id)
             const categorySlugs = categories.map((category: any) => category.slug)
+            const categoryTitles = categories.map((category: any) => category.title)
 
             return {
             id: p.id,
@@ -306,8 +365,10 @@ export class BulkProductsService {
             stock: String(p.stock),
             categoryId: p.categoryId ?? '',
             categorySlug: p.category?.slug ?? '',
+            categoryTitle: p.category?.title ?? '',
             categoryIds: categoryIds.join('|'),
             categorySlugs: categorySlugs.join('|'),
+            categoryTitles: categoryTitles.join('|'),
             description: p.description ?? '',
             miniDescription: p.miniDescription ?? '',
             images: (p.images ?? []).join('|')
@@ -349,8 +410,10 @@ export class BulkProductsService {
             'stock',
             'categoryId',
             'categorySlug',
+            'categoryTitle',
             'categoryIds',
             'categorySlugs',
+            'categoryTitles',
             'description',
             'miniDescription',
             'images'
@@ -367,6 +430,7 @@ export class BulkProductsService {
                 .filter((category: any) => category?.id)
             const categoryIds = categories.map((category: any) => category.id)
             const categorySlugs = categories.map((category: any) => category.slug)
+            const categoryTitles = categories.map((category: any) => category.title)
 
             const imageUrls = (p.images ?? []) as string[]
             const archivedRefs: string[] = []
@@ -399,8 +463,10 @@ export class BulkProductsService {
                 stock: String(p.stock),
                 categoryId: p.categoryId ?? '',
                 categorySlug: p.category?.slug ?? '',
+                categoryTitle: p.category?.title ?? '',
                 categoryIds: categoryIds.join('|'),
                 categorySlugs: categorySlugs.join('|'),
+                categoryTitles: categoryTitles.join('|'),
                 description: p.description ?? '',
                 miniDescription: p.miniDescription ?? '',
                 images: archivedRefs.join('|')
@@ -419,7 +485,7 @@ export class BulkProductsService {
     async importProductsArchive(
         tenantId: string,
         zipBuffer: Buffer,
-        opts?: { actorUserId?: string | null },
+        opts?: { actorUserId?: string | null; canCreateCategories?: boolean },
         onProgress?: BulkProgressCallback
     ): Promise<ImportSummary> {
         let zip: AdmZip
@@ -510,11 +576,12 @@ export class BulkProductsService {
     async importProductsCsv(
         tenantId: string,
         csvText: string,
-        opts?: { actorUserId?: string | null },
+        opts?: { actorUserId?: string | null; canCreateCategories?: boolean },
         onRowProgress?: (processed: number, total: number) => void
     ): Promise<ImportSummary> {
         const parsed = parseCsv(csvText)
         const summary: ImportSummary = { created: 0, updated: 0, skipped: 0, errors: [], warnings: [] }
+        const canCreateCategories = opts?.canCreateCategories ?? true
 
         const supportedColumns = new Set([
             'id',
@@ -525,8 +592,10 @@ export class BulkProductsService {
             'stock',
             'categoryId',
             'categorySlug',
+            'categoryTitle',
             'categoryIds',
             'categorySlugs',
+            'categoryTitles',
             'description',
             'miniDescription',
             'images'
@@ -593,15 +662,24 @@ export class BulkProductsService {
                     })
 
                 const categoryIds = await (async () => {
-                    const hasMultiCategoryColumns = hasColumn('categoryIds') || hasColumn('categorySlugs')
-                    const hasSingleCategoryColumns = hasColumn('categoryId') || hasColumn('categorySlug')
+                    const hasMultiCategoryColumns =
+                        hasColumn('categoryIds') || hasColumn('categorySlugs') || hasColumn('categoryTitles')
+                    const hasSingleCategoryColumns =
+                        hasColumn('categoryId') || hasColumn('categorySlug') || hasColumn('categoryTitle')
 
-                    const reportUnmatched = (resolution: CategoryResolution) => {
-                        const unmatched = [...resolution.unmatchedIds, ...resolution.unmatchedSlugs]
-                        if (unmatched.length > 0) {
+                    const reportResolution = (resolution: CategoryResolution) => {
+                        if (resolution.unmatchedIds.length > 0 || resolution.unmatchedSlugs.length > 0) {
+                            const unmatched = [...resolution.unmatchedIds, ...resolution.unmatchedSlugs]
                             summary.warnings.push({
                                 row: rowNumber,
                                 message: `Category not found in this store, skipped: ${unmatched.join(', ')}`
+                            })
+                        }
+                        if (resolution.createdSlugs.length > 0) {
+                            const label = resolution.createdSlugs.length === 1 ? 'category' : 'categories'
+                            summary.warnings.push({
+                                row: rowNumber,
+                                message: `Created new ${label} in this store: ${resolution.createdSlugs.join(', ')}`
                             })
                         }
                         return resolution.categoryIds
@@ -610,12 +688,13 @@ export class BulkProductsService {
                     if (hasMultiCategoryColumns) {
                         const idsCell = (record.categoryIds ?? '').trim()
                         const slugsCell = (record.categorySlugs ?? '').trim()
-                        if (!idsCell && !slugsCell) return []
-                        return reportUnmatched(
+                        const titlesCell = (record.categoryTitles ?? '').trim()
+                        if (!idsCell && !slugsCell && !titlesCell) return []
+                        return reportResolution(
                             await resolveCategoryIdsForImport(
                                 tenantId,
-                                idsCell ? parseDelimitedValues(idsCell) : [],
-                                slugsCell ? parseDelimitedValues(slugsCell) : []
+                                buildCategoryRefs(idsCell, slugsCell, titlesCell),
+                                canCreateCategories
                             )
                         )
                     }
@@ -623,12 +702,13 @@ export class BulkProductsService {
                     if (hasSingleCategoryColumns) {
                         const categoryIdCell = (record.categoryId ?? '').trim()
                         const categorySlugCell = (record.categorySlug ?? '').trim()
-                        if (!categoryIdCell && !categorySlugCell) return []
-                        return reportUnmatched(
+                        const categoryTitleCell = (record.categoryTitle ?? '').trim()
+                        if (!categoryIdCell && !categorySlugCell && !categoryTitleCell) return []
+                        return reportResolution(
                             await resolveCategoryIdsForImport(
                                 tenantId,
-                                categoryIdCell ? [categoryIdCell] : [],
-                                categorySlugCell ? [categorySlugCell] : []
+                                buildCategoryRefs(categoryIdCell, categorySlugCell, categoryTitleCell),
+                                canCreateCategories
                             )
                         )
                     }

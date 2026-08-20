@@ -234,9 +234,11 @@ describe('Admin products bulk ops', () => {
         expect(links.map((row) => row.categoryId)).toEqual(expect.arrayContaining([categoryAId, categoryBId]))
     })
 
-    it('imports a categorized product into a different tenant instead of erroring on the source tenant category id', async () => {
+    it('imports a categorized product into a different tenant by auto-creating the missing category', async () => {
         // Simulates migrating a catalog: export from tenant A (product has a category), then
         // import that same archive into tenant B, which has no category matching tenant A's id/slug.
+        // The destination tenant should get a new category (same slug/title) instead of erroring
+        // or silently dropping the category assignment.
         const exportRes = await request(app)
             .get(`/api/admin/products/export.zip?ids=${productAId}`)
             .set('X-Forwarded-Host', hostA)
@@ -250,6 +252,7 @@ describe('Admin products bulk ops', () => {
         expect(exportRes.status).toBe(200)
 
         const sourceProduct = await prisma.product.findFirst({ where: { tenantId: tenantAId, id: productAId } })
+        const sourceCategory = await prisma.category.findFirst({ where: { tenantId: tenantAId, id: categoryAId } })
 
         const importRes = await request(app)
             .post('/api/admin/products/import.zip')
@@ -261,12 +264,75 @@ describe('Admin products bulk ops', () => {
         expect(importRes.body.errors?.length || 0).toBe(0)
         expect(importRes.body.created).toBe(1)
         expect(
-            (importRes.body.warnings ?? []).some((w: any) => /Category not found in this store/i.test(w.message))
+            (importRes.body.warnings ?? []).some((w: any) => /Created new categor/i.test(w.message))
         ).toBe(true)
+
+        const createdCategory = await prisma.category.findFirst({
+            where: { tenantId: tenantBId, slug: sourceCategory!.slug }
+        })
+        expect(createdCategory).toBeTruthy()
+        expect(createdCategory?.title).toBe(sourceCategory!.title)
 
         const created = await prisma.product.findFirst({ where: { tenantId: tenantBId, slug: sourceProduct!.slug } })
         expect(created).toBeTruthy()
+        expect(created?.categoryId).toBe(createdCategory!.id)
+    })
+
+    it('does not auto-create categories for a staff user without categories:create permission', async () => {
+        // Same cross-tenant scenario, but the importing user is a restricted staff member: the
+        // missing category must be skipped with a warning instead of silently being created.
+        const restrictedRole = await prisma.tenantStaffRole.create({
+            data: { tenantId: tenantBId, name: 'Products only' }
+        })
+        await prisma.tenantStaffRolePermission.createMany({
+            data: [
+                { tenantId: tenantBId, roleId: restrictedRole.id, resource: 'products', action: 'create' },
+                { tenantId: tenantBId, roleId: restrictedRole.id, resource: 'products', action: 'read' },
+                { tenantId: tenantBId, roleId: restrictedRole.id, resource: 'products', action: 'update' }
+            ]
+        })
+        const restrictedStaff = await prisma.user.create({
+            data: {
+                tenantId: tenantBId,
+                email: `staff-nocats-${slugB}@example.com`,
+                role: 'staff',
+                passwordHash: 'x',
+                staffRoleId: restrictedRole.id
+            }
+        })
+        const restrictedToken = signAccessToken({
+            userId: restrictedStaff.id,
+            email: restrictedStaff.email,
+            role: restrictedStaff.role,
+            tenantId: restrictedStaff.tenantId
+        })
+
+        const slug = `no-cat-perm-${Date.now()}`
+        const csv = [
+            'slug,title,price,categorySlugs,categoryTitles',
+            `${slug},No Category Perm Product,10,brand-new-category-${Date.now()},Brand New Category`
+        ].join('\n')
+
+        const importRes = await request(app)
+            .post('/api/admin/products/import.csv')
+            .set('X-Forwarded-Host', hostB)
+            .set('Authorization', `Bearer ${restrictedToken}`)
+            .attach('file', Buffer.from(csv, 'utf8'), { filename: 'products.csv', contentType: 'text/csv' })
+
+        expect(importRes.status).toBe(200)
+        expect(importRes.body.created).toBe(1)
+        expect(
+            (importRes.body.warnings ?? []).some((w: any) => /Category not found in this store/i.test(w.message))
+        ).toBe(true)
+        expect(
+            (importRes.body.warnings ?? []).some((w: any) => /Created new categor/i.test(w.message))
+        ).toBe(false)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantBId, slug } })
+        expect(created).toBeTruthy()
         expect(created?.categoryId).toBeNull()
+
+        await prisma.tenantStaffRolePermission.deleteMany({ where: { tenantId: tenantBId, roleId: restrictedRole.id } })
     })
 
     it('imports images and normalizes tenant-scoped upload links', async () => {

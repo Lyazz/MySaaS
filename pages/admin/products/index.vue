@@ -1011,9 +1011,9 @@ function triggerBlobDownload(blob: Blob, filename: string) {
 }
 
 const productsImportTemplateHeader =
-  'id,slug,title,price,stock,isActive,categoryId,categorySlug,categoryIds,categorySlugs,description,miniDescription,images'
+  'id,slug,title,price,stock,isActive,categoryId,categorySlug,categoryTitle,categoryIds,categorySlugs,categoryTitles,description,miniDescription,images'
 const productsImportTemplateExample =
-  ',my-product,My product,1990,10,true,,,,,,,"image1.jpg|https://example.com/image2.jpg"'
+  ',my-product,My product,1990,10,true,,,,,,,,,"image1.jpg|https://example.com/image2.jpg"'
 const productsImportTemplateCsv = `${productsImportTemplateHeader}\n${productsImportTemplateExample}\n`
 
 const showBulkUpdateModal = ref(false)

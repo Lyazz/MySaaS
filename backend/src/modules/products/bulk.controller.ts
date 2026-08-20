@@ -16,6 +16,15 @@ const startNdjsonStream = (res: Response) => {
     ;(res as any).flushHeaders?.()
 }
 
+// Category auto-creation during import is a write to a *different* resource than "products", so it
+// needs its own permission check: non-staff users (admin/owner) always have it, staff need the
+// tenant's `requireStaffCrud('products')` middleware (applied to this whole router) to have already
+// populated req.staffPermissions — we just check it for the 'categories:create' grant too.
+const canCreateCategories = (req: Request): boolean => {
+    if (req.user?.role !== 'staff') return true
+    return req.staffPermissions?.has('categories:create') ?? false
+}
+
 export class BulkProductsController {
     async exportCsv(req: Request, res: Response) {
         try {
@@ -45,7 +54,8 @@ export class BulkProductsController {
             }
 
             const summary = await service.importProductsCsv(tenant.id, csvText, {
-                actorUserId: user?.id ?? null
+                actorUserId: user?.id ?? null,
+                canCreateCategories: canCreateCategories(req)
             })
             res.json(summary)
         } catch (error: any) {
@@ -81,7 +91,8 @@ export class BulkProductsController {
             }
 
             const summary = await service.importProductsArchive(tenant.id, file.buffer, {
-                actorUserId: user?.id ?? null
+                actorUserId: user?.id ?? null,
+                canCreateCategories: canCreateCategories(req)
             })
             res.json(summary)
         } catch (error: any) {
@@ -143,7 +154,7 @@ export class BulkProductsController {
             const summary = await service.importProductsArchive(
                 tenant.id,
                 file.buffer,
-                { actorUserId: user?.id ?? null },
+                { actorUserId: user?.id ?? null, canCreateCategories: canCreateCategories(req) },
                 (progress: BulkProgress) => {
                     if (!clientGone) writeNdjson(res, { type: 'progress', ...progress })
                 }
@@ -177,7 +188,7 @@ export class BulkProductsController {
             const summary = await service.importProductsCsv(
                 tenant.id,
                 csvText,
-                { actorUserId: user?.id ?? null },
+                { actorUserId: user?.id ?? null, canCreateCategories: canCreateCategories(req) },
                 (processed, total) => {
                     if (!clientGone) writeNdjson(res, { type: 'progress', phase: 'rows', processed, total })
                 }
