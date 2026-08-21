@@ -159,7 +159,7 @@ onUnmounted(() => {
       <!-- Scroll to Form or Add to Cart? For simplicity, scroll to top or just have a CTA -->
       <button
         onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-        class="bg-wl-ink text-wl-paper px-8 py-3.5 wl-label hover:bg-brand-700 transition-colors"
+        class="wl-cta px-8 py-3.5 wl-label"
       >
         {{ storefrontContent.actions.orderNow }}
       </button>

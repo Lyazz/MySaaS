@@ -56,29 +56,29 @@ const sortedProducts = computed(() => {
         >
           {{ storefrontContent.nav.home }}
         </NuxtLink>
-        <span class="mx-2 text-wl-ruleStrong">/</span>
+        <span class="mx-2 text-wl-oliveSoft">/</span>
         <NuxtLink
           to="/products"
           class="hover:text-wl-ink transition-colors"
         >
           {{ storefrontContent.nav.shop }}
         </NuxtLink>
-        <span class="mx-2 text-wl-ruleStrong">/</span>
+        <span class="mx-2 text-wl-oliveSoft">/</span>
         <span class="text-wl-ink">{{ category.title }}</span>
       </nav>
 
       <!-- Category plate: image behind, label panel in front -->
-      <div class="relative overflow-hidden border border-wl-rule bg-wl-card mb-10">
+      <div class="wl-specimen relative overflow-hidden border border-wl-rule bg-wl-card mb-10">
         <img
           v-if="category.imageUrl"
           :src="category.imageUrl"
           :alt="category.title"
           class="absolute inset-0 w-full h-full object-cover"
         >
-        <div v-if="category.imageUrl" class="absolute inset-0 bg-wl-paper/40" />
+        <div v-if="category.imageUrl" class="absolute inset-0 bg-wl-paper/50" />
         <div class="relative p-4 sm:p-8 lg:p-10 flex">
-          <div class="bg-wl-card border border-wl-rule p-6 sm:p-8 max-w-xl w-full">
-            <p class="wl-label text-wl-muted mb-3">
+          <div class="wl-plate wl-plate-lg relative z-10 p-6 sm:p-8 max-w-xl w-full">
+            <p class="wl-eyebrow wl-label mb-3">
               {{ storefrontContent.category.label }}
             </p>
             <h1 class="wl-display text-3xl sm:text-4xl text-wl-ink leading-tight">
@@ -110,11 +110,11 @@ const sortedProducts = computed(() => {
                 :key="cat.id"
                 :to="`/category/${cat.slug}`"
                 class="flex items-center gap-3 py-2.5 border-b border-wl-rule/60 transition-colors"
-                :class="cat.id === category.id ? 'text-wl-ink' : 'text-wl-muted hover:text-wl-ink'"
+                :class="cat.id === category.id ? 'text-wl-oliveDeep' : 'text-wl-muted hover:text-wl-oliveDeep'"
               >
                 <span
                   class="w-4 h-px flex-shrink-0 transition-colors"
-                  :class="cat.id === category.id ? 'bg-wl-ink' : 'bg-wl-ruleStrong'"
+                  :class="cat.id === category.id ? 'bg-wl-olive h-0.5' : 'bg-wl-ruleStrong'"
                 />
                 <span class="text-sm">{{ categoryDisplayTitle(cat) }}</span>
               </NuxtLink>
@@ -141,7 +141,7 @@ const sortedProducts = computed(() => {
               <div class="relative w-48">
                 <select
                   v-model="sortOption"
-                  class="w-full appearance-none bg-wl-card border border-wl-rule text-sm py-2.5 ps-4 pe-10 text-wl-ink focus:border-wl-ink outline-none cursor-pointer transition-colors"
+                  class="wl-field w-full appearance-none text-sm py-2.5 ps-4 pe-10 cursor-pointer"
                 >
                   <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
                   <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
@@ -158,10 +158,10 @@ const sortedProducts = computed(() => {
           <!-- Grid -->
           <div
             v-if="sortedProducts.length === 0"
-            class="bg-wl-card border border-wl-rule p-14 text-center"
+            class="wl-plate p-14 text-center"
           >
-            <div class="w-14 h-14 border border-wl-rule flex items-center justify-center mx-auto mb-6">
-              <Icon name="lucide:package-open" class="w-6 h-6 text-wl-muted" />
+            <div class="w-14 h-14 bg-wl-oliveWash border border-wl-oliveSoft flex items-center justify-center mx-auto mb-6">
+              <Icon name="lucide:package-open" class="w-6 h-6 text-wl-oliveDeep" />
             </div>
             <h3 class="wl-display text-2xl text-wl-ink mb-3">
               {{ storefrontContent.shop.results.noResults }}
@@ -171,7 +171,7 @@ const sortedProducts = computed(() => {
             </p>
             <NuxtLink
               to="/products"
-              class="inline-flex items-center justify-center mt-8 px-8 py-3.5 bg-wl-ink text-wl-paper wl-label hover:bg-brand-700 transition-colors"
+              class="inline-flex items-center justify-center mt-8 px-8 py-3.5 wl-cta wl-label"
             >
               {{ storefrontContent.shop.allProducts }}
             </NuxtLink>

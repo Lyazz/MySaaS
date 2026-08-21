@@ -50,7 +50,7 @@ const favorites = useFavorites()
           <div class="mt-8">
             <NuxtLink
               to="/products"
-              class="inline-flex items-center justify-center bg-wl-ink px-8 py-3.5 wl-label text-wl-paper hover:bg-brand-700 transition-colors"
+              class="inline-flex items-center justify-center wl-cta px-8 py-3.5 wl-label"
             >
               {{ storefrontContent.actions.startBrowsing }}
             </NuxtLink>

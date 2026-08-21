@@ -17,7 +17,7 @@
         <div>
           <NuxtLink
             to="/products"
-            class="inline-flex items-center px-10 py-4 wl-label text-wl-paper bg-wl-ink hover:bg-brand-700 transition-colors"
+            class="inline-flex items-center wl-cta px-10 py-4 wl-label"
           >
             {{ storefrontContent.cart.empty.cta }}
           </NuxtLink>
@@ -75,7 +75,7 @@
                     </div>
                     <button
                       type="button"
-                      class="p-2 -me-2 text-wl-muted hover:text-red-700 transition-colors"
+                      class="p-2 -me-2 text-wl-muted hover:text-wl-alert transition-colors"
                       @click="cartStore.removeItem(item.productId, item.variantId)"
                     >
                       <span class="sr-only">{{ storefrontContent.cart.item.remove }}</span>
@@ -115,7 +115,7 @@
         <!-- Order Summary -->
         <section
           aria-labelledby="summary-heading"
-          class="mt-12 bg-wl-card border border-wl-rule px-7 py-8 lg:col-span-5 lg:mt-0 lg:sticky lg:top-28"
+          class="mt-12 wl-plate px-7 py-8 lg:col-span-5 lg:mt-0 lg:sticky lg:top-28"
         >
           <h2
             id="summary-heading"
@@ -134,10 +134,10 @@
               </dd>
             </div>
             <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between gap-4">
-              <dt class="text-sm font-medium text-amber-800">
+              <dt class="text-sm font-medium text-wl-henna">
                 {{ t('storefront.clearance.discountLine') }}
               </dt>
-              <dd class="wl-num text-sm font-medium text-amber-800">
+              <dd class="wl-num text-sm font-medium text-wl-henna">
                 -{{ formatCurrency(cartStore.clearanceDiscount) }}
               </dd>
             </div>
@@ -162,14 +162,14 @@
           <div class="mt-8 space-y-2">
             <NuxtLink
               to="/checkout"
-              class="w-full flex items-center justify-center bg-wl-ink px-8 py-4 wl-label text-wl-paper hover:bg-brand-700 transition-colors"
+              class="w-full flex items-center justify-center wl-cta px-8 py-4 wl-label"
             >
               {{ storefrontContent.cart.actions.proceedToCheckout }}
             </NuxtLink>
 
             <NuxtLink
               to="/products"
-              class="w-full flex items-center justify-center border border-wl-rule px-8 py-4 wl-label text-wl-muted hover:text-wl-ink hover:border-wl-ink transition-colors"
+              class="wl-cta-ghost w-full flex items-center justify-center px-8 py-4 wl-label"
             >
               {{ storefrontContent.actions.continueShopping }}
             </NuxtLink>

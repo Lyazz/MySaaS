@@ -333,7 +333,7 @@ async function handleSubmit() {
         </div>
         <div
           v-if="!cartEnabled"
-          class="mt-5 inline-block border border-amber-300 bg-amber-50 text-amber-900 wl-label px-5 py-2.5"
+          class="mt-5 inline-block border border-wl-saffron/40 bg-wl-saffronWash text-wl-saffron wl-label px-5 py-2.5"
         >
           {{ storefrontContent.checkout.disabled }}
         </div>
@@ -464,7 +464,7 @@ async function handleSubmit() {
                           <span class="font-medium text-wl-ink">{{ form.pickupPoint }}</span>
                         </div>
                       </template>
-                      <p v-if="pickupPointsError" class="text-xs text-amber-800 mt-1">{{ pickupPointsError }}</p>
+                      <p v-if="pickupPointsError" class="text-xs text-wl-saffron mt-1">{{ pickupPointsError }}</p>
                     </div>
                   </div>
                </div>
@@ -476,9 +476,9 @@ async function handleSubmit() {
 
             <div
               v-if="errorMessage"
-              class="border border-red-300 bg-red-50 text-red-900 text-sm px-4 py-3.5 flex items-start gap-3"
+              class="border border-wl-alert/40 bg-wl-alertWash text-wl-alert text-sm px-4 py-3.5 flex items-start gap-3"
             >
-              <Icon name="lucide:alert-circle" class="w-4 h-4 text-red-700 flex-shrink-0 mt-0.5" />
+              <Icon name="lucide:alert-circle" class="w-4 h-4 text-wl-alert flex-shrink-0 mt-0.5" />
               <span class="font-medium">{{ errorMessage }}</span>
             </div>
 
@@ -486,7 +486,7 @@ async function handleSubmit() {
             <button
                type="submit"
                :disabled="submitting || cartStore.items.length === 0 || !hasRequiredFields"
-               class="w-full flex items-center justify-center bg-wl-ink px-8 py-5 wl-label text-wl-paper hover:bg-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wl-ink focus-visible:ring-offset-2 focus-visible:ring-offset-wl-paper transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+               class="wl-cta w-full flex items-center justify-center px-8 py-5 wl-label focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-wl-ink focus-visible:ring-offset-2 focus-visible:ring-offset-wl-paper transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
                <span v-if="submitting" class="flex items-center gap-2">
                  <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin" />
@@ -545,7 +545,7 @@ async function handleSubmit() {
                   :placeholder="storefrontContent.checkout.coupon.placeholder"
                   class="flex-1 min-w-0 h-11 border border-wl-rule bg-wl-paper px-3 text-sm text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
                 >
-                <button class="px-5 h-11 bg-wl-ink hover:bg-brand-700 text-wl-paper wl-label transition-colors flex-shrink-0">
+                <button class="wl-cta px-5 h-11 wl-label flex-shrink-0">
                   {{ storefrontContent.actions.apply }}
                 </button>
               </div>
@@ -557,8 +557,8 @@ async function handleSubmit() {
                  <dd class="wl-num font-medium text-wl-ink">{{ formatCurrency(cartStore.total) }}</dd>
               </div>
               <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between gap-4 text-sm">
-                 <dt class="text-amber-800 font-medium">{{ t('storefront.clearance.discountLine') }}</dt>
-                 <dd class="wl-num font-medium text-amber-800">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+                 <dt class="text-wl-henna font-medium">{{ t('storefront.clearance.discountLine') }}</dt>
+                 <dd class="wl-num font-medium text-wl-henna">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
               </div>
               <div v-if="selectedDelivery" class="flex items-center justify-between gap-4 text-sm">
                  <dt class="text-wl-muted flex items-baseline gap-1.5 min-w-0">

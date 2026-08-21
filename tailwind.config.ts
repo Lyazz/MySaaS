@@ -74,16 +74,38 @@ export default {
                 slate: {
                     850: '#151e2e', // Custom deep slate
                 },
-                // Wellness apothecary neutrals. Light only — the template has no
-                // dark surfaces. Fixed on purpose: the tenant's --brand stays an
-                // accent so any brand colour works on top.
+                // Wellness (herbarium apothecary). Light ground throughout —
+                // the one dark surface is the footer. Fixed on purpose: the
+                // tenant's --brand stays an accent so any brand colour works
+                // on top of the house palette.
                 wl: {
                     paper: '#F1F2EC',    // page ground, label stock with a green cast
-                    card: '#FCFCF9',     // raised surfaces: header, footer, cards
+                    card: '#FCFCF9',     // raised surfaces: header, cards, drawers
+                    linen: '#F7F5EC',    // warm alternate ground, one step off paper
+                    tint: '#E7EADC',     // quiet botanical wash, between paper and rule
                     ink: '#1B1A16',      // primary type, solid buttons
                     muted: '#6E6E62',    // secondary type, units
                     rule: '#D4D5CB',     // the hairline everything is built on
                     ruleStrong: '#B6B7AA',
+                    /*
+                      Accents from the attarine — the herbalist's stall. Fixed,
+                      like the neutrals, because each one carries a meaning the
+                      tenant's --brand must not be able to overwrite:
+                      olive is the house, saffron cautions, henna marks a price
+                      that came down, zellige is the deep ground.
+                    */
+                    olive: '#6E7A33',      // pressed-oil green: the house hue
+                    oliveDeep: '#4E5722',  // olive that holds AA on paper
+                    oliveSoft: '#A3AC7A',
+                    oliveWash: '#E3E7D2',
+                    zellige: '#16413E',    // glazed tile green-blue: inverted grounds
+                    zelligeDeep: '#0E2C2A',
+                    saffron: '#8E6114',    // caution: low stock, time running out (AA on paper)
+                    saffronWash: '#F3EAD5',
+                    henna: '#8E3B26',      // markdowns, and nothing else
+                    hennaWash: '#EFDFD8',
+                    alert: '#B3261E',      // a form that failed: the only true red
+                    alertWash: '#F7E3E0',
                 },
                 lime: {
                     neon: '#C6F432',
@@ -92,6 +114,10 @@ export default {
             boxShadow: {
                 'soft': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
                 'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.37)',
+                // Wellness shadows are cast in the deep tile green, not black, so
+                // raised paper never looks like it floats over a grey studio.
+                'wl': '0 1px 1px rgba(27, 26, 22, 0.03), 0 10px 26px -18px rgba(22, 65, 62, 0.32)',
+                'wl-lg': '0 2px 3px rgba(27, 26, 22, 0.04), 0 28px 60px -30px rgba(22, 65, 62, 0.45)',
             },
             animation: {
                 marquee: 'marquee 25s linear infinite',

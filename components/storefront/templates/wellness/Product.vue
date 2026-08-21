@@ -97,14 +97,14 @@ onUnmounted(() => {
         >
           Home
         </NuxtLink>
-        <span class="mx-2 text-wl-ruleStrong">/</span>
+        <span class="mx-2 text-wl-oliveSoft">/</span>
         <NuxtLink
           to="/products"
           class="hover:text-wl-ink transition-colors"
         >
           Shop
         </NuxtLink>
-        <span class="mx-2 text-wl-ruleStrong">/</span>
+        <span class="mx-2 text-wl-oliveSoft">/</span>
         <span class="text-wl-ink truncate max-w-xs">{{ product?.title }}</span>
       </nav>
 
@@ -122,7 +122,7 @@ onUnmounted(() => {
                 v-model:selected-options="selectedOptions"
             />
 
-            <div class="p-6 bg-wl-card border border-wl-rule">
+            <div class="wl-plate p-6">
                 <ProductOrderForm
                     :product="product"
                     :current-variant="currentVariant"
@@ -138,12 +138,12 @@ onUnmounted(() => {
         <div class="mt-20 col-span-12 max-w-4xl mx-auto w-full">
             <SafeRichText
               v-if="product?.description"
-              class="prose prose-stone text-wl-muted max-w-none leading-relaxed bg-wl-card border border-wl-rule p-8 md:p-12"
+              class="prose prose-stone text-wl-muted max-w-none leading-relaxed wl-plate p-8 md:p-12"
               :html="product.description"
             />
             <div
               v-else
-              class="prose prose-stone text-wl-muted max-w-none leading-relaxed bg-wl-card border border-wl-rule p-8 md:p-12 text-center"
+              class="prose prose-stone text-wl-muted max-w-none leading-relaxed wl-plate p-8 md:p-12 text-center"
             >
               <p>{{ storefrontContent.product.descriptionFallback }}</p>
             </div>

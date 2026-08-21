@@ -481,11 +481,11 @@ const handleAddToCart = async () => {
             <div class="flex flex-col gap-0.5">
                 <span class="wl-label text-wl-ink">{{ storefrontContent.productForm.quantity.label }}</span>
                 <span v-if="product?.isActive === false" class="wl-label text-wl-muted">{{ storefrontContent.productForm.stock.unavailable }}</span>
-                <span v-else-if="isOutOfStock" class="text-xs font-semibold text-red-700">{{ storefrontContent.productForm.stock.outOfStock }}</span>
-                <span v-else-if="isLowStock" class="text-xs font-semibold text-amber-700">
+                <span v-else-if="isOutOfStock" class="text-xs font-semibold text-wl-saffron">{{ storefrontContent.productForm.stock.outOfStock }}</span>
+                <span v-else-if="isLowStock" class="text-xs font-semibold text-wl-saffron">
                     {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
                 </span>
-                <span v-else class="text-xs font-semibold text-emerald-700">{{ storefrontContent.product.inStock }}</span>
+                <span v-else class="text-xs font-semibold text-wl-oliveDeep">{{ storefrontContent.product.inStock }}</span>
             </div>
             <div class="flex items-center border border-wl-rule">
                 <button 
@@ -518,7 +518,7 @@ const handleAddToCart = async () => {
 
         <div
             v-if="isClearanceEligible"
-            class="flex items-center gap-2 px-4 py-3 mb-6 border border-amber-300 bg-amber-50 text-amber-900 wl-label"
+            class="flex items-center gap-2 px-4 py-3 mb-6 border border-wl-saffron/40 bg-wl-saffronWash text-wl-saffron wl-label"
         >
             <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
             <span v-if="clearance.remainingForNextThreshold.value > 0">
@@ -688,7 +688,7 @@ const handleAddToCart = async () => {
                                 </span>
                             </div>
                         </template>
-                        <p v-if="pickupPointsError" class="text-xs text-amber-800">
+                        <p v-if="pickupPointsError" class="text-xs text-wl-saffron">
                             {{ pickupPointsError }}
                         </p>
                     </div>
@@ -702,15 +702,15 @@ const handleAddToCart = async () => {
 
                 <div
                     v-if="orderError"
-                    class="p-3 border border-red-300 bg-red-50 text-red-900 text-sm"
+                    class="p-3 border border-wl-alert/40 bg-wl-alertWash text-wl-alert text-sm"
                 >
                     {{ orderError }}
                 </div>
 
                 <!-- Clearance discount -->
                 <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between py-2 text-sm">
-                    <span class="wl-label text-amber-800">{{ t('storefront.clearance.discountLine') }}</span>
-                    <span class="wl-num font-medium text-amber-800">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
+                    <span class="wl-label text-wl-henna">{{ t('storefront.clearance.discountLine') }}</span>
+                    <span class="wl-num font-medium text-wl-henna">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
                 </div>
 
                 <!-- Total Price Display -->
@@ -722,7 +722,7 @@ const handleAddToCart = async () => {
                 <button 
                 type="submit"
                 :disabled="orderSubmitting || !canPurchase"
-                class="w-full h-14 bg-wl-ink hover:bg-brand-700 disabled:opacity-40 disabled:cursor-not-allowed text-wl-paper wl-label transition-colors flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
+                class="wl-cta w-full h-14 disabled:opacity-40 disabled:cursor-not-allowed wl-label flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
                 >
                 <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
                     <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>

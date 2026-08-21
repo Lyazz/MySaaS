@@ -121,7 +121,7 @@ defineProps<{
       <StorefrontSharedClearanceAnnouncementDialog root-class="cl-wellness" />
 
       <!-- Header — label stock, held down by a single strong rule -->
-      <header v-if="!hideNavigation" :class="['bg-wl-card text-wl-ink border-b border-wl-ruleStrong sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
+      <header v-if="!hideNavigation" :class="['bg-wl-card text-wl-ink border-b border-wl-ruleStrong shadow-wl sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="h-20 flex items-center justify-between gap-8">
             <!-- Left: mark + wordmark. The name is always set, logo or not. -->
@@ -137,8 +137,8 @@ defineProps<{
                   alt=""
                   class="h-9 md:h-10 max-w-[110px] object-contain flex-shrink-0"
                 >
-                <span v-else class="h-9 w-9 border border-wl-rule flex items-center justify-center flex-shrink-0">
-                   <Icon name="lucide:flower-2" class="w-4 h-4 text-wl-muted" />
+                <span v-else class="h-9 w-9 border border-wl-oliveSoft bg-wl-oliveWash flex items-center justify-center flex-shrink-0">
+                   <Icon name="lucide:flower-2" class="w-4 h-4 text-wl-oliveDeep" />
                 </span>
 
                 <span
@@ -153,8 +153,8 @@ defineProps<{
 
             <!-- Center: Navigation -->
             <nav class="hidden lg:flex items-center justify-center gap-8 flex-1">
-              <NuxtLink to="/" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b border-wl-ink">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b border-wl-ink">{{ storefrontContent.nav.shop }}</NuxtLink>
+              <NuxtLink to="/" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b-2 border-wl-olive">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b-2 border-wl-olive">{{ storefrontContent.nav.shop }}</NuxtLink>
 
               <!-- Categories Dropdown -->
               <div class="relative group flex items-center">
@@ -163,12 +163,12 @@ defineProps<{
                   <Icon name="lucide:chevron-down" class="w-3 h-3" />
                 </button>
                 <div class="absolute top-full start-0 pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-50">
-                  <div class="bg-wl-card border border-wl-rule shadow-lg py-1">
+                  <div class="wl-plate wl-plate-lg py-1">
                     <NuxtLink
                       v-for="cat in tenantCategories"
                       :key="cat.id"
                       :to="`/category/${cat.slug}`"
-                      class="block px-4 py-2.5 text-sm text-wl-muted hover:text-wl-ink hover:bg-wl-paper transition-colors"
+                      class="block px-4 py-2.5 text-sm text-wl-muted hover:text-wl-oliveDeep hover:bg-wl-oliveWash transition-colors"
                     >
                       {{ categoryDisplayTitle(cat) }}
                     </NuxtLink>
@@ -176,7 +176,7 @@ defineProps<{
                 </div>
               </div>
 
-              <NuxtLink to="/contact" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b border-wl-ink">{{ storefrontContent.nav.contact }}</NuxtLink>
+              <NuxtLink to="/contact" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b-2 border-wl-olive">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
 
             <!-- Right: Actions & Search -->
@@ -187,7 +187,7 @@ defineProps<{
                     type="text"
                     v-model="searchQuery"
                     :placeholder="storefrontContent.search?.placeholder || 'Search...'"
-                    class="w-[150px] focus:w-[210px] py-1.5 pe-6 text-sm text-wl-ink bg-transparent border-b border-wl-rule focus:border-wl-ink outline-none transition-all duration-300 placeholder:text-wl-muted/60"
+                    class="w-[150px] focus:w-[210px] py-1.5 pe-6 text-sm text-wl-ink bg-transparent border-b border-wl-rule focus:border-wl-olive outline-none transition-all duration-300 placeholder:text-wl-muted/60"
                     @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                     @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                   >
@@ -196,7 +196,7 @@ defineProps<{
                   <!-- Search Dropdown -->
                   <div
                     v-show="isSearchDropdownOpen"
-                    class="absolute top-full end-0 mt-3 w-72 bg-wl-card border border-wl-rule shadow-lg z-50 overflow-hidden text-start pointer-events-auto"
+                    class="absolute top-full end-0 mt-3 w-72 wl-plate wl-plate-lg z-50 overflow-hidden text-start pointer-events-auto"
                   >
                     <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">Searching...</div>
                     <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">No products found.</div>
@@ -205,13 +205,13 @@ defineProps<{
                         v-for="product in visibleSearchResults"
                         :key="product.id"
                         :to="`/product/${product.slug}`"
-                        class="flex items-center gap-3 px-3 py-2.5 hover:bg-wl-paper transition-colors border-b border-wl-rule/50 last:border-0"
+                        class="flex items-center gap-3 px-3 py-2.5 hover:bg-wl-oliveWash transition-colors border-b border-wl-rule/50 last:border-0"
                         @click="isSearchDropdownOpen = false"
                       >
                         <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-11 h-11 object-cover border border-wl-rule" />
                         <div class="flex-1 min-w-0">
                           <div class="text-sm font-medium text-wl-ink truncate">{{ product.title }}</div>
-                          <div class="wl-num text-xs text-wl-muted mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1.5 wl-label !text-[10px] text-brand-700">-{{ product.promotionDiscountPercent }}%</span></div>
+                          <div class="wl-num text-xs text-wl-muted mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1.5 wl-label !text-[10px] text-wl-henna">-{{ product.promotionDiscountPercent }}%</span></div>
                         </div>
                       </NuxtLink>
                     <button
@@ -232,7 +232,7 @@ defineProps<{
                <div class="flex items-center gap-1 sm:gap-2">
                  <LocaleSwitcher class="hidden lg:inline-flex" />
                   <button
-                    class="relative p-2.5 text-wl-muted hover:text-wl-ink transition-colors"
+                    class="relative p-2.5 text-wl-muted hover:text-wl-henna transition-colors"
                     :title="storefrontContent.header.wishlistTitle"
                     @click="navigateTo('/wishlist')"
                   >
@@ -244,11 +244,11 @@ defineProps<{
                       >{{ favorites.count.value }}</span>
                     </ClientOnly>
                   </button>
-                  <!-- Cart: paper on glass — the brand colour stays off the dark chrome -->
+                  <!-- Cart: ink that greens on hover, like every other primary action -->
                   <NuxtLink
                     v-if="storeSettings?.cartEnabled !== false"
                     to="/cart"
-                    class="group relative flex items-center gap-2 px-4 py-2 bg-wl-ink text-wl-paper hover:bg-brand-700 transition-colors"
+                    class="wl-cta group relative flex items-center gap-2 px-4 py-2"
                   >
                     <Icon name="lucide:shopping-bag" class="w-4 h-4" />
                     <span v-if="cartStore.itemCount > 0" class="wl-num text-xs font-semibold">{{ cartStore.itemCount }}</span>
@@ -280,7 +280,7 @@ defineProps<{
         <Transition name="slide">
           <div v-if="mobileMenuOpen" id="wellness-mobile-drawer" class="wl-root fixed top-0 start-0 bottom-0 w-[85%] max-w-xs bg-wl-paper z-[61] shadow-2xl flex flex-col overflow-y-auto font-wellness">
             <!-- Drawer header -->
-            <div class="flex items-center justify-between px-5 h-20 bg-wl-card border-b border-wl-ruleStrong text-wl-ink">
+            <div class="flex items-center justify-between px-5 h-20 bg-wl-card border-b-2 border-wl-olive text-wl-ink">
               <span class="wl-display-sm text-xl">{{ tenantName }}</span>
               <button @click="mobileMenuOpen = false" class="p-1 text-wl-muted hover:text-wl-ink transition-colors">
                 <Icon name="lucide:x" class="w-5 h-5" />
@@ -294,7 +294,7 @@ defineProps<{
                   type="text"
                   v-model="searchQuery"
                   :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full border-b border-wl-ruleStrong bg-transparent py-2.5 pe-8 text-sm placeholder:text-wl-muted/60 text-wl-ink outline-none focus:border-wl-ink transition-colors"
+                  class="w-full border-b border-wl-ruleStrong bg-transparent py-2.5 pe-8 text-sm placeholder:text-wl-muted/60 text-wl-ink outline-none focus:border-wl-olive transition-colors"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                   @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
                 >
@@ -302,7 +302,7 @@ defineProps<{
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-full start-0 end-0 mt-1 bg-wl-card border border-wl-rule shadow-lg z-50 overflow-hidden pointer-events-auto"
+                  class="absolute top-full start-0 end-0 mt-1 wl-plate wl-plate-lg z-50 overflow-hidden pointer-events-auto"
                 >
                   <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">Searching...</div>
                   <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">No products found.</div>
@@ -311,14 +311,13 @@ defineProps<{
                       v-for="product in visibleSearchResults"
                       :key="product.id"
                       :to="'/product/' + product.slug"
-                      class="flex items-center gap-3 px-4 py-3 hover:bg-wl-paper transition-colors border-b border-wl-rule/50 last:border-0"
+                      class="flex items-center gap-3 px-4 py-3 hover:bg-wl-oliveWash transition-colors border-b border-wl-rule/50 last:border-0"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover border border-wl-rule" />
                       <div class="flex-1 min-w-0">
                         <div class="text-sm font-medium text-wl-ink truncate">{{ product.title }}</div>
-                        <!-- Teleported outside the theme root, so --brand is out of scope here -->
-                        <div class="wl-num text-xs text-wl-muted mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1.5 wl-label !text-[10px] text-wl-ink">-{{ product.promotionDiscountPercent }}%</span></div>
+                                                <div class="wl-num text-xs text-wl-muted mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1.5 wl-label !text-[10px] text-wl-henna">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                   <button
@@ -379,24 +378,28 @@ defineProps<{
         <slot />
       </main>
 
-      <!-- Footer — the base of the bottle -->
-      <footer class="bg-wl-card text-wl-muted border-t border-wl-ruleStrong pt-20 pb-10">
+      <!--
+        Footer — the base of the bottle. The one dark surface in the theme:
+        glazed tile green, so the cream page above it reads as a label applied
+        to something, rather than as paper floating on more paper.
+      -->
+      <footer class="wl-ground-deep pt-20 pb-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-16">
             <!-- Brand Column -->
             <div class="col-span-1 md:col-span-1 md:pe-12">
-              <h3 class="wl-display-sm text-2xl text-wl-ink mb-6 flex items-center gap-3">
-                 <Icon name="lucide:flower-2" class="w-5 h-5 text-wl-muted" />
+              <h3 class="wl-display-sm wl-on-deep text-2xl mb-6 flex items-center gap-3">
+                 <Icon name="lucide:flower-2" class="w-5 h-5 text-wl-oliveSoft" />
                  {{ tenantName }}
               </h3>
 
               <ul v-if="primaryContactInfos.length" class="space-y-3 text-sm">
                 <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
-                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4 text-wl-muted mt-0.5 flex-shrink-0" />
+                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4 text-wl-oliveSoft mt-0.5 flex-shrink-0" />
                   <a
                     v-if="hrefFor(info)"
                     :href="hrefFor(info)!"
-                    class="hover:text-wl-ink transition-colors"
+                    class="transition-colors"
                     :target="isExternalHref(hrefFor(info)!) ? '_blank' : undefined"
                     :rel="isExternalHref(hrefFor(info)!) ? 'noopener noreferrer' : undefined"
                   >
@@ -412,7 +415,7 @@ defineProps<{
                   v-for="info in socialContactInfosWithHref"
                   :key="info.id"
                   :href="info.href"
-                  class="h-9 w-9 border border-wl-rule flex items-center justify-center text-wl-muted hover:text-wl-paper hover:bg-wl-ink hover:border-wl-ink transition-colors"
+                  class="h-9 w-9 border border-white/15 flex items-center justify-center hover:bg-wl-olive hover:border-wl-olive hover:text-wl-zelligeDeep transition-colors"
                   :target="isExternalHref(info.href) ? '_blank' : undefined"
                   :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
                 >
@@ -422,27 +425,27 @@ defineProps<{
             </div>
 
             <!-- Links Column (Contact) -->
-            <div class="md:border-s md:border-wl-rule md:ps-8">
-              <h4 class="wl-label text-wl-muted mb-6">{{ storefrontContent.footer.contact }}</h4>
+            <div class="md:border-s md:border-white/10 md:ps-8">
+              <h4 class="wl-label text-wl-oliveSoft mb-6">{{ storefrontContent.footer.contact }}</h4>
               <ul class="space-y-3 text-sm">
-                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="hover:text-wl-ink transition-colors">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="transition-colors">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
 
             <!-- Terms & Privacy Column -->
-            <div class="md:border-s md:border-wl-rule md:ps-8">
-               <h4 class="wl-label text-wl-muted mb-6">{{ storefrontContent.footer.termsPrivacy }}</h4>
+            <div class="md:border-s md:border-white/10 md:ps-8">
+               <h4 class="wl-label text-wl-oliveSoft mb-6">{{ storefrontContent.footer.termsPrivacy }}</h4>
                <ul class="space-y-3 text-sm">
-                 <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="hover:text-wl-ink transition-colors">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
-                 <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="hover:text-wl-ink transition-colors">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
-                 <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="hover:text-wl-ink transition-colors">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
+                 <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="transition-colors">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                 <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="transition-colors">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                 <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="transition-colors">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
                </ul>
             </div>
 
           </div>
 
           <!-- Bottom -->
-          <div class="pt-8 border-t border-wl-rule flex flex-col md:flex-row justify-between items-center gap-4 wl-label !tracking-[0.12em] text-wl-muted">
+          <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 wl-label !tracking-[0.12em]">
             <div>{{ storefrontContent.footer.copyright(tenantName) }}</div>
             <StorefrontSharedPoweredBy />
           </div>

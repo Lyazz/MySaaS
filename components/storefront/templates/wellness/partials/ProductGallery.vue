@@ -28,7 +28,7 @@ watch(() => props.images, () => {
     <div class="mb-8 lg:mb-0 lg:sticky lg:top-28">
         <!-- Specimen plate -->
         <div
-          class="aspect-[4/5] overflow-hidden bg-wl-card relative group cursor-zoom-in border border-wl-rule"
+          class="wl-specimen aspect-[4/5] overflow-hidden bg-wl-card relative group cursor-zoom-in border border-wl-rule"
           @mousemove="onPointerMove"
           @mouseleave="onPointerLeave"
         >
@@ -39,7 +39,7 @@ watch(() => props.images, () => {
             :style="zoomStyle"
         >
         <div class="absolute top-3 start-3">
-            <span class="wl-label bg-wl-card border border-wl-rule text-wl-muted px-2 py-1">
+            <span class="wl-chip wl-chip--olive wl-label">
             New Arrival
             </span>
         </div>
@@ -51,7 +51,7 @@ watch(() => props.images, () => {
             v-for="(img, idx) in images"
             :key="idx"
             class="w-16 h-16 overflow-hidden border transition-colors duration-200 relative flex-shrink-0"
-            :class="activeImageIndex === idx ? 'border-wl-ink' : 'border-wl-rule hover:border-wl-ruleStrong'"
+            :class="activeImageIndex === idx ? 'border-wl-olive ring-1 ring-wl-olive' : 'border-wl-rule hover:border-wl-oliveSoft'"
             @click="setActiveImage(idx)"
         >
             <img

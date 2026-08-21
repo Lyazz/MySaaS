@@ -59,7 +59,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   <div class="flex flex-col">
     <!-- Header -->
     <div>
-      <span class="wl-label text-wl-muted block mb-4">
+      <span class="wl-eyebrow wl-label mb-4">
         Premium Collection
       </span>
 
@@ -78,7 +78,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
       />
 
       <!-- Price sits on its own ruled line, the way a label states a dose -->
-      <div class="border-y border-wl-rule py-4">
+      <div class="border-t border-t-wl-rule border-b-2 border-b-wl-olive py-4">
         <span class="wl-num wl-display text-3xl text-wl-ink">
           {{ formatPrice(currentPrice) }}
         </span>
@@ -103,7 +103,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             @change="
               setOption(option.id, ($event.target as HTMLSelectElement).value)
             "
-            class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 pe-10 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none appearance-none cursor-pointer"
+            class="wl-field block w-full h-12 px-4 pe-10 appearance-none cursor-pointer"
           >
             <option value="" disabled>{{ option.name }}</option>
             <option
@@ -139,8 +139,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
                   ? 'opacity-60 cursor-pointer'
                   : 'cursor-pointer',
               selectedOptions[option.id] === value.id
-                ? 'border-wl-ink ring-1 ring-wl-ink ring-offset-2 ring-offset-wl-card'
-                : 'border-wl-rule hover:border-wl-ruleStrong',
+                ? 'border-wl-olive ring-1 ring-wl-olive ring-offset-2 ring-offset-wl-card'
+                : 'border-wl-rule hover:border-wl-oliveSoft',
             ]"
             :style="{ backgroundColor: value.meta || '#eee' }"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
@@ -162,7 +162,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
                 class="w-full h-px rotate-45 transform"
                 :class="
                   optionValueState(option.id, value.id) === 'out_of_stock'
-                    ? 'bg-red-700'
+                    ? 'bg-wl-saffron'
                     : 'bg-wl-muted'
                 "
               />
@@ -185,9 +185,9 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
                 ? 'opacity-40 grayscale cursor-not-allowed border-wl-rule'
                 : optionValueState(option.id, value.id) === 'out_of_stock'
                   ? 'opacity-70 cursor-pointer border-wl-rule'
-                  : 'cursor-pointer hover:border-wl-ruleStrong',
+                  : 'cursor-pointer hover:border-wl-oliveSoft',
               selectedOptions[option.id] === value.id
-                ? 'border-wl-ink ring-1 ring-wl-ink'
+                ? 'border-wl-olive ring-1 ring-wl-olive'
                 : 'border-wl-rule',
             ]"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
@@ -205,7 +205,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             <span v-else class="wl-label text-wl-muted">{{ value.label }}</span>
             <div
               v-if="optionValueState(option.id, value.id) === 'out_of_stock'"
-              class="absolute inset-x-0 bottom-0 bg-wl-card/95 wl-label text-red-800 px-1 py-0.5 text-center"
+              class="absolute inset-x-0 bottom-0 bg-wl-card/95 wl-label text-wl-saffron px-1 py-0.5 text-center"
             >
               Out
             </div>
@@ -225,12 +225,12 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
                 class="w-4 h-4 border transition-colors"
                 :class="
                   selectedOptions[option.id] === value.id
-                    ? 'border-wl-ink'
-                    : 'border-wl-ruleStrong group-hover:border-wl-muted'
+                    ? 'border-wl-olive'
+                    : 'border-wl-ruleStrong group-hover:border-wl-oliveSoft'
                 "
               ></div>
               <div
-                class="w-2 h-2 bg-wl-ink absolute transition-transform duration-150"
+                class="w-2 h-2 bg-wl-olive absolute transition-transform duration-150"
                 :class="
                   selectedOptions[option.id] === value.id
                     ? 'scale-100'
@@ -244,7 +244,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               :class="{
                 'text-wl-muted line-through':
                   optionValueState(option.id, value.id) !== 'available',
-                '!text-red-800':
+                '!text-wl-saffron':
                   optionValueState(option.id, value.id) === 'out_of_stock',
               }"
             >
@@ -266,10 +266,10 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               optionValueState(option.id, value.id) === 'unavailable'
                 ? 'bg-wl-paper text-wl-muted/50 border-wl-rule cursor-not-allowed'
                 : selectedOptions[option.id] === value.id
-                  ? 'bg-wl-ink text-wl-paper border-wl-ink'
+                  ? 'bg-wl-ink text-wl-paper border-wl-ink shadow-[inset_0_-3px_0_0_theme(colors.wl.olive)]'
                   : optionValueState(option.id, value.id) === 'out_of_stock'
-                    ? 'bg-wl-card text-red-800 border-red-300 hover:border-red-400'
-                    : 'bg-wl-card text-wl-muted border-wl-rule hover:border-wl-ink hover:text-wl-ink',
+                    ? 'bg-wl-saffronWash text-wl-saffron border-wl-saffron/40 hover:border-wl-saffron'
+                    : 'bg-wl-card text-wl-muted border-wl-rule hover:border-wl-olive hover:text-wl-oliveDeep',
             ]"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
             :title="
@@ -299,7 +299,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <!-- Mini Description -->
     <p
       v-if="product?.miniDescription"
-      class="text-wl-muted mt-8 leading-relaxed border-s-2 border-wl-ruleStrong ps-4"
+      class="text-wl-muted mt-8 leading-relaxed border-s-2 border-wl-olive ps-4"
     >
       {{ product.miniDescription }}
     </p>

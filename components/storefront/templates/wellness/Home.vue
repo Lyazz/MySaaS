@@ -106,13 +106,10 @@ const categories = computed(() =>
         <!-- Content sits on its own stock, so contrast never depends on the photo -->
         <div class="absolute inset-0 flex items-end justify-start p-4 sm:p-8 md:p-14">
              <div
-               class="max-w-md w-full bg-wl-card border border-wl-rule p-7 sm:p-9 text-start transition-all duration-700 delay-150"
+               class="max-w-md w-full wl-plate wl-plate-lg p-7 sm:p-9 text-start transition-all duration-700 delay-150"
                :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-6 opacity-0'"
              >
-                <div class="flex items-center gap-3 mb-5">
-                    <span class="inline-block w-8 h-px bg-wl-ruleStrong"></span>
-                    <span class="wl-label text-wl-muted">{{ storefrontContent.home.welcomeTo(tenantName) }}</span>
-                </div>
+                <span class="wl-eyebrow wl-label mb-5">{{ storefrontContent.home.welcomeTo(tenantName) }}</span>
 
                 <h2 class="wl-display text-[2.25rem] sm:text-5xl text-wl-ink mb-5 leading-[0.98]">
                   {{ slide.title }}
@@ -124,7 +121,7 @@ const categories = computed(() =>
 
                 <NuxtLink
                   :to="slideTo(slide.buttonHref)"
-                  class="group/cta inline-flex items-center gap-3 px-8 py-4 bg-wl-ink text-wl-paper wl-label hover:bg-brand-700 transition-colors"
+                  class="wl-cta group/cta inline-flex items-center gap-3 px-8 py-4 wl-label"
                 >
                   {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
                   <Icon name="lucide:arrow-right" class="w-4 h-4 transition-transform group-hover/cta:translate-x-1" />
@@ -134,12 +131,12 @@ const categories = computed(() =>
       </div>
 
       <!-- Slide index, on its own chip so it stays legible over any photo -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-6 end-4 sm:end-8 md:end-14 z-20 flex items-center gap-2.5 rtl:flex-row-reverse bg-wl-card border border-wl-rule px-3 py-2.5">
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 end-4 sm:end-8 md:end-14 z-20 flex items-center gap-2.5 rtl:flex-row-reverse wl-plate px-3 py-2.5">
         <button
           v-for="(slide, index) in heroSlides"
           :key="index"
-          class="h-px transition-all duration-300"
-          :class="index === currentSlide ? 'bg-wl-ink w-8' : 'bg-wl-ruleStrong w-4 hover:bg-wl-muted'"
+          class="h-0.5 transition-all duration-300"
+          :class="index === currentSlide ? 'bg-wl-olive w-8' : 'bg-wl-ruleStrong w-4 hover:bg-wl-oliveSoft'"
           :aria-label="slide.title"
           :aria-current="index === currentSlide"
           @click="currentSlide = index"
@@ -164,7 +161,7 @@ const categories = computed(() =>
             :to="`/category/${cat.slug}`"
             class="snap-start flex-shrink-0 w-56 sm:w-64 group"
           >
-            <div class="relative w-full h-72 overflow-hidden border border-wl-rule bg-wl-card">
+            <div class="wl-specimen relative w-full h-72 overflow-hidden border border-wl-rule bg-wl-card">
               <img
                 v-if="cat.imageUrl"
                 :src="cat.imageUrl"
@@ -172,7 +169,7 @@ const categories = computed(() =>
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
               >
               <div v-else class="w-full h-full bg-wl-card" />
-              <div class="absolute inset-0 bg-wl-ink/10 group-hover:bg-wl-ink/0 transition-colors duration-500" />
+              <div class="absolute inset-0 bg-wl-zellige/10 group-hover:bg-wl-zellige/0 transition-colors duration-500" />
             </div>
 
             <!-- Plate -->
@@ -180,7 +177,7 @@ const categories = computed(() =>
               <h3 class="wl-display-sm text-base text-wl-ink truncate">
                 <span class="wl-underline">{{ categoryDisplayTitle(cat) }}</span>
               </h3>
-              <p class="wl-label wl-num text-wl-muted flex-shrink-0">{{ storefrontContent.common.productsCount(cat.itemCount) }}</p>
+              <p class="wl-label wl-num text-wl-oliveDeep flex-shrink-0">{{ storefrontContent.common.productsCount(cat.itemCount) }}</p>
             </div>
           </NuxtLink>
         </div>
@@ -188,17 +185,17 @@ const categories = computed(() =>
     </section>
 
     <!-- Featured -->
-    <section v-if="sections.newArrivals.enabled" class="py-20 md:py-24 bg-wl-card border-t border-wl-rule">
+    <section v-if="sections.newArrivals.enabled" class="py-20 md:py-24 wl-ground-linen border-t border-wl-rule">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-10">
-          <span class="wl-label text-wl-muted mb-3 block max-w-full">{{ t('storefront.templates.wellness.home.curatedSelection') }}</span>
-          <div class="wl-ruled wl-ruled--start">
+          <span class="wl-eyebrow wl-label mb-3 max-w-full">{{ t('storefront.templates.wellness.home.curatedSelection') }}</span>
+          <div class="wl-ruled wl-ruled--start wl-ruled--olive">
             <h2 class="wl-display text-3xl md:text-[2.5rem] text-wl-ink leading-none flex-shrink-0">
               {{ sections.newArrivals.title }}
             </h2>
             <NuxtLink
               to="/products"
-              class="hidden md:inline-flex items-center gap-2 wl-label text-wl-ink flex-shrink-0 group/all"
+              class="hidden md:inline-flex items-center gap-2 wl-label text-wl-oliveDeep flex-shrink-0 group/all"
             >
               <span class="wl-underline">{{ t('storefront.templates.wellness.home.shopCollection') }}</span>
               <Icon name="lucide:arrow-right" class="w-3.5 h-3.5 transition-transform group-hover/all:translate-x-1" />
@@ -225,7 +222,7 @@ const categories = computed(() =>
         <div class="mt-10 md:hidden">
           <NuxtLink
             to="/products"
-            class="w-full inline-flex items-center justify-center px-8 py-4 border border-wl-ink text-wl-ink wl-label hover:bg-wl-ink hover:text-wl-paper transition-colors"
+            class="wl-cta-ghost w-full inline-flex items-center justify-center px-8 py-4 wl-label"
           >
             View all products
           </NuxtLink>
@@ -234,10 +231,10 @@ const categories = computed(() =>
     </section>
 
     <!-- Best Sellers -->
-    <section v-if="sections.bestSellers.enabled" class="py-20 md:py-24 bg-wl-paper border-t border-wl-rule">
+    <section v-if="sections.bestSellers.enabled" class="py-20 md:py-24 wl-ground-tint border-t border-wl-rule">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-10">
-          <div class="wl-ruled wl-ruled--start mb-4">
+          <div class="wl-ruled wl-ruled--start wl-ruled--olive mb-4">
             <h2 class="wl-display text-3xl md:text-[2.5rem] text-wl-ink leading-none flex-shrink-0">
               {{ sections.bestSellers.title }}
             </h2>
@@ -247,7 +244,7 @@ const categories = computed(() =>
           </p>
         </div>
 
-        <div v-if="bestSellersDisplayed.length === 0" class="border border-wl-rule bg-wl-card py-16 text-center wl-label text-wl-muted">
+        <div v-if="bestSellersDisplayed.length === 0" class="wl-plate py-16 text-center wl-label text-wl-muted">
           Coming soon.
         </div>
 

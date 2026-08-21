@@ -109,7 +109,7 @@ async function handleAddToCart() {
   >
     <!-- Specimen window -->
     <div
-      class="relative overflow-hidden bg-wl-card border border-wl-rule"
+      class="wl-specimen relative overflow-hidden bg-wl-card border border-wl-rule"
       :class="[
         viewMode === 'list'
           ? 'w-40 h-48 flex-shrink-0'
@@ -132,29 +132,29 @@ async function handleAddToCart() {
       <div class="absolute top-3 start-3 flex flex-col gap-1.5 items-start z-10">
         <span
           v-if="isClearanceEligible"
-          class="wl-label px-2 py-1 bg-wl-ink text-wl-paper"
+          class="wl-chip wl-chip--henna wl-label"
         >{{ t('storefront.clearance.badge') }}</span>
         <span
           v-if="isOutOfStock"
-          class="wl-label px-2 py-1 bg-wl-paper text-wl-muted border border-wl-rule"
+          class="wl-chip wl-label"
         >{{ storefrontContent.productForm.stock.outOfStock }}</span>
       </div>
 
       <!-- Quick Actions (fade up) -->
        <div
-        class="absolute inset-x-0 bottom-0 flex justify-center gap-px p-3 transition-all duration-300 pointer-events-none"
+        class="absolute inset-x-0 bottom-0 z-10 flex justify-center gap-px p-3 transition-all duration-300 pointer-events-none"
         :class="[ viewMode !== 'list' ? 'translate-y-3 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 focus-within:translate-y-0 focus-within:opacity-100' : 'hidden' ]"
       >
          <StorefrontSharedFavoriteButton
             :product-id="product.id"
-            button-class="pointer-events-auto h-10 w-10 bg-wl-card border border-wl-rule flex items-center justify-center hover:bg-wl-paper transition-colors"
+            button-class="pointer-events-auto h-10 w-10 bg-wl-card border border-wl-rule flex items-center justify-center hover:bg-wl-oliveWash transition-colors"
             icon-class="w-4 h-4"
             inactive-class="text-wl-ink"
-            active-class="text-red-700"
+            active-class="text-wl-henna"
          />
 
          <button
-            class="pointer-events-auto h-10 w-10 bg-wl-card border border-wl-rule border-s-0 flex items-center justify-center text-wl-ink hover:bg-wl-paper transition-colors"
+            class="pointer-events-auto h-10 w-10 bg-wl-card border border-wl-rule border-s-0 flex items-center justify-center text-wl-ink hover:bg-wl-oliveWash transition-colors"
             :title="storefrontContent.actions.quickView"
             @click.prevent="$emit('quick-view', product)"
          >
@@ -164,7 +164,7 @@ async function handleAddToCart() {
          <button
            v-if="storeSettings?.cartEnabled !== false"
            :disabled="isOutOfStock || !product.isActive"
-           class="pointer-events-auto h-10 w-10 bg-wl-ink text-wl-paper flex items-center justify-center hover:bg-brand-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+           class="wl-cta pointer-events-auto h-10 w-10 flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
            :title="storefrontContent.actions.addToCart"
            @click.prevent="handleAddToCart"
          >
@@ -173,7 +173,7 @@ async function handleAddToCart() {
       </div>
     
       <!-- Countdown Overlay -->
-      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
+      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-wl-zelligeDeep/70 via-wl-zelligeDeep/20 to-transparent pt-8 pb-3 pointer-events-none">
         <div class="scale-[0.85] sm:scale-90 origin-bottom">
           <StorefrontSharedCountdownTimer
             :end-date="product.promotionEndDate"
@@ -223,17 +223,17 @@ async function handleAddToCart() {
           </span>
           <span
             v-if="hasPromoSaving"
-            class="wl-num text-xs text-wl-muted line-through decoration-wl-ruleStrong"
+            class="wl-num text-xs text-wl-henna/80 line-through decoration-wl-henna/50"
           >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
         </div>
 
         <span
           v-if="isLowStock"
-          class="wl-label text-brand-700 flex-shrink-0"
+          class="wl-label text-wl-saffron flex-shrink-0"
         >{{ storefrontContent.productForm.stock.lowStock(product.stock) }}</span>
         <span
           v-else-if="!isOutOfStock"
-          class="wl-label text-wl-muted flex-shrink-0"
+          class="wl-label text-wl-oliveDeep flex-shrink-0"
         >{{ storefrontContent.product.inStock }}</span>
       </div>
 
@@ -242,17 +242,17 @@ async function handleAddToCart() {
           <button
              v-if="storeSettings?.cartEnabled !== false"
              :disabled="product.stock === 0"
-             class="px-7 py-3 bg-wl-ink text-wl-paper wl-label hover:bg-brand-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+             class="wl-cta px-7 py-3 wl-label disabled:opacity-40 disabled:cursor-not-allowed"
              @click.prevent="handleAddToCart"
           >
              {{ storefrontContent.actions.addToCart }}
           </button>
           <StorefrontSharedFavoriteButton
             :product-id="product.id"
-            button-class="px-4 py-3 border border-wl-rule hover:bg-wl-card transition-colors flex items-center"
+            button-class="wl-cta-ghost px-4 py-3 transition-colors flex items-center"
             icon-class="w-4 h-4"
             inactive-class="text-wl-muted"
-            active-class="text-red-700"
+            active-class="text-wl-henna"
           />
        </div>
     </div>
@@ -268,9 +268,9 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-6 end-6 z-50 bg-wl-card text-wl-ink border border-wl-ink px-6 py-4 shadow-lg flex items-center gap-4"
+        class="fixed bottom-6 end-6 z-50 wl-plate wl-plate-lg text-wl-ink !border-wl-olive px-6 py-4 flex items-center gap-4"
       >
-        <div class="w-6 h-6 border border-wl-ruleStrong text-wl-ink flex items-center justify-center shrink-0">
+        <div class="w-6 h-6 bg-wl-oliveWash border border-wl-oliveSoft text-wl-oliveDeep flex items-center justify-center shrink-0">
           <Icon name="lucide:check" class="w-3.5 h-3.5" />
         </div>
         <div>
