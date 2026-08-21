@@ -28,6 +28,10 @@ const templatesMeta = [
   { key: 'chrono', label: 'Chrono Luxe' },
   { key: 'maison', label: 'Pistachio' },
   { key: 'arena', label: 'Arena Performance' },
+  { key: 'playful', label: 'Playful' },
+  { key: 'activewear', label: 'Activewear' },
+  { key: 'nour', label: 'Nour Élégance' },
+  { key: 'embellir', label: 'Embellir' },
 ]
 
 const activeTemplateDef = computed(() => {

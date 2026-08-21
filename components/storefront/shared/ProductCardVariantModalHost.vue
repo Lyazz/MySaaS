@@ -18,6 +18,8 @@ type TemplateKey =
   | 'chrono'
   | 'maison'
   | 'arena'
+  | 'nour'
+  | 'embellir'
 
 type ThemeTokens = {
   overlay: string
@@ -266,6 +268,34 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
     addBtn: 'bg-[#3c3428] text-white hover:bg-[#7d6542]',
     closeBtn: 'text-[#6f6659] hover:text-[#3c3428]',
     unavailable: 'text-red-700'
+  },
+  nour: {
+    overlay: 'bg-[#2E1E20]/55',
+    panel: 'bg-[#FFFDF9] border border-[#C9A24B]/40 rounded-[20px]',
+    font: '',
+    title: 'text-[#2E1E20]',
+    subtitle: 'text-[#6B5850]',
+    row: 'border-[#C9A24B]/35 hover:border-brand-300 hover:bg-[#FAF3EA]',
+    rowLabel: 'text-[#2E1E20]',
+    rowMeta: 'text-[#6B5850]',
+    price: 'text-brand-700',
+    addBtn: 'bg-[#2E1E20] text-white hover:bg-brand-700',
+    closeBtn: 'text-[#9C8B82] hover:text-[#2E1E20]',
+    unavailable: 'text-rose-700'
+  },
+  embellir: {
+    overlay: 'bg-[#062622]/70',
+    panel: 'bg-[#FDFAF4] border border-[#CBBDAB] !rounded-[2px]',
+    font: '',
+    title: 'text-[#16211E]',
+    subtitle: 'text-[#5A6763]',
+    row: '!rounded-[2px] border-[#CBBDAB] hover:border-[#DFA254] hover:bg-[#F2ECE1]',
+    rowLabel: 'text-[#16211E]',
+    rowMeta: 'text-[#5A6763]',
+    price: 'text-brand-700',
+    addBtn: '!rounded-[2px] bg-brand-600 text-[#FDFAF4] hover:bg-[#DFA254] hover:text-[#062622]',
+    closeBtn: '!rounded-[2px] text-[#5A6763] hover:text-[#16211E]',
+    unavailable: 'text-[#B4593F]'
   },
   default: {
     overlay: 'bg-slate-900/60',

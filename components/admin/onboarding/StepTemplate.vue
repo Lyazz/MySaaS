@@ -85,6 +85,19 @@ const props = defineProps<{ modelValue: OnboardingForm }>()
 const emit = defineEmits<{ 'update:modelValue': [value: OnboardingForm] }>()
 const { t } = useI18n({ useScope: 'global' })
 
+/*
+ * Each card draws its own specimen with an inline font-family, but four of
+ * these faces (Teko, Cormorant, Marcellus, Bodoni Moda) only ship inside the
+ * storefront themes that use them. Without this the specimens fall back to a
+ * system serif and misrepresent the theme the merchant is picking.
+ */
+useHead({
+  link: [{
+    rel: 'stylesheet',
+    href: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:wght@400;500;600&family=Marcellus&family=Teko:wght@400;500;600&display=swap'
+  }]
+})
+
 const templates = computed(() => [
   { key: 'classic', label: 'Classic', description: t('admin.appearanceSettingsForm.templates.options.classic.description'), storeTypes: t('admin.appearanceSettingsForm.templates.options.classic.storeTypes'), fontClass: 'font-serif', fontName: 'Alice', fontStyle: "'Alice', serif", color: '#0f172a', bg: '#f8fafc', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)', border: '#e2e8f0', textColor: '#0f172a', btnText: '#ffffff', radius: '4px', emoji: '🖼️', sampleDesc: 'Élégant & intemporel', samplePrice: '189 DA' },
   { key: 'modern', label: 'Modern', description: t('admin.appearanceSettingsForm.templates.options.modern.description'), storeTypes: t('admin.appearanceSettingsForm.templates.options.modern.storeTypes'), fontClass: 'font-sans', fontName: 'Outfit', fontStyle: "'Outfit', ui-sans-serif, system-ui, sans-serif", color: '#0D9488', bg: '#f8fafc', cardBg: '#ffffff', imgBg: 'linear-gradient(135deg,#CCFBF1,#99F6E4)', border: '#e2e8f0', textColor: '#475569', btnText: '#ffffff', radius: '8px', emoji: '🛍️', sampleDesc: 'Minimaliste & moderne', samplePrice: '129 DA' },
@@ -99,5 +112,7 @@ const templates = computed(() => [
   { key: 'chrono', label: 'Chrono Luxe', description: t('admin.appearanceSettingsForm.templates.options.chrono.description'), storeTypes: t('admin.appearanceSettingsForm.templates.options.chrono.storeTypes'), fontClass: 'font-serif', fontName: 'Cormorant Garamond', fontStyle: "'Cormorant Garamond', serif", color: '#A67C52', bg: '#0E1117', cardBg: '#131720', imgBg: 'linear-gradient(135deg,#1A1F2E,#0B0E16)', border: 'rgba(212,197,169,0.18)', textColor: '#E8E0D5', btnText: '#ffffff', radius: '2px', emoji: '⌚', sampleDesc: 'Luxury Accessories', samplePrice: '3 500 DA' },
   { key: 'arena', label: 'Arena', description: t('admin.appearanceSettingsForm.templates.options.arena.description'), storeTypes: t('admin.appearanceSettingsForm.templates.options.arena.storeTypes'), fontClass: 'font-sans', fontName: 'Outfit', fontStyle: "'Outfit', ui-sans-serif, system-ui, sans-serif", color: '#00B8FC', bg: '#030508', cardBg: '#0B0F14', imgBg: 'linear-gradient(135deg,#111820,#030508)', border: '#133246', textColor: '#E2E8F0', btnText: '#02060A', radius: '6px', emoji: '🎮', sampleDesc: 'Esports Performance', samplePrice: '399 DA' },
   { key: 'maison', label: 'Pistachio', description: t('admin.appearanceSettingsForm.templates.options.maison.description'), storeTypes: t('admin.appearanceSettingsForm.templates.options.maison.storeTypes'), fontClass: 'font-serif', fontName: 'Fraunces', fontStyle: "'Fraunces', serif", color: '#0B4A25', bg: '#FBF3E6', cardBg: '#FFF9EA', imgBg: 'linear-gradient(135deg,#F7E4BD,#E4C58F)', border: '#E4C58F', textColor: '#1D2419', btnText: '#FFF9EA', radius: '28px', emoji: '🌰', sampleDesc: 'Pistachio Luxe', samplePrice: '250 DA' },
+  { key: 'nour', label: 'Nour Élégance', description: t('admin.appearanceSettingsForm.templates.options.nour.description'), storeTypes: t('admin.appearanceSettingsForm.templates.options.nour.storeTypes'), fontClass: 'font-serif', fontName: 'Marcellus', fontStyle: "'Marcellus', serif", color: '#7A3B46', bg: '#FAF3EA', cardBg: '#FFFDF9', imgBg: 'linear-gradient(135deg,#F3E7D8,#E4C58F)', border: '#E4C58F', textColor: '#2E1E20', btnText: '#FFFDF9', radius: '20px', emoji: '🧕', sampleDesc: 'Élégance drapée', samplePrice: '4 500 DA' },
+  { key: 'embellir', label: 'Embellir', description: t('admin.appearanceSettingsForm.templates.options.embellir.description'), storeTypes: t('admin.appearanceSettingsForm.templates.options.embellir.storeTypes'), fontClass: 'font-serif', fontName: 'Bodoni Moda', fontStyle: "'Bodoni Moda', Didot, serif", color: '#0E3F3A', bg: '#F2ECE1', cardBg: '#FDFAF4', imgBg: 'linear-gradient(135deg,#E4DACB,#CBBDAB)', border: '#CBBDAB', textColor: '#16211E', btnText: '#FDFAF4', radius: '2px', emoji: '🧴', sampleDesc: 'Beauté & bien-être', samplePrice: '2 400 DA' },
 ])
 </script>
