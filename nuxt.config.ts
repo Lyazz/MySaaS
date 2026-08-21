@@ -26,6 +26,24 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   ssr: ssrEnabled,
   devtools: { enabled: process.env.NODE_ENV !== 'production' },
+
+  /*
+   * Server sourcemaps are what pushed the production build over the 4 GB heap
+   * the Dockerfile grants it: `npm run build` died with an OOM in the Nitro
+   * stage, on this commit and on every commit before it, so no image could be
+   * produced at all. Turning them off brings the build back under the cap
+   * without needing a bigger build machine.
+   *
+   * The cost is that server stack traces in production point at bundled
+   * output rather than source. If that becomes the thing standing between you
+   * and a production bug, the alternative fix is to raise
+   * --max-old-space-size in the Dockerfile and set this back to true — the
+   * build needs a little over 4 GB and passes comfortably at 8 GB.
+   *
+   * `client` keeps Nuxt's default (off in production); it is spelled out here
+   * so the whole policy is readable in one place.
+   */
+  sourcemap: { server: false, client: false },
   runtimeConfig: {
     public: {
       // Used by client-side redirects/URL builders (e.g. send tenant admins to root host).
