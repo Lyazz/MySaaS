@@ -395,7 +395,7 @@ const props = defineProps<{
               </div>
             </div>
 
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-5">{{ storefrontContent.footer.contact }}</h4>
               <ul class="space-y-3 text-sm">
                 <li v-if="legalLinks.contact.enabled">
@@ -404,7 +404,7 @@ const props = defineProps<{
               </ul>
             </div>
 
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="text-[10px] font-black uppercase tracking-[0.32em] text-brand-500 mb-5">{{ storefrontContent.footer.termsPrivacy }}</h4>
               <ul class="space-y-3 text-sm">
                 <li v-if="legalLinks.terms.enabled">

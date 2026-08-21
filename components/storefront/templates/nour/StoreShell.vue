@@ -437,7 +437,7 @@ watch(isSearchOpen, (open) => {
             </div>
 
             <!-- Links Column -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="text-white font-semibold mb-6">
                 {{ storefrontContent.footer.contact }}
               </h4>
@@ -447,7 +447,7 @@ watch(isSearchOpen, (open) => {
                 </li>
 </ul>
             </div>
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="text-white font-semibold mb-6">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>

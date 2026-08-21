@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/cyber/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -220,10 +221,7 @@ const {
                 :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover opacity-70 transition-transform duration-700 group-hover:scale-105"
               >
-              <div
-                v-else
-                class="w-full h-full bg-gradient-to-br from-purple-900/40 via-pink-900/20 to-transparent"
-              />
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
               <div class="absolute inset-0 bg-gradient-to-t from-[#1a0a2e]/80 via-[#1a0a2e]/40 to-transparent" />
             </div>
 

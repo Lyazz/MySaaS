@@ -402,7 +402,7 @@ const props = defineProps<{
             </div>
 
             <!-- Links -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="text-white font-black text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
                 {{ storefrontContent.footer.contact }}
@@ -411,7 +411,7 @@ const props = defineProps<{
                 <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="text-white font-black text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-pink-400 inline-block"></span>
                 {{ storefrontContent.footer.termsPrivacy }}

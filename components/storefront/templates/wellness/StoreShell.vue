@@ -425,7 +425,7 @@ defineProps<{
             </div>
 
             <!-- Links Column (Contact) -->
-            <div class="md:border-s md:border-white/10 md:ps-8">
+            <div v-if="legalLinks.contact.enabled" class="md:border-s md:border-white/10 md:ps-8">
               <h4 class="wl-label text-wl-oliveSoft mb-6">{{ storefrontContent.footer.contact }}</h4>
               <ul class="space-y-3 text-sm">
                 <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="transition-colors">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
@@ -433,7 +433,7 @@ defineProps<{
             </div>
 
             <!-- Terms & Privacy Column -->
-            <div class="md:border-s md:border-white/10 md:ps-8">
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled" class="md:border-s md:border-white/10 md:ps-8">
                <h4 class="wl-label text-wl-oliveSoft mb-6">{{ storefrontContent.footer.termsPrivacy }}</h4>
                <ul class="space-y-3 text-sm">
                  <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="transition-colors">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>

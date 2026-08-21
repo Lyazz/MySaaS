@@ -32,21 +32,21 @@ export const DEFAULT_STOREFRONT_HOME_CONFIG: StorefrontHomeConfig = {
             subtitle: 'Discover the latest trends in books and stationery.',
             buttonText: 'Shop Now',
             buttonHref: '/products',
-            imageUrl: '/blank.svg'
+            imageUrl: '/images/homepage-defaults/new-collection.svg'
         },
         {
             title: 'Best Sellers',
             subtitle: 'Get your hands on the most popular items this week.',
             buttonText: 'Browse',
             buttonHref: '/products',
-            imageUrl: '/blank.svg'
+            imageUrl: '/images/homepage-defaults/best-sellers.svg'
         },
         {
             title: 'Special Offers',
             subtitle: 'Up to 50% off on selected items.',
             buttonText: 'View Deals',
             buttonHref: '/products',
-            imageUrl: '/blank.svg'
+            imageUrl: '/images/homepage-defaults/special-offers.svg'
         }
     ],
     sections: {

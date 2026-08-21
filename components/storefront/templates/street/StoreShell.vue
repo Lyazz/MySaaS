@@ -296,7 +296,7 @@ const currentYear = new Date().getFullYear()
             </div>
 
             <!-- Links Column -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="font-street text-2xl text-brand mb-6 uppercase">
                 {{ storefrontContent.footer.contact }}
               </h4>
@@ -306,7 +306,7 @@ const currentYear = new Date().getFullYear()
                 </li>
 </ul>
             </div>
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="font-street text-2xl text-brand mb-6 uppercase">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>

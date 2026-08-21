@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import ProductCard from '~/components/storefront/templates/embellir/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -190,7 +191,7 @@ const categories = computed(() => {
                 :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover transition-transform duration-[900ms] ease-out group-hover:scale-105"
               >
-              <div v-else class="emb-zellige w-full h-full bg-brand-600 opacity-90" />
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" font-family="'Bodoni Moda', 'Bodoni 72', Didot, ui-serif, Georgia, serif" class="w-full h-full" />
             </div>
 
             <!-- A glazed cartouche, not a scrim: merchant photography varies, and

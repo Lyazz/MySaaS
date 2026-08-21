@@ -351,7 +351,7 @@ watch(searchQuery, async (q) => {
             </div>
 
             <!-- Service -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.contact }}</span>
               <ul class="shell-footer__links">
                 <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="shell-footer__link">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
@@ -359,7 +359,7 @@ watch(searchQuery, async (q) => {
             </div>
 
             <!-- Legal -->
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.termsPrivacy }}</span>
               <ul class="shell-footer__links">
                 <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="shell-footer__link">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>

@@ -10,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -422,42 +423,42 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                 {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 text-sm text-slate-400">
-                <li>
-                  <a
-                    href="#"
+                <li v-if="legalLinks.contact.enabled">
+                  <NuxtLink
+                    :to="legalLinks.contact.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.contactUs }}</a>
+                  >{{ storefrontContent.footer.contactUs }}</NuxtLink>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <NuxtLink
+                    to="/about"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.aboutUs }}</a>
+                  >{{ storefrontContent.footer.aboutUs }}</NuxtLink>
                 </li>
               </ul>
             </div>
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="text-white font-semibold mb-6">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 text-sm text-slate-400">
-                <li>
-                  <a
-                    href="#"
+                <li v-if="legalLinks.terms.enabled">
+                  <NuxtLink
+                    :to="legalLinks.terms.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.termsOfService }}</a>
+                  >{{ storefrontContent.footer.termsOfService }}</NuxtLink>
                 </li>
-                <li>
-                  <a
-                    href="#"
+                <li v-if="legalLinks.privacy.enabled">
+                  <NuxtLink
+                    :to="legalLinks.privacy.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.privacyPolicy }}</a>
+                  >{{ storefrontContent.footer.privacyPolicy }}</NuxtLink>
                 </li>
-                <li>
-                  <a
-                    href="#"
+                <li v-if="legalLinks.returns.enabled">
+                  <NuxtLink
+                    :to="legalLinks.returns.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.returnPolicy }}</a>
+                  >{{ storefrontContent.footer.returnPolicy }}</NuxtLink>
                 </li>
               </ul>
             </div>

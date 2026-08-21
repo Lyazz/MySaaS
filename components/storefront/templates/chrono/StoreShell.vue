@@ -372,7 +372,7 @@ const props = defineProps<{
             </div>
 
             <!-- Links Columns -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="font-semibold mb-5 tracking-[0.15em] uppercase text-xs" style="color: #D4C5A9;">
                 {{ storefrontContent.footer.contact }}
               </h4>
@@ -380,7 +380,7 @@ const props = defineProps<{
                 <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="transition-colors hover:text-[#D4C5A9]">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="font-semibold mb-5 tracking-[0.15em] uppercase text-xs" style="color: #D4C5A9;">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>

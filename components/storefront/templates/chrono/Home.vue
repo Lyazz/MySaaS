@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/chrono/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -243,11 +244,7 @@ const displayedProducts = computed(() => {
                 class="w-full h-full object-cover transition-all duration-700 group-hover:scale-105"
                 style="opacity: 0.55;"
               >
-              <div
-                v-else
-                class="w-full h-full"
-                style="background: linear-gradient(135deg, #1A1F2E 0%, #0B0E16 100%);"
-              />
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
               <div class="absolute inset-0" style="background: linear-gradient(to top, rgba(8,11,18,0.9) 0%, rgba(8,11,18,0.3) 60%, transparent 100%);" />
             </div>
 

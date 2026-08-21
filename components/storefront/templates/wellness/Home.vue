@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/wellness/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -168,7 +169,7 @@ const categories = computed(() =>
                 :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.04]"
               >
-              <div v-else class="w-full h-full bg-wl-card" />
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" font-family="'Fraunces', 'Solway', Georgia, serif" class="w-full h-full" />
               <div class="absolute inset-0 bg-wl-zellige/10 group-hover:bg-wl-zellige/0 transition-colors duration-500" />
             </div>
 

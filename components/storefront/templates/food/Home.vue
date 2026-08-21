@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from './ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -216,7 +217,7 @@ const {
                             :alt="categoryDisplayTitle(cat)"
                             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
                         >
-                        <div v-else class="w-full h-full bg-stone-200" />
+                        <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
                         
                         <!-- Tape Decoration -->
                         <div class="absolute top-2 start-1/2 transform -translate-x-1/2 w-24 h-6 bg-white/30 rotate-2 backdrop-blur-sm" />

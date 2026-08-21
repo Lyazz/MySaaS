@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/playful/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -184,9 +185,7 @@ const categories = computed(() => {
                 :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover opacity-80 group-hover:opacity-90 group-hover:scale-105 transition-all duration-500"
               >
-              <div v-else class="w-full h-full flex items-center justify-center">
-                <Icon name="lucide:image" class="w-12 h-12 text-stone-300" />
-              </div>
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
 
               <!-- Floating sticker label at top (not bottom — avoids overflow clipping) -->

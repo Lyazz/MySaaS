@@ -448,7 +448,7 @@ watch(isSearchOpen, (open) => {
             </div>
 
             <!-- Links Column -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="emb-label text-[#DFA254] mb-6">
                 {{ storefrontContent.footer.contact }}
               </h4>
@@ -459,7 +459,7 @@ watch(isSearchOpen, (open) => {
               </ul>
             </div>
 
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="emb-label text-[#DFA254] mb-6">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>

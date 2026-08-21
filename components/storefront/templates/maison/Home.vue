@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ProductCard from './ProductCard.vue'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const props = defineProps<{
@@ -195,7 +196,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
               :alt="categoryDisplayTitle(cat)"
               class="atelier-cats__img"
             >
-            <div v-else class="atelier-cats__img-placeholder" />
+            <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" font-family="var(--at-f-display)" class="atelier-cats__img-placeholder" />
             <div class="atelier-cats__overlay" />
           </div>
           <div class="atelier-cats__meta">

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ProductCard from './ProductCard.vue'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   category: any
@@ -36,7 +37,7 @@ const categoryProducts = computed(() => {
         :alt="category.title"
         class="cat-banner__img"
       >
-      <div v-else class="cat-banner__placeholder" />
+      <CategoryPlaceholder v-else :title="category.title" font-family="var(--at-f-display)" class="cat-banner__placeholder" />
       <div class="cat-banner__veil" />
       <div class="cat-banner__content">
         <span class="cat-banner__label at-label">{{ storefrontContent.category.label }}</span>

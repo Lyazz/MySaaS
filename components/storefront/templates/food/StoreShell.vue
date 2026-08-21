@@ -432,13 +432,13 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
             <!-- Links Columns (Masonry style spacing) -->
             <div class="md:col-span-7 grid grid-cols-2 md:grid-cols-2 gap-8">
-               <div>
+               <div v-if="legalLinks.contact.enabled">
                  <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.contact }}</h4>
                  <ul class="space-y-4 text-sm text-stone-400">
                     <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.contactUs }}</NuxtLink></li>
                  </ul>
                </div>
-               <div>
+               <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
                  <h4 class="text-white font-bold mb-6 text-lg">{{ storefrontContent.footer.termsPrivacy }}</h4>
                  <ul class="space-y-4 text-sm text-stone-400">
                     <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="hover:text-brand-400 transition-colors flex items-center gap-2 group"><span class="w-1.5 h-1.5 rounded-full bg-stone-600 group-hover:bg-brand-500 transition-colors"></span> {{ storefrontContent.footer.termsOfService }}</NuxtLink></li>

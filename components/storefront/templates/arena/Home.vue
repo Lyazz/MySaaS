@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/arena/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -190,7 +191,7 @@ const displayedProducts = computed(() => {
           >
             <div class="absolute inset-0">
               <img v-if="cat.imageUrl" :src="cat.imageUrl" :alt="categoryDisplayTitle(cat)" class="w-full h-full object-cover opacity-60 group-hover:opacity-80 group-hover:scale-105 transition-all duration-700" />
-              <div v-else class="w-full h-full bg-[radial-gradient(circle_at_top_right,rgba(0,184,252,0.25),transparent_50%),linear-gradient(160deg,#0b0f14,#04060a)]" />
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
               <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent" />
             </div>
 
