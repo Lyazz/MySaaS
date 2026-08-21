@@ -322,20 +322,31 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 <style scoped>
 /* ── Tokens ────────────────────────────────────────────────────── */
 .atelier-root {
-  --c-bg:       #FBF3E6;
-  --c-surface:  #FFF9EA;
-  --c-surface-2:#F7E4BD;
-  --c-border:   #E4C58F;
-  --c-muted:    #8F7655;
-  --c-text:     #1D2419;
-  --c-sub:      #3F5E43;
-  --c-gold:     #B38335;
-  --c-cream:    #0B4A25;
+  /* Aliases onto the theme tokens — the palette lives in ThemeProvider.vue,
+     so a tenant's brand colour reaches this page too. */
+  --c-bg:        var(--at-bg);
+  --c-surface:   var(--at-surface);
+  --c-surface-2: var(--at-surface-2);
+  --c-surface-3: var(--at-surface-3);
+  --c-border:    var(--at-border);
+  --c-border-2:  var(--at-border-2);
+  --c-muted:     var(--at-muted);
+  --c-faint:     var(--at-faint);
+  --c-text:      var(--at-text);
+  --c-sub:       var(--at-sub);
+  --c-gold:      var(--at-gold);
+  --c-gold-700:  var(--at-gold-700);
+  --c-gold-300:  var(--at-gold-300);
+  --c-cream:     var(--at-cream);
+  --c-skin:      var(--at-skin);
+  --c-leaf:      var(--at-leaf);
 
-  --f-display: 'Fraunces', 'Noto Sans Arabic', Georgia, serif;
-  --f-mono:    'Noto Sans Arabic', ui-sans-serif, system-ui, sans-serif;
+  --f-display: var(--at-f-display);
+  --f-mono:    var(--at-f-mono);
 
-  background: var(--c-bg);
+  /* Transparent: the grain and the two corner washes are painted by
+     .atelier-theme and should read through the whole page. */
+  background: transparent;
   color: var(--c-text);
   font-family: var(--f-mono);
   min-height: 100vh;
@@ -344,44 +355,66 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 /* ── Typography helpers ───────────────────────────────────────── */
 .atelier-label {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--f-mono);
   font-size: 10px;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--c-gold);
+  color: var(--c-gold-700);
   margin-bottom: 10px;
   opacity: 0;
   transform: translateY(6px);
   animation: fadeUp 0.6s ease forwards;
   animation-delay: var(--delay, 0ms);
 }
-.atelier-label--light { color: var(--c-gold); }
+.atelier-label::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+.atelier-label--light { color: var(--c-gold-300); }
 
 .atelier-section-title {
   font-family: var(--f-display);
   font-size: clamp(2rem, 4vw, 3.5rem);
   font-weight: 700;
-  letter-spacing: 0;
-  line-height: 1.05;
-  color: var(--c-text);
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  color: var(--c-cream);
+  text-wrap: balance;
 }
 
 .atelier-ghost-link {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  padding: 9px 18px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--at-r-pill);
+  background: var(--c-surface);
   font-family: var(--f-mono);
   font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--c-sub);
   text-decoration: none;
-  transition: color 0.25s;
+  white-space: nowrap;
+  box-shadow: var(--at-shadow-xs);
+  transition: color 0.25s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
 }
-.atelier-ghost-link:hover { color: var(--c-gold); }
+.atelier-ghost-link:hover {
+  color: var(--c-gold-700);
+  border-color: var(--c-gold);
+  background: var(--c-surface-2);
+  box-shadow: var(--at-shadow-sm);
+}
 .atelier-ghost-link svg { transition: transform 0.25s; }
 .atelier-ghost-link:hover svg { transform: translateX(4px); }
 
@@ -392,18 +425,21 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   display: inline-flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 28px;
-  border: 1px solid rgba(11,74,37,0.24);
+  padding: 15px 32px;
+  border: 1px solid var(--at-hair);
+  border-radius: var(--at-r-pill);
+  background: var(--c-surface);
   font-family: var(--f-mono);
   font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--c-text);
   text-decoration: none;
   position: relative;
   overflow: hidden;
-  transition: color 0.3s, border-color 0.3s;
+  box-shadow: var(--at-shadow-sm);
+  transition: color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
   opacity: 0;
   transform: translateY(6px);
   animation: fadeUp 0.6s ease forwards;
@@ -413,23 +449,35 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--c-gold);
+  background: var(--at-grad-gold-ink);
   transform: translateX(-101%);
-  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 0.45s cubic-bezier(0.76, 0, 0.24, 1);
   z-index: 0;
 }
 .atelier-cta:hover::before { transform: translateX(0); }
-.atelier-cta:hover { border-color: var(--c-gold); }
+.atelier-cta:hover {
+  border-color: transparent;
+  color: #FFFBF0;
+  box-shadow: var(--at-shadow-md);
+  transform: translateY(-2px);
+}
 .atelier-cta span, .atelier-cta svg { position: relative; z-index: 1; }
+.atelier-cta svg { transition: transform 0.3s; }
+.atelier-cta:hover svg { transform: translateX(4px); }
 
+/* On the dark manifesto slab the CTA inverts: paper outline, gold fill. */
 .atelier-cta--light {
-  border-color: rgba(11,74,37,0.34);
-  color: var(--c-cream);
+  border-color: rgba(255,251,240,0.28);
+  background: rgba(255,251,240,0.05);
+  color: #FFFBF0;
+  box-shadow: none;
   opacity: 1;
   transform: none;
   animation: none;
 }
-.atelier-cta--light::before { background: var(--c-gold); }
+.atelier-cta--light::before { background: var(--at-grad-gold); }
+.atelier-cta--light:hover { color: var(--at-green-900); }
+.atelier-cta--light:hover { color: var(--at-green-900); box-shadow: var(--at-shadow-lg); }
 
 /* ── Animations ───────────────────────────────────────────────── */
 @keyframes fadeUp {
@@ -448,8 +496,21 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   min-height: 560px;
   max-height: 920px;
   overflow: hidden;
-  background: var(--c-bg);
-  border-bottom-right-radius: clamp(56px, 10vw, 150px);
+  background: var(--at-grad-paper);
+  border-end-end-radius: clamp(56px, 10vw, 150px);
+  box-shadow: inset 0 -1px 0 var(--c-border);
+}
+/* The tooth of the paper carried over the photograph, so the image sits
+   in the page instead of on top of it. */
+.atelier-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: var(--at-grain);
+  opacity: 0.55;
+  mix-blend-mode: multiply;
 }
 
 .atelier-hero__slide {
@@ -466,7 +527,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: brightness(0.94) saturate(0.92);
+  filter: brightness(0.97) saturate(0.94) contrast(1.02);
   transition: transform 8s ease;
 }
 .atelier-hero__slide.is-active .atelier-hero__img {
@@ -477,9 +538,18 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 16% 42%, rgba(251,243,230,0.06) 0 20%, rgba(210,164,100,0.78) 21% 100%),
-    linear-gradient(to right, rgba(215,174,112,0.94) 0%, rgba(225,190,135,0.52) 62%),
-    linear-gradient(to top, rgba(251,243,230,0.68) 0%, transparent 52%);
+    radial-gradient(118% 96% at 2% 50%,
+      rgba(255,251,240,0.97) 0%,
+      rgba(252,244,227,0.88) 24%,
+      rgba(247,231,198,0.46) 47%,
+      rgba(247,231,198,0.08) 66%,
+      transparent 80%),
+    linear-gradient(to top, rgba(250,242,227,0.92) 0%, rgba(250,242,227,0.24) 26%, transparent 54%),
+    radial-gradient(70% 70% at 92% 88%, var(--at-gold-dim), transparent 70%),
+    linear-gradient(105deg,
+      color-mix(in srgb, var(--at-green) 24%, transparent) 0%,
+      color-mix(in srgb, var(--at-green) 10%, transparent) 46%,
+      rgba(28,35,24,0.18) 100%);
 }
 
 .atelier-hero__body {
@@ -492,10 +562,11 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 }
 
 .atelier-hero__rule {
-  width: 1px;
+  width: 2px;
   height: 0;
-  background: var(--c-gold);
-  margin-right: clamp(20px, 3vw, 48px);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, var(--c-gold) 18%, var(--c-cream) 92%);
+  margin-inline-end: clamp(20px, 3vw, 48px);
   flex-shrink: 0;
   transition: height 1s cubic-bezier(0.76, 0, 0.24, 1) 0.2s;
 }
@@ -511,9 +582,10 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-family: var(--f-display);
   font-size: clamp(3rem, 7vw, 7rem);
   font-weight: 700;
-  line-height: 0.97;
-  letter-spacing: 0;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
   color: var(--c-cream);
+  text-wrap: balance;
   margin-bottom: 20px;
   opacity: 0;
   transform: translateY(12px);
@@ -526,10 +598,10 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-family: var(--f-mono);
   font-size: clamp(11px, 1.4vw, 14px);
   font-weight: 300;
-  line-height: 1.7;
-  color: rgba(29,36,25,0.72);
+  line-height: 1.8;
+  color: var(--at-ink-2);
   margin-bottom: 36px;
-  max-width: 340px;
+  max-width: 360px;
   opacity: 0;
   transform: translateY(8px);
   animation: fadeUp 0.7s ease forwards;
@@ -550,26 +622,33 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-hero__count {
   font-family: var(--f-mono);
   font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
   color: var(--c-sub);
 }
 
 .atelier-hero__arrow {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--c-border);
+  border-radius: var(--at-r-pill);
   color: var(--c-sub);
-  background: transparent;
+  background: rgba(255,251,240,0.82);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--at-shadow-xs);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 .atelier-hero__arrow:hover {
-  border-color: var(--c-gold);
-  color: var(--c-gold);
+  border-color: transparent;
+  color: #FFFBF0;
+  background: var(--at-grad-gold-ink);
+  box-shadow: var(--at-shadow-sm);
+  transform: translateY(-1px);
 }
 
 .atelier-hero__progress {
@@ -579,12 +658,13 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   right: 0;
   z-index: 20;
   display: flex;
-  height: 1px;
+  gap: 2px;
+  height: 2px;
 }
 
 .atelier-hero__progress-bar {
   flex: 1;
-  background: var(--c-border);
+  background: color-mix(in srgb, var(--c-border) 70%, transparent);
   position: relative;
   overflow: hidden;
 }
@@ -592,7 +672,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--c-gold);
+  background: var(--at-grad-gold);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -600,11 +680,31 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   animation: progressFill 7s linear forwards;
 }
 
+/* In Arabic the paper side of the scrim moves with the text. */
+[dir='rtl'] .atelier-hero__veil {
+  background:
+    radial-gradient(118% 96% at 98% 50%,
+      rgba(255,251,240,0.97) 0%,
+      rgba(252,244,227,0.88) 24%,
+      rgba(247,231,198,0.46) 47%,
+      rgba(247,231,198,0.08) 66%,
+      transparent 80%),
+    linear-gradient(to top, rgba(250,242,227,0.92) 0%, rgba(250,242,227,0.24) 26%, transparent 54%),
+    radial-gradient(70% 70% at 8% 88%, var(--at-gold-dim), transparent 70%),
+    linear-gradient(255deg,
+      color-mix(in srgb, var(--at-green) 24%, transparent) 0%,
+      color-mix(in srgb, var(--at-green) 10%, transparent) 46%,
+      rgba(28,35,24,0.18) 100%);
+}
+[dir='rtl'] .atelier-manifesto::before { right: auto; left: -40px; }
+[dir='rtl'] .atelier-manifesto::after  { right: auto; left: 40px; }
+
 /* ── Strip ─────────────────────────────────────────────────────── */
 .atelier-strip {
-  background: var(--c-surface);
+  background: var(--at-grad-shell);
   border-top: 1px solid var(--c-border);
   border-bottom: 1px solid var(--c-border);
+  box-shadow: inset 0 1px 0 rgba(255,251,240,0.6);
   padding: 18px 24px;
   display: flex;
   align-items: center;
@@ -619,17 +719,25 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   gap: 10px;
   font-family: var(--f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--c-sub);
 }
-.atelier-strip__item svg { color: var(--c-gold); flex-shrink: 0; }
+.atelier-strip__item svg {
+  color: var(--c-gold-700);
+  flex-shrink: 0;
+  padding: 5px;
+  box-sizing: content-box;
+  border-radius: var(--at-r-pill);
+  background: var(--at-gold-dim);
+}
 
 .atelier-strip__sep {
   width: 1px;
   height: 16px;
-  background: var(--c-border);
+  background: var(--c-border-2);
+  opacity: 0.7;
   display: none;
 }
 @media (min-width: 640px) { .atelier-strip__sep { display: block; } }
@@ -673,9 +781,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   position: relative;
   background: var(--c-surface);
   overflow: hidden;
-  border: 1px solid rgba(228,197,143,0.48);
-  border-radius: 26px 26px 32px 0;
-  box-shadow: 0 18px 48px rgba(69, 47, 20, 0.08);
+  border: 1px solid var(--c-border);
+  border-radius: var(--at-r-leaf);
+  box-shadow: var(--at-shadow-sm);
+  transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.35s, border-color 0.35s;
+}
+@media (min-width: 768px) {
+  .atelier-cats__item:hover {
+    transform: translateY(-5px);
+    border-color: var(--c-border-2);
+    box-shadow: var(--at-shadow-lg);
+  }
 }
 
 .atelier-cats__img-wrap {
@@ -703,34 +819,45 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__img-placeholder {
   width: 100%;
   height: 100%;
-  background: var(--c-surface);
+  background: var(--at-grad-shell);
 }
 
 .atelier-cats__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(251,243,230,0.78) 0%, transparent 58%);
+  background:
+    linear-gradient(to top, var(--c-surface) 0%, rgba(255,251,240,0.55) 22%, transparent 58%),
+    linear-gradient(160deg, color-mix(in srgb, var(--at-green) 18%, transparent) 0%, transparent 46%);
   pointer-events: none;
+  transition: opacity 0.4s;
 }
+.atelier-cats__item:hover .atelier-cats__overlay { opacity: 0.8; }
 
 .atelier-cats__meta {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 15px 20px;
   border-top: 1px solid var(--c-border);
   background: var(--c-surface);
   transition: background 0.25s;
 }
 .atelier-cats__item:hover .atelier-cats__meta { background: var(--c-surface-2); }
 
+/* The index reads as a plate number, set in the display face. */
 .atelier-cats__num {
-  font-family: var(--f-mono);
-  font-size: 9px;
-  font-weight: 300;
+  font-family: var(--f-display);
+  font-size: 15px;
+  font-weight: 600;
   letter-spacing: 0;
-  color: var(--c-gold);
+  font-variant-numeric: tabular-nums;
+  color: var(--c-gold-700);
   flex-shrink: 0;
+  padding-inline-end: 12px;
+  border-inline-end: 1px solid var(--c-border);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
 }
 
 .atelier-cats__info { flex: 1; }
@@ -738,8 +865,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__name {
   font-family: var(--f-display);
   font-size: 1.15rem;
-  font-weight: 400;
-  color: var(--c-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--c-cream);
   line-height: 1.2;
   margin: 0 0 2px;
 }
@@ -747,7 +875,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__count {
   font-family: var(--f-mono);
   font-size: 9px;
-  letter-spacing: 0;
+  letter-spacing: 0.1em;
   color: var(--c-muted);
   text-transform: uppercase;
 }
@@ -771,22 +899,31 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 .atelier-tag {
   display: inline-block;
-  padding: 7px 14px;
+  padding: 8px 16px;
   border: 1px solid var(--c-border);
+  border-radius: var(--at-r-pill);
+  background: var(--c-surface);
   font-family: var(--f-mono);
   font-size: 9px;
-  letter-spacing: 0;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--c-sub);
   text-decoration: none;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
 }
-.atelier-tag:hover { border-color: var(--c-gold); color: var(--c-gold); }
+.atelier-tag:hover {
+  border-color: var(--c-gold);
+  color: var(--c-gold-700);
+  background: var(--c-surface-2);
+  box-shadow: var(--at-shadow-xs);
+}
 
 /* ── Divider ─────────────────────────────────────────────────────── */
 .atelier-divider {
   height: 1px;
-  background: var(--c-border);
+  background: var(--at-grad-hair);
+  opacity: 0.7;
   margin: 0 clamp(24px, 6vw, 80px);
 }
 
@@ -824,8 +961,13 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   flex-shrink: 0;
   width: calc((100% - 16px) / 2);
   height: 340px;
-  background: var(--c-surface);
-  animation: pulse 1.4s ease-in-out infinite;
+  border-radius: var(--at-r-leaf);
+  border: 1px solid var(--c-border);
+  background:
+    linear-gradient(100deg, transparent 20%, rgba(255,251,240,0.9) 50%, transparent 80%),
+    var(--c-surface-2);
+  background-size: 220% 100%, auto;
+  animation: at-shimmer 1.8s linear infinite;
 }
 @media (min-width: 640px) {
   .atelier-products__skel-card { width: 240px; }
@@ -844,13 +986,16 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 /* ── Manifesto ───────────────────────────────────────────────────── */
 .atelier-manifesto {
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-border);
-  border-bottom: 1px solid var(--c-border);
+  background: var(--at-grad-green);
+  color: #FFFBF0;
+  border-top: 1px solid var(--at-green-900);
+  border-bottom: 1px solid var(--at-green-900);
   padding: clamp(60px, 10vw, 120px) clamp(24px, 6vw, 80px);
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 }
+/* Two honey rings, the way a nut's shell is scored. */
 .atelier-manifesto::before {
   content: '';
   position: absolute;
@@ -858,9 +1003,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   right: -40px;
   width: 400px;
   height: 400px;
-  border: 1px solid var(--c-border);
+  border: 1px solid var(--c-gold);
   border-radius: 50%;
-  opacity: 0.35;
+  opacity: 0.28;
 }
 .atelier-manifesto::after {
   content: '';
@@ -869,9 +1014,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   right: 40px;
   width: 240px;
   height: 240px;
-  border: 1px solid var(--c-border);
+  border: 1px solid var(--c-gold-300);
   border-radius: 50%;
-  opacity: 0.2;
+  opacity: 0.18;
 }
 
 .atelier-manifesto__inner {
@@ -889,7 +1034,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-manifesto__line {
   height: 1px;
   width: 48px;
-  background: var(--c-gold);
+  background: linear-gradient(90deg, var(--c-gold-300), transparent);
 }
 .atelier-manifesto__eyebrow .atelier-label {
   opacity: 1;
@@ -901,15 +1046,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-manifesto__quote {
   font-family: var(--f-display);
   font-size: clamp(2.8rem, 6vw, 5.5rem);
-  font-weight: 300;
+  font-weight: 500;
   line-height: 1.02;
-  letter-spacing: 0;
-  color: var(--c-cream);
+  letter-spacing: -0.03em;
+  color: #FFFBF0;
   margin: 0 0 28px;
+  text-wrap: balance;
 }
 .atelier-manifesto__quote em {
   font-style: italic;
-  color: var(--c-gold);
+  font-weight: 600;
+  color: var(--c-gold-300);
 }
 
 .atelier-manifesto__body {
@@ -917,7 +1064,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-size: 12px;
   font-weight: 300;
   line-height: 1.9;
-  color: var(--c-sub);
+  color: rgba(255,251,240,0.74);
   margin-bottom: 40px;
 }
 </style>

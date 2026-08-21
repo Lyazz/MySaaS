@@ -348,7 +348,7 @@ const templateCatalog: TemplateMeta[] = [
   { key: 'playful', name: 'Playful', short: 'PL', fit: 'Kids, toys, colorful gift shops', primary: '#9333EA', accent: '#FBBF24', bg: '#faf5ff' },
   { key: 'activewear', name: 'Activewear', short: 'AW', fit: 'Sports, performance, sharp drops', primary: '#EAB308', accent: '#000000', bg: '#000000' },
   { key: 'chrono', name: 'Chrono Luxe', short: 'CH', fit: 'Watches, jewelry, luxury accessories', primary: '#A67C52', accent: '#E8E0D5', bg: '#0E1117' },
-  { key: 'maison', name: 'Pistachio', short: 'PI', fit: 'Premium food, nuts, refined retail', primary: '#0B4A25', accent: '#F7E4BD', bg: '#FBF3E6' },
+  { key: 'maison', name: 'Pistachio', short: 'PI', fit: 'Premium food, nuts, refined retail', primary: '#0B4A25', accent: '#B38335', bg: '#FAF2E3' },
   { key: 'arena', name: 'Arena', short: 'AR', fit: 'Gaming gear, peripherals, esports and dark tech storefronts', primary: '#00B8FC', accent: '#050B12', bg: '#030508' },
   { key: 'nour', name: 'Nour Élégance', short: 'NO', fit: 'Abayas, hijabs, kaftans, modest fashion', primary: '#7A3B46', accent: '#C9A24B', bg: '#FAF3EA' },
   { key: 'embellir', name: 'Embellir', short: 'EM', fit: 'Skincare, cosmetics, bath and body, wellness', primary: '#0E3F3A', accent: '#DFA254', bg: '#F2ECE1' }

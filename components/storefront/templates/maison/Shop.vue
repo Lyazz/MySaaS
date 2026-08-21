@@ -300,8 +300,8 @@ const resetFilters = () => {
 .shop__title {
   font-family: var(--at-f-display);
   font-size: clamp(3rem, 6vw, 5.5rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   color: var(--at-cream);
   margin-top: 10px;
   line-height: 1.0;
@@ -317,27 +317,32 @@ const resetFilters = () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  background: none;
+  background: var(--at-surface);
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-pill);
+  box-shadow: var(--at-shadow-xs);
   color: var(--at-sub);
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  padding: 10px 16px;
+  padding: 11px 18px;
   cursor: pointer;
   margin-bottom: 24px;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
 }
-.shop__filter-toggle:hover { border-color: var(--at-gold); color: var(--at-gold); }
+.shop__filter-toggle:hover { border-color: var(--at-gold); color: var(--at-gold-700); background: var(--at-surface-2); }
 @media (min-width: 1024px) { .shop__filter-toggle { display: none; } }
 
 .shop__filter-count {
-  background: var(--at-gold);
-  color: var(--at-bg);
+  background: var(--at-grad-green);
+  color: #FFFBF0;
   font-size: 8px;
-  padding: 1px 5px;
-  font-weight: 400;
+  padding: 2px 7px;
+  border-radius: var(--at-r-pill);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
 }
 
 .shop__layout {
@@ -363,7 +368,7 @@ const resetFilters = () => {
 }
 
 .shop__sidebar::-webkit-scrollbar-thumb {
-  background: rgba(203, 164, 107, 0.45);
+  background: var(--at-border-2);
   border-radius: 999px;
 }
 
@@ -380,9 +385,10 @@ const resetFilters = () => {
   border: none;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--at-gold);
+  color: var(--at-gold-700);
   cursor: pointer;
   padding: 0;
   transition: opacity 0.2s;
@@ -393,7 +399,8 @@ const resetFilters = () => {
 .shop__filter-title {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--at-sub);
   margin-bottom: 14px;
@@ -406,25 +413,31 @@ const resetFilters = () => {
   cursor: pointer;
 }
 .shop__checkbox {
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   border: 1px solid var(--at-border-2);
+  border-radius: 4px;
   background: var(--at-surface);
   appearance: none;
   cursor: pointer;
   flex-shrink: 0;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background 0.15s, border-color 0.15s, box-shadow 0.15s;
   position: relative;
 }
-.shop__checkbox:checked { background: var(--at-gold); border-color: var(--at-gold); }
+.shop__checkbox:hover { border-color: var(--at-gold); }
+.shop__checkbox:checked {
+  background: var(--at-cream);
+  border-color: var(--at-cream);
+  box-shadow: var(--at-shadow-xs);
+}
 .shop__checkbox:checked::after {
   content: '';
   position: absolute;
   top: 2px;
-  left: 4px;
+  left: 5px;
   width: 4px;
   height: 7px;
-  border: 1px solid var(--at-bg);
+  border: 1.5px solid #FFFBF0;
   border-top: none;
   border-left: none;
   transform: rotate(45deg);
@@ -466,11 +479,14 @@ const resetFilters = () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 5px 10px;
-  border: 1px solid var(--at-border-2);
+  padding: 6px 12px;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-pill);
+  background: var(--at-surface-2);
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--at-sub);
 }
@@ -483,7 +499,7 @@ const resetFilters = () => {
   transition: color 0.15s;
   display: flex;
 }
-.shop__active-tag-remove:hover { color: var(--at-gold); }
+.shop__active-tag-remove:hover { color: var(--at-skin); }
 
 .shop__toolbar-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .shop__search-wrap { position: relative; }
@@ -519,6 +535,9 @@ const resetFilters = () => {
 
 .shop__empty {
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  background: var(--at-grad-paper);
+  box-shadow: var(--at-shadow-sm);
   padding: clamp(48px, 8vw, 96px) 24px;
   text-align: center;
   display: flex;
@@ -530,8 +549,9 @@ const resetFilters = () => {
 .shop__empty-title {
   font-family: var(--at-f-display);
   font-size: 1.6rem;
-  font-weight: 300;
-  color: var(--at-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--at-cream);
 }
 .shop__empty-sub {
   font-family: var(--at-f-mono);
@@ -543,8 +563,7 @@ const resetFilters = () => {
 .shop__grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: var(--at-border);
+  gap: clamp(12px, 1.6vw, 20px);
 }
 @media (min-width: 768px) { .shop__grid { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1280px) { .shop__grid { grid-template-columns: repeat(4, 1fr); } }
@@ -553,7 +572,8 @@ const resetFilters = () => {
 .shop__overlay {
   position: fixed;
   inset: 0;
-  background: rgba(46,33,23,0.36);
+  background: rgba(28,35,24,0.44);
+  backdrop-filter: blur(3px);
   z-index: 60;
 }
 .shop__drawer {
@@ -562,8 +582,9 @@ const resetFilters = () => {
   right: 0;
   bottom: 0;
   width: min(320px, 90vw);
-  background: var(--at-surface);
+  background: var(--at-grad-paper);
   border-left: 1px solid var(--at-border);
+  box-shadow: var(--at-shadow-lg);
   z-index: 61;
   display: flex;
   flex-direction: column;
@@ -574,6 +595,7 @@ const resetFilters = () => {
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid var(--at-border);
+  background: var(--at-grad-shell);
 }
 .shop__drawer-close {
   background: none;

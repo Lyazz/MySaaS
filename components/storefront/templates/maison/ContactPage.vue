@@ -99,15 +99,16 @@ const submitForm = () => {
 /* Header */
 .contact__header {
   border-bottom: 1px solid var(--at-border);
-  background: var(--at-surface);
+  background: var(--at-grad-shell);
   padding: clamp(48px, 8vw, 96px) clamp(20px, 6vw, 96px) clamp(32px, 5vw, 56px);
+  border-end-end-radius: clamp(40px, 7vw, 110px);
 }
 .contact__header-inner { max-width: 1400px; margin: 0 auto; }
 .contact__title {
   font-family: var(--at-f-display);
   font-size: clamp(3rem, 7vw, 7rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 1.0;
   color: var(--at-cream);
   margin-top: 10px;
@@ -122,6 +123,12 @@ const submitForm = () => {
   grid-template-columns: 1fr;
   gap: 1px;
   background: var(--at-border);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  box-shadow: var(--at-shadow-md);
+  overflow: hidden;
+  margin-top: clamp(32px, 5vw, 56px);
+  margin-bottom: clamp(32px, 5vw, 56px);
 }
 @media (min-width: 768px) {
   .contact__body { grid-template-columns: 1fr 1.4fr; }
@@ -136,23 +143,25 @@ const submitForm = () => {
   gap: 28px;
 }
 .contact__info-rule {
-  width: 1px;
+  width: 2px;
   flex-shrink: 0;
-  background: var(--at-gold);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, var(--at-gold), transparent);
   align-self: stretch;
   min-height: 80px;
 }
 .contact__info-title {
   font-family: var(--at-f-display);
   font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: -0.028em;
   line-height: 1.05;
   color: var(--at-cream);
   margin-bottom: 20px;
 }
 .contact__info-title em {
   font-style: italic;
+  font-weight: 400;
   color: var(--at-gold);
 }
 .contact__info-desc {
@@ -180,13 +189,15 @@ const submitForm = () => {
   color: var(--at-sub);
 }
 .contact__info-icon {
-  width: 28px;
-  height: 28px;
-  background: var(--at-gold-dim);
+  width: 30px;
+  height: 30px;
+  background: var(--at-grad-green);
+  border-radius: var(--at-r-pill);
+  box-shadow: var(--at-shadow-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--at-gold);
+  color: #FFFBF0;
   flex-shrink: 0;
 }
 .contact__info-tagline {
@@ -199,7 +210,7 @@ const submitForm = () => {
 
 /* Form panel */
 .contact__form-panel {
-  background: var(--at-bg);
+  background: var(--at-grad-paper);
   padding: clamp(40px, 6vw, 72px) clamp(24px, 4vw, 56px);
 }
 .contact__form {
@@ -212,7 +223,8 @@ const submitForm = () => {
 .contact__label {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--at-sub);
 }

@@ -111,7 +111,8 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
   border-bottom: 1px solid var(--at-border);
   padding: clamp(64px, 12vw, 140px) clamp(20px, 6vw, 96px) clamp(48px, 8vw, 96px);
   overflow: hidden;
-  background: var(--at-surface);
+  background: var(--at-grad-shell);
+  border-end-end-radius: clamp(48px, 9vw, 130px);
 }
 .about__hero-inner {
   max-width: 1400px;
@@ -123,40 +124,42 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
   z-index: 1;
 }
 .about__hero-rule {
-  width: 1px;
+  width: 2px;
   height: clamp(80px, 16vw, 180px);
-  background: var(--at-gold);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, var(--at-gold) 18%, var(--at-cream) 92%);
   flex-shrink: 0;
 }
 .about__hero-text {}
 .about__title {
   font-family: var(--at-f-display);
   font-size: clamp(3.5rem, 8vw, 8rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 0.97;
   color: var(--at-cream);
   margin-top: 12px;
 }
 .about__title em {
   font-style: italic;
+  font-weight: 400;
   color: var(--at-gold);
 }
 
 .about__hero-orb {
   position: absolute;
-  border: 1px solid var(--at-border);
+  border: 1px solid var(--at-border-2);
   border-radius: 50%;
   pointer-events: none;
 }
 .about__hero-orb--1 {
   width: 500px; height: 500px;
-  top: -200px; right: -100px;
+  top: -200px; inset-inline-end: -100px;
   opacity: 0.3;
 }
 .about__hero-orb--2 {
   width: 280px; height: 280px;
-  bottom: -120px; right: 120px;
+  bottom: -120px; inset-inline-end: 120px;
   opacity: 0.2;
 }
 
@@ -168,7 +171,8 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
 }
 .about__divider {
   height: 1px;
-  background: var(--at-border);
+  background: var(--at-grad-hair);
+  opacity: 0.7;
 }
 
 /* Description section */
@@ -192,10 +196,12 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
 .about__desc-lead {
   font-family: var(--at-f-display);
   font-size: clamp(1.4rem, 2.5vw, 2rem);
-  font-weight: 300;
-  color: var(--at-text);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--at-cream);
   line-height: 1.4;
   margin-bottom: 20px;
+  text-wrap: balance;
 }
 .about__desc-body {
   font-family: var(--at-f-mono);
@@ -218,9 +224,9 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
 .about__section-title {
   font-family: var(--at-f-display);
   font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 300;
+  font-weight: 600;
   color: var(--at-cream);
-  letter-spacing: 0;
+  letter-spacing: -0.025em;
 }
 
 .about__values-grid {
@@ -228,6 +234,10 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
   grid-template-columns: 1fr;
   gap: 1px;
   background: var(--at-border);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  box-shadow: var(--at-shadow-sm);
+  overflow: hidden;
 }
 @media (min-width: 768px) {
   .about__values-grid { grid-template-columns: repeat(3, 1fr); }
@@ -251,18 +261,21 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
   color: var(--at-gold);
 }
 .about__value-icon {
-  width: 36px;
-  height: 36px;
-  background: var(--at-gold-dim);
+  width: 38px;
+  height: 38px;
+  background: var(--at-grad-green);
+  border-radius: var(--at-r-pill);
+  box-shadow: var(--at-shadow-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--at-gold);
+  color: #FFFBF0;
 }
 .about__value-title {
   font-family: var(--at-f-display);
   font-size: 1.4rem;
-  font-weight: 400;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--at-cream);
 }
 .about__value-text {
@@ -284,14 +297,16 @@ const tenantName = computed(() => tenant.value?.name || 'Pistachio')
 .about__cta-title {
   font-family: var(--at-f-display);
   font-size: clamp(2.5rem, 5vw, 5rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: -0.032em;
   line-height: 1.0;
   color: var(--at-cream);
   margin-bottom: 32px;
+  text-wrap: balance;
 }
 .about__cta-title em {
   font-style: italic;
+  font-weight: 400;
   color: var(--at-gold);
 }
 </style>

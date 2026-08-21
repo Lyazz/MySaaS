@@ -232,8 +232,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 .details__title {
   font-family: var(--at-f-display);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: -0.028em;
   line-height: 1.1;
   color: var(--at-cream);
   margin: 8px 0 16px;
@@ -248,16 +248,22 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 }
 .details__price {
   font-family: var(--at-f-display);
-  font-size: 2rem;
-  font-weight: 400;
-  color: var(--at-gold);
+  font-size: 2.15rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  color: var(--at-cream);
 }
+/* A price that came down is stated in the skin rose, not in the house green. */
+.details__price-row:has(.details__price-compare) .details__price { color: var(--at-skin); }
 .details__price-compare {
   font-family: var(--at-f-mono);
   font-size: 13px;
   font-weight: 300;
+  font-variant-numeric: tabular-nums;
   color: var(--at-muted);
   text-decoration: line-through;
+  text-decoration-color: var(--at-skin-soft);
 }
 
 /* Options */
@@ -276,8 +282,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 .details__option-label {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--at-sub);
 }
@@ -303,7 +309,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 .details__color-swatch {
   width: 32px;
   height: 32px;
-  border: 2px solid transparent;
+  border-radius: var(--at-r-pill);
+  border: 2px solid var(--at-border);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -314,7 +321,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     transform 0.15s;
 }
 .details__color-swatch.is-selected {
-  border-color: var(--at-gold);
+  border-color: var(--at-cream);
+  box-shadow: var(--at-ring);
   transform: scale(1.1);
 }
 .details__color-swatch.is-unavailable {
@@ -331,6 +339,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   width: 56px;
   height: 56px;
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
   overflow: hidden;
   cursor: pointer;
   position: relative;
@@ -345,6 +354,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 }
 .details__img-swatch.is-selected {
   border-color: var(--at-gold);
+  box-shadow: var(--at-ring);
 }
 .details__img-swatch.is-unavailable {
   opacity: 0.35;
@@ -368,29 +378,33 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   gap: 6px;
 }
 .details__option-btn {
-  padding: 8px 14px;
+  padding: 9px 16px;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: 1px solid var(--at-border-2);
-  background: transparent;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-pill);
+  background: var(--at-surface);
   color: var(--at-sub);
   cursor: pointer;
   transition:
     border-color 0.15s,
     color 0.15s,
-    background 0.15s;
+    background 0.15s,
+    box-shadow 0.15s;
 }
 .details__option-btn:hover {
   border-color: var(--at-gold);
-  color: var(--at-gold);
+  color: var(--at-gold-700);
+  background: var(--at-surface-2);
 }
 .details__option-btn.is-selected {
-  border-color: var(--at-cream);
-  background: var(--at-cream);
-  color: var(--at-bg);
+  border-color: transparent;
+  background: var(--at-grad-green);
+  color: #FFFBF0;
+  box-shadow: var(--at-shadow-green);
 }
 .details__option-btn.is-unavailable {
   opacity: 0.25;
@@ -398,8 +412,9 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   text-decoration: line-through;
 }
 .details__option-btn.is-oos {
-  color: var(--at-error);
-  border-color: rgba(224, 106, 85, 0.35);
+  color: var(--at-skin);
+  border-color: var(--at-skin-soft);
+  background: var(--at-skin-dim);
 }
 
 /* Mini desc */

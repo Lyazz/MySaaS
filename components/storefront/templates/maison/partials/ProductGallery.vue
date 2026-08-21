@@ -65,7 +65,11 @@ watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
 .gallery__main {
   position: relative;
   aspect-ratio: 4/5;
-  background: var(--at-surface-2);
+  background: var(--at-grad-shell);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-leaf);
+  /* --at-r-leaf mirrors itself under [dir='rtl'] (see ThemeProvider.vue) */
+  box-shadow: var(--at-shadow-md);
   overflow: hidden;
   cursor: zoom-in;
 }
@@ -86,15 +90,19 @@ watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
 
 .gallery__counter {
   position: absolute;
-  bottom: 12px;
-  right: 12px;
-  background: rgba(255,249,234,0.9);
-  backdrop-filter: blur(4px);
-  padding: 5px 10px;
+  bottom: 14px;
+  right: 14px;
+  background: rgba(255,251,240,0.92);
+  backdrop-filter: blur(6px);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-pill);
+  box-shadow: var(--at-shadow-xs);
+  padding: 5px 12px;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
   color: var(--at-sub);
 }
 
@@ -104,18 +112,23 @@ watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
   flex-wrap: wrap;
 }
 .gallery__thumb {
-  width: 60px;
-  height: 60px;
+  width: 62px;
+  height: 62px;
   flex-shrink: 0;
   overflow: hidden;
-  border: 1px solid transparent;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
   cursor: pointer;
-  transition: border-color 0.2s, opacity 0.2s;
-  opacity: 0.5;
-  background: none;
+  transition: border-color 0.2s, opacity 0.2s, box-shadow 0.2s;
+  opacity: 0.55;
+  background: var(--at-surface-2);
   padding: 0;
 }
-.gallery__thumb.is-active { border-color: var(--at-gold); opacity: 1; }
+.gallery__thumb.is-active {
+  border-color: var(--at-gold);
+  opacity: 1;
+  box-shadow: var(--at-ring);
+}
 .gallery__thumb:hover { opacity: 0.85; }
 .gallery__thumb-img { width: 100%; height: 100%; object-fit: cover; }
 
