@@ -540,18 +540,19 @@ const templates: StoreTemplate[] = [
   { key: 'arena', category: 'tech', mood: 'dark', voice: 'sans', display: "'Outfit', system-ui, sans-serif", color: '#00b8fc', bg: '#030508', surface: '#0b0f14', border: '#133246', ink: '#e2e8f0', inkSoft: '#7d93a6', radius: '6px' },
   { key: 'chrono', category: 'luxury', mood: 'dark', voice: 'serif', display: "'Cormorant Garamond', serif", color: '#a67c52', bg: '#0e1117', surface: '#131720', border: 'rgba(212,197,169,0.22)', ink: '#e8e0d5', inkSoft: '#9a9082', radius: '2px' },
   { key: 'maison', category: 'luxury', mood: 'light', voice: 'serif', display: "'Fraunces', serif", color: '#0b4a25', bg: '#fbf3e6', surface: '#fff9ea', border: 'rgba(196,163,105,0.55)', ink: '#1d2419', inkSoft: '#5f6555', radius: '28px' },
-  { key: 'nour', category: 'elegant', mood: 'light', voice: 'serif', display: "'Marcellus', serif", color: '#7a3b46', bg: '#faf3ea', surface: '#fffdf9', border: 'rgba(201,162,75,0.4)', ink: '#2e1e20', inkSoft: '#725d57', radius: '20px' }
+  { key: 'nour', category: 'elegant', mood: 'light', voice: 'serif', display: "'Marcellus', serif", color: '#7a3b46', bg: '#faf3ea', surface: '#fffdf9', border: 'rgba(201,162,75,0.4)', ink: '#2e1e20', inkSoft: '#725d57', radius: '20px' },
+  { key: 'embellir', category: 'elegant', mood: 'light', voice: 'serif', display: "'Bodoni Moda', Didot, serif", color: '#0e3f3a', bg: '#f2ece1', surface: '#fdfaf4', border: '#cbbdab', ink: '#16211e', inkSoft: '#5a6763', radius: '2px' }
 ]
 
 /*
- * Three of the display faces (Teko, Cormorant, Marcellus) only ship inside the
+ * Four of the display faces (Teko, Cormorant, Marcellus, Bodoni Moda) only ship inside the
  * storefront themes that use them, so the admin has to ask for them itself —
- * otherwise those three specimens silently fall back and misrepresent the theme.
+ * otherwise those specimens silently fall back and misrepresent the theme.
  */
 useHead({
   link: [{
     rel: 'stylesheet',
-    href: 'https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600&family=Marcellus&family=Teko:wght@400;500;600&display=swap'
+    href: 'https://fonts.googleapis.com/css2?family=Bodoni+Moda:opsz,wght@6..96,400;6..96,500&family=Cormorant+Garamond:wght@400;500;600&family=Marcellus&family=Teko:wght@400;500;600&display=swap'
   }]
 })
 

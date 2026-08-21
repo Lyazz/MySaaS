@@ -184,6 +184,20 @@ import NourShop from './nour/Shop.vue'
 import NourCart from './nour/Cart.vue'
 import NourProductLandingPage from './nour/ProductLandingPage.vue'
 
+// Embellir Imports
+import EmbellirHome from './embellir/Home.vue'
+import EmbellirStoreShell from './embellir/StoreShell.vue'
+import EmbellirThemeProvider from './embellir/ThemeProvider.vue'
+import EmbellirCategory from './embellir/Category.vue'
+import EmbellirContact from './embellir/ContactPage.vue'
+import EmbellirAbout from './embellir/AboutPage.vue'
+import EmbellirCheckout from './embellir/Checkout.vue'
+import EmbellirProduct from './embellir/Product.vue'
+import EmbellirProductCard from './embellir/ProductCard.vue'
+import EmbellirShop from './embellir/Shop.vue'
+import EmbellirCart from './embellir/Cart.vue'
+import EmbellirProductLandingPage from './embellir/ProductLandingPage.vue'
+
 import ModernProductLandingPage from './modern/ProductLandingPage.vue'
 import ClassicProductLandingPage from './classic/ProductLandingPage.vue'
 import StreetProductLandingPage from './street/ProductLandingPage.vue'
@@ -199,11 +213,11 @@ import WellnessWishlist from './wellness/Wishlist.vue'
 import PlayfulProductLandingPage from './playful/ProductLandingPage.vue'
 import ActivewearProductLandingPage from './activewear/ProductLandingPage.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena' | 'nour'
+export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena' | 'nour' | 'embellir'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena', 'nour'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena', 'nour', 'embellir'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
@@ -219,7 +233,8 @@ export const homeTemplates = {
   chrono: ChronoHome,
   maison: MaisonHome,
   arena: ArenaHome,
-  nour: NourHome
+  nour: NourHome,
+  embellir: EmbellirHome
 } satisfies Record<TemplateKey, Component>
 
 export const productTemplates = {
@@ -236,7 +251,8 @@ export const productTemplates = {
   chrono: ChronoProduct,
   maison: MaisonProduct,
   arena: ArenaProduct,
-  nour: NourProduct
+  nour: NourProduct,
+  embellir: EmbellirProduct
 } satisfies Record<TemplateKey, Component>
 
 export const productCardTemplates = {
@@ -253,7 +269,8 @@ export const productCardTemplates = {
   chrono: ChronoProductCard,
   maison: MaisonProductCard,
   arena: ArenaProductCard,
-  nour: NourProductCard
+  nour: NourProductCard,
+  embellir: EmbellirProductCard
 } satisfies Record<TemplateKey, Component>
 
 export const categoryTemplates = {
@@ -270,7 +287,8 @@ export const categoryTemplates = {
   chrono: ChronoCategory,
   maison: MaisonCategory,
   arena: ArenaCategory,
-  nour: NourCategory
+  nour: NourCategory,
+  embellir: EmbellirCategory
 } satisfies Record<TemplateKey, Component>
 
 export const storeShellTemplates = {
@@ -287,7 +305,8 @@ export const storeShellTemplates = {
   chrono: ChronoStoreShell,
   maison: MaisonStoreShell,
   arena: ArenaStoreShell,
-  nour: NourStoreShell
+  nour: NourStoreShell,
+  embellir: EmbellirStoreShell
 } satisfies Record<TemplateKey, Component>
 
 export const shopTemplates = {
@@ -304,7 +323,8 @@ export const shopTemplates = {
   chrono: ChronoShop,
   maison: MaisonShop,
   arena: ArenaShop,
-  nour: NourShop
+  nour: NourShop,
+  embellir: EmbellirShop
 } satisfies Record<TemplateKey, Component>
 
 export const checkoutTemplates = {
@@ -321,7 +341,8 @@ export const checkoutTemplates = {
   chrono: ChronoCheckout,
   maison: MaisonCheckout,
   arena: ArenaCheckout,
-  nour: NourCheckout
+  nour: NourCheckout,
+  embellir: EmbellirCheckout
 } satisfies Record<TemplateKey, Component>
 
 export const cartTemplates = {
@@ -338,7 +359,8 @@ export const cartTemplates = {
   chrono: ChronoCart,
   maison: MaisonCart,
   arena: ArenaCart,
-  nour: NourCart
+  nour: NourCart,
+  embellir: EmbellirCart
 } satisfies Record<TemplateKey, Component>
 
 export const aboutPageTemplates = {
@@ -355,7 +377,8 @@ export const aboutPageTemplates = {
   chrono: ChronoAbout,
   maison: MaisonAbout,
   arena: ArenaAbout,
-  nour: NourAbout
+  nour: NourAbout,
+  embellir: EmbellirAbout
 } satisfies Record<TemplateKey, Component>
 
 export const contactPageTemplates = {
@@ -372,7 +395,8 @@ export const contactPageTemplates = {
   chrono: ChronoContact,
   maison: MaisonContact,
   arena: ArenaContact,
-  nour: NourContact
+  nour: NourContact,
+  embellir: EmbellirContact
 } satisfies Record<TemplateKey, Component>
 
 export const themeProviderTemplates = {
@@ -389,7 +413,8 @@ export const themeProviderTemplates = {
   chrono: ChronoThemeProvider,
   maison: MaisonThemeProvider,
   arena: ArenaThemeProvider,
-  nour: NourThemeProvider
+  nour: NourThemeProvider,
+  embellir: EmbellirThemeProvider
 } satisfies Record<TemplateKey, Component>
 
 export const productLandingPageTemplates = {
@@ -406,7 +431,8 @@ export const productLandingPageTemplates = {
   chrono: ModernProductLandingPage,
   maison: ModernProductLandingPage,
   arena: ArenaProductLandingPage,
-  nour: NourProductLandingPage
+  nour: NourProductLandingPage,
+  embellir: EmbellirProductLandingPage
 } satisfies Record<TemplateKey, Component>
 
 export const selectTemplate = (
@@ -431,5 +457,6 @@ export const wishlistTemplates = {
   chrono: WishlistDefault,
   maison: WishlistDefault,
   arena: WishlistDefault,
-  nour: WishlistDefault
+  nour: WishlistDefault,
+  embellir: WishlistDefault
 } as const

@@ -970,6 +970,14 @@
       "dialogFreeLabel": "offerts"
     },
     "pages": {
+      "about": {
+        "seo": {
+          "title": "À propos - {tenant}",
+          "description": "En savoir plus sur {tenant}."
+        },
+        "heading": "À propos de {tenant}",
+        "placeholder": "Ceci est la page « À propos » de la boutique. Remplacez ce texte depuis l'assistant de configuration pour présenter votre boutique."
+      },
       "contact": {
         "seo": {
           "title": "Contact - {tenant}",
@@ -1319,6 +1327,15 @@
         "home": {
           "curatedSelection": "Notre sélection",
           "shopCollection": "Voir la collection"
+        }
+      },
+      "embellir": {
+        "controls": {
+          "previous": "Précédent",
+          "next": "Suivant"
+        },
+        "search": {
+          "showMore": "Afficher plus"
         }
       }
     }
@@ -2200,6 +2217,11 @@
             "label": "Nour Élégance",
             "description": "Élégance drapée et douce pour la mode modeste.",
             "storeTypes": "Abayas, hijabs, kaftans, mode modeste"
+          },
+          "embellir": {
+            "label": "Embellir",
+            "description": "Zellige émaillé profond, plâtre chaud et titrage à fort contraste.",
+            "storeTypes": "Soins de la peau, cosmétiques, bain et corps, bien-être"
           }
         }
       },

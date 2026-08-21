@@ -988,6 +988,14 @@
       "dialogFreeLabel": "مجانية"
     },
     "pages": {
+      "about": {
+        "seo": {
+          "title": "من نحن - {tenant}",
+          "description": "تعرّف أكثر على {tenant}."
+        },
+        "heading": "عن {tenant}",
+        "placeholder": "هذه صفحة «من نحن» الخاصة بالمتجر. استبدل هذا النص من معالج إعدادات المتجر للتعريف بمتجرك."
+      },
       "contact": {
         "seo": {
           "title": "اتصل بنا - {tenant}",
@@ -1337,6 +1345,15 @@
         "home": {
           "curatedSelection": "مختاراتنا",
           "shopCollection": "تسوق المجموعة"
+        }
+      },
+      "embellir": {
+        "controls": {
+          "previous": "السابق",
+          "next": "التالي"
+        },
+        "search": {
+          "showMore": "عرض المزيد"
         }
       }
     }
@@ -2218,6 +2235,11 @@
             "label": "نور إليغانس",
             "description": "أناقة ناعمة ومتدفقة للأزياء المحتشمة.",
             "storeTypes": "عبايات، حجابات، قفاطين، أزياء محتشمة"
+          },
+          "embellir": {
+            "label": "Embellir",
+            "description": "زليج أخضر عميق وجصّ دافئ وخط عناوين عالي التباين.",
+            "storeTypes": "العناية بالبشرة، مستحضرات التجميل، الحمّام والجسم، الصحة"
           }
         }
       },

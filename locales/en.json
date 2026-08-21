@@ -984,6 +984,14 @@
       "dialogFreeLabel": "free"
     },
     "pages": {
+      "about": {
+        "seo": {
+          "title": "About - {tenant}",
+          "description": "Learn more about {tenant}."
+        },
+        "heading": "About {tenant}",
+        "placeholder": "This is the store about page. Replace this text from the store settings wizard to tell customers who you are."
+      },
       "contact": {
         "seo": {
           "title": "Contact - {tenant}",
@@ -1333,6 +1341,15 @@
         "home": {
           "curatedSelection": "Curated selection",
           "shopCollection": "Shop the collection"
+        }
+      },
+      "embellir": {
+        "controls": {
+          "previous": "Previous",
+          "next": "Next"
+        },
+        "search": {
+          "showMore": "Show more"
         }
       }
     }
@@ -2214,6 +2231,11 @@
             "label": "Nour Élégance",
             "description": "Soft draped elegance for modest fashion.",
             "storeTypes": "Abayas, hijabs, kaftans, modest fashion"
+          },
+          "embellir": {
+            "label": "Embellir",
+            "description": "Deep glazed tile, warm plaster and a high-contrast display face.",
+            "storeTypes": "Skincare, cosmetics, bath and body, wellness"
           }
         }
       },

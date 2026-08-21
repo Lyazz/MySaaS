@@ -13,6 +13,7 @@ export const TEMPLATE_ORIGINAL_BRAND_COLORS = {
   maison: '#0B4A25',
   arena: '#00B8FC',
   nour: '#7A3B46',
+  embellir: '#0E3F3A',
   minimal: '#65A30D',
   interior: '#65A30D'
 } as const
