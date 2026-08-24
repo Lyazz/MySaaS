@@ -440,10 +440,12 @@ async function fetchCarrierRates() {
         carrierRates[mode][rate.wilayaCode] = rate.carrierPrice == null ? null : Number(rate.carrierPrice)
       }
     })
-  } catch (e) {
+  } catch (e: any) {
     console.error('Failed to fetch carrier rates', e)
     saveKind.value = 'error'
-    saveMessage.value = t('admin.pages.delivery.errors.fetchCarrierRatesFailed')
+    // The carrier's own reason ("rate limit exceeded", "unauthorized") is far more
+    // actionable than a generic failure, so show it when there is one.
+    saveMessage.value = e?.data?.statusMessage || t('admin.pages.delivery.errors.fetchCarrierRatesFailed')
   } finally {
     loadingCarrierRates.value = false
   }

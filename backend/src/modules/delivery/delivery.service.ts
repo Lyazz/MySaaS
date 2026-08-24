@@ -301,8 +301,16 @@ export class DeliveryService {
             originWilayaCode: input.originWilayaCode
         }
 
-        const providerQuotes =
-            impl.quote && (!requiresCredentials || apiConfig) ? await impl.quote(quoteInput) : []
+        // Same reasoning as rateShopOptions: fall through to the tenant's own saved
+        // rate rather than failing the checkout when the carrier is unreachable.
+        let providerQuotes: QuoteOption[] = []
+        if (impl.quote && (!requiresCredentials || apiConfig)) {
+            try {
+                providerQuotes = await impl.quote(quoteInput)
+            } catch (error) {
+                console.error(`Quote failed for ${input.provider}`, error)
+            }
+        }
 
         if (providerQuotes.length > 0) {
             return this.applyTenantOverridesToQuotes({
@@ -353,8 +361,16 @@ export class DeliveryService {
                 originWilayaCode: input.originWilayaCode
             }
 
-            const providerQuotes =
-                impl.quote && (!requiresCredentials || apiConfig) ? await impl.quote(quoteInput) : []
+            // Rate-shopping is a shopper-facing path: one carrier being down, throttled
+            // or misconfigured must never block the others or the checkout itself.
+            let providerQuotes: QuoteOption[] = []
+            if (impl.quote && (!requiresCredentials || apiConfig)) {
+                try {
+                    providerQuotes = await impl.quote(quoteInput)
+                } catch (error) {
+                    console.error(`Rate shop failed for ${provider}`, error)
+                }
+            }
 
             if (providerQuotes.length > 0) {
                 all.push(
@@ -457,26 +473,58 @@ export class DeliveryService {
         const codAmount =
             typeof input.codAmount === 'number' && Number.isFinite(input.codAmount) && input.codAmount > 0 ? input.codAmount : undefined
 
-        return DeliveryService.mapWithConcurrency(wilayaCodes, 8, async (wilayaCode) => {
-            const quotes = await impl.quote!({
-                tenantId: input.tenantId,
-                provider: input.provider,
-                destination: { wilayaCode, communeCode },
-                weight,
-                codAmount,
-                deliveryMode: input.deliveryMode,
-                serviceLevel: effectiveServiceLevel,
-                originWilayaCode: input.originWilayaCode
-            })
+        // One request per destination wilaya. Carriers publish very different quotas —
+        // Yalidine throttles hard and answers a burst with 403/429 — so the fan-out is
+        // paced per carrier rather than at a single optimistic width.
+        const concurrency = DeliveryService.liveRateConcurrency(input.provider)
 
-            const best = quotes.length ? quotes.reduce((a, b) => (a.price <= b.price ? a : b)) : null
-            return {
-                wilayaCode,
-                carrierPrice: best ? best.price : null,
-                currency: best?.currency || 'DZD',
-                serviceLevel: effectiveServiceLevel
+        let systemicFailure: unknown = null
+
+        const rows = await DeliveryService.mapWithConcurrency(wilayaCodes, concurrency, async (wilayaCode) => {
+            if (systemicFailure) return { wilayaCode, carrierPrice: null, currency: 'DZD', serviceLevel: effectiveServiceLevel }
+
+            try {
+                const quotes = await impl.quote!({
+                    tenantId: input.tenantId,
+                    provider: input.provider,
+                    destination: { wilayaCode, communeCode },
+                    weight,
+                    codAmount,
+                    deliveryMode: input.deliveryMode,
+                    serviceLevel: effectiveServiceLevel,
+                    originWilayaCode: input.originWilayaCode
+                })
+
+                const best = quotes.length ? quotes.reduce((a, b) => (a.price <= b.price ? a : b)) : null
+                return {
+                    wilayaCode,
+                    carrierPrice: best ? best.price : null,
+                    currency: best?.currency || 'DZD',
+                    serviceLevel: effectiveServiceLevel
+                }
+            } catch (error) {
+                // Being throttled or unauthorized dooms every remaining wilaya too;
+                // remember it, stop hammering, and let the operator see the reason
+                // instead of a table full of dashes.
+                systemicFailure = error
+                return { wilayaCode, carrierPrice: null, currency: 'DZD', serviceLevel: effectiveServiceLevel }
             }
         })
+
+        if (systemicFailure) {
+            const status = (systemicFailure as any)?.statusCode
+            const message = (systemicFailure as any)?.statusMessage
+            throw new DeliveryConfigurationError(
+                status === 429 || status === 403 || status === 401 ? status : 502,
+                message || 'Carrier refused the rate request'
+            )
+        }
+
+        return rows
+    }
+
+    private static liveRateConcurrency(provider: ShipmentProvider): number {
+        return provider === 'YALIDINE' ? 2 : 8
     }
 
     /**

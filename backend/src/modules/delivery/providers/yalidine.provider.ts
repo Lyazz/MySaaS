@@ -42,6 +42,15 @@ type YalidineCreateParcelResult = {
 }
 
 const DEFAULT_ORIGIN_WILAYA_ID = 16
+
+/**
+ * Failures that say something about the account or the connection rather than about
+ * one destination: the whole table is wrong, not one row of it.
+ */
+const SYSTEMIC_STATUSES = new Set([401, 403, 429])
+
+export const isSystemicYalidineFailure = (error: unknown): boolean =>
+    error instanceof YalidineIntegrationError && SYSTEMIC_STATUSES.has(error.statusCode)
 const DEFAULT_ORIGIN_WILAYA_NAME = 'Alger'
 
 const parsePositiveNumber = (value: unknown): number | null => {
@@ -179,7 +188,11 @@ export class YalidineProvider implements DeliveryProvider {
                     source: 'provider'
                 }
             ]
-        } catch {
+        } catch (error) {
+            // "No fee for this destination" is an ordinary empty answer. Being blocked,
+            // throttled or unauthorized is not — swallowing those made a rate-limited
+            // account look identical to a carrier that simply doesn't serve the wilaya.
+            if (isSystemicYalidineFailure(error)) throw error
             return []
         }
     }

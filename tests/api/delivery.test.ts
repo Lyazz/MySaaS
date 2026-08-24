@@ -11,6 +11,7 @@ import { MaystroLocationService } from '../../backend/src/modules/delivery/mayst
 import { MaystroPickupPointService } from '../../backend/src/modules/delivery/maystro/maystro-pickup-point.service'
 import { YalidineLocationService } from '../../backend/src/modules/delivery/yalidine/yalidine-location.service'
 import { YalidineClient } from '../../backend/src/modules/delivery/yalidine/yalidine.client'
+import { YalidineIntegrationError } from '../../backend/src/modules/delivery/yalidine/yalidine.errors'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -1255,6 +1256,55 @@ describe('Delivery API', () => {
 
             expect(res.status).toBe(200)
             expect(res.body[0]).toMatchObject({ id: '10', name: 'GARDENIA PERFUME', communeId: '555' })
+        })
+
+        // A throttled carrier used to be indistinguishable from a carrier with no
+        // prices: quote() swallowed everything and the table filled with dashes.
+        it('reports the carrier reason when live rates are refused', async () => {
+            vi.restoreAllMocks()
+            await connect('YALIDINE')
+
+            vi.spyOn(YalidineProvider.prototype, 'quote').mockRejectedValue(
+                new YalidineIntegrationError({ statusCode: 429, statusMessage: 'Yalidine: rate limit exceeded' })
+            )
+
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/YALIDINE/live-rates?deliveryMode=home')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(429)
+            expect(res.body.statusMessage).toContain('rate limit')
+        })
+
+        it('keeps checkout working when a carrier is throttled', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+            await connect('YALIDINE')
+
+            await prisma.storeSettings.upsert({
+                where: { tenantId: tenantA.id },
+                create: { tenantId: tenantA.id, allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] },
+                update: { allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] }
+            })
+
+            vi.spyOn(YalidineProvider.prototype, 'quote').mockRejectedValue(
+                new YalidineIntegrationError({ statusCode: 429, statusMessage: 'Yalidine: rate limit exceeded' })
+            )
+            vi.spyOn(MaystroProvider.prototype, 'quote').mockResolvedValue([
+                { provider: 'MAYSTRO', serviceLevel: 'home', price: 450, currency: 'DZD', source: 'provider' }
+            ])
+
+            // The shopper must still be able to order with the carrier that is up.
+            const res = await request(app)
+                .post('/api/delivery/options')
+                .set('Host', `${tenantA.slug}.swekly.com`)
+                .send({ destination: { wilayaCode: '16', communeCode: 'Alger Centre' }, deliveryMode: 'home' })
+
+            expect(res.status).toBe(200)
+            // Maystro still quotes (the exact price may carry a tenant override).
+            expect(res.body.some((q: any) => q.provider === 'MAYSTRO')).toBe(true)
+            expect(res.body.every((q: any) => q.provider !== 'YALIDINE')).toBe(true)
         })
 
         it('serves pickup points to the storefront without auth', async () => {
