@@ -1168,14 +1168,15 @@ describe('Delivery API', () => {
             })
         })
 
-        it('narrows Yalidine agencies to a commune when that commune has any', async () => {
+        it('floats the customer\'s own commune to the top without hiding the rest', async () => {
             vi.restoreAllMocks()
             await connect('YALIDINE')
 
             vi.spyOn(YalidineLocationService.prototype, 'resolveWilaya').mockResolvedValue({ id: 16, name: 'Alger' })
             vi.spyOn(YalidineLocationService.prototype, 'listCenters').mockResolvedValue([
+                { id: 160501, name: 'Agence Bab El Oued', communeId: 1605, communeName: 'Bab El Oued', wilayaId: 16 },
                 { id: 160101, name: 'Agence Sacré-Cœur', communeId: 1601, communeName: 'Alger Centre', wilayaId: 16 },
-                { id: 160501, name: 'Agence Bab El Oued', communeId: 1605, communeName: 'Bab El Oued', wilayaId: 16 }
+                { id: 160902, name: 'Agence Bir Mourad Rais', communeId: 1609, communeName: 'Bir Mourad Raïs', wilayaId: 16 }
             ] as any)
 
             const res = await request(app)
@@ -1184,10 +1185,31 @@ describe('Delivery API', () => {
                 .set('Host', `${tenantA.slug}.swekly.com`)
 
             expect(res.status).toBe(200)
-            expect(res.body.map((p: any) => p.id)).toEqual(['160101'])
+            expect(res.body[0].id).toBe('160101')
+            // The other agencies stay reachable — most customers have none in their own commune.
+            expect(res.body).toHaveLength(3)
         })
 
-        it('keeps the whole wilaya when the requested commune has no agency', async () => {
+        it('matches the customer commune by name as well as by id', async () => {
+            vi.restoreAllMocks()
+            await connect('YALIDINE')
+
+            vi.spyOn(YalidineLocationService.prototype, 'resolveWilaya').mockResolvedValue({ id: 16, name: 'Alger' })
+            vi.spyOn(YalidineLocationService.prototype, 'listCenters').mockResolvedValue([
+                { id: 160501, name: 'Agence Bab El Oued', communeId: 1605, communeName: 'Bab El Oued', wilayaId: 16 },
+                { id: 160101, name: 'Agence Sacré-Cœur', communeId: 1601, communeName: 'Alger Centre', wilayaId: 16 }
+            ] as any)
+
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/YALIDINE/pickup-points?wilaya=16&commune=Alger%20Centre')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body[0].id).toBe('160101')
+        })
+
+        it('keeps every agency when the customer commune has none', async () => {
             vi.restoreAllMocks()
             await connect('YALIDINE')
 
@@ -1196,8 +1218,8 @@ describe('Delivery API', () => {
                 { id: 160101, name: 'Agence Sacré-Cœur', communeId: 1601, communeName: 'Alger Centre', wilayaId: 16 }
             ] as any)
 
-            // Agencies are sparse; an empty list would read as "no pickup available"
-            // when the neighbouring commune has one the customer can reach.
+            // 15 wilayas have exactly one agency, usually in the chef-lieu. Filtering by
+            // commune would hide it from nearly every customer in those wilayas.
             const res = await request(app)
                 .get('/api/admin/delivery/providers/YALIDINE/pickup-points?wilaya=16&commune=1699')
                 .set('Authorization', `Bearer ${tokenA}`)

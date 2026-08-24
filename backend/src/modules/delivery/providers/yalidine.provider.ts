@@ -290,23 +290,33 @@ export class YalidineProvider implements DeliveryProvider {
         return communes.map((c) => ({ id: String(c.id), name: c.name }))
     }
 
+    /** Does this agency sit in the commune the customer typed (by id or by name)? */
+    private static communeMatches(center: { communeId: number; communeName?: string }, commune: string): boolean {
+        const id = parsePositiveInt(commune)
+        if (id) return center.communeId === id
+        return normalizeLocationName(center.communeName ?? '') === normalizeLocationName(commune)
+    }
+
     async listPickupPoints(input: { wilayaCode: string; communeCode?: string }): Promise<ProviderPickupPoint[]> {
         const { location } = this.requireClient()
         const wilaya = await location.resolveWilaya(input.wilayaCode)
 
-        // Yalidine agencies are sparse — a commune often has none while its neighbour
-        // does. Narrow to the commune only if that actually leaves something to pick.
+        // Always return the whole wilaya, with the customer's own commune first,
+        // rather than filtering down to it. Yalidine runs a median of 3 agencies per
+        // wilaya and only one in 15 of them, usually in the chef-lieu — filtering by
+        // commune would hide the single agency from nearly every customer. Alger is
+        // the one wilaya where the list is long (24), and there sorting is enough:
+        // its agencies cover 23 of 57 communes, so most customers have none of their
+        // own and need to see the neighbouring ones anyway.
         const all = await location.listCenters({ wilayaId: wilaya.id })
         const raw = String(input.communeCode ?? '').trim()
 
-        let scoped = all
-        if (raw) {
-            const communeId = parsePositiveInt(raw)
-            const inCommune = communeId
-                ? all.filter((c) => c.communeId === communeId)
-                : all.filter((c) => normalizeLocationName(c.communeName ?? '') === normalizeLocationName(raw))
-            if (inCommune.length > 0) scoped = inCommune
-        }
+        const scoped = raw
+            ? [...all].sort(
+                  (a, b) =>
+                      Number(YalidineProvider.communeMatches(b, raw)) - Number(YalidineProvider.communeMatches(a, raw))
+              )
+            : all
 
         return scoped.map((c) => ({
             id: String(c.id),
