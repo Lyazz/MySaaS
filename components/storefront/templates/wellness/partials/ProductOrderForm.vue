@@ -188,81 +188,21 @@ const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption)
 )
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
-
-const syncPickupPointCommune = () => {
-  const name = (quickForm.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && quickForm.commune !== nextCommune) quickForm.commune = nextCommune
-}
-
-watchEffect(() => {
-  const options = deliveryOptions.value
-  if (!options.length) return
-  const selected = quickForm.selectedDeliveryOption
-  if (!selected || !options.some((opt: any) => opt.id === selected)) {
-    quickForm.selectedDeliveryOption = options[0].id
-  }
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => quickForm.wilaya,
+  commune: () => quickForm.commune,
+  selected: () => quickForm.pickupPoint,
+  onSelect: (name) => { quickForm.pickupPoint = name },
+  onCommuneChange: (communeId) => { quickForm.commune = communeId }
 })
 
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => quickForm.commune, () => quickForm.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    if (!isPickup) quickForm.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`
-      )
-      const data = await $fetch<any[]>(url, {
-        headers: { ...(useTenantApiHeaders() || {}) }
-      })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      if (isPickup) {
-        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-        if (relaisPoints.length > 0) {
-          const current = (quickForm.pickupPoint || '').trim()
-          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-            quickForm.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-            syncPickupPointCommune()
-          }
-        } else {
-          quickForm.pickupPoint = ''
-        }
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 
 onMounted(() => {
@@ -288,7 +228,7 @@ function getVariantTitle(variant: any) {
     if (!variant.optionValues || variant.optionValues.length === 0) return ''
     
     // Sort logic
-    let values = [...variant.optionValues]
+    const values = [...variant.optionValues]
     if (props.product.options && props.product.options.length > 0) {
        const optionPos = new Map(props.product.options.map((o: any) => [o.id, o.position]))
         values.sort((a: any, b: any) => {
@@ -349,7 +289,7 @@ const handleOrderSubmit = async () => {
 
         if (isMaystro) {
           
-          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) {
+          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() ) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
             return
@@ -368,7 +308,7 @@ const handleOrderSubmit = async () => {
             shippingCommuneCode: quickForm.commune || undefined,
             deliveryMode: delivery?.mode,
             shippingProvider: delivery?.provider || undefined,
-            shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
+            shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
             shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
             shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
             shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
@@ -468,300 +408,351 @@ const handleAddToCart = async () => {
 </script>
 
 <template>
-    <div>
-        <!-- Quantity Selector (Global for both COD and Cart) -->
-        <div class="flex items-center justify-between p-4 bg-wl-card border border-wl-rule mb-6">
-            <div class="flex flex-col gap-0.5">
-                <span class="wl-label text-wl-ink">{{ storefrontContent.productForm.quantity.label }}</span>
-                <span v-if="product?.isActive === false" class="wl-label text-wl-muted">{{ storefrontContent.productForm.stock.unavailable }}</span>
-                <span v-else-if="isOutOfStock" class="text-xs font-semibold text-wl-saffron">{{ storefrontContent.productForm.stock.outOfStock }}</span>
-                <span v-else-if="isLowStock" class="text-xs font-semibold text-wl-saffron">
-                    {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
-                </span>
-                <span v-else class="text-xs font-semibold text-wl-oliveDeep">{{ storefrontContent.product.inStock }}</span>
-            </div>
-            <div class="flex items-center border border-wl-rule">
-                <button 
-                    type="button"
-                    class="w-10 h-10 flex items-center justify-center text-wl-muted hover:text-wl-ink hover:bg-wl-paper transition-colors"
-                    :disabled="!canPurchase || quantity <= 1"
-                    @click="decrementQuantity"
-                >
-                    <Icon name="lucide:minus" class="w-4 h-4" />
-                </button>
-                <span class="w-12 text-center wl-num font-medium text-wl-ink border-x border-wl-rule leading-10">{{ quantity }}</span>
-                <button 
-                    type="button"
-                    class="w-10 h-10 flex items-center justify-center text-wl-muted hover:text-wl-ink hover:bg-wl-paper transition-colors"
-                    :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
-                    @click="incrementQuantity"
-                >
-                    <Icon name="lucide:plus" class="w-4 h-4" />
-                </button>
-            </div>
-        </div>
-
-        <BundleDealsPicker
-            :bundle-deals="product?.bundleDeals || []"
-            :unit-price="currentPrice"
-            :max-quantity="maxQuantity"
-            :disabled="!canPurchase"
-            @select-qty="selectBundleQty"
-        />
-
-        <div
-            v-if="isClearanceEligible"
-            class="flex items-center gap-2 px-4 py-3 mb-6 border border-wl-saffron/40 bg-wl-saffronWash text-wl-saffron wl-label"
+  <div>
+    <!-- Quantity Selector (Global for both COD and Cart) -->
+    <div class="flex items-center justify-between p-4 bg-wl-card border border-wl-rule mb-6">
+      <div class="flex flex-col gap-0.5">
+        <span class="wl-label text-wl-ink">{{ storefrontContent.productForm.quantity.label }}</span>
+        <span
+          v-if="product?.isActive === false"
+          class="wl-label text-wl-muted"
+        >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="isOutOfStock"
+          class="text-xs font-semibold text-wl-saffron"
+        >{{ storefrontContent.productForm.stock.outOfStock }}</span>
+        <span
+          v-else-if="isLowStock"
+          class="text-xs font-semibold text-wl-saffron"
         >
-            <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
-            <span v-if="clearance.remainingForNextThreshold.value > 0">
-                {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
-            </span>
-            <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
-        </div>
-
-        <!-- Quick COD Order Form -->
-        <div
-            v-if="codEnabled"
-            data-test="cod-order-card"
-            class="bg-wl-card p-6 md:p-8 border border-wl-rule relative overflow-hidden"
+          {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
+        </span>
+        <span
+          v-else
+          class="text-xs font-semibold text-wl-oliveDeep"
+        >{{ storefrontContent.product.inStock }}</span>
+      </div>
+      <div class="flex items-center border border-wl-rule">
+        <button 
+          type="button"
+          class="w-10 h-10 flex items-center justify-center text-wl-muted hover:text-wl-ink hover:bg-wl-paper transition-colors"
+          :disabled="!canPurchase || quantity <= 1"
+          @click="decrementQuantity"
         >
-            <div class="absolute top-0 start-0 w-full h-1 bg-gradient-to-r from-brand-400 to-brand-600" />
-            
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 border border-wl-rule flex items-center justify-center text-wl-muted">
-                <Icon name="lucide:banknote" class="w-5 h-5" />
-                </div>
-                <div>
-                <h3 class="wl-display-sm text-wl-ink text-xl leading-none">{{ storefrontContent.productForm.cod.title }}</h3>
-                <span class="wl-label text-wl-muted">{{ storefrontContent.productForm.cod.badge }}</span>
-                </div>
-            </div>
-            
-            <form class="space-y-5" @submit.prevent="handleOrderSubmit">
-                <div class="space-y-2">
-                <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.fullName.label }}</label>
-                <input 
-                    v-model="quickForm.fullName"
-                    type="text" 
-                    :placeholder="storefrontContent.checkout.form.fullName.placeholder" 
-                    class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
-                    :class="{ 'animate-attention': !quickForm.fullName }"
-                >
-                </div>
-                
-                <div class="space-y-2">
-                <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.phone.label }}</label>
-                <input
-                    v-model="quickForm.phone"
-                    type="tel"
-                    :placeholder="storefrontContent.checkout.form.phone.placeholder"
-                    class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
-                >
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                    <WilayaField
-                        v-model="quickForm.wilaya"
-                        input-class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none appearance-none cursor-pointer"
-                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
-                      />
-                </div>
-                <div class="space-y-2">
-                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.commune.label }}</label>
-                    <CommuneField
-                        v-model="quickForm.commune"
-                        :wilaya-code="quickForm.wilaya"
-                        :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                        :input-class="'block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none'"
-                        :select-class="'block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none'"
-                    />
-                </div>
-                </div>
-
-                <div v-if="!hideOptionalAddress" class="space-y-2">
-                    <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.address.label }}</label>
-                    <input
-                        v-model="quickForm.address"
-                        type="text"
-                        :placeholder="storefrontContent.checkout.form.address.placeholder"
-                        class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
-                    >
-                </div>
-                <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
-                    <label class="block wl-label text-wl-muted">
-                        {{ storefrontContent.checkout.sections.deliveryOptions }}
-                    </label>
-                    <div 
-                        v-for="option in deliveryOptions"
-                        :key="option.id"
-                        class="cursor-pointer relative p-4 border transition-colors duration-200 group"
-                        :class="quickForm.selectedDeliveryOption === option.id 
-                        ? 'border-wl-ink bg-wl-paper' : 'border-wl-rule hover:border-wl-ruleStrong'"
-                        @click="quickForm.selectedDeliveryOption = option.id"
-                    >
-                        <div class="flex items-center gap-4">
-                        <div 
-                            class="w-11 h-11 border flex items-center justify-center flex-shrink-0 transition-colors duration-200"
-                            :class="quickForm.selectedDeliveryOption === option.id ? 'bg-wl-ink border-wl-ink text-wl-paper' : 'bg-wl-card border-wl-rule text-wl-muted'"
-                        >
-                            <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-7 h-7 transition-colors duration-300" />
-                        </div>
-                        
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-1">
-                            <h4 class="wl-display-sm text-wl-ink text-base">
-                                {{ option.providerLabel }}
-                            </h4>
-                            <span class="wl-label text-wl-muted">
-                                {{ option.modeLabel }}
-                            </span>
-                            </div>
-                            <p class="text-xs text-wl-muted leading-relaxed">
-                            {{ option.description }}
-                            </p>
-                        </div>
-                        
-                        <div class="flex items-center gap-3 flex-shrink-0">
-                            <div class="text-end">
-                            <div class="wl-num font-medium text-wl-ink text-sm">
-                                {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
-                            </div>
-                            </div>
-                            <span
-                            class="block w-5 h-5 border transition-colors duration-200 flex-shrink-0"
-                            :class="quickForm.selectedDeliveryOption === option.id 
-                                ? 'border-wl-ink bg-wl-ink' : 'border-wl-ruleStrong'"
-                            >
-                            <span 
-                                v-if="quickForm.selectedDeliveryOption === option.id"
-                                class="block w-full h-full flex items-center justify-center"
-                            >
-                                <Icon name="lucide:check" class="w-3 h-3 text-wl-paper" />
-                            </span>
-                            </span>
-                        </div>
-                        </div>
-                    </div>
-
-                    <div
-                        v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
-                        class="space-y-2 mt-4"
-                    >
-                        <label class="block wl-label text-wl-muted">
-                            {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
-                        </label>
-                        <div
-                            v-if="pickupPointsLoading"
-                            class="flex items-center gap-2 px-4 py-3 border border-wl-rule bg-wl-paper text-sm text-wl-muted"
-                        >
-                            <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
-                            Loading…
-                        </div>
-                        <template v-else>
-                            <div
-                                v-if="stopDeskName"
-                                class="flex items-center gap-2 px-4 py-2.5 border border-wl-rule bg-wl-paper text-sm text-wl-muted"
-                            >
-                                <Icon name="lucide:building-2" class="w-4 h-4 text-wl-muted shrink-0" />
-                                <span>{{ stopDeskName }}</span>
-                            </div>
-                            <div
-                                v-if="isMaystroPickup && quickForm.pickupPoint"
-                                class="flex items-center gap-3 px-4 py-3 border border-wl-ink bg-wl-paper"
-                            >
-                                <Icon name="lucide:map-pin" class="w-4 h-4 text-blue-600 shrink-0" />
-                                <span class="text-sm font-medium text-wl-ink">
-                                    {{ quickForm.pickupPoint }}
-                                </span>
-                            </div>
-                        </template>
-                        <p v-if="pickupPointsError" class="text-xs text-wl-saffron">
-                            {{ pickupPointsError }}
-                        </p>
-                    </div>
-                </div>
-                <div v-else class="mt-6 px-4 py-3 border border-dashed border-wl-rule text-center text-xs text-wl-muted">
-                    <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-wl-muted" />
-                    {{ storefrontContent.checkout.help.deliveryOptions }}
-                </div>
-
-
-
-                <div
-                    v-if="orderError"
-                    class="p-3 border border-wl-alert/40 bg-wl-alertWash text-wl-alert text-sm"
-                >
-                    {{ orderError }}
-                </div>
-
-                <!-- Clearance discount -->
-                <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between py-2 text-sm">
-                    <span class="wl-label text-wl-henna">{{ t('storefront.clearance.discountLine') }}</span>
-                    <span class="wl-num font-medium text-wl-henna">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
-                </div>
-
-                <!-- Total Price Display -->
-                <div class="flex items-center justify-between p-4 bg-wl-paper border border-wl-rule">
-                    <span class="wl-label text-wl-muted">{{ storefrontContent.productForm.totalPrice }}</span>
-                    <span class="wl-num wl-display text-xl text-wl-ink">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
-                </div>
-
-                <button 
-                type="submit"
-                :disabled="orderSubmitting || !canPurchase"
-                class="wl-cta w-full h-14 disabled:opacity-40 disabled:cursor-not-allowed wl-label flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
-                >
-                <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
-                    <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
-                    <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 transition-transform" />
-                </span>
-                            
-                <div v-if="orderSubmitting" class="absolute inset-0 flex items-center justify-center">
-                    <Icon name="lucide:loader-2" class="animate-spin h-5 w-5 text-wl-paper" />
-                </div>
-                </button>
-            </form>
-        </div>
-
-        <!-- Add to Cart Button (Only if Cart is Enabled) -->
-        <div v-if="cartEnabled" class="mt-6">
-            <button 
-                type="button"
-                :disabled="addToCartSubmitting || !canPurchase"
-                class="w-full h-14 bg-wl-card border border-wl-ink text-wl-ink hover:bg-wl-paper wl-label transition-colors flex items-center justify-center gap-3"
-                @click="handleAddToCart"
-            >
-                    <Icon name="lucide:handbag" class="w-5 h-5" />
-                <span>{{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}</span>
-            </button>
-        </div>
-        
-        <!-- Success Toast -->
-        <Transition
-        enter-active-class="transform ease-out duration-300 transition"
-        enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-        leave-active-class="transition ease-in duration-100"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
+          <Icon
+            name="lucide:minus"
+            class="w-4 h-4"
+          />
+        </button>
+        <span class="w-12 text-center wl-num font-medium text-wl-ink border-x border-wl-rule leading-10">{{ quantity }}</span>
+        <button 
+          type="button"
+          class="w-10 h-10 flex items-center justify-center text-wl-muted hover:text-wl-ink hover:bg-wl-paper transition-colors"
+          :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
+          @click="incrementQuantity"
         >
-        <div
-            v-if="showSuccess"
-            class="fixed bottom-4 end-4 z-50 bg-wl-card text-wl-ink border border-wl-ink px-6 py-4 shadow-lg flex items-center gap-4"
-        >
-            <div class="w-7 h-7 border border-wl-ruleStrong flex items-center justify-center text-wl-ink shrink-0">
-            <Icon name="lucide:check" class="w-5 h-5" />
-            </div>
-            <div>
-            <div class="wl-label">{{ successTitle }}</div>
-            <div class="text-xs text-wl-muted">{{ successMessage }}</div>
-            </div>
-        </div>
-        </Transition>
+          <Icon
+            name="lucide:plus"
+            class="w-4 h-4"
+          />
+        </button>
+      </div>
     </div>
+
+    <BundleDealsPicker
+      :bundle-deals="product?.bundleDeals || []"
+      :unit-price="currentPrice"
+      :max-quantity="maxQuantity"
+      :disabled="!canPurchase"
+      @select-qty="selectBundleQty"
+    />
+
+    <div
+      v-if="isClearanceEligible"
+      class="flex items-center gap-2 px-4 py-3 mb-6 border border-wl-saffron/40 bg-wl-saffronWash text-wl-saffron wl-label"
+    >
+      <Icon
+        name="lucide:package-open"
+        class="w-4 h-4 flex-shrink-0"
+      />
+      <span v-if="clearance.remainingForNextThreshold.value > 0">
+        {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
+      </span>
+      <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
+    </div>
+
+    <!-- Quick COD Order Form -->
+    <div
+      v-if="codEnabled"
+      data-test="cod-order-card"
+      class="bg-wl-card p-6 md:p-8 border border-wl-rule relative overflow-hidden"
+    >
+      <div class="absolute top-0 start-0 w-full h-1 bg-gradient-to-r from-brand-400 to-brand-600" />
+            
+      <div class="flex items-center gap-3 mb-6">
+        <div class="w-10 h-10 border border-wl-rule flex items-center justify-center text-wl-muted">
+          <Icon
+            name="lucide:banknote"
+            class="w-5 h-5"
+          />
+        </div>
+        <div>
+          <h3 class="wl-display-sm text-wl-ink text-xl leading-none">
+            {{ storefrontContent.productForm.cod.title }}
+          </h3>
+          <span class="wl-label text-wl-muted">{{ storefrontContent.productForm.cod.badge }}</span>
+        </div>
+      </div>
+            
+      <form
+        class="space-y-5"
+        @submit.prevent="handleOrderSubmit"
+      >
+        <div class="space-y-2">
+          <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.fullName.label }}</label>
+          <input 
+            v-model="quickForm.fullName"
+            type="text" 
+            :placeholder="storefrontContent.checkout.form.fullName.placeholder" 
+            class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
+            :class="{ 'animate-attention': !quickForm.fullName }"
+          >
+        </div>
+                
+        <div class="space-y-2">
+          <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.phone.label }}</label>
+          <input
+            v-model="quickForm.phone"
+            type="tel"
+            :placeholder="storefrontContent.checkout.form.phone.placeholder"
+            class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
+          >
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+            <WilayaField
+              v-model="quickForm.wilaya"
+              input-class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none appearance-none cursor-pointer"
+              :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.commune.label }}</label>
+            <CommuneField
+              v-model="quickForm.commune"
+              :wilaya-code="quickForm.wilaya"
+              :placeholder="storefrontContent.checkout.form.commune.placeholder"
+              :input-class="'block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none'"
+              :select-class="'block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink focus:border-wl-ink focus:bg-white transition-colors outline-none'"
+            />
+          </div>
+        </div>
+
+        <div
+          v-if="!hideOptionalAddress"
+          class="space-y-2"
+        >
+          <label class="block wl-label text-wl-muted">{{ storefrontContent.checkout.form.address.label }}</label>
+          <input
+            v-model="quickForm.address"
+            type="text"
+            :placeholder="storefrontContent.checkout.form.address.placeholder"
+            class="block w-full h-12 border border-wl-rule bg-wl-paper px-4 text-wl-ink placeholder:text-wl-muted/60 focus:border-wl-ink focus:bg-white transition-colors outline-none"
+          >
+        </div>
+        <div
+          v-if="quickForm.wilaya && quickForm.commune"
+          class="space-y-3 mt-6"
+        >
+          <label class="block wl-label text-wl-muted">
+            {{ storefrontContent.checkout.sections.deliveryOptions }}
+          </label>
+          <div 
+            v-for="option in deliveryOptions"
+            :key="option.id"
+            class="cursor-pointer relative p-4 border transition-colors duration-200 group"
+            :class="quickForm.selectedDeliveryOption === option.id 
+              ? 'border-wl-ink bg-wl-paper' : 'border-wl-rule hover:border-wl-ruleStrong'"
+            @click="quickForm.selectedDeliveryOption = option.id"
+          >
+            <div class="flex items-center gap-4">
+              <div 
+                class="w-11 h-11 border flex items-center justify-center flex-shrink-0 transition-colors duration-200"
+                :class="quickForm.selectedDeliveryOption === option.id ? 'bg-wl-ink border-wl-ink text-wl-paper' : 'bg-wl-card border-wl-rule text-wl-muted'"
+              >
+                <CarrierMark
+                  :provider="option.provider"
+                  :icon="option.icon"
+                  :alt="option.providerLabel"
+                  class="w-7 h-7 transition-colors duration-300"
+                />
+              </div>
+                        
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="wl-display-sm text-wl-ink text-base">
+                    {{ option.providerLabel }}
+                  </h4>
+                  <span class="wl-label text-wl-muted">
+                    {{ option.modeLabel }}
+                  </span>
+                </div>
+                <p class="text-xs text-wl-muted leading-relaxed">
+                  {{ option.description }}
+                </p>
+              </div>
+                        
+              <div class="flex items-center gap-3 flex-shrink-0">
+                <div class="text-end">
+                  <div class="wl-num font-medium text-wl-ink text-sm">
+                    {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
+                  </div>
+                </div>
+                <span
+                  class="block w-5 h-5 border transition-colors duration-200 flex-shrink-0"
+                  :class="quickForm.selectedDeliveryOption === option.id 
+                    ? 'border-wl-ink bg-wl-ink' : 'border-wl-ruleStrong'"
+                >
+                  <span 
+                    v-if="quickForm.selectedDeliveryOption === option.id"
+                    class="block w-full h-full flex items-center justify-center"
+                  >
+                    <Icon
+                      name="lucide:check"
+                      class="w-3 h-3 text-wl-paper"
+                    />
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <StorefrontSharedPickupPointField
+            v-model="quickForm.pickupPoint"
+            :points="pickupPoints"
+            :loading="pickupPointsLoading"
+            :error="pickupPointsError"
+            :is-pickup-selected="isPickupSelected"
+            :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+            :empty-label="storefrontContent.checkout.help.deliveryOptions"
+            @change="syncPickupPointCommune"
+          />
+        </div>
+        <div
+          v-else
+          class="mt-6 px-4 py-3 border border-dashed border-wl-rule text-center text-xs text-wl-muted"
+        >
+          <Icon
+            name="lucide:map-pin"
+            class="w-4 h-4 mx-auto mb-1 text-wl-muted"
+          />
+          {{ storefrontContent.checkout.help.deliveryOptions }}
+        </div>
+
+
+
+        <div
+          v-if="orderError"
+          class="p-3 border border-wl-alert/40 bg-wl-alertWash text-wl-alert text-sm"
+        >
+          {{ orderError }}
+        </div>
+
+        <!-- Clearance discount -->
+        <div
+          v-if="quickOrderClearanceDiscount > 0"
+          class="flex items-center justify-between py-2 text-sm"
+        >
+          <span class="wl-label text-wl-henna">{{ t('storefront.clearance.discountLine') }}</span>
+          <span class="wl-num font-medium text-wl-henna">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
+        </div>
+
+        <!-- Total Price Display -->
+        <div class="flex items-center justify-between p-4 bg-wl-paper border border-wl-rule">
+          <span class="wl-label text-wl-muted">{{ storefrontContent.productForm.totalPrice }}</span>
+          <span class="wl-num wl-display text-xl text-wl-ink">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
+        </div>
+
+        <button 
+          type="submit"
+          :disabled="orderSubmitting || !canPurchase"
+          class="wl-cta w-full h-14 disabled:opacity-40 disabled:cursor-not-allowed wl-label flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
+        >
+          <span
+            class="relative z-10 flex items-center gap-2"
+            :class="{ 'opacity-0': orderSubmitting }"
+          >
+            <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
+            <Icon
+              name="lucide:arrow-right"
+              class="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 transition-transform"
+            />
+          </span>
+                            
+          <div
+            v-if="orderSubmitting"
+            class="absolute inset-0 flex items-center justify-center"
+          >
+            <Icon
+              name="lucide:loader-2"
+              class="animate-spin h-5 w-5 text-wl-paper"
+            />
+          </div>
+        </button>
+      </form>
+    </div>
+
+    <!-- Add to Cart Button (Only if Cart is Enabled) -->
+    <div
+      v-if="cartEnabled"
+      class="mt-6"
+    >
+      <button 
+        type="button"
+        :disabled="addToCartSubmitting || !canPurchase"
+        class="w-full h-14 bg-wl-card border border-wl-ink text-wl-ink hover:bg-wl-paper wl-label transition-colors flex items-center justify-center gap-3"
+        @click="handleAddToCart"
+      >
+        <Icon
+          name="lucide:handbag"
+          class="w-5 h-5"
+        />
+        <span>{{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}</span>
+      </button>
+    </div>
+        
+    <!-- Success Toast -->
+    <Transition
+      enter-active-class="transform ease-out duration-300 transition"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showSuccess"
+        class="fixed bottom-4 end-4 z-50 bg-wl-card text-wl-ink border border-wl-ink px-6 py-4 shadow-lg flex items-center gap-4"
+      >
+        <div class="w-7 h-7 border border-wl-ruleStrong flex items-center justify-center text-wl-ink shrink-0">
+          <Icon
+            name="lucide:check"
+            class="w-5 h-5"
+          />
+        </div>
+        <div>
+          <div class="wl-label">
+            {{ successTitle }}
+          </div>
+          <div class="text-xs text-wl-muted">
+            {{ successMessage }}
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </div>
 </template>
 
 <style scoped>

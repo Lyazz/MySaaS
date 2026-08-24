@@ -82,63 +82,21 @@ watch(() => form.value.phone, (phone) => {
 
 const selectedDelivery = computed(() => deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption))
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => form.value.wilaya,
+  commune: () => form.value.commune,
+  selected: () => form.value.pickupPoint,
+  onSelect: (name) => { form.value.pickupPoint = name },
+  onCommuneChange: (communeId) => { form.value.commune = communeId }
+})
 
-const syncPickupPointCommune = () => {
-  const name = (form.value.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
-}
-
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => form.value.commune, () => form.value.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    form.value.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-    if (!isPickup) return
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
-      const data = await $fetch<any[]>(url, { headers: { ...(useTenantApiHeaders() || {}) } })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-      if (relaisPoints.length > 0) {
-        form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-        syncPickupPointCommune()
-      } else if (pickupPoints.value.length === 0) {
-        pickupPointsError.value = 'Aucun point relais disponible dans cette région'
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 const discountedSubtotal = computed(() => Math.max(0, cartStore.total - cartStore.clearanceDiscount))
 
@@ -178,7 +136,7 @@ async function handleSubmit() {
 
     if (isMaystro) {
       if (!form.value.wilaya || !form.value.commune) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
-      if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
+      if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() ) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
       if (maystroShippingAmount == null) { errorMessage.value = 'Maystro shipping price unavailable for selected commune'; return }
     }
 
@@ -191,7 +149,7 @@ async function handleSubmit() {
       shippingCommuneCode: form.value.commune || undefined,
       deliveryMode: delivery?.mode,
       shippingProvider: delivery?.provider || undefined,
-      shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
+      shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
       shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
       shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
       shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
@@ -218,12 +176,17 @@ async function handleSubmit() {
     <div class="co__header">
       <div class="co__header-inner">
         <span class="at-label">Finaliser</span>
-        <h1 class="co__title">{{ storefrontContent.checkout.title }}</h1>
+        <h1 class="co__title">
+          {{ storefrontContent.checkout.title }}
+        </h1>
       </div>
     </div>
 
     <div class="co__body">
-      <div v-if="!cartEnabled" class="co__disabled">
+      <div
+        v-if="!cartEnabled"
+        class="co__disabled"
+      >
         {{ storefrontContent.checkout.disabled }}
       </div>
 
@@ -236,18 +199,42 @@ async function handleSubmit() {
             <div class="co__grid2">
               <div class="co__field">
                 <label class="co__label">{{ storefrontContent.checkout.form.fullName.label }}</label>
-                <input v-model="form.fullName" type="text" :placeholder="storefrontContent.checkout.form.fullName.placeholder" class="co__input">
+                <input
+                  v-model="form.fullName"
+                  type="text"
+                  :placeholder="storefrontContent.checkout.form.fullName.placeholder"
+                  class="co__input"
+                >
               </div>
               <div class="co__field">
                 <label class="co__label">{{ storefrontContent.checkout.form.phone.label }}</label>
-                <input v-model="form.phone" type="tel" :placeholder="storefrontContent.checkout.form.phone.placeholder" class="co__input">
+                <input
+                  v-model="form.phone"
+                  type="tel"
+                  :placeholder="storefrontContent.checkout.form.phone.placeholder"
+                  class="co__input"
+                >
               </div>
               <div class="co__field">
                 <label class="co__label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <div class="co__select-wrap">
-                  <WilayaField v-model="form.wilaya" input-class="co__select" :placeholder="storefrontContent.checkout.form.wilaya.placeholder" />
-                  <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="co__select-arrow">
-                    <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
+                  <WilayaField
+                    v-model="form.wilaya"
+                    input-class="co__select"
+                    :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                  />
+                  <svg
+                    width="8"
+                    height="5"
+                    viewBox="0 0 8 5"
+                    fill="none"
+                    class="co__select-arrow"
+                  >
+                    <path
+                      d="M1 1l3 3 3-3"
+                      stroke="currentColor"
+                      stroke-width="0.85"
+                    />
                   </svg>
                 </div>
               </div>
@@ -261,15 +248,26 @@ async function handleSubmit() {
                   :select-class="'co__select'"
                 />
               </div>
-              <div v-if="!hideOptionalAddress" class="co__field co__field--full">
+              <div
+                v-if="!hideOptionalAddress"
+                class="co__field co__field--full"
+              >
                 <label class="co__label">{{ storefrontContent.checkout.form.address.label }}</label>
-                <input v-model="form.address" type="text" :placeholder="storefrontContent.checkout.form.address.placeholder" class="co__input">
+                <input
+                  v-model="form.address"
+                  type="text"
+                  :placeholder="storefrontContent.checkout.form.address.placeholder"
+                  class="co__input"
+                >
               </div>
             </div>
           </div>
 
           <!-- Delivery options -->
-          <div v-if="form.wilaya && form.commune" class="co__card">
+          <div
+            v-if="form.wilaya && form.commune"
+            class="co__card"
+          >
             <span class="at-label co__card-label">{{ storefrontContent.checkout.sections.deliveryMethod }}</span>
             <div class="co__delivery-list">
               <div
@@ -281,52 +279,95 @@ async function handleSubmit() {
               >
                 <div class="co__delivery-left">
                   <div class="co__delivery-icon">
-                    <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" style="width:13px;height:13px" />
+                    <CarrierMark
+                      :provider="option.provider"
+                      :icon="option.icon"
+                      :alt="option.providerLabel"
+                      style="width:13px;height:13px"
+                    />
                   </div>
                   <div>
-                    <p class="co__delivery-name">{{ option.providerLabel }}</p>
-                    <p class="co__delivery-mode">{{ option.modeLabel }}</p>
+                    <p class="co__delivery-name">
+                      {{ option.providerLabel }}
+                    </p>
+                    <p class="co__delivery-mode">
+                      {{ option.modeLabel }}
+                    </p>
                   </div>
                 </div>
                 <div class="co__delivery-right">
                   <span class="co__delivery-price">
                     {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                   </span>
-                  <span class="co__radio" :class="form.selectedDeliveryOption === option.id && 'is-checked'" />
+                  <span
+                    class="co__radio"
+                    :class="form.selectedDeliveryOption === option.id && 'is-checked'"
+                  />
                 </div>
 
                 <!-- Maystro pickup info -->
-                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)" class="co__pickup-info">
-                  <div v-if="pickupPointsLoading" class="co__pickup-loading">
-                    <Icon name="lucide:loader-2" style="width:11px;height:11px" /> Chargement…
-                  </div>
-                  <template v-else>
-                    <div v-if="stopDeskName" class="co__pickup-desk">
-                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/><circle cx="5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="0.75"/></svg>
-                      {{ stopDeskName }}
-                    </div>
-                    <div v-if="form.pickupPoint" class="co__pickup-point">
-                      <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/><circle cx="5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="0.75"/></svg>
-                      {{ form.pickupPoint }}
-                    </div>
-                  </template>
-                  <p v-if="pickupPointsError" class="co__pickup-error">{{ pickupPointsError }}</p>
+                <div
+                  v-if="option.mode === 'pickup' && option.provider && form.selectedDeliveryOption === option.id"
+                  class="mt-3 pt-3 border-t border-slate-200"
+                >
+                  <StorefrontSharedPickupPointField
+                    v-model="form.pickupPoint"
+                    :points="pickupPoints"
+                    :loading="pickupPointsLoading"
+                    :error="pickupPointsError"
+                    :is-pickup-selected="isPickupSelected"
+                    :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+                    :empty-label="storefrontContent.checkout.help.deliveryOptions"
+                    @change="syncPickupPointCommune"
+                  />
                 </div>
               </div>
             </div>
           </div>
-          <div v-else class="co__card co__delivery-hint">
-            <svg width="16" height="20" viewBox="0 0 10 12" fill="none" style="color:var(--at-muted)">
-              <path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/>
+          <div
+            v-else
+            class="co__card co__delivery-hint"
+          >
+            <svg
+              width="16"
+              height="20"
+              viewBox="0 0 10 12"
+              fill="none"
+              style="color:var(--at-muted)"
+            >
+              <path
+                d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z"
+                stroke="currentColor"
+                stroke-width="0.75"
+              />
             </svg>
             {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
 
           <!-- Error -->
-          <div v-if="errorMessage" class="co__error">
-            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0">
-              <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="0.75"/>
-              <path d="M6 3v4M6 9v.5" stroke="currentColor" stroke-width="0.75"/>
+          <div
+            v-if="errorMessage"
+            class="co__error"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 12 12"
+              fill="none"
+              style="flex-shrink:0"
+            >
+              <circle
+                cx="6"
+                cy="6"
+                r="5"
+                stroke="currentColor"
+                stroke-width="0.75"
+              />
+              <path
+                d="M6 3v4M6 9v.5"
+                stroke="currentColor"
+                stroke-width="0.75"
+              />
             </svg>
             {{ errorMessage }}
           </div>
@@ -339,9 +380,18 @@ async function handleSubmit() {
 
             <!-- Items -->
             <div class="co__summary-items">
-              <div v-for="item in cartStore.items" :key="item.variantId || item.productId" class="co__summary-item">
+              <div
+                v-for="item in cartStore.items"
+                :key="item.variantId || item.productId"
+                class="co__summary-item"
+              >
                 <div class="co__item-img">
-                  <img v-if="item.image" :src="item.image" :alt="item.title" class="co__item-photo">
+                  <img
+                    v-if="item.image"
+                    :src="item.image"
+                    :alt="item.title"
+                    class="co__item-photo"
+                  >
                   <span class="co__item-qty">{{ item.quantity }}</span>
                 </div>
                 <span class="co__item-name">{{ item.title }}</span>
@@ -351,31 +401,51 @@ async function handleSubmit() {
 
             <!-- Coupon -->
             <div class="co__coupon">
-              <input v-model="couponCode" type="text" :placeholder="storefrontContent.checkout.coupon.placeholder" class="co__input co__coupon-input">
-              <button class="co__coupon-btn">{{ storefrontContent.actions.apply }}</button>
+              <input
+                v-model="couponCode"
+                type="text"
+                :placeholder="storefrontContent.checkout.coupon.placeholder"
+                class="co__input co__coupon-input"
+              >
+              <button class="co__coupon-btn">
+                {{ storefrontContent.actions.apply }}
+              </button>
             </div>
 
             <!-- Totals -->
             <dl class="co__totals">
-              <div v-if="selectedDelivery" class="co__total-row">
+              <div
+                v-if="selectedDelivery"
+                class="co__total-row"
+              >
                 <dt>{{ storefrontContent.checkout.summary.deliveryOption }}</dt>
-                <dd class="co__total-detail">{{ selectedDelivery.providerLabel }} — {{ selectedDelivery.modeLabel }}</dd>
+                <dd class="co__total-detail">
+                  {{ selectedDelivery.providerLabel }} — {{ selectedDelivery.modeLabel }}
+                </dd>
               </div>
               <div class="co__total-row">
                 <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
                 <dd>{{ formatCurrency(cartStore.total) }}</dd>
               </div>
-              <div v-if="cartStore.clearanceDiscount > 0" class="co__total-row co__total-row--clearance">
+              <div
+                v-if="cartStore.clearanceDiscount > 0"
+                class="co__total-row co__total-row--clearance"
+              >
                 <dt>{{ t('storefront.clearance.discountLine') }}</dt>
                 <dd>-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
               </div>
-              <div v-if="selectedDelivery" class="co__total-row">
+              <div
+                v-if="selectedDelivery"
+                class="co__total-row"
+              >
                 <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
                 <dd>{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</dd>
               </div>
               <div class="co__total-row co__total-row--grand">
                 <dt>{{ storefrontContent.cart.summary.total }}</dt>
-                <dd class="co__grand-price">{{ formatCurrency(grandTotal) }}</dd>
+                <dd class="co__grand-price">
+                  {{ formatCurrency(grandTotal) }}
+                </dd>
               </div>
             </dl>
 
@@ -385,11 +455,18 @@ async function handleSubmit() {
               :disabled="submitting || !cartEnabled || !hasRequiredFields"
               @click="handleSubmit"
             >
-              <Icon v-if="submitting" name="lucide:loader-2" style="width:14px;height:14px" />
+              <Icon
+                v-if="submitting"
+                name="lucide:loader-2"
+                style="width:14px;height:14px"
+              />
               {{ submitting ? storefrontContent.checkout.actions.placingOrder : storefrontContent.checkout.actions.placeOrder }}
             </button>
 
-            <NuxtLink to="/cart" class="co__back-link">
+            <NuxtLink
+              to="/cart"
+              class="co__back-link"
+            >
               {{ storefrontContent.checkout.actions.returnToCart }}
             </NuxtLink>
           </div>

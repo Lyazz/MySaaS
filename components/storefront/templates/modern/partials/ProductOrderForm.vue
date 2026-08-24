@@ -189,88 +189,21 @@ const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption)
 )
 
-// Pickup is a carrier capability, not a Maystro one — the selected option names the
-// carrier, and the generic route answers for whichever it is.
-const pickupProvider = computed(() => selectedDelivery.value?.provider || '')
-const isPickupSelected = computed(() => Boolean(pickupProvider.value) && selectedDelivery.value?.mode === 'pickup')
-
-type PickupPoint = { id: string; name: string; address?: string; communeId?: string; kind?: 'desk' | 'relay' }
-const pickupPoints = ref<PickupPoint[]>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
-
-// Only relays move the commune: Maystro prices a relay parcel against the relay's
-// own commune. A carrier desk does not reprice, so leave the customer's commune be.
-const syncPickupPointCommune = () => {
-  const name = (quickForm.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.find((p) => p.kind === 'relay' && p.name === name)
-  if (!point?.communeId) return
-  if (quickForm.commune !== point.communeId) quickForm.commune = point.communeId
-}
-
-watchEffect(() => {
-  const options = deliveryOptions.value
-  if (!options.length) return
-  const selected = quickForm.selectedDeliveryOption
-  if (!selected || !options.some((opt: any) => opt.id === selected)) {
-    quickForm.selectedDeliveryOption = options[0].id
-  }
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => quickForm.wilaya,
+  commune: () => quickForm.commune,
+  selected: () => quickForm.pickupPoint,
+  onSelect: (name) => { quickForm.pickupPoint = name },
+  onCommuneChange: (communeId) => { quickForm.commune = communeId }
 })
 
-watch(
-  [isPickupSelected, pickupProvider, () => quickForm.commune, () => quickForm.wilaya],
-  async ([isPickup, provider, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    if (!isPickup) quickForm.pickupPoint = ''
-    if (!isPickup || !provider || !wilaya) return
-
-    pickupPointsLoading.value = true
-    try {
-      const query = new URLSearchParams({ wilaya: String(wilaya) })
-      if (commune) query.set('commune', String(commune))
-      const url = useTenantApiUrl(
-        `/api/delivery/providers/${encodeURIComponent(provider as string)}/pickup-points?${query.toString()}`
-      )
-      const data = await $fetch<any[]>(url, {
-        headers: { ...(useTenantApiHeaders() || {}) }
-      })
-      pickupPoints.value = Array.isArray(data)
-        ? data
-            .map((p: any) => ({
-              id: String(p?.id ?? ''),
-              name: String(p?.name ?? ''),
-              address: p?.address ? String(p.address) : undefined,
-              communeId: p?.communeId ? String(p.communeId) : undefined,
-              kind: p?.kind === 'relay' ? ('relay' as const) : ('desk' as const)
-            }))
-            .filter((p) => p.name.trim().length > 0)
-        : []
-
-      const desk = pickupPoints.value.find((p) => p.kind === 'desk')
-      stopDeskName.value = desk && pickupPoints.value.length === 1 ? desk.name : ''
-
-      if (isPickup) {
-        const current = (quickForm.pickupPoint || '').trim()
-        if (!current || !pickupPoints.value.some((p) => p.name === current)) {
-          // Preselect only when there is nothing to choose between; with several
-          // agencies the customer picks, they don't get one assigned silently.
-          quickForm.pickupPoint = pickupPoints.value.length === 1 ? pickupPoints.value[0].name : ''
-          syncPickupPointCommune()
-        }
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 onMounted(() => {
     cartStore.loadFromLocalStorage()
@@ -356,7 +289,7 @@ const handleOrderSubmit = async () => {
 
         // Any carrier pickup needs a chosen point, not just Maystro's.
         if (delivery?.provider && delivery?.mode === 'pickup') {
-          if (!String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) {
+          if (!String(quickForm.pickupPoint || '').trim() ) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
             return
@@ -761,85 +694,16 @@ const scrollToForm = () => {
             </div>
           </div>
 
-          <div
-            v-if="isPickupSelected || pickupPointsLoading"
-            class="space-y-2 mt-4"
-          >
-            <label class="block text-sm font-semibold text-slate-700 ms-1">
-              {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
-            </label>
-            <div
-              v-if="pickupPointsLoading"
-              class="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
-            >
-              <Icon
-                name="lucide:loader-2"
-                class="w-4 h-4 animate-spin shrink-0"
-              />
-              Loading…
-            </div>
-            <template v-else>
-              <!-- One place to collect from: nothing to decide, just say where. -->
-              <div
-                v-if="pickupPoints.length === 1"
-                class="flex items-start gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50"
-              >
-                <Icon
-                  name="lucide:map-pin"
-                  class="w-4 h-4 text-blue-600 shrink-0 mt-0.5"
-                />
-                <span class="min-w-0">
-                  <span class="block text-sm font-semibold text-slate-900">{{ pickupPoints[0].name }}</span>
-                  <span
-                    v-if="pickupPoints[0].address"
-                    class="block text-xs text-slate-500 mt-0.5"
-                  >
-                    {{ pickupPoints[0].address }}
-                  </span>
-                </span>
-              </div>
-
-              <!-- Several: the customer chooses. The address is what makes
-                                 an agency recognisable, so it rides along in the option. -->
-              <select
-                v-else-if="pickupPoints.length > 1"
-                v-model="quickForm.pickupPoint"
-                class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:border-blue-400 focus:outline-none"
-                @change="syncPickupPointCommune"
-              >
-                <option
-                  value=""
-                  disabled
-                >
-                  {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
-                </option>
-                <option
-                  v-for="point in pickupPoints"
-                  :key="point.id"
-                  :value="point.name"
-                >
-                  {{ point.address ? `${point.name} — ${point.address}` : point.name }}
-                </option>
-              </select>
-
-              <div
-                v-else
-                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
-              >
-                <Icon
-                  name="lucide:building-2"
-                  class="w-4 h-4 text-slate-400 shrink-0"
-                />
-                <span>{{ storefrontContent.checkout.help.deliveryOptions }}</span>
-              </div>
-            </template>
-            <p
-              v-if="pickupPointsError"
-              class="text-xs text-amber-700"
-            >
-              {{ pickupPointsError }}
-            </p>
-          </div>
+          <StorefrontSharedPickupPointField
+                      v-model="quickForm.pickupPoint"
+                      :points="pickupPoints"
+                      :loading="pickupPointsLoading"
+                      :error="pickupPointsError"
+                      :is-pickup-selected="isPickupSelected"
+                      :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+                      :empty-label="storefrontContent.checkout.help.deliveryOptions"
+                      @change="syncPickupPointCommune"
+                    />
         </div>
         <div
           v-else

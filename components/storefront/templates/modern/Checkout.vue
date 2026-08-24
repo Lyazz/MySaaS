@@ -124,68 +124,21 @@ const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption)
 )
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => form.value.wilaya,
+  commune: () => form.value.commune,
+  selected: () => form.value.pickupPoint,
+  onSelect: (name) => { form.value.pickupPoint = name },
+  onCommuneChange: (communeId) => { form.value.commune = communeId }
+})
 
-const syncPickupPointCommune = () => {
-  const name = (form.value.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
-}
-
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => form.value.commune, () => form.value.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    form.value.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-    if (!isPickup) return
-
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`
-      )
-      const data = await $fetch<any[]>(url, {
-        headers: { ...(useTenantApiHeaders() || {}) }
-      })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-      if (relaisPoints.length > 0) {
-        form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-        syncPickupPointCommune()
-      } else if (pickupPoints.value.length === 0) {
-        pickupPointsError.value = 'Aucun point relais disponible dans cette région'
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 const discountedSubtotal = computed(() => Math.max(0, cartStore.total - cartStore.clearanceDiscount))
 
@@ -256,7 +209,7 @@ async function handleSubmit() {
 
         if (isMaystro) {
           
-          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) {
+          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() ) {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
           }
@@ -274,7 +227,7 @@ async function handleSubmit() {
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
-          shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
+          shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
           shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
           shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
           shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
@@ -358,10 +311,10 @@ async function handleSubmit() {
               <div class="col-span-2 md:col-span-1 space-y-2">
                 <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <WilayaField
-                        v-model="form.wilaya"
-                        input-class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
-                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
-                      />
+                  v-model="form.wilaya"
+                  input-class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
+                  :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                />
               </div>
               <div class="col-span-2 md:col-span-1 space-y-2">
                 <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
@@ -374,7 +327,7 @@ async function handleSubmit() {
                 />
               </div>
               <div
-                v-if="isMaystroPickup"
+                v-if="isPickupSelected"
                 class="col-span-2 space-y-2"
               >
                 <label class="block text-sm font-semibold text-slate-700 ms-1">
@@ -384,23 +337,35 @@ async function handleSubmit() {
                   v-if="pickupPointsLoading"
                   class="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
                 >
-                  <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
+                  <Icon
+                    name="lucide:loader-2"
+                    class="w-4 h-4 animate-spin shrink-0"
+                  />
                   Loading…
                 </div>
                 <div
                   v-else-if="form.pickupPoint"
                   class="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50"
                 >
-                  <Icon name="lucide:map-pin" class="w-4 h-4 text-blue-600 shrink-0" />
+                  <Icon
+                    name="lucide:map-pin"
+                    class="w-4 h-4 text-blue-600 shrink-0"
+                  />
                   <span class="text-sm font-semibold text-slate-900">
                     {{ form.pickupPoint }}
                   </span>
                 </div>
-                <p v-if="pickupPointsError" class="text-xs text-amber-700">
+                <p
+                  v-if="pickupPointsError"
+                  class="text-xs text-amber-700"
+                >
                   {{ pickupPointsError }}
                 </p>
               </div>
-              <div v-if="!hideOptionalAddress" class="col-span-2 space-y-2">
+              <div
+                v-if="!hideOptionalAddress"
+                class="col-span-2 space-y-2"
+              >
                 <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
@@ -413,7 +378,10 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery Options -->
-          <div v-if="form.wilaya && form.commune" class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100">
+          <div
+            v-if="form.wilaya && form.commune"
+            class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100"
+          >
             <div class="flex items-center justify-between mb-4">
               <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
                 {{ storefrontContent.checkout.sections.deliveryOptions }}
@@ -444,7 +412,13 @@ async function handleSubmit() {
                       ? `bg-${option.color}-100`
                       : 'bg-slate-100 group-hover:bg-slate-200'"
                   >
-                    <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-7 h-7 transition-colors duration-300" :class="form.selectedDeliveryOption === option.id ? `text-${option.color}-600` : 'text-slate-400 group-hover:text-slate-600'" />
+                    <CarrierMark
+                      :provider="option.provider"
+                      :icon="option.icon"
+                      :alt="option.providerLabel"
+                      class="w-7 h-7 transition-colors duration-300"
+                      :class="form.selectedDeliveryOption === option.id ? `text-${option.color}-600` : 'text-slate-400 group-hover:text-slate-600'"
+                    />
                   </div>
 
                   <!-- Details -->
@@ -453,7 +427,8 @@ async function handleSubmit() {
                       <h4 class="font-bold text-slate-900 text-sm">
                         {{ option.providerLabel }}
                       </h4>
-                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                      <span
+                        class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
                         :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
                       >
                         {{ option.modeLabel }}
@@ -481,36 +456,42 @@ async function handleSubmit() {
                         v-if="form.selectedDeliveryOption === option.id"
                         class="block w-full h-full rounded-full flex items-center justify-center"
                       >
-                        <Icon name="lucide:check" class="w-3 h-3 text-white" />
+                        <Icon
+                          name="lucide:check"
+                          class="w-3 h-3 text-white"
+                        />
                       </span>
                     </span>
                   </div>
                 </div>
-                <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)" class="mt-3 pt-3 border-t border-slate-100">
-                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-slate-500">
-                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
-                    Loading...
-                  </div>
-                  <template v-else>
-                    <div v-if="stopDeskName" class="flex items-center gap-2 text-xs text-slate-500">
-                      <Icon name="lucide:building-2" class="w-3 h-3 text-slate-400 flex-shrink-0" />
-                      <span>{{ stopDeskName }}</span>
-                    </div>
-                    <div v-if="form.pickupPoint" class="flex items-center gap-2 text-xs mt-1">
-                      <Icon name="lucide:map-pin" class="w-3 h-3 text-blue-600" />
-                      <span class="font-semibold text-slate-800">{{ form.pickupPoint }}</span>
-                    </div>
-                  </template>
-                  <p v-if="pickupPointsError" class="text-xs text-amber-600 mt-1">{{ pickupPointsError }}</p>
+                <div
+                  v-if="option.mode === 'pickup' && option.provider && form.selectedDeliveryOption === option.id"
+                  class="mt-3 pt-3 border-t border-slate-200"
+                >
+                  <StorefrontSharedPickupPointField
+                    v-model="form.pickupPoint"
+                    :points="pickupPoints"
+                    :loading="pickupPointsLoading"
+                    :error="pickupPointsError"
+                    :is-pickup-selected="isPickupSelected"
+                    :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+                    :empty-label="storefrontContent.checkout.help.deliveryOptions"
+                    @change="syncPickupPointCommune"
+                  />
                 </div>
               </div>
             </div>
           </div>
-          <div v-else class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 text-center text-sm text-slate-400">
-            <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-slate-300" />
+          <div
+            v-else
+            class="bg-white p-6 rounded-3xl shadow-soft border border-slate-100 text-center text-sm text-slate-400"
+          >
+            <Icon
+              name="lucide:map-pin"
+              class="w-5 h-5 mx-auto mb-2 text-slate-300"
+            />
             {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
-
         </div>
 
         <!-- Right Column: Summary -->
@@ -521,7 +502,10 @@ async function handleSubmit() {
                 Order Summary
               </h2>
               <div class="flex items-center gap-1.5 text-sm font-semibold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full">
-                <Icon name="lucide:handbag" class="w-4 h-4" />
+                <Icon
+                  name="lucide:handbag"
+                  class="w-4 h-4"
+                />
                 <span>{{ cartStore.itemCount }} {{ cartStore.itemCount === 1 ? 'item' : 'items' }}</span>
               </div>
             </div>
@@ -544,7 +528,10 @@ async function handleSubmit() {
                     v-else
                     class="h-full w-full flex items-center justify-center bg-slate-100 text-slate-300"
                   >
-                    <Icon name="lucide:image" class="w-8 h-8" />
+                    <Icon
+                      name="lucide:image"
+                      class="w-8 h-8"
+                    />
                   </div>
                 </div>
                 <div class="flex-1 min-w-0">
@@ -565,7 +552,10 @@ async function handleSubmit() {
             <div class="bg-gradient-to-br from-brand-50/30 to-brand-100/20 p-5 rounded-2xl border border-brand-200/50 mb-6 backdrop-blur-sm">
               <div class="flex justify-between items-center mb-3">
                 <div class="flex items-center gap-2">
-                  <Icon name="lucide:ticket-percent" class="w-4 h-4 text-brand-600" />
+                  <Icon
+                    name="lucide:ticket-percent"
+                    class="w-4 h-4 text-brand-600"
+                  />
                   <h4 class="text-sm font-bold text-slate-800">
                     {{ storefrontContent.checkout.coupon.title }}
                   </h4>
@@ -589,10 +579,16 @@ async function handleSubmit() {
 
             <!-- Totals -->
             <div class="space-y-3 pt-4 border-t border-slate-100">
-              <div v-if="selectedDelivery" class="flex justify-between text-sm">
+              <div
+                v-if="selectedDelivery"
+                class="flex justify-between text-sm"
+              >
                 <span class="text-slate-500">{{ storefrontContent.checkout.summary.deliveryOption }}</span>
                 <div class="flex items-center gap-2">
-                  <Icon :name="selectedDelivery.icon" class="w-4 h-4 text-slate-600" />
+                  <Icon
+                    :name="selectedDelivery.icon"
+                    class="w-4 h-4 text-slate-600"
+                  />
                   <span class="font-medium text-slate-900">{{ selectedDelivery.providerLabel }} - {{ selectedDelivery.modeLabel }}</span>
                 </div>
               </div>
@@ -600,11 +596,17 @@ async function handleSubmit() {
                 <span class="text-slate-500">{{ storefrontContent.cart.summary.subtotal }}</span>
                 <span class="font-bold text-slate-900">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</span>
               </div>
-              <div v-if="cartStore.clearanceDiscount > 0" class="flex justify-between text-sm">
+              <div
+                v-if="cartStore.clearanceDiscount > 0"
+                class="flex justify-between text-sm"
+              >
                 <span class="text-amber-700">{{ t('storefront.clearance.discountLine') }}</span>
                 <span class="font-bold text-amber-700">-{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}</span>
               </div>
-              <div v-if="selectedDelivery" class="flex justify-between text-sm">
+              <div
+                v-if="selectedDelivery"
+                class="flex justify-between text-sm"
+              >
                 <span class="text-slate-500">{{ storefrontContent.checkout.summary.shippingFee }}</span>
                 <span class="font-bold text-brand-600">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</span>
               </div>
@@ -622,7 +624,10 @@ async function handleSubmit() {
               v-if="errorMessage"
               class="mt-4 rounded-xl border-2 border-red-300 bg-red-50 text-red-800 text-sm px-4 py-3.5 flex items-start gap-3"
             >
-              <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5" />
+              <Icon
+                name="lucide:alert-circle"
+                class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+              />
               <span class="font-medium">{{ errorMessage }}</span>
             </div>
 

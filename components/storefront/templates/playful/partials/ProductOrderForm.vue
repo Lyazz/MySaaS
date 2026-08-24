@@ -184,79 +184,21 @@ const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption)
 )
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
-
-const syncPickupPointCommune = () => {
-  const name = (quickForm.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && quickForm.commune !== nextCommune) quickForm.commune = nextCommune
-}
-
-watchEffect(() => {
-  const options = deliveryOptions.value
-  if (!options.length) return
-  const selected = quickForm.selectedDeliveryOption
-  if (!selected || !options.some((opt: any) => opt.id === selected)) {
-    quickForm.selectedDeliveryOption = options[0].id
-  }
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => quickForm.wilaya,
+  commune: () => quickForm.commune,
+  selected: () => quickForm.pickupPoint,
+  onSelect: (name) => { quickForm.pickupPoint = name },
+  onCommuneChange: (communeId) => { quickForm.commune = communeId }
 })
 
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => quickForm.commune, () => quickForm.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    if (!isPickup) quickForm.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`
-      )
-      const data = await $fetch<any[]>(url, { headers: { ...(useTenantApiHeaders() || {}) } })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      if (isPickup) {
-        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-        if (relaisPoints.length > 0) {
-          const current = (quickForm.pickupPoint || '').trim()
-          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-            quickForm.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-            syncPickupPointCommune()
-          }
-        } else {
-          quickForm.pickupPoint = ''
-        }
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 onMounted(() => cartStore.loadFromLocalStorage())
 
@@ -269,7 +211,7 @@ watch([() => props.currentStock, () => props.currentVariant], () => {
 
 function getVariantTitle(variant: any) {
     if (!variant.optionValues || variant.optionValues.length === 0) return ''
-    let values = [...variant.optionValues]
+    const values = [...variant.optionValues]
     if (props.product.options && props.product.options.length > 0) {
        const optionPos = new Map(props.product.options.map((o: any) => [o.id, o.position]))
        values.sort((a: any, b: any) => ((optionPos.get(a.optionValue?.optionId) ?? 999) as number) - ((optionPos.get(b.optionValue?.optionId) ?? 999) as number))
@@ -308,7 +250,7 @@ const handleOrderSubmit = async () => {
 
         if (isMaystro) {
           if (!quickForm.wilaya || !quickForm.commune) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
-          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
+          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() ) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
           if (maystroShippingAmount == null) { orderError.value = 'Maystro shipping price unavailable for selected commune'; orderSubmitting.value = false; return }
         }
 
@@ -321,7 +263,7 @@ const handleOrderSubmit = async () => {
             shippingCommuneCode: quickForm.commune || undefined,
             deliveryMode: delivery?.mode,
             shippingProvider: delivery?.provider || undefined,
-            shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
+            shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
             shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
             shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
             shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
@@ -419,11 +361,26 @@ const scrollToForm = () => {
     <!-- Quantity + Stock -->
     <div class="flex items-center justify-between p-4 bg-white rounded-3xl border-3 border-violet-100 shadow-[0_3px_0_0_#ddd6fe] mb-5">
       <div class="flex flex-col gap-0.5">
-        <span class="font-black text-stone-700 text-sm" style="font-family: 'Fredoka', sans-serif">{{ storefrontContent.productForm.quantity.label }}</span>
-        <span v-if="product?.isActive === false" class="text-xs font-bold text-stone-500">{{ storefrontContent.productForm.stock.unavailable }}</span>
-        <span v-else-if="isOutOfStock" class="text-xs font-bold text-red-600">{{ storefrontContent.productForm.stock.outOfStock }}</span>
-        <span v-else-if="isLowStock" class="text-xs font-bold text-amber-600">{{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}</span>
-        <span v-else class="text-xs font-bold text-emerald-600">{{ storefrontContent.product.inStock }}</span>
+        <span
+          class="font-black text-stone-700 text-sm"
+          style="font-family: 'Fredoka', sans-serif"
+        >{{ storefrontContent.productForm.quantity.label }}</span>
+        <span
+          v-if="product?.isActive === false"
+          class="text-xs font-bold text-stone-500"
+        >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="isOutOfStock"
+          class="text-xs font-bold text-red-600"
+        >{{ storefrontContent.productForm.stock.outOfStock }}</span>
+        <span
+          v-else-if="isLowStock"
+          class="text-xs font-bold text-amber-600"
+        >{{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}</span>
+        <span
+          v-else
+          class="text-xs font-bold text-emerald-600"
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
       <!-- Qty stamp buttons -->
       <div class="flex items-center gap-1">
@@ -433,7 +390,10 @@ const scrollToForm = () => {
           :disabled="!canPurchase || quantity <= 1"
           @click="decrementQuantity"
         >
-          <Icon name="lucide:minus" class="w-4 h-4 stroke-[2.5]" />
+          <Icon
+            name="lucide:minus"
+            class="w-4 h-4 stroke-[2.5]"
+          />
         </button>
         <span class="w-12 text-center font-black text-stone-900 text-lg">{{ quantity }}</span>
         <button
@@ -442,7 +402,10 @@ const scrollToForm = () => {
           :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
           @click="incrementQuantity"
         >
-          <Icon name="lucide:plus" class="w-4 h-4 stroke-[2.5]" />
+          <Icon
+            name="lucide:plus"
+            class="w-4 h-4 stroke-[2.5]"
+          />
         </button>
       </div>
     </div>
@@ -459,7 +422,10 @@ const scrollToForm = () => {
       v-if="isClearanceEligible"
       class="flex items-center gap-2 px-4 py-3 mb-4 rounded-2xl border-3 border-amber-300 bg-amber-50 text-amber-800 text-xs font-black"
     >
-      <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
+      <Icon
+        name="lucide:package-open"
+        class="w-4 h-4 flex-shrink-0"
+      />
       <span v-if="clearance.remainingForNextThreshold.value > 0">
         {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
       </span>
@@ -478,20 +444,32 @@ const scrollToForm = () => {
 
       <div class="flex items-center gap-3 mb-6 mt-1">
         <div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
-          <Icon name="lucide:banknote" class="w-5 h-5" />
+          <Icon
+            name="lucide:banknote"
+            class="w-5 h-5"
+          />
         </div>
         <div>
-          <h3 class="font-black text-stone-900 text-lg leading-none" style="font-family: 'Fredoka', sans-serif">
+          <h3
+            class="font-black text-stone-900 text-lg leading-none"
+            style="font-family: 'Fredoka', sans-serif"
+          >
             {{ storefrontContent.productForm.cod.title }}
           </h3>
           <span class="text-xs text-stone-500 font-medium">{{ storefrontContent.productForm.cod.badge }}</span>
         </div>
       </div>
 
-      <form class="space-y-4" @submit.prevent="handleOrderSubmit">
+      <form
+        class="space-y-4"
+        @submit.prevent="handleOrderSubmit"
+      >
         <!-- Name -->
         <div>
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
+          <label
+            class="block text-sm font-black text-stone-700 mb-1.5 ms-1"
+            style="font-family: 'Fredoka', sans-serif"
+          >
             {{ storefrontContent.checkout.form.fullName.label }}
           </label>
           <input
@@ -504,7 +482,10 @@ const scrollToForm = () => {
 
         <!-- Phone -->
         <div>
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
+          <label
+            class="block text-sm font-black text-stone-700 mb-1.5 ms-1"
+            style="font-family: 'Fredoka', sans-serif"
+          >
             {{ storefrontContent.checkout.form.phone.label }}
           </label>
           <input
@@ -518,17 +499,23 @@ const scrollToForm = () => {
         <!-- Wilaya + Commune -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
+            <label
+              class="block text-sm font-black text-stone-700 mb-1.5 ms-1"
+              style="font-family: 'Fredoka', sans-serif"
+            >
               {{ storefrontContent.checkout.form.wilaya.label }}
             </label>
             <WilayaField
-                        v-model="quickForm.wilaya"
-                        input-class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 focus:border-violet-400 focus:outline-none appearance-none cursor-pointer transition-colors shadow-sm"
-                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
-                      />
+              v-model="quickForm.wilaya"
+              input-class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 focus:border-violet-400 focus:outline-none appearance-none cursor-pointer transition-colors shadow-sm"
+              :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+            />
           </div>
           <div>
-            <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
+            <label
+              class="block text-sm font-black text-stone-700 mb-1.5 ms-1"
+              style="font-family: 'Fredoka', sans-serif"
+            >
               {{ storefrontContent.checkout.form.commune.label }}
             </label>
             <CommuneField
@@ -543,7 +530,10 @@ const scrollToForm = () => {
 
         <!-- Address -->
         <div v-if="!hideOptionalAddress">
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ms-1" style="font-family: 'Fredoka', sans-serif">
+          <label
+            class="block text-sm font-black text-stone-700 mb-1.5 ms-1"
+            style="font-family: 'Fredoka', sans-serif"
+          >
             {{ storefrontContent.checkout.form.address.label }}
           </label>
           <input
@@ -555,8 +545,14 @@ const scrollToForm = () => {
         </div>
 
         <!-- Delivery Options -->
-        <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-2 mt-2">
-          <label class="block text-sm font-black text-stone-700 mb-2" style="font-family: 'Fredoka', sans-serif">
+        <div
+          v-if="quickForm.wilaya && quickForm.commune"
+          class="space-y-2 mt-2"
+        >
+          <label
+            class="block text-sm font-black text-stone-700 mb-2"
+            style="font-family: 'Fredoka', sans-serif"
+          >
             {{ storefrontContent.checkout.sections.deliveryOptions }}
           </label>
           <div
@@ -572,7 +568,13 @@ const scrollToForm = () => {
               class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
               :class="quickForm.selectedDeliveryOption === option.id ? 'bg-violet-100' : 'bg-stone-100'"
             >
-              <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-5 h-5" :class="quickForm.selectedDeliveryOption === option.id ? 'text-violet-600' : 'text-stone-400'" />
+              <CarrierMark
+                :provider="option.provider"
+                :icon="option.icon"
+                :alt="option.providerLabel"
+                class="w-5 h-5"
+                :class="quickForm.selectedDeliveryOption === option.id ? 'text-violet-600' : 'text-stone-400'"
+              />
             </div>
             <div class="flex-1 min-w-0">
               <div class="flex items-center gap-2 mb-0.5">
@@ -582,7 +584,9 @@ const scrollToForm = () => {
                   :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
                 >{{ option.modeLabel }}</span>
               </div>
-              <p class="text-xs text-stone-500">{{ option.description }}</p>
+              <p class="text-xs text-stone-500">
+                {{ option.description }}
+              </p>
             </div>
             <div class="flex items-center gap-2 flex-shrink-0">
               <span class="font-black text-violet-700 text-sm">
@@ -592,41 +596,44 @@ const scrollToForm = () => {
                 class="w-4.5 h-4.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors"
                 :class="quickForm.selectedDeliveryOption === option.id ? 'border-violet-600 bg-violet-600' : 'border-stone-300'"
               >
-                <Icon v-if="quickForm.selectedDeliveryOption === option.id" name="lucide:check" class="w-2.5 h-2.5 text-white" />
+                <Icon
+                  v-if="quickForm.selectedDeliveryOption === option.id"
+                  name="lucide:check"
+                  class="w-2.5 h-2.5 text-white"
+                />
               </span>
             </div>
           </div>
 
           <!-- Pickup points -->
-          <div v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)" class="space-y-2 mt-3">
-            <label class="block text-sm font-black text-stone-700" style="font-family: 'Fredoka', sans-serif">
-              {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
-            </label>
-            <div v-if="pickupPointsLoading" class="flex items-center gap-2 px-4 py-3 rounded-xl border-3 border-violet-100 bg-violet-50 text-sm text-stone-500">
-              <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
-              Loading…
-            </div>
-            <template v-else>
-              <div v-if="stopDeskName" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border-3 border-violet-100 bg-violet-50 text-sm text-stone-600">
-                <Icon name="lucide:building-2" class="w-4 h-4 text-violet-400 shrink-0" />
-                <span>{{ stopDeskName }}</span>
-              </div>
-              <div v-if="isMaystroPickup && quickForm.pickupPoint" class="flex items-center gap-3 px-4 py-3 rounded-xl border-3 border-violet-200 bg-violet-50">
-                <Icon name="lucide:map-pin" class="w-4 h-4 text-violet-600 shrink-0" />
-                <span class="text-sm font-black text-stone-900">{{ quickForm.pickupPoint }}</span>
-              </div>
-            </template>
-            <p v-if="pickupPointsError" class="text-xs text-amber-700">{{ pickupPointsError }}</p>
-          </div>
+          <StorefrontSharedPickupPointField
+            v-model="quickForm.pickupPoint"
+            :points="pickupPoints"
+            :loading="pickupPointsLoading"
+            :error="pickupPointsError"
+            :is-pickup-selected="isPickupSelected"
+            :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+            :empty-label="storefrontContent.checkout.help.deliveryOptions"
+            @change="syncPickupPointCommune"
+          />
         </div>
 
-        <div v-else class="mt-3 px-4 py-3 border-3 border-dashed border-violet-100 rounded-2xl text-center text-xs text-stone-400">
-          <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-stone-300" />
+        <div
+          v-else
+          class="mt-3 px-4 py-3 border-3 border-dashed border-violet-100 rounded-2xl text-center text-xs text-stone-400"
+        >
+          <Icon
+            name="lucide:map-pin"
+            class="w-4 h-4 mx-auto mb-1 text-stone-300"
+          />
           {{ storefrontContent.checkout.help.deliveryOptions }}
         </div>
 
         <!-- Error -->
-        <div v-if="orderError" class="p-3 rounded-xl border-3 border-red-200 bg-red-50 text-red-700 text-sm font-medium">
+        <div
+          v-if="orderError"
+          class="p-3 rounded-xl border-3 border-red-200 bg-red-50 text-red-700 text-sm font-medium"
+        >
           {{ orderError }}
         </div>
 
@@ -636,19 +643,31 @@ const scrollToForm = () => {
             <span class="text-stone-600 font-medium">{{ storefrontContent.checkout.summary.subtotal }}</span>
             <span class="font-black text-stone-900">{{ formatAmount(subtotal) }} {{ currencyCode }}</span>
           </div>
-          <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between text-sm">
+          <div
+            v-if="quickOrderClearanceDiscount > 0"
+            class="flex items-center justify-between text-sm"
+          >
             <span class="text-amber-700 font-medium">{{ t('storefront.clearance.discountLine') }}</span>
             <span class="font-black text-amber-700">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
           </div>
           <div class="flex items-center justify-between text-sm">
             <span class="text-stone-600 font-medium">{{ storefrontContent.checkout.summary.shipping }}</span>
-            <span class="font-black" :class="deliveryFee === 0 ? 'text-emerald-600' : 'text-stone-900'">
+            <span
+              class="font-black"
+              :class="deliveryFee === 0 ? 'text-emerald-600' : 'text-stone-900'"
+            >
               {{ deliveryFee === 0 ? storefrontContent.checkout.delivery.free : `${formatAmount(deliveryFee)} ${currencyCode}` }}
             </span>
           </div>
           <div class="border-t-2 border-violet-200 pt-2 flex items-center justify-between">
-            <span class="font-black text-stone-900" style="font-family: 'Fredoka', sans-serif">{{ storefrontContent.checkout.summary.total }}</span>
-            <span class="text-xl font-black text-violet-700" style="font-family: 'Fredoka', sans-serif">
+            <span
+              class="font-black text-stone-900"
+              style="font-family: 'Fredoka', sans-serif"
+            >{{ storefrontContent.checkout.summary.total }}</span>
+            <span
+              class="text-xl font-black text-violet-700"
+              style="font-family: 'Fredoka', sans-serif"
+            >
               {{ formatAmount(totalPrice) }} {{ currencyCode }}
             </span>
           </div>
@@ -662,19 +681,34 @@ const scrollToForm = () => {
           style="font-family: 'Fredoka', sans-serif"
         >
           <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shine z-0" />
-          <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
+          <span
+            class="relative z-10 flex items-center gap-2"
+            :class="{ 'opacity-0': orderSubmitting }"
+          >
             {{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}
-            <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
+            <Icon
+              name="lucide:arrow-right"
+              class="w-5 h-5 group-hover:translate-x-1.5 transition-transform"
+            />
           </span>
-          <div v-if="orderSubmitting" class="absolute inset-0 flex items-center justify-center z-10">
-            <Icon name="lucide:loader-2" class="animate-spin h-6 w-6 text-white" />
+          <div
+            v-if="orderSubmitting"
+            class="absolute inset-0 flex items-center justify-center z-10"
+          >
+            <Icon
+              name="lucide:loader-2"
+              class="animate-spin h-6 w-6 text-white"
+            />
           </div>
         </button>
       </form>
     </div>
 
     <!-- Add to Cart -->
-    <div v-if="cartEnabled" class="mt-4">
+    <div
+      v-if="cartEnabled"
+      class="mt-4"
+    >
       <button
         type="button"
         :disabled="addToCartSubmitting || !canPurchase"
@@ -682,7 +716,10 @@ const scrollToForm = () => {
         style="font-family: 'Fredoka', sans-serif; height: 3.25rem"
         @click="handleAddToCart"
       >
-        <Icon name="lucide:shopping-bag" class="w-5 h-5 stroke-[2.5]" />
+        <Icon
+          name="lucide:shopping-bag"
+          class="w-5 h-5 stroke-[2.5]"
+        />
         {{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}
       </button>
     </div>
@@ -691,19 +728,28 @@ const scrollToForm = () => {
     <div class="mt-7 grid grid-cols-3 gap-2">
       <div class="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-white border-3 border-violet-100">
         <div class="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
-          <Icon name="lucide:truck" class="w-4.5 h-4.5" />
+          <Icon
+            name="lucide:truck"
+            class="w-4.5 h-4.5"
+          />
         </div>
         <span class="text-[10px] font-black text-stone-700 leading-tight">{{ $t('storefront.product.features.delivery') }}</span>
       </div>
       <div class="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-white border-3 border-violet-100">
         <div class="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
-          <Icon name="lucide:headset" class="w-4.5 h-4.5" />
+          <Icon
+            name="lucide:headset"
+            class="w-4.5 h-4.5"
+          />
         </div>
         <span class="text-[10px] font-black text-stone-700 leading-tight">{{ $t('storefront.product.features.support') }}</span>
       </div>
       <div class="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-white border-3 border-violet-100">
         <div class="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
-          <Icon name="lucide:shield-check" class="w-4.5 h-4.5" />
+          <Icon
+            name="lucide:shield-check"
+            class="w-4.5 h-4.5"
+          />
         </div>
         <span class="text-[10px] font-black text-stone-700 leading-tight">{{ $t('storefront.product.features.securePayment') }}</span>
       </div>
@@ -723,11 +769,18 @@ const scrollToForm = () => {
         class="fixed bottom-4 end-4 z-50 bg-stone-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-stone-700/50"
       >
         <div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-          <Icon name="lucide:check" class="w-4 h-4" />
+          <Icon
+            name="lucide:check"
+            class="w-4 h-4"
+          />
         </div>
         <div>
-          <div class="font-black text-sm">{{ successTitle }}</div>
-          <div class="text-xs text-stone-400">{{ successMessage }}</div>
+          <div class="font-black text-sm">
+            {{ successTitle }}
+          </div>
+          <div class="text-xs text-stone-400">
+            {{ successMessage }}
+          </div>
         </div>
       </div>
     </Transition>
@@ -747,7 +800,10 @@ const scrollToForm = () => {
       >
         <div class="flex flex-col">
           <span class="text-xs text-stone-500 font-medium">Total</span>
-          <span class="text-xl font-black text-violet-700 leading-none" style="font-family: 'Fredoka', sans-serif">
+          <span
+            class="text-xl font-black text-violet-700 leading-none"
+            style="font-family: 'Fredoka', sans-serif"
+          >
             {{ formatAmount(totalPrice) }} {{ currencyCode }}
           </span>
         </div>
@@ -759,7 +815,10 @@ const scrollToForm = () => {
           @click="scrollToForm"
         >
           {{ storefrontContent.productForm.cod.submit }}
-          <Icon name="lucide:arrow-right" class="w-5 h-5" />
+          <Icon
+            name="lucide:arrow-right"
+            class="w-5 h-5"
+          />
         </button>
       </div>
     </Transition>

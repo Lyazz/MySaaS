@@ -134,63 +134,21 @@ const deliveryOptions = computed(() => {
 })
 
 const selectedDelivery = computed(() => deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption))
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
-
-const syncPickupPointCommune = () => {
-  const name = (quickForm.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && quickForm.commune !== nextCommune) quickForm.commune = nextCommune
-}
-
-watchEffect(() => {
-  const options = deliveryOptions.value
-  if (!options.length) return
-  const selected = quickForm.selectedDeliveryOption
-  if (!selected || !options.some((opt: any) => opt.id === selected)) {
-    quickForm.selectedDeliveryOption = options[0].id
-  }
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => quickForm.wilaya,
+  commune: () => quickForm.commune,
+  selected: () => quickForm.pickupPoint,
+  onSelect: (name) => { quickForm.pickupPoint = name },
+  onCommuneChange: (communeId) => { quickForm.commune = communeId }
 })
 
-watch([isMaystroPickup, isMaystroAvailable, () => quickForm.commune, () => quickForm.wilaya], async ([isPickup, maystroEnabled, commune, wilaya]) => {
-  pickupPointsError.value = ''
-  pickupPoints.value = []
-  stopDeskName.value = ''
-  if (!isPickup) quickForm.pickupPoint = ''
-  if (!maystroEnabled || !wilaya || !commune) return
-  pickupPointsLoading.value = true
-  try {
-    const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
-    const data = await $fetch<any[]>(url, { headers: { ...(useTenantApiHeaders() || {}) } })
-    pickupPoints.value = Array.isArray(data)
-      ? data.map((p: any) => ({ pickup_point: Number(p?.pickup_point), commune: Number(p?.commune), name: p?.name ? String(p.name) : undefined, name_lt: p?.name_lt ? String(p.name_lt) : undefined, name_ar: p?.name_ar ? String(p.name_ar) : undefined, delivery_type: Number(p?.delivery_type) })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-      : []
-    const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-    stopDeskName.value = stopDesk ? (stopDesk.name_lt || stopDesk.name_ar || stopDesk.name || '') : ''
-    if (isPickup) {
-      const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-      if (relaisPoints.length > 0) {
-        const current = (quickForm.pickupPoint || '').trim()
-        if (!current || !relaisPoints.some((p) => (p.name_lt || p.name_ar || '') === current)) {
-          quickForm.pickupPoint = relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-          syncPickupPointCommune()
-        }
-      } else {
-        quickForm.pickupPoint = ''
-      }
-    }
-  } catch (e: any) {
-    pickupPoints.value = []
-    pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-  } finally { pickupPointsLoading.value = false }
-}, { immediate: true })
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 onMounted(() => { cartStore.loadFromLocalStorage() })
 watch(() => props.currentVariant, () => { quantity.value = 1 })
@@ -234,7 +192,7 @@ const handleOrderSubmit = async () => {
     const maystroShippingAmount = providerPrices ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home) : null
     if (isMaystro) {
       if (!quickForm.wilaya || !quickForm.commune) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
-      if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
+      if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() ) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
       if (maystroShippingAmount == null) { orderError.value = 'Maystro shipping price unavailable for selected commune'; orderSubmitting.value = false; return }
     }
     const payload = {
@@ -242,7 +200,7 @@ const handleOrderSubmit = async () => {
       customerAddress: hideOptionalAddress.value ? undefined : (quickForm.address?.trim() || undefined), shippingAddressLine1: hideOptionalAddress.value ? undefined : (quickForm.address?.trim() || undefined),
       shippingWilayaCode: quickForm.wilaya || undefined, shippingCommuneCode: quickForm.commune || undefined,
       deliveryMode: delivery?.mode, shippingProvider: delivery?.provider || undefined,
-      shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
+      shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
       shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
       shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
       shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
@@ -277,19 +235,59 @@ const handleAddToCart = async () => {
     <!-- Qty + stock -->
     <div class="order-form__qty-row">
       <div class="order-form__stock">
-        <span v-if="product?.isActive === false" class="order-form__stock-label is-unavailable">{{ storefrontContent.productForm.stock.unavailable }}</span>
-        <span v-else-if="isOutOfStock" class="order-form__stock-label is-oos">{{ storefrontContent.productForm.stock.outOfStock }}</span>
-        <span v-else-if="isLowStock" class="order-form__stock-label is-low">{{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}</span>
-        <span v-else class="order-form__stock-label is-ok">{{ storefrontContent.product.inStock }}</span>
+        <span
+          v-if="product?.isActive === false"
+          class="order-form__stock-label is-unavailable"
+        >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="isOutOfStock"
+          class="order-form__stock-label is-oos"
+        >{{ storefrontContent.productForm.stock.outOfStock }}</span>
+        <span
+          v-else-if="isLowStock"
+          class="order-form__stock-label is-low"
+        >{{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}</span>
+        <span
+          v-else
+          class="order-form__stock-label is-ok"
+        >{{ storefrontContent.product.inStock }}</span>
         <span class="order-form__qty-heading">{{ storefrontContent.productForm.quantity.label }}</span>
       </div>
       <div class="order-form__qty-ctrl">
-        <button type="button" class="order-form__qty-btn" :disabled="!canPurchase || quantity <= 1" @click="decrementQuantity">
-          <svg width="8" height="2" viewBox="0 0 8 2" fill="none"><path d="M1 1h6" stroke="currentColor" stroke-width="0.85"/></svg>
+        <button
+          type="button"
+          class="order-form__qty-btn"
+          :disabled="!canPurchase || quantity <= 1"
+          @click="decrementQuantity"
+        >
+          <svg
+            width="8"
+            height="2"
+            viewBox="0 0 8 2"
+            fill="none"
+          ><path
+            d="M1 1h6"
+            stroke="currentColor"
+            stroke-width="0.85"
+          /></svg>
         </button>
         <span class="order-form__qty-val">{{ quantity }}</span>
-        <button type="button" class="order-form__qty-btn" :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)" @click="incrementQuantity">
-          <svg width="8" height="8" viewBox="0 0 8 8" fill="none"><path d="M4 1v6M1 4h6" stroke="currentColor" stroke-width="0.85"/></svg>
+        <button
+          type="button"
+          class="order-form__qty-btn"
+          :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
+          @click="incrementQuantity"
+        >
+          <svg
+            width="8"
+            height="8"
+            viewBox="0 0 8 8"
+            fill="none"
+          ><path
+            d="M4 1v6M1 4h6"
+            stroke="currentColor"
+            stroke-width="0.85"
+          /></svg>
         </button>
       </div>
     </div>
@@ -302,8 +300,14 @@ const handleAddToCart = async () => {
       @select-qty="selectBundleQty"
     />
 
-    <div v-if="isClearanceEligible" class="order-form__clearance">
-      <Icon name="lucide:package-open" style="width:14px;height:14px;flex-shrink:0" />
+    <div
+      v-if="isClearanceEligible"
+      class="order-form__clearance"
+    >
+      <Icon
+        name="lucide:package-open"
+        style="width:14px;height:14px;flex-shrink:0"
+      />
       <span v-if="clearance.remainingForNextThreshold.value > 0">
         {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
       </span>
@@ -311,39 +315,92 @@ const handleAddToCart = async () => {
     </div>
 
     <!-- COD form -->
-    <div v-if="codEnabled" class="order-form__cod" data-test="cod-order-card">
+    <div
+      v-if="codEnabled"
+      class="order-form__cod"
+      data-test="cod-order-card"
+    >
       <div class="order-form__cod-head">
         <div class="order-form__cod-icon">
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <rect x="1" y="3" width="12" height="8" stroke="currentColor" stroke-width="0.75"/>
-            <path d="M1 6h12" stroke="currentColor" stroke-width="0.75"/>
-            <path d="M4 9h3" stroke="currentColor" stroke-width="0.75"/>
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            fill="none"
+          >
+            <rect
+              x="1"
+              y="3"
+              width="12"
+              height="8"
+              stroke="currentColor"
+              stroke-width="0.75"
+            />
+            <path
+              d="M1 6h12"
+              stroke="currentColor"
+              stroke-width="0.75"
+            />
+            <path
+              d="M4 9h3"
+              stroke="currentColor"
+              stroke-width="0.75"
+            />
           </svg>
         </div>
         <div>
-          <p class="order-form__cod-title">{{ storefrontContent.productForm.cod.title }}</p>
+          <p class="order-form__cod-title">
+            {{ storefrontContent.productForm.cod.title }}
+          </p>
           <span class="order-form__cod-badge">{{ storefrontContent.productForm.cod.badge }}</span>
         </div>
       </div>
 
-      <form class="order-form__fields" @submit.prevent="handleOrderSubmit">
+      <form
+        class="order-form__fields"
+        @submit.prevent="handleOrderSubmit"
+      >
         <div class="order-form__field">
           <label class="order-form__label">{{ storefrontContent.checkout.form.fullName.label }}</label>
-          <input v-model="quickForm.fullName" type="text" :placeholder="storefrontContent.checkout.form.fullName.placeholder" class="at-input">
+          <input
+            v-model="quickForm.fullName"
+            type="text"
+            :placeholder="storefrontContent.checkout.form.fullName.placeholder"
+            class="at-input"
+          >
         </div>
 
         <div class="order-form__field">
           <label class="order-form__label">{{ storefrontContent.checkout.form.phone.label }}</label>
-          <input v-model="quickForm.phone" type="tel" :placeholder="storefrontContent.checkout.form.phone.placeholder" class="at-input">
+          <input
+            v-model="quickForm.phone"
+            type="tel"
+            :placeholder="storefrontContent.checkout.form.phone.placeholder"
+            class="at-input"
+          >
         </div>
 
         <div class="order-form__grid2">
           <div class="order-form__field">
             <label class="order-form__label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
             <div class="order-form__select-wrap">
-              <WilayaField v-model="quickForm.wilaya" input-class="at-select" :placeholder="storefrontContent.checkout.form.wilaya.placeholder" />
-              <svg width="8" height="5" viewBox="0 0 8 5" fill="none" class="order-form__select-arrow">
-                <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
+              <WilayaField
+                v-model="quickForm.wilaya"
+                input-class="at-select"
+                :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+              />
+              <svg
+                width="8"
+                height="5"
+                viewBox="0 0 8 5"
+                fill="none"
+                class="order-form__select-arrow"
+              >
+                <path
+                  d="M1 1l3 3 3-3"
+                  stroke="currentColor"
+                  stroke-width="0.85"
+                />
               </svg>
             </div>
           </div>
@@ -359,12 +416,23 @@ const handleAddToCart = async () => {
           </div>
         </div>
 
-        <div v-if="!hideOptionalAddress" class="order-form__field">
+        <div
+          v-if="!hideOptionalAddress"
+          class="order-form__field"
+        >
           <label class="order-form__label">{{ storefrontContent.checkout.form.address.label }}</label>
-          <input v-model="quickForm.address" type="text" :placeholder="storefrontContent.checkout.form.address.placeholder" class="at-input">
+          <input
+            v-model="quickForm.address"
+            type="text"
+            :placeholder="storefrontContent.checkout.form.address.placeholder"
+            class="at-input"
+          >
         </div>
 
-        <div v-if="quickForm.wilaya && quickForm.commune" class="order-form__field">
+        <div
+          v-if="quickForm.wilaya && quickForm.commune"
+          class="order-form__field"
+        >
           <label class="order-form__label">{{ storefrontContent.checkout.sections.deliveryOptions }}</label>
           <div class="order-form__delivery-list">
             <div
@@ -376,48 +444,79 @@ const handleAddToCart = async () => {
             >
               <div class="order-form__delivery-left">
                 <div class="order-form__delivery-icon-wrap">
-                  <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" style="width:13px;height:13px" />
+                  <CarrierMark
+                    :provider="option.provider"
+                    :icon="option.icon"
+                    :alt="option.providerLabel"
+                    style="width:13px;height:13px"
+                  />
                 </div>
                 <div>
-                  <p class="order-form__delivery-name">{{ option.providerLabel }}</p>
-                  <p class="order-form__delivery-mode">{{ option.modeLabel }}</p>
+                  <p class="order-form__delivery-name">
+                    {{ option.providerLabel }}
+                  </p>
+                  <p class="order-form__delivery-mode">
+                    {{ option.modeLabel }}
+                  </p>
                 </div>
               </div>
               <div class="order-form__delivery-right">
                 <span class="order-form__delivery-price">
                   {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                 </span>
-                <span class="order-form__delivery-radio" :class="quickForm.selectedDeliveryOption === option.id && 'is-checked'" />
+                <span
+                  class="order-form__delivery-radio"
+                  :class="quickForm.selectedDeliveryOption === option.id && 'is-checked'"
+                />
               </div>
             </div>
 
-            <div v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)" class="order-form__pickup">
-              <div v-if="pickupPointsLoading" class="order-form__pickup-loading">
-                <Icon name="lucide:loader-2" style="width:12px;height:12px" /> Chargement…
-              </div>
-              <template v-else>
-                <div v-if="stopDeskName" class="order-form__pickup-stopdesk">
-                  <svg width="10" height="10" viewBox="0 0 10 10" fill="none"><rect x="1" y="3" width="8" height="6" stroke="currentColor" stroke-width="0.75"/><path d="M3 3V2a2 2 0 014 0v1" stroke="currentColor" stroke-width="0.75"/></svg>
-                  {{ stopDeskName }}
-                </div>
-                <div v-if="isMaystroPickup && quickForm.pickupPoint" class="order-form__pickup-name">
-                  <svg width="10" height="12" viewBox="0 0 10 12" fill="none"><path d="M5 11S1 7.5 1 4.5a4 4 0 018 0C9 7.5 5 11 5 11z" stroke="currentColor" stroke-width="0.75"/><circle cx="5" cy="4.5" r="1.5" stroke="currentColor" stroke-width="0.75"/></svg>
-                  {{ quickForm.pickupPoint }}
-                </div>
-              </template>
-              <p v-if="pickupPointsError" class="order-form__pickup-error">{{ pickupPointsError }}</p>
-            </div>
+            <StorefrontSharedPickupPointField
+              v-model="quickForm.pickupPoint"
+              :points="pickupPoints"
+              :loading="pickupPointsLoading"
+              :error="pickupPointsError"
+              :is-pickup-selected="isPickupSelected"
+              :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+              :empty-label="storefrontContent.checkout.help.deliveryOptions"
+              @change="syncPickupPointCommune"
+            />
           </div>
         </div>
-        <div v-else class="order-form__field order-form__delivery-hint">
-          <Icon name="lucide:map-pin" style="width:14px;height:14px;margin:0 auto 4px;display:block;color:var(--at-sub)" />
+        <div
+          v-else
+          class="order-form__field order-form__delivery-hint"
+        >
+          <Icon
+            name="lucide:map-pin"
+            style="width:14px;height:14px;margin:0 auto 4px;display:block;color:var(--at-sub)"
+          />
           {{ storefrontContent.checkout.help.deliveryOptions }}
         </div>
 
-        <div v-if="orderError" class="order-form__error">
-          <svg width="12" height="12" viewBox="0 0 12 12" fill="none" style="flex-shrink:0">
-            <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="0.75"/>
-            <path d="M6 3v4M6 9v.5" stroke="currentColor" stroke-width="0.75"/>
+        <div
+          v-if="orderError"
+          class="order-form__error"
+        >
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 12 12"
+            fill="none"
+            style="flex-shrink:0"
+          >
+            <circle
+              cx="6"
+              cy="6"
+              r="5"
+              stroke="currentColor"
+              stroke-width="0.75"
+            />
+            <path
+              d="M6 3v4M6 9v.5"
+              stroke="currentColor"
+              stroke-width="0.75"
+            />
           </svg>
           {{ orderError }}
         </div>
@@ -437,34 +536,82 @@ const handleAddToCart = async () => {
           </span>
         </div>
 
-        <button type="submit" class="at-btn-solid" :disabled="orderSubmitting || !canPurchase">
-          <Icon v-if="orderSubmitting" name="lucide:loader-2" style="width:14px;height:14px" />
+        <button
+          type="submit"
+          class="at-btn-solid"
+          :disabled="orderSubmitting || !canPurchase"
+        >
+          <Icon
+            v-if="orderSubmitting"
+            name="lucide:loader-2"
+            style="width:14px;height:14px"
+          />
           {{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}
         </button>
       </form>
     </div>
 
     <div v-if="cartEnabled">
-      <button type="button" class="at-btn-ghost" :disabled="addToCartSubmitting || !canPurchase" @click="handleAddToCart">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
-          <path d="M2 2h1.5l2 8h7l1.5-5H4.5" stroke="currentColor" stroke-width="0.85"/>
-          <circle cx="7" cy="13" r="1" fill="currentColor"/>
-          <circle cx="12" cy="13" r="1" fill="currentColor"/>
+      <button
+        type="button"
+        class="at-btn-ghost"
+        :disabled="addToCartSubmitting || !canPurchase"
+        @click="handleAddToCart"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 16 16"
+          fill="none"
+        >
+          <path
+            d="M2 2h1.5l2 8h7l1.5-5H4.5"
+            stroke="currentColor"
+            stroke-width="0.85"
+          />
+          <circle
+            cx="7"
+            cy="13"
+            r="1"
+            fill="currentColor"
+          />
+          <circle
+            cx="12"
+            cy="13"
+            r="1"
+            fill="currentColor"
+          />
         </svg>
         {{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}
       </button>
     </div>
 
     <Transition name="form-toast">
-      <div v-if="showSuccess" class="order-form__toast">
+      <div
+        v-if="showSuccess"
+        class="order-form__toast"
+      >
         <div class="order-form__toast-icon">
-          <svg width="10" height="8" viewBox="0 0 10 8" fill="none">
-            <path d="M1 4l3 3 5-6" stroke="currentColor" stroke-width="1"/>
+          <svg
+            width="10"
+            height="8"
+            viewBox="0 0 10 8"
+            fill="none"
+          >
+            <path
+              d="M1 4l3 3 5-6"
+              stroke="currentColor"
+              stroke-width="1"
+            />
           </svg>
         </div>
         <div>
-          <div class="order-form__toast-title">{{ successTitle }}</div>
-          <div class="order-form__toast-msg">{{ successMessage }}</div>
+          <div class="order-form__toast-title">
+            {{ successTitle }}
+          </div>
+          <div class="order-form__toast-msg">
+            {{ successMessage }}
+          </div>
         </div>
       </div>
     </Transition>

@@ -124,68 +124,21 @@ const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption)
 )
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => form.value.wilaya,
+  commune: () => form.value.commune,
+  selected: () => form.value.pickupPoint,
+  onSelect: (name) => { form.value.pickupPoint = name },
+  onCommuneChange: (communeId) => { form.value.commune = communeId }
+})
 
-const syncPickupPointCommune = () => {
-  const name = (form.value.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
-}
-
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => form.value.commune, () => form.value.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    form.value.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-    if (!isPickup) return
-
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`
-      )
-      const data = await $fetch<any[]>(url, {
-        headers: { ...(useTenantApiHeaders() || {}) }
-      })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-      if (relaisPoints.length > 0) {
-        form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-        syncPickupPointCommune()
-      } else if (pickupPoints.value.length === 0) {
-        pickupPointsError.value = 'Aucun point relais disponible dans cette région'
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 const discountedSubtotal = computed(() => Math.max(0, cartStore.total - cartStore.clearanceDiscount))
 
@@ -256,7 +209,7 @@ async function handleSubmit() {
 
         if (isMaystro) {
 
-          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) {
+          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() ) {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
           }
@@ -274,7 +227,7 @@ async function handleSubmit() {
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
-          shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
+          shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
           shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
           shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
           shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
@@ -348,7 +301,9 @@ async function handleSubmit() {
           <div class="border border-[#CBBDAB] bg-[#FDFAF4]">
             <div class="flex items-center gap-3 px-6 py-4 border-b border-[#CBBDAB]">
               <span class="emb-star w-3 h-3 text-[#DFA254]" />
-              <h2 class="emb-label text-[#16211E]">{{ storefrontContent.checkout.sections.customerInformation }}</h2>
+              <h2 class="emb-label text-[#16211E]">
+                {{ storefrontContent.checkout.sections.customerInformation }}
+              </h2>
             </div>
 
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -389,26 +344,43 @@ async function handleSubmit() {
                 />
               </div>
 
-              <div v-if="isMaystroPickup" class="md:col-span-2 space-y-2">
+              <div
+                v-if="isPickupSelected"
+                class="md:col-span-2 space-y-2"
+              >
                 <label class="block emb-label text-[#8E9793]">{{ storefrontContent.checkout.delivery.mode.pickupPoint }}</label>
                 <div
                   v-if="pickupPointsLoading"
                   class="flex items-center gap-2 px-4 py-3 border border-[#CBBDAB] bg-[#F2ECE1] text-sm text-[#5A6763]"
                 >
-                  <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
+                  <Icon
+                    name="lucide:loader-2"
+                    class="w-4 h-4 animate-spin shrink-0"
+                  />
                   {{ storefrontContent.checkout.actions.placingOrder }}
                 </div>
                 <div
                   v-else-if="form.pickupPoint"
                   class="flex items-center gap-3 px-4 py-3 border-s-2 border-brand-600 bg-[#F2ECE1]"
                 >
-                  <Icon name="lucide:map-pin" class="w-4 h-4 text-brand-700 shrink-0" />
+                  <Icon
+                    name="lucide:map-pin"
+                    class="w-4 h-4 text-brand-700 shrink-0"
+                  />
                   <span class="text-sm font-semibold text-[#16211E]">{{ form.pickupPoint }}</span>
                 </div>
-                <p v-if="pickupPointsError" class="text-xs text-[#8A5A18]">{{ pickupPointsError }}</p>
+                <p
+                  v-if="pickupPointsError"
+                  class="text-xs text-[#8A5A18]"
+                >
+                  {{ pickupPointsError }}
+                </p>
               </div>
 
-              <div v-if="!hideOptionalAddress" class="md:col-span-2 space-y-2">
+              <div
+                v-if="!hideOptionalAddress"
+                class="md:col-span-2 space-y-2"
+              >
                 <label class="block emb-label text-[#8E9793]">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
@@ -421,11 +393,16 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery -->
-          <div v-if="form.wilaya && form.commune" class="border border-[#CBBDAB] bg-[#FDFAF4]">
+          <div
+            v-if="form.wilaya && form.commune"
+            class="border border-[#CBBDAB] bg-[#FDFAF4]"
+          >
             <div class="flex items-center justify-between gap-3 px-6 py-4 border-b border-[#CBBDAB]">
               <div class="flex items-center gap-3">
                 <span class="emb-star w-3 h-3 text-[#DFA254]" />
-                <h2 class="emb-label text-[#16211E]">{{ storefrontContent.checkout.sections.deliveryOptions }}</h2>
+                <h2 class="emb-label text-[#16211E]">
+                  {{ storefrontContent.checkout.sections.deliveryOptions }}
+                </h2>
               </div>
               <span class="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8A5A18] border border-[#DFA254] px-2 py-1">
                 {{ storefrontContent.checkout.required }}
@@ -433,7 +410,9 @@ async function handleSubmit() {
             </div>
 
             <div class="p-6 space-y-3">
-              <p class="text-xs text-[#5A6763] mb-2">{{ storefrontContent.checkout.help.deliveryOptions }}</p>
+              <p class="text-xs text-[#5A6763] mb-2">
+                {{ storefrontContent.checkout.help.deliveryOptions }}
+              </p>
 
               <button
                 v-for="option in deliveryOptions"
@@ -452,7 +431,12 @@ async function handleSubmit() {
                       ? 'bg-brand-600 text-[#FDFAF4]'
                       : 'bg-[#F2ECE1] text-[#5A6763]'"
                   >
-                    <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-5 h-5" />
+                    <CarrierMark
+                      :provider="option.provider"
+                      :icon="option.icon"
+                      :alt="option.providerLabel"
+                      class="w-5 h-5"
+                    />
                   </span>
 
                   <div class="flex-1 min-w-0">
@@ -462,7 +446,9 @@ async function handleSubmit() {
                         {{ option.modeLabel }}
                       </span>
                     </div>
-                    <p class="text-xs text-[#5A6763] mt-1 leading-relaxed">{{ option.description }}</p>
+                    <p class="text-xs text-[#5A6763] mt-1 leading-relaxed">
+                      {{ option.description }}
+                    </p>
                   </div>
 
                   <div class="flex items-center gap-3 shrink-0">
@@ -475,30 +461,29 @@ async function handleSubmit() {
                         ? 'border-brand-600 bg-brand-600'
                         : 'border-[#CBBDAB]'"
                     >
-                      <Icon v-if="form.selectedDeliveryOption === option.id" name="lucide:check" class="w-3 h-3 text-[#FDFAF4]" />
+                      <Icon
+                        v-if="form.selectedDeliveryOption === option.id"
+                        name="lucide:check"
+                        class="w-3 h-3 text-[#FDFAF4]"
+                      />
                     </span>
                   </div>
                 </div>
 
                 <div
-                  v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)"
-                  class="mt-3 pt-3 border-t border-[#CBBDAB]"
+                  v-if="option.mode === 'pickup' && option.provider && form.selectedDeliveryOption === option.id"
+                  class="mt-3 pt-3 border-t border-slate-200"
                 >
-                  <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-[#5A6763]">
-                    <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
-                    {{ storefrontContent.checkout.actions.placingOrder }}
-                  </div>
-                  <template v-else>
-                    <div v-if="stopDeskName" class="flex items-center gap-2 text-xs text-[#5A6763]">
-                      <Icon name="lucide:building-2" class="w-3 h-3 text-[#8E9793] flex-shrink-0" />
-                      <span>{{ stopDeskName }}</span>
-                    </div>
-                    <div v-if="form.pickupPoint" class="flex items-center gap-2 text-xs mt-1">
-                      <Icon name="lucide:map-pin" class="w-3 h-3 text-brand-700" />
-                      <span class="font-semibold text-[#16211E]">{{ form.pickupPoint }}</span>
-                    </div>
-                  </template>
-                  <p v-if="pickupPointsError" class="text-xs text-[#8A5A18] mt-1">{{ pickupPointsError }}</p>
+                  <StorefrontSharedPickupPointField
+                    v-model="form.pickupPoint"
+                    :points="pickupPoints"
+                    :loading="pickupPointsLoading"
+                    :error="pickupPointsError"
+                    :is-pickup-selected="isPickupSelected"
+                    :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+                    :empty-label="storefrontContent.checkout.help.deliveryOptions"
+                    @change="syncPickupPointCommune"
+                  />
                 </div>
               </button>
             </div>
@@ -508,7 +493,10 @@ async function handleSubmit() {
             v-else
             class="flex items-center gap-3 border border-dashed border-[#CBBDAB] px-6 py-5 text-sm text-[#8E9793]"
           >
-            <Icon name="lucide:map-pin" class="w-4 h-4 text-[#DFA254] shrink-0" />
+            <Icon
+              name="lucide:map-pin"
+              class="w-4 h-4 text-[#DFA254] shrink-0"
+            />
             {{ storefrontContent.checkout.help.deliveryOptions }}
           </div>
         </div>
@@ -517,7 +505,9 @@ async function handleSubmit() {
         <div class="lg:col-span-5">
           <div class="border border-[#CBBDAB] bg-[#FDFAF4] lg:sticky lg:top-28">
             <div class="flex items-center justify-between gap-3 bg-brand-600 text-[#FDFAF4] px-6 py-5">
-              <h2 class="emb-display text-2xl leading-none">{{ storefrontContent.checkout.sections.orderSummary }}</h2>
+              <h2 class="emb-display text-2xl leading-none">
+                {{ storefrontContent.checkout.sections.orderSummary }}
+              </h2>
               <span class="emb-label text-[#DFA254]">{{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}</span>
             </div>
 
@@ -536,13 +526,23 @@ async function handleSubmit() {
                       :alt="item.title"
                       class="h-full w-full object-cover object-center"
                     >
-                    <div v-else class="h-full w-full flex items-center justify-center text-[#CBBDAB]">
-                      <Icon name="lucide:image" class="w-6 h-6" />
+                    <div
+                      v-else
+                      class="h-full w-full flex items-center justify-center text-[#CBBDAB]"
+                    >
+                      <Icon
+                        name="lucide:image"
+                        class="w-6 h-6"
+                      />
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
-                    <p class="text-sm font-medium text-[#16211E] truncate">{{ item.title }}</p>
-                    <p class="text-xs text-[#8E9793] mt-0.5 tabular-nums">{{ storefrontContent.checkout.summary.quantityShort }}{{ item.quantity }}</p>
+                    <p class="text-sm font-medium text-[#16211E] truncate">
+                      {{ item.title }}
+                    </p>
+                    <p class="text-xs text-[#8E9793] mt-0.5 tabular-nums">
+                      {{ storefrontContent.checkout.summary.quantityShort }}{{ item.quantity }}
+                    </p>
                   </div>
                   <span class="text-sm font-semibold text-[#16211E] tabular-nums whitespace-nowrap">
                     {{ formatAmount(item.price) }} {{ currencyCode }}
@@ -576,31 +576,59 @@ async function handleSubmit() {
 
               <!-- Totals -->
               <dl class="mt-6 pt-6 border-t border-[#CBBDAB] space-y-3">
-                <div v-if="selectedDelivery" class="flex items-center justify-between gap-3 text-sm">
-                  <dt class="text-[#5A6763]">{{ storefrontContent.checkout.summary.deliveryOption }}</dt>
+                <div
+                  v-if="selectedDelivery"
+                  class="flex items-center justify-between gap-3 text-sm"
+                >
+                  <dt class="text-[#5A6763]">
+                    {{ storefrontContent.checkout.summary.deliveryOption }}
+                  </dt>
                   <dd class="flex items-center gap-2 text-[#16211E] font-medium text-end">
-                    <Icon :name="selectedDelivery.icon" class="w-4 h-4 text-[#8E9793] shrink-0" />
+                    <Icon
+                      :name="selectedDelivery.icon"
+                      class="w-4 h-4 text-[#8E9793] shrink-0"
+                    />
                     <span>{{ selectedDelivery.providerLabel }} — {{ selectedDelivery.modeLabel }}</span>
                   </dd>
                 </div>
                 <div class="flex items-center justify-between text-sm">
-                  <dt class="text-[#5A6763]">{{ storefrontContent.cart.summary.subtotal }}</dt>
-                  <dd class="font-semibold text-[#16211E] tabular-nums">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</dd>
+                  <dt class="text-[#5A6763]">
+                    {{ storefrontContent.cart.summary.subtotal }}
+                  </dt>
+                  <dd class="font-semibold text-[#16211E] tabular-nums">
+                    {{ formatAmount(cartStore.total) }} {{ currencyCode }}
+                  </dd>
                 </div>
-                <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between text-sm">
-                  <dt class="text-[#8A5A18]">{{ t('storefront.clearance.discountLine') }}</dt>
-                  <dd class="font-semibold text-[#8A5A18] tabular-nums">-{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}</dd>
+                <div
+                  v-if="cartStore.clearanceDiscount > 0"
+                  class="flex items-center justify-between text-sm"
+                >
+                  <dt class="text-[#8A5A18]">
+                    {{ t('storefront.clearance.discountLine') }}
+                  </dt>
+                  <dd class="font-semibold text-[#8A5A18] tabular-nums">
+                    -{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}
+                  </dd>
                 </div>
-                <div v-if="selectedDelivery" class="flex items-center justify-between text-sm">
-                  <dt class="text-[#5A6763]">{{ storefrontContent.checkout.summary.shippingFee }}</dt>
+                <div
+                  v-if="selectedDelivery"
+                  class="flex items-center justify-between text-sm"
+                >
+                  <dt class="text-[#5A6763]">
+                    {{ storefrontContent.checkout.summary.shippingFee }}
+                  </dt>
                   <dd class="font-semibold text-brand-700 tabular-nums">
                     {{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}
                   </dd>
                 </div>
 
                 <div class="flex items-baseline justify-between pt-4 border-t border-[#CBBDAB]">
-                  <dt class="emb-label text-[#16211E]">{{ storefrontContent.cart.summary.total }}</dt>
-                  <dd class="emb-display text-3xl text-brand-700 tabular-nums">{{ formatAmount(grandTotal) }} {{ currencyCode }}</dd>
+                  <dt class="emb-label text-[#16211E]">
+                    {{ storefrontContent.cart.summary.total }}
+                  </dt>
+                  <dd class="emb-display text-3xl text-brand-700 tabular-nums">
+                    {{ formatAmount(grandTotal) }} {{ currencyCode }}
+                  </dd>
                 </div>
               </dl>
 
@@ -612,7 +640,10 @@ async function handleSubmit() {
                 v-if="errorMessage"
                 class="mt-5 flex items-start gap-2.5 px-4 py-3 border-s-2 border-[#B4593F] bg-[#FBF0EC] text-[#8E3A22] text-sm"
               >
-                <Icon name="lucide:alert-circle" class="w-4 h-4 shrink-0 mt-0.5" />
+                <Icon
+                  name="lucide:alert-circle"
+                  class="w-4 h-4 shrink-0 mt-0.5"
+                />
                 <span>{{ errorMessage }}</span>
               </div>
 
@@ -622,7 +653,11 @@ async function handleSubmit() {
                 class="w-full mt-6 h-14 bg-brand-600 text-[#FDFAF4] emb-label hover:bg-[#DFA254] hover:text-[#062622] transition-colors disabled:bg-[#CBBDAB] disabled:text-[#5A6763] disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 @click="handleSubmit"
               >
-                <Icon v-if="submitting" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
+                <Icon
+                  v-if="submitting"
+                  name="lucide:loader-2"
+                  class="w-5 h-5 animate-spin"
+                />
                 <span>
                   {{ submitting ? storefrontContent.checkout.actions.placingOrder : (!cartEnabled ? storefrontContent.checkout.disabledShort : storefrontContent.checkout.actions.placeOrder) }}
                 </span>
@@ -634,7 +669,10 @@ async function handleSubmit() {
               </button>
 
               <p class="mt-4 flex items-center justify-center gap-2 text-xs text-[#8E9793]">
-                <Icon name="lucide:shield-check" class="w-3.5 h-3.5 text-brand-700" />
+                <Icon
+                  name="lucide:shield-check"
+                  class="w-3.5 h-3.5 text-brand-700"
+                />
                 {{ storefrontContent.checkout.secureTransaction }}
               </p>
             </div>

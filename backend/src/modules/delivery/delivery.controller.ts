@@ -14,6 +14,22 @@ const yalidineWebhookService = new YalidineWebhookService()
 const isShipmentProvider = (value: string): value is ShipmentProvider =>
     (Object.values(ShipmentProvider) as string[]).includes(value)
 
+/**
+ * The HTTP status to answer with when a carrier — or our own config check — refused.
+ * Covers DeliveryConfigurationError and every carrier's integration error alike.
+ */
+const carrierErrorStatus = (error: any): number | null => {
+    if (
+        error instanceof DeliveryConfigurationError ||
+        error instanceof MaystroIntegrationError ||
+        error instanceof YalidineIntegrationError
+    ) {
+        const status = Number(error.statusCode)
+        return Number.isFinite(status) && status >= 400 && status <= 599 ? status : 502
+    }
+    return null
+}
+
 export class DeliveryController {
     async getOptions(req: Request, res: Response) {
         const tenant = req.tenant
@@ -551,10 +567,14 @@ export class DeliveryController {
             })
             res.json(points)
         } catch (error: any) {
-            if (error instanceof DeliveryConfigurationError) {
+            // A carrier that is throttled, down or misconfigured is not a server fault.
+            // Passing its own status and reason through lets the storefront degrade
+            // quietly and the operator see why, instead of a bare 500.
+            const carrierStatus = carrierErrorStatus(error)
+            if (carrierStatus) {
                 return res
-                    .status(error.statusCode)
-                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                    .status(carrierStatus)
+                    .json({ statusCode: carrierStatus, statusMessage: error.statusMessage })
             }
             console.error('Get provider pickup points error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

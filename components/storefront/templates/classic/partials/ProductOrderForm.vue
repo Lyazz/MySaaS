@@ -187,81 +187,21 @@ const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption)
 )
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
-
-const syncPickupPointCommune = () => {
-  const name = (quickForm.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && quickForm.commune !== nextCommune) quickForm.commune = nextCommune
-}
-
-watchEffect(() => {
-  const options = deliveryOptions.value
-  if (!options.length) return
-  const selected = quickForm.selectedDeliveryOption
-  if (!selected || !options.some((opt: any) => opt.id === selected)) {
-    quickForm.selectedDeliveryOption = options[0].id
-  }
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => quickForm.wilaya,
+  commune: () => quickForm.commune,
+  selected: () => quickForm.pickupPoint,
+  onSelect: (name) => { quickForm.pickupPoint = name },
+  onCommuneChange: (communeId) => { quickForm.commune = communeId }
 })
 
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => quickForm.commune, () => quickForm.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    if (!isPickup) quickForm.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`
-      )
-      const data = await $fetch<any[]>(url, {
-        headers: { ...(useTenantApiHeaders() || {}) }
-      })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      if (isPickup) {
-        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-        if (relaisPoints.length > 0) {
-          const current = (quickForm.pickupPoint || '').trim()
-          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-            quickForm.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-            syncPickupPointCommune()
-          }
-        } else {
-          quickForm.pickupPoint = ''
-        }
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 
 onMounted(() => {
@@ -287,7 +227,7 @@ function getVariantTitle(variant: any) {
     if (!variant.optionValues || variant.optionValues.length === 0) return ''
     
     // Sort logic
-    let values = [...variant.optionValues]
+    const values = [...variant.optionValues]
     if (props.product.options && props.product.options.length > 0) {
        const optionPos = new Map(props.product.options.map((o: any) => [o.id, o.position]))
         values.sort((a: any, b: any) => {
@@ -348,7 +288,7 @@ const handleOrderSubmit = async () => {
 
         if (isMaystro) {
           
-          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) {
+          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() ) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
             return
@@ -367,7 +307,7 @@ const handleOrderSubmit = async () => {
             shippingCommuneCode: quickForm.commune || undefined,
             deliveryMode: delivery?.mode,
             shippingProvider: delivery?.provider || undefined,
-            shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
+            shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
             shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
             shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
             shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
@@ -467,299 +407,346 @@ const handleAddToCart = async () => {
 </script>
 
 <template>
-    <div>
-        <!-- Quantity Selector -->
-        <div class="flex items-center justify-between p-4 bg-white border border-slate-200 mb-6">
-            <div class="flex flex-col gap-0.5">
-                <span class="text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.productForm.quantity.label }}</span>
-                <span v-if="product?.isActive === false" class="text-xs font-medium text-slate-500 mt-1">{{ storefrontContent.productForm.stock.unavailable }}</span>
-                <span v-else-if="isOutOfStock" class="text-xs font-medium text-red-700 mt-1">{{ storefrontContent.productForm.stock.outOfStock }}</span>
-                <span v-else-if="isLowStock" class="text-xs font-medium text-amber-700 mt-1">
-                    {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
-                </span>
-                <span v-else class="text-xs font-medium text-emerald-700 mt-1">{{ storefrontContent.product.inStock }}</span>
-            </div>
-            <div class="flex items-center border border-slate-300">
-                <button 
-                    type="button"
-                    class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
-                    :disabled="!canPurchase || quantity <= 1"
-                    @click="decrementQuantity"
-                >
-                    <Icon name="lucide:minus" class="w-4 h-4" />
-                </button>
-                <span class="w-12 text-center font-bold text-slate-900">{{ quantity }}</span>
-                <button 
-                    type="button"
-                    class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
-                    :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
-                    @click="incrementQuantity"
-                >
-                    <Icon name="lucide:plus" class="w-4 h-4" />
-                </button>
-            </div>
-        </div>
-
-        <BundleDealsPicker
-            :bundle-deals="product?.bundleDeals || []"
-            :unit-price="currentPrice"
-            :max-quantity="maxQuantity"
-            :disabled="!canPurchase"
-            @select-qty="selectBundleQty"
-        />
-
-        <div
-            v-if="isClearanceEligible"
-            class="flex items-center gap-2 px-4 py-3 mb-6 border border-amber-300 bg-amber-50 text-amber-800 text-xs font-semibold"
+  <div>
+    <!-- Quantity Selector -->
+    <div class="flex items-center justify-between p-4 bg-white border border-slate-200 mb-6">
+      <div class="flex flex-col gap-0.5">
+        <span class="text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.productForm.quantity.label }}</span>
+        <span
+          v-if="product?.isActive === false"
+          class="text-xs font-medium text-slate-500 mt-1"
+        >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="isOutOfStock"
+          class="text-xs font-medium text-red-700 mt-1"
+        >{{ storefrontContent.productForm.stock.outOfStock }}</span>
+        <span
+          v-else-if="isLowStock"
+          class="text-xs font-medium text-amber-700 mt-1"
         >
-            <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
-            <span v-if="clearance.remainingForNextThreshold.value > 0">
-                {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
-            </span>
-            <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
-        </div>
-
-        <!-- Quick COD Order Form -->
-        <div
-            v-if="codEnabled"
-            data-test="cod-order-card"
-            class="bg-white p-8 border border-slate-200 relative mb-6"
+          {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
+        </span>
+        <span
+          v-else
+          class="text-xs font-medium text-emerald-700 mt-1"
+        >{{ storefrontContent.product.inStock }}</span>
+      </div>
+      <div class="flex items-center border border-slate-300">
+        <button 
+          type="button"
+          class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+          :disabled="!canPurchase || quantity <= 1"
+          @click="decrementQuantity"
         >
-            <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-100">
-                <h3 class="font-serif font-bold text-slate-900 text-2xl">{{ storefrontContent.productForm.cod.title }}</h3>
-                <span class="text-xs text-slate-500 font-bold uppercase tracking-widest">({{ storefrontContent.productForm.cod.badge }})</span>
-            </div>
-            
-            <form class="space-y-6" @submit.prevent="handleOrderSubmit">
-                <div class="space-y-2">
-                <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.fullName.label }}</label>
-                <input 
-                    v-model="quickForm.fullName"
-                    type="text" 
-                    :placeholder="storefrontContent.checkout.form.fullName.placeholder" 
-                    class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400"
-                    :class="{ 'border-slate-900 bg-slate-50': !quickForm.fullName }"
-                >
-                </div>
-                
-                <div class="space-y-2">
-                <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.phone.label }}</label>
-                <input
-                    v-model="quickForm.phone"
-                    type="tel"
-                    :placeholder="storefrontContent.checkout.form.phone.placeholder"
-                    class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400"
-                >
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                    <WilayaField
-                        v-model="quickForm.wilaya"
-                        input-class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none appearance-none cursor-pointer rounded-none"
-                        :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
-                      />
-                </div>
-                <div class="space-y-2">
-                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.commune.label }}</label>
-                    <CommuneField
-                    v-model="quickForm.commune"
-                    :wilaya-code="quickForm.wilaya"
-                    :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                    :input-class="'block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400'"
-                    :select-class="'block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none'"
-                    />
-                </div>
-                </div>
-
-                <div v-if="!hideOptionalAddress" class="space-y-2">
-                    <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.address.label }}</label>
-                    <input
-                        v-model="quickForm.address"
-                        type="text"
-                        :placeholder="storefrontContent.checkout.form.address.placeholder"
-                        class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400"
-                    >
-                </div>
-                <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-3 mt-6">
-                    <label class="block text-sm font-semibold text-slate-700 ms-1">
-                        {{ storefrontContent.checkout.sections.deliveryOptions }}
-                    </label>
-                    <div 
-                        v-for="option in deliveryOptions"
-                        :key="option.id"
-                        class="cursor-pointer relative rounded-2xl p-4 border-2 transition-all duration-300 group hover:scale-[1.005]"
-                        :class="quickForm.selectedDeliveryOption === option.id 
-                        ? 'border-brand-500 bg-brand-50/50 shadow-md' 
-                        : 'border-slate-100 hover:border-brand-200 hover:shadow-sm'"
-                        @click="quickForm.selectedDeliveryOption = option.id"
-                    >
-                        <div class="flex items-center gap-4">
-                        <div 
-                            class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
-                            :class="quickForm.selectedDeliveryOption === option.id 
-                            ? `bg-${option.color}-100` 
-                            : 'bg-slate-100 group-hover:bg-slate-200'"
-                        >
-                            <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-7 h-7 transition-colors duration-300" :class="quickForm.selectedDeliveryOption === option.id ? `text-${option.color}-600` : 'text-slate-400 group-hover:text-slate-600'" />
-                        </div>
-                        
-                        <div class="flex-1 min-w-0">
-                            <div class="flex items-center gap-2 mb-1">
-                            <h4 class="font-bold text-slate-900 text-sm">
-                                {{ option.providerLabel }}
-                            </h4>
-                            <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                                :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
-                            >
-                                {{ option.modeLabel }}
-                            </span>
-                            </div>
-                            <p class="text-xs text-slate-500 leading-relaxed">
-                            {{ option.description }}
-                            </p>
-                        </div>
-                        
-                        <div class="flex items-center gap-3 flex-shrink-0">
-                            <div class="text-end">
-                            <div class="font-bold text-brand-600 text-base">
-                                {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
-                            </div>
-                            </div>
-                            <span
-                            class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
-                            :class="quickForm.selectedDeliveryOption === option.id 
-                                ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
-                                : 'border-slate-300'"
-                            >
-                            <span 
-                                v-if="quickForm.selectedDeliveryOption === option.id"
-                                class="block w-full h-full rounded-full flex items-center justify-center"
-                            >
-                                <Icon name="lucide:check" class="w-3 h-3 text-white" />
-                            </span>
-                            </span>
-                        </div>
-                        </div>
-                    </div>
-
-                    <div
-                        v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)"
-                        class="space-y-2 mt-4"
-                    >
-                        <label class="block text-sm font-semibold text-slate-700 ms-1">
-                            {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
-                        </label>
-                        <div
-                            v-if="pickupPointsLoading"
-                            class="flex items-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
-                        >
-                            <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
-                            Loading…
-                        </div>
-                        <template v-else>
-                            <div
-                                v-if="stopDeskName"
-                                class="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500"
-                            >
-                                <Icon name="lucide:building-2" class="w-4 h-4 text-slate-400 shrink-0" />
-                                <span>{{ stopDeskName }}</span>
-                            </div>
-                            <div
-                                v-if="isMaystroPickup && quickForm.pickupPoint"
-                                class="flex items-center gap-3 px-4 py-3 rounded-xl border border-blue-200 bg-blue-50"
-                            >
-                                <Icon name="lucide:map-pin" class="w-4 h-4 text-blue-600 shrink-0" />
-                                <span class="text-sm font-semibold text-slate-900">
-                                    {{ quickForm.pickupPoint }}
-                                </span>
-                            </div>
-                        </template>
-                        <p v-if="pickupPointsError" class="text-xs text-amber-700">
-                            {{ pickupPointsError }}
-                        </p>
-                    </div>
-                </div>
-                <div v-else class="mt-6 px-4 py-3 border border-dashed border-slate-200 text-center text-xs text-slate-400">
-                    <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-slate-300" />
-                    {{ storefrontContent.checkout.help.deliveryOptions }}
-                </div>
-
-
-
-                <div
-                    v-if="orderError"
-                    class="p-4 border border-red-200 bg-red-50 text-red-700 text-sm"
-                >
-                    {{ orderError }}
-                </div>
-
-                <!-- Clearance discount -->
-                <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between py-2 text-sm">
-                    <span class="text-amber-700 uppercase tracking-wider text-xs font-bold">{{ t('storefront.clearance.discountLine') }}</span>
-                    <span class="font-medium text-amber-700">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
-                </div>
-
-                <!-- Total Price Display -->
-                <div class="flex items-center justify-between py-4 border-t border-b border-slate-100">
-                    <span class="text-slate-600 font-serif text-lg italic">{{ storefrontContent.productForm.totalPrice }}</span>
-                    <span class="text-xl font-bold font-serif text-slate-900">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
-                </div>
-
-                <button 
-                type="submit"
-                :disabled="orderSubmitting || !canPurchase"
-                class="w-full h-14 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group relative"
-                >
-                <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
-                    <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
-                    <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 transition-transform" />
-                </span>
-                            
-                <div v-if="orderSubmitting" class="absolute inset-0 flex items-center justify-center">
-                    <Icon name="lucide:loader-2" class="animate-spin h-6 w-6 text-white" />
-                </div>
-                </button>
-            </form>
-        </div>
-
-        <!-- Add to Cart Button (Only if Cart is Enabled) -->
-        <div v-if="cartEnabled">
-            <button 
-                type="button"
-                :disabled="addToCartSubmitting || !canPurchase"
-                class="w-full h-14 bg-white border border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white text-sm font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3"
-                @click="handleAddToCart"
-            >
-                    <Icon name="lucide:shopping-bag" class="w-5 h-5" />
-                <span>{{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}</span>
-            </button>
-        </div>
-        
-        <!-- Success Toast -->
-        <Transition
-        enter-active-class="transform ease-out duration-300 transition"
-        enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-        leave-active-class="transition ease-in duration-100"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
+          <Icon
+            name="lucide:minus"
+            class="w-4 h-4"
+          />
+        </button>
+        <span class="w-12 text-center font-bold text-slate-900">{{ quantity }}</span>
+        <button 
+          type="button"
+          class="w-10 h-10 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors"
+          :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
+          @click="incrementQuantity"
         >
-        <div
-            v-if="showSuccess"
-            class="fixed bottom-4 end-4 z-50 bg-slate-900 text-white px-6 py-4 shadow-xl flex items-center gap-4 border border-slate-700"
-        >
-            <div class="w-6 h-6 flex items-center justify-center text-white shrink-0">
-            <Icon name="lucide:check" class="w-5 h-5" />
-            </div>
-            <div>
-            <div class="font-bold text-sm uppercase tracking-wider">{{ successTitle }}</div>
-            <div class="text-xs text-slate-300">{{ successMessage }}</div>
-            </div>
-        </div>
-        </Transition>
+          <Icon
+            name="lucide:plus"
+            class="w-4 h-4"
+          />
+        </button>
+      </div>
     </div>
+
+    <BundleDealsPicker
+      :bundle-deals="product?.bundleDeals || []"
+      :unit-price="currentPrice"
+      :max-quantity="maxQuantity"
+      :disabled="!canPurchase"
+      @select-qty="selectBundleQty"
+    />
+
+    <div
+      v-if="isClearanceEligible"
+      class="flex items-center gap-2 px-4 py-3 mb-6 border border-amber-300 bg-amber-50 text-amber-800 text-xs font-semibold"
+    >
+      <Icon
+        name="lucide:package-open"
+        class="w-4 h-4 flex-shrink-0"
+      />
+      <span v-if="clearance.remainingForNextThreshold.value > 0">
+        {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
+      </span>
+      <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
+    </div>
+
+    <!-- Quick COD Order Form -->
+    <div
+      v-if="codEnabled"
+      data-test="cod-order-card"
+      class="bg-white p-8 border border-slate-200 relative mb-6"
+    >
+      <div class="flex items-center gap-3 mb-8 pb-4 border-b border-slate-100">
+        <h3 class="font-serif font-bold text-slate-900 text-2xl">
+          {{ storefrontContent.productForm.cod.title }}
+        </h3>
+        <span class="text-xs text-slate-500 font-bold uppercase tracking-widest">({{ storefrontContent.productForm.cod.badge }})</span>
+      </div>
+            
+      <form
+        class="space-y-6"
+        @submit.prevent="handleOrderSubmit"
+      >
+        <div class="space-y-2">
+          <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.fullName.label }}</label>
+          <input 
+            v-model="quickForm.fullName"
+            type="text" 
+            :placeholder="storefrontContent.checkout.form.fullName.placeholder" 
+            class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400"
+            :class="{ 'border-slate-900 bg-slate-50': !quickForm.fullName }"
+          >
+        </div>
+                
+        <div class="space-y-2">
+          <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.phone.label }}</label>
+          <input
+            v-model="quickForm.phone"
+            type="tel"
+            :placeholder="storefrontContent.checkout.form.phone.placeholder"
+            class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400"
+          >
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="space-y-2">
+            <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+            <WilayaField
+              v-model="quickForm.wilaya"
+              input-class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none appearance-none cursor-pointer rounded-none"
+              :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+            />
+          </div>
+          <div class="space-y-2">
+            <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.commune.label }}</label>
+            <CommuneField
+              v-model="quickForm.commune"
+              :wilaya-code="quickForm.wilaya"
+              :placeholder="storefrontContent.checkout.form.commune.placeholder"
+              :input-class="'block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400'"
+              :select-class="'block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none'"
+            />
+          </div>
+        </div>
+
+        <div
+          v-if="!hideOptionalAddress"
+          class="space-y-2"
+        >
+          <label class="block text-xs font-bold uppercase tracking-widest text-slate-900">{{ storefrontContent.checkout.form.address.label }}</label>
+          <input
+            v-model="quickForm.address"
+            type="text"
+            :placeholder="storefrontContent.checkout.form.address.placeholder"
+            class="block w-full h-12 border border-slate-300 bg-white px-4 text-slate-900 focus:border-slate-900 focus:ring-0 transition-all duration-200 outline-none rounded-none placeholder:text-slate-400"
+          >
+        </div>
+        <div
+          v-if="quickForm.wilaya && quickForm.commune"
+          class="space-y-3 mt-6"
+        >
+          <label class="block text-sm font-semibold text-slate-700 ms-1">
+            {{ storefrontContent.checkout.sections.deliveryOptions }}
+          </label>
+          <div 
+            v-for="option in deliveryOptions"
+            :key="option.id"
+            class="cursor-pointer relative rounded-2xl p-4 border-2 transition-all duration-300 group hover:scale-[1.005]"
+            :class="quickForm.selectedDeliveryOption === option.id 
+              ? 'border-brand-500 bg-brand-50/50 shadow-md' 
+              : 'border-slate-100 hover:border-brand-200 hover:shadow-sm'"
+            @click="quickForm.selectedDeliveryOption = option.id"
+          >
+            <div class="flex items-center gap-4">
+              <div 
+                class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
+                :class="quickForm.selectedDeliveryOption === option.id 
+                  ? `bg-${option.color}-100` 
+                  : 'bg-slate-100 group-hover:bg-slate-200'"
+              >
+                <CarrierMark
+                  :provider="option.provider"
+                  :icon="option.icon"
+                  :alt="option.providerLabel"
+                  class="w-7 h-7 transition-colors duration-300"
+                  :class="quickForm.selectedDeliveryOption === option.id ? `text-${option.color}-600` : 'text-slate-400 group-hover:text-slate-600'"
+                />
+              </div>
+                        
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <h4 class="font-bold text-slate-900 text-sm">
+                    {{ option.providerLabel }}
+                  </h4>
+                  <span
+                    class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                    :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
+                  >
+                    {{ option.modeLabel }}
+                  </span>
+                </div>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  {{ option.description }}
+                </p>
+              </div>
+                        
+              <div class="flex items-center gap-3 flex-shrink-0">
+                <div class="text-end">
+                  <div class="font-bold text-brand-600 text-base">
+                    {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
+                  </div>
+                </div>
+                <span
+                  class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
+                  :class="quickForm.selectedDeliveryOption === option.id 
+                    ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
+                    : 'border-slate-300'"
+                >
+                  <span 
+                    v-if="quickForm.selectedDeliveryOption === option.id"
+                    class="block w-full h-full rounded-full flex items-center justify-center"
+                  >
+                    <Icon
+                      name="lucide:check"
+                      class="w-3 h-3 text-white"
+                    />
+                  </span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <StorefrontSharedPickupPointField
+            v-model="quickForm.pickupPoint"
+            :points="pickupPoints"
+            :loading="pickupPointsLoading"
+            :error="pickupPointsError"
+            :is-pickup-selected="isPickupSelected"
+            :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+            :empty-label="storefrontContent.checkout.help.deliveryOptions"
+            @change="syncPickupPointCommune"
+          />
+        </div>
+        <div
+          v-else
+          class="mt-6 px-4 py-3 border border-dashed border-slate-200 text-center text-xs text-slate-400"
+        >
+          <Icon
+            name="lucide:map-pin"
+            class="w-4 h-4 mx-auto mb-1 text-slate-300"
+          />
+          {{ storefrontContent.checkout.help.deliveryOptions }}
+        </div>
+
+
+
+        <div
+          v-if="orderError"
+          class="p-4 border border-red-200 bg-red-50 text-red-700 text-sm"
+        >
+          {{ orderError }}
+        </div>
+
+        <!-- Clearance discount -->
+        <div
+          v-if="quickOrderClearanceDiscount > 0"
+          class="flex items-center justify-between py-2 text-sm"
+        >
+          <span class="text-amber-700 uppercase tracking-wider text-xs font-bold">{{ t('storefront.clearance.discountLine') }}</span>
+          <span class="font-medium text-amber-700">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
+        </div>
+
+        <!-- Total Price Display -->
+        <div class="flex items-center justify-between py-4 border-t border-b border-slate-100">
+          <span class="text-slate-600 font-serif text-lg italic">{{ storefrontContent.productForm.totalPrice }}</span>
+          <span class="text-xl font-bold font-serif text-slate-900">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
+        </div>
+
+        <button 
+          type="submit"
+          :disabled="orderSubmitting || !canPurchase"
+          class="w-full h-14 bg-slate-900 hover:bg-slate-800 disabled:bg-slate-400 disabled:cursor-not-allowed text-white text-sm font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3 group relative"
+        >
+          <span
+            class="relative z-10 flex items-center gap-2"
+            :class="{ 'opacity-0': orderSubmitting }"
+          >
+            <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
+            <Icon
+              name="lucide:arrow-right"
+              class="w-5 h-5 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180 transition-transform"
+            />
+          </span>
+                            
+          <div
+            v-if="orderSubmitting"
+            class="absolute inset-0 flex items-center justify-center"
+          >
+            <Icon
+              name="lucide:loader-2"
+              class="animate-spin h-6 w-6 text-white"
+            />
+          </div>
+        </button>
+      </form>
+    </div>
+
+    <!-- Add to Cart Button (Only if Cart is Enabled) -->
+    <div v-if="cartEnabled">
+      <button 
+        type="button"
+        :disabled="addToCartSubmitting || !canPurchase"
+        class="w-full h-14 bg-white border border-slate-900 text-slate-900 hover:bg-slate-900 hover:text-white text-sm font-bold uppercase tracking-widest transition-all duration-300 flex items-center justify-center gap-3"
+        @click="handleAddToCart"
+      >
+        <Icon
+          name="lucide:shopping-bag"
+          class="w-5 h-5"
+        />
+        <span>{{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}</span>
+      </button>
+    </div>
+        
+    <!-- Success Toast -->
+    <Transition
+      enter-active-class="transform ease-out duration-300 transition"
+      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
+      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      leave-active-class="transition ease-in duration-100"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="showSuccess"
+        class="fixed bottom-4 end-4 z-50 bg-slate-900 text-white px-6 py-4 shadow-xl flex items-center gap-4 border border-slate-700"
+      >
+        <div class="w-6 h-6 flex items-center justify-center text-white shrink-0">
+          <Icon
+            name="lucide:check"
+            class="w-5 h-5"
+          />
+        </div>
+        <div>
+          <div class="font-bold text-sm uppercase tracking-wider">
+            {{ successTitle }}
+          </div>
+          <div class="text-xs text-slate-300">
+            {{ successMessage }}
+          </div>
+        </div>
+      </div>
+    </Transition>
+  </div>
 </template>
 
 <style scoped>
