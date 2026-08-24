@@ -1,12 +1,13 @@
 import { Prisma, ShipmentProvider, ShipmentStatus, type PrismaClient, type Shipment } from '@prisma/client'
 import prisma from '../../lib/prisma'
 import { MaystroProvider } from './providers/maystro.provider'
-import { YalidineProvider } from './providers/yalidine.provider'
+import { YalidineProvider, isSystemicYalidineFailure } from './providers/yalidine.provider'
 import { SelfDeliveryProvider } from './providers/self.provider'
 import { DELIVERY_PROVIDER_CATALOG, getProviderCatalogItem } from './catalog'
 import { MaystroOrderService } from './maystro/maystro-order.service'
 import { MaystroWebhookService } from './maystro/maystro-webhook.service'
 import { MaystroLocationService } from './maystro/maystro-location.service'
+import { MaystroIntegrationError } from './maystro/maystro.errors'
 import { normalizeLocationName } from './shared/normalize-location-name'
 import { moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
 import { OrdersService } from '../orders/orders.service'
@@ -29,6 +30,16 @@ export type CarrierRateRow = {
 
 /** Carrier price lists change on the order of months, so a day is comfortably fresh. */
 const CARRIER_RATE_CACHE_TTL_MS = 24 * 60 * 60 * 1000
+
+/**
+ * Hard ceiling on one rate-table build. A carrier that stops responding costs a
+ * request timeout plus retries for every remaining wilaya; without this an operator's
+ * click hangs for many minutes instead of coming back with a reason.
+ */
+const CARRIER_RATE_BUILD_BUDGET_MS = 60_000
+
+/** Failures in a row before concluding the carrier is down rather than one wilaya. */
+const CARRIER_RATE_FAILURE_STREAK = 5
 
 type ProviderApiConfig = {
     // Maystro Orders Management API
@@ -501,9 +512,24 @@ export class DeliveryService {
         const concurrency = DeliveryService.liveRateConcurrency(input.provider)
 
         let systemicFailure: unknown = null
+        let consecutiveFailures = 0
+        const deadline = Date.now() + CARRIER_RATE_BUILD_BUDGET_MS
 
         const rows = await DeliveryService.mapWithConcurrency(wilayaCodes, concurrency, async (wilayaCode) => {
-            if (systemicFailure) return { wilayaCode, carrierPrice: null, currency: 'DZD', serviceLevel: effectiveServiceLevel }
+            const blank = { wilayaCode, carrierPrice: null, currency: 'DZD', serviceLevel: effectiveServiceLevel }
+            if (systemicFailure) return blank
+
+            // A blocked carrier does not always answer — it can simply stop responding,
+            // and every request then burns its own timeout and retries. Without a budget
+            // and a run of failures to stop on, one click hangs for many minutes.
+            if (Date.now() > deadline) {
+                systemicFailure = new DeliveryConfigurationError(504, 'Carrier took too long to price every wilaya')
+                return blank
+            }
+            if (consecutiveFailures >= CARRIER_RATE_FAILURE_STREAK) {
+                systemicFailure = new DeliveryConfigurationError(502, 'Carrier stopped answering rate requests')
+                return blank
+            }
 
             try {
                 const quotes = await impl.quote!({
@@ -517,6 +543,7 @@ export class DeliveryService {
                     originWilayaCode: input.originWilayaCode
                 })
 
+                consecutiveFailures = 0
                 const best = quotes.length ? quotes.reduce((a, b) => (a.price <= b.price ? a : b)) : null
                 return {
                     wilayaCode,
@@ -525,11 +552,14 @@ export class DeliveryService {
                     serviceLevel: effectiveServiceLevel
                 }
             } catch (error) {
-                // Being throttled or unauthorized dooms every remaining wilaya too;
-                // remember it, stop hammering, and let the operator see the reason
-                // instead of a table full of dashes.
-                systemicFailure = error
-                return { wilayaCode, carrierPrice: null, currency: 'DZD', serviceLevel: effectiveServiceLevel }
+                // Throttled or unauthorized dooms every remaining wilaya, so stop at
+                // once. Anything else might be one bad destination, so allow a short
+                // run before concluding the carrier is simply down.
+                consecutiveFailures += 1
+                if (isSystemicYalidineFailure(error) || error instanceof MaystroIntegrationError) {
+                    systemicFailure = error
+                }
+                return blank
             }
         })
 
