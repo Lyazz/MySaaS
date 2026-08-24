@@ -194,7 +194,7 @@ const pickup = usePickupPoints({
   commune: () => quickForm.commune,
   selected: () => quickForm.pickupPoint,
   onSelect: (name) => { quickForm.pickupPoint = name },
-  onCommuneChange: (communeId) => { quickForm.commune = communeId }
+  onCommuneChange: (communeName) => { quickForm.commune = communeName }
 })
 
 const isPickupSelected = pickup.isPickupSelected

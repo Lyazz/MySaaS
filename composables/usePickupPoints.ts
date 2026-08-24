@@ -39,12 +39,17 @@ export const usePickupPoints = (input: Accessors) => {
   /**
    * Only relays move the commune: Maystro prices a relay parcel against the relay's
    * own commune. A carrier desk does not reprice, so leave the shopper's commune be.
+   *
+   * The commune field holds names, not carrier ids — it is fed by the carrier-agnostic
+   * list, which has no single id to offer. Writing the id here blanked the field and
+   * took the delivery prices down with it.
    */
   const syncCommune = () => {
     const name = (input.selected() || '').trim()
     if (!name) return
     const point = points.value.find((p) => p.kind === 'relay' && p.name === name)
-    if (point?.communeId && input.commune() !== point.communeId) input.onCommuneChange(point.communeId)
+    const communeName = point?.communeName?.trim()
+    if (communeName && input.commune() !== communeName) input.onCommuneChange(communeName)
   }
 
   watch(

@@ -131,7 +131,7 @@ const pickup = usePickupPoints({
   commune: () => form.value.commune,
   selected: () => form.value.pickupPoint,
   onSelect: (name) => { form.value.pickupPoint = name },
-  onCommuneChange: (communeId) => { form.value.commune = communeId }
+  onCommuneChange: (communeName) => { form.value.commune = communeName }
 })
 
 const isPickupSelected = pickup.isPickupSelected
