@@ -215,7 +215,7 @@ export class DeliveryAccountsService {
                 : normalizeProviderConfigPatch(provider, pickAllowedKeys(provider, normalizeConfigUpdate(input.config)))
 
         if (provider === 'MAYSTRO' && patch && (patch.apiToken === '' || patch.apiToken == null)) {
-            ;(patch as any).apiKey = ''
+            (patch as any).apiKey = ''
         }
 
         // Carry forward system-managed keys (e.g. webhookSecret) regardless of what the user sends.

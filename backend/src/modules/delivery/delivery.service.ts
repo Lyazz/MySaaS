@@ -521,7 +521,19 @@ export class DeliveryService {
         provider: ShipmentProvider
         wilayaCode: string
         communeCode?: string
+        /**
+         * Set on the unauthenticated storefront route: an anonymous caller must not be
+         * able to spend the tenant's carrier API quota on a carrier they don't even sell.
+         */
+        requireOffered?: boolean
     }): Promise<ProviderPickupPoint[]> {
+        if (input.requireOffered) {
+            const offered = await this.getOfferedProviders(input.tenantId)
+            if (!offered.includes(input.provider)) {
+                throw new DeliveryConfigurationError(400, 'Provider is not offered by this store')
+            }
+        }
+
         const { impl } = await this.resolveProviderForAdmin(input.tenantId, input.provider)
         if (!impl.listPickupPoints) {
             throw new DeliveryConfigurationError(400, 'Provider does not offer pickup points')

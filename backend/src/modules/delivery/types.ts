@@ -83,6 +83,13 @@ export type ProviderPickupPoint = {
     address?: string
     communeId?: string
     communeName?: string
+    /**
+     * 'desk' is the carrier's own counter (Maystro stop desk, Yalidine agency);
+     * 'relay' is a third-party shop holding parcels. Maystro distinguishes the two
+     * and the storefront renders them differently, so the distinction is preserved
+     * rather than flattened.
+     */
+    kind?: 'desk' | 'relay'
 }
 
 export interface DeliveryProvider {

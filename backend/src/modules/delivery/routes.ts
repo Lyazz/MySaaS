@@ -14,6 +14,10 @@ const maystroController = new MaystroController()
 router.post('/delivery/options', controller.getOptions.bind(controller))
 router.get('/delivery/companies', controller.listCompanies.bind(controller))
 router.get('/delivery/communes', controller.listCommuneNames.bind(controller))
+router.get(
+    '/delivery/providers/:provider/pickup-points',
+    controller.getPublicProviderPickupPoints.bind(controller)
+)
 router.get('/delivery/maystro/wilayas', maystroController.listWilayas.bind(maystroController))
 router.get('/delivery/maystro/communes', maystroController.listCommunes.bind(maystroController))
 router.get('/delivery/maystro/pickup-points', maystroController.listPickupPoints.bind(maystroController))

@@ -183,7 +183,8 @@ export class MaystroProvider implements DeliveryProvider {
             id: String(p.pickup_point || p.commune),
             name: p.name || communeName.get(p.commune) || String(p.commune),
             communeId: String(p.commune),
-            communeName: communeName.get(p.commune)
+            communeName: communeName.get(p.commune),
+            kind: p.delivery_type === 3 ? ('relay' as const) : ('desk' as const)
         }))
     }
 }

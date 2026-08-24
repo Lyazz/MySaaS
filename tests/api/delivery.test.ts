@@ -1164,7 +1164,9 @@ describe('Delivery API', () => {
                 name: 'Agence Sacré-Cœur',
                 address: '116 Didouche Mourad',
                 communeId: '1601',
-                communeName: 'Alger Centre'
+                communeName: 'Alger Centre',
+                // Yalidine runs only its own counters, never third-party relays.
+                kind: 'desk'
             })
         })
 
@@ -1253,6 +1255,52 @@ describe('Delivery API', () => {
 
             expect(res.status).toBe(200)
             expect(res.body[0]).toMatchObject({ id: '10', name: 'GARDENIA PERFUME', communeId: '555' })
+        })
+
+        it('serves pickup points to the storefront without auth', async () => {
+            vi.restoreAllMocks()
+            await connect('YALIDINE')
+
+            await prisma.storeSettings.upsert({
+                where: { tenantId: tenantA.id },
+                create: { tenantId: tenantA.id, allowedDeliveryProviders: ['YALIDINE'] },
+                update: { allowedDeliveryProviders: ['YALIDINE'] }
+            })
+
+            vi.spyOn(YalidineLocationService.prototype, 'resolveWilaya').mockResolvedValue({ id: 16, name: 'Alger' })
+            vi.spyOn(YalidineLocationService.prototype, 'listCenters').mockResolvedValue([
+                { id: 160101, name: 'Agence Sacré-Cœur', communeId: 1601, communeName: 'Alger Centre', wilayaId: 16 }
+            ] as any)
+
+            const res = await request(app)
+                .get('/api/delivery/providers/YALIDINE/pickup-points?wilaya=16')
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body[0].id).toBe('160101')
+        })
+
+        it('the public route refuses a carrier the store does not offer', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+
+            await prisma.storeSettings.upsert({
+                where: { tenantId: tenantA.id },
+                create: { tenantId: tenantA.id, allowedDeliveryProviders: ['YALIDINE'] },
+                update: { allowedDeliveryProviders: ['YALIDINE'] }
+            })
+
+            const listSpy = vi.spyOn(MaystroPickupPointService.prototype, 'listActivePickupPointsNearby')
+
+            // Anonymous callers must not be able to spend the tenant's Maystro quota
+            // on a carrier the store doesn't even sell.
+            const res = await request(app)
+                .get('/api/delivery/providers/MAYSTRO/pickup-points?wilaya=16&commune=555')
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(400)
+            expect(res.body.statusMessage).toContain('not offered')
+            expect(listSpy).not.toHaveBeenCalled()
         })
 
         it('rejects pickup points for a carrier that has none', async () => {

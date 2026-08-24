@@ -500,9 +500,19 @@ export class DeliveryController {
         }
     }
 
+    /** Admin-side listing: the operator is authenticated, so any configured carrier answers. */
     async getProviderPickupPoints(req: Request, res: Response) {
-        const tenant = req.tenant
-        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+        return this.respondWithPickupPoints(req, res, { requireOffered: false })
+    }
+
+    /** Storefront listing: unauthenticated, so restricted to carriers the store actually offers. */
+    async getPublicProviderPickupPoints(req: Request, res: Response) {
+        return this.respondWithPickupPoints(req, res, { requireOffered: true })
+    }
+
+    private async respondWithPickupPoints(req: Request, res: Response, opts: { requireOffered: boolean }) {
+        const tenantId = req.tenant?.id || req.user?.tenantId
+        if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         const provider = this.parseProviderParam(req)
         if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
@@ -513,10 +523,11 @@ export class DeliveryController {
 
         try {
             const points = await service.listProviderPickupPoints({
-                tenantId: tenant.id,
+                tenantId,
                 provider,
                 wilayaCode: wilaya,
-                communeCode: commune || undefined
+                communeCode: commune || undefined,
+                requireOffered: opts.requireOffered
             })
             res.json(points)
         } catch (error: any) {

@@ -323,7 +323,9 @@ export class YalidineProvider implements DeliveryProvider {
             name: c.name,
             address: c.address,
             communeId: String(c.communeId),
-            communeName: c.communeName
+            communeName: c.communeName,
+            // Yalidine only runs its own agencies — no third-party relays.
+            kind: 'desk' as const
         }))
     }
 }
