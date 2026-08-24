@@ -90,7 +90,7 @@ describe('Maystro Orders Management integration', () => {
             }
 
             if (opts.method === 'GET' && opts.path === '/base/wilayas/') {
-                return [{ id: 16, name: 'Alger' }]
+                return [{ code: 16, display_id: 16, name: 'Alger' }]
             }
 
             if (opts.method === 'GET' && opts.path === '/base/communes/') {

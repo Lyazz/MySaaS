@@ -22,6 +22,7 @@ describe('Delivery API', () => {
     let tokenB: string
     let orderA: any
     let orderB: any
+    let productAId: string
     let shipmentSelfId: string
     let deliveryCashboxAId: string
 
@@ -39,9 +40,23 @@ describe('Delivery API', () => {
         tokenA = jwt.sign({ userId: userA.id, tenantId: tenantA.id }, JWT_SECRET)
         tokenB = jwt.sign({ userId: userB.id, tenantId: tenantB.id }, JWT_SECRET)
 
+        // A store has to offer a carrier before it can ship with it, and the column
+        // defaults to ['SELF']. Configuring credentials is not enough — without this,
+        // every shipment here fails with "Delivery provider is not enabled for this
+        // store", which is the product behaving correctly on an unfinished fixture.
+        for (const tenantId of [tenantA.id, tenantB.id]) {
+            await prisma.storeSettings.upsert({
+                where: { tenantId },
+                create: { tenantId, allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE', 'SELF'] },
+                update: { allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE', 'SELF'] }
+            })
+        }
+
         const productA = await prisma.product.create({
             data: { title: 'Prod A', slug: `prod-a-${Date.now()}`, price: 100, tenantId: tenantA.id }
         })
+
+        productAId = productA.id
         const productB = await prisma.product.create({
             data: { title: 'Prod B', slug: `prod-b-${Date.now()}`, price: 120, tenantId: tenantB.id }
         })
@@ -231,6 +246,22 @@ describe('Delivery API', () => {
     })
 
     it('pushes total + delivery fee as codAmount to external delivery providers', async () => {
+        // Its own order: creating a carrier shipment writes the carrier's price back
+        // onto the order, so sharing orderA here would silently move the amount the
+        // self-delivery test later asserts on.
+        const codOrder = await prisma.order.create({
+            data: {
+                tenantId: tenantA.id,
+                status: 'PENDING',
+                totalAmount: 220,
+                shippingAmount: 500,
+                shippingCurrency: 'DZD',
+                customerName: 'Alice Cod',
+                customerPhone: '0550123457',
+                items: { create: [{ productId: productAId, quantity: 2, price: 110 }] }
+            }
+        })
+
         await prisma.tenantDeliveryAccount.upsert({
             where: { tenantId_provider: { tenantId: tenantA.id, provider: 'YALIDINE' } },
             create: {
@@ -258,7 +289,7 @@ describe('Delivery API', () => {
             .set('Host', `${tenantA.slug}.swekly.com`)
             .send({
                 provider: 'YALIDINE',
-                orderId: orderA.id,
+                orderId: codOrder.id,
                 contactName: 'Alice',
                 contactPhone: '0550123456',
                 wilayaCode: '16',
@@ -351,8 +382,46 @@ describe('Delivery API', () => {
     })
 
     it('blocks manual status changes after confirmation for carrier-controlled orders', async () => {
+        // Owns its order and its carrier shipment: this used to lean on a previous
+        // test having attached a Yalidine shipment to orderA, so it passed or failed
+        // for reasons that had nothing to do with what it claims to check.
+        const carrierOrder = await prisma.order.create({
+            data: {
+                tenantId: tenantA.id,
+                status: 'PENDING',
+                totalAmount: 220,
+                shippingAmount: 500,
+                shippingCurrency: 'DZD',
+                customerName: 'Alice Carrier',
+                customerPhone: '0550123458',
+                items: { create: [{ productId: productAId, quantity: 2, price: 110 }] }
+            }
+        })
+
+        vi.spyOn(YalidineProvider.prototype, 'createShipment').mockResolvedValue({
+            providerShipmentId: 'yal-locked-1',
+            status: 'REQUESTED',
+            price: 500,
+            currency: 'DZD'
+        })
+
+        const shipment = await request(app)
+            .post('/api/shipments')
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
+            .send({
+                provider: 'YALIDINE',
+                orderId: carrierOrder.id,
+                contactName: 'Alice Carrier',
+                contactPhone: '0550123458',
+                wilayaCode: '16',
+                communeCode: '1605',
+                addressLine1: '123 Rue Test'
+            })
+        expect(shipment.status).toBe(201)
+
         const confirm = await request(app)
-            .patch(`/api/admin/orders/${orderA.id}`)
+            .patch(`/api/admin/orders/${carrierOrder.id}`)
             .set('Authorization', `Bearer ${tokenA}`)
             .set('Host', `${tenantA.slug}.swekly.com`)
             .send({ status: 'CONFIRMED' })
@@ -361,7 +430,7 @@ describe('Delivery API', () => {
         expect(confirm.body.status).toBe('CONFIRMED')
 
         const ship = await request(app)
-            .patch(`/api/admin/orders/${orderA.id}`)
+            .patch(`/api/admin/orders/${carrierOrder.id}`)
             .set('Authorization', `Bearer ${tokenA}`)
             .set('Host', `${tenantA.slug}.swekly.com`)
             .send({ status: 'SHIPPED' })
@@ -437,9 +506,24 @@ describe('Delivery API', () => {
         ).toString('base64')
         const double = Buffer.from(inner, 'utf8').toString('base64')
 
+        // The endpoint authenticates with X-Webhook-Secret against the stored account
+        // secret; this test predates that and was posting anonymously.
+        const webhookSecret = 'maystro-webhook-secret'
+        await prisma.tenantDeliveryAccount.upsert({
+            where: { tenantId_provider: { tenantId: tenantA.id, provider: 'MAYSTRO' } },
+            create: {
+                tenantId: tenantA.id,
+                provider: 'MAYSTRO',
+                isActive: true,
+                config: { apiToken: 'tenant-maystro-token', storeId: 'store-123', webhookSecret }
+            },
+            update: { config: { apiToken: 'tenant-maystro-token', storeId: 'store-123', webhookSecret } }
+        })
+
         const res = await request(app)
             .post('/api/webhooks/maystro')
             .set('Host', `${tenantA.slug}.swekly.com`)
+            .set('X-Webhook-Secret', webhookSecret)
             .send({ payload: double })
         expect(res.status).toBe(200)
         expect(res.body.success).toBe(true)
@@ -634,7 +718,9 @@ describe('Delivery API', () => {
             }
 
             if (opts.method === 'GET' && opts.path === '/base/wilayas/') {
-                return [{ id: 16, name: 'Alger' }]
+                // Maystro keys wilayas by "code"/"display_id", not "id" — the fixture
+                // said id, so the code resolved NaN and rejected a valid wilaya.
+                return [{ code: 16, display_id: 16, name: 'Alger' }]
             }
 
             if (opts.method === 'GET' && opts.path === '/base/communes/') {

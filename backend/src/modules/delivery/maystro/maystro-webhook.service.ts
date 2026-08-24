@@ -26,7 +26,17 @@ export const decodeMaystroWebhookBody = (raw: any): any | null => {
     if (!trimmed) return null
 
     const directJson = tryJsonParse(trimmed)
-    if (directJson) return directJson
+    if (directJson) {
+        // The route parses this body as text, so the common Maystro shape arrives as
+        // the *string* '{"payload":"<base64>"}'. Parsing it yields a wrapper whose
+        // payload is still encoded — returning that as-is left every field undefined
+        // and the webhook silently unhandled. Unwrap it the same way the object branch
+        // above does.
+        if (typeof directJson === 'object' && directJson !== null && typeof (directJson as any).payload === 'string') {
+            return decodeMaystroWebhookBody((directJson as any).payload)
+        }
+        return directJson
+    }
 
     if (!isProbablyBase64(trimmed)) return null
 
