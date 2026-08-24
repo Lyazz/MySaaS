@@ -1,5 +1,5 @@
 import prisma from '../../lib/prisma'
-import { Prisma } from '@prisma/client'
+import { Prisma, type ShipmentProvider } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
 import { computeClearanceDiscount, type ClearanceDiscountResult } from '../../../../shared/pricing/clearance-pricing'
@@ -10,6 +10,7 @@ import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { CashService, CashValidationError } from '../cash/cash.service'
 import { renderGenericBordereauPdf } from './bordereau-pdf'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
+import { DeliveryService } from '../delivery/delivery.service'
 import { maystroOrderStatusToString } from '../delivery/maystro/maystro-status'
 import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
 import { MaystroPickupPointService } from '../delivery/maystro/maystro-pickup-point.service'
@@ -264,6 +265,7 @@ export class OrdersService {
   }
     private maystroBordereau = new MaystroBordereauService()
     private maystroPickupPoints = new MaystroPickupPointService()
+    private delivery = new DeliveryService()
     private loyaltyFormula = new LoyaltyFormulaService()
     private loyaltyLedger = new LoyaltyLedgerService()
     private loyaltyCheckout = new LoyaltyCheckoutService()
@@ -593,6 +595,7 @@ export class OrdersService {
         tenantId: string
         shippingProvider: unknown
         deliveryMode: 'home' | 'pickup' | 'store'
+        shippingWilayaCode?: string | null
         shippingCommuneCode?: string | null
         rawPickupPoint: unknown
     }): Promise<number | null> {
@@ -602,38 +605,45 @@ export class OrdersService {
         const rawLabel = typeof input.rawPickupPoint === 'string' ? input.rawPickupPoint.trim() : ''
         if (!rawLabel) return null
 
+        // The storefront sends the point's name, because that is what the shopper picked
+        // from a list. Resolving it to the carrier's id belongs here, for whichever
+        // carrier is on the order — this used to accept Maystro relays only, so every
+        // Yalidine agency and every Maystro stop desk was rejected outright.
         const provider = typeof input.shippingProvider === 'string' ? input.shippingProvider.toUpperCase() : ''
-        if (provider !== 'MAYSTRO' || input.deliveryMode !== 'pickup') {
-            throw new OrderValidationError(400, 'shippingPickupPoint must be a numeric id')
+        if (!provider || input.deliveryMode !== 'pickup') {
+            throw new OrderValidationError(400, 'shippingPickupPoint is only valid on a carrier pickup order')
         }
 
-        const commune = typeof input.shippingCommuneCode === 'string' ? input.shippingCommuneCode.trim() : ''
-        if (!commune) {
-            throw new OrderValidationError(400, 'shippingCommuneCode is required when shippingPickupPoint is provided')
+        const wilaya = typeof input.shippingWilayaCode === 'string' ? input.shippingWilayaCode.trim() : ''
+        if (!wilaya) {
+            throw new OrderValidationError(400, 'shippingWilayaCode is required when shippingPickupPoint is provided')
         }
 
         try {
-            const creds = await getMaystroCredentials(input.tenantId)
-            const points = await this.maystroPickupPoints.listActivePickupPoints({
-                apiToken: creds.apiToken,
-                commune,
-                deliveryType: 3
+            const points = await this.delivery.listProviderPickupPoints({
+                tenantId: input.tenantId,
+                provider: provider as ShipmentProvider,
+                wilayaCode: wilaya,
+                communeCode:
+                    typeof input.shippingCommuneCode === 'string' && input.shippingCommuneCode.trim().length > 0
+                        ? input.shippingCommuneCode.trim()
+                        : undefined
             })
+
             const wanted = OrdersService.normalizePickupPointLabel(rawLabel)
-            const match = points.find((point) => {
-                if (!Number.isFinite(point.pickup_point) || point.pickup_point <= 0) return false
-                const names = [point.name, point.name_lt, point.name_ar].filter(
-                    (name): name is string => typeof name === 'string' && name.trim().length > 0
-                )
-                return names.some((name) => OrdersService.normalizePickupPointLabel(name) === wanted)
-            })
+            const match = points.find((point) => OrdersService.normalizePickupPointLabel(point.name) === wanted)
             if (!match) {
-                throw new OrderValidationError(400, 'Invalid Maystro pickup point for commune')
+                throw new OrderValidationError(400, 'Unknown pickup point for this carrier and wilaya')
             }
-            return Math.trunc(match.pickup_point)
+
+            const id = Number.parseInt(String(match.id), 10)
+            if (!Number.isFinite(id) || id <= 0) {
+                throw new OrderValidationError(400, 'Carrier returned an unusable pickup point id')
+            }
+            return id
         } catch (error) {
             if (error instanceof OrderValidationError) throw error
-            throw new OrderValidationError(400, 'Invalid Maystro pickup point for commune')
+            throw new OrderValidationError(400, 'Could not resolve the pickup point with the carrier')
         }
     }
 
@@ -1581,6 +1591,7 @@ export class OrdersService {
                 tenantId,
                 shippingProvider: nextShippingProvider,
                 deliveryMode: nextDeliveryMode,
+                shippingWilayaCode: nextShippingWilayaCode,
                 shippingCommuneCode: nextShippingCommuneCode,
                 rawPickupPoint: input.shippingPickupPoint
             })
@@ -2705,6 +2716,7 @@ export class OrdersService {
             tenantId: input.tenantId,
             shippingProvider,
             deliveryMode,
+            shippingWilayaCode: input.shippingWilayaCode,
             shippingCommuneCode: input.shippingCommuneCode,
             rawPickupPoint: input.shippingPickupPoint
         })
@@ -3171,6 +3183,7 @@ export class OrdersService {
             tenantId: input.tenantId,
             shippingProvider,
             deliveryMode,
+            shippingWilayaCode: input.shippingWilayaCode,
             shippingCommuneCode: input.shippingCommuneCode,
             rawPickupPoint: input.shippingPickupPoint
         })
