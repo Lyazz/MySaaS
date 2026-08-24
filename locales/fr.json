@@ -4018,7 +4018,11 @@
             "title": "Tarifs transporteur",
             "empty": "Pas encore récupérés — récupérez-les pour les comparer à vos prix.",
             "loaded": "{count} tarifs récupérés chez le transporteur.",
-            "needsConnection": "Connectez d’abord ce transporteur."
+            "needsConnection": "Connectez d’abord ce transporteur.",
+            "cached": "{count} tarifs, dernière vérification {age}.",
+            "ageJustNow": "il y a moins d’une heure",
+            "ageHours": "il y a {hours} h",
+            "ageDays": "il y a {days} j"
           },
           "margin": {
             "prefix": "Fixer chaque tarif visible à transporteur +",
@@ -4026,7 +4030,8 @@
             "apply": "Appliquer à {count} tarifs",
             "hint": "Remplit les champs ci-dessous. Rien n’est enregistré avant d’appuyer sur Enregistrer les tarifs.",
             "needsCarrierRates": "Récupérez d’abord les tarifs transporteur."
-          }
+          },
+          "refreshCarrierRates": "Actualiser depuis le transporteur"
         },
         "errors": {
           "updateProviderFailed": "Impossible de mettre à jour le statut du transporteur",

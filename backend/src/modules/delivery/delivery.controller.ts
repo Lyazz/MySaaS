@@ -428,14 +428,17 @@ export class DeliveryController {
             return res.status(400).json({ statusCode: 400, statusMessage: 'Unsupported provider' })
         }
 
-        const { deliveryMode, serviceLevel, weight, codAmount, originWilayaCode, communeCode } = req.query as {
+        const { deliveryMode, serviceLevel, weight, codAmount, originWilayaCode, communeCode, refresh } = req.query as {
             deliveryMode?: string
             serviceLevel?: string
             weight?: string
             codAmount?: string
             originWilayaCode?: string
             communeCode?: string
+            refresh?: string
         }
+
+        const forceRefresh = String(refresh || '').toLowerCase() === 'true'
 
         const rawDeliveryMode =
             typeof deliveryMode === 'string' && deliveryMode.trim().length > 0 ? deliveryMode.trim().toLowerCase() : undefined
@@ -462,7 +465,8 @@ export class DeliveryController {
                 weight: parsedWeight,
                 codAmount: parsedCod,
                 originWilayaCode: typeof originWilayaCode === 'string' ? originWilayaCode : undefined,
-                communeCode: typeof communeCode === 'string' ? communeCode : undefined
+                communeCode: typeof communeCode === 'string' ? communeCode : undefined,
+                forceRefresh
             })
             res.json(rates)
         } catch (error: any) {
@@ -496,6 +500,22 @@ export class DeliveryController {
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
             console.error('Get provider communes error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    /** When each mode's rate table was last rebuilt from the carrier. */
+    async getProviderRateCacheInfo(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        try {
+            res.json(await service.getCarrierRateCacheInfo(tenant.id, provider))
+        } catch (error) {
+            console.error('Get carrier rate cache info error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

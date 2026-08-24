@@ -1258,11 +1258,132 @@ describe('Delivery API', () => {
             expect(res.body[0]).toMatchObject({ id: '10', name: 'GARDENIA PERFUME', communeId: '555' })
         })
 
+        // Building the table costs one carrier call per wilaya, which is what trips
+        // Yalidine's quota. The cache exists so opening the screen costs nothing.
+        describe('carrier rate cache', () => {
+            const clearCache = () =>
+                prisma.deliveryCarrierRateCache.deleteMany({ where: { tenantId: tenantA.id } })
+
+            it('serves the second request from cache without re-quoting the carrier', async () => {
+                vi.restoreAllMocks()
+                await connect('YALIDINE')
+                await clearCache()
+
+                const quoteSpy = vi.spyOn(YalidineProvider.prototype, 'quote').mockImplementation(async (input: any) => [
+                    { provider: 'YALIDINE', serviceLevel: input.serviceLevel, price: 700, currency: 'DZD', source: 'provider' }
+                ])
+
+                const url = '/api/admin/delivery/providers/YALIDINE/live-rates?deliveryMode=home'
+                const first = await request(app)
+                    .get(url)
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                expect(first.status).toBe(200)
+                expect(first.body).toHaveLength(58)
+                const callsAfterFirst = quoteSpy.mock.calls.length
+                expect(callsAfterFirst).toBe(58)
+
+                const second = await request(app)
+                    .get(url)
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                expect(second.status).toBe(200)
+                expect(second.body).toEqual(first.body)
+                // Not one extra call to the carrier.
+                expect(quoteSpy.mock.calls.length).toBe(callsAfterFirst)
+            })
+
+            it('re-quotes when the operator asks for a refresh', async () => {
+                vi.restoreAllMocks()
+                await connect('YALIDINE')
+                await clearCache()
+
+                const quoteSpy = vi.spyOn(YalidineProvider.prototype, 'quote').mockResolvedValue([
+                    { provider: 'YALIDINE', serviceLevel: 'home', price: 700, currency: 'DZD', source: 'provider' }
+                ])
+
+                const base = '/api/admin/delivery/providers/YALIDINE/live-rates?deliveryMode=home'
+                await request(app).get(base).set('Authorization', `Bearer ${tokenA}`).set('Host', `${tenantA.slug}.swekly.com`)
+                const afterWarm = quoteSpy.mock.calls.length
+
+                await request(app)
+                    .get(`${base}&refresh=true`)
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                expect(quoteSpy.mock.calls.length).toBe(afterWarm * 2)
+            })
+
+            it('does not cache a build where the carrier priced nothing', async () => {
+                vi.restoreAllMocks()
+                await connect('YALIDINE')
+                await clearCache()
+
+                // An all-null build is more likely a transient fault than the truth;
+                // pinning it for a day would hide the carrier coming back.
+                const quoteSpy = vi.spyOn(YalidineProvider.prototype, 'quote').mockResolvedValue([])
+
+                const url = '/api/admin/delivery/providers/YALIDINE/live-rates?deliveryMode=home'
+                await request(app).get(url).set('Authorization', `Bearer ${tokenA}`).set('Host', `${tenantA.slug}.swekly.com`)
+                const afterFirst = quoteSpy.mock.calls.length
+
+                await request(app).get(url).set('Authorization', `Bearer ${tokenA}`).set('Host', `${tenantA.slug}.swekly.com`)
+                expect(quoteSpy.mock.calls.length).toBe(afterFirst * 2)
+            })
+
+            it('keeps one tenant\'s cached rates away from another', async () => {
+                vi.restoreAllMocks()
+                await connect('YALIDINE')
+                await clearCache()
+
+                vi.spyOn(YalidineProvider.prototype, 'quote').mockResolvedValue([
+                    { provider: 'YALIDINE', serviceLevel: 'home', price: 700, currency: 'DZD', source: 'provider' }
+                ])
+
+                await request(app)
+                    .get('/api/admin/delivery/providers/YALIDINE/live-rates?deliveryMode=home')
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                const cached = await prisma.deliveryCarrierRateCache.findMany({ where: { tenantId: tenantB.id } })
+                expect(cached).toHaveLength(0)
+            })
+
+            it('reports when the table was last rebuilt', async () => {
+                vi.restoreAllMocks()
+                await connect('YALIDINE')
+                await clearCache()
+
+                vi.spyOn(YalidineProvider.prototype, 'quote').mockResolvedValue([
+                    { provider: 'YALIDINE', serviceLevel: 'home', price: 700, currency: 'DZD', source: 'provider' }
+                ])
+
+                await request(app)
+                    .get('/api/admin/delivery/providers/YALIDINE/live-rates?deliveryMode=home')
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                const res = await request(app)
+                    .get('/api/admin/delivery/providers/YALIDINE/rate-cache')
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                expect(res.status).toBe(200)
+                expect(typeof res.body.home).toBe('string')
+                expect(Number.isFinite(Date.parse(res.body.home))).toBe(true)
+            })
+        })
+
         // A throttled carrier used to be indistinguishable from a carrier with no
         // prices: quote() swallowed everything and the table filled with dashes.
         it('reports the carrier reason when live rates are refused', async () => {
             vi.restoreAllMocks()
             await connect('YALIDINE')
+            // With a warm cache the operator would be served the last good build
+            // instead — that is the point of it. Empty it to see the failure itself.
+            await prisma.deliveryCarrierRateCache.deleteMany({ where: { tenantId: tenantA.id } })
 
             vi.spyOn(YalidineProvider.prototype, 'quote').mockRejectedValue(
                 new YalidineIntegrationError({ statusCode: 429, statusMessage: 'Yalidine: rate limit exceeded' })

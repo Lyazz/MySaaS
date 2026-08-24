@@ -4037,7 +4037,11 @@
             "title": "Carrier rates",
             "empty": "Not fetched yet — fetch them to compare against your prices.",
             "loaded": "{count} rates fetched from the carrier.",
-            "needsConnection": "Connect this carrier first."
+            "needsConnection": "Connect this carrier first.",
+            "cached": "{count} rates, last checked {age}.",
+            "ageJustNow": "less than an hour ago",
+            "ageHours": "{hours}h ago",
+            "ageDays": "{days}d ago"
           },
           "margin": {
             "prefix": "Set every visible rate to carrier +",
@@ -4045,7 +4049,8 @@
             "apply": "Apply to {count} rates",
             "hint": "Fills the rate boxes below. Nothing is saved until you press Save pricing.",
             "needsCarrierRates": "Fetch carrier rates first to use this."
-          }
+          },
+          "refreshCarrierRates": "Refresh from carrier"
         },
         "errors": {
           "updateProviderFailed": "Failed to update provider status",

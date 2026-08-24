@@ -1,4 +1,4 @@
-import { ShipmentProvider, ShipmentStatus, type PrismaClient, type Shipment } from '@prisma/client'
+import { Prisma, ShipmentProvider, ShipmentStatus, type PrismaClient, type Shipment } from '@prisma/client'
 import prisma from '../../lib/prisma'
 import { MaystroProvider } from './providers/maystro.provider'
 import { YalidineProvider } from './providers/yalidine.provider'
@@ -19,6 +19,16 @@ import type {
     TrackingEvent,
     DeliveryProvider
 } from './types'
+
+export type CarrierRateRow = {
+    wilayaCode: string
+    carrierPrice: number | null
+    currency: string
+    serviceLevel?: string
+}
+
+/** Carrier price lists change on the order of months, so a day is comfortably fresh. */
+const CARRIER_RATE_CACHE_TTL_MS = 24 * 60 * 60 * 1000
 
 type ProviderApiConfig = {
     // Maystro Orders Management API
@@ -446,11 +456,15 @@ export class DeliveryService {
         codAmount?: number
         originWilayaCode?: string
         communeCode?: string
-    }): Promise<Array<{ wilayaCode: string; carrierPrice: number | null; currency: string; serviceLevel?: string }>> {
+        /** Skip the cache and re-quote the carrier. */
+        forceRefresh?: boolean
+    }): Promise<CarrierRateRow[]> {
         const catalogItem = getProviderCatalogItem(input.provider)
         if (!catalogItem.supports.quote) {
             throw new DeliveryConfigurationError(400, 'Provider does not support live rates')
         }
+
+        const deliveryMode = input.deliveryMode ?? 'home'
 
         const effectiveServiceLevel = this.resolveServiceLevel({
             deliveryMode: input.deliveryMode,
@@ -473,9 +487,17 @@ export class DeliveryService {
         const codAmount =
             typeof input.codAmount === 'number' && Number.isFinite(input.codAmount) && input.codAmount > 0 ? input.codAmount : undefined
 
-        // One request per destination wilaya. Carriers publish very different quotas —
-        // Yalidine throttles hard and answers a burst with 403/429 — so the fan-out is
-        // paced per carrier rather than at a single optimistic width.
+        // Rebuilding this table costs one request per destination wilaya. Carrier
+        // prices move maybe monthly, so serve the last build unless the operator asks
+        // for a fresh one — that is what keeps a page visit from spending 58 calls.
+        if (!input.forceRefresh) {
+            const cached = await this.readCarrierRateCache(input.tenantId, input.provider, deliveryMode)
+            if (cached) return cached
+        }
+
+        // Carriers publish very different quotas — Yalidine throttles hard and answers
+        // a burst with 403/429 — so the fan-out is paced per carrier rather than at a
+        // single optimistic width.
         const concurrency = DeliveryService.liveRateConcurrency(input.provider)
 
         let systemicFailure: unknown = null
@@ -520,11 +542,58 @@ export class DeliveryService {
             )
         }
 
+        await this.writeCarrierRateCache(input.tenantId, input.provider, deliveryMode, effectiveServiceLevel, rows)
+
         return rows
     }
 
     private static liveRateConcurrency(provider: ShipmentProvider): number {
         return provider === 'YALIDINE' ? 2 : 8
+    }
+
+    private async readCarrierRateCache(
+        tenantId: string,
+        provider: ShipmentProvider,
+        deliveryMode: string
+    ): Promise<CarrierRateRow[] | null> {
+        const entry = await this.prisma.deliveryCarrierRateCache.findUnique({
+            where: { tenantId_provider_deliveryMode: { tenantId, provider, deliveryMode } }
+        })
+        if (!entry) return null
+
+        const age = Date.now() - entry.fetchedAt.getTime()
+        if (age > CARRIER_RATE_CACHE_TTL_MS) return null
+
+        return Array.isArray(entry.rates) ? (entry.rates as unknown as CarrierRateRow[]) : null
+    }
+
+    private async writeCarrierRateCache(
+        tenantId: string,
+        provider: ShipmentProvider,
+        deliveryMode: string,
+        serviceLevel: string | undefined,
+        rates: CarrierRateRow[]
+    ): Promise<void> {
+        // A build where the carrier answered nothing is not worth remembering — it
+        // would pin an empty table for a day over what was probably a transient fault.
+        if (!rates.some((row) => row.carrierPrice != null)) return
+
+        const payload = { serviceLevel: serviceLevel ?? null, rates: rates as unknown as Prisma.InputJsonValue, fetchedAt: new Date() }
+
+        await this.prisma.deliveryCarrierRateCache.upsert({
+            where: { tenantId_provider_deliveryMode: { tenantId, provider, deliveryMode } },
+            create: { tenantId, provider, deliveryMode, ...payload },
+            update: payload
+        })
+    }
+
+    /** When the table was last rebuilt from the carrier, so the admin can say so. */
+    async getCarrierRateCacheInfo(tenantId: string, provider: ShipmentProvider) {
+        const entries = await this.prisma.deliveryCarrierRateCache.findMany({
+            where: { tenantId, provider },
+            select: { deliveryMode: true, fetchedAt: true }
+        })
+        return Object.fromEntries(entries.map((e) => [e.deliveryMode, e.fetchedAt.toISOString()]))
     }
 
     /**

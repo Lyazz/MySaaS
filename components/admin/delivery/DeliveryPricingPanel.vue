@@ -21,7 +21,9 @@
           >
             {{
               carrierRatesFetched
-                ? t('admin.pages.delivery.pricing.carrierSource.loaded', { count: carrierRateCount })
+                ? carrierRatesAge
+                  ? t('admin.pages.delivery.pricing.carrierSource.cached', { count: carrierRateCount, age: carrierRatesAge })
+                  : t('admin.pages.delivery.pricing.carrierSource.loaded', { count: carrierRateCount })
                 : t('admin.pages.delivery.pricing.carrierSource.empty')
             }}
           </p>
@@ -31,7 +33,7 @@
           class="ui-btn ui-btn--secondary ui-btn--sm"
           :disabled="loadingCarrierRates || !canFetchCarrierRates"
           :title="canFetchCarrierRates ? undefined : t('admin.pages.delivery.pricing.carrierSource.needsConnection')"
-          @click="fetchCarrierRates"
+          @click="fetchCarrierRates(true)"
         >
           <Icon
             name="lucide:refresh-cw"
@@ -41,7 +43,7 @@
           {{
             loadingCarrierRates
               ? t('admin.pages.delivery.pricing.fetchingCarrierRates')
-              : t('admin.pages.delivery.pricing.fetchCarrierRates')
+              : t('admin.pages.delivery.pricing.refreshCarrierRates')
           }}
         </button>
       </div>
@@ -401,7 +403,16 @@ async function loadRates() {
   }
 }
 
-watch(() => props.provider.provider, loadRates, { immediate: true })
+watch(
+  () => props.provider.provider,
+  async () => {
+    await loadRates()
+    // Cheap now: the server answers from its last build unless asked to refresh, so
+    // the margin column is populated on arrival instead of after a click.
+    void fetchCarrierRates()
+  },
+  { immediate: true }
+)
 
 /* ── Carrier rates ───────────────────────────────────────────────────── */
 
@@ -419,7 +430,35 @@ const carrierRateCount = computed(
 
 const carrierRatesFetched = computed(() => carrierRateCount.value > 0)
 
-async function fetchCarrierRates() {
+const carrierRatesFetchedAt = ref<string | null>(null)
+
+/** How stale the shown carrier prices are — margins get set off these numbers. */
+const carrierRatesAge = computed(() => {
+  if (!carrierRatesFetchedAt.value) return ''
+  const hours = Math.floor((Date.now() - new Date(carrierRatesFetchedAt.value).getTime()) / 3_600_000)
+  if (hours < 1) return t('admin.pages.delivery.pricing.carrierSource.ageJustNow')
+  if (hours < 24) return t('admin.pages.delivery.pricing.carrierSource.ageHours', { hours })
+  return t('admin.pages.delivery.pricing.carrierSource.ageDays', { days: Math.floor(hours / 24) })
+})
+
+async function loadRateCacheInfo() {
+  try {
+    const info = await $fetch<Record<string, string>>(
+      `/api/admin/delivery/providers/${props.provider.provider}/rate-cache`,
+      { headers: authHeaders.value }
+    )
+    const stamps = Object.values(info || {}).filter(Boolean).sort()
+    carrierRatesFetchedAt.value = stamps.length ? stamps[0] : null
+  } catch {
+    carrierRatesFetchedAt.value = null
+  }
+}
+
+/**
+ * `refresh` re-quotes the carrier — 58 calls per mode. Without it the server serves
+ * its last build, which is why this can now run on open instead of only on click.
+ */
+async function fetchCarrierRates(refresh = false) {
   if (!canFetchCarrierRates.value || loadingCarrierRates.value) return
   loadingCarrierRates.value = true
   saveMessage.value = ''
@@ -428,7 +467,7 @@ async function fetchCarrierRates() {
     const results = await Promise.all(
       DELIVERY_MODES.map((mode) =>
         $fetch<Array<{ wilayaCode: string; carrierPrice: number | null }>>(
-          `/api/admin/delivery/providers/${props.provider.provider}/live-rates?deliveryMode=${mode}`,
+          `/api/admin/delivery/providers/${props.provider.provider}/live-rates?deliveryMode=${mode}${refresh ? '&refresh=true' : ''}`,
           { headers: authHeaders.value }
         )
       )
@@ -440,6 +479,8 @@ async function fetchCarrierRates() {
         carrierRates[mode][rate.wilayaCode] = rate.carrierPrice == null ? null : Number(rate.carrierPrice)
       }
     })
+
+    await loadRateCacheInfo()
   } catch (e: any) {
     console.error('Failed to fetch carrier rates', e)
     saveKind.value = 'error'

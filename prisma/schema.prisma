@@ -51,6 +51,7 @@ model Tenant {
   salesInvoices             SalesInvoice[]
   shipments                 Shipment[]
   deliveryRates             DeliveryRate[]
+  deliveryCarrierRateCache  DeliveryCarrierRateCache[]
   deliveryAccounts          TenantDeliveryAccount[]
   storeSettings             StoreSettings?
   contactInfos              TenantContactInfo[]
@@ -1302,6 +1303,27 @@ model MaystroInventoryEvent {
 
   @@index([tenantId])
   @@index([tenantId, createdAt])
+}
+
+/// Carrier-published prices per wilaya, cached so the admin pricing table doesn't
+/// re-quote the carrier on every visit. Building one table costs 58 API calls, and
+/// Yalidine answers that burst with 403 — see DeliveryService.getProviderLiveRatesByWilaya.
+/// Distinct from DeliveryRate, which holds the tenant's own override prices.
+model DeliveryCarrierRateCache {
+  id           String           @id @default(uuid())
+  tenantId     String
+  tenant       Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider     ShipmentProvider
+  deliveryMode String
+  serviceLevel String?
+  /// [{ wilayaCode, carrierPrice, currency, serviceLevel }] as returned to the admin.
+  rates        Json
+  fetchedAt    DateTime         @default(now())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([tenantId, provider, deliveryMode])
+  @@index([tenantId])
 }
 
 model DeliveryRate {

@@ -78,6 +78,12 @@ router.get(
     controller.getProviderCommunes.bind(controller)
 )
 router.get(
+    '/admin/delivery/providers/:provider/rate-cache',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    controller.getProviderRateCacheInfo.bind(controller)
+)
+router.get(
     '/admin/delivery/providers/:provider/pickup-points',
     requireTenantMember,
     requireStaffPermission('delivery', 'read'),
