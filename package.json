@@ -26,7 +26,9 @@
     "db:down": "docker-compose down",
     "db:generate": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy",
-    "db:migrate:status": "prisma migrate status"
+    "db:migrate:status": "prisma migrate status",
+    "seed:demo-stores": "node scripts/seed-theme-demo-stores.mjs",
+    "logos:carriers": "node scripts/normalize-carrier-logos.mjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.975.0",

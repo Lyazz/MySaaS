@@ -3,6 +3,7 @@ import axios from 'axios'
 import prisma from '../../../lib/prisma'
 import { MaystroClient } from './maystro.client'
 import { MaystroIntegrationError } from './maystro.errors'
+import { normalizeLocationName } from '../shared/normalize-location-name'
 
 export type MaystroWilaya = { id: number; name: string }
 export type MaystroCommune = { id: number; wilaya: number; name: string; postcode?: string; zone?: string }
@@ -130,7 +131,7 @@ export class MaystroLocationService {
         const wilayaId = Number.parseInt(wilayaTrimmed, 10)
         const wilayaMatch = Number.isFinite(wilayaId)
             ? wilayas.find((w) => w.id === wilayaId)
-            : wilayas.find((w) => w.name.toLowerCase() === wilayaTrimmed.toLowerCase())
+            : wilayas.find((w) => normalizeLocationName(w.name) === normalizeLocationName(wilayaTrimmed))
 
         if (!wilayaMatch) {
             throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'Invalid wilaya' })
@@ -140,7 +141,7 @@ export class MaystroLocationService {
         const communeId = Number.parseInt(communeTrimmed, 10)
         const communeMatch = Number.isFinite(communeId)
             ? communes.find((c) => c.id === communeId)
-            : communes.find((c) => c.name.toLowerCase() === communeTrimmed.toLowerCase())
+            : communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(communeTrimmed))
 
         if (!communeMatch) {
             throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'Invalid commune for wilaya' })

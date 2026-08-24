@@ -93,6 +93,22 @@ export class DeliveryController {
         }
     }
 
+    async listCommuneNames(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+
+        try {
+            const communes = await service.listCommuneNames(tenant.id, wilaya)
+            res.json(communes)
+        } catch (error) {
+            console.error('List delivery communes error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async createShipment(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
@@ -460,7 +476,80 @@ export class DeliveryController {
         }
     }
 
+    async getProviderCommunes(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+
+        try {
+            const communes = await service.listProviderCommunes({ tenantId: tenant.id, provider, wilayaCode: wilaya })
+            res.json(communes)
+        } catch (error: any) {
+            if (error instanceof DeliveryConfigurationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get provider communes error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async getProviderCommunePrice(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        const commune = typeof req.query.commune === 'string' ? req.query.commune.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+        if (!commune) return res.status(400).json({ statusCode: 400, statusMessage: 'commune is required' })
+
+        const { weight, codAmount, originWilayaCode } = req.query as {
+            weight?: string
+            codAmount?: string
+            originWilayaCode?: string
+        }
+
+        try {
+            const prices = await service.getProviderCommunePrice({
+                tenantId: tenant.id,
+                provider,
+                wilayaCode: wilaya,
+                communeCode: commune,
+                weight: weight ? Number(weight) : undefined,
+                codAmount: codAmount ? Number(codAmount) : undefined,
+                originWilayaCode: typeof originWilayaCode === 'string' ? originWilayaCode : undefined
+            })
+            res.json(prices)
+        } catch (error: any) {
+            if (error instanceof DeliveryConfigurationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get provider commune price error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    private parseProviderParam(req: Request): ShipmentProvider | null {
+        const provider = String(req.params.provider || '').toUpperCase()
+        if (!provider || !isShipmentProvider(provider)) return null
+        try {
+            getProviderCatalogItem(provider)
+        } catch {
+            return null
+        }
+        return provider
+    }
 
     async getDeliveryRates(req: Request, res: Response) {
         const tenant = req.tenant

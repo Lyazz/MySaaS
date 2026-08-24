@@ -3976,14 +3976,12 @@
       "delivery": {
         "metaTitle": "شركات التوصيل",
         "title": "شركات التوصيل",
-        "subtitle": "إدارة مزوّدي التوصيل والأسعار حسب الولاية",
+        "subtitle": "اختر شركات التوصيل الظاهرة عند الدفع وحدّد سعر كل ولاية",
         "providers": {
           "toggleLabel": "تفعيل الإعداد",
           "noCredentials": "بدون بيانات اعتماد",
           "connected": "متصل",
-          "notConnected": "غير متصل",
-          "wilayasSupported": "{count} ولايات مدعومة",
-          "managePricing": "إدارة الأسعار"
+          "notConnected": "غير متصل"
         },
         "credentials": {
           "title": "بيانات اعتماد API — {provider}",
@@ -3997,7 +3995,8 @@
           "secretPlaceholderNotSet": "أدخل التوكن",
           "errors": {
             "saveFailed": "تعذر حفظ بيانات الاعتماد"
-          }
+          },
+          "save": "حفظ الاتصال"
         },
         "pricing": {
           "title": "إعداد التسعير: {provider}",
@@ -4008,7 +4007,7 @@
             "office": "مكتب"
           },
           "searchPlaceholder": "ابحث عن الولاية (الرمز أو الاسم)…",
-          "overridePlaceholder": "اتركه فارغًا لاستخدام سعر المزوّد",
+          "overridePlaceholder": "سعر الناقل",
           "filters": {
             "all": "الكل",
             "overrides": "تعديلات",
@@ -4016,7 +4015,6 @@
             "missingCarrier": "سعر المزوّد غير متوفر"
           },
           "showingCount": "عرض {shown} من {total}",
-          "pageOf": "صفحة {page} / {pages}",
           "fetchCarrierRates": "جلب أسعار المزوّد",
           "fetchingCarrierRates": "جارٍ الجلب…",
           "table": {
@@ -4024,13 +4022,102 @@
             "wilaya": "اسم الولاية",
             "price": "السعر (DZD)",
             "carrierPrice": "سعر المزوّد",
-            "overridePrice": "سعرك"
+            "overridePrice": "سعرك",
+            "margin": "الهامش"
+          },
+          "save": "حفظ الأسعار",
+          "discard": "تجاهل",
+          "unsaved": "سعر غير محفوظ | أسعار غير محفوظة",
+          "noMatches": "لا توجد ولاية تطابق هذا البحث.",
+          "clearFilters": "مسح عوامل التصفية",
+          "loadFailed": "تعذّر تحميل الأسعار المحفوظة. أعد تحميل الصفحة.",
+          "carrierSource": {
+            "title": "أسعار الناقل",
+            "empty": "لم تُجلب بعد — اجلبها لمقارنتها بأسعارك.",
+            "loaded": "تم جلب {count} سعرًا من الناقل.",
+            "needsConnection": "اربط هذه الشركة أولًا."
+          },
+          "margin": {
+            "prefix": "اضبط كل سعر ظاهر على سعر الناقل +",
+            "unit": "وحدة الهامش",
+            "apply": "تطبيق على {count} سعر",
+            "hint": "يملأ الحقول أدناه. لا يُحفظ شيء حتى تضغط حفظ الأسعار.",
+            "needsCarrierRates": "اجلب أسعار الناقل أولًا لاستخدام هذا."
           }
         },
         "errors": {
           "updateProviderFailed": "تعذر تحديث حالة المزوّد",
           "saveFailed": "تعذر حفظ التسعير",
           "fetchCarrierRatesFailed": "تعذر جلب أسعار المزوّد"
+        },
+        "section": "الشحن",
+        "stats": {
+          "offered": "عند الدفع",
+          "connected": "متصلة",
+          "wilayas": "ولاية"
+        },
+        "rail": {
+          "carriers": "شركات التوصيل",
+          "alsoAtCheckout": "أيضًا عند الدفع",
+          "offerToggle": "إظهار {provider} عند الدفع"
+        },
+        "tabs": {
+          "connection": "الاتصال",
+          "pricing": "أسعار الولايات"
+        },
+        "workspace": {
+          "offered": "يمكن للعملاء اختيار هذه الشركة عند الدفع",
+          "notOffered": "مخفية عند الدفع",
+          "emptyTitle": "اختر شركة توصيل",
+          "emptyHint": "اختر شركة من القائمة لربطها وتحديد أسعارها لكل ولاية."
+        },
+        "storePickup": {
+          "title": "الاستلام من المتجر",
+          "hint": "العملاء الذين يختارون هذا يستلمون طلبهم بأنفسهم دون توصيل.",
+          "on": "متاح عند الدفع",
+          "off": "مخفي عند الدفع",
+          "toggleLabel": "إتاحة الاستلام من المتجر"
+        },
+        "maystro": {
+          "resync": {
+            "title": "إعادة مزامنة منتجات Maystro",
+            "hint": "تصلح المنتجات التي قبلتها Maystro دون معرّف منتج — السبب المعتاد لخطأ «منتجات مفقودة» عند إرسال الطلب. آمنة في أي وقت.",
+            "action": "إعادة المزامنة",
+            "running": "جارٍ المزامنة…",
+            "done": "تم إصلاح {fixed} منتج، وتخطي {skipped}.",
+            "failed": "فشلت إعادة المزامنة. حاول مجددًا.",
+            "needsConnection": "اربط Maystro أولًا."
+          }
+        },
+        "yalidine": {
+          "title": "إعداد Webhook الخاص بـ Yalidine",
+          "hint": "أضف هذا الرابط في لوحة Webhooks لدى Yalidine ليتم تحديث حالات التوصيل في متجرك تلقائيًا.",
+          "urlLabel": "رابط Webhook لإعطائه لـ Yalidine",
+          "urlHint": "يجب أن يكون نطاق HTTPS عامًا. غيّر النطاق إذا كان متجرك يستخدم نطاقًا مخصصًا.",
+          "localhostNotice": "لا يمكن لـ localhost استقبال webhooks، لذا يُعرض رابط الإنتاج الخاص بمتجرك.",
+          "copy": "نسخ الرابط",
+          "copied": "تم النسخ",
+          "copyFailed": "تعذّر النسخ. حدّد الرابط وانسخه يدويًا.",
+          "stepsTitle": "في لوحة Yalidine",
+          "steps": {
+            "open": "افتح لوحة Webhooks.",
+            "paste": "أضف webhook والصق الرابط أعلاه.",
+            "secret": "اضبط نفس السر هناك وفي حقل Webhook Secret هنا.",
+            "activate": "اختبر الـ webhook ثم فعّله."
+          },
+          "eventsTitle": "اختر هذه الأحداث"
+        },
+        "probe": {
+          "title": "تحقق من سعر بلدية محددة",
+          "hint": "أسعار الناقل في الجدول محسوبة بعيّنة لكل ولاية. تحقق من بلدية للحصول على سعر الناقل الدقيق.",
+          "commune": "البلدية",
+          "selectCommune": "اختر بلدية",
+          "loadingCommunes": "جارٍ تحميل البلديات…",
+          "noCommunes": "لا توجد بلديات",
+          "action": "تحقق من السعر",
+          "checking": "جارٍ التحقق…",
+          "communesFailed": "تعذّر تحميل البلديات. تحقق من بيانات هذا الناقل.",
+          "pricesFailed": "تعذّر جلب الأسعار من هذا الناقل. حاول مجددًا."
         }
       },
       "onboarding": {

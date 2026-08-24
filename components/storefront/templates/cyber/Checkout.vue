@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CarrierMark from '~/components/storefront/shared/CarrierMark.vue'
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
@@ -36,18 +37,9 @@ const deliveryOptions = computed(() => {
   const options: any[] = []
   
   availableProviders.value.forEach((provider: any) => {
-    const homePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-        ? String(Math.round(maystroPrices.homePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '350'
-    const officePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-        ? String(Math.round(maystroPrices.officePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
 
     options.push({
       id: `${provider.key}-home`,
@@ -101,7 +93,7 @@ const form = ref({
   selectedDeliveryOption: ''
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => form.value.wilaya,
   communeCode: () => form.value.commune
 })
@@ -246,10 +238,11 @@ async function handleSubmit() {
         const url = useTenantApiUrl('/api/orders')
         const isMaystro = delivery?.provider === 'MAYSTRO'
         const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
+        const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
         const maystroShippingAmount =
-          isMaystro
-            ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
-            : null
+          providerPrices
+            ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home)
+          : null
 
         if (isMaystro) {
           
@@ -272,9 +265,9 @@ async function handleSubmit() {
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
           shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
-          shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-          shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-          shippingCurrency: isMaystro ? currencyCode.value : undefined,
+          shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+          shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+          shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
           redeemPointsRequested: loyalty.redeemPointsRequested.value || undefined,
           items: cartStore.items.map(item => ({
             productId: item.productId,
@@ -426,13 +419,7 @@ async function handleSubmit() {
                         ? 'bg-gradient-to-br from-pink-500/30 to-orange-500/30 border-pink-500/50' 
                         : 'bg-purple-900/50 border-purple-500/30'"
                     >
-                      <Icon 
-                        :name="option.icon" 
-                        class="w-6 h-6 transition-colors duration-300"
-                        :class="form.selectedDeliveryOption === option.id 
-                          ? 'text-pink-400' 
-                          : 'text-purple-400/70'"
-                      />
+                      <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-6 h-6 transition-colors duration-300" :class="form.selectedDeliveryOption === option.id ? 'text-pink-400' : 'text-purple-400/70'" />
                     </div>
                     
                     <!-- Details -->

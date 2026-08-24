@@ -1,5 +1,6 @@
 import { YalidineClient } from './yalidine.client'
 import { YalidineIntegrationError } from './yalidine.errors'
+import { normalizeLocationName } from '../shared/normalize-location-name'
 
 export type YalidineWilaya = { id: number; name: string; zone?: number; isDeliverable?: boolean }
 export type YalidineCommune = {
@@ -24,13 +25,6 @@ type CacheEntry<T> = { value: T; expiresAt: number }
 const nowMs = () => Date.now()
 
 const asBoolean = (value: unknown) => value === true || value === 1 || value === '1'
-
-const normalizeComparable = (value: unknown) =>
-    String(value || '')
-        .trim()
-        .toLowerCase()
-        .normalize('NFD')
-        .replace(/[\u0300-\u036f]/g, '')
 
 const parsePositiveInt = (value: unknown): number | null => {
     const n = Number.parseInt(String(value ?? '').trim(), 10)
@@ -116,7 +110,7 @@ export class YalidineLocationService {
         const id = parsePositiveInt(raw)
         const match = id
             ? wilayas.find((w) => w.id === id)
-            : wilayas.find((w) => normalizeComparable(w.name) === normalizeComparable(raw))
+            : wilayas.find((w) => normalizeLocationName(w.name) === normalizeLocationName(raw))
 
         if (!match) throw new YalidineIntegrationError({ statusCode: 400, statusMessage: 'Yalidine: invalid wilaya' })
         return { id: match.id, name: match.name }
@@ -136,7 +130,7 @@ export class YalidineLocationService {
         const communeId = parsePositiveInt(rawCommune)
         const communeMatch = communeId
             ? communes.find((c) => c.id === communeId)
-            : communes.find((c) => normalizeComparable(c.name) === normalizeComparable(rawCommune))
+            : communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(rawCommune))
 
         if (!communeMatch) {
             throw new YalidineIntegrationError({ statusCode: 400, statusMessage: 'Yalidine: invalid commune for wilaya' })

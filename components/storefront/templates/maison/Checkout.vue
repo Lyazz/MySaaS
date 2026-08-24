@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CarrierMark from '~/components/storefront/shared/CarrierMark.vue'
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
@@ -40,7 +41,7 @@ const form = ref({
   selectedDeliveryOption: ''
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => form.value.wilaya,
   communeCode: () => form.value.commune
 })
@@ -48,10 +49,9 @@ const maystroPrices = useMaystroDeliveryPrices({
 const deliveryOptions = computed(() => {
   const options: any[] = []
   availableProviders.value.forEach((provider: any) => {
-    const homePrice = provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-      ? String(Math.round(maystroPrices.homePrice.value)) : provider.key === 'MAYSTRO' ? '—' : '350'
-    const officePrice = provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-      ? String(Math.round(maystroPrices.officePrice.value)) : provider.key === 'MAYSTRO' ? '—' : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
 
     options.push({ id: `${provider.key}-home`, provider: provider.key, providerLabel: provider.label, mode: 'home', modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery, icon: provider.icon, color: provider.color, price: homePrice })
     options.push({ id: `${provider.key}-pickup`, provider: provider.key, providerLabel: provider.label, mode: 'pickup', modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint, icon: provider.icon, color: provider.color, price: officePrice })
@@ -173,7 +173,8 @@ async function handleSubmit() {
     const delivery = selectedDelivery.value
     const isMaystro = delivery?.provider === 'MAYSTRO'
     const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
-    const maystroShippingAmount = isMaystro ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value) : null
+    const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
+    const maystroShippingAmount = providerPrices ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home) : null
 
     if (isMaystro) {
       if (!form.value.wilaya || !form.value.commune) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
@@ -191,9 +192,9 @@ async function handleSubmit() {
       deliveryMode: delivery?.mode,
       shippingProvider: delivery?.provider || undefined,
       shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
-      shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-      shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-      shippingCurrency: isMaystro ? currencyCode.value : undefined,
+      shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+      shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+      shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
       redeemPointsRequested: loyalty.redeemPointsRequested.value || undefined,
       items: cartStore.items.map(item => ({ productId: item.productId, variantId: item.variantId, quantity: item.quantity }))
     }
@@ -280,7 +281,7 @@ async function handleSubmit() {
               >
                 <div class="co__delivery-left">
                   <div class="co__delivery-icon">
-                    <Icon :name="option.icon" style="width:13px;height:13px" />
+                    <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" style="width:13px;height:13px" />
                   </div>
                   <div>
                     <p class="co__delivery-name">{{ option.providerLabel }}</p>

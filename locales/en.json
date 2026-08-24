@@ -3978,14 +3978,12 @@
       "delivery": {
         "metaTitle": "Delivery companies",
         "title": "Delivery companies",
-        "subtitle": "Manage delivery providers and pricing per Wilaya",
+        "subtitle": "Choose which carriers appear at checkout and what each wilaya costs",
         "providers": {
           "toggleLabel": "Use setting",
           "noCredentials": "No credentials",
           "connected": "Connected",
-          "notConnected": "Not connected",
-          "wilayasSupported": "{count} Wilayas supported",
-          "managePricing": "Manage pricing"
+          "notConnected": "Not connected"
         },
         "credentials": {
           "title": "API credentials — {provider}",
@@ -3999,7 +3997,8 @@
           "secretPlaceholderNotSet": "Enter token",
           "errors": {
             "saveFailed": "Failed to save credentials"
-          }
+          },
+          "save": "Save connection"
         },
         "pricing": {
           "title": "Pricing configuration: {provider}",
@@ -4010,7 +4009,7 @@
             "office": "Office"
           },
           "searchPlaceholder": "Search wilaya (code or name)…",
-          "overridePlaceholder": "Leave blank to use carrier",
+          "overridePlaceholder": "Carrier rate",
           "filters": {
             "all": "All",
             "overrides": "Overrides",
@@ -4018,7 +4017,6 @@
             "missingCarrier": "Missing carrier rate"
           },
           "showingCount": "Showing {shown} of {total}",
-          "pageOf": "Page {page} / {pages}",
           "fetchCarrierRates": "Fetch carrier rates",
           "fetchingCarrierRates": "Fetching…",
           "table": {
@@ -4026,13 +4024,102 @@
             "wilaya": "Wilaya name",
             "price": "Price (DZD)",
             "carrierPrice": "Carrier rate",
-            "overridePrice": "Your rate"
+            "overridePrice": "Your rate",
+            "margin": "Margin"
+          },
+          "save": "Save pricing",
+          "discard": "Discard",
+          "unsaved": "unsaved rate | unsaved rates",
+          "noMatches": "No wilaya matches this search.",
+          "clearFilters": "Clear filters",
+          "loadFailed": "Could not load saved rates. Reload the page.",
+          "carrierSource": {
+            "title": "Carrier rates",
+            "empty": "Not fetched yet — fetch them to compare against your prices.",
+            "loaded": "{count} rates fetched from the carrier.",
+            "needsConnection": "Connect this carrier first."
+          },
+          "margin": {
+            "prefix": "Set every visible rate to carrier +",
+            "unit": "Margin unit",
+            "apply": "Apply to {count} rates",
+            "hint": "Fills the rate boxes below. Nothing is saved until you press Save pricing.",
+            "needsCarrierRates": "Fetch carrier rates first to use this."
           }
         },
         "errors": {
           "updateProviderFailed": "Failed to update provider status",
           "saveFailed": "Failed to save pricing",
           "fetchCarrierRatesFailed": "Failed to fetch carrier rates"
+        },
+        "section": "Shipping",
+        "stats": {
+          "offered": "at checkout",
+          "connected": "connected",
+          "wilayas": "wilayas"
+        },
+        "rail": {
+          "carriers": "Carriers",
+          "alsoAtCheckout": "Also at checkout",
+          "offerToggle": "Show {provider} at checkout"
+        },
+        "tabs": {
+          "connection": "Connection",
+          "pricing": "Wilaya pricing"
+        },
+        "workspace": {
+          "offered": "Customers can choose this carrier at checkout",
+          "notOffered": "Hidden from checkout",
+          "emptyTitle": "Pick a carrier",
+          "emptyHint": "Select a carrier on the left to connect it and set its per-wilaya rates."
+        },
+        "storePickup": {
+          "title": "Pickup at store",
+          "hint": "Customers who pick this skip delivery and collect the order themselves.",
+          "on": "Offered at checkout",
+          "off": "Hidden from checkout",
+          "toggleLabel": "Offer pickup at store"
+        },
+        "maystro": {
+          "resync": {
+            "title": "Resync Maystro products",
+            "hint": "Repairs products Maystro accepted without returning a product ID — the usual cause of \"missing products\" errors when pushing an order. Safe to run any time.",
+            "action": "Resync products",
+            "running": "Resyncing…",
+            "done": "{fixed} product(s) fixed, {skipped} skipped.",
+            "failed": "Resync failed. Try again.",
+            "needsConnection": "Connect Maystro first."
+          }
+        },
+        "yalidine": {
+          "title": "Yalidine webhook setup",
+          "hint": "Add this URL in the Yalidine Webhooks Dashboard so delivery statuses update in your store automatically.",
+          "urlLabel": "Webhook URL to give Yalidine",
+          "urlHint": "Must be a public HTTPS tenant domain. Replace the domain if your store uses a custom one.",
+          "localhostNotice": "Localhost cannot receive Yalidine webhooks, so this shows your production tenant URL.",
+          "copy": "Copy URL",
+          "copied": "Copied",
+          "copyFailed": "Copy failed. Select the URL and copy it manually.",
+          "stepsTitle": "In the Yalidine dashboard",
+          "steps": {
+            "open": "Open the Webhooks Dashboard.",
+            "paste": "Add a webhook and paste the URL above.",
+            "secret": "Set the same secret there and in the Webhook Secret field here.",
+            "activate": "Test the webhook, then activate it."
+          },
+          "eventsTitle": "Select these events"
+        },
+        "probe": {
+          "title": "Check an exact commune price",
+          "hint": "Carrier rates in the table are sampled per wilaya. Check one commune for the carrier's exact price.",
+          "commune": "Commune",
+          "selectCommune": "Select a commune",
+          "loadingCommunes": "Loading communes…",
+          "noCommunes": "No communes",
+          "action": "Check price",
+          "checking": "Checking…",
+          "communesFailed": "Could not load communes. Check this carrier’s credentials.",
+          "pricesFailed": "Could not fetch prices from this carrier. Try again."
         }
       },
       "onboarding": {

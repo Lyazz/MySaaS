@@ -7,6 +7,9 @@ import app from '../../backend/src/app'
 import { MaystroProvider } from '../../backend/src/modules/delivery/providers/maystro.provider'
 import { YalidineProvider } from '../../backend/src/modules/delivery/providers/yalidine.provider'
 import { MaystroClient } from '../../backend/src/modules/delivery/maystro/maystro.client'
+import { MaystroLocationService } from '../../backend/src/modules/delivery/maystro/maystro-location.service'
+import { MaystroPickupPointService } from '../../backend/src/modules/delivery/maystro/maystro-pickup-point.service'
+import { YalidineClient } from '../../backend/src/modules/delivery/yalidine/yalidine.client'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
@@ -801,5 +804,354 @@ describe('Delivery API', () => {
         expect(res.body.length).toBe(58)
         const w16 = res.body.find((r: any) => r.wilayaCode === '16')
         expect(w16?.carrierPrice).toBe(160)
+    })
+
+    it('resolves the same commune name independently against Maystro and Yalidine during rate-shopping', async () => {
+        vi.restoreAllMocks()
+
+        await request(app)
+            .put('/api/admin/delivery/providers/MAYSTRO/account')
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
+            .send({
+                offered: true,
+                isActive: true,
+                config: { apiToken: 'tenant-maystro-token', storeId: 'store-123' }
+            })
+
+        await request(app)
+            .put('/api/admin/delivery/providers/YALIDINE/account')
+            .set('Authorization', `Bearer ${tokenA}`)
+            .set('Host', `${tenantA.slug}.swekly.com`)
+            .send({
+                offered: true,
+                isActive: true,
+                config: { apiId: 'tenant-yalidine-id', apiToken: 'tenant-yalidine-token' }
+            })
+
+        await prisma.storeSettings.upsert({
+            where: { tenantId: tenantA.id },
+            create: { tenantId: tenantA.id, allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] },
+            update: { allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] }
+        })
+
+        // Maystro's own internal commune id for "Hydra" is 1605.
+        vi.spyOn(MaystroClient.prototype, 'request').mockImplementation(async (opts: any) => {
+            if (opts.method === 'GET' && opts.path === '/base/wilayas/') {
+                return [{ id: 31, name: 'Oran' }]
+            }
+            if (opts.method === 'GET' && opts.path === '/base/communes/') {
+                return [{ id: 1605, wilaya: 31, name: 'Hydra' }]
+            }
+            if (opts.method === 'GET' && opts.path === '/base/delivery-prices/') {
+                expect(opts.params.commune).toBe('1605')
+                return { delivery_price: 450 }
+            }
+            return {}
+        })
+
+        // Yalidine's own internal commune id for "Hydra" is a completely different number (9876).
+        vi.spyOn(YalidineClient.prototype, 'request').mockImplementation(async (opts: any) => {
+            if (opts.method === 'GET' && opts.path === '/fees/') {
+                return {
+                    from_wilaya_name: 'Oran',
+                    to_wilaya_name: 'Oran',
+                    oversize_fee: 0,
+                    per_commune: {
+                        '9876': { commune_id: 9876, commune_name: 'Hydra', express_home: 380, express_desk: 300 }
+                    }
+                }
+            }
+            return {}
+        })
+
+        const res = await request(app)
+            .post('/api/delivery/options')
+            .set('Host', `${tenantA.slug}.swekly.com`)
+            .send({
+                destination: { wilayaCode: '31', communeCode: 'Hydra' },
+                deliveryMode: 'home'
+            })
+
+        expect(res.status).toBe(200)
+        const byProvider = Object.fromEntries(res.body.map((q: any) => [q.provider, q]))
+        expect(byProvider.MAYSTRO?.price).toBe(450)
+        expect(byProvider.YALIDINE?.price).toBe(380)
+    })
+
+    it('GET /api/delivery/communes merges and dedupes commune names across offered providers', async () => {
+        vi.restoreAllMocks()
+
+        await prisma.storeSettings.upsert({
+            where: { tenantId: tenantA.id },
+            create: { tenantId: tenantA.id, allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] },
+            update: { allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] }
+        })
+
+        vi.spyOn(MaystroProvider.prototype, 'listCommunes').mockResolvedValue([
+            { name: 'Hydra' },
+            { name: 'Birkhadem' }
+        ])
+        // Same commune as Maystro's "Hydra", spelled differently by Yalidine's own catalog,
+        // plus one commune Maystro doesn't have.
+        vi.spyOn(YalidineProvider.prototype, 'listCommunes').mockResolvedValue([
+            { name: 'HYDRA' },
+            { name: 'Es Senia' }
+        ])
+
+        const res = await request(app)
+            .get('/api/delivery/communes?wilaya=16')
+            .set('Host', `${tenantA.slug}.swekly.com`)
+
+        expect(res.status).toBe(200)
+        const names = res.body.map((c: any) => c.name)
+        // Deduped by normalized name (Maystro's "Hydra" wins over Yalidine's "HYDRA" per provider preference order).
+        expect(names).toEqual(['Birkhadem', 'Es Senia', 'Hydra'])
+    })
+
+    it('GET /api/delivery/communes tolerates one provider being unreachable', async () => {
+        vi.restoreAllMocks()
+
+        await prisma.storeSettings.upsert({
+            where: { tenantId: tenantA.id },
+            create: { tenantId: tenantA.id, allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] },
+            update: { allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] }
+        })
+
+        vi.spyOn(MaystroProvider.prototype, 'listCommunes').mockResolvedValue([
+            { name: 'Hydra' },
+            { name: 'Birkhadem' }
+        ])
+        vi.spyOn(YalidineProvider.prototype, 'listCommunes').mockImplementation(async () => {
+            throw new Error('Yalidine unreachable')
+        })
+
+        const res = await request(app)
+            .get('/api/delivery/communes?wilaya=16')
+            .set('Host', `${tenantA.slug}.swekly.com`)
+
+        expect(res.status).toBe(200)
+        const names = res.body.map((c: any) => c.name)
+        expect(names).toEqual(['Birkhadem', 'Hydra'])
+    })
+
+    // The generic provider routes exist so no carrier gets a capability the others
+    // can't have. These tests assert the symmetry rather than either carrier's quirks.
+    describe('generic per-provider commune routes', () => {
+        const connect = async (provider: 'MAYSTRO' | 'YALIDINE') => {
+            const config =
+                provider === 'MAYSTRO'
+                    ? { apiToken: 'tenant-maystro-token', storeId: 'store-123' }
+                    : { apiId: 'tenant-yalidine-id', apiToken: 'tenant-yalidine-token' }
+
+            await request(app)
+                .put(`/api/admin/delivery/providers/${provider}/account`)
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+                .send({ offered: true, isActive: true, config })
+        }
+
+        const providerClass = {
+            MAYSTRO: MaystroProvider,
+            YALIDINE: YalidineProvider
+        } as const
+
+        it.each(['MAYSTRO', 'YALIDINE'] as const)(
+            'GET /admin/delivery/providers/%s/communes returns the carrier commune list with ids',
+            async (provider) => {
+                vi.restoreAllMocks()
+                await connect(provider)
+
+                vi.spyOn(providerClass[provider].prototype, 'listCommunes').mockResolvedValue([
+                    { id: '101', name: 'Hydra' },
+                    { id: '102', name: 'Birkhadem' }
+                ])
+
+                const res = await request(app)
+                    .get(`/api/admin/delivery/providers/${provider}/communes?wilaya=16`)
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                expect(res.status).toBe(200)
+                expect(res.body).toEqual([
+                    { id: '101', name: 'Hydra' },
+                    { id: '102', name: 'Birkhadem' }
+                ])
+            }
+        )
+
+        it.each(['MAYSTRO', 'YALIDINE'] as const)(
+            'GET /admin/delivery/providers/%s/commune-price quotes home and office for one commune',
+            async (provider) => {
+                vi.restoreAllMocks()
+                await connect(provider)
+
+                vi.spyOn(providerClass[provider].prototype, 'quote').mockImplementation(async (input: any) => [
+                    {
+                        provider,
+                        serviceLevel: input.serviceLevel,
+                        price: input.deliveryMode === 'home' ? 600 : 400,
+                        currency: 'DZD',
+                        source: 'provider'
+                    }
+                ])
+
+                const res = await request(app)
+                    .get(`/api/admin/delivery/providers/${provider}/commune-price?wilaya=16&commune=101`)
+                    .set('Authorization', `Bearer ${tokenA}`)
+                    .set('Host', `${tenantA.slug}.swekly.com`)
+
+                expect(res.status).toBe(200)
+                expect(res.body.home.price).toBe(600)
+                expect(res.body.office.price).toBe(400)
+                expect(res.body.home.currency).toBe('DZD')
+            }
+        )
+
+        it('commune-price reports the carrier price, not the tenant override', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+
+            // An override that would win on the storefront must not leak into this probe.
+            await request(app)
+                .put('/api/rates/MAYSTRO')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+                .send({
+                    rates: [{ wilayaCode: '16', price: 999, communeCode: '', serviceLevel: 'home', isActive: true }]
+                })
+
+            vi.spyOn(MaystroProvider.prototype, 'quote').mockResolvedValue([
+                { provider: 'MAYSTRO', serviceLevel: 'home', price: 600, currency: 'DZD', source: 'provider' }
+            ])
+
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/MAYSTRO/commune-price?wilaya=16&commune=101')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body.home.price).toBe(600)
+        })
+
+        it('rejects a provider whose credentials are not configured', async () => {
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/MAYSTRO/communes?wilaya=16')
+                .set('Authorization', `Bearer ${tokenB}`)
+                .set('Host', `${tenantB.slug}.swekly.com`)
+
+            expect(res.status).toBe(400)
+            expect(res.body.statusMessage).toContain('credentials')
+        })
+
+        it('rejects an unknown provider', async () => {
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/NOPE/communes?wilaya=16')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(400)
+            expect(res.body.statusMessage).toBe('Invalid provider')
+        })
+
+        it('requires wilaya and commune', async () => {
+            vi.restoreAllMocks()
+            await connect('YALIDINE')
+
+            const noWilaya = await request(app)
+                .get('/api/admin/delivery/providers/YALIDINE/communes')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+            expect(noWilaya.status).toBe(400)
+            expect(noWilaya.body.statusMessage).toBe('wilaya is required')
+
+            const noCommune = await request(app)
+                .get('/api/admin/delivery/providers/YALIDINE/commune-price?wilaya=16')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+            expect(noCommune.status).toBe(400)
+            expect(noCommune.body.statusMessage).toBe('commune is required')
+        })
+
+        // Regression: the storefront commune picker moved to the carrier-agnostic list,
+        // which carries names only. Maystro's /base/* endpoints key on numeric ids, so
+        // a name has to be resolved at the boundary or pickup points silently return [].
+        it('resolves a commune NAME to a Maystro id for pickup points', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+
+            vi.spyOn(MaystroLocationService.prototype, 'listCommunes').mockResolvedValue([
+                { id: 1234, wilaya: 16, name: 'Hydra' },
+                { id: 1235, wilaya: 16, name: 'Birkhadem' }
+            ] as any)
+
+            const listSpy = vi
+                .spyOn(MaystroPickupPointService.prototype, 'listActivePickupPoints')
+                .mockResolvedValue([
+                    { name: 'Desk Hydra', commune: 1234, pickup_point: 77, delivery_type: 3, active: true }
+                ] as any)
+
+            const res = await request(app)
+                .get('/api/delivery/maystro/pickup-points?commune=Hydra&wilaya=16')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body[0]?.pickup_point).toBe(77)
+            // The carrier must be asked for the id, never the raw name.
+            expect(listSpy).toHaveBeenCalledWith(expect.objectContaining({ commune: '1234' }))
+        })
+
+        it('still accepts a numeric commune id for pickup points', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+
+            const listSpy = vi
+                .spyOn(MaystroPickupPointService.prototype, 'listActivePickupPoints')
+                .mockResolvedValue([
+                    { name: 'Desk Hydra', commune: 1234, pickup_point: 77, delivery_type: 3, active: true }
+                ] as any)
+
+            const res = await request(app)
+                .get('/api/delivery/maystro/pickup-points?commune=1234&wilaya=16')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(listSpy).toHaveBeenCalledWith(expect.objectContaining({ commune: '1234' }))
+        })
+
+        it('rejects a commune name that does not exist in the wilaya', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+
+            vi.spyOn(MaystroLocationService.prototype, 'listCommunes').mockResolvedValue([
+                { id: 1234, wilaya: 16, name: 'Hydra' }
+            ] as any)
+
+            const res = await request(app)
+                .get('/api/delivery/maystro/pickup-points?commune=Nowhere&wilaya=16')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(400)
+            expect(res.body.statusMessage).toBe('Invalid commune for wilaya')
+        })
+
+        it('does not leak another tenant\'s carrier connection', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+
+            vi.spyOn(MaystroProvider.prototype, 'listCommunes').mockResolvedValue([{ id: '101', name: 'Hydra' }])
+
+            // tenantB never connected Maystro, so it must be refused even though tenantA did.
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/MAYSTRO/communes?wilaya=16')
+                .set('Authorization', `Bearer ${tokenB}`)
+                .set('Host', `${tenantB.slug}.swekly.com`)
+
+            expect(res.status).toBe(400)
+            expect(res.body.statusMessage).toContain('credentials')
+        })
     })
 })

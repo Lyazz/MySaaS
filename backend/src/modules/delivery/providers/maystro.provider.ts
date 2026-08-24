@@ -3,11 +3,13 @@ import type {
     CreateShipmentInput,
     CreateShipmentResult,
     DeliveryProvider,
+    ProviderCommune,
     QuoteOption,
     QuoteRequest,
     TrackingEvent
 } from '../types'
 import { MaystroClient } from '../maystro/maystro.client'
+import { normalizeLocationName } from '../shared/normalize-location-name'
 
 export class MaystroProvider implements DeliveryProvider {
     provider: ShipmentProvider = 'MAYSTRO'
@@ -37,7 +39,7 @@ export class MaystroProvider implements DeliveryProvider {
         if (!this.client) return null
         const wilayas = await this.client.request<any[]>({ method: 'GET', path: '/base/wilayas/' })
         const match = (Array.isArray(wilayas) ? wilayas : []).find(
-            (w) => String(w?.name ?? w?.name_lt ?? w?.name_ar ?? '').toLowerCase() === trimmed.toLowerCase()
+            (w) => normalizeLocationName(w?.name ?? w?.name_lt ?? w?.name_ar ?? '') === normalizeLocationName(trimmed)
         )
         const id = Number(match?.id ?? match?.code ?? match?.display_id ?? NaN)
         if (!Number.isFinite(id)) return null
@@ -80,7 +82,7 @@ export class MaystroProvider implements DeliveryProvider {
                     communeId = String(numericCommune)
                 } else {
                     const communes = await this.listCommunesForWilaya(wilayaId)
-                    const match = communes.find((c) => c.name.toLowerCase() === rawCommune.toLowerCase())
+                    const match = communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(rawCommune))
                     if (match) communeId = String(match.id)
                 }
             }
@@ -134,5 +136,12 @@ export class MaystroProvider implements DeliveryProvider {
     async track(): Promise<TrackingEvent[]> {
         // Maystro does not expose a simple tracking endpoint; rely on stored events + webhooks.
         return []
+    }
+
+    async listCommunes(wilayaCode: string): Promise<ProviderCommune[]> {
+        const wilayaId = await this.resolveWilayaId(wilayaCode)
+        if (!wilayaId) return []
+        const communes = await this.listCommunesForWilaya(wilayaId)
+        return communes.map((c) => ({ id: String(c.id), name: c.name }))
     }
 }

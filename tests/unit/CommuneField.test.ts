@@ -3,12 +3,12 @@ import { mount } from '@vue/test-utils'
 import { defineComponent, ref } from 'vue'
 import CommuneField from '../../components/storefront/CommuneField.vue'
 
-const communesRef = ref<Array<{ id: number; name: string }>>([])
+const communesRef = ref<Array<{ name: string }>>([])
 const loadingRef = ref(false)
 const errorRef = ref<string | null>(null)
 
-vi.mock('~/composables/useMaystroCommunes', () => ({
-    useMaystroCommunes: () => ({
+vi.mock('~/composables/useDeliveryCommunes', () => ({
+    useDeliveryCommunes: () => ({
         communes: communesRef,
         loading: loadingRef,
         error: errorRef,
@@ -48,11 +48,11 @@ describe('CommuneField', () => {
     })
 
     it('enables <select> when communes are available', () => {
-        communesRef.value = [{ id: 575, name: 'Alger' }]
+        communesRef.value = [{ name: 'Alger' }]
         const wrapper = mount(Harness, { props: { wilayaCode: '16' } })
         const select = wrapper.get('select')
         expect(select.attributes('disabled')).toBeUndefined()
-        expect(wrapper.text()).toContain('575 - Alger')
+        expect(wrapper.text()).toContain('Alger')
     })
 })
 

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CarrierMark from '~/components/storefront/shared/CarrierMark.vue'
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
@@ -112,7 +113,7 @@ const availableProviders = computed(() => {
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => quickForm.wilaya,
   communeCode: () => quickForm.commune
 })
@@ -120,10 +121,9 @@ const maystroPrices = useMaystroDeliveryPrices({
 const deliveryOptions = computed(() => {
   const options: any[] = []
   availableProviders.value.forEach((provider: any) => {
-    const homePrice = provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-      ? String(Math.round(maystroPrices.homePrice.value)) : provider.key === 'MAYSTRO' ? '—' : '350'
-    const officePrice = provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-      ? String(Math.round(maystroPrices.officePrice.value)) : provider.key === 'MAYSTRO' ? '—' : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
     options.push({ id: `${provider.key}-home`, provider: provider.key, providerLabel: provider.label, mode: 'home', modeLabel: storefrontContent.value.checkout.delivery.mode.homeDelivery, icon: provider.icon, color: provider.color, price: homePrice, description: storefrontContent.value.checkout.delivery.description.homeDelivery })
     options.push({ id: `${provider.key}-pickup`, provider: provider.key, providerLabel: provider.label, mode: 'pickup', modeLabel: storefrontContent.value.checkout.delivery.mode.pickupPoint, icon: provider.icon, color: provider.color, price: officePrice, description: storefrontContent.value.checkout.delivery.description.pickupPoint })
   })
@@ -230,7 +230,8 @@ const handleOrderSubmit = async () => {
     const delivery = selectedDelivery.value
     const isMaystro = delivery?.provider === 'MAYSTRO'
     const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
-    const maystroShippingAmount = isMaystro ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value) : null
+    const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
+    const maystroShippingAmount = providerPrices ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home) : null
     if (isMaystro) {
       if (!quickForm.wilaya || !quickForm.commune) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
       if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
@@ -242,9 +243,9 @@ const handleOrderSubmit = async () => {
       shippingWilayaCode: quickForm.wilaya || undefined, shippingCommuneCode: quickForm.commune || undefined,
       deliveryMode: delivery?.mode, shippingProvider: delivery?.provider || undefined,
       shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
-      shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-      shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-      shippingCurrency: isMaystro ? currencyCode.value : undefined,
+      shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+      shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+      shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
       items: [{ productId: props.product.id, variantId: props.currentVariant?.id, quantity: quantity.value }]
     }
     const currency = storeSettings.value?.currencyCode || 'DZD'
@@ -375,7 +376,7 @@ const handleAddToCart = async () => {
             >
               <div class="order-form__delivery-left">
                 <div class="order-form__delivery-icon-wrap">
-                  <Icon :name="option.icon" style="width:13px;height:13px" />
+                  <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" style="width:13px;height:13px" />
                 </div>
                 <div>
                   <p class="order-form__delivery-name">{{ option.providerLabel }}</p>

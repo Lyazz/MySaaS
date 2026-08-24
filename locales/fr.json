@@ -3959,14 +3959,12 @@
       "delivery": {
         "metaTitle": "Entreprises de livraison",
         "title": "Entreprises de livraison",
-        "subtitle": "Gérez les transporteurs et les tarifs par wilaya",
+        "subtitle": "Choisissez les transporteurs proposés au paiement et le tarif de chaque wilaya",
         "providers": {
           "toggleLabel": "Activer",
           "noCredentials": "Sans identifiants",
           "connected": "Connecté",
-          "notConnected": "Non connecté",
-          "wilayasSupported": "{count} wilayas prises en charge",
-          "managePricing": "Gérer les tarifs"
+          "notConnected": "Non connecté"
         },
         "credentials": {
           "title": "Identifiants API — {provider}",
@@ -3980,7 +3978,8 @@
           "secretPlaceholderNotSet": "Saisir le token",
           "errors": {
             "saveFailed": "Impossible d’enregistrer les identifiants"
-          }
+          },
+          "save": "Enregistrer la connexion"
         },
         "pricing": {
           "title": "Configuration des tarifs : {provider}",
@@ -3991,7 +3990,7 @@
             "office": "Bureau"
           },
           "searchPlaceholder": "Rechercher une wilaya (code ou nom)…",
-          "overridePlaceholder": "Laisser vide pour utiliser le transporteur",
+          "overridePlaceholder": "Tarif transporteur",
           "filters": {
             "all": "Toutes",
             "overrides": "Overrides",
@@ -3999,7 +3998,6 @@
             "missingCarrier": "Tarif transporteur manquant"
           },
           "showingCount": "Affichage {shown} sur {total}",
-          "pageOf": "Page {page} / {pages}",
           "fetchCarrierRates": "Récupérer les tarifs du transporteur",
           "fetchingCarrierRates": "Récupération…",
           "table": {
@@ -4007,13 +4005,102 @@
             "wilaya": "Wilaya",
             "price": "Prix (DZD)",
             "carrierPrice": "Tarif transporteur",
-            "overridePrice": "Votre tarif"
+            "overridePrice": "Votre tarif",
+            "margin": "Marge"
+          },
+          "save": "Enregistrer les tarifs",
+          "discard": "Annuler",
+          "unsaved": "tarif non enregistré | tarifs non enregistrés",
+          "noMatches": "Aucune wilaya ne correspond à cette recherche.",
+          "clearFilters": "Effacer les filtres",
+          "loadFailed": "Chargement des tarifs impossible. Rechargez la page.",
+          "carrierSource": {
+            "title": "Tarifs transporteur",
+            "empty": "Pas encore récupérés — récupérez-les pour les comparer à vos prix.",
+            "loaded": "{count} tarifs récupérés chez le transporteur.",
+            "needsConnection": "Connectez d’abord ce transporteur."
+          },
+          "margin": {
+            "prefix": "Fixer chaque tarif visible à transporteur +",
+            "unit": "Unité de marge",
+            "apply": "Appliquer à {count} tarifs",
+            "hint": "Remplit les champs ci-dessous. Rien n’est enregistré avant d’appuyer sur Enregistrer les tarifs.",
+            "needsCarrierRates": "Récupérez d’abord les tarifs transporteur."
           }
         },
         "errors": {
           "updateProviderFailed": "Impossible de mettre à jour le statut du transporteur",
           "saveFailed": "Impossible d’enregistrer les tarifs",
           "fetchCarrierRatesFailed": "Impossible de récupérer les tarifs du transporteur"
+        },
+        "section": "Livraison",
+        "stats": {
+          "offered": "au paiement",
+          "connected": "connectés",
+          "wilayas": "wilayas"
+        },
+        "rail": {
+          "carriers": "Transporteurs",
+          "alsoAtCheckout": "Aussi au paiement",
+          "offerToggle": "Proposer {provider} au paiement"
+        },
+        "tabs": {
+          "connection": "Connexion",
+          "pricing": "Tarifs par wilaya"
+        },
+        "workspace": {
+          "offered": "Les clients peuvent choisir ce transporteur au paiement",
+          "notOffered": "Masqué au paiement",
+          "emptyTitle": "Choisissez un transporteur",
+          "emptyHint": "Sélectionnez un transporteur à gauche pour le connecter et définir ses tarifs par wilaya."
+        },
+        "storePickup": {
+          "title": "Retrait en magasin",
+          "hint": "Les clients qui choisissent cette option viennent récupérer leur commande eux-mêmes.",
+          "on": "Proposé au paiement",
+          "off": "Masqué au paiement",
+          "toggleLabel": "Proposer le retrait en magasin"
+        },
+        "maystro": {
+          "resync": {
+            "title": "Resynchroniser les produits Maystro",
+            "hint": "Répare les produits acceptés par Maystro sans identifiant produit — la cause habituelle des erreurs « produits manquants » lors de l’envoi d’une commande. Sans risque.",
+            "action": "Resynchroniser",
+            "running": "Resynchronisation…",
+            "done": "{fixed} produit(s) corrigé(s), {skipped} ignoré(s).",
+            "failed": "Échec de la resynchronisation. Réessayez.",
+            "needsConnection": "Connectez d’abord Maystro."
+          }
+        },
+        "yalidine": {
+          "title": "Configuration du webhook Yalidine",
+          "hint": "Ajoutez cette URL dans le tableau de bord Webhooks de Yalidine pour que les statuts de livraison se mettent à jour automatiquement.",
+          "urlLabel": "URL du webhook à donner à Yalidine",
+          "urlHint": "Doit être un domaine HTTPS public. Remplacez le domaine si votre boutique en utilise un personnalisé.",
+          "localhostNotice": "Localhost ne peut pas recevoir les webhooks Yalidine : l’URL de production est affichée.",
+          "copy": "Copier l’URL",
+          "copied": "Copié",
+          "copyFailed": "Copie impossible. Sélectionnez l’URL et copiez-la manuellement.",
+          "stepsTitle": "Dans le tableau de bord Yalidine",
+          "steps": {
+            "open": "Ouvrez le tableau de bord Webhooks.",
+            "paste": "Ajoutez un webhook et collez l’URL ci-dessus.",
+            "secret": "Définissez le même secret là-bas et dans le champ Webhook Secret ici.",
+            "activate": "Testez le webhook, puis activez-le."
+          },
+          "eventsTitle": "Sélectionnez ces événements"
+        },
+        "probe": {
+          "title": "Vérifier le prix exact d’une commune",
+          "hint": "Les tarifs transporteur du tableau sont échantillonnés par wilaya. Vérifiez une commune pour le prix exact du transporteur.",
+          "commune": "Commune",
+          "selectCommune": "Choisir une commune",
+          "loadingCommunes": "Chargement des communes…",
+          "noCommunes": "Aucune commune",
+          "action": "Vérifier le prix",
+          "checking": "Vérification…",
+          "communesFailed": "Chargement des communes impossible. Vérifiez les identifiants de ce transporteur.",
+          "pricesFailed": "Récupération des prix impossible chez ce transporteur. Réessayez."
         }
       },
       "onboarding": {

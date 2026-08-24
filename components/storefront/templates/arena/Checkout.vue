@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CarrierMark from '~/components/storefront/shared/CarrierMark.vue'
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
@@ -33,12 +34,9 @@ const availableProviders = computed(() => {
 const deliveryOptions = computed(() => {
   const options: any[] = []
   availableProviders.value.forEach((provider: any) => {
-    const homePrice = provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-      ? String(Math.round(maystroPrices.homePrice.value))
-      : provider.key === 'MAYSTRO' ? '—' : '350'
-    const officePrice = provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-      ? String(Math.round(maystroPrices.officePrice.value))
-      : provider.key === 'MAYSTRO' ? '—' : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
 
     options.push({
       id: `${provider.key}-home`,
@@ -88,7 +86,7 @@ const form = ref({
   selectedDeliveryOption: ''
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => form.value.wilaya,
   communeCode: () => form.value.commune
 })
@@ -236,8 +234,9 @@ async function handleSubmit() {
         const url = useTenantApiUrl('/api/orders')
         const isMaystro = delivery?.provider === 'MAYSTRO'
         const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
-        const maystroShippingAmount = isMaystro
-          ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
+        const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
+        const maystroShippingAmount = providerPrices
+          ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home)
           : null
 
         if (isMaystro) {
@@ -261,9 +260,9 @@ async function handleSubmit() {
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
           shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
-          shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-          shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-          shippingCurrency: isMaystro ? currencyCode.value : undefined,
+          shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+          shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+          shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
           redeemPointsRequested: loyalty.redeemPointsRequested.value || undefined,
           items: cartStore.items.map(item => ({
             productId: item.productId,
@@ -415,7 +414,7 @@ async function handleSubmit() {
                   class="w-12 h-12 flex items-center justify-center flex-shrink-0 border transition-colors"
                   :class="form.selectedDeliveryOption === option.id ? 'border-brand-500 bg-brand-500 text-[#02060a]' : 'border-white/15 text-slate-400 group-hover:text-white'"
                 >
-                  <Icon :name="option.icon" class="w-5 h-5" />
+                  <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-5 h-5" />
                 </div>
                 <div class="flex-1 min-w-0">
                   <div class="flex items-center gap-2 mb-0.5">

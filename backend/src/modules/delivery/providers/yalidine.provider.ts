@@ -3,6 +3,7 @@ import type {
     CreateShipmentInput,
     CreateShipmentResult,
     DeliveryProvider,
+    ProviderCommune,
     QuoteOption,
     QuoteRequest,
     TrackingEvent
@@ -11,6 +12,7 @@ import { YalidineClient } from '../yalidine/yalidine.client'
 import { YalidineIntegrationError } from '../yalidine/yalidine.errors'
 import { YalidineLocationService } from '../yalidine/yalidine-location.service'
 import { yalidineStatusToShipmentStatus } from '../yalidine/yalidine-status'
+import { normalizeLocationName } from '../shared/normalize-location-name'
 
 type YalidineFeeResponse = {
     from_wilaya_name?: string
@@ -159,7 +161,7 @@ export class YalidineProvider implements DeliveryProvider {
             const selected = communeId
                 ? feesByCommune[String(communeId)] ?? candidates.find((c) => Number(c?.commune_id) === communeId)
                 : rawCommune
-                    ? candidates.find((c) => String(c?.commune_name ?? '').toLowerCase() === rawCommune.toLowerCase())
+                    ? candidates.find((c) => normalizeLocationName(c?.commune_name ?? '') === normalizeLocationName(rawCommune))
                     : candidates
                         .filter((c) => parsePositiveNumber((c as any)?.[feeKey]) != null)
                         .sort((a, b) => Number((a as any)[feeKey]) - Number((b as any)[feeKey]))[0]
@@ -278,5 +280,12 @@ export class YalidineProvider implements DeliveryProvider {
             eventTime: event?.date_status ? new Date(String(event.date_status).replace(' ', 'T')) : undefined,
             raw: event
         }))
+    }
+
+    async listCommunes(wilayaCode: string): Promise<ProviderCommune[]> {
+        const { location } = this.requireClient()
+        const wilaya = await location.resolveWilaya(wilayaCode)
+        const communes = await location.listCommunes({ wilayaId: wilaya.id })
+        return communes.map((c) => ({ id: String(c.id), name: c.name }))
     }
 }

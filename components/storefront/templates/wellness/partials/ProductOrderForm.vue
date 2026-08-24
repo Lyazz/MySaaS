@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CarrierMark from '~/components/storefront/shared/CarrierMark.vue'
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
@@ -127,7 +128,7 @@ const availableProviders = computed(() => {
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => quickForm.wilaya,
   communeCode: () => quickForm.commune
 })
@@ -137,18 +138,9 @@ const deliveryOptions = computed(() => {
   const options: any[] = []
   
   availableProviders.value.forEach((provider: any) => {
-    const homePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-        ? String(Math.round(maystroPrices.homePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '350'
-    const officePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-        ? String(Math.round(maystroPrices.officePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
 
     options.push({
       id: `${provider.key}-home`,
@@ -349,10 +341,11 @@ const handleOrderSubmit = async () => {
         const delivery = selectedDelivery.value
         const isMaystro = delivery?.provider === 'MAYSTRO'
         const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
+        const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
         const maystroShippingAmount =
-          isMaystro
-            ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
-            : null
+          providerPrices
+            ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home)
+          : null
 
         if (isMaystro) {
           
@@ -376,9 +369,9 @@ const handleOrderSubmit = async () => {
             deliveryMode: delivery?.mode,
             shippingProvider: delivery?.provider || undefined,
             shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
-            shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-            shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-            shippingCurrency: isMaystro ? currencyCode.value : undefined,
+            shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+            shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+            shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
             items: [
                 {
                     productId: props.product.id,
@@ -614,10 +607,7 @@ const handleAddToCart = async () => {
                             class="w-11 h-11 border flex items-center justify-center flex-shrink-0 transition-colors duration-200"
                             :class="quickForm.selectedDeliveryOption === option.id ? 'bg-wl-ink border-wl-ink text-wl-paper' : 'bg-wl-card border-wl-rule text-wl-muted'"
                         >
-                            <Icon 
-                            :name="option.icon" 
-                            class="w-7 h-7 transition-colors duration-300"
-                            />
+                            <CarrierMark :provider="option.provider" :icon="option.icon" :alt="option.providerLabel" class="w-7 h-7 transition-colors duration-300" />
                         </div>
                         
                         <div class="flex-1 min-w-0">

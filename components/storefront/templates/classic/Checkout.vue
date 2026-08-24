@@ -37,18 +37,9 @@ const deliveryOptions = computed(() => {
   
   // Add provider options (home + pickup for each)
   availableProviders.value.forEach((provider: any) => {
-    const homePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-        ? String(Math.round(maystroPrices.homePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '350'
-    const officePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-        ? String(Math.round(maystroPrices.officePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
 
     // Home delivery option
     options.push({
@@ -105,7 +96,7 @@ const form = ref({
   selectedDeliveryOption: ''
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => form.value.wilaya,
   communeCode: () => form.value.commune
 })
@@ -251,10 +242,11 @@ async function handleSubmit() {
         const url = useTenantApiUrl('/api/orders')
         const isMaystro = delivery?.provider === 'MAYSTRO'
         const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
+        const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
         const maystroShippingAmount =
-          isMaystro
-            ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
-            : null
+          providerPrices
+            ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home)
+          : null
 
         if (isMaystro) {
           
@@ -277,9 +269,9 @@ async function handleSubmit() {
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
           shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
-          shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-          shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-          shippingCurrency: isMaystro ? currencyCode.value : undefined,
+          shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+          shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+          shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
           redeemPointsRequested: loyalty.redeemPointsRequested.value || undefined,
           items: cartStore.items.map(item => ({
             productId: item.productId,

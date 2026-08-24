@@ -7,10 +7,12 @@ import { DELIVERY_PROVIDER_CATALOG, getProviderCatalogItem } from './catalog'
 import { MaystroOrderService } from './maystro/maystro-order.service'
 import { MaystroWebhookService } from './maystro/maystro-webhook.service'
 import { MaystroLocationService } from './maystro/maystro-location.service'
+import { normalizeLocationName } from './shared/normalize-location-name'
 import { moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
 import { OrdersService } from '../orders/orders.service'
 import type {
     CreateShipmentInput,
+    ProviderCommune,
     QuoteOption,
     QuoteRequest,
     TrackingEvent,
@@ -173,6 +175,37 @@ export class DeliveryService {
         }
 
         throw new Error(`Unsupported provider: ${provider}`)
+    }
+
+    async listCommuneNames(tenantId: string, wilayaCode: string): Promise<{ name: string }[]> {
+        const offeredProviders = await this.getOfferedProviders(tenantId)
+
+        const preferenceOrder: ShipmentProvider[] = ['MAYSTRO', 'YALIDINE']
+        const orderedProviders = [
+            ...preferenceOrder.filter((p) => offeredProviders.includes(p)),
+            ...offeredProviders.filter((p) => !preferenceOrder.includes(p))
+        ]
+
+        const byNormalizedName = new Map<string, string>()
+
+        for (const provider of orderedProviders) {
+            try {
+                const { impl } = await this.resolveProvider(tenantId, provider)
+                if (!impl.listCommunes) continue
+                const communes = await impl.listCommunes(wilayaCode)
+                for (const commune of communes) {
+                    const key = normalizeLocationName(commune.name)
+                    if (!key || byNormalizedName.has(key)) continue
+                    byNormalizedName.set(key, commune.name)
+                }
+            } catch {
+                // A misconfigured/unreachable provider must not break the merged list for the others.
+            }
+        }
+
+        return Array.from(byNormalizedName.values())
+            .sort((a, b) => a.localeCompare(b))
+            .map((name) => ({ name }))
     }
 
     private resolveServiceLevel(input: { serviceLevel?: string; deliveryMode?: 'home' | 'office' }) {
@@ -443,6 +476,88 @@ export class DeliveryService {
                 serviceLevel: effectiveServiceLevel
             }
         })
+    }
+
+    /**
+     * Resolve one provider for an admin-side lookup, failing loudly rather than
+     * silently returning nothing — the admin needs to know *why* a carrier can't
+     * answer, unlike the storefront where a dead provider is just skipped.
+     */
+    private async resolveProviderForAdmin(tenantId: string, provider: ShipmentProvider) {
+        const catalogItem = getProviderCatalogItem(provider)
+        const { impl, apiConfig } = await this.resolveProvider(tenantId, provider)
+
+        const requiresCredentials = catalogItem.credentialFields.some((f) => f.required)
+        if (requiresCredentials && !apiConfig) {
+            throw new DeliveryConfigurationError(400, 'Delivery provider credentials are not configured')
+        }
+
+        return { impl, catalogItem }
+    }
+
+    /**
+     * The carrier's own commune list for a wilaya, ids included. Generic across
+     * carriers: anything implementing `listCommunes` answers here.
+     */
+    async listProviderCommunes(input: {
+        tenantId: string
+        provider: ShipmentProvider
+        wilayaCode: string
+    }): Promise<ProviderCommune[]> {
+        const { impl } = await this.resolveProviderForAdmin(input.tenantId, input.provider)
+        if (!impl.listCommunes) {
+            throw new DeliveryConfigurationError(400, 'Provider does not expose communes')
+        }
+        return impl.listCommunes(input.wilayaCode)
+    }
+
+    /**
+     * The carrier's raw price for one exact commune, per delivery mode.
+     *
+     * Deliberately calls `impl.quote()` rather than `listOptions()`: the admin is
+     * asking what the carrier charges, not what the shopper would pay, so tenant
+     * overrides and fallback rates must not be applied.
+     */
+    async getProviderCommunePrice(input: {
+        tenantId: string
+        provider: ShipmentProvider
+        wilayaCode: string
+        communeCode: string
+        weight?: number
+        codAmount?: number
+        originWilayaCode?: string
+    }): Promise<Record<'home' | 'office', { price: number | null; currency: string }>> {
+        const { impl, catalogItem } = await this.resolveProviderForAdmin(input.tenantId, input.provider)
+        if (!catalogItem.supports.quote || !impl.quote) {
+            throw new DeliveryConfigurationError(400, 'Provider does not support live rates')
+        }
+
+        const weight = typeof input.weight === 'number' && Number.isFinite(input.weight) && input.weight > 0 ? input.weight : 1
+        const codAmount =
+            typeof input.codAmount === 'number' && Number.isFinite(input.codAmount) && input.codAmount > 0
+                ? input.codAmount
+                : undefined
+
+        const modes = ['home', 'office'] as const
+        const results = await Promise.all(
+            modes.map(async (deliveryMode) => {
+                const quotes = await impl.quote!({
+                    tenantId: input.tenantId,
+                    provider: input.provider,
+                    destination: { wilayaCode: input.wilayaCode, communeCode: input.communeCode },
+                    weight,
+                    codAmount,
+                    deliveryMode,
+                    serviceLevel: this.resolveServiceLevel({ deliveryMode }),
+                    originWilayaCode: input.originWilayaCode
+                })
+
+                const best = quotes.length ? quotes.reduce((a, b) => (a.price <= b.price ? a : b)) : null
+                return [deliveryMode, { price: best ? best.price : null, currency: best?.currency || 'DZD' }] as const
+            })
+        )
+
+        return Object.fromEntries(results) as Record<'home' | 'office', { price: number | null; currency: string }>
     }
 
     async listCompanies(tenantId: string) {

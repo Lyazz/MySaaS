@@ -62,6 +62,16 @@ export type TrackingEvent = {
     raw?: any
 }
 
+/**
+ * A commune as the carrier knows it. `id` is the carrier's own identifier when it
+ * has one — carriers that price per commune (Maystro, Yalidine) need it to quote an
+ * exact address, and dropping it here is what used to force carrier-specific routes.
+ */
+export type ProviderCommune = {
+    id?: string
+    name: string
+}
+
 export interface DeliveryProvider {
     provider: ShipmentProvider
     quote?(input: QuoteRequest): Promise<QuoteOption[]>
@@ -70,4 +80,5 @@ export interface DeliveryProvider {
     getLabel?(shipment: Shipment): Promise<string | null>
     handleWebhook?(payload: any): Promise<{ shipmentId?: string; events?: TrackingEvent[]; status?: ShipmentStatus } | null>
     listCompanies?(): Promise<{ code: string; name: string }[]>
+    listCommunes?(wilayaCode: string): Promise<ProviderCommune[]>
 }

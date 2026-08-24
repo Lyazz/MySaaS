@@ -61,7 +61,7 @@ const handleUpdate = (val: any) => {
           :class="[inputClass, 'w-full pe-10 truncate rtl:pr-4 rtl:pl-10']"
           :displayValue="(option: any) => option?.label || ''"
           :placeholder="placeholder"
-          @change="query = $event.target.value"
+          @input="query = ($event.target as HTMLInputElement).value"
           @focus="openDropdown"
           @click="openDropdown"
         />

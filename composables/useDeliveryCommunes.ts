@@ -1,14 +1,14 @@
 import { computed, ref, watch } from 'vue'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 
-export type MaystroCommune = { id: number; name: string; wilaya: number; postcode?: string; zone?: string }
+export type DeliveryCommune = { name: string }
 
-type Cache = Record<string, MaystroCommune[]>
+type Cache = Record<string, DeliveryCommune[]>
 
-export const useMaystroCommunes = (wilayaCode: () => string) => {
-  const cache = useState<Cache>('maystro-communes-cache', () => ({}))
+export const useDeliveryCommunes = (wilayaCode: () => string) => {
+  const cache = useState<Cache>('delivery-communes-cache', () => ({}))
 
-  const communes = ref<MaystroCommune[]>([])
+  const communes = ref<DeliveryCommune[]>([])
   const loading = ref(false)
   const error = ref<string | null>(null)
 
@@ -28,8 +28,8 @@ export const useMaystroCommunes = (wilayaCode: () => string) => {
 
     loading.value = true
     try {
-      const url = useTenantApiUrl(`/api/delivery/maystro/communes?wilaya=${encodeURIComponent(w)}`)
-      const data = await $fetch<MaystroCommune[]>(url, {
+      const url = useTenantApiUrl(`/api/delivery/communes?wilaya=${encodeURIComponent(w)}`)
+      const data = await $fetch<DeliveryCommune[]>(url, {
         headers: {
           ...(useTenantApiHeaders() || {})
         }
@@ -50,4 +50,3 @@ export const useMaystroCommunes = (wilayaCode: () => string) => {
 
   return { communes, loading, error, refresh }
 }
-

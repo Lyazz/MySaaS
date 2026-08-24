@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, watch } from 'vue'
-import { useMaystroCommunes } from '~/composables/useMaystroCommunes'
+import { useDeliveryCommunes } from '~/composables/useDeliveryCommunes'
 
 const props = defineProps<{
   modelValue: string
@@ -19,7 +19,7 @@ const value = computed({
   set: (v: string) => emit('update:modelValue', v)
 })
 
-const { communes, loading, error } = useMaystroCommunes(() => props.wilayaCode)
+const { communes, loading, error } = useDeliveryCommunes(() => props.wilayaCode)
 
 watch(
   () => props.wilayaCode,
@@ -31,8 +31,8 @@ watch(
 const communeOptions = computed(() => {
   if (!communes.value) return []
   return communes.value.map(c => ({
-    value: String(c.id),
-    label: `${c.id} - ${c.name}`
+    value: c.name,
+    label: c.name
   }))
 })
 </script>
