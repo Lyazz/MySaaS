@@ -500,6 +500,36 @@ export class DeliveryController {
         }
     }
 
+    async getProviderPickupPoints(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        const commune = typeof req.query.commune === 'string' ? req.query.commune.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+
+        try {
+            const points = await service.listProviderPickupPoints({
+                tenantId: tenant.id,
+                provider,
+                wilayaCode: wilaya,
+                communeCode: commune || undefined
+            })
+            res.json(points)
+        } catch (error: any) {
+            if (error instanceof DeliveryConfigurationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get provider pickup points error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async getProviderCommunePrice(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })

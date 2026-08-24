@@ -4,6 +4,7 @@ import type {
     CreateShipmentResult,
     DeliveryProvider,
     ProviderCommune,
+    ProviderPickupPoint,
     QuoteOption,
     QuoteRequest,
     TrackingEvent
@@ -287,5 +288,32 @@ export class YalidineProvider implements DeliveryProvider {
         const wilaya = await location.resolveWilaya(wilayaCode)
         const communes = await location.listCommunes({ wilayaId: wilaya.id })
         return communes.map((c) => ({ id: String(c.id), name: c.name }))
+    }
+
+    async listPickupPoints(input: { wilayaCode: string; communeCode?: string }): Promise<ProviderPickupPoint[]> {
+        const { location } = this.requireClient()
+        const wilaya = await location.resolveWilaya(input.wilayaCode)
+
+        // Yalidine agencies are sparse — a commune often has none while its neighbour
+        // does. Narrow to the commune only if that actually leaves something to pick.
+        const all = await location.listCenters({ wilayaId: wilaya.id })
+        const raw = String(input.communeCode ?? '').trim()
+
+        let scoped = all
+        if (raw) {
+            const communeId = parsePositiveInt(raw)
+            const inCommune = communeId
+                ? all.filter((c) => c.communeId === communeId)
+                : all.filter((c) => normalizeLocationName(c.communeName ?? '') === normalizeLocationName(raw))
+            if (inCommune.length > 0) scoped = inCommune
+        }
+
+        return scoped.map((c) => ({
+            id: String(c.id),
+            name: c.name,
+            address: c.address,
+            communeId: String(c.communeId),
+            communeName: c.communeName
+        }))
     }
 }

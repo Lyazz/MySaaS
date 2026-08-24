@@ -74,6 +74,12 @@ router.get(
     controller.getProviderCommunes.bind(controller)
 )
 router.get(
+    '/admin/delivery/providers/:provider/pickup-points',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    controller.getProviderPickupPoints.bind(controller)
+)
+router.get(
     '/admin/delivery/providers/:provider/commune-price',
     requireTenantMember,
     requireStaffPermission('delivery', 'read'),

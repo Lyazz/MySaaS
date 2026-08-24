@@ -72,6 +72,19 @@ export type ProviderCommune = {
     name: string
 }
 
+/**
+ * A place the customer collects the parcel themselves — Maystro calls these pickup
+ * points and stop desks, Yalidine calls them centers/agencies. Normalized here so
+ * checkout can offer "collect it yourself" without knowing which carrier is behind it.
+ */
+export type ProviderPickupPoint = {
+    id: string
+    name: string
+    address?: string
+    communeId?: string
+    communeName?: string
+}
+
 export interface DeliveryProvider {
     provider: ShipmentProvider
     quote?(input: QuoteRequest): Promise<QuoteOption[]>
@@ -81,4 +94,5 @@ export interface DeliveryProvider {
     handleWebhook?(payload: any): Promise<{ shipmentId?: string; events?: TrackingEvent[]; status?: ShipmentStatus } | null>
     listCompanies?(): Promise<{ code: string; name: string }[]>
     listCommunes?(wilayaCode: string): Promise<ProviderCommune[]>
+    listPickupPoints?(input: { wilayaCode: string; communeCode?: string }): Promise<ProviderPickupPoint[]>
 }

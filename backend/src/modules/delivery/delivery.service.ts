@@ -13,6 +13,7 @@ import { OrdersService } from '../orders/orders.service'
 import type {
     CreateShipmentInput,
     ProviderCommune,
+    ProviderPickupPoint,
     QuoteOption,
     QuoteRequest,
     TrackingEvent,
@@ -509,6 +510,23 @@ export class DeliveryService {
             throw new DeliveryConfigurationError(400, 'Provider does not expose communes')
         }
         return impl.listCommunes(input.wilayaCode)
+    }
+
+    /**
+     * Places the customer can collect from, normalized across carriers — Maystro
+     * pickup points and stop desks, Yalidine agencies.
+     */
+    async listProviderPickupPoints(input: {
+        tenantId: string
+        provider: ShipmentProvider
+        wilayaCode: string
+        communeCode?: string
+    }): Promise<ProviderPickupPoint[]> {
+        const { impl } = await this.resolveProviderForAdmin(input.tenantId, input.provider)
+        if (!impl.listPickupPoints) {
+            throw new DeliveryConfigurationError(400, 'Provider does not offer pickup points')
+        }
+        return impl.listPickupPoints({ wilayaCode: input.wilayaCode, communeCode: input.communeCode })
     }
 
     /**

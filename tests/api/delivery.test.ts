@@ -9,6 +9,7 @@ import { YalidineProvider } from '../../backend/src/modules/delivery/providers/y
 import { MaystroClient } from '../../backend/src/modules/delivery/maystro/maystro.client'
 import { MaystroLocationService } from '../../backend/src/modules/delivery/maystro/maystro-location.service'
 import { MaystroPickupPointService } from '../../backend/src/modules/delivery/maystro/maystro-pickup-point.service'
+import { YalidineLocationService } from '../../backend/src/modules/delivery/yalidine/yalidine-location.service'
 import { YalidineClient } from '../../backend/src/modules/delivery/yalidine/yalidine.client'
 
 const JWT_SECRET = process.env.JWT_SECRET!
@@ -1136,6 +1137,110 @@ describe('Delivery API', () => {
 
             expect(res.status).toBe(400)
             expect(res.body.statusMessage).toBe('Invalid commune for wilaya')
+        })
+
+        // Pickup points used to be a Maystro-only feature because only Maystro had a
+        // bespoke route, even though Yalidine publishes agencies too. Both now answer
+        // through one route in one shape.
+        it('GET /admin/delivery/providers/YALIDINE/pickup-points returns normalized agencies', async () => {
+            vi.restoreAllMocks()
+            await connect('YALIDINE')
+
+            vi.spyOn(YalidineLocationService.prototype, 'resolveWilaya').mockResolvedValue({ id: 16, name: 'Alger' })
+            vi.spyOn(YalidineLocationService.prototype, 'listCenters').mockResolvedValue([
+                { id: 160101, name: 'Agence Sacré-Cœur', address: '116 Didouche Mourad', communeId: 1601, communeName: 'Alger Centre', wilayaId: 16 },
+                { id: 160501, name: 'Agence Bab El Oued', address: '107 Rue Colonel Lotfi', communeId: 1605, communeName: 'Bab El Oued', wilayaId: 16 }
+            ] as any)
+
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/YALIDINE/pickup-points?wilaya=16')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body).toHaveLength(2)
+            expect(res.body[0]).toEqual({
+                id: '160101',
+                name: 'Agence Sacré-Cœur',
+                address: '116 Didouche Mourad',
+                communeId: '1601',
+                communeName: 'Alger Centre'
+            })
+        })
+
+        it('narrows Yalidine agencies to a commune when that commune has any', async () => {
+            vi.restoreAllMocks()
+            await connect('YALIDINE')
+
+            vi.spyOn(YalidineLocationService.prototype, 'resolveWilaya').mockResolvedValue({ id: 16, name: 'Alger' })
+            vi.spyOn(YalidineLocationService.prototype, 'listCenters').mockResolvedValue([
+                { id: 160101, name: 'Agence Sacré-Cœur', communeId: 1601, communeName: 'Alger Centre', wilayaId: 16 },
+                { id: 160501, name: 'Agence Bab El Oued', communeId: 1605, communeName: 'Bab El Oued', wilayaId: 16 }
+            ] as any)
+
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/YALIDINE/pickup-points?wilaya=16&commune=1601')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body.map((p: any) => p.id)).toEqual(['160101'])
+        })
+
+        it('keeps the whole wilaya when the requested commune has no agency', async () => {
+            vi.restoreAllMocks()
+            await connect('YALIDINE')
+
+            vi.spyOn(YalidineLocationService.prototype, 'resolveWilaya').mockResolvedValue({ id: 16, name: 'Alger' })
+            vi.spyOn(YalidineLocationService.prototype, 'listCenters').mockResolvedValue([
+                { id: 160101, name: 'Agence Sacré-Cœur', communeId: 1601, communeName: 'Alger Centre', wilayaId: 16 }
+            ] as any)
+
+            // Agencies are sparse; an empty list would read as "no pickup available"
+            // when the neighbouring commune has one the customer can reach.
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/YALIDINE/pickup-points?wilaya=16&commune=1699')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body.map((p: any) => p.id)).toEqual(['160101'])
+        })
+
+        it('returns Maystro pickup points in the same shape, resolving a commune name', async () => {
+            vi.restoreAllMocks()
+            await connect('MAYSTRO')
+
+            // Maystro resolves commune names against its own catalog before asking
+            // for pickup points, so the catalog call has to be stubbed too.
+            vi.spyOn(MaystroClient.prototype, 'request').mockImplementation(async (opts: any) => {
+                if (String(opts?.path).includes('/base/communes/')) {
+                    return [{ id: 555, name: 'Sidi Mhamed' }] as any
+                }
+                return [] as any
+            })
+
+            vi.spyOn(MaystroPickupPointService.prototype, 'listActivePickupPointsNearby').mockResolvedValue([
+                { name: 'GARDENIA PERFUME', commune: 555, pickup_point: 10, delivery_type: 3, active: true }
+            ] as any)
+
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/MAYSTRO/pickup-points?wilaya=16&commune=555')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(200)
+            expect(res.body[0]).toMatchObject({ id: '10', name: 'GARDENIA PERFUME', communeId: '555' })
+        })
+
+        it('rejects pickup points for a carrier that has none', async () => {
+            const res = await request(app)
+                .get('/api/admin/delivery/providers/SELF/pickup-points?wilaya=16')
+                .set('Authorization', `Bearer ${tokenA}`)
+                .set('Host', `${tenantA.slug}.swekly.com`)
+
+            expect(res.status).toBe(400)
+            expect(res.body.statusMessage).toContain('pickup points')
         })
 
         it('does not leak another tenant\'s carrier connection', async () => {

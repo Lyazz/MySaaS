@@ -12,6 +12,15 @@ export type YalidineCommune = {
     isDeliverable?: boolean
 }
 
+export type YalidineCenter = {
+    id: number
+    name: string
+    address?: string
+    communeId: number
+    communeName?: string
+    wilayaId: number
+}
+
 export type ResolvedYalidineLocation = {
     wilayaId: number
     wilayaName: string
@@ -40,6 +49,7 @@ export class YalidineLocationService {
     private client: YalidineClient
     private wilayasCache: CacheEntry<YalidineWilaya[]> | null = null
     private communesCache = new Map<string, CacheEntry<YalidineCommune[]>>()
+    private centersCache = new Map<string, CacheEntry<YalidineCenter[]>>()
 
     constructor(client: YalidineClient) {
         this.client = client
@@ -100,6 +110,43 @@ export class YalidineLocationService {
 
         this.communesCache.set(cacheKey, { value: communes, expiresAt: nowMs() + this.cacheTtlMs() })
         return communes
+    }
+
+    /**
+     * Yalidine's agencies ("centers") — the equivalent of Maystro's stop desks.
+     * Scoped by wilaya; the caller narrows to a commune when it wants only the
+     * agencies the customer can realistically walk to.
+     */
+    async listCenters(input: { wilayaId?: string | number; communeId?: string | number } = {}): Promise<YalidineCenter[]> {
+        const wilayaId = input.wilayaId == null ? null : parsePositiveInt(input.wilayaId)
+        const communeId = input.communeId == null ? null : parsePositiveInt(input.communeId)
+        const cacheKey = `${wilayaId ?? 'all'}:${communeId ?? 'all'}`
+        const cached = this.centersCache.get(cacheKey)
+        if (cached && cached.expiresAt > nowMs()) return cached.value
+
+        const data = await this.client.request<any[] | ListEnvelope<any>>({
+            method: 'GET',
+            path: '/centers/',
+            params: {
+                page_size: 1000,
+                wilaya_id: wilayaId ?? undefined,
+                commune_id: communeId ?? undefined
+            }
+        })
+
+        const centers = unwrapList(data)
+            .map((c: any) => ({
+                id: Number(c?.center_id),
+                name: String(c?.name ?? ''),
+                address: c?.address == null ? undefined : String(c.address),
+                communeId: Number(c?.commune_id),
+                communeName: c?.commune_name == null ? undefined : String(c.commune_name),
+                wilayaId: Number(c?.wilaya_id)
+            }))
+            .filter((c) => Number.isFinite(c.id) && c.name.trim().length > 0)
+
+        this.centersCache.set(cacheKey, { value: centers, expiresAt: nowMs() + this.cacheTtlMs() })
+        return centers
     }
 
     async resolveWilaya(input: string | number): Promise<{ id: number; name: string }> {

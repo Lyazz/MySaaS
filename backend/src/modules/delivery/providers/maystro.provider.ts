@@ -4,11 +4,13 @@ import type {
     CreateShipmentResult,
     DeliveryProvider,
     ProviderCommune,
+    ProviderPickupPoint,
     QuoteOption,
     QuoteRequest,
     TrackingEvent
 } from '../types'
 import { MaystroClient } from '../maystro/maystro.client'
+import { MaystroPickupPointService } from '../maystro/maystro-pickup-point.service'
 import { normalizeLocationName } from '../shared/normalize-location-name'
 
 export class MaystroProvider implements DeliveryProvider {
@@ -18,8 +20,12 @@ export class MaystroProvider implements DeliveryProvider {
     private wilayaIdByInput = new Map<string, number>()
     private communesByWilayaId = new Map<number, Array<{ id: number; name: string }>>()
 
+    private apiToken: string | null = null
+    private pickupPoints = new MaystroPickupPointService()
+
     constructor(opts?: { apiToken?: string }) {
         const apiToken = typeof opts?.apiToken === 'string' ? opts.apiToken.trim() : ''
+        this.apiToken = apiToken || null
         this.client = apiToken ? new MaystroClient({ apiToken }) : null
     }
 
@@ -143,5 +149,41 @@ export class MaystroProvider implements DeliveryProvider {
         if (!wilayaId) return []
         const communes = await this.listCommunesForWilaya(wilayaId)
         return communes.map((c) => ({ id: String(c.id), name: c.name }))
+    }
+
+    async listPickupPoints(input: { wilayaCode: string; communeCode?: string }): Promise<ProviderPickupPoint[]> {
+        if (!this.apiToken) return []
+
+        const wilayaId = await this.resolveWilayaId(input.wilayaCode)
+        if (!wilayaId) return []
+
+        const communes = await this.listCommunesForWilaya(wilayaId)
+        const communeName = new Map(communes.map((c) => [c.id, c.name]))
+
+        const raw = String(input.communeCode ?? '').trim()
+        let communeId: number | null = null
+        if (raw) {
+            const numeric = Number.parseInt(raw, 10)
+            communeId = Number.isFinite(numeric)
+                ? numeric
+                : communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(raw))?.id ?? null
+        }
+
+        // Maystro keys pickup points by commune, so without one there is nothing to
+        // ask for; fall back to the nearby walk the storefront already relies on.
+        const points = communeId
+            ? await this.pickupPoints.listActivePickupPointsNearby({
+                  apiToken: this.apiToken,
+                  commune: communeId,
+                  wilaya: wilayaId
+              })
+            : []
+
+        return points.map((p) => ({
+            id: String(p.pickup_point || p.commune),
+            name: p.name || communeName.get(p.commune) || String(p.commune),
+            communeId: String(p.commune),
+            communeName: communeName.get(p.commune)
+        }))
     }
 }
