@@ -833,12 +833,22 @@ export class DeliveryService {
             throw new DeliveryConfigurationError(400, 'Delivery provider credentials are not configured')
         }
 
+        // The chosen pickup point belongs to every carrier that has one, not just
+        // Maystro. Leaving it out of Yalidine's metadata meant a confirmed agency order
+        // reached the carrier with no stopdesk_id and was refused.
+        const metadataWithPickupPoint =
+            orderPickupPoint && baseInput.metadata?.pickupPoint == null
+                ? { ...(baseInput.metadata || {}), pickupPoint: orderPickupPoint }
+                : baseInput.metadata
+
         const maybeAugmentedMetadata =
-            baseInput.provider === 'MAYSTRO' && orderPickupPoint && baseInput.metadata?.pickupPoint == null
-                ? { ...(baseInput.metadata || {}), pickupPoint: orderPickupPoint, maystroDeliveryType: 3 }
+            baseInput.provider === 'MAYSTRO'
+                ? orderPickupPoint
+                    ? { ...(metadataWithPickupPoint || {}), maystroDeliveryType: 3 }
+                    : metadataWithPickupPoint
                 : baseInput.provider === 'YALIDINE'
                     ? {
-                        ...(baseInput.metadata || {}),
+                        ...(metadataWithPickupPoint || {}),
                         items:
                             Array.isArray(baseInput.metadata?.items) && baseInput.metadata.items.length
                                 ? baseInput.metadata.items
@@ -847,7 +857,7 @@ export class DeliveryService {
                                     quantity: item.quantity
                                 }))
                     }
-                : baseInput.metadata
+                    : metadataWithPickupPoint
 
         const result =
             baseInput.provider === 'MAYSTRO'

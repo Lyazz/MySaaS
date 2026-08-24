@@ -267,13 +267,18 @@ export class OrdersController {
                             addressLine2: undefined,
                             notes: order.shippingNotes ?? undefined,
                             deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
-                            metadata: provider === 'MAYSTRO' && order.shippingPickupPoint
-                                ? { pickupPoint: order.shippingPickupPoint, maystroDeliveryType: 3 }
+                            // The pickup point travels for whichever carrier holds it;
+                            // maystroDeliveryType is the only Maystro-specific part.
+                            metadata: order.shippingPickupPoint
+                                ? {
+                                    pickupPoint: order.shippingPickupPoint,
+                                    ...(provider === 'MAYSTRO' ? { maystroDeliveryType: 3 } : {})
+                                }
                                 : undefined
                         })
                         return res.json(updated)
                     } catch (shipmentErr: any) {
-                        console.error('Auto Maystro shipment failed after confirm:', shipmentErr)
+                        console.error(`Auto ${provider} shipment failed after confirm:`, shipmentErr)
                         if (wasPendingBeforeConfirm) {
                             try {
                                 await service.rollbackCarrierConfirmation(tenant.id, order.id)
