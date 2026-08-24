@@ -22,7 +22,7 @@ export const CARRIER_BRANDS: Record<string, CarrierBrand> = {
   },
   YALIDINE: {
     logo: '/images/carriers/yalidine.png',
-    tile: '#d8232a',
+    tile: '#d72e31',
     icon: 'lucide:package'
   },
   ECOTRACK: { icon: 'lucide:send' },
