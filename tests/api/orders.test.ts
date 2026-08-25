@@ -587,6 +587,11 @@ describe('Public checkout order flow', () => {
         const shipmentSpy = vi.spyOn(DeliveryService.prototype, 'createShipment')
         const rollbackSpy = vi.spyOn(OrdersService.prototype, 'rollbackCarrierConfirmation')
 
+        // spyOn returns the existing spy when one is already installed, so the counts
+        // below would otherwise include calls made by earlier tests in this file.
+        shipmentSpy.mockClear()
+        rollbackSpy.mockClear()
+
         shipmentSpy.mockResolvedValueOnce({ id: 'mock-shipment' } as any)
 
         const firstConfirm = await request(app)

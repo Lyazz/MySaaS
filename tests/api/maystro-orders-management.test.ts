@@ -29,6 +29,10 @@ describe('Maystro Orders Management integration', () => {
                 tenantId: tenant.id,
                 status: 'PENDING',
                 totalAmount: 220,
+                // total_price sent to Maystro is the COD amount, i.e. goods + shipping.
+                // Without a shipping amount the test's expected 720 could never hold.
+                shippingAmount: 500,
+                shippingCurrency: 'DZD',
                 customerName: 'Alice',
                 customerPhone: '0550123456',
                 items: {
@@ -97,7 +101,10 @@ describe('Maystro Orders Management integration', () => {
                 return [{ id: 575, wilaya: 16, name: 'Alger' }]
             }
 
-            if (opts.method === 'POST' && opts.path === '/orders') {
+            // The service posts to '/orders/' with the trailing slash; without it this
+            // arm never matched and the call fell through to {}, so the shipment came
+            // back with no id and no tracking at all.
+            if (opts.method === 'POST' && opts.path === '/orders/') {
                 return { id: 'mx-order-1', external_id: opts.data.external_id, tracking: 'TRK-1', success: true, delivery_price: 500 }
             }
 
@@ -122,7 +129,9 @@ describe('Maystro Orders Management integration', () => {
 
         expect(res.status).toBe(201)
         expect(res.body.provider).toBe('MAYSTRO')
-        expect(res.body.providerShipmentId).toBe('mx-order-1')
+        // providerShipmentId holds Maystro's tracking (display_id), not the order UUID —
+        // the UUID lives on the mapping below.
+        expect(res.body.providerShipmentId).toBe('TRK-1')
 
         const mapping = await prisma.maystroOrderMapping.findUnique({
             where: { tenantId_localOrderId: { tenantId: tenant.id, localOrderId: order.id } }
@@ -137,7 +146,7 @@ describe('Maystro Orders Management integration', () => {
         expect(productMap?.syncStatus).toBe('SYNCED')
         expect(productMap?.maystroProductId).toBe(product.id)
 
-        const orderCall = calls.find((c) => c.method === 'POST' && c.path === '/orders')
+        const orderCall = calls.find((c) => c.method === 'POST' && c.path === '/orders/')
         expect(orderCall).toBeTruthy()
         expect(orderCall.data.external_id).toBe(order.id)
         expect(orderCall.data.total_price).toBe(720)
