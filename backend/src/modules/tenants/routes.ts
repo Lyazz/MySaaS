@@ -4,6 +4,7 @@ import { requireSuperAdmin } from '../../middleware/superadmin.middleware'
 import { logAction } from '../../lib/audit'
 import bcrypt from 'bcryptjs'
 import { seedStaffRolePresets } from '../staff-roles/presets'
+import { ensureSubscription } from '../billing/subscription.service'
 
 const router = Router()
 
@@ -97,16 +98,9 @@ router.post('/', async (req, res) => {
                 }
             })
 
-            await tx.tenantSubscription.create({
-                data: {
-                    tenantId: newTenant.id,
-                    planCode: 'basic',
-                    interval: 'month',
-                    status: 'ACTIVE',
-                    currentPeriodStart: now,
-                    currentPeriodEnd: addUtcMonths(now, 1)
-                }
-            })
+            // Super-admin created tenants start live, not on a trial: they are
+            // created because someone already agreed to pay.
+            await ensureSubscription(tx, newTenant.id, { now })
 
             return newTenant
         })

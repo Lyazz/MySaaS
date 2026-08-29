@@ -40,15 +40,15 @@ import filesRouter from './modules/files/routes';
 import loyaltyRouter from './modules/loyalty/routes';
 import googleOAuthRouter from './modules/google-oauth/routes';
 import syncRouter from './modules/sync/routes';
-import provisioningRouter from './modules/provisioning/routes';
 import activationRouter from './modules/activation/routes';
+import activationSuperAdminRouter from './modules/activation/superadmin.routes';
+import tenantMigrationRouter from './modules/tenant-migration/routes';
 import notificationsRouter from './modules/notifications/routes';
 
 const router = Router();
 
 // Public / Auth
 router.use('/', authRouter);
-router.use('/', provisioningRouter);
 
 // Token-based file downloads (local dev fallback)
 router.use('/files', filesRouter);
@@ -103,5 +103,7 @@ router.use('/admin/notifications', notificationsRouter);
 router.use('/super-admin', superAdminRouter);
 router.use('/super-admin/billing', billingAdminRouter);
 router.use('/super-admin/tenants', tenantsRouter);
+router.use('/super-admin/activation', activationSuperAdminRouter);
+router.use('/super-admin', tenantMigrationRouter);
 
 export default router;

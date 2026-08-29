@@ -57,7 +57,8 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text( 'app.billing_subscription'.tr(),
+          Text(
+            'app.billing_subscription'.tr(),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -65,7 +66,8 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text( 'app.usage_plans_and_payment_submis'.tr(),
+          Text(
+            'app.usage_plans_and_payment_submis'.tr(),
             style: TextStyle(color: textMuted),
           ),
           const SizedBox(height: 24),
@@ -88,14 +90,14 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
           Row(
             children: [
               ChoiceChip(
-                label: Text( 'superAdmin.paymentsPage.interval.monthly'.tr()),
+                label: Text('superAdmin.paymentsPage.interval.monthly'.tr()),
                 selected: billingState.interval == 'month',
                 onSelected: (_) =>
                     ref.read(billingProvider.notifier).setInterval('month'),
               ),
               const SizedBox(width: 8),
               ChoiceChip(
-                label: Text( 'superAdmin.paymentsPage.interval.yearly'.tr()),
+                label: Text('superAdmin.paymentsPage.interval.yearly'.tr()),
                 selected: billingState.interval == 'year',
                 onSelected: (_) =>
                     ref.read(billingProvider.notifier).setInterval('year'),
@@ -189,7 +191,8 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text( 'app.submit_or_simulate_payment'.tr(),
+                  Text(
+                    'app.submit_or_simulate_payment'.tr(),
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
@@ -254,7 +257,8 @@ class _BillingScreenState extends ConsumerState<BillingScreen> {
               ),
             ),
           const SizedBox(height: 24),
-          Text( 'app.recent_payments'.tr(),
+          Text(
+            'app.recent_payments'.tr(),
             style: TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.w700,

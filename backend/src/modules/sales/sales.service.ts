@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { RETRY_CONFLICT } from '../../lib/conflict-codes'
 import { PosService } from '../pos/pos.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { CashService } from '../cash/cash.service'
@@ -343,6 +344,7 @@ export class SalesService {
                 })
                 if (updated.count !== 1) {
                     throw new SalesValidationError(409, 'Inventory conflict, please retry', {
+                        code: RETRY_CONFLICT,
                         code: 'SALE_REFUND_INVENTORY_CONFLICT'
                     })
                 }
@@ -398,6 +400,7 @@ export class SalesService {
             })
             if (statusUpdate.count !== 1) {
                 throw new SalesValidationError(409, 'Sale was updated by another request, please retry', {
+                    code: RETRY_CONFLICT,
                     code: 'SALE_REFUND_STATUS_CONFLICT'
                 })
             }

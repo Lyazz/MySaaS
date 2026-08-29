@@ -55,13 +55,16 @@ class Sidebar extends ConsumerWidget {
       if (url.startsWith('http://') || url.startsWith('https://')) return url;
       final uri = Uri.tryParse(workspaceState.apiBaseUrl);
       if (uri != null) {
-        final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
+        final base =
+            '${uri.scheme}://${uri.host}${uri.hasPort ? ':${uri.port}' : ''}';
         return url.startsWith('/') ? '$base$url' : '$base/$url';
       }
       return url;
     }
 
-    final String? resolvedLogoUrl = resolveLogoUrl(ref.watch(storeSettingsProvider).settings.logoUrl);
+    final String? resolvedLogoUrl = resolveLogoUrl(
+      ref.watch(storeSettingsProvider).settings.logoUrl,
+    );
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 300),
@@ -274,14 +277,13 @@ class Sidebar extends ConsumerWidget {
             Container(
               width: 28,
               height: 28,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7),
-              ),
+              decoration: BoxDecoration(borderRadius: BorderRadius.circular(7)),
               clipBehavior: Clip.antiAlias,
               child: CachedNetworkImage(
                 imageUrl: resolvedLogoUrl,
                 fit: BoxFit.contain,
-                errorWidget: (context, url, error) => _buildInitialsLogo(context, initial),
+                errorWidget: (context, url, error) =>
+                    _buildInitialsLogo(context, initial),
               ),
             )
           else
@@ -417,10 +419,14 @@ class Sidebar extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 1),
       decoration: isActive
           ? BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.10),
+              color: Theme.of(
+                context,
+              ).colorScheme.primary.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.16),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.16),
               ),
             )
           : BoxDecoration(borderRadius: BorderRadius.circular(8)),
@@ -566,10 +572,14 @@ class Sidebar extends ConsumerWidget {
                   width: 28,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.15),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.15),
                     borderRadius: BorderRadius.circular(99),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.30),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.30),
                     ),
                   ),
                   alignment: Alignment.center,

@@ -24,7 +24,12 @@ final apiProvider = Provider<ApiService>((ref) {
           // sign-in attempt answers 401 too, and logging out there would wipe
           // the provisioned local workspace just because someone mistyped
           // their password.
-          ref.read(authProvider.notifier).logout();
+          //
+          // Session expiry, unlike a deliberate sign-out, keeps the local
+          // database: the queued writes in it are the user's, not the
+          // session's, and an expired token is the normal way a long offline
+          // stretch ends.
+          ref.read(authProvider.notifier).handleSessionExpired();
         }
         handler.next(error);
       },

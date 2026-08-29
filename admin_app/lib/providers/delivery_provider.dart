@@ -52,32 +52,39 @@ class DeliveryNotifier extends Notifier<DeliveryState> {
     }
   }
 
-  Future<void> toggleProvider(String id) async {
-    DeliveryProvider? existing;
-    for (final provider in state.providers) {
-      if (provider.id == id) {
-        existing = provider;
-        break;
-      }
-    }
-    if (existing == null) return;
-
+  Future<void> setOffered(String id, bool offered) async {
     state = state.copyWith(isLoading: true, error: null);
     try {
-      final updated = await _repo.setProviderEnabled(id, !existing.isEnabled);
-      final providers = [
-        for (final provider in state.providers)
-          if (provider.id == id) updated else provider,
-      ];
-      state = state.copyWith(
-        providers: providers,
-        isLoading: false,
-        error: null,
-      );
+      final updated = await _repo.setOffered(id, offered);
+      _applyUpdate(updated);
+      state = state.copyWith(isLoading: false, error: null);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
+  }
+
+  Future<void> saveAccount(
+    String provider, {
+    bool? offered,
+    bool? isActive,
+    Map<String, String>? config,
+  }) async {
+    final updated = await _repo.saveAccount(
+      provider,
+      offered: offered,
+      isActive: isActive,
+      config: config,
+    );
+    _applyUpdate(updated);
+  }
+
+  void _applyUpdate(DeliveryProvider updated) {
+    final providers = [
+      for (final provider in state.providers)
+        if (provider.id == updated.id) updated else provider,
+    ];
+    state = state.copyWith(providers: providers);
   }
 }
 

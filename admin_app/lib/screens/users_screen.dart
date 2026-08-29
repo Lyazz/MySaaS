@@ -503,12 +503,36 @@ class _UsersTable extends StatelessWidget {
       minWidth: 1200,
       header: Row(
         children: [
-          _buildHeaderCell(context, 'admin.pages.users.columns.email'.tr(), flex: 4),
-          _buildHeaderCell(context, 'admin.pages.users.columns.role'.tr(), flex: 2),
-          _buildHeaderCell(context, 'admin.pages.users.columns.staffRole'.tr(), flex: 3),
-          _buildHeaderCell(context, 'admin.pages.users.columns.cashbox'.tr(), flex: 2),
-          _buildHeaderCell(context, 'admin.pages.users.columns.status'.tr(), flex: 2),
-          _buildHeaderCell(context, 'admin.pages.users.columns.createdAt'.tr(), flex: 2),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.email'.tr(),
+            flex: 4,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.role'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.staffRole'.tr(),
+            flex: 3,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.cashbox'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.status'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.createdAt'.tr(),
+            flex: 2,
+          ),
           Expanded(
             flex: 2,
             child: Align(
@@ -656,7 +680,11 @@ class _UsersTable extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderCell(BuildContext context, String text, {required int flex}) {
+  Widget _buildHeaderCell(
+    BuildContext context,
+    String text, {
+    required int flex,
+  }) {
     return Expanded(flex: flex, child: _headerText(context, text));
   }
 }
@@ -774,7 +802,11 @@ class _RolesTable extends StatelessWidget {
     );
   }
 
-  Widget _buildHeaderCell(BuildContext context, String text, {required int flex}) {
+  Widget _buildHeaderCell(
+    BuildContext context,
+    String text, {
+    required int flex,
+  }) {
     return Expanded(flex: flex, child: _headerText(context, text));
   }
 }

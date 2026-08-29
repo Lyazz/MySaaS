@@ -42,6 +42,38 @@ export const expressAuthMiddleware = async (req: Request, res: Response, next: N
                     }
                 }
 
+                // Device-bound sessions: tokens issued to the Flutter app carry
+                // the device they were minted for. Revoking or transferring a
+                // device bumps `Device.tokenVersion`, which retires every token
+                // minted under the old one -- per-device revocation, without the
+                // blast radius of `User.tokenInvalidBefore`, which kills every
+                // session for that user across every device.
+                //
+                // Browser sessions carry no `deviceId` and are unaffected: the
+                // web admin is deliberately not seat-limited.
+                if (decoded.deviceId) {
+                    const device = await prisma.device.findFirst({
+                        where: {
+                            id: decoded.deviceId,
+                            ...(decoded.tenantId ? { tenantId: decoded.tenantId } : {})
+                        }
+                    })
+
+                    if (!device || device.tokenVersion !== decoded.dv) {
+                        return next()
+                    }
+
+                    // A revoked device may still drain writes it queued while
+                    // offline, so revoking a terminal never destroys work the
+                    // tenant already captured on it.
+                    const canDrain =
+                        device.drainUntil instanceof Date && device.drainUntil > new Date()
+
+                    if (device.status !== 'ACTIVE' && !canDrain) {
+                        return next()
+                    }
+                }
+
                 req.user = user
                 // Also enforce tenant context if mismatch?
                 // The middleware/tenant.ts sets req.context.tenant

@@ -49,12 +49,15 @@ void main() {
       expect(cols(1600, isMobile: false, preferred: 6), 6);
     });
 
-    test('a high density no longer produces unreadable tiles on narrow windows', () {
-      // 8 columns at 700px used to be honoured directly, drawing ~70px tiles.
-      final count = cols(700, isMobile: false, preferred: 8);
-      expect(count, lessThan(8));
-      expect(700 / count, greaterThanOrEqualTo(kPosMinTileWidthDesktop));
-    });
+    test(
+      'a high density no longer produces unreadable tiles on narrow windows',
+      () {
+        // 8 columns at 700px used to be honoured directly, drawing ~70px tiles.
+        final count = cols(700, isMobile: false, preferred: 8);
+        expect(count, lessThan(8));
+        expect(700 / count, greaterThanOrEqualTo(kPosMinTileWidthDesktop));
+      },
+    );
 
     test('stays within the density control range at every width', () {
       for (var width = 360.0; width <= 2560.0; width += 20) {

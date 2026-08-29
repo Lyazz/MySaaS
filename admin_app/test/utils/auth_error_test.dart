@@ -117,7 +117,10 @@ void main() {
 
     test('falls back to unknown', () {
       expect(AuthErrorMapper.classify(null), AuthErrorKind.unknown);
-      expect(AuthErrorMapper.classify(Exception('boom')), AuthErrorKind.unknown);
+      expect(
+        AuthErrorMapper.classify(Exception('boom')),
+        AuthErrorKind.unknown,
+      );
       expect(
         AuthErrorMapper.classify(_badResponse(302)),
         AuthErrorKind.unknown,

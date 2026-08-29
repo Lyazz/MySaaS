@@ -61,21 +61,27 @@ void main() {
     );
   });
 
-  test('cashbox and delivery provider fingerprints cover activation state', () {
+  test('cashbox fingerprint covers activation state', () {
     final cashboxA = CashboxSummary(id: 'cash-1', name: 'Main', isActive: true);
     final cashboxB = cashboxA.copyWith(isActive: false);
-    final providerA = DeliveryProvider(
-      id: 'MAYSTRO',
-      name: 'Maystro',
-      offered: true,
-      isEnabled: true,
-    );
-    final providerB = providerA.copyWith(isEnabled: false);
 
     expect(
       SyncConflictPolicies.fingerprintCashbox(cashboxA),
       isNot(SyncConflictPolicies.fingerprintCashbox(cashboxB)),
     );
+  });
+
+  test('delivery provider fingerprint covers the offered flag', () {
+    // Credentials/isActive are saved via the online-only saveAccount() call,
+    // never queued for offline sync, so the fingerprint only needs to track
+    // the one field that flows through the sync queue: `offered`.
+    final providerA = DeliveryProvider(
+      id: 'MAYSTRO',
+      name: 'Maystro',
+      offered: true,
+    );
+    final providerB = providerA.copyWith(offered: false);
+
     expect(
       SyncConflictPolicies.fingerprintDeliveryProvider(providerA),
       isNot(SyncConflictPolicies.fingerprintDeliveryProvider(providerB)),

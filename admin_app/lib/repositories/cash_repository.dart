@@ -2,6 +2,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/cash.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_conflict_policy.dart';
@@ -54,6 +55,7 @@ class CashRepository {
     required String name,
     bool isActive = true,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('cashbox', 'create'));
     final db = await _dbService.database;
     final offlineId = const Uuid().v4();
     final cashbox = CashboxSummary(
@@ -82,6 +84,7 @@ class CashRepository {
     String? name,
     bool? isActive,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('cashbox', 'update'));
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Cashbox ID is required');
     final db = await _dbService.database;
@@ -338,6 +341,7 @@ class CashRepository {
     required double openingFloat,
     String? note,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('cashSession', 'open'));
     final db = await _dbService.database;
     final id = const Uuid().v4();
     final openedAt = DateTime.now();
@@ -381,6 +385,7 @@ class CashRepository {
     required double closingCount,
     String? note,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('cashSession', 'close'));
     final db = await _dbService.database;
     final current = await getSessionDetails(sessionId);
     if (current == null) throw Exception('Cash session not found');
@@ -437,6 +442,14 @@ class CashRepository {
     final db = await _dbService.database;
     final session = await getSessionDetails(sessionId);
     if (session == null) throw Exception('Cash session not found');
+
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'cashTransaction',
+        'create',
+        finishesOpenWork: session.status == 'OPEN',
+      ),
+    );
 
     final id = const Uuid().v4();
     final newTransaction = CashTransactionSummary(

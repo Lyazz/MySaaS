@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -10,7 +12,9 @@ import 'providers/auth_provider.dart';
 import 'providers/settings_provider.dart';
 import 'router.dart';
 import 'services/app_storage.dart';
+import 'services/license_service.dart';
 import 'services/notification_service.dart';
+import 'services/sync_service.dart';
 import 'theme/app_theme.dart';
 
 Future<void> main() async {
@@ -22,6 +26,11 @@ Future<void> main() async {
   final bootstrap = await AppStorage.loadBootstrap(
     defaultApiBaseUrl: defaultApiBaseUrl,
   );
+
+  // Evaluated before the first frame, from local storage only, so the UI never
+  // renders as writable and then locks a moment later. This works with no
+  // network: the licence is a signed token the device verifies itself.
+  await LicenseService().restore();
 
   runApp(
     EasyLocalization(
@@ -46,8 +55,38 @@ class AdminApp extends ConsumerStatefulWidget {
   ConsumerState<AdminApp> createState() => _AdminAppState();
 }
 
-class _AdminAppState extends ConsumerState<AdminApp> {
+class _AdminAppState extends ConsumerState<AdminApp>
+    with WidgetsBindingObserver {
   bool _scheduledInitialNotificationSync = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    LicenseService().startPeriodicEvaluation();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    LicenseService().dispose();
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    // Connectivity events are the sync loop's usual wake-up, but a backgrounded
+    // app is not guaranteed to receive them: the OS suspends the process, and
+    // the network the device came back on may have changed several times since.
+    // Coming to the foreground is the one moment we know the user is watching,
+    // so flush whatever the outage left queued.
+    unawaited(SyncService().syncNow());
+    // Resume is also when a licence must be re-checked: a terminal that sat in
+    // the background for a week may have crossed its grace boundary, and a
+    // revocation issued meanwhile has had no chance to reach it.
+    unawaited(LicenseService().onResumed());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,11 +122,13 @@ class _AdminAppState extends ConsumerState<AdminApp> {
   }
 
   void _syncNotifications(AuthState authState) {
-    ref.read(notificationServiceProvider).syncAuthState(
-      isAuthenticated: authState.isAuthenticated,
-      mode: authState.mode,
-      userId: authState.user?.id,
-      tenantId: authState.user?.tenantId,
-    );
+    ref
+        .read(notificationServiceProvider)
+        .syncAuthState(
+          isAuthenticated: authState.isAuthenticated,
+          mode: authState.mode,
+          userId: authState.user?.id,
+          tenantId: authState.user?.tenantId,
+        );
   }
 }

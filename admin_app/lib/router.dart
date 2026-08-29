@@ -8,7 +8,9 @@ import 'screens/activation_screen.dart';
 import 'screens/dashboard_screen.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
-import 'screens/upgrade_screen.dart';
+import 'screens/device_screen.dart';
+import 'screens/license_screen.dart';
+import 'screens/migration_screen.dart';
 import 'screens/products_screen.dart';
 import 'screens/product_form_screen.dart';
 import 'screens/orders_screen.dart';
@@ -146,12 +148,23 @@ final routerProvider = Provider<GoRouter>((ref) {
       final lockedFeature = FeatureAccess.featureForRoute(state.uri.path);
       final isProvisioned = bootstrap.isProvisioned;
 
+      final isDeviceRoute = state.uri.path == '/device';
+
       if (!isProvisioned) {
-        if (isActivateRoute || isLoginRoute || isRegisterRoute) {
+        // `/device` belongs here too: a device whose seat was refused has no
+        // provisioning yet, and this screen is its only way to ask for one.
+        if (isActivateRoute ||
+            isLoginRoute ||
+            isRegisterRoute ||
+            isDeviceRoute) {
           return null;
         }
         return '/login';
       }
+
+      // Always reachable once provisioned as well, so an operator can look up
+      // this terminal's identity without signing out.
+      if (isDeviceRoute) return null;
 
       if (isActivateRoute) {
         if (isLoggedIn) return '/';
@@ -220,9 +233,25 @@ final routerProvider = Provider<GoRouter>((ref) {
             NoTransitionPage(key: state.pageKey, child: const RegisterScreen()),
       ),
       GoRoute(
-        path: '/upgrade',
+        path: '/device',
+        pageBuilder: (context, state) => NoTransitionPage(
+          key: state.pageKey,
+          child: DeviceScreen(
+            startWithRequest: state.uri.queryParameters['request'] == '1',
+          ),
+        ),
+      ),
+      GoRoute(
+        path: '/migrate',
+        pageBuilder: (context, state) => NoTransitionPage(
+          key: state.pageKey,
+          child: const MigrationScreen(),
+        ),
+      ),
+      GoRoute(
+        path: '/license',
         pageBuilder: (context, state) =>
-            NoTransitionPage(key: state.pageKey, child: const UpgradeScreen()),
+            NoTransitionPage(key: state.pageKey, child: const LicenseScreen()),
       ),
       ShellRoute(
         builder: (context, state, child) {

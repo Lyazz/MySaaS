@@ -155,14 +155,16 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text( 'admin.pages.cash.transactions.title'.tr(),
+                            Text(
+                              'admin.pages.cash.transactions.title'.tr(),
                               style: TextStyle(
                                 fontWeight: FontWeight.w700,
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),
                             ),
                             const SizedBox(height: 4),
-                            Text( 'app.transactions_for_this_cashbox'.tr(),
+                            Text(
+                              'app.transactions_for_this_cashbox'.tr(),
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Theme.of(
@@ -196,17 +198,40 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
                   else if (cash.transactions.isEmpty)
                     Padding(
                       padding: EdgeInsets.all(32),
-                      child: Center(child: Text( 'app.no_transactions_found'.tr())),
+                      child: Center(
+                        child: Text('app.no_transactions_found'.tr()),
+                      ),
                     )
                   else
                     Column(
                       children: [
                         _TableHeader(
                           columns: [
-                            _Col(label: 'superAdmin.paymentsPage.history.table.date'.tr(), flex: 2),
-                            _Col(label: 'admin.pages.inventory.movements.table.type'.tr(), flex: 3),
-                            _Col(label: 'superAdmin.paymentsPage.history.table.method'.tr(), flex: 2),
-                            _Col(label: 'superAdmin.paymentsPage.history.table.amount'.tr(), flex: 2, alignRight: true),
+                            _Col(
+                              label:
+                                  'superAdmin.paymentsPage.history.table.date'
+                                      .tr(),
+                              flex: 2,
+                            ),
+                            _Col(
+                              label:
+                                  'admin.pages.inventory.movements.table.type'
+                                      .tr(),
+                              flex: 3,
+                            ),
+                            _Col(
+                              label:
+                                  'superAdmin.paymentsPage.history.table.method'
+                                      .tr(),
+                              flex: 2,
+                            ),
+                            _Col(
+                              label:
+                                  'superAdmin.paymentsPage.history.table.amount'
+                                      .tr(),
+                              flex: 2,
+                              alignRight: true,
+                            ),
                           ],
                         ),
                         ...cash.transactions.map(
@@ -273,7 +298,9 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
     BuildContext context,
     CashboxSummary cashbox,
   ) async {
-    final openingController = TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr());
+    final openingController = TextEditingController(
+      text: 'admin.forms.product.stock.placeholder'.tr(),
+    );
     final noteController = TextEditingController();
     final ok = await showDialog<bool>(
       context: context,
@@ -288,7 +315,10 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'admin.pages.sales.refundModal.noteLabel'.tr(), controller: noteController),
+            FormInput(
+              label: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+              controller: noteController,
+            ),
           ],
         ),
         secondaryLabel: 'Cancel',
@@ -368,7 +398,10 @@ class _CashboxDetailScreenState extends ConsumerState<CashboxDetailScreen> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'admin.pages.sales.refundModal.noteLabel'.tr(), controller: noteController),
+            FormInput(
+              label: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+              controller: noteController,
+            ),
           ],
         ),
         secondaryLabel: 'Cancel',

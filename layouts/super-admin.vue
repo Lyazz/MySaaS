@@ -185,6 +185,7 @@ const route = useRoute()
 const sidebarOpen = ref(false)
 const { t } = useI18n({ useScope: 'global' })
 const pendingPaymentsCount = ref(0)
+const pendingDeviceRequestsCount = ref(0)
 const previousTheme = ref<string | null>(null)
 const superAdminStyle = {
   '--brand': '#C6F432',
@@ -205,6 +206,7 @@ onMounted(async () => {
     sidebarOpen.value = true
   }
   await loadPendingCount()
+  await loadPendingDeviceRequests()
 })
 
 onBeforeUnmount(() => {
@@ -215,6 +217,17 @@ onBeforeUnmount(() => {
   }
   document.documentElement.removeAttribute('data-theme')
 })
+
+async function loadPendingDeviceRequests() {
+  try {
+    const res = await $fetch('/api/super-admin/activation/requests?status=PENDING', {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    }) as { requests: any[] }
+    pendingDeviceRequestsCount.value = res?.requests?.length ?? 0
+  } catch {
+    // silently fail — badge is non-critical
+  }
+}
 
 async function loadPendingCount() {
   try {
@@ -252,6 +265,12 @@ const navItems = computed(() => [
     label: t('superAdmin.nav.payments', 'Payments'),
     icon: 'lucide:clock',
     badge: pendingPaymentsCount.value
+  },
+  {
+    path: '/super-admin/devices',
+    label: t('superAdmin.nav.devices', 'Devices'),
+    icon: 'lucide:smartphone',
+    badge: pendingDeviceRequestsCount.value
   },
   {
     path: '/super-admin/analytics',

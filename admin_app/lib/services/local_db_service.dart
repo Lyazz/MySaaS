@@ -2,12 +2,13 @@ import 'dart:io';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart' hide openDatabase, getDatabasesPath;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart'
+    hide openDatabase, getDatabasesPath;
 
 class LocalDbService {
   static final LocalDbService instance = LocalDbService._init();
   static Database? _database;
-  
+
   LocalDbService._init();
 
   Future<Database> get database async {
@@ -42,7 +43,8 @@ class LocalDbService {
     const textType = 'TEXT';
     const intType = 'INTEGER';
     const realType = 'REAL';
-    const boolType = 'INTEGER'; // SQLite doesn't have a separate boolean storage class
+    const boolType =
+        'INTEGER'; // SQLite doesn't have a separate boolean storage class
 
     // Categories Table
     await db.execute('''

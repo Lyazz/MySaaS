@@ -243,7 +243,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                   return InkWell(
                     onTap: () => context.push('/sales/${sale.id}'),
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 13,
+                      ),
                       child: Row(
                         children: [
                           Expanded(

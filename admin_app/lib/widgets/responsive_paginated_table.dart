@@ -85,7 +85,8 @@ class _ResponsivePaginatedTableState<T>
           Center(
             child: Padding(
               padding: EdgeInsets.all(48.0),
-              child: Text( 'app.admin_common_nodataavailable'.tr().tr(),
+              child: Text(
+                'app.admin_common_nodataavailable'.tr().tr(),
                 style: const TextStyle(color: Colors.grey),
               ),
             ),

@@ -9,6 +9,8 @@ import '../models/subscription_tier.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
 import '../services/device_info_service.dart';
+import '../services/activation_service.dart';
+import '../services/license_service.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
 import '../services/workspace_data_cleaner.dart';
@@ -122,6 +124,9 @@ class AuthState {
 }
 
 class AuthNotifier extends Notifier<AuthState> {
+  /// Guards against re-entering [logout] while a sign-out is already running.
+  bool _isSigningOut = false;
+
   @override
   AuthState build() {
     final bootstrap = ref.watch(bootstrapProvider);
@@ -134,6 +139,7 @@ class AuthNotifier extends Notifier<AuthState> {
       workspaceId: bootstrap.workspaceId,
     );
     SyncService().initialize(ref.read(apiProvider), mode: bootstrap.mode);
+    LicenseService().initialize(ref.read(activationServiceProvider));
 
     final token = bootstrap.authToken;
     if (token != null && token.trim().isNotEmpty) {
@@ -316,8 +322,7 @@ class AuthNotifier extends Notifier<AuthState> {
       throw AuthFailure(AuthErrorKind.forbidden, message, statusCode: 403);
     }
 
-    final rawStaffRole = (body['staffRole'] as Map?)
-        ?.cast<String, dynamic>();
+    final rawStaffRole = (body['staffRole'] as Map?)?.cast<String, dynamic>();
     final staffRole = rawStaffRole != null
         ? StaffRoleInfo.fromJson(rawStaffRole)
         : null;
@@ -340,6 +345,7 @@ class AuthNotifier extends Notifier<AuthState> {
       workspaceId: bootstrap.workspaceId,
     );
     SyncService().initialize(apiService, mode: runtime.mode);
+    LicenseService().initialize(ref.read(activationServiceProvider));
 
     await AppStorage.saveProvisioningState(
       mode: runtime.mode,
@@ -356,7 +362,9 @@ class AuthNotifier extends Notifier<AuthState> {
 
     // Save activation token if it was returned by auto-registration
     if (activationToken != null && activationToken.isNotEmpty) {
-      await AppStorage.saveActivationToken(activationToken);
+      // Hand it to the licence engine too, not just to storage: otherwise the
+      // device would keep evaluating an empty licence until the next cold start.
+      await LicenseService().applyActivationToken(activationToken);
     }
     ref
         .read(bootstrapProvider.notifier)
@@ -422,6 +430,7 @@ class AuthNotifier extends Notifier<AuthState> {
         workspaceId: bootstrap.workspaceId,
       );
       SyncService().initialize(apiService, mode: runtime.mode);
+      LicenseService().initialize(ref.read(activationServiceProvider));
 
       await AppStorage.saveProvisioningState(
         mode: runtime.mode,
@@ -469,7 +478,45 @@ class AuthNotifier extends Notifier<AuthState> {
     state = AuthState(mode: mode, subscriptionTier: subscriptionTier);
   }
 
-  Future<void> logout({bool clearProvisioning = false}) async {
+  /// Ends the session.
+  ///
+  /// [clearWorkspaceData] wipes the encrypted workspace database and its files.
+  /// That is right for a deliberate sign-out, but never for a session that
+  /// expired on its own — see [handleSessionExpired].
+  Future<void> logout({
+    bool clearProvisioning = false,
+    bool clearWorkspaceData = true,
+  }) async {
+    // The 401 interceptor calls into here from inside a Dio error handler, so
+    // a sync pass failing several requests at once re-enters this method. Left
+    // unguarded, the second call tears down state the first is still using.
+    if (_isSigningOut) return;
+    _isSigningOut = true;
+    try {
+      await _performLogout(
+        clearProvisioning: clearProvisioning,
+        clearWorkspaceData: clearWorkspaceData,
+      );
+    } finally {
+      _isSigningOut = false;
+    }
+  }
+
+  /// Handles a 401 on an authenticated request: the token expired or was
+  /// revoked server-side.
+  ///
+  /// Drops the session so the user is sent back to sign-in, but leaves the
+  /// workspace database in place. A device that spent longer offline than the
+  /// token's lifetime reconnects straight into this path, and wiping there
+  /// would destroy every write queued during the outage — the exact loss the
+  /// outbox exists to prevent. The queue flushes on its own once the same
+  /// tenant signs back in and [SyncService.initialize] runs again.
+  Future<void> handleSessionExpired() => logout(clearWorkspaceData: false);
+
+  Future<void> _performLogout({
+    required bool clearProvisioning,
+    required bool clearWorkspaceData,
+  }) async {
     final bootstrap = ref.read(bootstrapProvider);
     final apiService = ref.read(apiProvider);
     final dataCleaner = WorkspaceDataCleaner();
@@ -480,9 +527,15 @@ class AuthNotifier extends Notifier<AuthState> {
       }
     } catch (_) {}
 
-    await dataCleaner.clearProvisionedWorkspace(bootstrap);
+    // Stop syncing before touching the database, and await it: `reset()` waits
+    // for the pass already in flight, which still holds the database handle.
+    // Deleting underneath it used to leave the pass writing into a closing
+    // handle, and on Windows the open file made the delete fail outright.
+    await SyncService().reset();
     apiService.setToken(null);
-    SyncService().reset();
+    if (clearWorkspaceData) {
+      await dataCleaner.clearProvisionedWorkspace(bootstrap);
+    }
     await AppStorage.clearAuthSession();
 
     if (clearProvisioning) {

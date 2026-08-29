@@ -59,7 +59,9 @@ export class PosController {
             if (error instanceof PosValidationError) {
                 return res.status(error.statusCode).json({
                     statusCode: error.statusCode,
-                    statusMessage: error.statusMessage
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
                 })
             }
             if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {

@@ -2,6 +2,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/product.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -71,6 +72,7 @@ class CategoryRepository {
     required String slug,
     String? imageUrl,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('category', 'create'));
     final id = const Uuid().v4();
     final db = await _dbService.database;
     final payload = {
@@ -111,6 +113,7 @@ class CategoryRepository {
     required String slug,
     String? imageUrl,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('category', 'update'));
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Category ID is required');
     final db = await _dbService.database;
@@ -148,6 +151,7 @@ class CategoryRepository {
   }
 
   Future<void> deleteCategory(String id) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('category', 'delete'));
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Category ID is required');
     final db = await _dbService.database;

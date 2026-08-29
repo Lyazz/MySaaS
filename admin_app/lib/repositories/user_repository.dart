@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/admin_user.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -87,6 +88,7 @@ class UserRepository {
   }
 
   Future<AdminUser> createUser(Map<String, dynamic> payload) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('user', 'create'));
     final db = await _dbService.database;
 
     final id = const Uuid().v4();
@@ -118,6 +120,7 @@ class UserRepository {
   }
 
   Future<AdminUser> updateUser(String id, Map<String, dynamic> payload) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('user', 'update'));
     final db = await _dbService.database;
 
     final dataToUpdate = <String, dynamic>{
@@ -170,6 +173,7 @@ class UserRepository {
   }
 
   Future<void> deleteUser(String id) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('user', 'delete'));
     final db = await _dbService.database;
     await db.update(
       'users',

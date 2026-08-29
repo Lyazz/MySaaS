@@ -41,15 +41,21 @@ class ReceiptBuilder {
 
     List<int> bytes = [];
     final safeContactInfos = contactInfos ?? {};
-    
-    final storeName = effectiveLayout.storeNameOverride ?? storeSettings?.name ?? 'MySaaS Store';
-    final storeAddress = effectiveLayout.storeAddressOverride ?? safeContactInfos['address'];
-    final storePhone = effectiveLayout.storePhoneOverride ?? safeContactInfos['phone'];
-    final storeEmail = effectiveLayout.storeEmailOverride ?? safeContactInfos['email'];
+
+    final storeName =
+        effectiveLayout.storeNameOverride ??
+        storeSettings?.name ??
+        'MySaaS Store';
+    final storeAddress =
+        effectiveLayout.storeAddressOverride ?? safeContactInfos['address'];
+    final storePhone =
+        effectiveLayout.storePhoneOverride ?? safeContactInfos['phone'];
+    final storeEmail =
+        effectiveLayout.storeEmailOverride ?? safeContactInfos['email'];
     final logoUrl = resolvedLogoUrl ?? storeSettings?.logoUrl;
 
     // 1. Header
-    
+
     if (effectiveLayout.showLogo && logoUrl != null && logoUrl.isNotEmpty) {
       final cachedLogo = await logoCacheService.cacheLogo(logoUrl);
       if (cachedLogo != null && await cachedLogo.exists()) {
@@ -63,7 +69,7 @@ class ReceiptBuilder {
         } catch (_) {}
       }
     }
-    
+
     if (effectiveLayout.showStoreName) {
       bytes += generator.text(
         storeName,
@@ -76,28 +82,42 @@ class ReceiptBuilder {
       );
       bytes += generator.feed(1);
     }
-    
-    if (effectiveLayout.showStoreAddress && storeAddress != null && storeAddress.isNotEmpty) {
-      bytes += generator.text(storeAddress, styles: const PosStyles(align: PosAlign.center));
+
+    if (effectiveLayout.showStoreAddress &&
+        storeAddress != null &&
+        storeAddress.isNotEmpty) {
+      bytes += generator.text(
+        storeAddress,
+        styles: const PosStyles(align: PosAlign.center),
+      );
     }
-    if (effectiveLayout.showStorePhone && storePhone != null && storePhone.isNotEmpty) {
-      bytes += generator.text('Tel: $storePhone', styles: const PosStyles(align: PosAlign.center));
+    if (effectiveLayout.showStorePhone &&
+        storePhone != null &&
+        storePhone.isNotEmpty) {
+      bytes += generator.text(
+        'Tel: $storePhone',
+        styles: const PosStyles(align: PosAlign.center),
+      );
     }
-    if (effectiveLayout.showStoreEmail && storeEmail != null && storeEmail.isNotEmpty) {
-      bytes += generator.text('Email: $storeEmail', styles: const PosStyles(align: PosAlign.center));
+    if (effectiveLayout.showStoreEmail &&
+        storeEmail != null &&
+        storeEmail.isNotEmpty) {
+      bytes += generator.text(
+        'Email: $storeEmail',
+        styles: const PosStyles(align: PosAlign.center),
+      );
     }
-    
-    if (effectiveLayout.showStoreAddress || effectiveLayout.showStorePhone || effectiveLayout.showStoreEmail) {
+
+    if (effectiveLayout.showStoreAddress ||
+        effectiveLayout.showStorePhone ||
+        effectiveLayout.showStoreEmail) {
       bytes += generator.feed(1);
     }
 
     if (effectiveLayout.showHeader && effectiveLayout.headerText.isNotEmpty) {
       bytes += generator.text(
         effectiveLayout.headerText,
-        styles: const PosStyles(
-          align: PosAlign.center,
-          bold: true,
-        ),
+        styles: const PosStyles(align: PosAlign.center, bold: true),
       );
       bytes += generator.feed(1);
     }
@@ -152,7 +172,11 @@ class ReceiptBuilder {
     } else {
       // 80mm Layout
       bytes += generator.row([
-        PosColumn(text: 'app.item'.tr(), width: 6, styles: const PosStyles(bold: true)),
+        PosColumn(
+          text: 'app.item'.tr(),
+          width: 6,
+          styles: const PosStyles(bold: true),
+        ),
         PosColumn(
           text: 'admin.pages.sales.detail.itemsTable.qty'.tr(),
           width: 2,
@@ -243,19 +267,25 @@ class ReceiptBuilder {
         styles: const PosStyles(align: PosAlign.center, bold: true),
       );
     }
-    
+
     if (effectiveLayout.showOrderNumber && orderId != null) {
       bytes += generator.feed(1);
       try {
         final List<int> barcodeData = orderId.codeUnits;
         bytes += generator.barcode(Barcode.code128(barcodeData));
-        bytes += generator.text(orderId, styles: const PosStyles(align: PosAlign.center));
+        bytes += generator.text(
+          orderId,
+          styles: const PosStyles(align: PosAlign.center),
+        );
       } catch (e) {
         // Fallback if barcode fails
-        bytes += generator.text(orderId, styles: const PosStyles(align: PosAlign.center));
+        bytes += generator.text(
+          orderId,
+          styles: const PosStyles(align: PosAlign.center),
+        );
       }
     }
-    
+
     bytes += generator.feed(3);
 
     // 4. Cut & Drawer

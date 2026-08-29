@@ -230,6 +230,13 @@ void main() {
     await tester.pump();
 
     expect(copiedText, 'https://demo.swekly.com/product/alpha-one');
+
+    // Copying raises a toast that auto-closes after 3s. Its timer is not a
+    // frame callback, so `pumpAndSettle` will not drain it — the test has to
+    // advance past it, or it ends with a pending timer and fails on
+    // `!timersPending`.
+    await tester.pump(const Duration(seconds: 4));
+    await tester.pumpAndSettle();
   });
 
   testWidgets('submit payload includes lowStockThreshold', (

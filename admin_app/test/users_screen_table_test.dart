@@ -102,7 +102,15 @@ void main() {
       find.byWidgetPredicate((w) => w is ResponsivePaginatedTable),
       findsOneWidget,
     );
-    expect(find.text('Email'), findsOneWidget);
+    // Matched on the whole label, case-insensitively: the header is styled
+    // uppercase, which this test has no stake in, but a substring match
+    // would also catch the 'Email' inside search placeholders and cells.
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && w.data?.toLowerCase() == 'email',
+      ),
+      findsOneWidget,
+    );
     expect(find.byTooltip('Edit'), findsNWidgets(2));
 
     await tester.tap(find.text('Roles (staff)'));
@@ -112,7 +120,12 @@ void main() {
       find.byWidgetPredicate((w) => w is ResponsivePaginatedTable),
       findsOneWidget,
     );
-    expect(find.text('Name'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && w.data?.toLowerCase() == 'name',
+      ),
+      findsOneWidget,
+    );
     expect(find.byTooltip('Edit'), findsOneWidget);
     expect(find.byTooltip('Delete'), findsOneWidget);
   });

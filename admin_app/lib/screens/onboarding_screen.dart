@@ -138,7 +138,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
         : AppColors.lightTextTertiary;
 
     return Scaffold(
-      appBar: AppBar(title: Text( 'app.setup_checklist'.tr())),
+      appBar: AppBar(title: Text('app.setup_checklist'.tr())),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -148,7 +148,10 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 children: [
                   Text('Failed to load: $_error'),
                   const SizedBox(height: 12),
-                  ElevatedButton(onPressed: _load, child: Text( 'app.retry'.tr())),
+                  ElevatedButton(
+                    onPressed: _load,
+                    child: Text('app.retry'.tr()),
+                  ),
                 ],
               ),
             )
@@ -160,7 +163,8 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                   if (total > 0) ...[
                     Row(
                       children: [
-                        Text( 'app.progress'.tr(),
+                        Text(
+                          'app.progress'.tr(),
                           style: TextStyle(fontWeight: FontWeight.w600),
                         ),
                         Text('$done / $total steps completed'),

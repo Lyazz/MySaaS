@@ -83,8 +83,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
       builder: (context) => AppDialog(
         title: 'admin.pages.purchases.detail.deleteModal.title'.tr(),
         description: 'admin.confirmModal.defaults.message'.tr(),
-        content: Text( 'app.are_you_sure_you_want_to_delet2'.tr(),
-        ),
+        content: Text('app.are_you_sure_you_want_to_delet2'.tr()),
         secondaryLabel: 'Cancel',
         onSecondary: () => Navigator.pop(context, false),
         primaryLabel: 'Delete',
@@ -125,8 +124,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
 
     if (purchaseAsync.status == 'NOT_FOUND') {
       return Scaffold(
-        appBar: AppBar(title: Text( 'app.not_found'.tr())),
-        body: Center(child: Text( 'app.purchase_order_not_found'.tr())),
+        appBar: AppBar(title: Text('app.not_found'.tr())),
+        body: Center(child: Text('app.purchase_order_not_found'.tr())),
       );
     }
 
@@ -156,7 +155,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                       children: [
                         InkWell(
                           onTap: () => context.go('/purchases'),
-                          child: Text( 'admin.pages.purchases.index.title'.tr(),
+                          child: Text(
+                            'admin.pages.purchases.index.title'.tr(),
                             style: TextStyle(
                               color: Colors.grey[500],
                               fontWeight: FontWeight.w500,
@@ -267,7 +267,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text( 'admin.pages.purchases.detail.items.title'.tr(),
+                        Text(
+                          'admin.pages.purchases.detail.items.title'.tr(),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -409,7 +410,10 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
       title: 'admin.pages.purchases.detail.cards.summary'.tr(),
       icon: LucideIcons.fileText,
       children: [
-        _SummaryRow(label: 'admin.pages.purchases.detail.cards.itemsOrdered'.tr(), value: ordered.toInt().toString()),
+        _SummaryRow(
+          label: 'admin.pages.purchases.detail.cards.itemsOrdered'.tr(),
+          value: ordered.toInt().toString(),
+        ),
         _SummaryRow(
           label: 'admin.pages.purchases.detail.cards.itemsReceived'.tr(),
           value: received.toInt().toString(),
@@ -440,7 +444,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             children: [
               Icon(LucideIcons.fileText, size: 32, color: Colors.grey[300]),
               const SizedBox(height: 8),
-              Text( 'app.no_notes_added'.tr(),
+              Text(
+                'app.no_notes_added'.tr(),
                 style: TextStyle(color: Colors.grey[500], fontSize: 13),
               ),
             ],
@@ -457,7 +462,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
         children: [
           Icon(LucideIcons.shoppingCart, size: 48, color: Colors.grey[300]),
           const SizedBox(height: 16),
-          Text( 'app.no_items_added_yet'.tr(),
+          Text(
+            'app.no_items_added_yet'.tr(),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -465,7 +471,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text( 'app.add_products_to_this_purchase'.tr(),
+          Text(
+            'app.add_products_to_this_purchase'.tr(),
             style: TextStyle(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
@@ -496,7 +503,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          Text( 'admin.pages.purchases.detail.items.table.totalOrderValue'.tr(),
+          Text(
+            'admin.pages.purchases.detail.items.table.totalOrderValue'.tr(),
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(width: 24),
@@ -646,14 +654,45 @@ class _TableHeader extends StatelessWidget {
       ),
       child: Row(
         children: [
-          Expanded(flex: 3, child: Text( 'admin.pages.sales.detail.itemsTable.product'.tr(), style: headerStyle)),
-          Expanded(flex: 2, child: Text( 'admin.pages.purchases.detail.items.table.ordered'.tr(), style: headerStyle)),
-          Expanded(flex: 2, child: Text( 'admin.pages.purchases.detail.items.table.unitCost'.tr(), style: headerStyle)),
-          Expanded(flex: 2, child: Text( 'admin.pages.purchases.detail.items.table.received'.tr(), style: headerStyle)),
-          Expanded(flex: 3, child: Text( 'admin.pages.purchases.detail.items.table.receiveNow'.tr(), style: headerStyle)),
+          Expanded(
+            flex: 3,
+            child: Text(
+              'admin.pages.sales.detail.itemsTable.product'.tr(),
+              style: headerStyle,
+            ),
+          ),
           Expanded(
             flex: 2,
-            child: Text( 'admin.pages.sales.detail.itemsTable.total'.tr(),
+            child: Text(
+              'admin.pages.purchases.detail.items.table.ordered'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.purchases.detail.items.table.unitCost'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.purchases.detail.items.table.received'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              'admin.pages.purchases.detail.items.table.receiveNow'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.sales.detail.itemsTable.total'.tr(),
               style: headerStyle,
               textAlign: TextAlign.right,
             ),
@@ -811,7 +850,8 @@ class _TableRowState extends State<_TableRow> {
               child: widget.item.quantityReceived > 0
                   ? Text(widget.money.format(widget.item.unitCost))
                   : FormInput(
-                      label: 'admin.pages.purchases.detail.items.table.unitCost'.tr(),
+                      label: 'admin.pages.purchases.detail.items.table.unitCost'
+                          .tr(),
                       showLabel: false,
                       controller: _costController,
                       keyboardType: TextInputType.number,
@@ -948,19 +988,19 @@ class _TableRowState extends State<_TableRow> {
                       borderless: true,
                       filled: false,
                       isDense: true,
-                      textStyle: TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      textStyle: TextStyle(fontSize: 12, color: Colors.grey),
                       contentPadding: EdgeInsets.zero,
                       items: [
                         DropdownMenuItem(
                           value: 'replace',
-                          child: Text( 'app.replace_price'.tr()),
+                          child: Text('app.replace_price'.tr()),
                         ),
                         DropdownMenuItem(
                           value: 'weighted',
-                          child: Text( 'admin.pages.purchases.detail.items.table.salePriceMode.weighted'.tr()),
+                          child: Text(
+                            'admin.pages.purchases.detail.items.table.salePriceMode.weighted'
+                                .tr(),
+                          ),
                         ),
                       ],
                       onChanged: (val) {
@@ -1047,7 +1087,8 @@ class _VariantSelectorDialogState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text( 'admin.pages.purchases.detail.addProducts'.tr(),
+                Text(
+                  'admin.pages.purchases.detail.addProducts'.tr(),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 IconButton(

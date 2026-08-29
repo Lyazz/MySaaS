@@ -113,7 +113,8 @@ class AdminDashboardRevenue {
   });
 
   factory AdminDashboardRevenue.fromJson(Map<String, dynamic> json) {
-    double asDouble(dynamic value) => double.tryParse(value?.toString() ?? '') ?? 0.0;
+    double asDouble(dynamic value) =>
+        double.tryParse(value?.toString() ?? '') ?? 0.0;
     return AdminDashboardRevenue(
       total: asDouble(json['total']),
       orders: asDouble(json['orders']),
@@ -143,9 +144,11 @@ class AdminDashboardTrend {
     return AdminDashboardTrend(
       date: json['date']?.toString() ?? '',
       ordersCount: int.tryParse(json['ordersCount']?.toString() ?? '') ?? 0,
-      ordersRevenue: double.tryParse(json['ordersRevenue']?.toString() ?? '') ?? 0.0,
+      ordersRevenue:
+          double.tryParse(json['ordersRevenue']?.toString() ?? '') ?? 0.0,
       posRevenue: double.tryParse(json['posRevenue']?.toString() ?? '') ?? 0.0,
-      totalRevenue: double.tryParse(json['totalRevenue']?.toString() ?? '') ?? 0.0,
+      totalRevenue:
+          double.tryParse(json['totalRevenue']?.toString() ?? '') ?? 0.0,
     );
   }
 }
@@ -214,7 +217,8 @@ class AdminDashboardCriticalStock {
       productId: json['productId']?.toString() ?? '',
       title: json['title']?.toString() ?? '',
       stock: int.tryParse(json['stock']?.toString() ?? '') ?? 0,
-      lowStockThreshold: int.tryParse(json['lowStockThreshold']?.toString() ?? '') ?? 0,
+      lowStockThreshold:
+          int.tryParse(json['lowStockThreshold']?.toString() ?? '') ?? 0,
     );
   }
 }

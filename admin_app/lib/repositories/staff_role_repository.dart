@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/staff_role.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -68,6 +69,7 @@ class StaffRoleRepository {
     required String name,
     required List<StaffRolePermissionGroup> permissions,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('staffRole', 'create'));
     final db = await _dbService.database;
     final id = const Uuid().v4();
 
@@ -103,6 +105,7 @@ class StaffRoleRepository {
     required String name,
     required List<StaffRolePermissionGroup> permissions,
   }) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('staffRole', 'update'));
     final db = await _dbService.database;
 
     await db.update(
@@ -136,6 +139,7 @@ class StaffRoleRepository {
   }
 
   Future<void> deleteRole(String id) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('staffRole', 'delete'));
     final db = await _dbService.database;
 
     await db.update(

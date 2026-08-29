@@ -1,6 +1,7 @@
 import 'package:uuid/uuid.dart';
 
 import '../models/customer_payment.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -57,6 +58,25 @@ class CustomerPaymentRepository {
     Map<String, dynamic> payload,
   ) async {
     final db = await _dbService.database;
+
+    // Collecting on a customer who already exists is finishing open work; a
+    // locked device may still take money it is owed. Creating a payment against
+    // nobody is not.
+    final customerRows = await db.query(
+      'customers',
+      columns: ['id'],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [customerId, _tid],
+      limit: 1,
+    );
+
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'customerPayment',
+        'create',
+        finishesOpenWork: customerRows.isNotEmpty,
+      ),
+    );
 
     final id = const Uuid().v4();
     final newPayment = CustomerPayment.fromJson({

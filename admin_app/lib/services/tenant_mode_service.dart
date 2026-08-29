@@ -32,10 +32,22 @@ class TenantModeService {
         : null;
   }
 
+  /// Paths that stay reachable even for an offline-only tenant.
+  ///
+  /// Licence traffic carries no business data -- only the device's own
+  /// activation state -- and it is what lets an offline-only device renew its
+  /// window and learn it has been revoked. Blocking it here would lock every
+  /// offline-only tenant by construction, since the window would expire with no
+  /// way to refresh it.
+  static const Set<String> _alwaysAllowedPaths = {
+    '/login',
+    '/me',
+    '/activation/heartbeat',
+    '/activation/online',
+  };
+
   bool isRequestAllowed(String path) {
     if (_mode != AppMode.offlineOnly) return true;
-    final trimmed = path.trim();
-    if (trimmed == '/login' || trimmed == '/me') return true;
-    return false;
+    return _alwaysAllowedPaths.contains(path.trim());
   }
 }

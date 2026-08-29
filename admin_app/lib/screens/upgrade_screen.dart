@@ -147,7 +147,10 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
         : AppColors.lightTextSecondary;
 
     return Scaffold(
-      appBar: AppBar(title: Text( 'app.upgrade_to_online_tier'.tr()), elevation: 0),
+      appBar: AppBar(
+        title: Text('app.upgrade_to_online_tier'.tr()),
+        elevation: 0,
+      ),
       body: Center(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -164,7 +167,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                     color: AppColors.blue,
                   ),
                   const SizedBox(height: 24),
-                  Text( 'app.create_your_online_account'.tr(),
+                  Text(
+                    'app.create_your_online_account'.tr(),
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -173,7 +177,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 8),
-                  Text( 'app.your_offline_data_will_automat'.tr(),
+                  Text(
+                    'app.your_offline_data_will_automat'.tr(),
                     style: TextStyle(color: textSecondary),
                     textAlign: TextAlign.center,
                   ),
@@ -198,7 +203,8 @@ class _UpgradeScreenState extends ConsumerState<UpgradeScreen> {
                   TextFormField(
                     controller: _nameController,
                     decoration: InputDecoration(
-                      labelText: 'admin.pages.onboarding.storeInfo.nameLabel'.tr(),
+                      labelText: 'admin.pages.onboarding.storeInfo.nameLabel'
+                          .tr(),
                       border: OutlineInputBorder(),
                     ),
                     validator: (v) => v!.isEmpty ? 'Required' : null,

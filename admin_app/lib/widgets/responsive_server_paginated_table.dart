@@ -101,7 +101,8 @@ class _ResponsiveServerPaginatedTableState<T>
           Center(
             child: Padding(
               padding: EdgeInsets.all(48),
-              child: Text( 'app.admin_common_nodataavailable'.tr().tr(),
+              child: Text(
+                'app.admin_common_nodataavailable'.tr().tr(),
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -230,10 +231,16 @@ class _ResponsiveServerPaginatedTableState<T>
                     vertical: 12,
                   ),
                   decoration: BoxDecoration(
-                    color: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC), // dark: surface-2 / light: slate-50
+                    color: isDark
+                        ? AppColors.surface2
+                        : const Color(
+                            0xFFF8FAFC,
+                          ), // dark: surface-2 / light: slate-50
                     border: Border(
                       bottom: BorderSide(
-                        color: isDark ? AppColors.surfaceBorder : const Color(0xFFE2E8F0),
+                        color: isDark
+                            ? AppColors.surfaceBorder
+                            : const Color(0xFFE2E8F0),
                       ),
                     ),
                   ),
@@ -309,8 +316,12 @@ class _ResponsiveServerPaginatedTableState<T>
       builder: (context, constraints) {
         final isSmall = constraints.maxWidth < 600;
         final isDark = Theme.of(context).brightness == Brightness.dark;
-        final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-        final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+        final textSecondary = isDark
+            ? AppColors.textSecondary
+            : AppColors.lightTextSecondary;
+        final textPrimary = isDark
+            ? AppColors.textPrimary
+            : AppColors.lightTextPrimary;
 
         final showingText = Text(
           'admin.common.showing'.tr(
@@ -328,7 +339,8 @@ class _ResponsiveServerPaginatedTableState<T>
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             if (!isSmall) showingText,
-            if (isSmall) Align(alignment: Alignment.centerRight, child: showingText),
+            if (isSmall)
+              Align(alignment: Alignment.centerRight, child: showingText),
             if (isSmall) const SizedBox(height: 12),
             Row(
               mainAxisAlignment: isSmall

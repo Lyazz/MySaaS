@@ -134,32 +134,59 @@ class AdminStatCard extends StatelessWidget {
     );
   }
 
-  ({Color bg, Color border, Color text}) _getToneColors(String tone, bool isDark) {
+  ({Color bg, Color border, Color text}) _getToneColors(
+    String tone,
+    bool isDark,
+  ) {
     switch (tone) {
       case 'blue':
         return (
-          bg: isDark ? const Color(0xFF1E3A8A).withValues(alpha: 0.3) : const Color(0xFFEFF6FF), // blue-50
-          border: isDark ? const Color(0xFF1E3A8A) : const Color(0xFFBFDBFE), // blue-200
-          text: isDark ? const Color(0xFF60A5FA) : const Color(0xFF1D4ED8), // blue-700
+          bg: isDark
+              ? const Color(0xFF1E3A8A).withValues(alpha: 0.3)
+              : const Color(0xFFEFF6FF), // blue-50
+          border: isDark
+              ? const Color(0xFF1E3A8A)
+              : const Color(0xFFBFDBFE), // blue-200
+          text: isDark
+              ? const Color(0xFF60A5FA)
+              : const Color(0xFF1D4ED8), // blue-700
         );
       case 'orange':
         return (
-          bg: isDark ? const Color(0xFF7C2D12).withValues(alpha: 0.3) : const Color(0xFFFFF7ED), // orange-50
-          border: isDark ? const Color(0xFF7C2D12) : const Color(0xFFFED7AA), // orange-200
-          text: isDark ? const Color(0xFFFB923C) : const Color(0xFFC2410C), // orange-700
+          bg: isDark
+              ? const Color(0xFF7C2D12).withValues(alpha: 0.3)
+              : const Color(0xFFFFF7ED), // orange-50
+          border: isDark
+              ? const Color(0xFF7C2D12)
+              : const Color(0xFFFED7AA), // orange-200
+          text: isDark
+              ? const Color(0xFFFB923C)
+              : const Color(0xFFC2410C), // orange-700
         );
       case 'red':
         return (
-          bg: isDark ? const Color(0xFF7F1D1D).withValues(alpha: 0.3) : const Color(0xFFFEF2F2), // red-50
-          border: isDark ? const Color(0xFF7F1D1D) : const Color(0xFFFECACA), // red-200
-          text: isDark ? const Color(0xFFF87171) : const Color(0xFFB91C1C), // red-700
+          bg: isDark
+              ? const Color(0xFF7F1D1D).withValues(alpha: 0.3)
+              : const Color(0xFFFEF2F2), // red-50
+          border: isDark
+              ? const Color(0xFF7F1D1D)
+              : const Color(0xFFFECACA), // red-200
+          text: isDark
+              ? const Color(0xFFF87171)
+              : const Color(0xFFB91C1C), // red-700
         );
       case 'lime':
       default:
         return (
-          bg: isDark ? const Color(0xFF365314).withValues(alpha: 0.3) : const Color(0xFFF7FEE7), // lime-50
-          border: isDark ? const Color(0xFF365314) : const Color(0xFFD9F99D), // lime-200
-          text: isDark ? const Color(0xFFA3E635) : const Color(0xFF4D7C0F), // lime-700
+          bg: isDark
+              ? const Color(0xFF365314).withValues(alpha: 0.3)
+              : const Color(0xFFF7FEE7), // lime-50
+          border: isDark
+              ? const Color(0xFF365314)
+              : const Color(0xFFD9F99D), // lime-200
+          text: isDark
+              ? const Color(0xFFA3E635)
+              : const Color(0xFF4D7C0F), // lime-700
         );
     }
   }

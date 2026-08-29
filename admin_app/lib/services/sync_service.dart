@@ -15,13 +15,20 @@ import '../utils/image_storage_manager.dart';
 import 'api_service.dart';
 import 'database_service.dart';
 import 'sync_conflict_policy.dart';
+import 'license_service.dart';
 import 'tenant_mode_service.dart';
 
 enum SyncStatus { pending, syncing, synced, failed, conflicted, rejected }
 
 enum SyncStage { synced, pending, syncing, failed, conflicted }
 
-enum _SyncFailureDisposition { retryable, conflicted, rejected }
+enum _SyncFailureDisposition {
+  retryable,
+  conflicted,
+  rejected,
+  sessionExpired,
+  unreachable,
+}
 
 class SyncConflictDetected implements Exception {
   final String message;
@@ -251,9 +258,30 @@ class SyncService {
   Timer? _retryTimer;
   ApiService? _apiService;
   bool _isSyncing = false;
+
   /// Completes when the in-flight sync pass finishes; null when idle.
   Future<void>? _activePass;
   AppMode _mode = AppMode.online;
+
+  /// Set when the server answered a queued write with 401.
+  ///
+  /// Every queued write is then blocked on the same thing — a valid session —
+  /// so the loop stops instead of spending each row's retry budget on a failure
+  /// none of them caused. A device that was offline longer than the access
+  /// token lives reconnects straight into this case, and without the pause the
+  /// whole outbox would exhaust `_maxRetries` within about a minute and still
+  /// be stranded once the user signed back in.
+  ///
+  /// Cleared by [initialize], which the sign-in path calls with a fresh token.
+  bool _pausedForSessionExpiry = false;
+
+  /// Consecutive passes that could not reach the server at all.
+  ///
+  /// Drives the backoff for unreachable failures, which deliberately do not
+  /// spend a row's `retryCount` — see [_SyncFailureDisposition.unreachable].
+  /// In memory only: a restart starting over at a short delay is the right
+  /// behaviour, since the network is very often different by then.
+  int _unreachableStreak = 0;
 
   String get _activeWorkspaceId => TenantModeService().activeWorkspaceId ?? '';
 
@@ -262,8 +290,15 @@ class SyncService {
   void initialize(ApiService apiService, {required AppMode mode}) {
     _apiService = apiService;
     _mode = mode;
+    // A caller handing us an ApiService is handing us a session, so whatever
+    // 401 paused the loop no longer applies.
+    _pausedForSessionExpiry = false;
     unawaited(_bootstrap());
   }
+
+  /// True while the loop is parked waiting for the user to sign in again.
+  @visibleForTesting
+  bool get isPausedForSessionExpiry => _pausedForSessionExpiry;
 
   /// Recovers work stranded by a crash before reporting state or syncing.
   Future<void> _bootstrap() async {
@@ -341,9 +376,58 @@ class SyncService {
     ) {
       if (!_mode.allowsNetworkRequests) return;
       if (results.any((r) => r != ConnectivityResult.none)) {
-        _checkAndSync();
+        unawaited(_onConnectivityRestored());
       }
     });
+  }
+
+  /// Runs when the device joins a network again.
+  ///
+  /// The retry budget exists to stop the app hammering a server that keeps
+  /// refusing a write. A different network is new evidence, not more of the
+  /// old, so rows that had spent their budget get one more chance instead of
+  /// waiting behind a manual retry the user has no reason to expect. Rows
+  /// still inside their budget keep the backoff they are serving, and
+  /// `conflicted` and `rejected` are left alone — those are terminal by
+  /// design and only the user should move them.
+  Future<void> _onConnectivityRestored() async {
+    _unreachableStreak = 0;
+    await _restoreExhaustedRetryBudget();
+    unawaited(_checkAndSync());
+  }
+
+  /// Requests a sync pass now — used when the app returns to the foreground,
+  /// where connectivity may well have changed while no listener was running.
+  Future<void> syncNow() async {
+    if (!_mode.allowsNetworkRequests) return;
+    _unreachableStreak = 0;
+    await _restoreExhaustedRetryBudget();
+    await _checkAndSync();
+  }
+
+  Future<int> _restoreExhaustedRetryBudget() async {
+    try {
+      final db = await _dbService.database;
+      return await db.update(
+        'sync_queue',
+        {
+          'status': SyncStatus.pending.name,
+          'retryCount': 0,
+          'nextRetryAt': null,
+        },
+        where:
+            'tenantId = ? AND workspaceId = ? AND status = ? AND retryCount >= ?',
+        whereArgs: [
+          TenantModeService().activeTenantId,
+          _activeWorkspaceId,
+          SyncStatus.failed.name,
+          _maxRetries,
+        ],
+      );
+    } catch (error) {
+      debugPrint('SyncService: could not restore retry budget: $error');
+      return 0;
+    }
   }
 
   Future<bool> get isOnline async {
@@ -420,6 +504,15 @@ class SyncService {
     if (!_isSupportedOperation(entityType, action)) {
       throw SyncUnsupportedOperation(entityType, action);
     }
+    // Backstop for the licence lock. The fine-grained ruling belongs to the
+    // repository, which knows whether a write finishes already-open work; this
+    // only catches a repository that forgot to wrap a mutation, so it fails
+    // closed rather than silently queueing work a locked device may not do.
+    //
+    // Note this gates only *new* writes. Draining the existing outbox stays
+    // allowed: work captured before the lock is the tenant's data.
+    LicenseService().assertWriteAllowed(entityType, action);
+
     final tenantId = TenantModeService().activeTenantId;
     if (tenantId.trim().isEmpty) {
       throw StateError(
@@ -459,7 +552,10 @@ class SyncService {
   /// plus twelve domain refreshes on each one would be a lot of traffic for no
   /// new information.
   Future<void> _checkAndSync({bool pullRemote = true}) async {
-    if (_isSyncing || _apiService == null || !_mode.allowsNetworkRequests) {
+    if (_isSyncing ||
+        _apiService == null ||
+        _pausedForSessionExpiry ||
+        !_mode.allowsNetworkRequests) {
       return;
     }
     final online = await isOnline;
@@ -503,9 +599,13 @@ class SyncService {
       );
 
       for (final opMap in pendingOps) {
-        await _processOperation(
+        final keepGoing = await _processOperation(
           SyncOperation.fromMap(opMap.cast<String, dynamic>()),
         );
+        // The session died mid-pass. Every remaining row would draw the same
+        // 401, and the pull below with it, so stop here and leave the queue
+        // exactly as it is until a new token arrives.
+        if (!keepGoing) return;
       }
       if (pullRemote && tenantId.trim().isNotEmpty) {
         await _pullRemoteChanges(tenantId);
@@ -525,7 +625,9 @@ class SyncService {
     }
   }
 
-  Future<void> _processOperation(SyncOperation op) async {
+  /// Attempts one queued operation. Returns false when the pass must stop
+  /// because the session expired — see [_pausedForSessionExpiry].
+  Future<bool> _processOperation(SyncOperation op) async {
     final db = await _dbService.database;
 
     await db.update(
@@ -558,7 +660,7 @@ class SyncService {
         debugPrint(
           'SyncService: deferring ${op.entityType}:${op.action} — $blockedBy',
         );
-        return;
+        return true;
       }
       final resolved = await _processImagesInPayload(withResolvedAliases);
       final conflict = await _preflightConflictCheck(resolved);
@@ -566,15 +668,63 @@ class SyncService {
         throw SyncConflictDetected(conflict);
       }
       final responseData = await _executeApiCall(resolved);
+      // The server answered, so whatever outage the backoff was tracking is
+      // over.
+      _unreachableStreak = 0;
       await _applySuccessfulSync(resolved, responseData);
       await db.delete(
         'sync_queue',
         where: 'id = ? AND tenantId = ? AND workspaceId = ?',
         whereArgs: [op.id, op.tenantId, op.workspaceId],
       );
+      return true;
     } catch (e) {
       final disposition = _classifySyncFailure(e);
       final newRetryCount = op.retryCount + 1;
+      if (disposition == _SyncFailureDisposition.sessionExpired) {
+        // The write is fine; the session is not. Hand the row back untouched —
+        // same retry count, no backoff — and park the loop. Counting this as a
+        // failed attempt would let a single expired token walk the entire
+        // outbox past `_maxRetries`, so that everything queued during the
+        // outage would need a manual retry after signing back in.
+        await db.update(
+          'sync_queue',
+          {'status': SyncStatus.pending.name, 'nextRetryAt': null},
+          where: 'id = ? AND tenantId = ? AND workspaceId = ?',
+          whereArgs: [op.id, op.tenantId, op.workspaceId],
+        );
+        _pausedForSessionExpiry = true;
+        debugPrint(
+          'SyncService: session expired, pausing until re-authentication',
+        );
+        return false;
+      }
+      if (disposition == _SyncFailureDisposition.unreachable) {
+        // The server never answered, so nothing is known about this write —
+        // least of all that it is bad. Keep `retryCount` where it is so the
+        // row stays eligible however long the outage runs, and back off on a
+        // streak counter instead. Every other row would hit the same wall, so
+        // the pass stops here.
+        _unreachableStreak += 1;
+        final nextRetryAt = DateTime.now().add(
+          Duration(seconds: _backoffSeconds(_unreachableStreak)),
+        );
+        await db.update(
+          'sync_queue',
+          {
+            'status': SyncStatus.failed.name,
+            'lastError': _syncErrorMessage(e),
+            'nextRetryAt': nextRetryAt.toIso8601String(),
+          },
+          where: 'id = ? AND tenantId = ? AND workspaceId = ?',
+          whereArgs: [op.id, op.tenantId, op.workspaceId],
+        );
+        debugPrint(
+          'SyncService: server unreachable (streak $_unreachableStreak), '
+          'retrying at $nextRetryAt',
+        );
+        return false;
+      }
       if (disposition == _SyncFailureDisposition.conflicted) {
         await db.update(
           'sync_queue',
@@ -622,6 +772,7 @@ class SyncService {
           await _scheduleNextRetry();
         }
       }
+      return true;
     }
   }
 
@@ -634,13 +785,68 @@ class SyncService {
     }
     if (error is DioException) {
       final status = error.response?.statusCode;
-      if (status == 409) return _SyncFailureDisposition.conflicted;
+      if (status == null) {
+        // No response at all: DNS failure, refused connection, timeout. The
+        // device believed it was online because `connectivity_plus` reports
+        // whether an interface is up, not whether anything is reachable
+        // through it — a captive portal, a VPN with no route, or a server
+        // that is simply down all look "connected".
+        return _SyncFailureDisposition.unreachable;
+      }
+      if (status == 401) return _SyncFailureDisposition.sessionExpired;
+      if (status == 409) {
+        // Not every 409 needs a human. The server uses it both for a real
+        // conflict — a duplicate phone number, stock that is genuinely gone —
+        // and for losing an optimistic-concurrency race, where the row simply
+        // moved between its read and its conditional write. The second kind
+        // succeeds if you send the identical payload again, and parking it as
+        // `conflicted` stranded writes in the recovery list that the queue was
+        // always going to drain by itself.
+        return _isRetryableConflict(error)
+            ? _SyncFailureDisposition.retryable
+            : _SyncFailureDisposition.conflicted;
+      }
       if (status == 400 || status == 403 || status == 404 || status == 422) {
         return _SyncFailureDisposition.rejected;
+      }
+      // These say the infrastructure cannot serve the request right now, which
+      // is not the write's fault either: a restart or a rate limit used to
+      // spend the whole queue's budget in about a minute and strand every row
+      // behind a manual retry.
+      //
+      // A bare 500 is deliberately not in this list. It can just as easily be
+      // a server bug that this particular payload triggers every time, and
+      // that case has to reach the user rather than retry forever.
+      if (status == 429 || status == 502 || status == 503 || status == 504) {
+        return _SyncFailureDisposition.unreachable;
       }
       return _SyncFailureDisposition.retryable;
     }
     return _SyncFailureDisposition.retryable;
+  }
+
+  /// The server's machine-readable marker for "you lost a race, send it again".
+  /// Mirrors `RETRY_CONFLICT` in `backend/src/lib/conflict-codes.ts`.
+  static const String _retryConflictCode = 'RETRY_CONFLICT';
+
+  /// True when a 409 describes a lost optimistic-concurrency race rather than a
+  /// conflict someone has to resolve.
+  ///
+  /// Prefers the server's `code`. The message check behind it is a fallback for
+  /// a server older than this build — every one of these failures already ends
+  /// in "please retry", and reading that is better than sending the user to a
+  /// recovery screen for a write that only needed sending twice.
+  bool _isRetryableConflict(DioException error) {
+    final data = error.response?.data;
+    if (data is! Map) return false;
+
+    final code = data['code']?.toString().trim().toUpperCase();
+    if (code == _retryConflictCode) return true;
+
+    final message = (data['statusMessage'] ?? data['message'] ?? data['error'])
+        ?.toString()
+        .toLowerCase();
+    return message != null && message.contains('please retry');
   }
 
   String _syncErrorMessage(Object error) {
@@ -662,7 +868,11 @@ class SyncService {
   Future<void> _scheduleNextRetry() async {
     _retryTimer?.cancel();
     _retryTimer = null;
-    if (_apiService == null || !_mode.allowsNetworkRequests) return;
+    if (_apiService == null ||
+        _pausedForSessionExpiry ||
+        !_mode.allowsNetworkRequests) {
+      return;
+    }
     // Scheduling only decides when to wake up next. It runs from the `finally`
     // of a sync pass, so it can be reading the queue exactly as a logout or
     // tenant switch closes the database underneath it. A failure here must not
@@ -701,7 +911,12 @@ class SyncService {
     // `nextRetryAt` of their own, so without this they would sit untouched
     // until connectivity happened to flap. Such a sweep only needs to drain the
     // outbox — it carries no reason to re-pull remote state.
-    if (delay == null || delay > _idleSweepDelay) {
+    //
+    // Skipped while the server is unreachable: those pending rows are not
+    // waiting on a parent that just synced, they are waiting on the network,
+    // exactly like the row that failed. Letting the sweep pre-empt the backoff
+    // would keep the app retrying every five seconds for the whole outage.
+    if (_unreachableStreak == 0 && (delay == null || delay > _idleSweepDelay)) {
       final pending =
           Sqflite.firstIntValue(
             await db.rawQuery(
@@ -730,7 +945,14 @@ class SyncService {
   static const Map<String, Map<String, String>> _dependencyFields = {
     'order': {'id': 'order'},
     'user': {'staffRoleId': 'staffRole', 'cashboxId': 'cashbox'},
-    'sale': {'customerId': 'customer', 'orderId': 'order'},
+    // `cashboxId` matters as much as the customer: the server attaches the
+    // sale's cash movement to it, so a till created offline must reach the
+    // server before any sale can name it.
+    'sale': {
+      'customerId': 'customer',
+      'orderId': 'order',
+      'cashboxId': 'cashbox',
+    },
     'customerPayment': {'customerId': 'customer', 'saleId': 'sale'},
     'purchase': {
       'id': 'purchase',
@@ -804,7 +1026,6 @@ class SyncService {
   /// operation is still going to create that entity, defer instead of sending.
   Future<String?> _findBlockingDependency(SyncOperation op) async {
     final fields = _dependencyFields[op.entityType] ?? const <String, String>{};
-    if (fields.isEmpty) return null;
 
     for (final entry in fields.entries) {
       // A create's own `id` cannot block it: `_hasPendingCreateFor` excludes
@@ -817,7 +1038,84 @@ class SyncService {
         return '${entry.value} "$value" has not synced yet';
       }
     }
+    return _findBlockingPrecondition(op);
+  }
+
+  /// Returns a description of a server-side *state* precondition that another
+  /// queued operation has not established yet, or null.
+  ///
+  /// [_dependencyFields] can only express "this id must exist remotely". A POS
+  /// sale has a precondition its payload never names: the server posts the
+  /// sale's SALE_PAYMENT movement through the cash ledger, which refuses — and
+  /// so rolls back the whole sale — with 409 `CASH_SESSION_REQUIRED` unless the
+  /// cashbox has an open session.
+  ///
+  /// When the till was opened on this device while offline, that
+  /// `cashSession:open` is still in the outbox. FIFO alone does not order the
+  /// two safely: an open that failed carries a `nextRetryAt`, which holds it
+  /// out of the batch while the sale queued behind it stays eligible and goes
+  /// first. The 409 that comes back is filed by [_classifySyncFailure] as
+  /// `conflicted` — terminal, and needing a human — for a queue that was always
+  /// going to resolve itself.
+  Future<String?> _findBlockingPrecondition(SyncOperation op) async {
+    if (op.entityType != 'sale' || op.action != 'create') return null;
+
+    final cashboxId = op.payload['cashboxId']?.toString().trim();
+    if (cashboxId == null || cashboxId.isEmpty) return null;
+
+    if (await _hasPendingSessionOpenFor(cashboxId, op)) {
+      return 'cashbox "$cashboxId" has no open session on the server yet';
+    }
     return null;
+  }
+
+  /// True when a non-terminal `cashSession:open` for [cashboxId] is still
+  /// queued.
+  ///
+  /// The candidate's own `cashboxId` is resolved through the alias table before
+  /// comparing: [op] has already been rewritten to remote ids by
+  /// [_resolveOperationAliases], while a row still sitting in the queue carries
+  /// whatever id it was enqueued with.
+  Future<bool> _hasPendingSessionOpenFor(
+    String cashboxId,
+    SyncOperation op,
+  ) async {
+    final db = await _dbService.database;
+    final rows = await db.query(
+      'sync_queue',
+      columns: ['payload'],
+      where:
+          'tenantId = ? AND workspaceId = ? AND entityType = ? AND action = ? '
+          'AND id != ? AND status IN (?, ?, ?)',
+      whereArgs: [
+        op.tenantId,
+        op.workspaceId,
+        'cashSession',
+        'open',
+        op.id,
+        SyncStatus.pending.name,
+        SyncStatus.failed.name,
+        SyncStatus.syncing.name,
+      ],
+    );
+
+    for (final row in rows) {
+      final Map<String, dynamic> payload;
+      try {
+        payload = jsonDecode(row['payload'] as String) as Map<String, dynamic>;
+      } catch (_) {
+        continue;
+      }
+      final candidate = payload['cashboxId']?.toString().trim();
+      if (candidate == null || candidate.isEmpty) continue;
+      final resolved = await _resolveEntityAlias(
+        'cashbox',
+        candidate,
+        tenantId: op.tenantId,
+      );
+      if (resolved == cashboxId) return true;
+    }
+    return false;
   }
 
   /// Actions that bring an entity into existence server-side. Only these can

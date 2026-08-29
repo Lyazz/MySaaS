@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client'
+import { RETRY_CONFLICT } from '../../lib/conflict-codes'
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
@@ -11,11 +12,19 @@ import { CashService } from '../cash/cash.service'
 export class PosValidationError extends Error {
     statusCode: number
     statusMessage: string
+    code?: string
+    meta?: Record<string, unknown>
 
-    constructor(statusCode: number, statusMessage: string) {
+    constructor(
+        statusCode: number,
+        statusMessage: string,
+        opts?: { code?: string; meta?: Record<string, unknown> }
+    ) {
         super(statusMessage)
         this.statusCode = statusCode
         this.statusMessage = statusMessage
+        this.code = opts?.code
+        this.meta = opts?.meta
     }
 }
 
@@ -367,7 +376,7 @@ export class PosService {
                 },
                 data: { stock: { decrement: item.quantity } }
             })
-            if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry')
+            if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
             touchedProductIds.add(variantBefore.productId)
 
             const after = await tx.productVariant.findFirst({

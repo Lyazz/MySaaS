@@ -47,7 +47,8 @@ void _initCustomEUR() {
     DECIMAL_PATTERN: '#,##0.###',
     SCIENTIFIC_PATTERN: '#E0',
     PERCENT_PATTERN: '#,##0%',
-    CURRENCY_PATTERN: '#,##0.00 \u00A4', // \u00A4 is the currency sign placeholder at the end
+    CURRENCY_PATTERN:
+        '#,##0.00 \u00A4', // \u00A4 is the currency sign placeholder at the end
     DEF_CURRENCY_CODE: 'EUR',
   );
   _eurInitialized = true;
@@ -70,7 +71,11 @@ NumberFormat tenantCurrencyFormatter(StoreSettings settings) {
     return NumberFormat.currency(locale: 'custom_DZD', name: 'DZD');
   } else if (code.toUpperCase() == 'EUR') {
     _initCustomEUR();
-    return NumberFormat.currency(locale: 'custom_EUR', name: 'EUR', symbol: '€');
+    return NumberFormat.currency(
+      locale: 'custom_EUR',
+      name: 'EUR',
+      symbol: '€',
+    );
   } else {
     final country = tenantCurrencyCountry(settings);
     return NumberFormat.simpleCurrency(name: code, locale: 'en_$country');

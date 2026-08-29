@@ -1,3 +1,5 @@
+import { generateKeyPairSync } from 'node:crypto'
+
 import { config } from '@vue/test-utils'
 
 config.global.mocks = {
@@ -7,3 +9,19 @@ config.global.mocks = {
 
 process.env.JWT_SECRET ||= 'test-jwt-secret'
 process.env.TRUST_PROXY ||= 'true'
+
+// Activation licenses are RS256-signed and `assertRequiredEnv()` refuses to boot
+// without a keypair. Generate an ephemeral one per test worker rather than
+// committing a fixture: a checked-in test key is exactly the mistake that put a
+// real private key in this repo's history. The guard keeps it to one generation
+// per worker, since env vars persist across sequential test files.
+if (!process.env.ACTIVATION_PRIVATE_KEY || !process.env.ACTIVATION_PUBLIC_KEY) {
+    const { privateKey, publicKey } = generateKeyPairSync('rsa', {
+        modulusLength: 2048,
+        privateKeyEncoding: { type: 'pkcs8', format: 'pem' },
+        publicKeyEncoding: { type: 'spki', format: 'pem' }
+    })
+
+    process.env.ACTIVATION_PRIVATE_KEY = privateKey
+    process.env.ACTIVATION_PUBLIC_KEY = publicKey
+}

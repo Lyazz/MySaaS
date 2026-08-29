@@ -95,19 +95,31 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         children: [
           Expanded(
             flex: 3,
-            child: _headerText(context, 'admin.pages.sales.detail.itemsTable.product'.tr()),
+            child: _headerText(
+              context,
+              'admin.pages.sales.detail.itemsTable.product'.tr(),
+            ),
           ),
           Expanded(
             flex: 2,
-            child: _headerText(context, 'admin.pages.purchases.detail.items.sku'.tr()),
+            child: _headerText(
+              context,
+              'admin.pages.purchases.detail.items.sku'.tr(),
+            ),
           ),
           Expanded(
             flex: 1,
-            child: _headerText(context, 'admin.pages.products.index.table.stock'.tr()),
+            child: _headerText(
+              context,
+              'admin.pages.products.index.table.stock'.tr(),
+            ),
           ),
           Expanded(
             flex: 1,
-            child: _headerText(context, 'superAdmin.paymentsPage.history.table.status'.tr()),
+            child: _headerText(
+              context,
+              'superAdmin.paymentsPage.history.table.status'.tr(),
+            ),
           ),
           SizedBox(width: 48), // Actions space
         ],
@@ -118,10 +130,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         final imagePath = product.mainImageUrl?.trim();
 
         return Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 20,
-            vertical: 13,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -154,7 +163,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     Expanded(
                       child: Text(
                         product.title,
-                        style: const TextStyle(fontWeight: FontWeight.w500, fontSize: 13),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

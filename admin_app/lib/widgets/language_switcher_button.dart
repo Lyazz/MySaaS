@@ -29,8 +29,12 @@ class _LanguageSwitcherButtonState extends State<LanguageSwitcherButton> {
         ? AppColors.surfaceBorder
         : AppColors.lightSidebarBorder;
     final hoverBg = isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
-    final color = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-    final hoverColor = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final color = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final hoverColor = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
 
     return PopupMenuButton<Locale>(
       tooltip: 'i18n.switcher.label'.tr(),

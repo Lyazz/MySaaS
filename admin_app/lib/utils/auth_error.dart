@@ -35,6 +35,14 @@ enum AuthErrorKind {
   /// 409 — conflicting state (slug taken, duplicate email across tenants).
   conflict,
 
+  /// 409 `DEVICE_LIMIT_REACHED` — the tenant's licensed seats are all taken.
+  /// Distinct from [conflict] because it has a way out: the operator can ask an
+  /// administrator to approve this device, rather than being told "try again".
+  deviceNotApproved,
+
+  /// 403 `DEVICE_REVOKED` — an administrator deactivated this device.
+  deviceRevoked,
+
   /// 5xx — the API blew up.
   server,
 
@@ -67,8 +75,30 @@ class AuthErrorMapper {
 
   /// Classifies [error] without touching localization, so it can be unit
   /// tested without an initialized `EasyLocalization`.
+  /// Machine-readable reason the backend sent, if any.
+  ///
+  /// The activation and auth modules answer with a stable `code` precisely so
+  /// the app can branch without matching on prose.
+  static String? serverCode(Object? error) {
+    if (error is! DioException) return null;
+    final data = error.response?.data;
+    if (data is! Map) return null;
+    final code = data['code'];
+    return code is String && code.trim().isNotEmpty ? code.trim() : null;
+  }
+
   static AuthErrorKind classify(Object? error) {
     if (error is AuthFailure) return error.kind;
+
+    // Device seat refusals outrank the plain status mapping: a 409 that means
+    // "all seats taken" needs a different screen from a 409 that means
+    // "that slug is taken".
+    switch (serverCode(error)) {
+      case 'DEVICE_LIMIT_REACHED':
+        return AuthErrorKind.deviceNotApproved;
+      case 'DEVICE_REVOKED':
+        return AuthErrorKind.deviceRevoked;
+    }
 
     if (error is DioException) {
       switch (error.type) {
@@ -150,6 +180,10 @@ class AuthErrorMapper {
           AuthErrorKind.forbidden,
           AuthErrorKind.notFound,
           AuthErrorKind.conflict,
+          // The backend spells these out with the seat count and the reason,
+          // which is more useful than any generic wording we could write.
+          AuthErrorKind.deviceNotApproved,
+          AuthErrorKind.deviceRevoked,
         }.contains(kind);
 
     final message = useServerMessage
@@ -180,6 +214,12 @@ class AuthErrorMapper {
       AuthErrorKind.forbidden => 'auth.errors.forbidden'.tr(),
       AuthErrorKind.notFound => 'auth.errors.notFound'.tr(),
       AuthErrorKind.conflict => 'auth.errors.conflict'.tr(),
+      // Fallbacks only: `toFailure` prefers the backend's wording for these,
+      // because it names the seat count and the revocation reason.
+      AuthErrorKind.deviceNotApproved =>
+        'This device is not activated for your account yet.',
+      AuthErrorKind.deviceRevoked =>
+        'This device was deactivated by an administrator.',
       AuthErrorKind.server => 'auth.errors.server'.tr(),
       AuthErrorKind.unknown => 'auth.errors.unknown'.tr(),
     };

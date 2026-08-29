@@ -1,14 +1,23 @@
 import prisma from '../../lib/prisma'
+import { RETRY_CONFLICT } from '../../lib/conflict-codes'
 import { syncProductStockForProducts } from './product-stock.service'
 
 export class InventoryValidationError extends Error {
     statusCode: number
     statusMessage: string
+    code?: string
+    meta?: Record<string, unknown>
 
-    constructor(statusCode: number, statusMessage: string) {
+    constructor(
+        statusCode: number,
+        statusMessage: string,
+        opts?: { code?: string; meta?: Record<string, unknown> }
+    ) {
         super(statusMessage)
         this.statusCode = statusCode
         this.statusMessage = statusMessage
+        this.code = opts?.code
+        this.meta = opts?.meta
     }
 }
 
@@ -192,7 +201,7 @@ export class InventoryService {
             })
 
             if (updateResult.count !== 1) {
-                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry')
+                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry', { code: RETRY_CONFLICT })
             }
 
             const refreshed = await tx.productVariant.findFirst({
@@ -266,7 +275,7 @@ export class InventoryService {
             })
 
             if (updateResult.count !== 1) {
-                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry')
+                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry', { code: RETRY_CONFLICT })
             }
 
             const refreshed = await tx.productVariant.findFirst({
@@ -397,7 +406,7 @@ export class InventoryService {
             })
 
             if (updateResult.count !== 1) {
-                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry')
+                throw new InventoryValidationError(409, 'Variant was updated by another request, please retry', { code: RETRY_CONFLICT })
             }
 
             const refreshed = await tx.productVariant.findFirst({

@@ -40,7 +40,9 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
     _phone = TextEditingController();
     _email = TextEditingController();
     _address = TextEditingController();
-    _openingBalance = TextEditingController(text: 'admin.forms.product.stock.placeholder'.tr());
+    _openingBalance = TextEditingController(
+      text: 'admin.forms.product.stock.placeholder'.tr(),
+    );
 
     if (widget.customerId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadCustomer());

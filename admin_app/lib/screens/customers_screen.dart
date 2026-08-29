@@ -94,8 +94,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   ],
                   ResponsiveFilterBar(
                     searchField: FormInput(
-                      label: 'app.admin_pages_customers_index_fi'.tr()
-                          .tr(),
+                      label: 'app.admin_pages_customers_index_fi'.tr().tr(),
                       controller: _searchController,
                       hint:
                           'admin.pages.customers.index.filters.searchPlaceholder'
@@ -214,8 +213,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             'admin.pages.customers.index.table.customer'.tr(),
             flex: 3,
           ),
-          _buildHeaderCell('admin.pages.customers.index.table.info'.tr(), flex: 3),
-          _buildHeaderCell('admin.pages.customers.index.table.address'.tr(), flex: 3),
+          _buildHeaderCell(
+            'admin.pages.customers.index.table.info'.tr(),
+            flex: 3,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.index.table.address'.tr(),
+            flex: 3,
+          ),
           _buildHeaderCell(
             'admin.pages.customers.index.table.orders'.tr(),
             flex: 1,
@@ -343,7 +348,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                             ),
                           ],
                         ),
-                      if ((customer.email ?? '').trim().isEmpty && customer.phone.trim().isEmpty)
+                      if ((customer.email ?? '').trim().isEmpty &&
+                          customer.phone.trim().isEmpty)
                         Text(
                           '—',
                           style: TextStyle(
@@ -359,7 +365,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                 Expanded(
                   flex: 3,
                   child: Text(
-                    (customer.address ?? '').trim().isEmpty ? '—' : customer.address!,
+                    (customer.address ?? '').trim().isEmpty
+                        ? '—'
+                        : customer.address!,
                     style: TextStyle(
                       fontSize: 13,
                       color: Theme.of(

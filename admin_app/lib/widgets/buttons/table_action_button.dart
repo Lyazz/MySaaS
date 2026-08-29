@@ -31,8 +31,12 @@ class _TableActionButtonState extends State<TableActionButton> {
 
     // Normal styling
     Color bg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
-    Color border = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    Color iconColor = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    Color border = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    Color iconColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     // Danger styling
     if (widget.isDanger) {
@@ -46,7 +50,9 @@ class _TableActionButtonState extends State<TableActionButton> {
       }
     } else {
       if (_isHovered && !isDisabled) {
-        border = isDark ? AppColors.surfaceBorderHover : AppColors.lightSurfaceBorderHover;
+        border = isDark
+            ? AppColors.surfaceBorderHover
+            : AppColors.lightSurfaceBorderHover;
         iconColor = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
       }
     }
@@ -67,20 +73,16 @@ class _TableActionButtonState extends State<TableActionButton> {
           border: Border.all(color: border, width: 1),
         ),
         child: Center(
-          child: widget.isLoading 
-            ? SizedBox(
-                width: 14, 
-                height: 14, 
-                child: CircularProgressIndicator(
-                  strokeWidth: 2, 
-                  color: iconColor,
+          child: widget.isLoading
+              ? SizedBox(
+                  width: 14,
+                  height: 14,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: iconColor,
+                  ),
                 )
-              )
-            : Icon(
-                widget.icon,
-                size: 16,
-                color: iconColor,
-              ),
+              : Icon(widget.icon, size: 16, color: iconColor),
         ),
       ),
     );
@@ -97,10 +99,7 @@ class _TableActionButtonState extends State<TableActionButton> {
     );
 
     if (widget.tooltip != null) {
-      return Tooltip(
-        message: widget.tooltip!,
-        child: button,
-      );
+      return Tooltip(message: widget.tooltip!, child: button);
     }
 
     return button;

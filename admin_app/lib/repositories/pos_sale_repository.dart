@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:uuid/uuid.dart';
 
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -15,6 +16,7 @@ class PosSaleRepository {
   String get _tid => TenantModeService().activeTenantId;
 
   Future<String> createSale(Map<String, dynamic> payload) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('sale', 'create'));
     final db = await _dbService.database;
 
     final saleId = const Uuid().v4();

@@ -13,5 +13,6 @@ router.post('/tenants/:tenantId/payments/import', controller.importTenantPayment
 router.post('/tenants/:tenantId/payments/:paymentId/review', controller.reviewPayment.bind(controller))
 router.get('/tenants/:tenantId/payments/:paymentId/proof-url', controller.getPaymentProofUrl.bind(controller))
 router.put('/tenants/:tenantId/subscription', controller.setTenantSubscription.bind(controller))
+router.post('/tenants/:tenantId/trial', controller.setTrial.bind(controller))
 
 export default router

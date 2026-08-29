@@ -42,9 +42,10 @@ class _AdminNotificationsButtonState
       vsync: this,
       duration: const Duration(milliseconds: 1800),
     );
-    _pulseAnim = Tween<double>(begin: 1.0, end: 1.18).animate(
-      CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut),
-    );
+    _pulseAnim = Tween<double>(
+      begin: 1.0,
+      end: 1.18,
+    ).animate(CurvedAnimation(parent: _pulseCtrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -63,12 +64,14 @@ class _AdminNotificationsButtonState
   }
 
   Offset _getDropdownOffset() {
-    final box =
-        _buttonKey.currentContext?.findRenderObject() as RenderBox?;
+    final box = _buttonKey.currentContext?.findRenderObject() as RenderBox?;
     if (box == null) return Offset.zero;
     final position = box.localToGlobal(Offset.zero);
     final size = box.size;
-    return Offset(position.dx + size.width - 380, position.dy + size.height + 8);
+    return Offset(
+      position.dx + size.width - 380,
+      position.dy + size.height + 8,
+    );
   }
 
   @override
@@ -81,14 +84,16 @@ class _AdminNotificationsButtonState
       _onUnreadChanged(state.unreadCount);
     });
 
-    final borderColor =
-        isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
-    final hoverBg =
-        isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
-    final iconColor =
-        isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
-    final hoverColor =
-        isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSidebarBorder;
+    final hoverBg = isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
+    final iconColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final hoverColor = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
 
     return OverlayPortal(
       controller: _overlayController,
@@ -101,9 +106,7 @@ class _AdminNotificationsButtonState
           _overlayController.hide();
           // Keep a reference to the main widget's context before await
           final mainContext = this.context;
-          await ref
-              .read(adminNotificationsProvider.notifier)
-              .markRead(item.id);
+          await ref.read(adminNotificationsProvider.notifier).markRead(item.id);
           if (!mainContext.mounted) return;
           _openNotification(mainContext, item);
         },
@@ -161,7 +164,10 @@ class _AdminNotificationsButtonState
                 Positioned(
                   right: -5,
                   top: -5,
-                  child: _AnimatedBadge(count: state.unreadCount, isDark: isDark),
+                  child: _AnimatedBadge(
+                    count: state.unreadCount,
+                    isDark: isDark,
+                  ),
                 ),
             ],
           ),
@@ -208,8 +214,7 @@ class _AnimatedBadgeState extends State<_AnimatedBadge>
       vsync: this,
       duration: const Duration(milliseconds: 350),
     );
-    _scaleAnim =
-        CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut);
+    _scaleAnim = CurvedAnimation(parent: _ctrl, curve: Curves.elasticOut);
     _ctrl.forward();
   }
 
@@ -380,8 +385,7 @@ class _NotificationPanel extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onViewAll;
 
-  Color get _surface =>
-      isDark ? AppColors.surface2 : AppColors.lightSurface1;
+  Color get _surface => isDark ? AppColors.surface2 : AppColors.lightSurface1;
   Color get _border =>
       isDark ? AppColors.surfaceBorder : AppColors.lightSidebarBorder;
   Color get _textPrimary =>
@@ -467,9 +471,7 @@ class _NotificationPanel extends StatelessWidget {
               Divider(height: 1, thickness: 1, color: _divider),
 
               // ── Content ─────────────────────────────────────────────────
-              Flexible(
-                child: _buildBody(context, todayItems, earlierItems),
-              ),
+              Flexible(child: _buildBody(context, todayItems, earlierItems)),
 
               // ── Footer ─────────────────────────────────────────────────
               if (state.items.isNotEmpty) ...[
@@ -500,8 +502,11 @@ class _NotificationPanel extends StatelessWidget {
     }
 
     if (state.items.isEmpty) {
-      return _EmptyState(isDark: isDark, textPrimary: _textPrimary,
-          textSecondary: _textSecondary);
+      return _EmptyState(
+        isDark: isDark,
+        textPrimary: _textPrimary,
+        textSecondary: _textSecondary,
+      );
     }
 
     return ListView(
@@ -509,32 +514,42 @@ class _NotificationPanel extends StatelessWidget {
       padding: EdgeInsets.zero,
       children: [
         if (todayItems.isNotEmpty) ...[
-          _SectionLabel(label: 'Today', isDark: isDark,
-              textTertiary: _textTertiary),
-          ...todayItems.asMap().entries.map((e) => _NotificationRow(
-                item: e.value,
-                isDark: isDark,
-                index: e.key,
-                textPrimary: _textPrimary,
-                textSecondary: _textSecondary,
-                textTertiary: _textTertiary,
-                dividerColor: _divider,
-                onTap: () => onNavigate(e.value),
-              )),
+          _SectionLabel(
+            label: 'Today',
+            isDark: isDark,
+            textTertiary: _textTertiary,
+          ),
+          ...todayItems.asMap().entries.map(
+            (e) => _NotificationRow(
+              item: e.value,
+              isDark: isDark,
+              index: e.key,
+              textPrimary: _textPrimary,
+              textSecondary: _textSecondary,
+              textTertiary: _textTertiary,
+              dividerColor: _divider,
+              onTap: () => onNavigate(e.value),
+            ),
+          ),
         ],
         if (earlierItems.isNotEmpty) ...[
-          _SectionLabel(label: 'Earlier', isDark: isDark,
-              textTertiary: _textTertiary),
-          ...earlierItems.asMap().entries.map((e) => _NotificationRow(
-                item: e.value,
-                isDark: isDark,
-                index: todayItems.length + e.key,
-                textPrimary: _textPrimary,
-                textSecondary: _textSecondary,
-                textTertiary: _textTertiary,
-                dividerColor: _divider,
-                onTap: () => onNavigate(e.value),
-              )),
+          _SectionLabel(
+            label: 'Earlier',
+            isDark: isDark,
+            textTertiary: _textTertiary,
+          ),
+          ...earlierItems.asMap().entries.map(
+            (e) => _NotificationRow(
+              item: e.value,
+              isDark: isDark,
+              index: todayItems.length + e.key,
+              textPrimary: _textPrimary,
+              textSecondary: _textSecondary,
+              textTertiary: _textTertiary,
+              dividerColor: _divider,
+              onTap: () => onNavigate(e.value),
+            ),
+          ),
         ],
       ],
     );
@@ -616,7 +631,9 @@ class _PanelHeader extends StatelessWidget {
                       const SizedBox(width: 6),
                       Container(
                         padding: const EdgeInsets.symmetric(
-                            horizontal: 6, vertical: 1),
+                          horizontal: 6,
+                          vertical: 1,
+                        ),
                         decoration: BoxDecoration(
                           color: AppColors.brand.withValues(alpha: 0.15),
                           borderRadius: BorderRadius.circular(999),
@@ -757,9 +774,7 @@ class _HeaderActionState extends State<_HeaderAction>
             width: 28,
             height: 28,
             decoration: BoxDecoration(
-              color: _hovered
-                  ? widget.hoverBg
-                  : Colors.transparent,
+              color: _hovered ? widget.hoverBg : Colors.transparent,
               borderRadius: BorderRadius.circular(7),
               border: Border.all(color: widget.border),
             ),
@@ -774,8 +789,8 @@ class _HeaderActionState extends State<_HeaderAction>
                 size: 13,
                 color: _hovered
                     ? (widget.isDark
-                        ? AppColors.textPrimary
-                        : AppColors.lightTextPrimary)
+                          ? AppColors.textPrimary
+                          : AppColors.lightTextPrimary)
                     : widget.textTertiary,
               ),
             ),
@@ -884,9 +899,7 @@ class _NotificationRowState extends State<_NotificationRow>
 
   Color get _rowBg {
     if (_hovered) {
-      return widget.isDark
-          ? AppColors.navHoverBg
-          : AppColors.lightNavHoverBg;
+      return widget.isDark ? AppColors.navHoverBg : AppColors.lightNavHoverBg;
     }
     if (widget.item.isUnread) {
       return AppColors.brand.withValues(alpha: 0.04);
@@ -924,7 +937,8 @@ class _NotificationRowState extends State<_NotificationRow>
                       borderRadius: BorderRadius.circular(10),
                       border: widget.item.isUnread
                           ? Border.all(
-                              color: AppColors.brand.withValues(alpha: 0.3))
+                              color: AppColors.brand.withValues(alpha: 0.3),
+                            )
                           : null,
                     ),
                     child: Icon(
@@ -1083,9 +1097,14 @@ class _LoadingStateState extends State<_LoadingState>
             child: AnimatedBuilder(
               animation: _shimmer,
               builder: (_, __) {
-                final opacity = 0.04 + 0.06 * (0.5 + 0.5 * math.sin(
-                  _shimmer.value * 2 * math.pi + i * 0.8,
-                ));
+                final opacity =
+                    0.04 +
+                    0.06 *
+                        (0.5 +
+                            0.5 *
+                                math.sin(
+                                  _shimmer.value * 2 * math.pi + i * 0.8,
+                                ));
                 return Row(
                   children: [
                     Container(
@@ -1106,8 +1125,9 @@ class _LoadingStateState extends State<_LoadingState>
                             height: 11,
                             width: double.infinity,
                             decoration: BoxDecoration(
-                              color: (widget.isDark ? Colors.white : Colors.black)
-                                  .withValues(alpha: opacity),
+                              color:
+                                  (widget.isDark ? Colors.white : Colors.black)
+                                      .withValues(alpha: opacity),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1116,8 +1136,9 @@ class _LoadingStateState extends State<_LoadingState>
                             height: 9,
                             width: 160,
                             decoration: BoxDecoration(
-                              color: (widget.isDark ? Colors.white : Colors.black)
-                                  .withValues(alpha: opacity * 0.7),
+                              color:
+                                  (widget.isDark ? Colors.white : Colors.black)
+                                      .withValues(alpha: opacity * 0.7),
                               borderRadius: BorderRadius.circular(4),
                             ),
                           ),
@@ -1166,9 +1187,10 @@ class _EmptyStateState extends State<_EmptyState>
       vsync: this,
       duration: const Duration(milliseconds: 2000),
     )..repeat(reverse: true);
-    _float = Tween<double>(begin: -4, end: 4).animate(
-      CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut),
-    );
+    _float = Tween<double>(
+      begin: -4,
+      end: 4,
+    ).animate(CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut));
   }
 
   @override
@@ -1197,10 +1219,7 @@ class _EmptyStateState extends State<_EmptyState>
                 gradient: const LinearGradient(
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
-                  colors: [
-                    Color(0x20C6F432),
-                    Color(0x0886EFAC),
-                  ],
+                  colors: [Color(0x20C6F432), Color(0x0886EFAC)],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -1226,10 +1245,7 @@ class _EmptyStateState extends State<_EmptyState>
           const SizedBox(height: 4),
           Text(
             'No new notifications right now.',
-            style: TextStyle(
-              color: widget.textSecondary,
-              fontSize: 11.5,
-            ),
+            style: TextStyle(color: widget.textSecondary, fontSize: 11.5),
           ),
         ],
       ),

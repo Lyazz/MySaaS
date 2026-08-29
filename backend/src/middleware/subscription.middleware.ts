@@ -1,5 +1,9 @@
 import type { Request, Response, NextFunction } from 'express';
 import prisma from '../lib/prisma';
+import {
+  ensureSubscription,
+  STATUS_TRIALING
+} from '../modules/billing/subscription.service';
 
 const addUtcMonths = (date: Date, months: number) =>
   new Date(
@@ -19,10 +23,15 @@ const isSuperAdminPath = (path: string) => path.startsWith('/api/super-admin');
 const isAuthPath = (path: string) =>
   path === '/api/login' || path === '/api/register' || path === '/api/me';
 const isFilesPath = (path: string) => path.startsWith('/api/files');
-const isProvisioningPath = (path: string) =>
-  path === '/api/provisioning/activate' ||
-  path === '/api/admin/provisioning/tokens';
 const isWebhookPath = (path: string) => path.startsWith('/api/webhooks/');
+/**
+ * Activation must stay reachable for a tenant this middleware would otherwise
+ * reject. A PAST_DUE or trial-expired tenant gets 402 on every tenant-scoped
+ * path -- including, without this, its own heartbeat and re-activation. That
+ * would make the lock permanent: the device could never obtain the fresh
+ * licence that unlocks it once the tenant pays.
+ */
+const isActivationPath = (path: string) => path.startsWith('/api/activation');
 
 export const expressSubscriptionMiddleware = async (
   req: Request,
@@ -36,7 +45,7 @@ export const expressSubscriptionMiddleware = async (
   if (isAuthPath(path)) return next();
   if (isSuperAdminPath(path)) return next();
   if (isFilesPath(path)) return next();
-  if (isProvisioningPath(path)) return next();
+  if (isActivationPath(path)) return next();
   if (isWebhookPath(path)) return next();
 
   // Determine tenant context:
@@ -70,22 +79,26 @@ export const expressSubscriptionMiddleware = async (
   const now = new Date();
   const defaultEnd = addUtcMonths(now, 1);
 
-  const subscription = await prisma.tenantSubscription.upsert({
-    where: { tenantId: tenant.id },
-    create: {
-      tenantId: tenant.id,
-      planCode: 'basic',
-      interval: 'month',
-      status: 'ACTIVE',
-      currentPeriodStart: now,
-      currentPeriodEnd: defaultEnd,
-    },
-    update: {},
-  });
+  // One writer for this row, shared with registration and super-admin tenant
+  // creation. All three used to create it independently, each hardcoding
+  // status ACTIVE -- which is why nothing ever wrote TRIALING.
+  const subscription = await ensureSubscription(prisma, tenant.id, { now });
 
   req.subscription = subscription;
 
-  const end = subscription.currentPeriodEnd ?? defaultEnd;
+  const isTrialing =
+    subscription.status?.trim().toUpperCase() === STATUS_TRIALING;
+
+  // A live trial is full access. It ends by its own date rather than by the
+  // paid period, and the activation licence handed to a device is clamped to
+  // the same instant, so an offline trial device locks itself on schedule.
+  if (isTrialing && subscription.trialEnd && now < subscription.trialEnd) {
+    return next();
+  }
+
+  const end = isTrialing
+    ? (subscription.trialEnd ?? defaultEnd)
+    : (subscription.currentPeriodEnd ?? defaultEnd);
   const isExpired = now >= end;
 
   if (isExpired) {

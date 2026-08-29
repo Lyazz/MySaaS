@@ -8,7 +8,7 @@ import 'package:admin_app/utils/tenant_currency.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'helpers/pump_localized_app.dart';
@@ -90,7 +90,8 @@ void main() {
     (name: 'light', data: ThemeData.light(useMaterial3: true)),
   ]) {
     testWidgets(
-      'POS product card shows full price without plus icon in ${theme.name} theme',
+      'POS product card shows the full price, with the plus affordance hidden, '
+      'in ${theme.name} theme',
       (WidgetTester tester) async {
         await tester.binding.setSurfaceSize(const Size(360, 780));
         addTearDown(() async {
@@ -122,12 +123,27 @@ void main() {
         );
         expect(cardFinder, findsOneWidget);
 
+        // The plus is a desktop hover affordance, so it is in the tree at all
+        // times and `findsNothing` can never hold. What the card must actually
+        // guarantee is that nothing covers the price until the pointer is over
+        // it — on a touch surface, that means never. Assert it is invisible
+        // rather than absent, which is the same promise against the
+        // implementation that exists.
+        final plusFinder = find.descendant(
+          of: cardFinder,
+          matching: find.byIcon(LucideIcons.plus),
+        );
+        expect(plusFinder, findsOneWidget);
         expect(
-          find.descendant(
-            of: cardFinder,
-            matching: find.byIcon(LucideIcons.plus),
-          ),
-          findsNothing,
+          tester
+              .widget<AnimatedOpacity>(
+                find.ancestor(
+                  of: plusFinder,
+                  matching: find.byType(AnimatedOpacity),
+                ),
+              )
+              .opacity,
+          0.0,
         );
         expect(
           find.byKey(const ValueKey('pos-product-price-product_1')),

@@ -2,6 +2,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/contact_info.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_conflict_policy.dart';
@@ -52,6 +53,9 @@ class ContactInfosRepository {
   }
 
   Future<ContactInfo> create(Map<String, dynamic> payload) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('contactInfo', 'create'),
+    );
     final db = await _dbService.database;
     final offlineId = const Uuid().v4();
     final item = ContactInfo.fromJson({
@@ -71,6 +75,9 @@ class ContactInfosRepository {
   }
 
   Future<ContactInfo> update(String id, Map<String, dynamic> payload) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('contactInfo', 'update'),
+    );
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Contact info ID is required');
     final db = await _dbService.database;
@@ -98,6 +105,9 @@ class ContactInfosRepository {
   }
 
   Future<void> delete(String id) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('contactInfo', 'delete'),
+    );
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Contact info ID is required');
     final db = await _dbService.database;

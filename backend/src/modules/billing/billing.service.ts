@@ -66,8 +66,7 @@ export class BillingService {
                 status: 'ACTIVE',
                 currentPeriodStart: now,
                 currentPeriodEnd,
-                cancelAtPeriodEnd: false,
-                trialEnd: null
+                cancelAtPeriodEnd: false
             }
         })
     }

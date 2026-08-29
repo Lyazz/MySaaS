@@ -91,7 +91,6 @@ class PrinterProfileRepository {
       'syncStatus': SyncStatus.pending.name,
     });
 
-
     return newProfile;
   }
 
@@ -110,7 +109,6 @@ class PrinterProfileRepository {
       where: 'id = ? AND tenantId = ?',
       whereArgs: [profile.id, _tid],
     );
-
   }
 
   Future<void> deleteProfile(String id) async {

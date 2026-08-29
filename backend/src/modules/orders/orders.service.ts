@@ -1,4 +1,5 @@
 import prisma from '../../lib/prisma'
+import { RETRY_CONFLICT } from '../../lib/conflict-codes'
 import { Prisma, type ShipmentProvider } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
@@ -2030,7 +2031,7 @@ export class OrdersService {
                         },
                         data: { reserved: { increment: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -2087,7 +2088,7 @@ export class OrdersService {
                         },
                         data: { stock: { decrement: qty }, reserved: { decrement: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -2128,7 +2129,7 @@ export class OrdersService {
                         },
                         data: { reserved: { decrement: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -2162,7 +2163,7 @@ export class OrdersService {
                             where: { tenantId, id: item.variantId, reserved: variantBefore.reserved },
                             data: { reserved: { decrement: qty } }
                         })
-                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                         touchedProductIds.add(variantBefore.productId)
 
                         const after = await tx.productVariant.findFirst({
@@ -2194,7 +2195,7 @@ export class OrdersService {
                             where: { tenantId, id: item.variantId, stock: variantBefore.stock },
                             data: { stock: { increment: qty } }
                         })
-                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                         touchedProductIds.add(variantBefore.productId)
 
                         const after = await tx.productVariant.findFirst({
@@ -2228,7 +2229,7 @@ export class OrdersService {
                         where: { tenantId, id: item.variantId, stock: variantBefore.stock },
                         data: { stock: { increment: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -2485,7 +2486,7 @@ export class OrdersService {
                     },
                     data: { reserved: { decrement: qty } }
                 })
-                if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                 touchedProductIds.add(variantBefore.productId)
 
                 const after = await tx.productVariant.findFirst({
@@ -2518,7 +2519,7 @@ export class OrdersService {
                 where: { tenantId, id, status: 'CONFIRMED' },
                 data: { status: 'PENDING' }
             })
-            if (updated.count !== 1) throw new OrderValidationError(409, 'Order rollback conflict, please retry')
+            if (updated.count !== 1) throw new OrderValidationError(409, 'Order rollback conflict, please retry', { code: RETRY_CONFLICT })
         })
 
         return prisma.order.findFirst({ where: { id, tenantId } })

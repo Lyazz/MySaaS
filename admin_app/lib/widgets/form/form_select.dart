@@ -79,7 +79,10 @@ class FormSelect<T> extends StatelessWidget {
     );
     final focusedOutlineBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+      borderSide: BorderSide(
+        color: Theme.of(context).colorScheme.primary,
+        width: 1.5,
+      ),
     );
     final errorOutlineBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),

@@ -131,7 +131,6 @@ class ReceiptLayoutRepository {
       'syncStatus': SyncStatus.pending.name,
     });
 
-
     return newLayout;
   }
 
@@ -165,7 +164,6 @@ class ReceiptLayoutRepository {
       where: 'id = ? AND tenantId = ?',
       whereArgs: [layout.id, _tid],
     );
-
   }
 
   Future<void> deleteLayout(String id) async {

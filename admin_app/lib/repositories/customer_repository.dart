@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/customer.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -68,6 +69,7 @@ class CustomerRepository {
   }
 
   Future<Customer> createCustomer(Map<String, dynamic> customerData) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('customer', 'create'));
     final db = await _dbService.database;
     final id = const Uuid().v4();
     customerData['id'] = id;
@@ -136,6 +138,7 @@ class CustomerRepository {
     String id,
     Map<String, dynamic> update,
   ) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('customer', 'update'));
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Customer ID is required');
     final db = await _dbService.database;

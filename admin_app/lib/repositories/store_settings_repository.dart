@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/store_settings.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_conflict_policy.dart';
@@ -45,6 +46,9 @@ class StoreSettingsRepository {
   }
 
   Future<StoreSettings> patchStoreSettings(Map<String, dynamic> patch) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('storeSettings', 'patch'),
+    );
     final db = await _dbService.database;
     final current = await _readLocalSettings(db) ?? StoreSettings.empty;
     final updated = _applyPatch(current, patch);

@@ -55,7 +55,9 @@ void main() {
       subcategory2,
     ];
 
-    testWidgets('renders CategoriesScreen with workspace layout', (tester) async {
+    testWidgets('renders CategoriesScreen with workspace layout', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildLocalizedTestApp(
           home: ProviderScope(
@@ -68,7 +70,7 @@ void main() {
             ],
             child: const CategoriesScreen(),
           ),
-        )
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -76,11 +78,16 @@ void main() {
       expect(find.byType(CategoryWorkspace), findsOneWidget);
 
       // Parent categories should be visible in the list
-      expect(find.text('Electronics'), findsWidgets); // Found in left pane (and right pane if active)
+      expect(
+        find.text('Electronics'),
+        findsWidgets,
+      ); // Found in left pane (and right pane if active)
       expect(find.text('Clothing'), findsWidgets); // Left pane
     });
 
-    testWidgets('clicking a parent category shows its subcategories', (tester) async {
+    testWidgets('clicking a parent category shows its subcategories', (
+      tester,
+    ) async {
       await tester.pumpWidget(
         buildLocalizedTestApp(
           home: ProviderScope(
@@ -91,9 +98,11 @@ void main() {
                 ),
               ),
             ],
-            child: const Scaffold(body: CategoriesScreen()), // Wrapped in scaffold to support snackbar
+            child: const Scaffold(
+              body: CategoriesScreen(),
+            ), // Wrapped in scaffold to support snackbar
           ),
-        )
+        ),
       );
       await tester.pumpAndSettle();
 
@@ -110,7 +119,10 @@ void main() {
       expect(find.text('Laptops'), findsNothing);
 
       // Should show empty state for Clothing subcategories
-      expect(find.text('No subcategories for this category yet.'), findsWidgets);
+      expect(
+        find.text('No subcategories for this category yet.'),
+        findsWidgets,
+      );
     });
   });
 }

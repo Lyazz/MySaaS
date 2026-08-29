@@ -20,6 +20,7 @@ import 'admin_notifications_button.dart';
 import 'language_switcher_button.dart';
 import 'responsive_layout.dart';
 import 'sidebar.dart';
+import 'license_banner.dart';
 import 'offline_banner.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -166,6 +167,7 @@ class _AppShellState extends ConsumerState<AppShell> {
       drawer: const Sidebar(),
       body: Column(
         children: [
+          const LicenseBanner(),
           const OfflineBanner(),
           Expanded(child: widget.child),
         ],
@@ -181,6 +183,7 @@ class _AppShellState extends ConsumerState<AppShell> {
           Expanded(
             child: Column(
               children: [
+                const LicenseBanner(),
                 const OfflineBanner(),
                 _buildDesktopHeader(),
                 Expanded(child: widget.child),

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:admin_app/bootstrap.dart';
 import 'package:admin_app/models/app_mode.dart';
@@ -8,8 +7,12 @@ import 'package:admin_app/models/bootstrap_config.dart';
 import 'package:admin_app/providers/auth_provider.dart';
 import 'package:admin_app/services/api_service.dart';
 import 'package:admin_app/services/database_service.dart';
+import 'package:admin_app/services/sync_service.dart';
+import 'package:admin_app/services/tenant_mode_service.dart';
 import 'package:admin_app/utils/auth_error.dart';
+import 'package:connectivity_plus_platform_interface/connectivity_plus_platform_interface.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
@@ -119,12 +122,29 @@ void main() {
     late ProviderContainer container;
     late _StubAdapter adapter;
     late Directory tempDir;
+    late ConnectivityPlatform originalConnectivityPlatform;
+    late Directory appDocsDir;
+    const pathProviderChannel = MethodChannel(
+      'plugins.flutter.io/path_provider',
+    );
 
     // AuthNotifier boots SyncService, which touches the local database. Point
     // it at an ffi-backed temp file so these tests do not need a real device.
     setUp(() async {
       sqfliteFfiInit();
+      // SyncService checks connectivity as soon as AuthNotifier boots it.
+      // Report "offline" so no pass runs behind these tests.
+      originalConnectivityPlatform = ConnectivityPlatform.instance;
+      ConnectivityPlatform.instance = _OfflineConnectivityPlatform();
       tempDir = await Directory.systemTemp.createTemp('auth-guard-test');
+      // Signing out clears the workspace's files and cache, both of which ask
+      // path_provider where the app documents live.
+      appDocsDir = await Directory.systemTemp.createTemp('auth-guard-docs');
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(
+            pathProviderChannel,
+            (call) async => appDocsDir.path,
+          );
       DatabaseService.databasesPathProvider = () async => tempDir.path;
       DatabaseService.databaseOpener =
           (
@@ -154,9 +174,23 @@ void main() {
     });
 
     tearDown(() async {
+      // Detach the sync loop before closing the database: it reopens the
+      // handle to publish state, which would keep the file locked below.
+      await SyncService().reset();
       await DatabaseService().resetForTest();
       DatabaseService.resetTestOverrides();
-      if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
+      ConnectivityPlatform.instance = originalConnectivityPlatform;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(pathProviderChannel, null);
+      for (final dir in [tempDir, appDocsDir]) {
+        // Windows refuses to delete a file another handle still holds. These
+        // are temp directories, so a leaked one is not worth failing a run.
+        try {
+          if (dir.existsSync()) dir.deleteSync(recursive: true);
+        } on FileSystemException {
+          // ignored
+        }
+      }
     });
 
     ProviderContainer buildContainer(
@@ -224,13 +258,14 @@ void main() {
 
       expect(container.read(authProvider).token, 'existing-token');
       expect(container.read(authProvider).error, isNotNull);
-      expect(container.read(authProvider).error, isNot(contains('DioException')));
+      expect(
+        container.read(authProvider).error,
+        isNot(contains('DioException')),
+      );
     });
 
     test('login rejects a response without a token', () async {
-      container = buildContainer(
-        (options) => _json({'success': true}, 200),
-      );
+      container = buildContainer((options) => _json({'success': true}, 200));
 
       await expectLater(
         container.read(authProvider.notifier).login('owner@example.com', 'pw'),
@@ -273,5 +308,97 @@ void main() {
       );
       expect(stub.requestedPaths, isEmpty);
     });
+
+    /// A device that was offline longer than its access token lives comes back
+    /// to a 401 on the first authenticated call. That is the moment the outbox
+    /// exists for, so the session goes and the local data stays.
+    group('session expiry', () {
+      setUp(() {
+        TenantModeService().initialize(
+          mode: AppMode.online,
+          tenantId: 'tenant-1',
+          workspaceId: 'workspace-1',
+        );
+      });
+
+      /// Queues a write the way a repository would, and returns the file the
+      /// workspace database lives in.
+      Future<File> queueOfflineWrite() async {
+        await SyncService().enqueueOperation(
+          entityType: 'product',
+          action: 'create',
+          payload: {'id': 'product-1', 'title': 'Mug', 'price': 9.5},
+        );
+        return File((await DatabaseService().database).path);
+      }
+
+      Future<void> waitForSignOut(ProviderContainer container) async {
+        // The interceptor fires the sign-out without awaiting it, so the
+        // request rejects before the state has settled.
+        final deadline = DateTime.now().add(const Duration(seconds: 5));
+        while (DateTime.now().isBefore(deadline)) {
+          if (container.read(authProvider).token == null) return;
+          await Future<void>.delayed(const Duration(milliseconds: 20));
+        }
+        fail('Timed out waiting for the session to be dropped');
+      }
+
+      test('a 401 drops the session but keeps the queued writes', () async {
+        container = buildContainer((options) {
+          if (options.path == '/admin/orders') {
+            return _json({'statusCode': 401, 'statusMessage': 'Expired'}, 401);
+          }
+          return _json({'success': true}, 200);
+        }, authToken: 'expired-token');
+
+        container.read(authProvider.notifier);
+        final dbFile = await queueOfflineWrite();
+        expect(dbFile.existsSync(), isTrue);
+
+        await expectLater(
+          container.read(apiProvider).client.get('/admin/orders'),
+          throwsA(isA<DioException>()),
+        );
+        await waitForSignOut(container);
+
+        // Signed out, but the workspace is intact: wiping it here would delete
+        // the very writes the user made during the outage.
+        expect(container.read(authProvider).token, isNull);
+        expect(dbFile.existsSync(), isTrue);
+        expect(
+          await (await DatabaseService().database).query('sync_queue'),
+          hasLength(1),
+        );
+      });
+
+      test('a deliberate sign-out still clears the workspace', () async {
+        container = buildContainer(
+          (options) => _json({'success': true}, 200),
+          authToken: 'live-token',
+        );
+
+        final notifier = container.read(authProvider.notifier);
+        final dbFile = await queueOfflineWrite();
+        expect(dbFile.existsSync(), isTrue);
+
+        await notifier.logout();
+
+        expect(container.read(authProvider).token, isNull);
+        expect(dbFile.existsSync(), isFalse);
+      });
+    });
   });
+}
+
+/// Reports a device with no connectivity, so SyncService parks instead of
+/// reaching for the platform channel these tests do not have.
+class _OfflineConnectivityPlatform extends ConnectivityPlatform {
+  @override
+  Future<List<ConnectivityResult>> checkConnectivity() async => const [
+    ConnectivityResult.none,
+  ];
+
+  @override
+  Stream<List<ConnectivityResult>> get onConnectivityChanged =>
+      const Stream<List<ConnectivityResult>>.empty();
 }

@@ -54,7 +54,15 @@ void main() {
       find.byWidgetPredicate((w) => w is ResponsiveServerPaginatedTable),
       findsOneWidget,
     );
-    expect(find.text('Sale ID'), findsOneWidget);
+    // Matched on the whole label, case-insensitively: the header is styled
+    // uppercase, which this test has no stake in, but a substring match
+    // would also catch the 'Sale ID' inside search placeholders and cells.
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && w.data?.toLowerCase() == 'sale id',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Page 1 of 2'), findsOneWidget);
     expect(find.byTooltip('View order'), findsOneWidget);
   });

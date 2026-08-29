@@ -95,6 +95,9 @@ void main() {
       addTearDown(() async {
         DatabaseService.databasesPathProvider = originalPathProvider;
         DatabaseService.databaseOpener = originalOpener;
+        // Close the workspace database first: on Windows the open file
+        // handle makes the directory delete fail outright (errno 32).
+        await DatabaseService().resetForTest();
         await tempDir.delete(recursive: true);
       });
 
@@ -122,7 +125,12 @@ void main() {
       final tempDir = await Directory.systemTemp.createTemp(
         'database-service-legacy-root-copy',
       );
-      addTearDown(() => tempDir.delete(recursive: true));
+      addTearDown(() async {
+        // Close the workspace database first: on Windows the open file handle
+        // makes the directory delete fail outright (errno 32).
+        await DatabaseService().resetForTest();
+        await tempDir.delete(recursive: true);
+      });
 
       final legacyPath = p.join(tempDir.path, 'mysaas_offline_encryptedd.db');
       final legacyDb = await factory.openDatabase(
@@ -253,7 +261,12 @@ void main() {
       final tempDir = await Directory.systemTemp.createTemp(
         'database-service-workspace-backfill',
       );
-      addTearDown(() => tempDir.delete(recursive: true));
+      addTearDown(() async {
+        // Close the workspace database first: on Windows the open file handle
+        // makes the directory delete fail outright (errno 32).
+        await DatabaseService().resetForTest();
+        await tempDir.delete(recursive: true);
+      });
 
       DatabaseService.databasesPathProvider = () async => tempDir.path;
       DatabaseService.databaseOpener =
@@ -350,7 +363,12 @@ void main() {
       final tempDir = await Directory.systemTemp.createTemp(
         'database-service-open-once',
       );
-      addTearDown(() => tempDir.delete(recursive: true));
+      addTearDown(() async {
+        // Close the workspace database first: on Windows the open file handle
+        // makes the directory delete fail outright (errno 32).
+        await DatabaseService().resetForTest();
+        await tempDir.delete(recursive: true);
+      });
 
       TenantModeService().initialize(
         mode: AppMode.online,
@@ -459,7 +477,12 @@ void main() {
       final tempDir = await Directory.systemTemp.createTemp(
         'database-service-recovery',
       );
-      addTearDown(() => tempDir.delete(recursive: true));
+      addTearDown(() async {
+        // Close the workspace database first: on Windows the open file handle
+        // makes the directory delete fail outright (errno 32).
+        await DatabaseService().resetForTest();
+        await tempDir.delete(recursive: true);
+      });
 
       TenantModeService().initialize(
         mode: AppMode.online,
@@ -542,7 +565,12 @@ void main() {
       final tempDir = await Directory.systemTemp.createTemp(
         'database-service-code7-recovery',
       );
-      addTearDown(() => tempDir.delete(recursive: true));
+      addTearDown(() async {
+        // Close the workspace database first: on Windows the open file handle
+        // makes the directory delete fail outright (errno 32).
+        await DatabaseService().resetForTest();
+        await tempDir.delete(recursive: true);
+      });
 
       TenantModeService().initialize(
         mode: AppMode.online,

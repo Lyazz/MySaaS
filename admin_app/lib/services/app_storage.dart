@@ -155,6 +155,66 @@ class AppStorage {
     await _secureStorage.delete(key: _keyActivationToken);
   }
 
+  static const _keyLicenseSnapshotJson = 'license_snapshot_json';
+  static const _keyLicenseTimeHwm = 'license_time_hwm';
+  static const _keyLastHeartbeatAt = 'last_heartbeat_at';
+
+  /// Cached evaluation of the licence, so the very first frame after a cold
+  /// start already knows whether this device may write. Re-derived from the
+  /// activation token, never trusted over it.
+  static Future<void> saveLicenseSnapshot(Map<String, dynamic> snapshot) async {
+    await _secureStorage.write(
+      key: _keyLicenseSnapshotJson,
+      value: jsonEncode(snapshot),
+    );
+  }
+
+  static Future<Map<String, dynamic>?> getLicenseSnapshot() async {
+    final raw = await _secureStorage.read(key: _keyLicenseSnapshotJson);
+    if (raw == null || raw.trim().isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Latest instant ever observed. See [MonotonicClock]: this is what stops a
+  /// rolled-back device clock from un-expiring a licence.
+  static Future<void> saveLicenseTimeHighWaterMark(DateTime value) async {
+    await _secureStorage.write(
+      key: _keyLicenseTimeHwm,
+      value: value.toUtc().toIso8601String(),
+    );
+  }
+
+  static Future<DateTime?> getLicenseTimeHighWaterMark() async {
+    final raw = await _secureStorage.read(key: _keyLicenseTimeHwm);
+    if (raw == null || raw.trim().isEmpty) return null;
+    return DateTime.tryParse(raw)?.toUtc();
+  }
+
+  static Future<void> saveLastHeartbeatAt(DateTime value) async {
+    await _secureStorage.write(
+      key: _keyLastHeartbeatAt,
+      value: value.toUtc().toIso8601String(),
+    );
+  }
+
+  static Future<DateTime?> getLastHeartbeatAt() async {
+    final raw = await _secureStorage.read(key: _keyLastHeartbeatAt);
+    if (raw == null || raw.trim().isEmpty) return null;
+    return DateTime.tryParse(raw)?.toUtc();
+  }
+
+  static Future<void> clearLicenseState() async {
+    await _secureStorage.delete(key: _keyLicenseSnapshotJson);
+    await _secureStorage.delete(key: _keyLastHeartbeatAt);
+    // The high-water mark deliberately survives: clearing it would hand an
+    // attacker a clock reset for the price of a logout.
+  }
+
   static ThemeMode? parseThemeMode(String? raw) {
     switch (raw) {
       case 'light':

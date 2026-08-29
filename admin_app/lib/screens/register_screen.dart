@@ -715,9 +715,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           ),
           const SizedBox(height: 10),
           Text(
-            'auth.register.success.message'.tr(
-              namedArgs: {'name': tenantName},
-            ),
+            'auth.register.success.message'.tr(namedArgs: {'name': tenantName}),
             style: GoogleFonts.dmSans(
               color: palette.secondaryText,
               fontSize: 14,

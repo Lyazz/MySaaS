@@ -1,3 +1,4 @@
+import 'package:admin_app/app_config.dart';
 import 'package:admin_app/models/app_mode.dart';
 import 'package:admin_app/models/provisioning_payload.dart';
 import 'package:admin_app/models/subscription_tier.dart';
@@ -43,7 +44,11 @@ void main() {
       'isOffline': true,
     });
 
-    expect(payload.apiBaseUrl, 'https://swekly.com/api');
+    // Compared against the configured default rather than a literal: what the
+    // fallback has to guarantee is "use the app's own base URL when the payload
+    // names none", and pinning the production string here breaks the test on
+    // any build pointed at a different host.
+    expect(payload.apiBaseUrl, defaultApiBaseUrl);
     expect(payload.mode, AppMode.offlineOnly);
     expect(payload.subscriptionTier, SubscriptionTier.offlineOnly);
   });

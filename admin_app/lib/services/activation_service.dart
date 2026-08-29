@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import 'package:dart_jsonwebtoken/dart_jsonwebtoken.dart';
+import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/provisioning_payload.dart';
@@ -19,10 +21,35 @@ ZwIDAQAB
 -----END PUBLIC KEY-----
 ''';
 
-const String _activationPublicKey = String.fromEnvironment(
+const String _configuredActivationPublicKey = String.fromEnvironment(
   'ACTIVATION_PUBLIC_KEY_PEM',
-  defaultValue: _defaultActivationPublicKey,
 );
+
+/// Public key used to verify activation licences offline.
+///
+/// Embedding a *public* key in the app is correct and necessary: it is what lets
+/// a device verify a licence with no network. The danger is different -- the
+/// fallback below pairs with a private key that leaked into git history, so a
+/// release build trusting it would accept licences minted by anyone holding that
+/// history.
+///
+/// So the fallback exists only in debug builds. A release build with no
+/// `ACTIVATION_PUBLIC_KEY_PEM` fails loudly at startup rather than shipping
+/// trust in a compromised key.
+String get activationPublicKey {
+  final configured = _configuredActivationPublicKey.trim();
+  if (configured.isNotEmpty) return configured;
+
+  if (kReleaseMode) {
+    throw StateError(
+      'ACTIVATION_PUBLIC_KEY_PEM is required for release builds. '
+      'Pass it with --dart-define-from-file, or '
+      r'--dart-define=ACTIVATION_PUBLIC_KEY_PEM="$(cat activation-public.pem)".',
+    );
+  }
+
+  return _defaultActivationPublicKey;
+}
 
 final deviceInfoProvider = Provider<DeviceInfoService>((ref) {
   return DeviceInfoService();
@@ -42,6 +69,47 @@ class ActivationResult {
     required this.activationToken,
     required this.provisioning,
   });
+}
+
+/// What one heartbeat attempt established.
+///
+/// Three outcomes, deliberately distinct: the window was renewed, the server
+/// actively refused this device, or the server could not be reached. Only the
+/// middle one may lock anything.
+class HeartbeatOutcome {
+  final String? activationToken;
+  final DateTime? serverTime;
+
+  /// Set when the server refused, e.g. DEVICE_REVOKED, TENANT_SUSPENDED,
+  /// TOKEN_SUPERSEDED, DEVICE_UNKNOWN.
+  final String? refusalCode;
+  final String? revokedReason;
+
+  /// True when nothing could be established -- offline, timeout, 5xx.
+  final bool unreachable;
+
+  const HeartbeatOutcome.renewed({
+    required this.activationToken,
+    this.serverTime,
+  }) : refusalCode = null,
+       revokedReason = null,
+       unreachable = false;
+
+  const HeartbeatOutcome.refused({required String code, this.revokedReason})
+    : activationToken = null,
+      serverTime = null,
+      refusalCode = code,
+      unreachable = false;
+
+  const HeartbeatOutcome.unreachable()
+    : activationToken = null,
+      serverTime = null,
+      refusalCode = null,
+      revokedReason = null,
+      unreachable = true;
+
+  bool get isRenewed => activationToken != null;
+  bool get isRefused => refusalCode != null;
 }
 
 class ActivationService {
@@ -91,9 +159,71 @@ class ActivationService {
     );
   }
 
+  /// Verifies a licence locally and returns its raw claims.
+  ///
+  /// No network. This is what lets a device evaluate its own licence at boot on
+  /// a machine that has not seen the internet in weeks.
+  Future<Map<String, dynamic>> decodeClaims(String token) async {
+    final publicKey = RSAPublicKey(activationPublicKey.trim());
+    final jwt = JWT.verify(token.trim(), publicKey);
+    return Map<String, dynamic>.from(jwt.payload as Map);
+  }
+
+  /// Renews the offline window against the server.
+  ///
+  /// Returns an outcome rather than throwing on refusal: a revoked device or a
+  /// suspended tenant is a *result* the licence state machine must record, not
+  /// an error to swallow. Only an unreachable server throws.
+  Future<HeartbeatOutcome> heartbeat({
+    required String activationToken,
+    String? appVersion,
+  }) async {
+    final hardwareId = await _deviceInfoService.getHardwareId();
+
+    try {
+      final response = await _apiService.client.post(
+        '/activation/heartbeat',
+        data: {
+          'activationToken': activationToken,
+          'hardwareId': hardwareId,
+          if (appVersion != null && appVersion.trim().isNotEmpty)
+            'appVersion': appVersion.trim(),
+        },
+      );
+
+      final data = response.data;
+      if (data is! Map || data['activationToken'] == null) {
+        return const HeartbeatOutcome.unreachable();
+      }
+
+      return HeartbeatOutcome.renewed(
+        activationToken: data['activationToken'].toString(),
+        serverTime: DateTime.tryParse(
+          data['serverTime']?.toString() ?? '',
+        )?.toUtc(),
+      );
+    } on DioException catch (error) {
+      final status = error.response?.statusCode;
+      final body = error.response?.data;
+
+      // No response at all means the network is down, which is emphatically not
+      // a reason to lock: offline operation is the product.
+      if (status == null) return const HeartbeatOutcome.unreachable();
+
+      final code = body is Map ? body['code']?.toString() : null;
+      final reason = body is Map ? body['revokedReason']?.toString() : null;
+
+      if (code == null) return const HeartbeatOutcome.unreachable();
+
+      return HeartbeatOutcome.refused(code: code, revokedReason: reason);
+    } catch (_) {
+      return const HeartbeatOutcome.unreachable();
+    }
+  }
+
   Future<ActivationResult> verifyOfflineActivationCode(String token) async {
     try {
-      final publicKey = RSAPublicKey(_activationPublicKey.trim());
+      final publicKey = RSAPublicKey(activationPublicKey.trim());
       final jwt = JWT.verify(token.trim(), publicKey);
       final payload = Map<String, dynamic>.from(jwt.payload as Map);
       final currentHardwareId = await _deviceInfoService.getHardwareId();

@@ -31,6 +31,10 @@
           <Icon name="lucide:receipt" class="h-4 w-4" />
           <span>{{ t('superAdmin.tenants.actions.payments') }}</span>
         </NuxtLink>
+        <NuxtLink :to="`/super-admin/tenants/${tenantId}/devices`" class="ui-btn ui-btn--secondary ui-btn--md">
+          <Icon name="lucide:smartphone" class="h-4 w-4" />
+          <span>Devices &amp; licence</span>
+        </NuxtLink>
       </div>
     </div>
 
@@ -119,6 +123,35 @@
             </div>
           </div>
           <div v-else class="text-sm text-slate-500">{{ t('superAdmin.tenants.detail.plan.noSubscription') }}</div>
+
+          <!--
+            Trial control. The activation licence a device holds is clamped to
+            trialEnd, so changing it here is what expires or revives a device in
+            the field -- including one that never reconnects.
+          -->
+          <div v-if="detail.subscription" class="flex flex-wrap items-end gap-3 pt-3 border-t border-slate-100">
+            <label class="text-sm">
+              <span class="block text-slate-500 mb-1">Trial length (days)</span>
+              <input
+                v-model.number="trialDays"
+                type="number"
+                min="1"
+                max="365"
+                class="w-28 rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              >
+            </label>
+            <button
+              type="button"
+              class="ui-btn ui-btn--secondary ui-btn--md"
+              :disabled="trialSubmitting"
+              @click="submitTrial"
+            >
+              {{ detail.subscription.status === 'TRIALING' ? 'Extend trial' : 'Start trial' }}
+            </button>
+            <p class="text-xs text-slate-500 basis-full">
+              Devices lock themselves when the trial ends, with no network needed.
+            </p>
+          </div>
 
           <!-- Usage -->
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
@@ -319,6 +352,26 @@ async function loadDetail() {
     error.value = e?.data?.statusMessage || e?.message || t('superAdmin.tenants.detail.errors.loadFailed')
   } finally {
     loading.value = false
+  }
+}
+
+const trialDays = ref(15)
+const trialSubmitting = ref(false)
+
+async function submitTrial() {
+  error.value = ''
+  trialSubmitting.value = true
+  try {
+    await $fetch(`/api/super-admin/billing/tenants/${encodeURIComponent(tenantId.value)}/trial`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      body: { days: trialDays.value }
+    })
+    await loadDetail()
+  } catch (e: any) {
+    error.value = e?.data?.statusMessage || e?.message || 'Could not update the trial'
+  } finally {
+    trialSubmitting.value = false
   }
 }
 

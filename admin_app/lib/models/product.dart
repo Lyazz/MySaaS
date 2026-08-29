@@ -74,7 +74,9 @@ class Product {
       description: json['description'],
       searchKeywords: json['searchKeywords'],
       price: _parseCheckDouble(json['price']),
-      promotionalPrice: json['promotionalPrice'] != null ? _parseCheckDouble(json['promotionalPrice']) : null,
+      promotionalPrice: json['promotionalPrice'] != null
+          ? _parseCheckDouble(json['promotionalPrice'])
+          : null,
       isPromotionActive: json['isPromotionActive'] == true,
       promotionStartDate: _parseCheckDateTime(json['promotionStartDate']),
       promotionEndDate: _parseCheckDateTime(json['promotionEndDate']),
@@ -106,8 +108,8 @@ class Product {
       stockAllocationRequired: json['stockAllocationRequired'] == true,
       stockAllocationSourceVariantId: json['stockAllocationSourceVariantId']
           ?.toString(),
-      stockAllocationSourceVariantTitle: json['stockAllocationSourceVariantTitle']
-          ?.toString(),
+      stockAllocationSourceVariantTitle:
+          json['stockAllocationSourceVariantTitle']?.toString(),
       stockAllocationSourceBalance: json['stockAllocationSourceBalance'] is Map
           ? StockAllocationBalance.fromJson(
               Map<String, dynamic>.from(json['stockAllocationSourceBalance']),

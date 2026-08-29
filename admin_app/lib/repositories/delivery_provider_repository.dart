@@ -1,6 +1,7 @@
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/delivery_provider.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_conflict_policy.dart';
@@ -52,27 +53,66 @@ class DeliveryProviderRepository {
     return localProviders;
   }
 
-  Future<DeliveryProvider> setProviderEnabled(String id, bool enabled) async {
+  Future<DeliveryProvider> setOffered(String id, bool offered) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('deliveryProvider', 'update'),
+    );
     final trimmed = id.trim().toUpperCase();
     if (trimmed.isEmpty) throw ArgumentError('Provider ID is required');
     final db = await _dbService.database;
     final current = await _findById(db, trimmed);
     if (current == null) throw Exception('Delivery provider not found');
 
-    final updated = current.copyWith(offered: enabled, isEnabled: enabled);
+    final updated = current.copyWith(offered: offered);
     await _upsertLocal(db, updated, syncStatus: SyncStatus.pending.name);
     await _syncService.enqueueOperation(
       entityType: 'deliveryProvider',
       action: 'update',
       payload: {
         'id': trimmed,
-        'offered': enabled,
-        'isActive': enabled,
+        'offered': offered,
         'baseFingerprint': SyncConflictPolicies.fingerprintDeliveryProvider(
           current,
         ),
       },
     );
+    return updated;
+  }
+
+  /// Saves carrier credentials / active state. Requires connectivity — this
+  /// is a cloud-integration-style write (like [IntegrationsRepository]), not
+  /// a core offline operation, so secrets are never queued or cached locally.
+  Future<DeliveryProvider> saveAccount(
+    String provider, {
+    bool? offered,
+    bool? isActive,
+    Map<String, String>? config,
+  }) async {
+    final trimmed = provider.trim().toUpperCase();
+    if (trimmed.isEmpty) throw ArgumentError('Provider ID is required');
+
+    final res = await _apiService.client.put(
+      '/admin/delivery/providers/$trimmed/account',
+      data: {
+        if (offered != null) 'offered': offered,
+        if (isActive != null) 'isActive': isActive,
+        if (config != null) 'config': config,
+      },
+    );
+    final data = res.data;
+    final updated = _fromAdminResponse(
+      data is Map ? data.cast<String, dynamic>() : const {},
+    );
+
+    // Best-effort: keep the cached offered/active summary in sync for the
+    // offline list view. Credentials themselves are never written locally
+    // (only the summary fields `_upsertLocal` persists), and a cache miss
+    // here must not fail a save that already succeeded on the server.
+    try {
+      final db = await _dbService.database;
+      await _upsertLocal(db, updated, syncStatus: SyncStatus.synced.name);
+    } catch (_) {}
+
     return updated;
   }
 
@@ -85,15 +125,25 @@ class DeliveryProviderRepository {
       if (supports is Map && supports['webhooks'] == true) 'webhooks',
     ];
     final account = data['account'];
+    final credentialFields = data['credentialFields'];
     return DeliveryProvider(
       id: data['provider']?.toString() ?? '',
       name: data['name']?.toString() ?? '',
       description: supportTags.isEmpty ? null : supportTags.join(' • '),
       offered: data['offered'] == true,
-      isEnabled:
-          data['offered'] == true &&
-          account is Map &&
-          account['isActive'] == true,
+      credentialFields: credentialFields is List
+          ? credentialFields
+                .whereType<Map>()
+                .map(
+                  (f) => DeliveryCredentialField.fromJson(
+                    f.cast<String, dynamic>(),
+                  ),
+                )
+                .toList()
+          : const [],
+      account: account is Map
+          ? DeliveryAccount.fromJson(account.cast<String, dynamic>())
+          : null,
     );
   }
 
@@ -146,7 +196,7 @@ class DeliveryProviderRepository {
       'name': provider.name,
       'description': provider.description,
       'offered': provider.offered ? 1 : 0,
-      'isEnabled': provider.isEnabled ? 1 : 0,
+      'isEnabled': provider.isActive ? 1 : 0,
       'syncStatus': syncStatus,
     });
     await db.insert(

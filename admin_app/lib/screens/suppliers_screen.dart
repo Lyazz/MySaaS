@@ -140,7 +140,8 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               filters: [
                 SizedBox(
                   width: 200,
-                  child: FormSelect<String>(showLabel: false, 
+                  child: FormSelect<String>(
+                    showLabel: false,
                     label: 'admin.pages.pos.catalog.actions.sort'.tr(),
                     value: _sortBy,
                     contentPadding: EdgeInsets.symmetric(
@@ -150,11 +151,11 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                     items: [
                       DropdownMenuItem(
                         value: 'name_asc',
-                        child: Text( 'app.name_a_z'.tr()),
+                        child: Text('app.name_a_z'.tr()),
                       ),
                       DropdownMenuItem(
                         value: 'name_desc',
-                        child: Text( 'app.name_z_a'.tr()),
+                        child: Text('app.name_z_a'.tr()),
                       ),
                     ],
                     onChanged: (value) {
@@ -404,8 +405,9 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
       context: context,
       builder: (context) => AppDialog(
         title: 'app.admin_pages_suppliers_index_de'.tr().tr(),
-        description: 'app.admin_pages_suppliers_index_de2'.tr()
-            .tr(namedArgs: {'name': supplier.name}),
+        description: 'app.admin_pages_suppliers_index_de2'.tr().tr(
+          namedArgs: {'name': supplier.name},
+        ),
         content: Text(supplier.name),
         secondaryLabel: 'admin.common.cancel'.tr(),
         onSecondary: () => Navigator.pop(context, false),

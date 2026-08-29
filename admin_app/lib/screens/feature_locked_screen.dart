@@ -79,13 +79,18 @@ class FeatureLockedScreen extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(14),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.08),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.08),
                     borderRadius: BorderRadius.circular(14),
                     border: Border.all(
-                      color: Theme.of(context).colorScheme.primary.withValues(alpha: 0.14),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.primary.withValues(alpha: 0.14),
                     ),
                   ),
-                  child: Text( 'app.upgrade_to_an_online_tier_to_u'.tr(),
+                  child: Text(
+                    'app.upgrade_to_an_online_tier_to_u'.tr(),
                     style: TextStyle(
                       fontSize: 13,
                       height: 1.45,

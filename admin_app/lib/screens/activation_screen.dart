@@ -10,6 +10,7 @@ import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
+import '../services/license_service.dart';
 import '../services/activation_service.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
@@ -78,7 +79,7 @@ class _ActivationScreenState extends ConsumerState<ActivationScreen> {
       workspaceId: payload.workspaceId,
     );
     await AppStorage.clearAuthSession();
-    await AppStorage.saveActivationToken(result.activationToken);
+    await LicenseService().applyActivationToken(result.activationToken);
 
     ref.read(bootstrapProvider.notifier).replace(bootstrap);
     ref

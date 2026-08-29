@@ -8,7 +8,12 @@ const sendAuthError = (res: Response, error: unknown): boolean => {
     if (error instanceof AuthServiceError) {
         res.status(error.statusCode).json({
             statusCode: error.statusCode,
-            statusMessage: error.statusMessage
+            statusMessage: error.statusMessage,
+            // Present on device seat refusals so the app can branch on the
+            // reason rather than parse prose, and can offer the request-access
+            // flow when `canRequestAccess` comes through in details.
+            ...(error.code ? { code: error.code } : {}),
+            ...(error.details ?? {})
         })
         return true
     }

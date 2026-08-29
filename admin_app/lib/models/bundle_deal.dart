@@ -20,12 +20,20 @@ class ProductBundleDeal {
   factory ProductBundleDeal.fromJson(Map<String, dynamic> json) {
     return ProductBundleDeal(
       id: json['id']?.toString(),
-      bundleQty: json['bundleQty'] is int ? json['bundleQty'] : int.tryParse(json['bundleQty']?.toString() ?? '2') ?? 2,
-      bundlePrice: json['bundlePrice'] is num ? (json['bundlePrice'] as num).toDouble() : double.tryParse(json['bundlePrice']?.toString() ?? '0') ?? 0.0,
+      bundleQty: json['bundleQty'] is int
+          ? json['bundleQty']
+          : int.tryParse(json['bundleQty']?.toString() ?? '2') ?? 2,
+      bundlePrice: json['bundlePrice'] is num
+          ? (json['bundlePrice'] as num).toDouble()
+          : double.tryParse(json['bundlePrice']?.toString() ?? '0') ?? 0.0,
       tag: json['tag']?.toString(),
       isActive: json['isActive'] != false,
-      startsAt: json['startsAt'] != null ? DateTime.tryParse(json['startsAt'].toString()) : null,
-      endsAt: json['endsAt'] != null ? DateTime.tryParse(json['endsAt'].toString()) : null,
+      startsAt: json['startsAt'] != null
+          ? DateTime.tryParse(json['startsAt'].toString())
+          : null,
+      endsAt: json['endsAt'] != null
+          ? DateTime.tryParse(json['endsAt'].toString())
+          : null,
     );
   }
 

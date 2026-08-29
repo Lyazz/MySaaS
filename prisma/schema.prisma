@@ -11,7 +11,10 @@ model Tenant {
   id              String    @id @default(uuid())
   slug            String    @unique
   name            String
-  isOffline       Boolean   @default(true)
+  /// Offline-only is now a deliberate choice, not the birth state. Every
+  /// self-registered tenant starts on an online trial; a super admin puts a
+  /// tenant on the offline-only tier explicitly.
+  isOffline       Boolean   @default(false)
   isSuspended     Boolean   @default(false)
   maintenanceMode Boolean   @default(false)
   archivedAt      DateTime?
@@ -65,10 +68,13 @@ model Tenant {
   maystroInventoryLogs      MaystroInventoryEvent[]
   licenses                  License[]
   devices                   Device[]
+  activationRequests        DeviceActivationRequest[]
+  migrationJobs             TenantMigrationJob[]
   notificationEvents        NotificationEvent[]
   notificationSubscriptions NotificationSubscription[]
   notificationDeliveries    NotificationDelivery[]
   blacklistEntries          BlacklistEntry[]
+  idempotencyKeys           IdempotencyKey[]
 }
 
 model Cashbox {
@@ -1418,6 +1424,8 @@ model OrderItem {
   @@index([tenantId, orderId])
 }
 
+/// Deliberately has no tenant FK: audit rows must outlive the tenant they
+/// describe, so deleting a tenant cannot erase the record of what was done to it.
 model AuditLog {
   id        String   @id @default(uuid())
   action    String
@@ -1426,6 +1434,10 @@ model AuditLog {
   targetId  String? // ID of the target entity (e.g. tenantId)
   tenantId  String? // Tenant context usually null for super admin actions but good to have
   createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([action, createdAt])
+  @@index([targetId])
 }
 
 model GoogleOAuthToken {
@@ -1534,7 +1546,17 @@ model License {
   isActive   Boolean   @default(true)
   expiresAt  DateTime?
 
-  devices Device[]
+  /// How long a device may run without reaching the server before it must
+  /// re-validate. Per-license rather than a global so a super admin can widen
+  /// it for a tenant who genuinely has no connectivity, without loosening it
+  /// for everyone.
+  offlineValidityDays Int @default(30)
+  /// Warning period after `offlineValidityDays` elapses, before the app drops
+  /// to read-only. Local data is never destroyed either way.
+  graceDays           Int @default(7)
+
+  devices            Device[]
+  activationRequests DeviceActivationRequest[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1553,13 +1575,177 @@ model Device {
   hardwareId     String
   deviceName     String?
   devicePlatform String?
+  /// ACTIVE | REVOKED | RETIRED
   status         String  @default("ACTIVE")
 
+  /// Bumped on revoke and on transfer. Every activation token and every
+  /// device-bound access token carries the version it was minted under, so a
+  /// stale token stops verifying on the next contact without needing a
+  /// blocklist to be consulted on every request.
+  tokenVersion Int @default(1)
+
+  /// Server-side mirror of the window the last issued token carries, so the
+  /// super-admin panel can show what a device believes without asking it.
+  licenseExpiresAt DateTime?
+  graceUntil       DateTime?
+
   lastSyncAt DateTime?
+  lastSeenAt DateTime?
+  appVersion String?
+
+  revokedAt       DateTime?
+  revokedByUserId String?
+  revokedReason   String?
+  /// A revoked device may keep pushing writes it already queued offline until
+  /// this instant, so revoking a terminal never destroys the tenant's work.
+  drainUntil      DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@unique([licenseId, hardwareId])
   @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([hardwareId])
+}
+
+enum TenantMigrationStatus {
+  DRAFT
+  UPLOADING
+  VALIDATED
+  APPLIED
+  FAILED
+}
+
+/// A super-admin-driven import of an offline tenant's local database.
+///
+/// Upgrading from offline-only to an online tier used to be a client-side
+/// operation: the app registered a brand-new tenant and rewrote `tenantId` on
+/// every local table. That is a cross-tenant data move decided by the client,
+/// with no validation and no idempotency. This replaces it with a job the
+/// super admin opens, the device uploads into, and only the super admin applies.
+model TenantMigrationJob {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  /// The device the data came from, when known.
+  deviceId String?
+
+  status TenantMigrationStatus @default(DRAFT)
+
+  /// What the device said it would send, then what actually landed. The gap
+  /// between them is the report a super admin reads before flipping the tier.
+  declaredCounts Json?
+  appliedCounts  Json?
+  errors         Json?
+
+  startedByUserId String?
+  appliedByUserId String?
+  appliedAt       DateTime?
+
+  stagingRows TenantMigrationStagingRow[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+}
+
+/// Rows a device has uploaded but that have not been applied yet.
+///
+/// Staged rather than streamed straight into the live tables, so `apply` can run
+/// as one transaction. A link that drops mid-upload leaves a partial *staging*
+/// set, which is discardable; it must never leave a partially migrated tenant.
+model TenantMigrationStagingRow {
+  id     String             @id @default(uuid())
+  jobId  String
+  job    TenantMigrationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  domain String
+  /// One page of rows, exactly as the device sent them.
+  payload Json
+
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([jobId, domain])
+}
+
+enum DeviceActivationRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+  CANCELLED
+}
+
+/// A device asking for a seat it cannot claim on its own.
+///
+/// The first device on a tenant auto-claims its seat at login. Every subsequent
+/// one is refused and lands here instead, where a super admin approves or denies
+/// it. That is what makes "one activated device, and a second only when the super
+/// admin permits it" enforceable rather than advisory.
+model DeviceActivationRequest {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  licenseId String
+  license   License @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  hardwareId     String
+  deviceName     String?
+  devicePlatform String?
+
+  /// Set when the tenant is moving to a replacement terminal rather than asking
+  /// for an extra seat. Approving frees the old seat in the same transaction.
+  replacesDeviceId  String?
+  requestedByUserId String?
+  reason            String?
+
+  status          DeviceActivationRequestStatus @default(PENDING)
+  decidedAt       DateTime?
+  decidedByUserId String?
+  decisionNote    String?
+
+  /// Minted on approval. The waiting device polls, then swaps this for a real
+  /// activation token exactly once.
+  claimCode String?   @unique
+  claimedAt DateTime?
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+
+/// Replay cache for writes that carry an `Idempotency-Key` header.
+///
+/// A device that queues writes while offline resends them on reconnect. If the
+/// server accepted one but the response never made it back — a timeout, a
+/// dropped connection — the client cannot tell the difference between "not
+/// applied" and "applied, answer lost", so it retries. Without this table that
+/// retry creates a second customer, order or cash movement.
+model IdempotencyKey {
+  id           String    @id @default(uuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key          String
+  method       String
+  path         String
+  /// Digest of the request this key first claimed. Reusing one key for a
+  /// different body is a client bug, not a retry, and must not replay.
+  requestHash  String
+  statusCode   Int?
+  responseBody Json?
+  /// Null while the first attempt is still running.
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+  @@index([createdAt])
 }

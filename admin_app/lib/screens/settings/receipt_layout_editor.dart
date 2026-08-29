@@ -179,14 +179,18 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
 
     _headerTextController = TextEditingController(text: _layout.headerText);
     _footerTextController = TextEditingController(text: _layout.footerText);
-    _storeNameController =
-        TextEditingController(text: _layout.storeNameOverride ?? '');
-    _storeAddressController =
-        TextEditingController(text: _layout.storeAddressOverride ?? '');
-    _storePhoneController =
-        TextEditingController(text: _layout.storePhoneOverride ?? '');
-    _storeEmailController =
-        TextEditingController(text: _layout.storeEmailOverride ?? '');
+    _storeNameController = TextEditingController(
+      text: _layout.storeNameOverride ?? '',
+    );
+    _storeAddressController = TextEditingController(
+      text: _layout.storeAddressOverride ?? '',
+    );
+    _storePhoneController = TextEditingController(
+      text: _layout.storePhoneOverride ?? '',
+    );
+    _storeEmailController = TextEditingController(
+      text: _layout.storeEmailOverride ?? '',
+    );
 
     void rebuildPreview() {
       if (mounted) setState(() => _previewKey++);
@@ -272,35 +276,37 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
   Widget build(BuildContext context) {
     final currentLayout = _currentLayout;
 
-    return LayoutBuilder(builder: (context, constraints) {
-      final isMobile = constraints.maxWidth < 900;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isMobile = constraints.maxWidth < 900;
 
-      if (isMobile) {
-        return _MobileLayout(
-          currentLayout: currentLayout,
-          onSave: () => widget.onSave(currentLayout),
-          editorContent: _buildEditorScroll(currentLayout, isMobile: true),
-          previewContent: _buildPreviewPanel(currentLayout),
+        if (isMobile) {
+          return _MobileLayout(
+            currentLayout: currentLayout,
+            onSave: () => widget.onSave(currentLayout),
+            editorContent: _buildEditorScroll(currentLayout, isMobile: true),
+            previewContent: _buildPreviewPanel(currentLayout),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: _kBg,
+          appBar: _buildAppBar(currentLayout),
+          body: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // ── Left: Editor ──────────────────────────────────────────────
+              SizedBox(
+                width: 420,
+                child: _buildEditorScroll(currentLayout, isMobile: false),
+              ),
+              // ── Right: Preview ────────────────────────────────────────────
+              Expanded(child: _buildPreviewPanel(currentLayout)),
+            ],
+          ),
         );
-      }
-
-      return Scaffold(
-        backgroundColor: _kBg,
-        appBar: _buildAppBar(currentLayout),
-        body: Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // ── Left: Editor ──────────────────────────────────────────────
-            SizedBox(
-              width: 420,
-              child: _buildEditorScroll(currentLayout, isMobile: false),
-            ),
-            // ── Right: Preview ────────────────────────────────────────────
-            Expanded(child: _buildPreviewPanel(currentLayout)),
-          ],
-        ),
-      );
-    });
+      },
+    );
   }
 
   // ── AppBar ────────────────────────────────────────────────────────────────
@@ -321,20 +327,22 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
               color: _kAccentLight,
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(LucideIcons.receipt,
-                color: _kAccent, size: 20),
+            child: const Icon(LucideIcons.receipt, color: _kAccent, size: 20),
           ),
           const SizedBox(width: 12),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text( 'app.admin_receipt_editor_title'.tr().tr(),
+              Text(
+                'app.admin_receipt_editor_title'.tr().tr(),
                 style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: _kText),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: _kText,
+                ),
               ),
-              Text( 'app.customize_your_receipt_layout'.tr(),
+              Text(
+                'app.customize_your_receipt_layout'.tr(),
                 style: const TextStyle(fontSize: 12, color: _kSubText),
               ),
             ],
@@ -356,8 +364,10 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
   }
 
   // ── Editor scroll wrapper ─────────────────────────────────────────────────
-  Widget _buildEditorScroll(ReceiptLayout currentLayout,
-      {required bool isMobile}) {
+  Widget _buildEditorScroll(
+    ReceiptLayout currentLayout, {
+    required bool isMobile,
+  }) {
     return Container(
       color: _kBg,
       child: SingleChildScrollView(
@@ -367,19 +377,27 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
           children: [
             _buildPresetsSection(),
             _buildSectionLabel(
-                'admin.receipt.editor.storeInformation'.tr(), LucideIcons.store),
+              'admin.receipt.editor.storeInformation'.tr(),
+              LucideIcons.store,
+            ),
             _buildStoreInfoSection(currentLayout),
             const SizedBox(height: 8),
             _buildSectionLabel(
-                'admin.receipt.editor.headerLegacy'.tr(), LucideIcons.chevronUp),
+              'admin.receipt.editor.headerLegacy'.tr(),
+              LucideIcons.chevronUp,
+            ),
             _buildHeaderSection(currentLayout),
             const SizedBox(height: 8),
             _buildSectionLabel(
-                'admin.receipt.editor.content'.tr(), LucideIcons.list),
+              'admin.receipt.editor.content'.tr(),
+              LucideIcons.list,
+            ),
             _buildContentSection(currentLayout),
             const SizedBox(height: 8),
             _buildSectionLabel(
-                'admin.receipt.editor.footer'.tr(), LucideIcons.chevronDown),
+              'admin.receipt.editor.footer'.tr(),
+              LucideIcons.chevronDown,
+            ),
             _buildFooterSection(currentLayout),
           ],
         ),
@@ -420,12 +438,14 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
           children: [
             const Icon(LucideIcons.sparkles, size: 16, color: _kAccent),
             const SizedBox(width: 8),
-            Text( 'app.quick_presets'.tr(),
+            Text(
+              'app.quick_presets'.tr(),
               style: TextStyle(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: _kSubText,
-                  letterSpacing: 0.5),
+                fontSize: 13,
+                fontWeight: FontWeight.w700,
+                color: _kSubText,
+                letterSpacing: 0.5,
+              ),
             ),
           ],
         ),
@@ -438,11 +458,13 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
           crossAxisSpacing: 10,
           childAspectRatio: 2.6,
           children: _kPresets
-              .map((p) => _PresetCard(
-                    preset: p,
-                    isActive: _activePreset == p.key,
-                    onTap: () => _applyPreset(p),
-                  ))
+              .map(
+                (p) => _PresetCard(
+                  preset: p,
+                  isActive: _activePreset == p.key,
+                  onTap: () => _applyPreset(p),
+                ),
+              )
               .toList(),
         ),
         const SizedBox(height: 8),
@@ -466,8 +488,7 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
             label: 'app.admin_receipt_editor_showstore'.tr().tr(),
             icon: LucideIcons.store,
             value: layout.showStoreName,
-            onChanged: (v) =>
-                _updateLayout(layout.copyWith(showStoreName: v)),
+            onChanged: (v) => _updateLayout(layout.copyWith(showStoreName: v)),
           ),
           _ExpandingField(
             visible: layout.showStoreName,
@@ -496,8 +517,7 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
             label: 'app.admin_receipt_editor_showstore3'.tr().tr(),
             icon: LucideIcons.phone,
             value: layout.showStorePhone,
-            onChanged: (v) =>
-                _updateLayout(layout.copyWith(showStorePhone: v)),
+            onChanged: (v) => _updateLayout(layout.copyWith(showStorePhone: v)),
           ),
           _ExpandingField(
             visible: layout.showStorePhone,
@@ -511,8 +531,7 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
             label: 'app.admin_receipt_editor_showstore4'.tr().tr(),
             icon: LucideIcons.mail,
             value: layout.showStoreEmail,
-            onChanged: (v) =>
-                _updateLayout(layout.copyWith(showStoreEmail: v)),
+            onChanged: (v) => _updateLayout(layout.copyWith(showStoreEmail: v)),
           ),
           _ExpandingField(
             visible: layout.showStoreEmail,
@@ -535,8 +554,7 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
             label: 'app.admin_receipt_editor_showcusto'.tr().tr(),
             icon: LucideIcons.messageSquare,
             value: layout.showHeader,
-            onChanged: (v) =>
-                _updateLayout(layout.copyWith(showHeader: v)),
+            onChanged: (v) => _updateLayout(layout.copyWith(showHeader: v)),
           ),
           _ExpandingField(
             visible: layout.showHeader,
@@ -568,8 +586,7 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
             label: 'app.admin_receipt_editor_showdate'.tr().tr(),
             icon: LucideIcons.calendar,
             value: layout.showDate,
-            onChanged: (v) =>
-                _updateLayout(layout.copyWith(showDate: v)),
+            onChanged: (v) => _updateLayout(layout.copyWith(showDate: v)),
           ),
           const _Divider(),
           _PillToggleRow(
@@ -601,8 +618,7 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
             label: 'app.admin_receipt_editor_showfoote'.tr().tr(),
             icon: LucideIcons.chevronDown,
             value: layout.showFooter,
-            onChanged: (v) =>
-                _updateLayout(layout.copyWith(showFooter: v)),
+            onChanged: (v) => _updateLayout(layout.copyWith(showFooter: v)),
           ),
           _ExpandingField(
             visible: layout.showFooter,
@@ -628,8 +644,10 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
             children: [
               // Label chip
               Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: _kAccentLight,
                   borderRadius: BorderRadius.circular(20),
@@ -640,11 +658,13 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
                   children: [
                     const Icon(LucideIcons.eye, size: 14, color: _kAccent),
                     const SizedBox(width: 6),
-                    Text( 'admin.appearanceSettingsForm.preview.title'.tr(),
+                    Text(
+                      'admin.appearanceSettingsForm.preview.title'.tr(),
                       style: const TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: _kAccent),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: _kAccent,
+                      ),
                     ),
                   ],
                 ),
@@ -657,10 +677,12 @@ class _ReceiptLayoutEditorState extends ConsumerState<ReceiptLayoutEditor>
                 contactInfos: _contactInfos,
               ),
               const SizedBox(height: 16),
-              Text( 'app.receipt_updates_instantly_as_y'.tr(),
+              Text(
+                'app.receipt_updates_instantly_as_y'.tr(),
                 style: TextStyle(
-                    fontSize: 12,
-                    color: _kSubText.withValues(alpha: 0.7)),
+                  fontSize: 12,
+                  color: _kSubText.withValues(alpha: 0.7),
+                ),
               ),
             ],
           ),
@@ -707,12 +729,13 @@ class _ThermalPrinterMockup extends ConsumerWidget {
     ];
     const total = 26.00;
     final customer = Customer(
-        id: '1',
-        name: 'Yanis M.',
-        phone: '+XX X XXX XXXX',
-        email: '',
-        ordersCount: 0,
-        totalSpent: 0);
+      id: '1',
+      name: 'Yanis M.',
+      phone: '+XX X XXX XXXX',
+      email: '',
+      ordersCount: 0,
+      totalSpent: 0,
+    );
 
     return Column(
       children: [
@@ -722,13 +745,13 @@ class _ThermalPrinterMockup extends ConsumerWidget {
           height: 52,
           decoration: BoxDecoration(
             color: const Color(0xFF2D3748),
-            borderRadius:
-                const BorderRadius.vertical(top: Radius.circular(14)),
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(14)),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.25),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4)),
+                color: Colors.black.withValues(alpha: 0.25),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
           child: Row(
@@ -750,12 +773,14 @@ class _ThermalPrinterMockup extends ConsumerWidget {
                 ),
               ),
               const SizedBox(width: 12),
-              Text( 'app.receipt_printer'.tr(),
+              Text(
+                'app.receipt_printer'.tr(),
                 style: TextStyle(
-                    color: Colors.white.withValues(alpha: 0.7),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 1.5),
+                  color: Colors.white.withValues(alpha: 0.7),
+                  fontSize: 10,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 1.5,
+                ),
               ),
               const SizedBox(width: 12),
               // Feed button
@@ -801,9 +826,10 @@ class _ThermalPrinterMockup extends ConsumerWidget {
             color: Colors.white,
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.15),
-                  blurRadius: 16,
-                  offset: const Offset(0, 6)),
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 16,
+                offset: const Offset(0, 6),
+              ),
             ],
           ),
           child: ClipRect(
@@ -842,23 +868,22 @@ class _ThermalPrinterMockup extends ConsumerWidget {
           ),
         ),
         // ── Torn bottom edge ──────────────────────────────────────────────
-        CustomPaint(
-          size: const Size(280, 16),
-          painter: _TornEdgePainter(),
-        ),
+        CustomPaint(size: const Size(280, 16), painter: _TornEdgePainter()),
         // ── Printer body bottom ────────────────────────────────────────────
         Container(
           width: 310,
           height: 16,
           decoration: BoxDecoration(
             color: const Color(0xFF2D3748),
-            borderRadius:
-                const BorderRadius.vertical(bottom: Radius.circular(14)),
+            borderRadius: const BorderRadius.vertical(
+              bottom: Radius.circular(14),
+            ),
             boxShadow: [
               BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.2),
-                  blurRadius: 8,
-                  offset: const Offset(0, 4)),
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 4),
+              ),
             ],
           ),
         ),
@@ -901,8 +926,11 @@ class _PresetCard extends StatelessWidget {
   final bool isActive;
   final VoidCallback onTap;
 
-  const _PresetCard(
-      {required this.preset, required this.isActive, required this.onTap});
+  const _PresetCard({
+    required this.preset,
+    required this.isActive,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -912,9 +940,7 @@ class _PresetCard extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         curve: Curves.easeOut,
         decoration: BoxDecoration(
-          color: isActive
-              ? preset.color.withValues(alpha: 0.08)
-              : _kCard,
+          color: isActive ? preset.color.withValues(alpha: 0.08) : _kCard,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: isActive ? preset.color : _kBorder,
@@ -923,9 +949,10 @@ class _PresetCard extends StatelessWidget {
           boxShadow: isActive
               ? [
                   BoxShadow(
-                      color: preset.color.withValues(alpha: 0.15),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2))
+                    color: preset.color.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
                 ]
               : [],
         ),
@@ -949,16 +976,16 @@ class _PresetCard extends StatelessWidget {
                   Text(
                     preset.label,
                     style: TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w700,
-                        color: isActive ? preset.color : _kText),
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: isActive ? preset.color : _kText,
+                    ),
                   ),
                   Text(
                     preset.description,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style:
-                        const TextStyle(fontSize: 10, color: _kSubText),
+                    style: const TextStyle(fontSize: 10, color: _kSubText),
                   ),
                 ],
               ),
@@ -1002,20 +1029,17 @@ class _PillToggleRow extends StatelessWidget {
                   : const Color(0xFFF1F5F9),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: Icon(
-              icon,
-              size: 16,
-              color: value ? _kAccent : _kSubText,
-            ),
+            child: Icon(icon, size: 16, color: value ? _kAccent : _kSubText),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Text(
               label,
               style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: value ? _kText : _kSubText),
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: value ? _kText : _kSubText,
+              ),
             ),
           ),
           // Segmented pill: OFF | ON
@@ -1108,8 +1132,6 @@ class _PillSegment extends StatelessWidget {
   }
 }
 
-
-
 // ═══════════════════════════════════════════════════════════════════════════
 // Helpers
 // ═══════════════════════════════════════════════════════════════════════════
@@ -1127,9 +1149,10 @@ class _EditorCard extends StatelessWidget {
         border: Border.all(color: _kBorder),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2)),
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
         ],
       ),
       child: child,
@@ -1151,8 +1174,9 @@ class _ExpandingField extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
         child: child,
       ),
-      crossFadeState:
-          visible ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+      crossFadeState: visible
+          ? CrossFadeState.showSecond
+          : CrossFadeState.showFirst,
       duration: const Duration(milliseconds: 220),
       sizeCurve: Curves.easeInOut,
     );
@@ -1201,31 +1225,42 @@ class _MobileLayout extends StatelessWidget {
                   color: _kAccentLight,
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child:
-                    const Icon(LucideIcons.receipt, color: _kAccent, size: 18),
+                child: const Icon(
+                  LucideIcons.receipt,
+                  color: _kAccent,
+                  size: 18,
+                ),
               ),
               const SizedBox(width: 10),
-              Text( 'app.receipt_layout'.tr(),
+              Text(
+                'app.receipt_layout'.tr(),
                 style: TextStyle(
-                    fontSize: 15, fontWeight: FontWeight.bold, color: _kText),
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                  color: _kText,
+                ),
               ),
             ],
           ),
           bottom: TabBar(
             tabs: [
               Tab(
-                  text: 'app.editor'.tr(),
-                  icon: const Icon(LucideIcons.edit3, size: 16)),
+                text: 'app.editor'.tr(),
+                icon: const Icon(LucideIcons.edit3, size: 16),
+              ),
               Tab(
-                  text: 'admin.pages.onboarding.brand.preview'.tr(),
-                  icon: const Icon(LucideIcons.eye, size: 16)),
+                text: 'admin.pages.onboarding.brand.preview'.tr(),
+                icon: const Icon(LucideIcons.eye, size: 16),
+              ),
             ],
             labelColor: _kAccent,
             unselectedLabelColor: _kSubText,
             indicatorColor: _kAccent,
             indicatorWeight: 2.5,
             labelStyle: const TextStyle(
-                fontSize: 12, fontWeight: FontWeight.w600),
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
           ),
           actions: [
             IconButton(
@@ -1235,12 +1270,7 @@ class _MobileLayout extends StatelessWidget {
             ),
           ],
         ),
-        body: TabBarView(
-          children: [
-            editorContent,
-            previewContent,
-          ],
-        ),
+        body: TabBarView(children: [editorContent, previewContent]),
       ),
     );
   }

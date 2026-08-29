@@ -1,3 +1,4 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
@@ -99,7 +100,9 @@ class PosSession {
           ? null
           : (selectedCustomer ?? this.selectedCustomer),
       discount: clearDiscount ? null : (discount ?? this.discount),
-      lastInteractedItemIndex: clearLastInteracted ? null : (lastInteractedItemIndex ?? this.lastInteractedItemIndex),
+      lastInteractedItemIndex: clearLastInteracted
+          ? null
+          : (lastInteractedItemIndex ?? this.lastInteractedItemIndex),
     );
   }
 }
@@ -310,7 +313,8 @@ class PosNotifier extends Notifier<PosState> {
               (v.barcode != null && v.barcode!.trim() == normalized);
           if (matchesSku || matchesBarcode) {
             final bool isMainProductVariant = v.optionValues.isEmpty;
-            final bool needsVariantSelection = isMainProductVariant && p.options.isNotEmpty;
+            final bool needsVariantSelection =
+                isMainProductVariant && p.options.isNotEmpty;
             return PosLookupItem(
               productId: p.id,
               variantId: v.id,
@@ -340,8 +344,14 @@ class PosNotifier extends Notifier<PosState> {
 
     bool needsSelection = item.needsVariantSelection;
     if (!needsSelection) {
-      final product = state.products.where((p) => p.id == item.productId).firstOrNull;
-      if (product != null && product.options.isNotEmpty && (item.variantLabel == null || item.variantLabel == 'Default' || item.variantLabel!.isEmpty)) {
+      final product = state.products
+          .where((p) => p.id == item.productId)
+          .firstOrNull;
+      if (product != null &&
+          product.options.isNotEmpty &&
+          (item.variantLabel == null ||
+              item.variantLabel == 'Default' ||
+              item.variantLabel!.isEmpty)) {
         needsSelection = true;
       }
     }
@@ -389,10 +399,14 @@ class PosNotifier extends Notifier<PosState> {
       ];
     }
 
-    _updateCurrentSession(current.copyWith(
-      cart: newCart,
-      lastInteractedItemIndex: existingIndex >= 0 ? existingIndex : newCart.length - 1,
-    ));
+    _updateCurrentSession(
+      current.copyWith(
+        cart: newCart,
+        lastInteractedItemIndex: existingIndex >= 0
+            ? existingIndex
+            : newCart.length - 1,
+      ),
+    );
     return item;
   }
 
@@ -483,10 +497,14 @@ class PosNotifier extends Notifier<PosState> {
       );
       newCart = [...current.cart, newItem];
     }
-    _updateCurrentSession(current.copyWith(
-      cart: newCart,
-      lastInteractedItemIndex: existingIndex >= 0 ? existingIndex : newCart.length - 1,
-    ));
+    _updateCurrentSession(
+      current.copyWith(
+        cart: newCart,
+        lastInteractedItemIndex: existingIndex >= 0
+            ? existingIndex
+            : newCart.length - 1,
+      ),
+    );
   }
 
   void addCustomItem({
@@ -533,12 +551,16 @@ class PosNotifier extends Notifier<PosState> {
       }
       return item;
     }).toList();
-    
-    final interactedIndex = newCart.indexWhere((item) => item.productId == productId && item.variantId == variantId);
-    _updateCurrentSession(current.copyWith(
-      cart: newCart,
-      lastInteractedItemIndex: interactedIndex >= 0 ? interactedIndex : null,
-    ));
+
+    final interactedIndex = newCart.indexWhere(
+      (item) => item.productId == productId && item.variantId == variantId,
+    );
+    _updateCurrentSession(
+      current.copyWith(
+        cart: newCart,
+        lastInteractedItemIndex: interactedIndex >= 0 ? interactedIndex : null,
+      ),
+    );
   }
 
   void updateQuantityAtIndex(int index, int quantity) {
@@ -557,10 +579,9 @@ class PosNotifier extends Notifier<PosState> {
     final item = current.cart[index];
     final newCart = [...current.cart];
     newCart[index] = item.copyWith(quantity: quantity);
-    _updateCurrentSession(current.copyWith(
-      cart: newCart,
-      lastInteractedItemIndex: index,
-    ));
+    _updateCurrentSession(
+      current.copyWith(cart: newCart, lastInteractedItemIndex: index),
+    );
   }
 
   void incrementLastInteractedItemQuantity() {
@@ -625,7 +646,26 @@ class PosNotifier extends Notifier<PosState> {
       // The sale's cash-ledger entry is attached to this cashbox server-side.
       // Without it every POS sale posts unattributed and never shows against
       // the cashier's open session.
-      final cashboxId = resolvePosCashboxId(ref.read(cashProvider).cashboxes);
+      final cashboxes = ref.read(cashProvider).cashboxes;
+      final cashboxId = resolvePosCashboxId(cashboxes);
+      if (cashboxId == null) {
+        // The server routes the sale's SALE_PAYMENT movement through the cash
+        // ledger, which refuses it with 409 unless the till has an open
+        // session — and the sale is created in the same transaction, so it
+        // rolls back with it. Ringing it up anyway would bank it locally, hand
+        // the customer a receipt, and then strand the sale in the sync recovery
+        // list where retrying can only reproduce the same 409.
+        final hasOpenSession = cashboxes.any(
+          (cashbox) => cashbox.openSession != null && cashbox.id.isNotEmpty,
+        );
+        state = state.copyWith(
+          isLoading: false,
+          error: hasOpenSession
+              ? 'admin.pages.pos.alerts.ambiguousCashbox'.tr()
+              : 'admin.pages.pos.alerts.noOpenSession'.tr(),
+        );
+        return false;
+      }
 
       final payload = {
         'items': current.cart
@@ -642,7 +682,7 @@ class PosNotifier extends Notifier<PosState> {
         'subtotal': subtotal,
         'discountAmount': discountAmount,
         'total': total,
-        if (cashboxId != null) 'cashboxId': cashboxId,
+        'cashboxId': cashboxId,
         if (current.discount != null)
           'discount': current.discount!.toJson(subtotal),
         if (paymentBreakdown != null)

@@ -6,11 +6,7 @@ class UiTabItem {
   final String label;
   final int? count;
 
-  const UiTabItem({
-    required this.key,
-    required this.label,
-    this.count,
-  });
+  const UiTabItem({required this.key, required this.label, this.count});
 }
 
 /// Underline-style tab bar matching the Nuxt webapp AdminTabFilter design.
@@ -32,8 +28,12 @@ class UiTabFilter extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final brand = Theme.of(context).colorScheme.primary;
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textMuted = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textMuted = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -63,7 +63,9 @@ class UiTabFilter extends StatelessWidget {
                               tab.label,
                               style: TextStyle(
                                 fontSize: 14,
-                                fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+                                fontWeight: isActive
+                                    ? FontWeight.w600
+                                    : FontWeight.w400,
                                 color: isActive ? brand : textMuted,
                               ),
                             ),
@@ -71,13 +73,15 @@ class UiTabFilter extends StatelessWidget {
                               const SizedBox(width: 6),
                               Container(
                                 padding: const EdgeInsets.symmetric(
-                                    horizontal: 6, vertical: 1),
+                                  horizontal: 6,
+                                  vertical: 1,
+                                ),
                                 decoration: BoxDecoration(
                                   color: isActive
                                       ? brand.withValues(alpha: 0.15)
                                       : (isDark
-                                          ? AppColors.surface3
-                                          : AppColors.lightSurface3),
+                                            ? AppColors.surface3
+                                            : AppColors.lightSurface3),
                                   borderRadius: BorderRadius.circular(9999),
                                 ),
                                 child: Text(

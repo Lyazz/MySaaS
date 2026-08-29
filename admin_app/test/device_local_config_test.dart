@@ -29,27 +29,30 @@ void main() {
       );
     });
 
-    test('entity types that do have a server route are still accepted', () async {
-      // Guards against over-trimming the supported set: these four are the
-      // neighbours of the two removed above. With no tenant bound in this bare
-      // test they fail the *later* tenant check with a StateError, which is
-      // itself the proof that they passed the supported-operation gate.
-      for (final pair in const [
-        ('product', 'create'),
-        ('customer', 'update'),
-        ('order', 'updateStatus'),
-        ('contactInfo', 'delete'),
-      ]) {
-        await expectLater(
-          SyncService().enqueueOperation(
-            entityType: pair.$1,
-            action: pair.$2,
-            payload: const {'id': 'x'},
-          ),
-          throwsA(isA<StateError>()),
-          reason: '${pair.$1}:${pair.$2} must remain syncable',
-        );
-      }
-    });
+    test(
+      'entity types that do have a server route are still accepted',
+      () async {
+        // Guards against over-trimming the supported set: these four are the
+        // neighbours of the two removed above. With no tenant bound in this bare
+        // test they fail the *later* tenant check with a StateError, which is
+        // itself the proof that they passed the supported-operation gate.
+        for (final pair in const [
+          ('product', 'create'),
+          ('customer', 'update'),
+          ('order', 'updateStatus'),
+          ('contactInfo', 'delete'),
+        ]) {
+          await expectLater(
+            SyncService().enqueueOperation(
+              entityType: pair.$1,
+              action: pair.$2,
+              payload: const {'id': 'x'},
+            ),
+            throwsA(isA<StateError>()),
+            reason: '${pair.$1}:${pair.$2} must remain syncable',
+          );
+        }
+      },
+    );
   });
 }

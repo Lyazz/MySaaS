@@ -4,6 +4,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/order.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_conflict_policy.dart';
@@ -379,6 +380,14 @@ class OrderRepository {
   Future<void> updateCallStatus(String id, String status) async {
     final resolvedId = await _resolveOrderId(id);
 
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'order',
+        'updateCallStatus',
+        finishesOpenWork: await _orderExistsLocally(resolvedId),
+      ),
+    );
+
     if (await _syncService.isOnline) {
       try {
         await _apiService.client.patch(
@@ -397,6 +406,14 @@ class OrderRepository {
 
   Future<void> updateInternalNotes(String id, String notes) async {
     final resolvedId = await _resolveOrderId(id);
+
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'order',
+        'updateInternalNotes',
+        finishesOpenWork: await _orderExistsLocally(resolvedId),
+      ),
+    );
 
     if (await _syncService.isOnline) {
       try {
@@ -428,6 +445,16 @@ class OrderRepository {
         ? 'PENDING'
         : currentRows.first['status']?.toString() ?? 'PENDING';
 
+    // Moving an order that already exists locally to its final status counts as
+    // finishing open work; inventing one does not.
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'order',
+        'updateStatus',
+        finishesOpenWork: currentRows.isNotEmpty,
+      ),
+    );
+
     await db.update(
       'orders',
       {'status': status, 'syncStatus': SyncStatus.pending.name},
@@ -449,6 +476,7 @@ class OrderRepository {
   }
 
   Future<Map<String, dynamic>> createOrder(Map<String, dynamic> payload) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('order', 'create'));
     final db = await _dbService.database;
     final offlineId = const Uuid().v4();
     final items = _normalizeItems(payload['items']);
@@ -483,6 +511,22 @@ class OrderRepository {
     );
 
     return {'success': true, 'orderId': offlineId, 'offline': true};
+  }
+
+  /// Cheap existence probe used by the licence guard: annotating an order that
+  /// already exists is finishing open work, creating one through the back door
+  /// is not.
+  Future<bool> _orderExistsLocally(String id) async {
+    if (id.trim().isEmpty) return false;
+    final db = await _dbService.database;
+    final rows = await db.query(
+      'orders',
+      columns: ['id'],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
   }
 
   Future<String> _resolveOrderId(String id) async {

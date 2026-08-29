@@ -2,6 +2,7 @@ import type { Request, Response } from 'express'
 import { BillingAdminService } from './billing-admin.service'
 import { logAction } from '../../lib/audit'
 import type { BillingInterval, PlanCode } from '../../../../shared/pricing/plans'
+import { setTrial, TRIAL_DAYS } from '../billing/subscription.service'
 
 const isBillingInterval = (value: unknown): value is BillingInterval => value === 'month' || value === 'year'
 const firstString = (value: unknown): string | null => {
@@ -127,6 +128,46 @@ export class BillingAdminController {
                 return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid planCode' })
             }
             console.error('Set tenant subscription error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
+    /**
+     * Starts or extends a trial.
+     *
+     * Super-admin only, deliberately: a self-serve extension would make the
+     * trial unbounded, and the activation licence a device holds is clamped to
+     * `trialEnd`, so extending it is what un-expires a device in the field.
+     */
+    async setTrial(req: Request, res: Response) {
+        const user = req.user
+        const tenantId = firstString((req.params as any)?.tenantId)
+
+        if (!tenantId) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'tenantId is required' })
+        }
+
+        const rawDays = Number((req.body ?? {}).days)
+        const days = Number.isInteger(rawDays) && rawDays > 0 ? rawDays : TRIAL_DAYS
+
+        if (days > 365) {
+            return res.status(400).json({ statusCode: 400, statusMessage: 'days must be 365 or fewer' })
+        }
+
+        try {
+            const subscription = await setTrial(tenantId, days)
+
+            await logAction({
+                action: 'SET_TENANT_TRIAL',
+                details: `Trial set to ${days} day(s), ending ${subscription.trialEnd?.toISOString()}`,
+                userId: user?.id,
+                targetId: subscription.id,
+                tenantId
+            })
+
+            return res.json(subscription)
+        } catch (error) {
+            console.error('Set tenant trial error', error)
             return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
     }

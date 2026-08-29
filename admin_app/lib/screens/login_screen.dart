@@ -40,6 +40,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   bool _submitted = false;
   String? _errorMessage;
 
+  /// True when the sign-in itself was fine but this device has no licensed
+  /// seat. That is not a dead end -- the operator can ask an administrator --
+  /// so the screen offers the route instead of only an error.
+  bool _deviceNeedsApproval = false;
+
   @override
   void initState() {
     super.initState();
@@ -60,7 +65,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _clearError() {
     if (_errorMessage == null) return;
-    setState(() => _errorMessage = null);
+    setState(() {
+      _errorMessage = null;
+      _deviceNeedsApproval = false;
+    });
   }
 
   Future<void> _handleLogin() async {
@@ -85,7 +93,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       context.go('/');
     } catch (error) {
       if (!mounted) return;
-      setState(() => _errorMessage = AuthErrorMapper.messageFor(error));
+      final kind = AuthErrorMapper.classify(error);
+      setState(() {
+        _errorMessage = AuthErrorMapper.messageFor(error);
+        _deviceNeedsApproval =
+            kind == AuthErrorKind.deviceNotApproved ||
+            kind == AuthErrorKind.deviceRevoked;
+      });
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -331,7 +345,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             'auth.login.hero.copyright'.tr(
               namedArgs: {'year': DateTime.now().year.toString()},
             ),
-            style: GoogleFonts.dmSans(color: palette.secondaryText, fontSize: 12),
+            style: GoogleFonts.dmSans(
+              color: palette.secondaryText,
+              fontSize: 12,
+            ),
           ),
         ],
       ),
@@ -489,6 +506,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   const SizedBox(height: 18),
                   if (_errorMessage != null) ...[
                     AuthErrorBanner(message: _errorMessage!),
+                    if (_deviceNeedsApproval) ...[
+                      const SizedBox(height: 10),
+                      OutlinedButton.icon(
+                        key: const Key('login-request-device-access'),
+                        onPressed: () => context.go('/device?request=1'),
+                        icon: const Icon(Icons.devices_other),
+                        label: const Text('Request access for this device'),
+                      ),
+                    ],
                     const SizedBox(height: 16),
                   ],
                   AuthSubmitButton(

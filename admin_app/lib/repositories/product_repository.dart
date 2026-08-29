@@ -4,6 +4,7 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'package:uuid/uuid.dart';
 
 import '../models/product.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -222,6 +223,7 @@ class ProductRepository {
   }
 
   Future<Product> createProduct(Map<String, dynamic> data) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('product', 'create'));
     final id = (data['id']?.toString().trim().isNotEmpty == true)
         ? data['id'].toString().trim()
         : const Uuid().v4();
@@ -249,6 +251,7 @@ class ProductRepository {
   }
 
   Future<Product> updateProduct(String id, Map<String, dynamic> data) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('product', 'update'));
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Product ID is required');
     final db = await _dbService.database;
@@ -313,6 +316,7 @@ class ProductRepository {
   }
 
   Future<void> deleteProduct(String id) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('product', 'delete'));
     final trimmed = id.trim();
     if (trimmed.isEmpty) throw ArgumentError('Product ID is required');
     final db = await _dbService.database;

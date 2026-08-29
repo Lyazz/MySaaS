@@ -71,10 +71,7 @@ class SyncConflictPolicies {
       _fingerprint({'name': cashbox.name, 'isActive': cashbox.isActive});
 
   static String fingerprintDeliveryProvider(DeliveryProvider provider) =>
-      _fingerprint({
-        'offered': provider.offered,
-        'isEnabled': provider.isEnabled,
-      });
+      _fingerprint({'offered': provider.offered});
 
   static String fingerprintData(Map<String, dynamic> value) =>
       _fingerprint(value);

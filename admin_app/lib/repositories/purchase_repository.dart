@@ -3,6 +3,7 @@ import 'package:uuid/uuid.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/purchase.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -183,6 +184,9 @@ class PurchaseRepository {
     String supplierId,
     String supplierName,
   ) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('purchase', 'createDraft'),
+    );
     final db = await _dbService.database;
 
     final id = const Uuid().v4();
@@ -218,6 +222,7 @@ class PurchaseRepository {
   }
 
   Future<void> addPurchaseItem(String purchaseId, PurchaseItem item) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('purchase', 'addItem'));
     final online = await _syncService.isOnline;
 
     await _syncService.enqueueOperation(
@@ -244,6 +249,9 @@ class PurchaseRepository {
     double quantityReceived, {
     String salePriceMode = 'replace',
   }) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('purchase', 'receiveItem'),
+    );
     await _syncService.enqueueOperation(
       entityType: 'purchase',
       action: 'receiveItem',
@@ -263,6 +271,9 @@ class PurchaseRepository {
     double? quantity,
     double? cost,
   }) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('purchase', 'updateItem'),
+    );
     final payload = <String, dynamic>{
       'purchaseId': purchaseId,
       'itemId': itemId,
@@ -278,6 +289,9 @@ class PurchaseRepository {
   }
 
   Future<void> removePurchaseItem(String purchaseId, String itemId) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('purchase', 'removeItem'),
+    );
     await _syncService.enqueueOperation(
       entityType: 'purchase',
       action: 'removeItem',
@@ -286,6 +300,7 @@ class PurchaseRepository {
   }
 
   Future<void> deletePurchase(String id) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('purchase', 'delete'));
     final db = await _dbService.database;
     await db.update(
       'purchases',
@@ -302,6 +317,9 @@ class PurchaseRepository {
   }
 
   Future<void> updateStatus(String id, String status) async {
+    LicenseWritePolicy.ensureAllowed(
+      const WriteIntent('purchase', 'updateStatus'),
+    );
     final db = await _dbService.database;
 
     await db.update(

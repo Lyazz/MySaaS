@@ -2446,7 +2446,9 @@
           "invoicePopupBlocked": "Invoice popup was blocked by the browser.",
           "invoiceFailed": "Invoice failed: {message}",
           "invoicesDisabled": "Sales invoices are disabled in Functional settings.",
-          "noLastSale": "No recent sale to reprint."
+          "noLastSale": "No recent sale to reprint.",
+          "noOpenSession": "Open a cash session before ringing up a sale.",
+          "ambiguousCashbox": "Several cashboxes have an open session. Assign this terminal to one before selling."
         }
       },
       "cash": {

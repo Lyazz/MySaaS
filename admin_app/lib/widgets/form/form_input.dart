@@ -100,7 +100,10 @@ class FormInput extends StatelessWidget {
     );
     final focusedBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
+      borderSide: BorderSide(
+        color: Theme.of(context).colorScheme.primary,
+        width: 1.5,
+      ),
     );
     final errorBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),

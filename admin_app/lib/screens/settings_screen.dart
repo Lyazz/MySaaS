@@ -94,13 +94,22 @@ class SettingsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        Container(
-          decoration: BoxDecoration(
-            color: surface1,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: borderColor),
+        // The surface colour belongs on a Material, not a DecoratedBox: the
+        // ListTiles inside paint their background and ink splashes onto the
+        // nearest Material ancestor, so a coloured box between them and it
+        // swallows both — Flutter asserts on exactly this arrangement. The
+        // border stays on a DecoratedBox, which carries no colour of its own.
+        Material(
+          color: surface1,
+          borderRadius: BorderRadius.circular(18),
+          clipBehavior: Clip.antiAlias,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: borderColor),
+            ),
+            child: Column(children: children),
           ),
-          child: Column(children: children),
         ),
       ],
     );
@@ -135,8 +144,12 @@ class SettingsTile extends ConsumerWidget {
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     final localLockedFeature = lockedFeature;
-    final locked = localLockedFeature != null &&
-        FeatureAccess.isLockedForTier(auth.subscriptionTier, localLockedFeature);
+    final locked =
+        localLockedFeature != null &&
+        FeatureAccess.isLockedForTier(
+          auth.subscriptionTier,
+          localLockedFeature,
+        );
 
     return ListTile(
       enabled: enabled && !locked,
@@ -151,7 +164,10 @@ class SettingsTile extends ConsumerWidget {
         locked ? '$subtitle\nAvailable on online tiers.' : subtitle,
         style: TextStyle(color: textMuted, height: 1.35),
       ),
-      leading: Icon(icon, color: locked ? textMuted : Theme.of(context).colorScheme.primary),
+      leading: Icon(
+        icon,
+        color: locked ? textMuted : Theme.of(context).colorScheme.primary,
+      ),
       trailing: Icon(
         locked ? LucideIcons.lock : LucideIcons.chevronRight,
         size: 18,
@@ -189,10 +205,7 @@ class AppSettingsSection extends ConsumerWidget {
         SwitchListTile(
           title: Text(
             'app.dark_mode'.tr(),
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: textPrimary,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, color: textPrimary),
           ),
           subtitle: Text(
             'app.enable_the_dark_admin_theme'.tr(),
@@ -205,10 +218,7 @@ class AppSettingsSection extends ConsumerWidget {
         ListTile(
           title: Text(
             'app.provisioned_workspace'.tr(),
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: textPrimary,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, color: textPrimary),
           ),
           subtitle: Text(
             '${workspace.apiBaseUrl}\nManaged by secure provisioning.',
@@ -223,29 +233,20 @@ class AppSettingsSection extends ConsumerWidget {
         ListTile(
           title: Text(
             'app.reprovision_workspace'.tr(),
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              color: textPrimary,
-            ),
+            style: TextStyle(fontWeight: FontWeight.w600, color: textPrimary),
           ),
           subtitle: Text(
             'app.clear_local_tenant_data_on_thi'.tr(),
             style: TextStyle(color: textMuted, height: 1.35),
           ),
           leading: const Icon(LucideIcons.rotateCcw, color: AppColors.red),
-          trailing: Icon(
-            LucideIcons.chevronRight,
-            size: 18,
-            color: textMuted,
-          ),
+          trailing: Icon(LucideIcons.chevronRight, size: 18, color: textMuted),
           onTap: () async {
             final confirm = await showDialog<bool>(
               context: context,
               builder: (dialogContext) => AlertDialog(
                 title: Text('app.reprovision_workspace'.tr()),
-                content: Text(
-                  'app.this_clears_the_local_workspac'.tr(),
-                ),
+                content: Text('app.this_clears_the_local_workspac'.tr()),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.of(dialogContext).pop(false),

@@ -4,15 +4,21 @@ import helmet from 'helmet'
 import { expressTenantMiddleware } from './middleware/tenant.middleware'
 import { expressAuthMiddleware } from './middleware/auth.middleware'
 import { expressTenantFromUserMiddleware } from './middleware/tenant-from-user.middleware'
+import { expressIdempotencyMiddleware } from './middleware/idempotency.middleware'
 import { expressAuditMiddleware } from './middleware/audit.middleware'
 import { expressSubscriptionMiddleware } from './middleware/subscription.middleware'
 import {
+    activationRateLimiter,
     apiRateLimiter,
     loginRateLimiter,
     publicOrderRateLimiter,
     registerRateLimiter
 } from './middleware/rate-limit.middleware'
+import { assertRequiredEnv } from './lib/env-check'
 import routes from './routes'
+
+// Fail at boot, not on the first request that happens to need a secret.
+assertRequiredEnv()
 
 const app = express()
 const isProduction = process.env.NODE_ENV === 'production'
@@ -73,10 +79,16 @@ app.use('/api', apiRateLimiter)
 app.use('/api/login', loginRateLimiter)
 app.use('/api/register', registerRateLimiter)
 app.use('/api/orders', publicOrderRateLimiter)
+app.use('/api/activation', activationRateLimiter)
 app.use(expressAuthMiddleware)
 app.use(expressTenantFromUserMiddleware)
 app.use(expressAuditMiddleware)
 app.use(expressSubscriptionMiddleware)
+
+// After tenant + auth resolution, so the key is scoped to a trusted tenant,
+// and after audit/subscription so a replayed response is still logged and
+// still counted the way the original was.
+app.use('/api/admin', expressIdempotencyMiddleware)
 
 app.use('/api', routes)
 

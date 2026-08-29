@@ -5,7 +5,8 @@ import prisma from '../../lib/prisma'
 import { signAccessToken } from '../../lib/jwt'
 import { seedStaffRolePresets } from '../staff-roles/presets'
 import { PhoneNormalizationService } from '../loyalty/phone-normalization.service'
-import { ActivationService } from '../activation/activation.service'
+import { ActivationError, ActivationService } from '../activation/activation.service'
+import { ensureSubscription } from '../billing/subscription.service'
 
 const MIN_PASSWORD_LENGTH = 8
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -23,11 +24,29 @@ type StaffRoleWithPermissions = {
 export class AuthServiceError extends Error {
     constructor(
         public statusCode: number,
-        public statusMessage: string
+        public statusMessage: string,
+        /** Stable machine-readable reason, e.g. DEVICE_LIMIT_REACHED. */
+        public code?: string,
+        /** Extra fields merged into the response body, e.g. canRequestAccess. */
+        public details?: Record<string, unknown>
     ) {
         super(statusMessage)
     }
 }
+
+/**
+ * Kill switch for device seat enforcement.
+ *
+ * Ships disabled. Seat checks have been broken for long enough that some tenants
+ * are running more devices than their licence allows; turning enforcement on
+ * before those devices have heartbeated at least once would lock real shops out
+ * mid-day. Enable it only once `Device.lastSeenAt` shows adoption.
+ *
+ * Disabled still means the failure is logged and no activation token is issued,
+ * so the client learns it is unseated -- it just is not blocked from logging in.
+ */
+const isDeviceSeatEnforcementEnabled = () =>
+    process.env.DEVICE_SEAT_ENFORCEMENT === 'true'
 
 export type RegisterInput = {
     name?: unknown
@@ -52,11 +71,17 @@ export class AuthService {
     private phoneNormalization = new PhoneNormalizationService()
     private activationService = new ActivationService()
 
+    /**
+     * Registration was hard-gated to a single phone number while the platform
+     * was closed. Self-serve trials need it open, so the gate now defaults OFF
+     * and must be switched on deliberately.
+     *
+     * The trial itself is the abuse limit, backed by `registerRateLimiter`
+     * (5/hour) and by the fact that a trial tenant's devices expire on their
+     * own. `REGISTER_WHITELIST_PHONE` is kept so the gate can be re-armed.
+     */
     private isTemporaryPhoneLockEnabled() {
-        const configured = process.env.REGISTER_PHONE_LOCK_ENABLED
-        if (configured === 'true') return true
-        if (configured === 'false') return false
-        return process.env.NODE_ENV !== 'test'
+        return process.env.REGISTER_PHONE_LOCK_ENABLED === 'true'
     }
 
     private getAllowedRegistrationPhoneNormalized() {
@@ -133,7 +158,10 @@ export class AuthService {
                 data: {
                     name,
                     slug: normalizedSlug,
-                    isOffline: true
+                    // A self-registered tenant starts on an online trial. It was
+                    // pinned to offline-only here, which meant every signup was
+                    // born on the local-only tier no matter what it signed up for.
+                    isOffline: false
                 }
             })
 
@@ -165,16 +193,10 @@ export class AuthService {
                 }
             })
 
-            await tx.tenantSubscription.create({
-                data: {
-                    tenantId: createdTenant.id,
-                    planCode: 'basic',
-                    interval: 'month',
-                    status: 'ACTIVE',
-                    currentPeriodStart: now,
-                    currentPeriodEnd: addUtcMonths(now, 1)
-                }
-            })
+            // Self-registration starts a trial, not a live subscription. The
+            // trial's end date bounds the activation licence a device receives,
+            // so it expires by itself even on a device that never reconnects.
+            await ensureSubscription(tx, createdTenant.id, { startTrial: true, now })
 
             return { tenant: createdTenant, user }
         })
@@ -203,6 +225,31 @@ export class AuthService {
                 required: true
             }
         }
+    }
+
+    /**
+     * Turns a seat refusal into a login refusal the client can act on.
+     *
+     * The 409 deliberately carries `canRequestAccess`, so the app can offer
+     * "ask your administrator for access" instead of a dead-end error -- that
+     * request flow is what makes a one-device licence workable in practice.
+     */
+    private toDeviceAuthError(error: unknown): AuthServiceError {
+        if (error instanceof ActivationError) {
+            return new AuthServiceError(
+                error.statusCode,
+                error.message,
+                error.code,
+                error.details
+            )
+        }
+
+        // An unexpected failure must not silently grant a seat.
+        return new AuthServiceError(
+            503,
+            'Device activation is temporarily unavailable',
+            'DEVICE_ACTIVATION_UNAVAILABLE'
+        )
     }
 
     async login(input: LoginInput, tenant?: Tenant) {
@@ -252,13 +299,6 @@ export class AuthService {
             throw new AuthServiceError(401, 'Invalid credentials')
         }
 
-        const token = signAccessToken({
-            userId: user.id,
-            email: user.email,
-            role: user.role,
-            tenantId: user.tenantId
-        })
-
         const { passwordHash, ...userInfo } = user
         const responseTenant = tenant || user.tenant
         const isOffline = responseTenant ? responseTenant.isOffline : false
@@ -266,7 +306,14 @@ export class AuthService {
         const role = await this.loadStaffRole(user)
         const { staffRole, staffPermissions } = this.buildStaffPermissions(role)
 
+        // The seat claim runs BEFORE the access token is signed, because the
+        // token carries the device binding. It also has to be able to fail the
+        // whole login: a `hardwareId` means the Flutter app, and refusing an
+        // unseated device is the entire point of one-device licensing. Absence
+        // of `hardwareId` means the browser admin, which is not seat-limited.
         let activationToken: string | undefined
+        let deviceBinding: { deviceId: string; tokenVersion: number } | undefined
+
         if (hardwareId && user.tenantId) {
             try {
                 const activationResult = await this.activationService.autoRegisterOrLoginDevice(
@@ -276,10 +323,34 @@ export class AuthService {
                     devicePlatform
                 )
                 activationToken = activationResult.activationToken
-            } catch (error: any) {
-                console.error('Auto-activation during login failed:', error.message)
+                deviceBinding = {
+                    deviceId: activationResult.device.id,
+                    tokenVersion: activationResult.device.tokenVersion
+                }
+            } catch (error) {
+                if (isDeviceSeatEnforcementEnabled()) {
+                    throw this.toDeviceAuthError(error)
+                }
+
+                console.error(
+                    'Device seat claim failed during login (enforcement disabled):',
+                    error instanceof Error ? error.message : error
+                )
             }
         }
+
+        const token = signAccessToken({
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+            tenantId: user.tenantId,
+            // Present only for app logins. `dv` retires the token as soon as the
+            // device is revoked or transferred, without the blast radius of
+            // `User.tokenInvalidBefore`, which kills every session for the user.
+            ...(deviceBinding
+                ? { deviceId: deviceBinding.deviceId, dv: deviceBinding.tokenVersion }
+                : {})
+        })
 
         return {
             success: true,

@@ -17,6 +17,7 @@ class StoreSettings {
   final String orderIdPrefix;
   final int minimumOrderAmountDzd;
   final bool hideOptionalAddress;
+  final bool storePickupEnabled;
   final Map<String, dynamic> legalPages;
 
   const StoreSettings({
@@ -38,6 +39,7 @@ class StoreSettings {
     this.orderIdPrefix = 'ORD',
     this.minimumOrderAmountDzd = 0,
     this.hideOptionalAddress = false,
+    this.storePickupEnabled = false,
     this.legalPages = const {},
   });
 
@@ -63,6 +65,7 @@ class StoreSettings {
       minimumOrderAmountDzd:
           int.tryParse(json['minimumOrderAmountDzd']?.toString() ?? '0') ?? 0,
       hideOptionalAddress: json['hideOptionalAddress'] == true,
+      storePickupEnabled: json['storePickupEnabled'] == true,
       legalPages: legalPages is Map
           ? Map<String, dynamic>.from(legalPages)
           : const {},
@@ -88,6 +91,7 @@ class StoreSettings {
     String? orderIdPrefix,
     int? minimumOrderAmountDzd,
     bool? hideOptionalAddress,
+    bool? storePickupEnabled,
     Map<String, dynamic>? legalPages,
   }) {
     return StoreSettings(
@@ -111,6 +115,7 @@ class StoreSettings {
       minimumOrderAmountDzd:
           minimumOrderAmountDzd ?? this.minimumOrderAmountDzd,
       hideOptionalAddress: hideOptionalAddress ?? this.hideOptionalAddress,
+      storePickupEnabled: storePickupEnabled ?? this.storePickupEnabled,
       legalPages: legalPages ?? this.legalPages,
     );
   }
@@ -133,6 +138,7 @@ class StoreSettings {
     'orderIdPrefix': orderIdPrefix,
     'minimumOrderAmountDzd': minimumOrderAmountDzd,
     'hideOptionalAddress': hideOptionalAddress,
+    'storePickupEnabled': storePickupEnabled,
     'legalPages': legalPages,
   };
 

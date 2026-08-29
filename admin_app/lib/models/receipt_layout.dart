@@ -15,7 +15,7 @@ class ReceiptLayout {
   final String? storePhoneOverride;
   final bool showStoreEmail;
   final String? storeEmailOverride;
-  
+
   // Keep legacy for backward compatibility, mapped to custom message
   final bool showHeader;
   final String headerText;
@@ -88,22 +88,31 @@ class ReceiptLayout {
       name: map['name'] ?? 'Custom Layout',
       showLogo: map['showLogo'] == 1 || map['showLogo'] == true,
       cachedLogoUrl: map['cachedLogoUrl'],
-      showStoreName: map['showStoreName'] == 1 || map['showStoreName'] == true || map['showStoreName'] == null,
+      showStoreName:
+          map['showStoreName'] == 1 ||
+          map['showStoreName'] == true ||
+          map['showStoreName'] == null,
       storeNameOverride: map['storeNameOverride'],
-      showStoreAddress: map['showStoreAddress'] == 1 || map['showStoreAddress'] == true,
+      showStoreAddress:
+          map['showStoreAddress'] == 1 || map['showStoreAddress'] == true,
       storeAddressOverride: map['storeAddressOverride'],
-      showStorePhone: map['showStorePhone'] == 1 || map['showStorePhone'] == true,
+      showStorePhone:
+          map['showStorePhone'] == 1 || map['showStorePhone'] == true,
       storePhoneOverride: map['storePhoneOverride'],
-      showStoreEmail: map['showStoreEmail'] == 1 || map['showStoreEmail'] == true,
+      showStoreEmail:
+          map['showStoreEmail'] == 1 || map['showStoreEmail'] == true,
       storeEmailOverride: map['storeEmailOverride'],
       showHeader: map['showHeader'] == 1 || map['showHeader'] == true,
       headerText: map['headerText'] ?? '',
       showDate: map['showDate'] == 1 || map['showDate'] == true,
-      showOrderNumber: map['showOrderNumber'] == 1 || map['showOrderNumber'] == true,
-      showCustomerInfo: map['showCustomerInfo'] == 1 || map['showCustomerInfo'] == true,
+      showOrderNumber:
+          map['showOrderNumber'] == 1 || map['showOrderNumber'] == true,
+      showCustomerInfo:
+          map['showCustomerInfo'] == 1 || map['showCustomerInfo'] == true,
       showFooter: map['showFooter'] == 1 || map['showFooter'] == true,
       footerText: map['footerText'] ?? '',
-      showTaxBreakdown: map['showTaxBreakdown'] == 1 || map['showTaxBreakdown'] == true,
+      showTaxBreakdown:
+          map['showTaxBreakdown'] == 1 || map['showTaxBreakdown'] == true,
     );
   }
 

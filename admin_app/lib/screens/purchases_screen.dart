@@ -122,7 +122,8 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text( 'admin.pages.purchases.index.title'.tr(),
+                        Text(
+                          'admin.pages.purchases.index.title'.tr(),
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
@@ -131,7 +132,8 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                           ),
                         ),
                         SizedBox(height: 4),
-                        Text( 'app.manage_your_purchase_orders'.tr(),
+                        Text(
+                          'app.manage_your_purchase_orders'.tr(),
                           style: TextStyle(fontSize: 14, color: textMuted),
                         ),
                       ],
@@ -160,7 +162,8 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                 filters: [
                   SizedBox(
                     width: 320,
-                    child: DateRangeFilterField(showLabel: false, 
+                    child: DateRangeFilterField(
+                      showLabel: false,
                       range: (_startDate != null && _endDate != null)
                           ? DateTimeRange(start: _startDate!, end: _endDate!)
                           : null,
@@ -178,7 +181,8 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   ),
                   SizedBox(
                     width: 240,
-                    child: FormSelect<String?>(showLabel: false, 
+                    child: FormSelect<String?>(
+                      showLabel: false,
                       label: 'admin.pages.purchases.detail.cards.supplier'.tr(),
                       value: _selectedSupplierId,
                       contentPadding: const EdgeInsets.symmetric(
@@ -188,7 +192,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                       items: [
                         DropdownMenuItem<String?>(
                           value: null,
-                          child: Text( 'admin.pages.purchases.index.filters.allSuppliers'.tr()),
+                          child: Text(
+                            'admin.pages.purchases.index.filters.allSuppliers'
+                                .tr(),
+                          ),
                         ),
                         ...suppliers.map(
                           (s) => DropdownMenuItem<String?>(
@@ -266,7 +273,8 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                     : AppColors.lightTextTertiary,
               ),
               const SizedBox(height: 16),
-              Text( 'admin.pages.purchases.index.empty.title'.tr(),
+              Text(
+                'admin.pages.purchases.index.empty.title'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -284,26 +292,45 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
       minWidth: 900,
       header: Row(
         children: [
-          Expanded(flex: 2, child: Text( 'admin.pages.purchases.index.table.id'.tr().toUpperCase(), style: _headerStyle(isDark))),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.purchases.index.table.id'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
+          ),
           Expanded(
             flex: 3,
-            child: Text( 'admin.pages.purchases.detail.cards.supplier'.tr().toUpperCase(), style: _headerStyle(isDark)),
+            child: Text(
+              'admin.pages.purchases.detail.cards.supplier'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'superAdmin.paymentsPage.history.table.status'.tr().toUpperCase(), style: _headerStyle(isDark)),
+            child: Text(
+              'superAdmin.paymentsPage.history.table.status'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'admin.pages.sales.detail.sections.items'.tr().toUpperCase(), style: _headerStyle(isDark)),
+            child: Text(
+              'admin.pages.sales.detail.sections.items'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
           ),
           Expanded(
             flex: 2,
-            child: Text( 'superAdmin.paymentsPage.history.table.date'.tr().toUpperCase(), style: _headerStyle(isDark)),
+            child: Text(
+              'superAdmin.paymentsPage.history.table.date'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
           ),
           Expanded(
             flex: 1,
-            child: Text( 'admin.pages.purchases.index.table.action'.tr().toUpperCase(),
+            child: Text(
+              'admin.pages.purchases.index.table.action'.tr().toUpperCase(),
               style: _headerStyle(isDark),
               textAlign: TextAlign.right,
             ),
@@ -314,10 +341,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
         return InkWell(
           onTap: () => context.go('/purchases/${purchase.id}'),
           child: Padding(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 20,
-              vertical: 13,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
             child: Row(
               children: [
                 Expanded(

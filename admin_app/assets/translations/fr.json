@@ -2447,7 +2447,9 @@
           "invoicePopupBlocked": "La fenêtre de facture a été bloquée par le navigateur.",
           "invoiceFailed": "Échec de la facture : {message}",
           "invoicesDisabled": "Les factures de vente sont désactivées dans les paramètres fonctionnels.",
-          "noLastSale": "Aucune vente récente à réimprimer."
+          "noLastSale": "Aucune vente récente à réimprimer.",
+          "noOpenSession": "Ouvrez une session de caisse avant d'enregistrer une vente.",
+          "ambiguousCashbox": "Plusieurs caisses ont une session ouverte. Affectez ce terminal à l'une d'elles avant de vendre."
         }
       },
       "cash": {

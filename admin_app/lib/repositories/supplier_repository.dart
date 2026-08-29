@@ -2,6 +2,7 @@ import 'package:uuid/uuid.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/supplier.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
@@ -71,6 +72,7 @@ class SupplierRepository {
   }
 
   Future<Supplier> createSupplier(Supplier supplier) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('supplier', 'create'));
     final db = await _dbService.database;
 
     final id = const Uuid().v4();
@@ -104,6 +106,7 @@ class SupplierRepository {
   }
 
   Future<void> updateSupplier(Supplier supplier) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('supplier', 'update'));
     final db = await _dbService.database;
 
     await db.update(
@@ -128,6 +131,7 @@ class SupplierRepository {
   }
 
   Future<void> deleteSupplier(String id) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('supplier', 'delete'));
     final db = await _dbService.database;
     await db.update(
       'suppliers',

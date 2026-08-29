@@ -549,7 +549,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: p.saleId == null || p.saleId!.trim().isEmpty
-                      ? Text( 'app.str_204'.tr(),
+                      ? Text(
+                          'app.str_204'.tr(),
                           style: TextStyle(
                             color: Theme.of(
                               context,
@@ -622,7 +623,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
           children: [
             const Icon(LucideIcons.alertCircle, size: 28),
             const SizedBox(height: 12),
-            Text( 'app.admin_pages_customers_detail_e'.tr().tr(),
+            Text(
+              'app.admin_pages_customers_detail_e'.tr().tr(),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -651,7 +653,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
               ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
-            Text( 'app.admin_pages_customers_detail_n'.tr().tr(),
+            Text(
+              'app.admin_pages_customers_detail_n'.tr().tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -659,7 +662,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
               ),
             ),
             const SizedBox(height: 8),
-            Text( 'app.admin_pages_customers_detail_n2'.tr().tr(),
+            Text(
+              'app.admin_pages_customers_detail_n2'.tr().tr(),
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

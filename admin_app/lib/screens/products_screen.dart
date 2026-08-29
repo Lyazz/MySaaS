@@ -204,8 +204,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   Widget _buildHeader() {
     final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -225,10 +229,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             const SizedBox(height: 4),
             Text(
               'admin.pages.products.index.subtitle'.tr(),
-              style: TextStyle(
-                fontSize: 14,
-                color: textSecondary,
-              ),
+              style: TextStyle(fontSize: 14, color: textSecondary),
             ),
           ],
         ),
@@ -246,8 +247,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final selectedCategoryId = ref.watch(productCategoryFilterProvider);
     final selectedStatus = ref.watch(productStatusFilterProvider);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     final activeFilterChips = isMobile
         ? const <Widget>[]
@@ -404,7 +409,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   Widget _buildImportExportMenu() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return PopupMenuButton<String>(
       tooltip: 'admin.common.actions'.tr(),
@@ -422,11 +429,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           value: 'export',
           child: Row(
             children: [
-              Icon(
-                LucideIcons.upload,
-                size: 16,
-                color: textTertiary,
-              ),
+              Icon(LucideIcons.upload, size: 16, color: textTertiary),
               const SizedBox(width: 8),
               Text('admin.pages.products.index.bulk.export'.tr()),
             ],
@@ -436,11 +439,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           value: 'import',
           child: Row(
             children: [
-              Icon(
-                LucideIcons.download,
-                size: 16,
-                color: textTertiary,
-              ),
+              Icon(LucideIcons.download, size: 16, color: textTertiary),
               const SizedBox(width: 8),
               Text('admin.pages.products.index.bulk.import'.tr()),
             ],
@@ -460,7 +459,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   Widget _buildSortSelect() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -631,16 +632,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   void _showMobileOperations() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: isDark
-          ? AppColors.surface2
-          : AppColors.lightSurface2,
+      backgroundColor: isDark ? AppColors.surface2 : AppColors.lightSurface2,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -696,10 +701,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     children: [
                       if (!(ref.read(authProvider).mode == AppMode.offlineOnly))
                         ListTile(
-                          leading: Icon(
-                            LucideIcons.plus,
-                            color: textPrimary,
-                          ),
+                          leading: Icon(LucideIcons.plus, color: textPrimary),
                           title: Text(
                             'app.admin_pages_products_index_add'.tr().tr(),
                           ),
@@ -785,10 +787,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         ),
                       ),
                       ListTile(
-                        leading: Icon(
-                          LucideIcons.upload,
-                          color: textTertiary,
-                        ),
+                        leading: Icon(LucideIcons.upload, color: textTertiary),
                         title: Text(
                           'admin.pages.products.index.bulk.export'.tr(),
                         ),
@@ -831,10 +830,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       if (_selectedProductIds.isNotEmpty) ...[
                         const Divider(),
                         ListTile(
-                          leading: Icon(
-                            LucideIcons.edit,
-                            color: textTertiary,
-                          ),
+                          leading: Icon(LucideIcons.edit, color: textTertiary),
                           title: Text(
                             '${'admin.pages.products.index.bulk.update'.tr()} — ${'admin.pages.products.index.bulk.selected'.tr(namedArgs: {'count': _selectedProductIds.length.toString()})}',
                           ),
@@ -879,9 +875,13 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   Widget _buildEmptyState() {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
 
     return Center(
       child: Padding(
@@ -895,11 +895,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 color: isDark ? AppColors.surface3 : AppColors.lightSurface3,
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                LucideIcons.package,
-                size: 32,
-                color: textMuted,
-              ),
+              child: Icon(LucideIcons.package, size: 32, color: textMuted),
             ),
             const SizedBox(height: 16),
             Text(
@@ -946,10 +942,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final allSelected =
         products.isNotEmpty && selectedVisibleCount == products.length;
     final noneSelected = selectedVisibleCount == 0;
-    
+
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
 
     return Row(
       children: [
@@ -1076,7 +1076,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
 
   Widget _buildStockCell(BuildContext context, Product product) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
 
     if (product.stock == 0) {
       // Out of stock — red badge
@@ -1130,11 +1132,19 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final imagePath = product.mainImageUrl?.trim();
     final isSelected = _selectedProductIds.contains(product.id);
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
-    final textSecondary = isDark ? AppColors.textSecondary : AppColors.lightTextSecondary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
-    final surfaceBorder = isDark ? AppColors.surfaceBorder : AppColors.lightSurfaceBorder;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     return Container(
       color: isSelected
@@ -1170,17 +1180,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         ? AppColors.surface3
                         : AppColors.lightSurface3,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: surfaceBorder,
-                      width: 1,
-                    ),
+                    border: Border.all(color: surfaceBorder, width: 1),
                   ),
                   child: imagePath == null || imagePath.isEmpty
-                      ? Icon(
-                          LucideIcons.image,
-                          color: textMuted,
-                          size: 20,
-                        )
+                      ? Icon(LucideIcons.image, color: textMuted, size: 20)
                       : ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: TenantImageWidget(imagePath: imagePath),
@@ -1206,10 +1209,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       const SizedBox(height: 3),
                       Text(
                         product.slug,
-                        style: TextStyle(
-                          color: textSecondary,
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: textSecondary, fontSize: 12),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -1231,10 +1231,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     )
                   : Text(
                       'admin.pages.products.index.table.uncategorized'.tr(),
-                      style: TextStyle(
-                        color: textMuted,
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: textMuted, fontSize: 13),
                     ),
             ),
           ),
@@ -1293,11 +1290,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             child: Align(
               alignment: Alignment.center,
               child: PopupMenuButton<String>(
-                icon: Icon(
-                  LucideIcons.globe,
-                  color: textTertiary,
-                  size: 18,
-                ),
+                icon: Icon(LucideIcons.globe, color: textTertiary, size: 18),
                 position: PopupMenuPosition.under,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
@@ -1321,11 +1314,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     value: 'copy_product',
                     child: Row(
                       children: [
-                        Icon(
-                          LucideIcons.copy,
-                          size: 16,
-                          color: textTertiary,
-                        ),
+                        Icon(LucideIcons.copy, size: 16, color: textTertiary),
                         const SizedBox(width: 8),
                         Text('app.admin_pages_products_index_lin2'.tr().tr()),
                       ],
@@ -1350,11 +1339,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     value: 'copy_landing',
                     child: Row(
                       children: [
-                        Icon(
-                          LucideIcons.copy,
-                          size: 16,
-                          color: textTertiary,
-                        ),
+                        Icon(LucideIcons.copy, size: 16, color: textTertiary),
                         const SizedBox(width: 8),
                         Text('app.admin_pages_products_index_lin4'.tr().tr()),
                       ],
@@ -1429,7 +1414,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final bool hasPromotion =
         product.promotionalPrice != null && product.promotionalPrice! > 0;
     final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
-    final textPrimary = isDark ? AppColors.textPrimary : AppColors.lightTextPrimary;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
 
     if (hasPromotion) {
       return Column(
@@ -1528,7 +1515,9 @@ class _ActiveFilterChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textTertiary = isDark ? AppColors.textTertiary : AppColors.lightTextTertiary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
     return Container(
       constraints: const BoxConstraints(maxWidth: 180),
       padding: const EdgeInsets.only(left: 10, right: 4, top: 6, bottom: 6),

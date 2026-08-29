@@ -36,7 +36,12 @@ export class InventoryController {
             res.json(moves)
         } catch (error: any) {
             if (error instanceof InventoryValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('List inventory movements error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -72,7 +77,12 @@ export class InventoryController {
             res.json(updated)
         } catch (error: any) {
             if (error instanceof InventoryValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Update variant inventory error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -102,7 +112,12 @@ export class InventoryController {
             res.json(updated)
         } catch (error: any) {
             if (error instanceof InventoryValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Adjust variant stock error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
@@ -132,7 +147,12 @@ export class InventoryController {
             res.json(updated)
         } catch (error: any) {
             if (error instanceof InventoryValidationError) {
-                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
             }
             console.error('Set variant stock error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })

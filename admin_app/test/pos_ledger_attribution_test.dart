@@ -38,18 +38,18 @@ void main() {
     });
 
     test('an explicit preference breaks the ambiguous case', () {
-      final resolved = resolvePosCashboxId(
-        [_cashbox('a', open: true), _cashbox('b', open: true)],
-        preferredCashboxId: 'b',
-      );
+      final resolved = resolvePosCashboxId([
+        _cashbox('a', open: true),
+        _cashbox('b', open: true),
+      ], preferredCashboxId: 'b');
       expect(resolved, 'b');
     });
 
     test('a preference for a closed till is ignored', () {
-      final resolved = resolvePosCashboxId(
-        [_cashbox('a', open: true), _cashbox('b')],
-        preferredCashboxId: 'b',
-      );
+      final resolved = resolvePosCashboxId([
+        _cashbox('a', open: true),
+        _cashbox('b'),
+      ], preferredCashboxId: 'b');
       expect(resolved, 'a');
     });
   });
