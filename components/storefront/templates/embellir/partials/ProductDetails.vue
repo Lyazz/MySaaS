@@ -60,6 +60,20 @@ const discountPercent = computed(() => {
   if (!props.originalPrice || props.originalPrice <= props.currentPrice) return 0;
   return Math.round(((props.originalPrice - props.currentPrice) / props.originalPrice) * 100);
 });
+
+const { inviteTick } = useVariantSelectionInvite()
+const optionNudge = ref(false)
+const hasUnselectedOptions = computed(() =>
+  Array.isArray(props.product?.options) &&
+  props.product.options.some((o: any) => !props.selectedOptions?.[o.id])
+)
+watch(inviteTick, () => {
+  optionNudge.value = false
+  setTimeout(() => {
+    optionNudge.value = true
+    setTimeout(() => { optionNudge.value = false }, 700)
+  }, 20)
+})
 </script>
 
 <template>
@@ -125,7 +139,15 @@ const discountPercent = computed(() => {
     <div
       v-if="!hideOptionSelectors && product?.options && product.options.length > 0"
       class="space-y-6"
+      :class="{ 'vux-invite': hasUnselectedOptions, 'vux-invite-nudge': optionNudge }"
     >
+      <p
+        v-if="hasUnselectedOptions"
+        class="vux-invite-hint inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600"
+      >
+        <Icon name="lucide:arrow-down" class="w-3.5 h-3.5" />
+        {{ $t('storefront.productForm.chooseOptionsPrompt') }}
+      </p>
       <div v-for="option in product.options" :key="option.id">
         <p class="emb-label text-[#8E9793] mb-3">{{ option.name }}</p>
 

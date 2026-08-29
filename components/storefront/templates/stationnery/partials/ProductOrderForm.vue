@@ -57,6 +57,8 @@ const totalPrice = computed(() => {
 })
 
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
+const { invite } = useVariantSelectionInvite()
+const needsVariantChoice = computed(() => hasVariants.value && !props.currentVariant)
 
 const maxQuantity = computed(() => {
     if (props.currentVariant?.trackInventory === false) return 99
@@ -71,7 +73,7 @@ const isInStock = computed(() => {
     return maxQuantity.value > 0
 })
 
-const isOutOfStock = computed(() => !isInStock.value)
+const isOutOfStock = computed(() => !isInStock.value && !needsVariantChoice.value)
 
 const isLowStock = computed(() => {
     if (!isInStock.value) return false
@@ -211,6 +213,7 @@ onMounted(() => {
 
 watch(() => props.currentVariant, () => {
     quantity.value = 1
+    orderError.value = ''
 })
 
 watch([() => props.currentStock, () => props.currentVariant], () => {
@@ -250,6 +253,7 @@ const triggerSuccessToast = (title: string, message: string) => {
 
 const handleOrderSubmit = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); orderError.value = storefrontContent.value.productForm.errors.selectOptions; return }
     orderError.value = ''
 
     if (!canPurchase.value) {
@@ -372,6 +376,7 @@ const handleOrderSubmit = async () => {
 
 const handleAddToCart = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); triggerSuccessToast(storefrontContent.value.productForm.errors.selectOptions, storefrontContent.value.productForm.chooseOptionsPrompt); return }
     if (!canPurchase.value) {
         triggerSuccessToast(
             storefrontContent.value.actions.outOfStock,
@@ -417,6 +422,10 @@ const handleAddToCart = async () => {
           v-if="product?.isActive === false"
           class="text-xs font-semibold text-slate-500"
         >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="needsVariantChoice"
+          class="text-xs font-semibold text-slate-500"
+        >{{ storefrontContent.productForm.stock.selectOptions }}</span>
         <span
           v-else-if="isOutOfStock"
           class="text-xs font-semibold text-red-700"
@@ -685,7 +694,7 @@ const handleAddToCart = async () => {
 
         <button 
           type="submit"
-          :disabled="orderSubmitting || !canPurchase"
+          :disabled="orderSubmitting || (!canPurchase && !needsVariantChoice)"
           class="w-full h-14 bg-slate-900 hover:bg-brand-700 disabled:bg-slate-400 disabled:cursor-not-allowed text-white font-bold text-lg rounded-sm shadow-md transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 mt-6 group overflow-hidden relative"
         >
           <span
@@ -719,7 +728,7 @@ const handleAddToCart = async () => {
     >
       <button 
         type="button"
-        :disabled="addToCartSubmitting || !canPurchase"
+        :disabled="addToCartSubmitting || (!canPurchase && !needsVariantChoice)"
         class="w-full h-14 bg-white border border-slate-900 text-slate-900 hover:bg-slate-50 font-bold text-lg rounded-sm transition-all duration-300 transform active:scale-[0.98] flex items-center justify-center gap-3 shadow-sm hover:shadow-md"
         @click="handleAddToCart"
       >

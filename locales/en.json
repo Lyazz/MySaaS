@@ -1225,7 +1225,8 @@
       "stock": {
         "unavailable": "Unavailable",
         "outOfStock": "Out of stock",
-        "lowStock": "Low stock: {count} left"
+        "lowStock": "Low stock: {count} left",
+        "selectOptions": "Choose an option to see availability"
       },
       "cod": {
         "title": "Order now",
@@ -1233,9 +1234,11 @@
         "submit": "Confirm order",
         "submitting": "Submitting…"
       },
+      "chooseOptionsPrompt": "Select your options to continue",
       "totalPrice": "Total price:",
       "errors": {
-        "outOfStockVariant": "This variant is out of stock."
+        "outOfStockVariant": "This variant is out of stock.",
+        "selectOptions": "Please choose your options first"
       }
     },
     "toasts": {

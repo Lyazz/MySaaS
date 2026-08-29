@@ -54,6 +54,8 @@ const quickOrderClearanceDiscount = computed(() => {
 
 const totalPrice = computed(() => Math.max(0, rawSubtotal.value - quickOrderClearanceDiscount.value))
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
+const { invite } = useVariantSelectionInvite()
+const needsVariantChoice = computed(() => hasVariants.value && !props.currentVariant)
 const maxQuantity = computed(() => {
   if (props.currentVariant?.trackInventory === false) return 99
   return Math.max(0, Number(props.currentStock ?? 0))
@@ -64,7 +66,7 @@ const isInStock = computed(() => {
   if (props.currentVariant?.trackInventory === false) return true
   return maxQuantity.value > 0
 })
-const isOutOfStock = computed(() => !isInStock.value)
+const isOutOfStock = computed(() => !isInStock.value && !needsVariantChoice.value)
 const isLowStock = computed(() => {
   if (!isInStock.value) return false
   if (props.currentVariant?.trackInventory === false) return false
@@ -151,7 +153,7 @@ const pickupPointsError = pickup.error
 const syncPickupPointCommune = pickup.syncCommune
 
 onMounted(() => { cartStore.loadFromLocalStorage() })
-watch(() => props.currentVariant, () => { quantity.value = 1 })
+watch(() => props.currentVariant, () => { quantity.value = 1; orderError.value = '' })
 watch([() => props.currentStock, () => props.currentVariant], () => {
   if (!canPurchase.value) { quantity.value = 1; return }
   if (maxQuantity.value > 0 && quantity.value > maxQuantity.value) quantity.value = Math.max(1, maxQuantity.value)
@@ -174,6 +176,7 @@ const triggerSuccessToast = (title: string, message: string) => {
 
 const handleOrderSubmit = async () => {
   if (!props.product) return
+  if (needsVariantChoice.value) { invite(); orderError.value = storefrontContent.value.productForm.errors.selectOptions; return }
   orderError.value = ''
   if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
   if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
@@ -220,6 +223,7 @@ const handleOrderSubmit = async () => {
 
 const handleAddToCart = async () => {
   if (!props.product) return
+  if (needsVariantChoice.value) { invite(); triggerSuccessToast(storefrontContent.value.productForm.errors.selectOptions, storefrontContent.value.productForm.chooseOptionsPrompt); return }
   if (!canPurchase.value) { triggerSuccessToast(storefrontContent.value.actions.outOfStock, storefrontContent.value.toasts.outOfStock.message); return }
   addToCartSubmitting.value = true
   const variantLabel = props.currentVariant ? getVariantTitle(props.currentVariant) : ''
@@ -239,6 +243,10 @@ const handleAddToCart = async () => {
           v-if="product?.isActive === false"
           class="order-form__stock-label is-unavailable"
         >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="needsVariantChoice"
+          class="order-form__stock-label is-unavailable"
+        >{{ storefrontContent.productForm.stock.selectOptions }}</span>
         <span
           v-else-if="isOutOfStock"
           class="order-form__stock-label is-oos"
@@ -539,7 +547,7 @@ const handleAddToCart = async () => {
         <button
           type="submit"
           class="at-btn-solid"
-          :disabled="orderSubmitting || !canPurchase"
+          :disabled="orderSubmitting || (!canPurchase && !needsVariantChoice)"
         >
           <Icon
             v-if="orderSubmitting"
@@ -555,7 +563,7 @@ const handleAddToCart = async () => {
       <button
         type="button"
         class="at-btn-ghost"
-        :disabled="addToCartSubmitting || !canPurchase"
+        :disabled="addToCartSubmitting || (!canPurchase && !needsVariantChoice)"
         @click="handleAddToCart"
       >
         <svg

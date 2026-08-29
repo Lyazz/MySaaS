@@ -62,6 +62,8 @@ const quickOrderClearanceDiscount = computed(() => {
 const totalPrice = computed(() => Math.max(0, subtotal.value - quickOrderClearanceDiscount.value) + deliveryFee.value)
 
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
+const { invite } = useVariantSelectionInvite()
+const needsVariantChoice = computed(() => hasVariants.value && !props.currentVariant)
 
 const maxQuantity = computed(() => {
     if (props.currentVariant?.trackInventory === false) return 99
@@ -76,7 +78,7 @@ const isInStock = computed(() => {
     return maxQuantity.value > 0
 })
 
-const isOutOfStock = computed(() => !isInStock.value)
+const isOutOfStock = computed(() => !isInStock.value && !needsVariantChoice.value)
 
 const isLowStock = computed(() => {
     if (!isInStock.value) return false
@@ -202,7 +204,7 @@ const syncPickupPointCommune = pickup.syncCommune
 
 onMounted(() => cartStore.loadFromLocalStorage())
 
-watch(() => props.currentVariant, () => { quantity.value = 1 })
+watch(() => props.currentVariant, () => { quantity.value = 1; orderError.value = '' })
 
 watch([() => props.currentStock, () => props.currentVariant], () => {
     if (!canPurchase.value) { quantity.value = 1; return }
@@ -228,6 +230,7 @@ const triggerSuccessToast = (title: string, message: string) => {
 
 const handleOrderSubmit = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); orderError.value = storefrontContent.value.productForm.errors.selectOptions; return }
     orderError.value = ''
     if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
     if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
@@ -303,6 +306,7 @@ const handleOrderSubmit = async () => {
 
 const handleAddToCart = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); triggerSuccessToast(storefrontContent.value.productForm.errors.selectOptions, storefrontContent.value.productForm.chooseOptionsPrompt); return }
     if (!canPurchase.value) {
         triggerSuccessToast(storefrontContent.value.actions.outOfStock, storefrontContent.value.toasts.outOfStock.message)
         return
@@ -369,6 +373,10 @@ const scrollToForm = () => {
           v-if="product?.isActive === false"
           class="text-xs font-bold text-stone-500"
         >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="needsVariantChoice"
+          class="text-xs font-bold text-stone-500"
+        >{{ storefrontContent.productForm.stock.selectOptions }}</span>
         <span
           v-else-if="isOutOfStock"
           class="text-xs font-bold text-red-600"
@@ -676,7 +684,7 @@ const scrollToForm = () => {
         <!-- Submit -->
         <button
           type="submit"
-          :disabled="orderSubmitting || !canPurchase"
+          :disabled="orderSubmitting || (!canPurchase && !needsVariantChoice)"
           class="w-full h-14 bg-violet-700 text-white font-black text-lg rounded-full shadow-[0_6px_0_0_#4c1d95] hover:-translate-y-1 active:translate-y-2 active:shadow-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-3 mt-2 relative overflow-hidden group"
           style="font-family: 'Fredoka', sans-serif"
         >
@@ -711,7 +719,7 @@ const scrollToForm = () => {
     >
       <button
         type="button"
-        :disabled="addToCartSubmitting || !canPurchase"
+        :disabled="addToCartSubmitting || (!canPurchase && !needsVariantChoice)"
         class="w-full h-13 bg-amber-400 text-amber-900 font-black text-base rounded-full border-3 border-amber-300 shadow-[0_4px_0_0_#d97706] hover:-translate-y-0.5 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
         style="font-family: 'Fredoka', sans-serif; height: 3.25rem"
         @click="handleAddToCart"

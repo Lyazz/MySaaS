@@ -734,6 +734,46 @@
   50% { transform: translate3d(0, -12px, 0); }
 }
 
+/* ── Variant-selection invite ─────────────────────────────────────────────
+ * Draws the shopper's eye to product options they haven't chosen yet. The
+ * gentle "breathe" runs continuously while an option is unselected; the
+ * "nudge" shake fires once when they try to buy without choosing.
+ *
+ * `var(--brand)` is read here (not pre-resolved into a :root token) so the
+ * ring picks up each storefront theme's own brand colour, which is set on a
+ * wrapper deep in the template — not on :root. */
+@keyframes vux-invite-breathe {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
+  50%      { box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand, #6366f1) 55%, transparent); }
+}
+
+@keyframes vux-invite-nudge {
+  0%, 100% { transform: translateX(0); }
+  15% { transform: translateX(-6px); }
+  30% { transform: translateX(6px); }
+  45% { transform: translateX(-4px); }
+  60% { transform: translateX(4px); }
+  75% { transform: translateX(-2px); }
+}
+
+@keyframes vux-invite-hint-pulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+.vux-invite {
+  border-radius: 0.75rem;
+  animation: vux-invite-breathe 2.6s ease-in-out infinite;
+}
+
+.vux-invite-nudge {
+  animation: vux-invite-nudge 0.55s ease-in-out both;
+}
+
+.vux-invite-hint {
+  animation: vux-invite-hint-pulse 2.6s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -742,6 +782,12 @@
   .marketing-float,
   .marketing-float--slow,
   .marketing-float--delay {
+    animation: none !important;
+  }
+
+  .vux-invite,
+  .vux-invite-nudge,
+  .vux-invite-hint {
     animation: none !important;
   }
 }

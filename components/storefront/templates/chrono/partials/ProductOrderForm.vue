@@ -55,6 +55,8 @@ const quickOrderClearanceDiscount = computed(() => {
 
 const totalPrice = computed(() => Math.max(0, rawSubtotal.value - quickOrderClearanceDiscount.value))
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
+const { invite } = useVariantSelectionInvite()
+const needsVariantChoice = computed(() => hasVariants.value && !props.currentVariant)
 const maxQuantity = computed(() => { if (props.currentVariant?.trackInventory === false) return 99; return Math.max(0, Number(props.currentStock ?? 0)) })
 const isInStock = computed(() => {
     if (props.product?.isActive === false) return false
@@ -62,7 +64,7 @@ const isInStock = computed(() => {
     if (props.currentVariant?.trackInventory === false) return true
     return maxQuantity.value > 0
 })
-const isOutOfStock = computed(() => !isInStock.value)
+const isOutOfStock = computed(() => !isInStock.value && !needsVariantChoice.value)
 const isLowStock = computed(() => isInStock.value && props.currentVariant?.trackInventory !== false && maxQuantity.value > 0 && maxQuantity.value <= LOW_STOCK_THRESHOLD)
 const canPurchase = computed(() => isInStock.value)
 const cartStockCap = computed(() => props.currentVariant?.trackInventory === false ? 9999 : maxQuantity.value)
@@ -79,7 +81,7 @@ const quickForm = reactive({ fullName: '', phone: '', wilaya: '', commune: '', a
     selectedDeliveryOption: '' })
 
 onMounted(() => cartStore.loadFromLocalStorage())
-watch(() => props.currentVariant, () => { quantity.value = 1 })
+watch(() => props.currentVariant, () => { quantity.value = 1; orderError.value = '' })
 watch([() => props.currentStock, () => props.currentVariant], () => {
     if (!canPurchase.value) { quantity.value = 1; return }
     if (maxQuantity.value > 0 && quantity.value > maxQuantity.value) quantity.value = Math.max(1, maxQuantity.value)
@@ -102,6 +104,7 @@ const triggerSuccessToast = (title: string, message: string) => {
 
 const handleOrderSubmit = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); orderError.value = storefrontContent.value.productForm.errors.selectOptions; return }
     orderError.value = ''
     if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
     if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
@@ -165,6 +168,7 @@ const handleOrderSubmit = async () => {
 
 const handleAddToCart = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); triggerSuccessToast(storefrontContent.value.productForm.errors.selectOptions, storefrontContent.value.productForm.chooseOptionsPrompt); return }
     if (!canPurchase.value) { triggerSuccessToast(storefrontContent.value.actions.outOfStock, storefrontContent.value.toasts.outOfStock.message); return }
     addToCartSubmitting.value = true
     const variantLabel = props.currentVariant ? getVariantTitle(props.currentVariant) : ''
@@ -296,6 +300,11 @@ const scrollToForm = () => {
           class="text-xs"
           style="color:#5A5450;"
         >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="needsVariantChoice"
+          class="text-xs"
+          style="color:#5A5450;"
+        >{{ storefrontContent.productForm.stock.selectOptions }}</span>
         <span
           v-else-if="isOutOfStock"
           class="text-xs"
@@ -625,7 +634,7 @@ const scrollToForm = () => {
 
         <button 
           type="submit"
-          :disabled="orderSubmitting || !canPurchase"
+          :disabled="orderSubmitting || (!canPurchase && !needsVariantChoice)"
           class="w-full h-14 font-medium text-base tracking-[0.2em] uppercase transition-all duration-300 flex items-center justify-center gap-3 group relative overflow-hidden disabled:opacity-40 disabled:cursor-not-allowed"
           style="background-color:#A67C52; color:#fff; border-radius:1px;"
         >
@@ -666,7 +675,7 @@ const scrollToForm = () => {
     >
       <button 
         type="button"
-        :disabled="addToCartSubmitting || !canPurchase"
+        :disabled="addToCartSubmitting || (!canPurchase && !needsVariantChoice)"
         class="w-full h-12 border font-medium text-sm tracking-[0.15em] uppercase transition-all duration-200 flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
         style="background-color:transparent; border-color:rgba(166,124,82,0.3); color:#A67C52; border-radius:1px;"
         @click="handleAddToCart"
