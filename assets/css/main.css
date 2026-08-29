@@ -743,8 +743,8 @@
  * ring picks up each storefront theme's own brand colour, which is set on a
  * wrapper deep in the template — not on :root. */
 @keyframes vux-invite-breathe {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 0, 0, 0); }
-  50%      { box-shadow: 0 0 0 4px color-mix(in srgb, var(--brand, #6366f1) 55%, transparent); }
+  0%, 100% { outline-color: transparent; }
+  50%      { outline-color: color-mix(in srgb, var(--brand, #6366f1) 55%, transparent); }
 }
 
 @keyframes vux-invite-nudge {
@@ -763,6 +763,10 @@
 
 .vux-invite {
   border-radius: 0.75rem;
+  /* outline + offset keeps the ring clear of the swatches without
+   * reflowing the content the way padding would. */
+  outline: 3px solid transparent;
+  outline-offset: 8px;
   animation: vux-invite-breathe 2.6s ease-in-out infinite;
 }
 
