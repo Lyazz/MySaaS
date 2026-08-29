@@ -1211,7 +1211,8 @@
       "stock": {
         "unavailable": "Indisponible",
         "outOfStock": "Rupture de stock",
-        "lowStock": "Stock faible : {count} restants"
+        "lowStock": "Stock faible : {count} restants",
+        "selectOptions": "Choisissez une option pour voir la disponibilité"
       },
       "cod": {
         "title": "Commander maintenant",
@@ -1219,9 +1220,11 @@
         "submit": "Confirmer la commande",
         "submitting": "Envoi…"
       },
+      "chooseOptionsPrompt": "Sélectionnez vos options pour continuer",
       "totalPrice": "Prix total :",
       "errors": {
-        "outOfStockVariant": "Cette variante est en rupture de stock."
+        "outOfStockVariant": "Cette variante est en rupture de stock.",
+        "selectOptions": "Veuillez d'abord choisir vos options"
       }
     },
     "toasts": {

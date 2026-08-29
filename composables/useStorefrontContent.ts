@@ -224,7 +224,8 @@ export function useStorefrontContent() {
       stock: {
         unavailable: i18n.t('storefront.productForm.stock.unavailable'),
         outOfStock: i18n.t('storefront.productForm.stock.outOfStock'),
-        lowStock: (count: number) => i18n.t('storefront.productForm.stock.lowStock', { count })
+        lowStock: (count: number) => i18n.t('storefront.productForm.stock.lowStock', { count }),
+        selectOptions: i18n.t('storefront.productForm.stock.selectOptions')
       },
       cod: {
         title: i18n.t('storefront.productForm.cod.title'),
@@ -233,8 +234,10 @@ export function useStorefrontContent() {
         submitting: i18n.t('storefront.productForm.cod.submitting')
       },
       totalPrice: i18n.t('storefront.productForm.totalPrice'),
+      chooseOptionsPrompt: i18n.t('storefront.productForm.chooseOptionsPrompt'),
       errors: {
-        outOfStockVariant: i18n.t('storefront.productForm.errors.outOfStockVariant')
+        outOfStockVariant: i18n.t('storefront.productForm.errors.outOfStockVariant'),
+        selectOptions: i18n.t('storefront.productForm.errors.selectOptions')
       }
     },
     toasts: {

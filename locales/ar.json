@@ -1229,7 +1229,8 @@
       "stock": {
         "unavailable": "غير متاح",
         "outOfStock": "غير متوفر",
-        "lowStock": "المخزون منخفض: {count} متبقي"
+        "lowStock": "المخزون منخفض: {count} متبقي",
+        "selectOptions": "اختر أحد الخيارات لمعرفة التوفر"
       },
       "cod": {
         "title": "اطلب الآن",
@@ -1237,9 +1238,11 @@
         "submit": "تأكيد الطلب",
         "submitting": "جارٍ الإرسال…"
       },
+      "chooseOptionsPrompt": "اختر الخيارات",
       "totalPrice": "السعر الإجمالي:",
       "errors": {
-        "outOfStockVariant": "هذا الخيار غير متوفر."
+        "outOfStockVariant": "هذا الخيار غير متوفر.",
+        "selectOptions": "يرجى اختيار الخيارات أولاً"
       }
     },
     "toasts": {

@@ -1,0 +1,635 @@
+{
+  "tenant": {
+    "slug": "wellness",
+    "name": "Wellness"
+  },
+  "storeSettings": {
+    "templateKey": "wellness",
+    "language": "fr",
+    "currencyCode": "DZD",
+    "currencyCountry": "DZ"
+  },
+  "categories": [
+    {
+      "title": "Dermocosmétique",
+      "slug": "dermocosmetique"
+    },
+    {
+      "title": "Soins du Visage",
+      "slug": "soins-visage"
+    },
+    {
+      "title": "Solaire",
+      "slug": "solaire"
+    },
+    {
+      "title": "Cheveux",
+      "slug": "cheveux"
+    },
+    {
+      "title": "Maman & Bébé",
+      "slug": "maman-bebe"
+    },
+    {
+      "title": "Vitamines & Compléments",
+      "slug": "vitamines-complements"
+    },
+    {
+      "title": "Dispositifs Médicaux",
+      "slug": "dispositifs-medicaux"
+    },
+    {
+      "title": "Hygiène & Bien-être",
+      "slug": "hygiene-bien-etre"
+    }
+  ],
+  "products": [
+    {
+      "title": "Sérum Vitamine C Éclat 30ml",
+      "slug": "serum-vitamine-c-eclat-30ml",
+      "price": "3200",
+      "stock": 42,
+      "isActive": true,
+      "miniDescription": "Sérum anti-oxydant concentré en vitamine C pure pour un teint éclatant.",
+      "description": "<p>Sérum concentré à la <strong>vitamine C pure (15%)</strong> pour un teint éclatant et uniforme. Formule anti-oxydante qui atténue les taches pigmentaires et stimule la production de collagène.</p><ul><li>15% Vitamine C stabilisée</li><li>Acide hyaluronique</li><li>Sans parabènes</li></ul>",
+      "categorySlug": "dermocosmetique",
+      "variants": [
+        {
+          "sku": "WELL-SERVITC-30",
+          "price": "3200",
+          "stock": 42,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p01-vitc-serum-1.jpg",
+          "position": 0,
+          "isMain": true
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p01-vitc-serum-2.jpg",
+          "position": 1,
+          "isMain": false
+        }
+      ]
+    },
+    {
+      "title": "Crème Hydratante Acide Hyaluronique 50ml",
+      "slug": "creme-hydratante-acide-hyaluronique-50ml",
+      "price": "2800",
+      "stock": 60,
+      "isActive": true,
+      "miniDescription": "Hydratation intense 24h à l'acide hyaluronique.",
+      "description": "<p>Crème hydratante quotidienne enrichie en <strong>acide hyaluronique haute et basse poids moléculaire</strong> pour une hydratation intense et durable, tous types de peaux.</p>",
+      "categorySlug": "soins-visage",
+      "variants": [
+        {
+          "sku": "WELL-CRHYA-50",
+          "price": "2800",
+          "stock": 60,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p02-hyaluronic-cream-1.jpg",
+          "position": 0,
+          "isMain": true
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p02-hyaluronic-cream-2.jpg",
+          "position": 1,
+          "isMain": false
+        }
+      ]
+    },
+    {
+      "title": "Fluide Solaire SPF50+ Visage",
+      "slug": "fluide-solaire-spf50-visage",
+      "price": "2600",
+      "stock": 40,
+      "isActive": true,
+      "miniDescription": "Protection très haute SPF50+, texture fluide non grasse.",
+      "description": "<p>Protection solaire très haute <strong>SPF50+</strong> à texture fluide non grasse, résistante à l'eau. Protège des UVA/UVB tout en respectant les peaux sensibles.</p>",
+      "categorySlug": "solaire",
+      "variants": [
+        {
+          "sku": "WELL-SOL-SPF50-30",
+          "price": "2600",
+          "stock": 25,
+          "trackInventory": true
+        },
+        {
+          "sku": "WELL-SOL-SPF50-50",
+          "price": "3800",
+          "stock": 15,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p03-sunscreen-1.jpg",
+          "position": 0,
+          "isMain": true
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p03-sunscreen-2.jpg",
+          "position": 1,
+          "isMain": false
+        }
+      ]
+    },
+    {
+      "title": "Eau Micellaire Peaux Sensibles 400ml",
+      "slug": "eau-micellaire-peaux-sensibles-400ml",
+      "price": "1500",
+      "stock": 3,
+      "isActive": true,
+      "miniDescription": "Démaquillant 3-en-1 sans rinçage pour peaux sensibles.",
+      "description": "<p>Eau micellaire démaquillante <strong>3-en-1</strong> (visage, yeux, lèvres) formulée pour les peaux sensibles. Sans rinçage, sans alcool.</p>",
+      "categorySlug": "soins-visage",
+      "variants": [
+        {
+          "sku": "WELL-EAUMIC-400",
+          "price": "1500",
+          "stock": 3,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p04-micellar-water.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Crème Nuit Anti-Âge Régénérante 50ml",
+      "slug": "creme-nuit-anti-age-regenerante-50ml",
+      "price": "4500",
+      "stock": 15,
+      "isActive": true,
+      "miniDescription": "Soin de nuit régénérant au rétinol et peptides.",
+      "description": "<p>Soin de nuit régénérant intense qui agit pendant le cycle naturel de réparation cutanée. Formule enrichie en <strong>rétinol et peptides</strong> pour atténuer les rides.</p>",
+      "categorySlug": "dermocosmetique",
+      "variants": [
+        {
+          "sku": "WELL-CRNUIT-50",
+          "price": "4500",
+          "stock": 15,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p05-night-cream.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Crème Change Bébé Apaisante",
+      "slug": "creme-change-bebe-apaisante",
+      "price": "950",
+      "stock": 70,
+      "isActive": true,
+      "miniDescription": "Crème protectrice au zinc pour le change de bébé.",
+      "description": "<p>Crème protectrice pour le change, apaise et prévient les rougeurs. Formulée à l'<strong>oxyde de zinc</strong>, sans parfum, testée sous contrôle pédiatrique.</p>",
+      "categorySlug": "maman-bebe",
+      "variants": [
+        {
+          "sku": "WELL-BEBE-CHG-75",
+          "price": "950",
+          "stock": 40,
+          "trackInventory": true
+        },
+        {
+          "sku": "WELL-BEBE-CHG-150",
+          "price": "1600",
+          "stock": 30,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p06-diaper-cream.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Vitamines Prénatales 90 Gélules",
+      "slug": "vitamines-prenatales-90-gelules",
+      "price": "2200",
+      "stock": 999999,
+      "isActive": true,
+      "miniDescription": "Complexe complet acide folique + fer + DHA pour la grossesse.",
+      "description": "<p>Complément alimentaire complet pour la grossesse : <strong>acide folique, fer, iode, DHA</strong> et vitamines essentielles pour la maman et le bébé.</p>",
+      "categorySlug": "vitamines-complements",
+      "variants": [
+        {
+          "sku": "WELL-VITPRE-90",
+          "price": "2200",
+          "stock": 0,
+          "trackInventory": false
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p07-prenatal-vitamins.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Oméga-3 Huile de Poisson 120 Capsules",
+      "slug": "omega3-huile-poisson-120-capsules",
+      "price": "2900",
+      "stock": 80,
+      "isActive": true,
+      "miniDescription": "Huile de poisson purifiée riche en EPA/DHA.",
+      "description": "<p>Complément riche en <strong>EPA et DHA</strong> pour soutenir la fonction cardiovasculaire et cognitive. Huile de poisson purifiée, sans arrière-goût.</p>",
+      "categorySlug": "vitamines-complements",
+      "variants": [
+        {
+          "sku": "WELL-OMEGA3-120",
+          "price": "2900",
+          "stock": 80,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p08-fish-oil.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Thermomètre Digital Frontal",
+      "slug": "thermometre-digital-frontal",
+      "price": "3500",
+      "stock": 25,
+      "isActive": true,
+      "miniDescription": "Thermomètre infrarouge sans contact, mesure en 1 seconde.",
+      "description": "<p>Thermomètre sans contact à infrarouge, mesure frontale en 1 seconde. Mémoire de 32 mesures, alarme fièvre.</p>",
+      "categorySlug": "dispositifs-medicaux",
+      "variants": [
+        {
+          "sku": "WELL-THERMO-IR01",
+          "price": "3500",
+          "stock": 25,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p09-thermometer.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Tensiomètre Bras Automatique",
+      "slug": "tensiometre-bras-automatique",
+      "price": "8900",
+      "stock": 0,
+      "isActive": true,
+      "miniDescription": "Tensiomètre électronique à brassard avec détection d'arythmie.",
+      "description": "<p>Tensiomètre électronique à brassard, mesure automatique de la tension artérielle et du pouls, écran large rétroéclairé, détection d'arythmie.</p>",
+      "categorySlug": "dispositifs-medicaux",
+      "variants": [
+        {
+          "sku": "WELL-TENSIO-BRAS",
+          "price": "8900",
+          "stock": 0,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p10-bp-monitor.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Chaussettes de Contention Classe 2",
+      "slug": "chaussettes-contention-classe-2",
+      "price": "2400",
+      "stock": 36,
+      "isActive": true,
+      "miniDescription": "Contention médicale Classe 2, tissage fin et respirant.",
+      "description": "<p>Chaussettes de contention médicale <strong>Classe 2 (20-36 mmHg)</strong>, idéales pour l'insuffisance veineuse et la prévention des jambes lourdes. Tissage fin et respirant.</p>",
+      "categorySlug": "dispositifs-medicaux",
+      "variants": [
+        {
+          "sku": "WELL-CHAUSCONT-BE-M",
+          "price": "2400",
+          "stock": 10,
+          "trackInventory": true
+        },
+        {
+          "sku": "WELL-CHAUSCONT-BE-L",
+          "price": "2400",
+          "stock": 8,
+          "trackInventory": true
+        },
+        {
+          "sku": "WELL-CHAUSCONT-NO-M",
+          "price": "2500",
+          "stock": 12,
+          "trackInventory": true
+        },
+        {
+          "sku": "WELL-CHAUSCONT-NO-L",
+          "price": "2500",
+          "stock": 6,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p11-socks-main.jpg",
+          "position": 0,
+          "isMain": true
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p11-socks-beige.jpg",
+          "position": 1,
+          "isMain": false
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p11-socks-black.jpg",
+          "position": 2,
+          "isMain": false
+        }
+      ]
+    },
+    {
+      "title": "Baume à Lèvres Réparateur",
+      "slug": "baume-levres-reparateur",
+      "price": "650",
+      "stock": 20,
+      "isActive": false,
+      "miniDescription": "Baume nourrissant au beurre de karité.",
+      "description": "<p>Baume nourrissant au beurre de karité pour lèvres gercées et sèches.</p>",
+      "categorySlug": "soins-visage",
+      "variants": [
+        {
+          "sku": "WELL-BAUMELEV-01",
+          "price": "650",
+          "stock": 20,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p12-lip-balm.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Shampoing Antipelliculaire 250ml",
+      "slug": "shampoing-antipelliculaire-250ml",
+      "price": "1800",
+      "stock": 45,
+      "isActive": true,
+      "miniDescription": "Traitant, élimine les pellicules dès la 1ère utilisation.",
+      "description": "<p>Shampoing traitant qui élimine les pellicules dès la première utilisation et apaise durablement le cuir chevelu.</p>",
+      "categorySlug": "cheveux",
+      "variants": [
+        {
+          "sku": "WELL-SHAMPAP-250",
+          "price": "1800",
+          "stock": 45,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p13-shampoo.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Sérum Fortifiant Anti-Chute Cheveux",
+      "slug": "serum-fortifiant-anti-chute-cheveux",
+      "price": "3100",
+      "stock": 30,
+      "isActive": true,
+      "miniDescription": "Concentré fortifiant anti-chute, application quotidienne.",
+      "description": "<p>Sérum concentré qui renforce la fibre capillaire et ralentit la chute des cheveux. Application quotidienne, sans rinçage.</p>",
+      "categorySlug": "cheveux",
+      "variants": [
+        {
+          "sku": "WELL-SERCHUTE-01",
+          "price": "3100",
+          "stock": 30,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p14-hair-serum.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Gel Hydroalcoolique Désinfectant",
+      "slug": "gel-hydroalcoolique-desinfectant",
+      "price": "350",
+      "stock": 230,
+      "isActive": true,
+      "miniDescription": "Désinfectant mains sans rinçage, 99,9% des germes éliminés.",
+      "description": "<p>Gel désinfectant pour les mains sans rinçage, élimine 99,9% des germes. Enrichi en glycérine pour ne pas dessécher la peau.</p>",
+      "categorySlug": "hygiene-bien-etre",
+      "variants": [
+        {
+          "sku": "WELL-GELHYDRO-100",
+          "price": "350",
+          "stock": 100,
+          "trackInventory": true
+        },
+        {
+          "sku": "WELL-GELHYDRO-250",
+          "price": "650",
+          "stock": 80,
+          "trackInventory": true
+        },
+        {
+          "sku": "WELL-GELHYDRO-500",
+          "price": "1100",
+          "stock": 50,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p15-hand-sanitizer.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Boisson Isotonique Électrolytes",
+      "slug": "boisson-isotonique-electrolytes",
+      "price": "450",
+      "stock": 50,
+      "isActive": true,
+      "miniDescription": "Réhydratation isotonique, sodium + potassium + magnésium.",
+      "description": "<p>Boisson de réhydratation isotonique enrichie en électrolytes (sodium, potassium, magnésium) pour compenser les pertes minérales.</p>",
+      "categorySlug": "vitamines-complements",
+      "variants": [
+        {
+          "sku": "WELL-ISOTON-01",
+          "price": "450",
+          "stock": 50,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p16-electrolyte-powder.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Gel Anti-Imperfections Ciblé",
+      "slug": "gel-anti-imperfections-cible",
+      "price": "2100",
+      "stock": 33,
+      "isActive": true,
+      "miniDescription": "Traitement ciblé anti-imperfections, action en 6h.",
+      "description": "<p>Gel traitant local à action ciblée contre les imperfections, boutons et points noirs. Formule au <strong>peroxyde de benzoyle et acide salicylique</strong> qui assèche rapidement les boutons sans agresser la peau environnante.</p><ul><li>Action ciblée en 6h</li><li>Non comédogène</li><li>Testé dermatologiquement</li></ul>",
+      "categorySlug": "dermocosmetique",
+      "variants": [
+        {
+          "sku": "WELL-GELACNE-01",
+          "price": "2100",
+          "stock": 33,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p17-acne-gel-1.jpg",
+          "position": 0,
+          "isMain": true
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p17-acne-gel-2.jpg",
+          "position": 1,
+          "isMain": false
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p17-acne-gel-3.jpg",
+          "position": 2,
+          "isMain": false
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p17-acne-gel-4.jpg",
+          "position": 3,
+          "isMain": false
+        },
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p17-acne-gel-5.jpg",
+          "position": 4,
+          "isMain": false
+        }
+      ]
+    },
+    {
+      "title": "Masques Chirurgicaux Type II (Boîte de 50)",
+      "slug": "masques-chirurgicaux-type-2-boite-50",
+      "price": "890",
+      "stock": 200,
+      "isActive": true,
+      "miniDescription": "Boîte de 50 masques chirurgicaux 3 plis, filtration ≥98%.",
+      "description": "<p>Masques chirurgicaux 3 plis Type II, filtration bactérienne ≥98%. Boîte de 50 masques à usage unique, élastiques auriculaires confortables.</p>",
+      "categorySlug": "hygiene-bien-etre",
+      "variants": [
+        {
+          "sku": "WELL-MASQCHIR-50",
+          "price": "890",
+          "stock": 200,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p18-face-mask.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Boisson Collagène Beauté 10 Sticks",
+      "slug": "boisson-collagene-beaute-10-sticks",
+      "price": "3600",
+      "stock": 33,
+      "isActive": true,
+      "miniDescription": "Collagène marin hydrolysé + vitamine C, cure de 10 jours.",
+      "description": "<p>Complément beauté buvable au <strong>collagène marin hydrolysé</strong>, vitamine C et acide hyaluronique pour soutenir l'élasticité de la peau.</p>",
+      "categorySlug": "vitamines-complements",
+      "variants": [
+        {
+          "sku": "WELL-COLLABEAU-10",
+          "price": "3600",
+          "stock": 40,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p19-collagen-drink.jpg",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    },
+    {
+      "title": "Rouleau de Bandage Élastique",
+      "slug": "rouleau-bandage-elastique",
+      "price": "320",
+      "stock": 7,
+      "isActive": true,
+      "miniDescription": null,
+      "description": null,
+      "categorySlug": "dispositifs-medicaux",
+      "variants": [
+        {
+          "sku": "WELL-BANDELAST-01",
+          "price": "320",
+          "stock": 10,
+          "trackInventory": true
+        }
+      ],
+      "images": [
+        {
+          "url": "/uploads/0c9d2c9f-e025-4ae2-b451-de745f1bc79a/p20-bandage.png",
+          "position": 0,
+          "isMain": true
+        }
+      ]
+    }
+  ]
+}
