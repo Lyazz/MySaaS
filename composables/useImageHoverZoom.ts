@@ -26,6 +26,10 @@ export function useImageHoverZoom(options: HoverZoomOptions = {}) {
   const zoomStyle = computed<CSSProperties>(() => ({
     transformOrigin: `${originX.value}% ${originY.value}%`,
     transform: isZoomActive.value && isEnabled.value ? `scale(${zoomScale})` : 'scale(1)',
+    // Ease the scale briefly on the way in and out, but let the focal point
+    // glide to the pointer rather than lurching in instant steps. Set inline
+    // so it overrides any `transition-transform duration-*` class on the image.
+    transition: 'transform 250ms ease-out, transform-origin 120ms ease-out',
     willChange: 'transform'
   }))
 

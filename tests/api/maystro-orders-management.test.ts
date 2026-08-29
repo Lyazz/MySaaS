@@ -144,7 +144,13 @@ describe('Maystro Orders Management integration', () => {
         expect(mapping?.tracking).toBe('TRK-1')
 
         const productMap = await prisma.maystroProductMapping.findUnique({
-            where: { tenantId_localProductId: { tenantId: tenant.id, localProductId: product.id } }
+            where: {
+                tenantId_localProductId_localVariantId: {
+                    tenantId: tenant.id,
+                    localProductId: product.id,
+                    localVariantId: ''
+                }
+            }
         })
         expect(productMap?.syncStatus).toBe('SYNCED')
         expect(productMap?.maystroProductId).toBe(product.id)
@@ -376,5 +382,115 @@ describe('Maystro Orders Management integration', () => {
         await expect(
             service.cancelMaystroOrder({ tenantId: tenant.id, apiToken: 'test-token', localOrderId: cancelOrder.id })
         ).rejects.toThrow('Maystro request failed')
+    })
+    it('gives each attribute combination its own Maystro product, named with the attribute', async () => {
+        // Maystro renders the order's product name from the catalog entry and ignores the
+        // description the line carried, so a variant only reaches the picker by name when
+        // it owns a remote product of its own.
+        const option = await prisma.productOption.create({
+            data: { tenantId: tenant.id, productId: product.id, name: 'Couleur', position: 0 }
+        })
+        const [blue, red] = await Promise.all([
+            prisma.productOptionValue.create({
+                data: { tenantId: tenant.id, optionId: option.id, label: 'Bleu', position: 0 }
+            }),
+            prisma.productOptionValue.create({
+                data: { tenantId: tenant.id, optionId: option.id, label: 'Rouge', position: 1 }
+            })
+        ])
+        const [blueVariant, redVariant] = await Promise.all([
+            prisma.productVariant.create({
+                data: { tenantId: tenant.id, productId: product.id, sku: `mx-blue-${Date.now()}`, price: 110 }
+            }),
+            prisma.productVariant.create({
+                data: { tenantId: tenant.id, productId: product.id, sku: `mx-red-${Date.now()}`, price: 110 }
+            })
+        ])
+        await prisma.productVariantOptionValue.createMany({
+            data: [
+                { tenantId: tenant.id, variantId: blueVariant.id, optionValueId: blue.id },
+                { tenantId: tenant.id, variantId: redVariant.id, optionValueId: red.id }
+            ]
+        })
+
+        const attributeOrder = await prisma.order.create({
+            data: {
+                tenantId: tenant.id,
+                status: 'PENDING',
+                totalAmount: 330,
+                shippingAmount: 500,
+                shippingCurrency: 'DZD',
+                customerName: 'Nadia',
+                customerPhone: '0550126444'
+            }
+        })
+        await prisma.orderItem.createMany({
+            data: [
+                { tenantId: tenant.id, orderId: attributeOrder.id, productId: product.id, variantId: blueVariant.id, quantity: 1, price: 110 },
+                { tenantId: tenant.id, orderId: attributeOrder.id, productId: product.id, variantId: redVariant.id, quantity: 2, price: 110 }
+            ]
+        })
+
+        const calls: any[] = []
+        vi.spyOn(MaystroClient.prototype, 'request').mockImplementation(async (opts: any) => {
+            calls.push({ method: opts.method, path: opts.path, data: opts.data })
+
+            if (opts.method === 'POST' && opts.path === '/stock/products/') {
+                return { id: `mx-prod-${opts.data.product_id}`, product_id: opts.data.product_id }
+            }
+            if (opts.method === 'PATCH' && opts.path.startsWith('/stock/products/')) {
+                return { id: 'mx-prod-patched' }
+            }
+            if (opts.method === 'GET' && opts.path === '/base/wilayas/') return [{ code: 16, display_id: 16, name: 'Alger' }]
+            if (opts.method === 'GET' && opts.path === '/base/communes/') return [{ id: 575, wilaya: 16, name: 'Alger' }]
+            if (opts.method === 'POST' && opts.path === '/orders/') {
+                return { id: 'mx-order-4', external_id: opts.data.external_id, tracking: 'TRK-4', success: true }
+            }
+            return {}
+        })
+
+        const res = await request(app)
+            .post('/api/shipments')
+            .set('Authorization', `Bearer ${token}`)
+            .set('Host', `${tenant.slug}.swekly.com`)
+            .send({
+                provider: 'MAYSTRO',
+                orderId: attributeOrder.id,
+                contactName: 'Nadia',
+                contactPhone: '0550126444',
+                wilayaCode: '16',
+                communeCode: '575',
+                addressLine1: '4 Rue Test'
+            })
+
+        expect(res.status).toBe(201)
+
+        const catalogCalls = calls.filter((c) => c.method === 'POST' && c.path === '/stock/products/')
+        expect(catalogCalls.map((c) => c.data.logistical_description).sort()).toEqual([
+            'Maystro Product - Bleu',
+            'Maystro Product - Rouge'
+        ])
+        expect(catalogCalls.map((c) => c.data.product_id).sort()).toEqual([blueVariant.id, redVariant.id].sort())
+
+        // Distinct attribute combinations are distinct products to Maystro, so they stay
+        // on separate detail lines instead of being collapsed together.
+        const orderCall = calls.find((c) => c.method === 'POST' && c.path === '/orders/')
+        expect(orderCall.data.details).toHaveLength(2)
+        const byProduct = Object.fromEntries(orderCall.data.details.map((d: any) => [d.product, d]))
+        expect(byProduct[blueVariant.id].quantity).toBe(1)
+        expect(byProduct[blueVariant.id].description).toBe('Maystro Product - Bleu')
+        expect(byProduct[redVariant.id].quantity).toBe(2)
+        expect(byProduct[redVariant.id].description).toBe('Maystro Product - Rouge')
+
+        const variantMapping = await prisma.maystroProductMapping.findUnique({
+            where: {
+                tenantId_localProductId_localVariantId: {
+                    tenantId: tenant.id,
+                    localProductId: product.id,
+                    localVariantId: blueVariant.id
+                }
+            }
+        })
+        expect(variantMapping?.maystroProductId).toBe(blueVariant.id)
     })
 })

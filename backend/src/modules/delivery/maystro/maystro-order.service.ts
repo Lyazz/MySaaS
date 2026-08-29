@@ -4,7 +4,12 @@ import { MaystroClient } from './maystro.client'
 import { MaystroIntegrationError } from './maystro.errors'
 import { MaystroLocationService } from './maystro-location.service'
 import { MaystroPickupPointService } from './maystro-pickup-point.service'
-import { MaystroProductService } from './maystro-product.service'
+import {
+    MAYSTRO_VARIANT_INCLUDE,
+    MaystroProductService,
+    maystroProductNaming,
+    type MaystroNamedVariant
+} from './maystro-product.service'
 import { MAYSTRO_STATUS_ABORTED, maystroOrderStatusToString } from './maystro-status'
 
 type MaystroOrderDetail = {
@@ -104,7 +109,7 @@ export class MaystroOrderService {
     }): Promise<{ externalId: string; payload: MaystroOrderPayload }> {
         const order = await this.prisma.order.findFirst({
             where: { tenantId: input.tenantId, id: input.localOrderId },
-            include: { items: { include: { product: true } } }
+            include: { items: { include: { product: true, variant: MAYSTRO_VARIANT_INCLUDE } } }
         })
         if (!order) {
             throw new MaystroIntegrationError({ statusCode: 404, statusMessage: 'Order not found for tenant' })
@@ -129,15 +134,28 @@ export class MaystroOrderService {
             orderId: order.id
         })
 
+        // A variant that carries attributes owns its own Maystro product, so a line is
+        // identified by product *and* variant, not by product alone.
+        const lines = order.items.map((item) => {
+            const naming = maystroProductNaming({
+                title: item.product?.title ?? '',
+                variant: item.variant as MaystroNamedVariant
+            })
+            return { item, naming, key: `${item.productId}:${naming.localVariantId}` }
+        })
+
         const mappings = await this.prisma.maystroProductMapping.findMany({
             where: { tenantId: input.tenantId, localProductId: { in: order.items.map((i) => i.productId) } }
         })
-        const syncedMappings = mappings.filter((m) => m.syncStatus === 'SYNCED')
-        const mappedSet = new Set(syncedMappings.map((m) => m.localProductId))
-        const maystroProductIdByLocalProductId = new Map(
-            syncedMappings.map((mapping) => [mapping.localProductId, mapping.maystroProductId])
+        const maystroProductIdByKey = new Map(
+            mappings
+                .filter((mapping) => mapping.syncStatus === 'SYNCED')
+                .map((mapping) => [`${mapping.localProductId}:${mapping.localVariantId}`, mapping.maystroProductId])
         )
-        const missing = Array.from(new Set(order.items.map((i) => i.productId))).filter((id) => !mappedSet.has(id))
+
+        const missing = Array.from(
+            new Set(lines.filter((line) => !maystroProductIdByKey.has(line.key)).map((line) => line.item.productId))
+        )
         if (missing.length) {
             throw new MaystroIntegrationError({
                 statusCode: 400,
@@ -175,32 +193,30 @@ export class MaystroOrderService {
         }
 
         // Maystro refuses an order that names the same product on two detail lines —
-        // "Inconsistent products(missing products)", error 50. Our orders legitimately
-        // carry one line per selected variant, so several lines can share a product
-        // whenever the shopper picked more than one attribute combination. Collapse
-        // them onto a single detail and sum the quantities; Maystro tracks stock per
-        // product, so nothing about the shipment is lost.
+        // "Inconsistent products(missing products)", error 50. Distinct attribute
+        // combinations now resolve to distinct remote products, so what is left to
+        // collapse is genuine repetition: the same product and variant on two lines.
         const detailsByProduct = new Map<string, MaystroOrderDetail>()
-        for (const item of order.items) {
-            const maystroProductId = maystroProductIdByLocalProductId.get(item.productId)
+        for (const line of lines) {
+            const maystroProductId = maystroProductIdByKey.get(line.key)
             if (!maystroProductId) {
                 throw new MaystroIntegrationError({
                     statusCode: 400,
                     statusMessage: 'Cannot create Maystro order: some products are not synced',
-                    details: { missingProductIds: [item.productId] }
+                    details: { missingProductIds: [line.item.productId] }
                 })
             }
 
             const merged = detailsByProduct.get(maystroProductId)
             if (merged) {
-                merged.quantity += item.quantity
+                merged.quantity += line.item.quantity
                 continue
             }
 
             detailsByProduct.set(maystroProductId, {
                 product: maystroProductId,
-                description: item.product?.title ? String(item.product.title) : undefined,
-                quantity: item.quantity
+                description: line.naming.logisticalDescription || undefined,
+                quantity: line.item.quantity
             })
         }
         const details: MaystroOrderDetail[] = Array.from(detailsByProduct.values())
