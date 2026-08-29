@@ -1,5 +1,9 @@
 import type { ShipmentStatus } from '@prisma/client'
 
+/// Maystro has no endpoint that removes an order — DELETE /orders/{id}/ answers 405.
+/// Cancelling means moving it to ABORTED with a status PATCH.
+export const MAYSTRO_STATUS_ABORTED = 50
+
 export const maystroOrderStatusToShipmentStatus = (code: unknown): ShipmentStatus => {
     const n = typeof code === 'string' ? Number.parseInt(code, 10) : typeof code === 'number' ? code : NaN
 

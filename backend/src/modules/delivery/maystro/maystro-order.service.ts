@@ -5,7 +5,7 @@ import { MaystroIntegrationError } from './maystro.errors'
 import { MaystroLocationService } from './maystro-location.service'
 import { MaystroPickupPointService } from './maystro-pickup-point.service'
 import { MaystroProductService } from './maystro-product.service'
-import { maystroOrderStatusToString } from './maystro-status'
+import { MAYSTRO_STATUS_ABORTED, maystroOrderStatusToString } from './maystro-status'
 
 type MaystroOrderDetail = {
     product: string
@@ -152,18 +152,36 @@ export class MaystroOrderService {
             commune: input.commune
         })
 
+        // Maystro runs one stop desk per wilaya and it sits in the wilaya's center
+        // commune, so a delivery_type=2 order addressed to any other commune is refused
+        // with "SD delivery type is not allowed outside center commune" (error 45).
+        // The parcel goes to that same desk whichever commune the shopper lives in, so
+        // retarget the payload instead of failing the push — their own address is
+        // already carried by destination_text.
+        const destinationCommune =
+            input.deliveryType === 2 && normalizedLocation.centerCommune != null
+                ? normalizedLocation.centerCommune
+                : normalizedLocation.commune
+
         if (input.deliveryType === 3) {
             if (!input.pickupPoint) {
                 throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'pickup_point is required for delivery_type=3' })
             }
             await this.pickupPoints.assertPickupPointValid({
                 apiToken: input.apiToken,
-                commune: normalizedLocation.commune,
+                commune: destinationCommune,
                 pickupPoint: input.pickupPoint
             })
         }
 
-        const details: MaystroOrderDetail[] = order.items.map((item) => {
+        // Maystro refuses an order that names the same product on two detail lines —
+        // "Inconsistent products(missing products)", error 50. Our orders legitimately
+        // carry one line per selected variant, so several lines can share a product
+        // whenever the shopper picked more than one attribute combination. Collapse
+        // them onto a single detail and sum the quantities; Maystro tracks stock per
+        // product, so nothing about the shipment is lost.
+        const detailsByProduct = new Map<string, MaystroOrderDetail>()
+        for (const item of order.items) {
             const maystroProductId = maystroProductIdByLocalProductId.get(item.productId)
             if (!maystroProductId) {
                 throw new MaystroIntegrationError({
@@ -173,12 +191,19 @@ export class MaystroOrderService {
                 })
             }
 
-            return {
+            const merged = detailsByProduct.get(maystroProductId)
+            if (merged) {
+                merged.quantity += item.quantity
+                continue
+            }
+
+            detailsByProduct.set(maystroProductId, {
                 product: maystroProductId,
                 description: item.product?.title ? String(item.product.title) : undefined,
                 quantity: item.quantity
-            }
-        })
+            })
+        }
+        const details: MaystroOrderDetail[] = Array.from(detailsByProduct.values())
 
         const payload: MaystroOrderPayload = {
             customer_name: input.customerName,
@@ -191,7 +216,7 @@ export class MaystroOrderService {
             total_price: this.computeCarrierTotalPrice(order as any),
             delivery_type: input.deliveryType,
             pickup_point: input.deliveryType === 3 ? input.pickupPoint : undefined,
-            commune: normalizedLocation.commune,
+            commune: destinationCommune,
             wilaya: normalizedLocation.wilaya,
             details
         }
@@ -325,12 +350,18 @@ export class MaystroOrderService {
 
         const client = new MaystroClient({ apiToken: input.apiToken })
         try {
+            // Orders are not deletable — DELETE on this path answers 405 (the endpoint
+            // allows GET, PUT, PATCH, HEAD, OPTIONS). Cancelling is a move to ABORTED.
             await client.request({
-                method: 'DELETE',
-                path: `/orders/${mapping.maystroOrderId}/`
+                method: 'PATCH',
+                path: `/orders/${mapping.maystroOrderId}/`,
+                data: { status: MAYSTRO_STATUS_ABORTED }
             })
-        } catch {
-            // Maystro may return 404 if already deleted/not found — treat as success
+        } catch (error: any) {
+            // Maystro no longer knows this order, so there is nothing left to cancel.
+            // Anything else means the parcel is still live on their side and the caller
+            // must hear about it rather than believe the cancellation went through.
+            if (error?.statusCode !== 404) throw error
         }
 
         return mapping
