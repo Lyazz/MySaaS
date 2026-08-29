@@ -739,43 +739,47 @@
  * gentle "breathe" runs continuously while an option is unselected; the
  * "nudge" shake fires once when they try to buy without choosing.
  *
- * `var(--brand)` is read here (not pre-resolved into a :root token) so the
- * ring picks up each storefront theme's own brand colour, which is set on a
- * wrapper deep in the template — not on :root. */
+ * Everything here stays inside the element's own box — inset shadow, a padded
+ * pill, a small transform — so a near-full-width picker group can't push the
+ * page into horizontal scroll. `var(--brand)` is read at use (not baked into a
+ * :root token) so each storefront theme's own brand colour comes through. */
 @keyframes vux-invite-breathe {
-  0%, 100% { outline-color: transparent; }
-  50%      { outline-color: color-mix(in srgb, var(--brand, #6366f1) 55%, transparent); }
+  0%, 100% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand, #6366f1) 15%, transparent); }
+  50%      { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand, #6366f1) 55%, transparent); }
 }
 
 @keyframes vux-invite-nudge {
   0%, 100% { transform: translateX(0); }
-  15% { transform: translateX(-6px); }
-  30% { transform: translateX(6px); }
-  45% { transform: translateX(-4px); }
-  60% { transform: translateX(4px); }
-  75% { transform: translateX(-2px); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
 }
 
-@keyframes vux-invite-hint-pulse {
-  0%, 100% { opacity: 0.55; }
-  50%      { opacity: 1; }
+@keyframes vux-invite-arrow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
 }
 
 .vux-invite {
   border-radius: 0.75rem;
-  /* outline + offset keeps the ring clear of the swatches without
-   * reflowing the content the way padding would. */
-  outline: 3px solid transparent;
-  outline-offset: 8px;
   animation: vux-invite-breathe 2.6s ease-in-out infinite;
 }
 
 .vux-invite-nudge {
-  animation: vux-invite-nudge 0.55s ease-in-out both;
+  animation: vux-invite-nudge 0.5s ease-in-out both;
 }
 
+/* Pill so the prompt reads as an action, not a stray line of text. */
 .vux-invite-hint {
-  animation: vux-invite-hint-pulse 2.6s ease-in-out infinite;
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--brand, #6366f1) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand, #6366f1) 30%, transparent);
+}
+
+.vux-invite-hint :where(svg, .iconify, [class*="i-lucide"]) {
+  animation: vux-invite-arrow 1.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -791,7 +795,8 @@
 
   .vux-invite,
   .vux-invite-nudge,
-  .vux-invite-hint {
+  .vux-invite-hint,
+  .vux-invite-hint :where(svg, .iconify, [class*="i-lucide"]) {
     animation: none !important;
   }
 }
