@@ -762,7 +762,13 @@ describe('Delivery API', () => {
         expect(orderCall?.data?.details?.[0]?.product).toBe('remote-product-123')
 
         const mapping = await prisma.maystroProductMapping.findUnique({
-            where: { tenantId_localProductId: { tenantId: tenantA.id, localProductId: mappedProduct.id } }
+            where: {
+                tenantId_localProductId_localVariantId: {
+                    tenantId: tenantA.id,
+                    localProductId: mappedProduct.id,
+                    localVariantId: ''
+                }
+            }
         })
         expect(mapping?.syncStatus).toBe('SYNCED')
         expect(mapping?.maystroProductId).toBe('remote-product-123')

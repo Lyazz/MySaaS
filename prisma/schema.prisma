@@ -1256,6 +1256,13 @@ model MaystroProductMapping {
   localProductId String
   product        Product @relation(fields: [tenantId, localProductId], references: [tenantId, id], onDelete: Cascade)
 
+  /// The variant this remote product stands for, or "" when the product carries no
+  /// attributes. Maystro shows an order's product name from the catalog's
+  /// logistical_description and ignores whatever the order line says, so a variant
+  /// only reaches the picker by name if it owns a remote product. Empty string
+  /// rather than null keeps the compound unique usable with findUnique.
+  localVariantId String @default("")
+
   maystroProductId String
   maystroUuid      String?
 
@@ -1266,7 +1273,7 @@ model MaystroProductMapping {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([tenantId, localProductId])
+  @@unique([tenantId, localProductId, localVariantId])
   @@unique([tenantId, maystroProductId])
   @@index([tenantId])
 }

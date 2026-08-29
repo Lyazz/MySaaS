@@ -10,6 +10,58 @@ type MaystroProduct = {
     store: string
 }
 
+type MaystroVariantOption = {
+    label?: string | null
+    position?: number | null
+    option?: { name?: string | null; position?: number | null } | null
+}
+
+export type MaystroNamedVariant = {
+    id: string
+    optionValues?: Array<{ optionValue?: MaystroVariantOption | null }> | null
+} | null | undefined
+
+/// Reads a variant's attributes as one label, e.g. "Bleu / XL". Sorted by option then
+/// value so the same variant always yields the same string: that string names the
+/// product in Maystro's catalog, so it must not drift between syncs.
+export const maystroVariantLabel = (variant: MaystroNamedVariant): string => {
+    const entries = Array.isArray(variant?.optionValues) ? variant!.optionValues! : []
+    return entries
+        .map((entry) => entry?.optionValue)
+        .filter((value): value is MaystroVariantOption => Boolean(value?.label && String(value.label).trim()))
+        .sort((a, b) => {
+            const byOption = (a.option?.position ?? 0) - (b.option?.position ?? 0)
+            if (byOption !== 0) return byOption
+            const byOptionName = String(a.option?.name ?? '').localeCompare(String(b.option?.name ?? ''))
+            if (byOptionName !== 0) return byOptionName
+            const byValue = (a.position ?? 0) - (b.position ?? 0)
+            if (byValue !== 0) return byValue
+            return String(a.label).localeCompare(String(b.label))
+        })
+        .map((value) => String(value.label).trim())
+        .join(' / ')
+}
+
+/// Maystro names an order line from the catalog's logistical_description and discards
+/// the description the order carried, so an attribute reaches the picker only by being
+/// part of the remote product's own name. A variant that carries attributes therefore
+/// gets its own remote product; a product without any keeps the single product-level
+/// entry its catalog row and delivery stats already live on.
+export const maystroProductNaming = (input: { title: string; variant: MaystroNamedVariant }) => {
+    const label = maystroVariantLabel(input.variant)
+    const title = String(input.title ?? '').trim()
+    return {
+        localVariantId: label && input.variant?.id ? String(input.variant.id) : '',
+        logisticalDescription: label ? title + ' - ' + label : title
+    }
+}
+
+/// Everything maystroProductNaming needs to render a variant's label, kept in one
+/// place so the sync and the order payload always name a product identically.
+export const MAYSTRO_VARIANT_INCLUDE = {
+    include: { optionValues: { include: { optionValue: { include: { option: true } } } } }
+} as const
+
 export class MaystroProductService {
     private prisma: PrismaClient
 
@@ -17,20 +69,34 @@ export class MaystroProductService {
         this.prisma = client
     }
 
+    private mappingKey(input: { tenantId: string; localProductId: string; localVariantId?: string | null }) {
+        return {
+            tenantId_localProductId_localVariantId: {
+                tenantId: input.tenantId,
+                localProductId: input.localProductId,
+                localVariantId: input.localVariantId || ''
+            }
+        }
+    }
+
     async createOrUpdateProduct(input: {
         tenantId: string
         apiToken: string
         storeId: string
         localProductId: string
+        localVariantId?: string | null
         logisticalDescription: string
     }) {
         const client = new MaystroClient({ apiToken: input.apiToken })
 
+        const localVariantId = input.localVariantId || ''
         const existing = await this.prisma.maystroProductMapping.findUnique({
-            where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } }
+            where: this.mappingKey({ ...input, localVariantId })
         })
 
-        const productId = input.localProductId
+        // An attribute-bearing variant is its own product to Maystro, so the variant id
+        // is what has to travel as product_id — that is the handle order details use.
+        const productId = localVariantId || input.localProductId
 
         // Treat ERROR-status mappings as unsynced: force a fresh create attempt.
         if (!existing || existing.syncStatus === 'ERROR') {
@@ -46,10 +112,11 @@ export class MaystroProductService {
                 })
 
                 await this.prisma.maystroProductMapping.upsert({
-                    where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                    where: this.mappingKey({ ...input, localVariantId }),
                     create: {
                         tenantId: input.tenantId,
                         localProductId: input.localProductId,
+                        localVariantId,
                         maystroProductId: created.product_id || productId,
                         maystroUuid: created.id,
                         syncStatus: 'SYNCED',
@@ -118,8 +185,8 @@ export class MaystroProductService {
                             where: {
                                 tenantId: input.tenantId,
                                 maystroUuid: descMatch.id,
-                                localProductId: { not: input.localProductId },
-                                syncStatus: 'SYNCED'
+                                syncStatus: 'SYNCED',
+                                NOT: { localProductId: input.localProductId, localVariantId }
                             }
                         })
                         if (ownedByOther) {
@@ -139,10 +206,11 @@ export class MaystroProductService {
                             })
 
                             await this.prisma.maystroProductMapping.upsert({
-                                where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                                where: this.mappingKey({ ...input, localVariantId }),
                                 create: {
                                     tenantId: input.tenantId,
                                     localProductId: input.localProductId,
+                                    localVariantId,
                                     maystroProductId: created.product_id || productId,
                                     maystroUuid: created.id,
                                     syncStatus: 'SYNCED',
@@ -184,10 +252,11 @@ export class MaystroProductService {
                     }
 
                     await this.prisma.maystroProductMapping.upsert({
-                        where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                        where: this.mappingKey({ ...input, localVariantId }),
                         create: {
                             tenantId: input.tenantId,
                             localProductId: input.localProductId,
+                            localVariantId,
                             maystroProductId: finalProduct.product_id || productId,
                             maystroUuid: finalProduct.id,
                             syncStatus: 'SYNCED',
@@ -206,10 +275,11 @@ export class MaystroProductService {
                     return finalProduct
                 } catch (secondError: any) {
                     await this.prisma.maystroProductMapping.upsert({
-                        where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                        where: this.mappingKey({ ...input, localVariantId }),
                         create: {
                             tenantId: input.tenantId,
                             localProductId: input.localProductId,
+                            localVariantId,
                             maystroProductId: productId,
                             syncStatus: 'ERROR',
                             lastError: String(secondError?.message || error?.message || 'Failed to sync product'),
@@ -248,7 +318,7 @@ export class MaystroProductService {
             }
 
             await this.prisma.maystroProductMapping.update({
-                where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                where: this.mappingKey({ ...input, localVariantId }),
                 data: {
                     maystroProductId: updated.product_id || existing.maystroProductId,
                     maystroUuid: updated.id || existing.maystroUuid,
@@ -261,7 +331,7 @@ export class MaystroProductService {
             return updated
         } catch (error: any) {
             await this.prisma.maystroProductMapping.update({
-                where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                where: this.mappingKey({ ...input, localVariantId }),
                 data: {
                     syncStatus: 'ERROR',
                     lastError: String(error?.message || 'Failed to sync product')
@@ -280,14 +350,14 @@ export class MaystroProductService {
         return Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : []) as MaystroProduct[]
     }
 
-    async deleteProduct(input: { tenantId: string; apiToken: string; localProductId: string }) {
+    async deleteProduct(input: { tenantId: string; apiToken: string; localProductId: string; localVariantId?: string | null }) {
         const client = new MaystroClient({ apiToken: input.apiToken })
 
         const mapping = await this.prisma.maystroProductMapping.findUnique({
-            where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } }
+            where: this.mappingKey(input)
         })
 
-        const productId = mapping?.maystroProductId ?? input.localProductId
+        const productId = mapping?.maystroProductId ?? (input.localVariantId || input.localProductId)
         await client.request<void>({
             method: 'DELETE',
             path: `/stock/products/${encodeURIComponent(productId)}/`
@@ -295,7 +365,7 @@ export class MaystroProductService {
 
         if (mapping) {
             await this.prisma.maystroProductMapping.update({
-                where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId: input.localProductId } },
+                where: this.mappingKey(input),
                 data: {
                     syncStatus: 'PENDING',
                     lastSyncedAt: new Date(),
@@ -333,18 +403,22 @@ export class MaystroProductService {
 
                 const mapping = byUuid.get(item.id)
                 const localProductId = mapping?.localProductId
-                if (!localProductId) { skipped++; continue }
+                if (!mapping || !localProductId) { skipped++; continue }
+
+                // Variant-level mappings answer to the variant id remotely, product-level
+                // ones to the product id — the same rule createOrUpdateProduct applies.
+                const productId = mapping.localVariantId || localProductId
 
                 try {
                     await client.request<any>({
                         method: 'PATCH',
                         path: `/stock/products/${encodeURIComponent(item.id)}/`,
-                        data: { product_id: localProductId }
+                        data: { product_id: productId }
                     })
 
                     await this.prisma.maystroProductMapping.update({
-                        where: { tenantId_localProductId: { tenantId: input.tenantId, localProductId } },
-                        data: { maystroProductId: localProductId, syncStatus: 'SYNCED', lastSyncedAt: new Date(), lastError: null }
+                        where: this.mappingKey(mapping),
+                        data: { maystroProductId: productId, syncStatus: 'SYNCED', lastSyncedAt: new Date(), lastError: null }
                     })
                     fixed++
                 } catch {
@@ -365,26 +439,33 @@ export class MaystroProductService {
     async ensureOrderProductsSynced(input: { tenantId: string; apiToken: string; storeId: string; orderId: string }) {
         const order = await this.prisma.order.findFirst({
             where: { tenantId: input.tenantId, id: input.orderId },
-            include: { items: { include: { product: true } } }
+            include: { items: { include: { product: true, variant: MAYSTRO_VARIANT_INCLUDE } } }
         })
         if (!order) {
             throw new MaystroIntegrationError({ statusCode: 404, statusMessage: 'Order not found for tenant' })
         }
 
-        const products = order.items
-            .map((item) => item.product)
-            .filter((p): p is NonNullable<typeof p> => Boolean(p))
+        // One remote product per distinct product+variant the order touches: two lines of
+        // the same attribute combination still share a single catalog entry.
+        const synced = new Set<string>()
+        for (const item of order.items) {
+            if (!item.product) continue
 
-        for (const product of products) {
+            const naming = maystroProductNaming({ title: item.product.title, variant: item.variant as MaystroNamedVariant })
+            const key = `${item.productId}:${naming.localVariantId}`
+            if (synced.has(key)) continue
+            synced.add(key)
+
             await this.createOrUpdateProduct({
                 tenantId: input.tenantId,
                 apiToken: input.apiToken,
                 storeId: input.storeId,
-                localProductId: product.id,
-                logisticalDescription: product.title
+                localProductId: item.productId,
+                localVariantId: naming.localVariantId,
+                logisticalDescription: naming.logisticalDescription
             })
         }
 
-        return { order, productsCount: products.length }
+        return { order, productsCount: synced.size }
     }
 }
