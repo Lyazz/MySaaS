@@ -57,7 +57,8 @@ export class PublicProductsService {
         })
     }
 
-    async listProducts(tenantId: string, search?: string) {
+    async listProducts(tenantId: string, options: { search?: string; categorySlug?: string } = {}) {
+        const { search, categorySlug } = options
         const now = new Date()
         const settings = await prisma.storeSettings.findUnique({
             where: { tenantId },
@@ -69,7 +70,24 @@ export class PublicProductsService {
             }
         })
 
-        const where: any = { tenantId, isActive: true }
+        const where: any = { tenantId, isActive: true, visibility: 'LISTED' }
+
+        if (categorySlug) {
+            // Category page reached by its own link: show every listed+active product
+            // in that category, regardless of the category's own visibility.
+            where.OR = [
+                { category: { slug: categorySlug } },
+                { categoryLinks: { some: { tenantId, category: { slug: categorySlug } } } }
+            ]
+        } else {
+            // Browse surfaces: a product disappears when it has categories and every
+            // one of them is UNLISTED. Products with no category stay visible.
+            where.OR = [
+                { AND: [{ categoryId: null }, { categoryLinks: { none: {} } }] },
+                { category: { visibility: 'LISTED' } },
+                { categoryLinks: { some: { tenantId, category: { visibility: 'LISTED' } } } }
+            ]
+        }
         // Note: search filtering is done in-memory (below) using normalizeSearchText
         // so that Arabic Alef variants and Latin diacritics are handled correctly.
         // Prisma's `contains: mode: insensitive` cannot normalize Arabic characters.

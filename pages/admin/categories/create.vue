@@ -101,6 +101,19 @@
         :hint="t('admin.forms.category.image.hint')"
       />
 
+      <BaseSelect
+        v-model="form.visibility"
+        :label="t('admin.forms.category.visibility.label')"
+        :hint="t('admin.forms.category.visibility.hint')"
+      >
+        <option value="LISTED">
+          {{ t('admin.forms.category.visibility.listed') }}
+        </option>
+        <option value="UNLISTED">
+          {{ t('admin.forms.category.visibility.unlisted') }}
+        </option>
+      </BaseSelect>
+
       <div
         v-if="errorMessage"
         class="p-4 bg-red-50 border border-red-200 rounded-md"
@@ -151,7 +164,8 @@ const form = ref({
   title: '',
   slug: '',
   parentId: '',
-  imageUrl: null as string | null
+  imageUrl: null as string | null,
+  visibility: 'LISTED' as 'LISTED' | 'UNLISTED'
 })
 
 type Category = {
@@ -330,7 +344,8 @@ async function handleSubmit() {
         title: form.value.title,
         slug: form.value.slug,
         parentId: form.value.parentId || null,
-        imageUrl: form.value.imageUrl
+        imageUrl: form.value.imageUrl,
+        visibility: form.value.visibility
       }
     })
 

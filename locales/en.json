@@ -2409,6 +2409,12 @@
         },
         "isActive": {
           "label": "Product is active and visible to customers"
+        },
+        "visibility": {
+          "label": "Visibility",
+          "hint": "Unlisted products are hidden from the shop grid, search and related products, but stay reachable at their direct link.",
+          "listed": "Listed — shown in the shop grid, search and related products",
+          "unlisted": "Unlisted — only reachable via direct link"
         }
       },
       "category": {
@@ -2425,6 +2431,13 @@
         "image": {
           "label": "Category image (optional)",
           "hint": "Shown on storefront category tiles"
+        },
+        "visibility": {
+          "label": "Visibility",
+          "hint": "Unlisted categories are hidden from storefront navigation and listings, but stay reachable at their direct link.",
+          "listed": "Listed — shown in navigation and listings",
+          "unlisted": "Unlisted — only reachable via direct link",
+          "unlistedNotice": "This category is hidden from storefront navigation and listings. Its products are also hidden from the shop grid unless they belong to another listed category. The category page stays reachable at its direct link."
         }
       },
       "customer": {
@@ -3459,6 +3472,11 @@
           "title": "Edit product",
           "subtitle": "Update product information",
           "submit": "Update product",
+          "notListed": {
+            "title": "Not listed in your store",
+            "reasonProduct": "This product's visibility is set to Unlisted. It is hidden from the shop grid, search and related products, but customers can still reach it at its direct link.",
+            "reasonCategory": "Every category this product belongs to is unlisted, so it is hidden from the shop grid. It stays reachable at its direct link and on its category pages."
+          },
           "tabs": {
             "general": "General",
             "description": "Landing page description",

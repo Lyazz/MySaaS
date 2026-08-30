@@ -27,6 +27,15 @@ const normalizeImages = (images: unknown): string[] | undefined => {
     return normalized
 }
 
+const normalizeVisibility = (value: unknown): 'LISTED' | 'UNLISTED' | undefined => {
+    if (value === undefined) return undefined
+    if (value === 'LISTED' || value === 'UNLISTED') return value
+    const err = new Error('Invalid visibility') as any
+    err.statusCode = 400
+    err.statusMessage = err.message
+    throw err
+}
+
 const normalizeClientId = (value: unknown): string | undefined => {
     if (value === undefined || value === null || value === '') return undefined
     if (typeof value !== 'string') throw new Error('Invalid id')
@@ -405,6 +414,7 @@ export class ProductsService {
                     stock: data.stock || 0,
                     lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : 5,
                     isActive: data.isActive ?? true,
+                    visibility: normalizeVisibility(data.visibility) ?? 'LISTED',
                     categoryId: categoryAssignment?.categoryId ?? null,
                     images: images ?? [],
                     promotionalPrice: data.promotionalPrice !== undefined && data.promotionalPrice !== null ? String(data.promotionalPrice) : null,
@@ -607,6 +617,7 @@ export class ProductsService {
                     miniDescription: sanitizedMiniDescription,
                     searchKeywords: data.searchKeywords !== undefined ? (typeof data.searchKeywords === 'string' ? data.searchKeywords : null) : undefined,
                     isActive: typeof data.isActive === 'boolean' ? data.isActive : undefined,
+                    visibility: normalizeVisibility(data.visibility),
                     categoryId: categoryAssignment ? categoryAssignment.categoryId : undefined,
                     images: images,
                     lowStockThreshold: data.lowStockThreshold !== undefined ? Number(data.lowStockThreshold) : undefined,

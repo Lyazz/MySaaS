@@ -2393,6 +2393,12 @@
         },
         "isActive": {
           "label": "Le produit est actif et visible pour les clients"
+        },
+        "visibility": {
+          "label": "Visibilité",
+          "hint": "Les produits non répertoriés sont masqués de la grille boutique, de la recherche et des produits associés, mais restent accessibles via leur lien direct.",
+          "listed": "Répertorié — affiché dans la grille boutique, la recherche et les produits associés",
+          "unlisted": "Non répertorié — accessible uniquement via le lien direct"
         }
       },
       "category": {
@@ -2409,6 +2415,13 @@
         "image": {
           "label": "Image de la catégorie (optionnel)",
           "hint": "Affichée sur les tuiles de catégories dans la boutique"
+        },
+        "visibility": {
+          "label": "Visibilité",
+          "hint": "Les catégories non répertoriées sont masquées de la navigation et des listes de la boutique, mais restent accessibles via leur lien direct.",
+          "listed": "Répertoriée — affichée dans la navigation et les listes",
+          "unlisted": "Non répertoriée — accessible uniquement via le lien direct",
+          "unlistedNotice": "Cette catégorie est masquée de la navigation et des listes de la boutique. Ses produits sont également masqués de la grille boutique sauf s'ils appartiennent à une autre catégorie répertoriée. La page de la catégorie reste accessible via son lien direct."
         }
       },
       "customer": {
@@ -3440,6 +3453,11 @@
           "title": "Modifier le produit",
           "subtitle": "Mettre à jour les informations du produit",
           "submit": "Mettre à jour le produit",
+          "notListed": {
+            "title": "Non répertorié dans votre boutique",
+            "reasonProduct": "La visibilité de ce produit est définie sur « Non répertorié ». Il est masqué de la grille boutique, de la recherche et des produits associés, mais les clients peuvent toujours y accéder via son lien direct.",
+            "reasonCategory": "Toutes les catégories auxquelles ce produit appartient sont non répertoriées, il est donc masqué de la grille boutique. Il reste accessible via son lien direct et sur ses pages de catégorie."
+          },
           "tabs": {
             "general": "Général",
             "description": "Description de la landing page",

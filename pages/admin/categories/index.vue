@@ -188,6 +188,12 @@
               </div>
 
               <div class="flex items-center gap-2 shrink-0">
+                <span
+                  v-if="category.visibility === 'UNLISTED'"
+                  class="ui-badge ui-badge--amber"
+                >
+                  {{ t('admin.forms.category.visibility.unlisted') }}
+                </span>
                 <span class="ui-badge ui-badge--slate">
                   {{ t('admin.pages.categories.index.table.productsCount', { count: category._count?.products || 0 }) }}
                 </span>
@@ -345,6 +351,12 @@
                   </p>
                 </div>
                 <div class="flex items-center gap-1">
+                  <span
+                    v-if="subcategory.visibility === 'UNLISTED'"
+                    class="ui-badge ui-badge--amber me-1"
+                  >
+                    {{ t('admin.forms.category.visibility.unlisted') }}
+                  </span>
                   <a
                     :href="getCategoryUrl(subcategory.slug)"
                     target="_blank"
@@ -465,6 +477,7 @@ interface Category {
   parentId?: string | null
   parent?: { id: string; title: string; slug: string } | null
   createdAt?: string
+  visibility?: 'LISTED' | 'UNLISTED'
   _count?: { products: number; subcategories?: number }
 }
 

@@ -1,8 +1,10 @@
 import type { Request, Response } from 'express'
 import { CategoriesService } from './categories.service'
+import { PublicProductsService } from './public-products.service'
 import { isValidContentSlug, normalizeContentSlug } from '../../../../shared/content-slug'
 
 const categoriesService = new CategoriesService()
+const publicProductsService = new PublicProductsService()
 
 export class CategoriesController {
     async checkSlugAvailability(req: Request, res: Response) {
@@ -71,6 +73,9 @@ export class CategoriesController {
                         statusMessage: 'Category image must be a PNG (http/https or /uploads path)'
                     })
                 }
+                if (e.message === 'Invalid visibility') {
+                    return res.status(400).json({ statusCode: 400, statusMessage: e.message })
+                }
                 throw e
             }
         } catch (error) {
@@ -111,6 +116,9 @@ export class CategoriesController {
                         statusCode: 400,
                         statusMessage: 'Category image must be a PNG (http/https or /uploads path)'
                     })
+                }
+                if (e.message === 'Invalid visibility') {
+                    return res.status(400).json({ statusCode: 400, statusMessage: e.message })
                 }
                 throw e
             }
@@ -183,6 +191,28 @@ export class CategoriesController {
             res.json(categories)
         } catch (error) {
             console.error('Public categories list error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async getPublicCategoryBySlug(req: Request, res: Response) {
+        const tenant = req.tenant
+
+        if (!tenant) {
+            return res.status(404).json({ statusCode: 404, statusMessage: 'Tenant not found' })
+        }
+
+        try {
+            const slug = String(req.params.slug || '')
+            const category = await categoriesService.getPublicBySlug(tenant.id, slug)
+            if (!category) {
+                return res.status(404).json({ statusCode: 404, statusMessage: 'Category not found' })
+            }
+
+            const products = await publicProductsService.listProducts(tenant.id, { categorySlug: slug })
+            res.json({ ...category, products })
+        } catch (error) {
+            console.error('Public category detail error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

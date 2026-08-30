@@ -131,6 +131,28 @@
           :hint="t('admin.forms.category.image.hint')"
         />
 
+        <BaseSelect
+          v-model="form.visibility"
+          :label="t('admin.forms.category.visibility.label')"
+          :hint="t('admin.forms.category.visibility.hint')"
+        >
+          <option value="LISTED">
+            {{ t('admin.forms.category.visibility.listed') }}
+          </option>
+          <option value="UNLISTED">
+            {{ t('admin.forms.category.visibility.unlisted') }}
+          </option>
+        </BaseSelect>
+
+        <div
+          v-if="form.visibility === 'UNLISTED'"
+          class="flex items-start gap-2 rounded-md p-3 text-sm"
+          style="background: color-mix(in srgb, var(--warning, #d97706) 12%, transparent); color: var(--text-primary)"
+        >
+          <Icon name="lucide:eye-off" class="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{{ t('admin.forms.category.visibility.unlistedNotice') }}</span>
+        </div>
+
         <div
           v-if="errorMessage"
           class="p-4 bg-red-50 border border-red-200 rounded-md"
@@ -203,7 +225,8 @@ const form = ref({
   title: '',
   slug: '',
   parentId: '',
-  imageUrl: null as string | null
+  imageUrl: null as string | null,
+  visibility: 'LISTED' as 'LISTED' | 'UNLISTED'
 })
 
 type Category = {
@@ -398,6 +421,7 @@ async function fetchCategory() {
     form.value.slug = data.slug
     form.value.parentId = data.parentId || ''
     form.value.imageUrl = data.imageUrl ?? null
+    form.value.visibility = data.visibility === 'UNLISTED' ? 'UNLISTED' : 'LISTED'
     lastAutoSlug.value = slugify(data.slug || data.title)
   } catch (error: any) {
     console.error('Failed to load category:', error)
@@ -425,7 +449,8 @@ async function handleSubmit() {
         title: form.value.title,
         slug: form.value.slug,
         parentId: form.value.parentId || null,
-        imageUrl: form.value.imageUrl
+        imageUrl: form.value.imageUrl,
+        visibility: form.value.visibility
       }
     })
   } catch (error: any) {

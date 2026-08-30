@@ -165,6 +165,37 @@
               />
             </div>
 
+            <!-- Visibility -->
+            <BaseSelect
+              v-model="form.visibility"
+              :label="t('admin.forms.product.visibility.label')"
+              :hint="t('admin.forms.product.visibility.hint')"
+            >
+              <option value="LISTED">
+                {{ t('admin.forms.product.visibility.listed') }}
+              </option>
+              <option value="UNLISTED">
+                {{ t('admin.forms.product.visibility.unlisted') }}
+              </option>
+            </BaseSelect>
+
+            <!-- Not-listed indication -->
+            <div
+              v-if="notListedReason"
+              class="flex items-start gap-2 rounded-xl border px-4 py-3 text-sm"
+              style="border-color: color-mix(in srgb, var(--warning, #d97706) 45%, var(--surface-border)); background: color-mix(in srgb, var(--warning, #d97706) 12%, transparent); color: var(--text-primary)"
+            >
+              <Icon name="lucide:eye-off" class="w-4 h-4 mt-0.5 shrink-0" />
+              <div>
+                <p class="font-medium">{{ t('admin.pages.products.edit.notListed.title') }}</p>
+                <p class="mt-0.5" style="color: var(--text-secondary)">
+                  {{ notListedReason === 'category'
+                    ? t('admin.pages.products.edit.notListed.reasonCategory')
+                    : t('admin.pages.products.edit.notListed.reasonProduct') }}
+                </p>
+              </div>
+            </div>
+
             <!-- Title -->
             <!-- Title -->
             <BaseInput
@@ -781,6 +812,7 @@ interface Category {
   displayTitle?: string
   parentId?: string | null
   parent?: { id: string; title: string } | null
+  visibility?: 'LISTED' | 'UNLISTED'
 }
 type CategoryOption = Category & { depth: number }
 
@@ -877,6 +909,7 @@ const form = ref({
   lowStockThreshold: 5,
   categoryIds: [] as string[],
   isActive: true,
+  visibility: 'LISTED' as 'LISTED' | 'UNLISTED',
   images: [] as string[], // Legacy field for backwards compatibility
   promotionalPrice: null as number | null,
   isPromotionActive: false,
@@ -984,6 +1017,16 @@ function toggleCategorySelection(categoryId: string, checked: boolean) {
   else next.delete(categoryId)
   form.value.categoryIds = Array.from(next)
 }
+
+// Why the product is hidden from storefront browse surfaces (grid, search, nav).
+// 'product' = its own visibility is UNLISTED; 'category' = every category it
+// belongs to is UNLISTED. It stays reachable at its direct link either way.
+const notListedReason = computed<'product' | 'category' | null>(() => {
+  if (form.value.visibility === 'UNLISTED') return 'product'
+  const selected = categories.value.filter((c) => form.value.categoryIds.includes(c.id))
+  if (selected.length > 0 && selected.every((c) => c.visibility === 'UNLISTED')) return 'category'
+  return null
+})
 
 watch(() => form.value.title, (newTitle) => {
   void syncAutoSlugFromTitle(newTitle)
@@ -1098,6 +1141,7 @@ async function fetchProduct() {
         ? data.categoryIds.filter((id: unknown) => typeof id === 'string' && id.length > 0)
         : (data.categoryId ? [data.categoryId] : []),
       isActive: data.isActive,
+      visibility: data.visibility === 'UNLISTED' ? 'UNLISTED' : 'LISTED',
       images: data.images || [],
       promotionalPrice: data.promotionalPrice ? Number(data.promotionalPrice) : null,
       isPromotionActive: data.isPromotionActive ?? false,
@@ -1418,6 +1462,7 @@ async function handleSubmit() {
       searchKeywords: form.value.searchKeywords || null,
       description: form.value.description || null,
       isActive: form.value.isActive,
+      visibility: form.value.visibility,
       lowStockThreshold: Number(form.value.lowStockThreshold),
       images: productImages.value.map(img => img.url), // Keep legacy images in sync
       promotionalPrice: allowProductPromotion && form.value.isPromotionActive && form.value.promotionalPrice ? Number(form.value.promotionalPrice) : null,

@@ -358,6 +358,14 @@
                   <span class="text-xs" style="color: var(--text-secondary)">
                     {{ product.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
                   </span>
+                  <span
+                    v-if="product.visibility === 'UNLISTED'"
+                    class="ui-badge ui-badge--amber inline-flex items-center gap-1"
+                    :title="t('admin.forms.product.visibility.hint')"
+                  >
+                    <Icon name="lucide:eye-off" class="w-3 h-3" />
+                    {{ t('admin.forms.product.visibility.unlisted') }}
+                  </span>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap text-center">
@@ -891,6 +899,7 @@ interface Product {
   stock: number
   lowStockThreshold: number
   isActive: boolean
+  visibility?: 'LISTED' | 'UNLISTED'
   images?: string[]
   productImages?: Array<{ id: string; url: string; isMain: boolean; position: number }>
   category?: { id: string; title: string }
