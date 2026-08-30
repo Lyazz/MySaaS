@@ -955,7 +955,8 @@
     "common": {
       "productsCount": "{count} produits",
       "selectPlaceholder": "Sélectionner…",
-      "storeFallback": "Boutique"
+      "storeFallback": "Boutique",
+      "collection": "Collection"
     },
     "actions": {
       "addToCart": "Ajouter au panier",

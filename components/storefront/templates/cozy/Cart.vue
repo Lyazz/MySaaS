@@ -9,136 +9,129 @@ const { currencyCode, format: formatCurrency } = useCurrency()
 </script>
 
 <template>
-  <div class="min-h-[80vh] px-4 py-12 bg-gradient-to-b from-amber-50/30 to-white">
-    <div class="max-w-5xl mx-auto">
-        <h1 class="font-cozy font-black text-4xl text-slate-800 text-center mb-12">{{ storefrontContent.cart.title }}</h1>
+  <div class="ed-theme">
+    <div class="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-16">
+      <div class="border-b border-[#262019] pb-6 mb-10">
+        <p class="ed-kicker mb-3">{{ storefrontContent.cart.label }}</p>
+        <h1 class="ed-display text-4xl md:text-6xl text-[#262019]">{{ storefrontContent.cart.title }}</h1>
+      </div>
 
-        <div v-if="!cartStore.hasItems" class="text-center py-20 bg-white/80 backdrop-blur-sm rounded-[3rem] shadow-soft">
-            <div class="w-24 h-24 bg-brand-50 rounded-full flex items-center justify-center mx-auto mb-6 text-brand-300">
-                <Icon name="lucide:handbag" class="w-10 h-10" />
-            </div>
-            <h2 class="font-bold text-xl text-slate-600 mb-6">{{ storefrontContent.cart.empty.subtitle }}</h2>
-            <NuxtLink to="/products" class="inline-block bg-brand-500 text-white font-bold px-8 py-3 rounded-full hover:bg-brand-600 transition-colors shadow-lg shadow-brand-200">
-                {{ storefrontContent.cart.empty.cta }}
-            </NuxtLink>
-        </div>
+      <div v-if="!cartStore.hasItems" class="border border-dashed border-[#C4B8A4] py-20 text-center">
+        <Icon name="lucide:shopping-bag" class="w-9 h-9 mx-auto mb-5 text-[#C4B8A4]" />
+        <h2 class="ed-display text-2xl text-[#262019] mb-6">{{ storefrontContent.cart.empty.subtitle }}</h2>
+        <NuxtLink to="/products" class="ed-btn-solid">{{ storefrontContent.cart.empty.cta }}</NuxtLink>
+      </div>
 
-        <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-12">
-            
-            <!-- Cart Items -->
-            <section class="lg:col-span-8 space-y-6">
-                <TransitionGroup name="list">
-                    <div 
-                      v-for="item in cartStore.items" 
-                      :key="item.variantId || item.productId" 
-                      class="bg-white p-6 rounded-[2rem] shadow-soft flex gap-6 items-center hover:shadow-lg transition-shadow"
-                    >
-                        <div class="w-24 h-24 bg-slate-50 rounded-2xl overflow-hidden flex-shrink-0">
-                            <img v-if="item.image" :src="item.image" :alt="item.title" class="w-full h-full object-cover" />
-                            <div v-else class="w-full h-full flex items-center justify-center text-slate-300">
-                              <Icon name="lucide:image" class="w-8 h-8" />
-                            </div>
-                        </div>
-                        
-                        <div class="flex-grow">
-                            <h3 class="font-bold text-slate-700 text-lg mb-1">
-                                <NuxtLink :to="`/product/${item.slug}`" class="hover:text-brand-500 transition-colors">{{ item.title }}</NuxtLink>
-                            </h3>
-                            <p v-if="item.variantId" class="text-sm text-slate-400">{{ item.variantId.slice(0, 8) }}</p>
-                            
-                            <div class="flex items-center gap-4 mt-3">
-                                <div class="flex items-center bg-slate-50 rounded-full px-2 py-1">
-                                    <button 
-                                      :disabled="item.quantity <= 1"
-                                      @click="cartStore.updateQuantity(item.productId, item.quantity - 1, item.variantId)" 
-                                      class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 font-bold disabled:opacity-30"
-                                    >
-                                      <Icon name="lucide:minus" class="w-4 h-4" />
-                                    </button>
-                                    <span class="font-bold text-slate-700 w-8 text-center text-sm">{{ item.quantity }}</span>
-                                    <button 
-                                      :disabled="item.quantity >= item.stock"
-                                      @click="cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)" 
-                                      class="w-8 h-8 flex items-center justify-center text-slate-400 hover:text-slate-600 font-bold disabled:opacity-30"
-                                    >
-                                      <Icon name="lucide:plus" class="w-4 h-4" />
-                                    </button>
-                                </div>
-                                <div class="font-bold text-slate-700">
-                                    {{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}
-                                </div>
-                            </div>
-                        </div>
+      <div v-else class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16">
+        <!-- Items -->
+        <section class="lg:col-span-7 xl:col-span-8">
+          <div class="hidden sm:grid grid-cols-12 gap-4 ed-ui text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[#8A7E6E] pb-3 border-b border-[#262019]">
+            <span class="col-span-6">{{ storefrontContent.cart.sections.items }}</span>
+            <span class="col-span-3 text-center">{{ storefrontContent.productForm.quantity.label }}</span>
+            <span class="col-span-3 text-end">{{ storefrontContent.cart.summary.subtotal }}</span>
+          </div>
 
-                        <button @click="cartStore.removeItem(item.productId, item.variantId)" class="w-10 h-10 rounded-full hover:bg-red-50 text-slate-300 hover:text-red-400 flex items-center justify-center transition-colors">
-                            <Icon name="lucide:trash-2" class="w-5 h-5" />
-                        </button>
-                    </div>
-                </TransitionGroup>
-            </section>
-
-            <!-- Summary -->
-            <section class="lg:col-span-4">
-                <div class="bg-white p-8 rounded-[2rem] shadow-soft sticky top-24">
-                    <h2 class="font-bold text-slate-800 text-xl mb-6">{{ storefrontContent.cart.summary.title }}</h2>
-                    <dl class="space-y-4 text-sm font-medium text-slate-500 mb-8">
-                         <div class="flex justify-between">
-                            <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
-                            <dd class="text-slate-700 font-bold">{{ formatCurrency(cartStore.total) }}</dd>
-                        </div>
-                        <div v-if="cartStore.clearanceDiscount > 0" class="flex justify-between">
-                            <dt class="text-amber-600">{{ t('storefront.clearance.discountLine') }}</dt>
-                            <dd class="text-amber-600 font-bold">-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
-                            <dd class="text-slate-400 text-xs">{{ storefrontContent.cart.summary.shippingHint }}</dd>
-                        </div>
-                        <div class="flex justify-between">
-                            <dt>{{ storefrontContent.cart.summary.tax }}</dt>
-                            <dd class="text-slate-700">{{ formatCurrency(0) }}</dd>
-                        </div>
-                        <div class="flex justify-between pt-4 border-t border-slate-100 text-lg">
-                            <dt class="text-slate-800 font-bold">{{ storefrontContent.cart.summary.total }}</dt>
-                            <dd class="text-brand-500 font-bold">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</dd>
-                        </div>
-                    </dl>
-
-                     <NuxtLink 
-                        to="/checkout"
-                        class="block w-full text-center bg-slate-800 text-white font-bold py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-brand-500 hover:shadow-brand-300 hover:-translate-y-1 transition-all duration-300"
-                    >
-                        {{ storefrontContent.cart.actions.proceedToCheckout }}
-                    </NuxtLink>
-
-                    <NuxtLink
-                      to="/products"
-                      class="block w-full text-center text-slate-500 hover:text-brand-500 font-medium py-3 mt-4 transition-colors"
-                    >
-                      {{ storefrontContent.actions.continueShopping }}
-                    </NuxtLink>
+          <TransitionGroup name="list" tag="div" class="divide-y divide-[#DAD2C4]">
+            <div
+              v-for="item in cartStore.items"
+              :key="item.variantId || item.productId"
+              class="py-6 grid grid-cols-12 gap-4 items-center"
+            >
+              <div class="col-span-12 sm:col-span-6 flex gap-4 items-center">
+                <div class="w-20 h-24 bg-[#FBF8F2] border border-[#DAD2C4] overflow-hidden flex-shrink-0">
+                  <img v-if="item.image" :src="item.image" :alt="item.title" class="w-full h-full object-cover">
+                  <div v-else class="w-full h-full flex items-center justify-center text-[#C4B8A4]">
+                    <Icon name="lucide:image" class="w-6 h-6" />
+                  </div>
                 </div>
-            </section>
+                <div class="min-w-0">
+                  <h3 class="ed-display text-[17px] text-[#262019] leading-snug">
+                    <NuxtLink :to="`/product/${item.slug}`" class="hover:text-[#97401F] transition-colors">{{ item.title }}</NuxtLink>
+                  </h3>
+                  <p v-if="item.variantId" class="ed-ui text-xs text-[#8A7E6E] mt-1">{{ storefrontContent.cart.item.variant }}</p>
+                  <button
+                    class="ed-link ed-ui text-[11px] uppercase tracking-[0.12em] text-[#8A7E6E] mt-2 inline-block"
+                    @click="cartStore.removeItem(item.productId, item.variantId)"
+                  >{{ storefrontContent.cart.item.remove }}</button>
+                </div>
+              </div>
 
-        </div>
+              <div class="col-span-7 sm:col-span-3 flex sm:justify-center">
+                <div class="flex items-center border border-[#C4B8A4]">
+                  <button
+                    :disabled="item.quantity <= 1"
+                    class="w-9 h-9 flex items-center justify-center text-[#4A4038] hover:bg-[#EFE8DA] transition-colors disabled:opacity-30"
+                    @click="cartStore.updateQuantity(item.productId, item.quantity - 1, item.variantId)"
+                  >
+                    <Icon name="lucide:minus" class="w-3.5 h-3.5" />
+                  </button>
+                  <span class="w-10 text-center ed-ui text-sm font-semibold text-[#262019] tabular-nums border-x border-[#C4B8A4]">{{ item.quantity }}</span>
+                  <button
+                    :disabled="item.quantity >= item.stock"
+                    class="w-9 h-9 flex items-center justify-center text-[#4A4038] hover:bg-[#EFE8DA] transition-colors disabled:opacity-30"
+                    @click="cartStore.updateQuantity(item.productId, item.quantity + 1, item.variantId)"
+                  >
+                    <Icon name="lucide:plus" class="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div class="col-span-5 sm:col-span-3 text-end ed-display text-[17px] text-[#262019]">
+                {{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}
+              </div>
+            </div>
+          </TransitionGroup>
+
+          <NuxtLink to="/products" class="ed-link ed-ui text-[11px] font-semibold uppercase tracking-[0.14em] inline-flex items-center gap-2 mt-8">
+            <Icon name="lucide:arrow-left" class="w-4 h-4 rtl:rotate-180" />
+            {{ storefrontContent.actions.continueShopping }}
+          </NuxtLink>
+        </section>
+
+        <!-- Summary -->
+        <section class="lg:col-span-5 xl:col-span-4">
+          <div class="border border-[#262019] bg-[#FBF8F2] p-7 lg:sticky lg:top-24">
+            <h2 class="ed-display text-xl text-[#262019] mb-6 pb-4 border-b border-[#DAD2C4]">{{ storefrontContent.cart.summary.title }}</h2>
+            <dl class="space-y-3.5 ed-ui text-sm text-[#8A7E6E] mb-7">
+              <div class="flex justify-between">
+                <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
+                <dd class="text-[#262019] font-semibold">{{ formatCurrency(cartStore.total) }}</dd>
+              </div>
+              <div v-if="cartStore.clearanceDiscount > 0" class="flex justify-between text-[#97401F]">
+                <dt>{{ t('storefront.clearance.discountLine') }}</dt>
+                <dd class="font-semibold">−{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+              </div>
+              <div class="flex justify-between">
+                <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
+                <dd class="text-xs">{{ storefrontContent.cart.summary.shippingHint }}</dd>
+              </div>
+              <div class="flex justify-between">
+                <dt>{{ storefrontContent.cart.summary.tax }}</dt>
+                <dd class="text-[#262019]">{{ formatCurrency(0) }}</dd>
+              </div>
+              <div class="flex justify-between items-baseline pt-4 border-t border-[#262019]">
+                <dt class="ed-display text-lg text-[#262019]">{{ storefrontContent.cart.summary.total }}</dt>
+                <dd class="ed-display text-2xl text-[#B8532E]">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</dd>
+              </div>
+            </dl>
+
+            <NuxtLink to="/checkout" class="ed-btn-solid w-full">
+              {{ storefrontContent.cart.actions.proceedToCheckout }}
+              <Icon name="lucide:arrow-right" class="w-4 h-4 rtl:rotate-180" />
+            </NuxtLink>
+          </div>
+        </section>
+      </div>
     </div>
   </div>
 </template>
 
 <style scoped>
-.list-move,
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.4s ease;
-}
+.list-move, .list-enter-active, .list-leave-active { transition: all 0.4s ease; }
+.list-enter-from, .list-leave-to { opacity: 0; transform: translateX(20px); }
+.list-leave-active { position: absolute; }
 
-.list-enter-from,
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(20px);
-}
-
-.list-leave-active {
-  position: absolute;
+@media (prefers-reduced-motion: reduce) {
+  .list-move, .list-enter-active, .list-leave-active { transition: none; }
 }
 </style>

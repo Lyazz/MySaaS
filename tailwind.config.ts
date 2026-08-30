@@ -19,7 +19,10 @@ export default {
                 serif: ['Alice', 'serif'],
                 stationery: ['Merriweather', 'serif'],
                 street: ['Anton', 'sans-serif'],
-                cozy: ['Nunito', 'sans-serif'],
+                // Cozy (slow-living editorial magazine): Newsreader is the display/body
+                // serif voice, Hanken Grotesk sets the UI + label microtype.
+                cozy: ['Newsreader', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
+                cozyUi: ['Hanken Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                 food: ['Nunito', 'sans-serif'],
                 cyber: ['Orbitron', 'sans-serif'],
                 jetbrains: ['JetBrains Mono', 'monospace'],

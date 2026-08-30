@@ -56,14 +56,14 @@ const themeMap: Record<TemplateKey, TagTheme> = {
     iconClass: 'w-3 h-3 mr-1',
   },
 
-  // ── Cozy (warm, soft rounded)
+  // ── Cozy (slow-living editorial: hairlines, ink on ivory, one terracotta note)
   cozy: {
-    wrapper: 'max-w-6xl mx-auto px-4 py-8 mt-0',
-    inner: 'border-t border-slate-100 pt-6',
-    label: 'font-cozy text-sm text-slate-500 font-medium mb-4',
-    tag: 'inline-flex items-center px-4 py-1.5 rounded-full text-sm font-medium bg-brand-50 text-brand-700 hover:bg-brand-100 transition-colors shadow-sm border border-brand-100',
-    icon: 'lucide:tag',
-    iconClass: 'w-3.5 h-3.5 mr-1.5',
+    wrapper: 'max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-10 mt-0',
+    inner: 'border-t border-[#262019] pt-6',
+    label: 'font-cozy-ui text-[10.5px] font-semibold uppercase tracking-[0.16em] text-[#8A7E6E] mb-4',
+    tag: 'inline-flex items-center px-4 py-1.5 text-[12px] uppercase tracking-[0.1em] font-cozy-ui text-[#4A4038] border border-[#C4B8A4] hover:border-[#262019] hover:text-[#262019] transition-colors',
+    icon: 'lucide:hash',
+    iconClass: 'w-3 h-3 mr-1.5 opacity-50',
   },
 
   // ── Cyber / Synthwave (neon glow effect)

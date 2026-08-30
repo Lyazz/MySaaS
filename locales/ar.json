@@ -973,7 +973,8 @@
     "common": {
       "productsCount": "{count} منتجات",
       "selectPlaceholder": "اختر…",
-      "storeFallback": "المتجر"
+      "storeFallback": "المتجر",
+      "collection": "تشكيلة"
     },
     "actions": {
       "addToCart": "أضف إلى السلة",
