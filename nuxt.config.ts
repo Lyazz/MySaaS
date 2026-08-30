@@ -51,7 +51,13 @@ export default defineNuxtConfig({
       platformBaseDomain:
         process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN ||
         process.env.PLATFORM_BASE_DOMAIN ||
-        'swekly.com'
+        'swekly.com',
+      // Set to "false" to close self-serve store registration on the marketing site.
+      // The /register page then shows a "temporarily closed" notice instead of the form.
+      registrationsOpen:
+        (process.env.NUXT_PUBLIC_REGISTRATIONS_OPEN ??
+          process.env.REGISTRATIONS_OPEN ??
+          'true') !== 'false'
     }
   },
   modules: [

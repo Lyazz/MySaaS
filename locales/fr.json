@@ -747,6 +747,13 @@
       }
     },
     "register": {
+      "closed": {
+        "badge": "Inscriptions en pause",
+        "title": "Les inscriptions sont temporairement fermées",
+        "message": "La création de nouvelles boutiques est suspendue pour le moment. Nous la rouvrirons bientôt — merci de votre patience.",
+        "haveAccount": "Vous avez déjà un compte ?",
+        "logIn": "Se connecter"
+      },
       "hero": {
         "launchYour": "Lancez votre",
         "empire": "Empire",

@@ -107,9 +107,17 @@ export class AuthService {
         })
     }
 
+    private areRegistrationsOpen() {
+        return (process.env.REGISTRATIONS_OPEN ?? 'true') !== 'false'
+    }
+
     async register(input: RegisterInput, tenant?: Tenant) {
         if (tenant) {
             throw new AuthServiceError(403, 'Registration is only allowed from the SaaS landing domain')
+        }
+
+        if (!this.areRegistrationsOpen()) {
+            throw new AuthServiceError(403, 'Registration is temporarily closed')
         }
 
         const name = typeof input.name === 'string' ? input.name.trim() : ''

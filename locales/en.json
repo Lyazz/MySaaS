@@ -761,6 +761,13 @@
       }
     },
     "register": {
+      "closed": {
+        "badge": "Registration paused",
+        "title": "Sign-ups are temporarily closed",
+        "message": "New store registration is paused for now. We'll reopen it soon — thanks for your patience.",
+        "haveAccount": "Already have an account?",
+        "logIn": "Log in"
+      },
       "hero": {
         "launchYour": "Launch your",
         "empire": "Empire",

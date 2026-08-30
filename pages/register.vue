@@ -7,6 +7,7 @@ import { useAuthStore } from '~/stores/auth'
 const { t } = useI18n({ useScope: 'global' })
 const year = new Date().getFullYear()
 const authStore = useAuthStore()
+const registrationsOpen = computed(() => useRuntimeConfig().public.registrationsOpen !== false)
 
 definePageMeta({
   middleware: 'saas-only',
@@ -209,7 +210,35 @@ async function register() {
 
 <template>
   <div class="min-h-screen pt-20 pb-12 md:pt-28">
-    <div class="cinematic-container !max-w-[80rem]">
+    <!-- ─── Registration temporarily closed ─── -->
+    <div v-if="!registrationsOpen" class="cinematic-container !max-w-2xl">
+      <div class="cinematic-card relative overflow-hidden p-8 md:p-12 text-center">
+        <div class="absolute inset-0 cinematic-grid-bg opacity-40" />
+        <div class="relative">
+          <span class="cinematic-pill mx-auto">
+            <span class="cinematic-pill__dot" />
+            {{ t('auth.register.closed.badge') }}
+          </span>
+          <div class="mx-auto mt-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
+            <Icon name="lucide:lock" class="h-6 w-6 text-lime-neon" />
+          </div>
+          <h1 class="cinematic-headline mt-6 !text-3xl md:!text-4xl">
+            {{ t('auth.register.closed.title') }}
+          </h1>
+          <p class="cinematic-subhead mx-auto mt-4 max-w-md">
+            {{ t('auth.register.closed.message') }}
+          </p>
+          <div class="mt-8 text-sm text-[color:var(--m-text-dim)]">
+            {{ t('auth.register.closed.haveAccount') }}
+            <NuxtLink to="/login" class="font-medium text-lime-neon hover:underline">
+              {{ t('auth.register.closed.logIn') }}
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="cinematic-container !max-w-[80rem]">
       <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
 
         <!-- ─── Left: Brand panel (desktop only) ─── -->
