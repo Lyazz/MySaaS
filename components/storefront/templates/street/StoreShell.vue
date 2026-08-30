@@ -45,6 +45,40 @@ const mobileCategoriesDropdownOpen = ref(false)
 watch(mobileMenuOpen, (open) => {
     if (!open) mobileCategoriesDropdownOpen.value = false
 })
+
+// Drawer search — mirrors the other templates' StoreShell search.
+const searchQuery = ref('')
+const searchResults = ref<any[]>([])
+const searchLoading = ref(false)
+const isSearchDropdownOpen = ref(false)
+let searchTimeout: any
+
+watch(searchQuery, (newVal) => {
+    if ((newVal?.length ?? 0) >= 3) {
+        searchLoading.value = true
+        isSearchDropdownOpen.value = true
+        clearTimeout(searchTimeout)
+        searchTimeout = setTimeout(async () => {
+            try {
+                const data = await $fetch<any[]>(useTenantApiUrl('/api/products'), {
+                    headers: useTenantApiHeaders(),
+                    query: { q: newVal },
+                })
+                searchResults.value = Array.isArray(data) ? data : []
+            } catch (e) {
+                console.error('Search error:', e)
+                searchResults.value = []
+            } finally {
+                searchLoading.value = false
+            }
+        }, 500)
+    } else {
+        clearTimeout(searchTimeout)
+        searchResults.value = []
+        searchLoading.value = false
+        isSearchDropdownOpen.value = false
+    }
+})
 // Build dynamic menu
 const categories = computed(() => {
     return [
@@ -143,9 +177,9 @@ const currentYear = new Date().getFullYear()
               to="/cart"
               class="relative group"
             >
-              <div class="h-12 px-6 flex items-center gap-2 bg-black text-brand border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,222,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+              <div class="h-12 px-3 lg:px-6 flex items-center gap-2 bg-black text-brand border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,222,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                 <Icon name="lucide:handbag" class="w-5 h-5" />
-                <span class="font-street text-xl">{{ storefrontContent.cart.label }}</span>
+                <span class="font-street text-xl hidden lg:inline">{{ storefrontContent.cart.label }}</span>
                 <div class="bg-brand text-black font-bold h-6 w-6 flex items-center justify-center border border-black text-xs">
                   {{ cartStore.itemCount }}
                 </div>

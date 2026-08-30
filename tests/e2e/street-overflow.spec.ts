@@ -97,3 +97,25 @@ for (const vp of WIDTHS) {
     await assertNoOverflow(page, `product (${href}) @ ${vp.label}`)
   })
 }
+
+test('mobile menu drawer opens without a render error', async ({ page }) => {
+  const pageErrors: string[] = []
+  page.on('pageerror', (e) => pageErrors.push(e.message))
+
+  await page.setViewportSize({ width: 375, height: 812 })
+  await page.goto(`http://${HOST}/`, { waitUntil: 'networkidle' })
+
+  // dismiss the clearance announcement modal if it auto-opened
+  const clearanceClose = page.locator('.cl-backdrop button').first()
+  if (await clearanceClose.isVisible().catch(() => false)) {
+    await clearanceClose.click()
+    await expect(page.locator('.cl-backdrop')).toHaveCount(0)
+  }
+
+  await page.locator('button:has([class*="i-lucide:menu"])').first().click()
+
+  const drawer = page.locator('.fixed.top-0.start-0.bottom-0')
+  await expect(drawer).toBeVisible()
+  await expect(drawer.locator('nav a').first()).toBeVisible()
+  expect(pageErrors, `page errors: ${pageErrors.join(' | ')}`).toEqual([])
+})
