@@ -143,12 +143,12 @@ async function handleAddToCart() {
                 </NuxtLink>
             </h3>
             
-            <div class="flex items-center justify-between mt-auto">
-                <span class="font-mono font-bold text-lg bg-black text-white px-2 py-0.5">
+            <div class="flex items-center justify-between gap-2 mt-auto">
+                <span class="font-mono font-bold text-lg bg-black text-white px-2 py-0.5 shrink-0">
                     {{ formatPrice(product.price) }}
                 </span>
-                
-                <div class="font-mono text-xs text-gray-500 uppercase">
+
+                <div class="font-mono text-xs text-gray-500 uppercase truncate min-w-0 text-end">
                     {{ product.category?.title || 'Collection' }}
                 </div>
             </div>
