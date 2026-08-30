@@ -536,7 +536,30 @@
     "nav": {
       "features": "Features",
       "pricing": "Pricing",
+      "templates": "Templates",
       "about": "About"
+    },
+    "templatesPage": {
+      "hero": {
+        "pill": "Store templates",
+        "title": {
+          "prefix": "Design built to ",
+          "accent": "sell"
+        },
+        "subtitle": "Pick from {count} professionally designed templates. Every theme is mobile-first, RTL-ready, blazing fast and fully customizable to your brand."
+      },
+      "card": {
+        "viewDemo": "View demo store",
+        "accent": "Color",
+        "shotAlt": "{name} demo store"
+      },
+      "cta": {
+        "eyebrow": "Ready to launch?",
+        "headlinePre": "Pick a template,",
+        "headlineAccent": "open",
+        "headlinePost": "your store today",
+        "button": "Start for free"
+      }
     },
     "actions": {
       "dashboard": "Dashboard",

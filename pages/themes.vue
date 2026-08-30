@@ -1,233 +1,191 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { computed } from 'vue'
+import { STORE_THEMES } from '~/shared/storefront/theme/catalogue'
 
 definePageMeta({
-  layout: 'marketing',
-  title: 'Thèmes - Swekly'
+  layout: 'marketing'
 })
 
-const categories = ['Tous', 'Mode', 'Électronique', 'Alimentation', 'Beauté', 'Livres']
-const activeCategory = ref('Tous')
+const { t } = useI18n({ useScope: 'global' })
+const { public: { platformBaseDomain } } = useRuntimeConfig()
+const requestUrl = useRequestURL()
 
-const themes = [
-  { 
-    id: 1, 
-    name: 'Minimalist', 
-    category: 'Mode', 
-    image: 'https://images.unsplash.com/photo-1445205170230-053b83016050?q=80&w=800&auto=format&fit=crop', 
-    description: 'Épuré et moderne, parfait pour mettre en valeur vos collections de vêtements.',
-    price: 'Gratuit', 
-    popular: true 
-  },
-  { 
-    id: 2, 
-    name: 'TechPro', 
-    category: 'Électronique', 
-    image: 'https://images.unsplash.com/photo-1498049794561-7780e7231661?q=80&w=800&auto=format&fit=crop', 
-    description: 'Design tech orienté conversion, idéal pour les gadgets et l\'informatique.',
-    price: 'Gratuit',
-    popular: false
-  },
-  { 
-    id: 3, 
-    name: 'Fresh Bite', 
-    category: 'Alimentation', 
-    image: 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?q=80&w=800&auto=format&fit=crop', 
-    description: 'Chaleureux et appétissant. Parfait pour la livraison de repas ou l\'épicerie fine.',
-    price: 'Premium',
-    popular: false
-  },
-  { 
-    id: 4, 
-    name: 'Glow Up', 
-    category: 'Beauté', 
-    image: 'https://images.unsplash.com/photo-1596462502278-27bf85033e5a?q=80&w=800&auto=format&fit=crop', 
-    description: 'Doux et élégant. Conçu pour les cosmétiques et les soins personnels.',
-    price: 'Gratuit', 
-    popular: true 
-  },
-  { 
-    id: 5, 
-    name: 'Bookworm', 
-    category: 'Livres', 
-    image: 'https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=800&auto=format&fit=crop', 
-    description: 'Mise en page classique et lisible, idéale pour l\'édition et la culture.',
-    price: 'Premium',
-    popular: false
-  },
-  { 
-    id: 6, 
-    name: 'Urban Street', 
-    category: 'Mode', 
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&auto=format&fit=crop', 
-    description: 'Style urbain et audacieux pour le streetwear et les accessoires.',
-    price: 'Gratuit',
-    popular: true
-  },
-]
+/*
+ * Demo stores are seeded with slug === theme key (scripts/seed-theme-demo-stores.mjs),
+ * and storefronts resolve the tenant from the Host header. Locally that means
+ * `{key}.localhost:3000`; in production `{key}.{platformBaseDomain}`.
+ */
+const isLocalHost = requestUrl.hostname === 'localhost' || requestUrl.hostname.endsWith('.localhost')
+const demoStoreUrl = (key: string) => {
+  if (isLocalHost) {
+    const port = requestUrl.port ? `:${requestUrl.port}` : ''
+    return `${requestUrl.protocol}//${key}.localhost${port}`
+  }
+  return `https://${key}.${platformBaseDomain}`
+}
 
-const filteredThemes = computed(() => {
-  if (activeCategory.value === 'Tous') return themes
-  return themes.filter(t => t.category === activeCategory.value)
+const optionKey = (key: string) => `admin.appearanceSettingsForm.templates.options.${key}`
+
+const themes = computed(() => STORE_THEMES.map((theme) => ({
+  ...theme,
+  label: t(`${optionKey(theme.key)}.label`),
+  description: t(`${optionKey(theme.key)}.description`),
+  storeTypes: t(`${optionKey(theme.key)}.storeTypes`),
+  demoUrl: demoStoreUrl(theme.key),
+  /*
+   * The address bar always shows the production host, even on localhost: it is
+   * there to say "this is a real store", and `modern.localhost:3000` says the
+   * opposite.
+   */
+  demoHost: `${theme.key}.${platformBaseDomain}`,
+  shot: `/themes/${theme.key}.webp`
+})))
+
+/*
+ * After `themes`, not before it. On the client `useSeoMeta` resolves its
+ * computed inputs in a `watchEffect` that runs immediately, so a description
+ * reading `themes.value` from above the declaration threw on the temporal dead
+ * zone — which left unhead without an entry to dispose and put a
+ * "Cannot read properties of undefined" in every visitor's console.
+ */
+useSeoMeta({
+  title: computed(() => `${t('marketing.nav.templates')} — Swekly`),
+  description: computed(() => t('marketing.templatesPage.hero.subtitle', { count: themes.value.length }))
 })
 </script>
 
 <template>
-  <div class="themes-page min-h-screen font-sans pt-24 md:pt-28 pb-20">
-    <section class="relative overflow-hidden px-4 pt-8 pb-14 text-center">
-      <div class="themes-page__blob themes-page__blob--mint" />
-      <div class="themes-page__blob themes-page__blob--orange" />
-
-      <div class="relative z-10 max-w-4xl mx-auto">
-        <h1 class="text-5xl md:text-6xl font-black tracking-tight mb-6 text-[#0D1F1A]">
-          Des vitrines
-          <span class="themes-page__accent">magnifiques</span>
-        </h1>
-        <p class="text-base md:text-xl max-w-2xl mx-auto leading-relaxed text-[#0D1F1A]/65">
-          Trouvez le design parfait pour votre boutique. Tous nos thèmes sont optimisés pour mobile, ultra-rapides et entièrement personnalisables.
-        </p>
-      </div>
-    </section>
-
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="mb-14 flex flex-wrap items-center justify-center gap-2">
-        <button
-          v-for="cat in categories"
-          :key="cat"
-          class="rounded-full border-2 border-[#0D1F1A] px-6 py-2.5 text-sm font-bold transition-all duration-300"
-          :class="activeCategory === cat ? 'bg-[#0D1F1A] text-[#FFF8E7]' : 'bg-[#FFFDF4] text-[#0D1F1A]'"
-          @click="activeCategory = cat"
-        >
-          {{ cat }}
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 transition-all duration-500">
-        <article
-          v-for="theme in filteredThemes"
-          :key="theme.id"
-          class="group flex flex-col overflow-hidden rounded-3xl border-2 border-[#0D1F1A] bg-[#FFFDF4] shadow-[6px_6px_0_#0D1F1A] transition-all duration-300 hover:-translate-y-1"
-        >
-          <div class="relative aspect-[4/3] overflow-hidden bg-[#F5EDD3]">
-            <img
-              :src="theme.image"
-              :alt="theme.name"
-              class="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+  <div class="pt-24 md:pt-32">
+    <!-- ─── Hero ─── -->
+    <section class="relative overflow-hidden pb-12">
+      <div class="cinematic-grid-bg" />
+      <div class="cinematic-container relative">
+        <div class="mx-auto max-w-3xl text-center">
+          <span class="cinematic-pill">
+            <span class="cinematic-pill__dot" />
+            {{ t('marketing.templatesPage.hero.pill') }}
+          </span>
+          <h1 class="cinematic-headline mt-6">
+            {{ t('marketing.templatesPage.hero.title.prefix') }}
+            <em>{{ t('marketing.templatesPage.hero.title.accent') }}</em>
+          </h1>
+          <p class="cinematic-subhead mx-auto mt-5">
+            {{ t('marketing.templatesPage.hero.subtitle', { count: themes.length }) }}
+          </p>
+          <div class="mt-9 flex flex-wrap items-center justify-center gap-3">
+            <NuxtLink
+              to="/register"
+              class="cinematic-button cinematic-button--primary"
             >
-
-            <div class="absolute top-4 start-4 flex gap-2">
-              <span class="rounded-full border-2 border-[#0D1F1A] bg-[#FFF8E7] px-3 py-1 text-xs font-bold text-[#0D1F1A]">
-                {{ theme.category }}
-              </span>
-              <span v-if="theme.popular" class="inline-flex items-center gap-1 rounded-full border-2 border-[#0D1F1A] bg-[#FF7A45] px-3 py-1 text-xs font-bold text-white">
-                <Icon name="lucide:flame" class="h-3 w-3" />
-                Populaire
-              </span>
-            </div>
+              {{ t('marketing.actions.getStarted') }}
+              <Icon
+                name="lucide:arrow-right"
+                class="h-4 w-4"
+              />
+            </NuxtLink>
+            <NuxtLink
+              to="/pricing"
+              class="cinematic-button cinematic-button--ghost"
+            >
+              {{ t('marketing.nav.pricing') }}
+            </NuxtLink>
           </div>
-
-          <div class="flex flex-1 flex-col p-6">
-            <div class="mb-3 flex items-center justify-between">
-              <h3 class="text-xl font-extrabold tracking-tight text-[#0D1F1A]">
-                {{ theme.name }}
-              </h3>
-              <span
-                class="rounded-full border-2 border-[#0D1F1A] px-2.5 py-1 text-xs font-bold"
-                :class="theme.price === 'Gratuit' ? 'bg-[#1F9D8E] text-white' : 'bg-[#F4C04E] text-[#0D1F1A]'"
-              >
-                {{ theme.price }}
-              </span>
-            </div>
-            <p class="mb-6 flex-1 text-sm leading-relaxed text-[#0D1F1A]/65">
-              {{ theme.description }}
-            </p>
-            <div class="border-t border-[#0D1F1A]/15 pt-5">
-              <NuxtLink to="/register" class="inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 border-[#0D1F1A] bg-[#FFF8E7] py-3 font-bold text-[#0D1F1A] transition-colors hover:bg-[#F5EDD3]">
-                Utiliser ce thème
-                <Icon name="lucide:arrow-right" class="h-4 w-4" />
-              </NuxtLink>
-            </div>
-          </div>
-        </article>
-      </div>
-
-      <div v-if="filteredThemes.length === 0" class="py-20 text-center">
-        <div class="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full border-2 border-[#0D1F1A] bg-[#FFFDF4] text-[#0D1F1A]/45">
-          <Icon name="lucide:search-x" class="h-8 w-8" />
         </div>
-        <h3 class="mb-2 text-xl font-bold text-[#0D1F1A]">
-          Aucun thème trouvé
-        </h3>
-        <p class="text-[#0D1F1A]/65">
-          Nous n'avons pas encore de thème dans cette catégorie.
-        </p>
-        <button class="mt-6 font-bold text-[#FF7A45] hover:underline" @click="activeCategory = 'Tous'">
-          Voir tous les thèmes
-        </button>
       </div>
     </section>
 
-    <section class="px-4 pt-20 text-center">
-      <div class="mx-auto max-w-2xl rounded-3xl border-2 border-[#0D1F1A] bg-[#FFF1DC] px-8 py-12 text-[#0D1F1A] shadow-[8px_8px_0_#FF7A45]">
-        <h2 class="mb-5 text-3xl font-black tracking-tight">
-          Prêt à créer votre boutique ?
-        </h2>
-        <p class="mb-8 text-[#0D1F1A]/65">
-          Commencez avec l'un de nos superbes thèmes et personnalisez-le à votre image.
-        </p>
-        <NuxtLink to="/register" class="inline-flex items-center gap-2 rounded-full border-2 border-[#FF7A45] bg-[#FF7A45] px-8 py-3 font-bold text-white transition-transform hover:-translate-y-0.5 hover:border-[#ff8a5d] hover:bg-[#ff8a5d]">
-          Commencer gratuitement
-        </NuxtLink>
+    <!-- ─── Theme grid ─── -->
+    <section class="cinematic-section !pt-8">
+      <div class="cinematic-container">
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <article
+            v-for="theme in themes"
+            :key="theme.key"
+            class="cinematic-card group flex flex-col p-0"
+          >
+            <div class="cinematic-card-glow" />
+
+            <!--
+              The theme's own demo storefront, photographed. Not a mock-up of
+              one: this is the page behind "view the demo store" below.
+            -->
+            <MarketingThemeShot
+              :src="theme.shot"
+              :host="theme.demoHost"
+              :alt="t('marketing.templatesPage.card.shotAlt', { name: theme.label })"
+            />
+
+            <!-- Meta -->
+            <div class="flex flex-1 flex-col gap-3 border-t border-white/[0.06] p-5">
+              <div class="flex items-center justify-between gap-2">
+                <h3 class="text-lg font-medium tracking-tight text-[color:var(--m-text)]">
+                  {{ theme.label }}
+                </h3>
+                <span
+                  class="flex items-center gap-1"
+                  :aria-label="t('marketing.templatesPage.card.accent')"
+                >
+                  <span
+                    v-for="swatch in theme.swatches"
+                    :key="swatch"
+                    class="h-3.5 w-3.5 rounded-full border border-white/20"
+                    :style="{ background: swatch }"
+                  />
+                </span>
+              </div>
+
+              <p class="text-[13px] leading-snug text-[color:var(--m-text-dim)]">
+                {{ theme.description }}
+              </p>
+
+              <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                <span class="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[color:var(--m-text-dim)]">
+                  {{ t('admin.appearanceSettingsForm.templates.moods.' + theme.mood) }}
+                </span>
+                <span class="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[color:var(--m-text-dim)]">
+                  {{ t('admin.appearanceSettingsForm.templates.voices.' + theme.voice) }}
+                </span>
+                <span class="rounded-full border border-white/[0.08] bg-white/[0.03] px-2 py-0.5 text-[color:var(--m-text-dim)]">
+                  {{ theme.fontName }}
+                </span>
+              </div>
+
+              <div class="mt-1 flex items-start gap-1.5 text-[12px] text-[color:var(--m-text-faint)]">
+                <Icon
+                  name="lucide:store"
+                  class="mt-0.5 h-3.5 w-3.5 flex-none"
+                />
+                <span>{{ t('admin.appearanceSettingsForm.templates.bestFor') }} · {{ theme.storeTypes }}</span>
+              </div>
+
+              <div class="mt-auto flex items-center justify-end border-t border-white/[0.06] pt-3">
+                <a
+                  :href="theme.demoUrl"
+                  target="_blank"
+                  rel="noopener"
+                  class="inline-flex items-center gap-1.5 text-[12px] font-medium text-[color:var(--m-accent)] transition-opacity hover:opacity-80"
+                >
+                  {{ t('marketing.templatesPage.card.viewDemo') }}
+                  <Icon
+                    name="lucide:external-link"
+                    class="h-3.5 w-3.5"
+                  />
+                </a>
+              </div>
+            </div>
+          </article>
+        </div>
       </div>
     </section>
+
+    <!-- ─── Final CTA ─── -->
+    <MarketingCinematicCTABand
+      :eyebrow="t('marketing.templatesPage.cta.eyebrow')"
+      :headline-pre="t('marketing.templatesPage.cta.headlinePre')"
+      :headline-accent="t('marketing.templatesPage.cta.headlineAccent')"
+      :headline-post="t('marketing.templatesPage.cta.headlinePost')"
+      :primary-cta="{ label: t('marketing.templatesPage.cta.button'), to: '/register' }"
+      :secondary-cta="{ label: t('marketing.footer.support.contact'), to: '/contact' }"
+    />
   </div>
 </template>
-
-<style scoped>
-.themes-page {
-  background: #FFF8E7;
-  color: #0D1F1A;
-}
-
-.themes-page__accent {
-  color: #FF7A45;
-  position: relative;
-  display: inline-block;
-}
-
-.themes-page__accent::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  bottom: -0.2em;
-  width: 100%;
-  height: 0.2em;
-  background: rgba(244, 192, 78, 0.9);
-  border-radius: 999px;
-  z-index: -1;
-}
-
-.themes-page__blob {
-  pointer-events: none;
-  position: absolute;
-  border-radius: 999px;
-  filter: blur(80px);
-  opacity: 0.35;
-}
-
-.themes-page__blob--mint {
-  width: 320px;
-  height: 320px;
-  top: -100px;
-  left: -90px;
-  background: #1F9D8E;
-}
-
-.themes-page__blob--orange {
-  width: 320px;
-  height: 320px;
-  top: -70px;
-  right: -100px;
-  background: #FF7A45;
-}
-</style>

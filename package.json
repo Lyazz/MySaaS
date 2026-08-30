@@ -27,6 +27,7 @@
     "db:generate": "prisma generate",
     "db:migrate:deploy": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",
+    "themes:shots": "node scripts/capture-theme-shots.mjs",
     "seed:demo-stores": "node scripts/seed-theme-demo-stores.mjs",
     "logos:carriers": "node scripts/normalize-carrier-logos.mjs"
   },

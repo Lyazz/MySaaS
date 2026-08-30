@@ -91,7 +91,7 @@
           "number": "01",
           "caption": "Design",
           "title": "Choisissez un thème, faites-le vôtre.",
-          "description": "Des modèles mobile-first qui s'adaptent à votre marque en quelques minutes."
+          "description": "Des thèmes mobile-first qui s'adaptent à votre marque en quelques minutes."
         },
         "sell": {
           "number": "02",
@@ -144,7 +144,7 @@
         },
         "templates": {
           "title": "Thèmes prêts à l’emploi",
-          "description": "Des modèles rapides, pensés mobile, faciles à personnaliser."
+          "description": "Des thèmes rapides, pensés mobile, faciles à personnaliser."
         },
         "fastSupport": {
           "title": "Support réactif",
@@ -243,7 +243,7 @@
         "prefix": "Des vitrines",
         "accent": "prêtes à vendre"
       },
-      "subtitle": "Choisissez un modèle rapide, pensé mobile, et personnalisez‑le à votre goût.",
+      "subtitle": "Choisissez un thème rapide, pensé mobile, et personnalisez‑le à votre goût.",
       "viewAll": "Voir les thèmes"
     },
     "contact": {
@@ -452,7 +452,7 @@
         "titlePre": "Des boutiques superbes,",
         "titleAccent": "prêtes à lancer",
         "titlePost": "",
-        "description": "Choisissez un modèle conçu par des professionnels et personnalisez-le à votre marque. Chaque thème est mobile-first, RTL et ultra-rapide.",
+        "description": "Choisissez un thème conçu par des professionnels et personnalisez-le à votre marque. Chaque thème est mobile-first, RTL et ultra-rapide.",
         "viewAll": "Voir tous les thèmes"
       },
       "integrations": {
@@ -536,7 +536,30 @@
     "nav": {
       "features": "Fonctionnalités",
       "pricing": "Tarifs",
+      "templates": "Thèmes",
       "about": "À propos"
+    },
+    "templatesPage": {
+      "hero": {
+        "pill": "Thèmes de boutique",
+        "title": {
+          "prefix": "Un design fait pour ",
+          "accent": "vendre"
+        },
+        "subtitle": "Choisissez parmi {count} thèmes conçus par des professionnels. Chaque thème est mobile-first, RTL, ultra-rapide et entièrement personnalisable à votre marque."
+      },
+      "card": {
+        "viewDemo": "Voir la boutique de démo",
+        "accent": "Couleur",
+        "shotAlt": "Boutique de démo {name}"
+      },
+      "cta": {
+        "eyebrow": "Prêt à lancer ?",
+        "headlinePre": "Choisissez un thème,",
+        "headlineAccent": "ouvrez",
+        "headlinePost": "votre boutique aujourd'hui",
+        "button": "Commencer gratuitement"
+      }
     },
     "actions": {
       "dashboard": "Tableau de bord",
@@ -1534,7 +1557,7 @@
         "inputLabel": "Devise"
       },
       "template": {
-        "title": "Modèle de boutique",
+        "title": "Thème de boutique",
         "subtitle": "Sélectionnez la structure de mise en page de votre vitrine.",
         "select": "Sélectionner",
         "selected": "Sélectionné",
@@ -2104,8 +2127,8 @@
           "label": "Couleur principale",
           "hint": "Utilisée pour les boutons, liens et accents.",
           "suggested": "Palettes suggérées",
-          "overrideLabel": "Appliquer la couleur de marque au modèle",
-          "overrideHint": "Désactivez pour garder la couleur d'origine du modèle sélectionné."
+          "overrideLabel": "Appliquer la couleur de marque au thème",
+          "overrideHint": "Désactivez pour garder la couleur d'origine du thème sélectionné."
         }
       },
       "announcement": {
@@ -2118,7 +2141,7 @@
         }
       },
       "templates": {
-        "title": "Modèle de boutique",
+        "title": "Thème de boutique",
         "subtitle": "Chaque thème définit la typographie, les couleurs et les formes de votre boutique. Testez-en un sur votre propre boutique avant de changer.",
         "quickView": "Aperçu",
         "searchPlaceholder": "Rechercher un thème",

@@ -7,6 +7,7 @@ const { t, locale } = useI18n({ useScope: 'global' })
 
 const productLinks = computed(() => [
   { label: t('marketing.nav.features'), to: '/features' },
+  { label: t('marketing.nav.templates'), to: '/themes' },
   { label: t('marketing.nav.pricing'), to: '/pricing' },
   { label: t('marketing.footer.support.contact'), to: '/contact' }
 ])
