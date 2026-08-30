@@ -454,21 +454,23 @@ async function handleSubmit() {
             <div
               v-for="item in cartStore.items"
               :key="item.variantId || item.productId"
-              class="flex gap-4 relative"
+              class="flex gap-3 sm:gap-4 relative"
             >
-              <div class="w-16 h-16 border-2 border-black bg-white rounded-none relative overflow-hidden">
-                <img
-                  v-if="item.image"
-                  :src="item.image"
-                  :alt="item.title"
-                  class="w-full h-full object-cover"
-                >
+              <div class="relative w-16 h-16 shrink-0">
+                <div class="w-16 h-16 border-2 border-black bg-white overflow-hidden">
+                  <img
+                    v-if="item.image"
+                    :src="item.image"
+                    :alt="item.title"
+                    class="w-full h-full object-cover"
+                  >
+                </div>
                 <span class="absolute -top-2 -end-2 bg-black text-white w-6 h-6 flex items-center justify-center font-mono text-xs font-bold rounded-full border border-white">
                   {{ item.quantity }}
                 </span>
               </div>
-              <div class="flex-grow">
-                <h4 class="font-street uppercase text-lg">
+              <div class="flex-grow min-w-0">
+                <h4 class="font-street uppercase text-lg break-words">
                   {{ item.title }}
                 </h4>
                 <p
@@ -478,7 +480,7 @@ async function handleSubmit() {
                   {{ item.variantId.slice(0,8) }}
                 </p>
               </div>
-              <div class="font-mono font-bold">
+              <div class="font-mono font-bold shrink-0">
                 {{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}
               </div>
             </div>
@@ -492,9 +494,9 @@ async function handleSubmit() {
                 v-model="couponCode"
                 type="text"
                 :placeholder="storefrontContent.checkout.coupon.placeholder"
-                class="flex-1 bg-gray-100 border-2 border-black p-2 font-mono text-sm uppercase focus:shadow-[2px_2px_0_0_var(--brand)] outline-none"
+                class="flex-1 min-w-0 bg-gray-100 border-2 border-black p-2 font-mono text-sm uppercase focus:shadow-[2px_2px_0_0_var(--brand)] outline-none"
               >
-              <button class="px-4 py-2 bg-black text-white font-mono text-sm uppercase hover:bg-brand hover:text-black transition-colors">
+              <button class="shrink-0 px-4 py-2 bg-black text-white font-mono text-sm uppercase hover:bg-brand hover:text-black transition-colors">
                 {{ storefrontContent.actions.apply }}
               </button>
             </div>

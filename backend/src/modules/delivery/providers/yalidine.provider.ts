@@ -333,6 +333,9 @@ export class YalidineProvider implements DeliveryProvider {
 
         return scoped.map((c) => ({
             id: String(c.id),
+            // Unlike a Maystro stop desk, a Yalidine agency has a real id of its own:
+            // it is the stopdesk_id the order carries.
+            carrierPointId: String(c.id),
             name: c.name,
             address: c.address,
             communeId: String(c.communeId),

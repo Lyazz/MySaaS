@@ -102,7 +102,7 @@ async function handleAddToCart() {
                  <img 
                     :src="mainImage" 
                     :alt="product.title" 
-                    class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300"
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 >
             </NuxtLink>
 
@@ -115,15 +115,15 @@ async function handleAddToCart() {
             />
            
             <!-- Quick Add Overlay (Street Style) -->
-            <button 
+            <button
                 @click.prevent="handleAddToCart"
-                class="absolute bottom-0 start-0 w-full bg-black text-white py-3 font-street text-xl uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-200 hover:bg-brand hover:text-black border-t-2 border-black"
+                class="absolute bottom-0 start-0 w-full bg-black text-white py-2 lg:py-3 px-2 font-street text-xs lg:text-xl uppercase tracking-wide lg:tracking-widest whitespace-nowrap overflow-hidden text-ellipsis translate-y-0 lg:translate-y-full lg:group-hover:translate-y-0 transition-transform duration-200 hover:bg-brand hover:text-black border-t-2 border-black"
             >
                 {{ storefrontContent.actions.addToCart }}
             </button>
         
       <!-- Countdown Overlay -->
-      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
+      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-9 lg:bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
         <div class="scale-[0.85] sm:scale-90 origin-bottom">
           <StorefrontSharedCountdownTimer
             :end-date="product.promotionEndDate"

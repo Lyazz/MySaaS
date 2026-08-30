@@ -67,9 +67,21 @@ export class MaystroPickupPointService {
         const communes = await location.listCommunes({ apiToken: input.apiToken, wilaya: input.wilaya })
         if (!communes.length) return []
 
+        // Maystro runs one stop desk per wilaya and it sits in the wilaya's center
+        // commune, so that commune is the answer far more often than any other and is
+        // probed first. Ranking the rest by |id difference| — the previous sole
+        // ordering — is arithmetic, not geography: it made a hit depend on how close
+        // the shopper's commune id happened to be, which is why the same wilaya
+        // returned a desk for one commune and nothing for its neighbour.
+        const wilayas = await location.listWilayas({ apiToken: input.apiToken })
+        const wilayaId = typeof input.wilaya === 'number' ? input.wilaya : Number(String(input.wilaya))
+        const centerCommuneId = wilayas.find((w) => w.id === wilayaId)?.centerCommune ?? null
+
         const ranked = communes
             .slice()
             .sort((a, b) => {
+                if (a.id === centerCommuneId) return -1
+                if (b.id === centerCommuneId) return 1
                 if (!Number.isFinite(requestedCommuneId)) return a.id - b.id
                 return Math.abs(a.id - requestedCommuneId) - Math.abs(b.id - requestedCommuneId)
             })
@@ -87,10 +99,21 @@ export class MaystroPickupPointService {
         return []
     }
 
+    /**
+     * Only a relay (delivery_type=3) carries a pickup_point, and it must be checked
+     * against the commune the relay itself sits in — not the shopper's. The two differ
+     * whenever the shopper's own commune has no relay and one was offered from a
+     * neighbouring commune, and validating against the shopper's commune then rejected
+     * a point the storefront had legitimately offered.
+     */
     async assertPickupPointValid(input: { apiToken: string; commune: string | number; pickupPoint: number }) {
         const points = await this.listActivePickupPoints({ apiToken: input.apiToken, commune: input.commune })
-        if (!points.some((p) => p.pickup_point === input.pickupPoint)) {
-            throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'Invalid pickup_point for commune' })
+        if (!points.some((p) => p.delivery_type === 3 && p.pickup_point === input.pickupPoint)) {
+            throw new MaystroIntegrationError({
+                statusCode: 400,
+                statusMessage: 'Invalid pickup_point for commune',
+                details: { commune: input.commune, pickupPoint: input.pickupPoint }
+            })
         }
     }
 

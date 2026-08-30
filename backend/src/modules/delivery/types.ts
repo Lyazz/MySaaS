@@ -78,6 +78,12 @@ export type ProviderCommune = {
  * checkout can offer "collect it yourself" without knowing which carrier is behind it.
  */
 export type ProviderPickupPoint = {
+    /**
+     * Stable key for this point, unique within a carrier. Only ever a UI/lookup key —
+     * never put it on the wire. A Maystro stop desk has no carrier id of its own, so
+     * its key is synthesised from the commune; sending that to Maystro as a
+     * pickup_point is what produced "Invalid pickup_point for commune".
+     */
     id: string
     name: string
     address?: string
@@ -90,6 +96,13 @@ export type ProviderPickupPoint = {
      * rather than flattened.
      */
     kind?: 'desk' | 'relay'
+    /**
+     * The identifier the carrier itself accepts on an order, or null when the carrier
+     * addresses this point some other way. Yalidine agencies and Maystro relays both
+     * have one; a Maystro stop desk does not — Maystro runs a single desk per wilaya
+     * and reaches it through the wilaya's center commune, with no pickup_point at all.
+     */
+    carrierPointId?: string | null
 }
 
 export interface DeliveryProvider {

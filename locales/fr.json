@@ -1188,7 +1188,8 @@
           "self": "Livraison par le commerçant",
           "storePickup": "Retrait en magasin",
           "homeDelivery": "Livraison à domicile"
-        }
+        },
+        "noPickupPoints": "Aucun point de retrait ne dessert cette commune. Choisissez une autre commune, ou la livraison à domicile."
       }
     },
     "orderSuccess": {

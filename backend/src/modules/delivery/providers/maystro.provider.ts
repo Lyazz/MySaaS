@@ -11,6 +11,7 @@ import type {
 } from '../types'
 import { MaystroClient } from '../maystro/maystro.client'
 import { MaystroPickupPointService } from '../maystro/maystro-pickup-point.service'
+import { MaystroLocationService } from '../maystro/maystro-location.service'
 import { normalizeLocationName } from '../shared/normalize-location-name'
 
 export class MaystroProvider implements DeliveryProvider {
@@ -22,6 +23,7 @@ export class MaystroProvider implements DeliveryProvider {
 
     private apiToken: string | null = null
     private pickupPoints = new MaystroPickupPointService()
+    private location = new MaystroLocationService()
 
     constructor(opts?: { apiToken?: string }) {
         const apiToken = typeof opts?.apiToken === 'string' ? opts.apiToken.trim() : ''
@@ -91,9 +93,27 @@ export class MaystroProvider implements DeliveryProvider {
                     const match = communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(rawCommune))
                     if (match) communeId = String(match.id)
                 }
+
+                if (!communeId) {
+                    // Maystro does not carry this commune under that name. Home delivery is
+                    // priced per commune, so there is nothing honest to quote — quoting the
+                    // wilaya's first commune, as this used to, hands the shopper a price for
+                    // somewhere else.
+                    //
+                    // Desk collection is different: Maystro runs one stop desk per wilaya and
+                    // its price is the same for every commune of that wilaya (verified 2026-08-30,
+                    // 450 DZD across Béjaïa). The parcel really would go to that desk, so
+                    // quoting it from the centre commune is the true answer, not a substitution.
+                    if (deliveryType !== 2) return []
+                    const centre = await this.centerCommuneFor(wilayaId)
+                    if (!centre) return []
+                    communeId = String(centre)
+                }
             }
 
             if (!communeId) {
+                // No commune was requested at all — the admin rate table asks per wilaya.
+                // Any commune of the wilaya is a fair sample for that question.
                 const cached = this.sampleCommuneByWilaya.get(wilayaKey)
                 if (cached) {
                     communeId = cached
@@ -151,6 +171,19 @@ export class MaystroProvider implements DeliveryProvider {
         return communes.map((c) => ({ id: String(c.id), name: c.name }))
     }
 
+    /**
+     * The commune holding this wilaya's stop desk. Maystro reports it as `center_commune`
+     * on the wilaya itself, and it is the fallback for any commune we cannot resolve.
+     */
+    private async centerCommuneFor(wilayaId: number): Promise<number | null> {
+        try {
+            const wilayas = await this.location.listWilayas({ apiToken: this.apiToken ?? undefined })
+            return wilayas.find((w) => w.id === wilayaId)?.centerCommune ?? null
+        } catch {
+            return null
+        }
+    }
+
     async listPickupPoints(input: { wilayaCode: string; communeCode?: string }): Promise<ProviderPickupPoint[]> {
         if (!this.apiToken) return []
 
@@ -169,22 +202,39 @@ export class MaystroProvider implements DeliveryProvider {
                 : communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(raw))?.id ?? null
         }
 
-        // Maystro keys pickup points by commune, so without one there is nothing to
-        // ask for; fall back to the nearby walk the storefront already relies on.
-        const points = communeId
+        // Maystro keys pickup points by commune, but a commune we cannot place must not
+        // come back empty-handed: Maystro runs exactly one stop desk per wilaya, sited in
+        // its center commune, and that desk serves the whole wilaya.
+        //
+        // Our commune list merges several carriers plus a static dataset, so it carries
+        // spellings Maystro does not use — Béjaïa's "Aït Maouche" is Maystro's "Beni
+        // Maouch", and the two never normalize to each other. Returning [] for those made
+        // the wilaya's desk look unavailable to shoppers it actually serves.
+        const lookupCommuneId = communeId ?? (await this.centerCommuneFor(wilayaId))
+
+        const points = lookupCommuneId
             ? await this.pickupPoints.listActivePickupPointsNearby({
                   apiToken: this.apiToken,
-                  commune: communeId,
+                  commune: lookupCommuneId,
                   wilaya: wilayaId
               })
             : []
 
-        return points.map((p) => ({
-            id: String(p.pickup_point || p.commune),
-            name: p.name || communeName.get(p.commune) || String(p.commune),
-            communeId: String(p.commune),
-            communeName: communeName.get(p.commune),
-            kind: p.delivery_type === 3 ? ('relay' as const) : ('desk' as const)
-        }))
+        // A stop desk (delivery_type=2) comes back with pickup_point=null, so it has no
+        // carrier id to send. Keying it by commune here is what used to leak a commune id
+        // into the order as if it were a pickup_point — the carrier then rejected it with
+        // "Invalid pickup_point for commune". The commune only names the desk locally.
+        return points.map((p) => {
+            const isRelay = p.delivery_type === 3
+            const carrierPointId = isRelay && p.pickup_point > 0 ? String(p.pickup_point) : null
+            return {
+                id: carrierPointId ?? `desk:${p.commune}`,
+                carrierPointId,
+                name: p.name || communeName.get(p.commune) || String(p.commune),
+                communeId: String(p.commune),
+                communeName: communeName.get(p.commune),
+                kind: isRelay ? ('relay' as const) : ('desk' as const)
+            }
+        })
     }
 }

@@ -174,6 +174,27 @@ const normalizeDeliveryMode = (value: unknown): 'home' | 'pickup' | 'store' => {
     return 'home'
 }
 
+/**
+ * What the shopper actually chose, kept whole. A single numeric id cannot describe it:
+ * a Maystro stop desk has no carrier id, and a relay may sit in a different commune from
+ * the shopper - both facts are needed later to build a payload the carrier accepts.
+ */
+type ResolvedShippingPickupPoint = {
+    /** The carrier's own id, or null when the carrier addresses the point another way. */
+    pointId: number | null
+    kind: 'desk' | 'relay' | null
+    /** The commune the point sits in, which is not always the shopper's. */
+    communeCode: string | null
+    name: string | null
+}
+
+const EMPTY_PICKUP_POINT: ResolvedShippingPickupPoint = {
+    pointId: null,
+    kind: null,
+    communeCode: null,
+    name: null
+}
+
 const toOptionalPickupPoint = (value: unknown): number | null => {
     if (value === undefined || value === null) return null
     const n = typeof value === 'number' ? value : Number(String(value).trim())
@@ -599,12 +620,22 @@ export class OrdersService {
         shippingWilayaCode?: string | null
         shippingCommuneCode?: string | null
         rawPickupPoint: unknown
-    }): Promise<number | null> {
+    }): Promise<ResolvedShippingPickupPoint> {
         const numeric = toOptionalPickupPoint(input.rawPickupPoint)
-        if (numeric) return numeric
+        // A value that parses as a number is an id, never a label — looking it up by name
+        // would only ever miss.
+        const rawLabel = numeric ? '' : typeof input.rawPickupPoint === 'string' ? input.rawPickupPoint.trim() : ''
+        if (!numeric && !rawLabel) return EMPTY_PICKUP_POINT
 
-        const rawLabel = typeof input.rawPickupPoint === 'string' ? input.rawPickupPoint.trim() : ''
-        if (!rawLabel) return null
+        // A bare id is self-sufficient: it predates any carrier lookup and must keep
+        // working when the carrier is unreachable or not configured at all. The lookup
+        // below only enriches it with the kind and commune it could not carry.
+        const bareId = (): ResolvedShippingPickupPoint => ({
+            pointId: numeric,
+            kind: null,
+            communeCode: null,
+            name: null
+        })
 
         // The storefront sends the point's name, because that is what the shopper picked
         // from a list. Resolving it to the carrier's id belongs here, for whichever
@@ -617,6 +648,9 @@ export class OrdersService {
 
         const wilaya = typeof input.shippingWilayaCode === 'string' ? input.shippingWilayaCode.trim() : ''
         if (!wilaya) {
+            // Taken at face value when there is no wilaya to look it up against, exactly
+            // as it always was.
+            if (numeric) return bareId()
             throw new OrderValidationError(400, 'shippingWilayaCode is required when shippingPickupPoint is provided')
         }
 
@@ -632,18 +666,38 @@ export class OrdersService {
             })
 
             const wanted = OrdersService.normalizePickupPointLabel(rawLabel)
-            const match = points.find((point) => OrdersService.normalizePickupPointLabel(point.name) === wanted)
+            const match = rawLabel
+                ? points.find((point) => OrdersService.normalizePickupPointLabel(point.name) === wanted)
+                : points.find((point) => String(point.carrierPointId ?? point.id) === String(numeric))
+
             if (!match) {
+                // An id we cannot place stays as it is; only a name we cannot place is an
+                // error, because a name is only ever produced by the list just re-read.
+                if (numeric) return bareId()
                 throw new OrderValidationError(400, 'Unknown pickup point for this carrier and wilaya')
             }
 
-            const id = Number.parseInt(String(match.id), 10)
-            if (!Number.isFinite(id) || id <= 0) {
+            // A Maystro stop desk has no carrier id at all: the wilaya has exactly one desk
+            // and the carrier routes to it by commune. Storing the synthetic key - or the
+            // commune id that used to stand in for it - is what the carrier then rejected
+            // as "Invalid pickup_point for commune", so a desk keeps a null id on purpose.
+            const carrierPointId = match.carrierPointId ?? null
+            const parsed = carrierPointId == null ? NaN : Number.parseInt(String(carrierPointId), 10)
+            const pointId = Number.isFinite(parsed) && parsed > 0 ? parsed : null
+            if (carrierPointId != null && pointId == null) {
                 throw new OrderValidationError(400, 'Carrier returned an unusable pickup point id')
             }
-            return id
+
+            return {
+                pointId,
+                kind: match.kind ?? null,
+                communeCode: match.communeName?.trim() || match.communeId?.trim() || null,
+                name: match.name?.trim() || null
+            }
         } catch (error) {
             if (error instanceof OrderValidationError) throw error
+            // Only a name genuinely needs the carrier to be reachable; an id does not.
+            if (numeric) return bareId()
             throw new OrderValidationError(400, 'Could not resolve the pickup point with the carrier')
         }
     }
@@ -1469,6 +1523,9 @@ export class OrdersService {
                 shippingAddressLine1: true,
                 shippingNotes: true,
                 shippingPickupPoint: true,
+                shippingPickupPointKind: true,
+                shippingPickupPointCommune: true,
+                shippingPickupPointName: true,
                 sale: { select: { id: true } },
                 _count: {
                     select: {
@@ -1582,13 +1639,20 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingCurrency is too long')
         }
 
-        let nextShippingPickupPoint: number | null
-        if (nextShippingProvider !== 'MAYSTRO' || nextDeliveryMode !== 'pickup') {
-            nextShippingPickupPoint = null
+        // Yalidine agencies are pickup points too; gating this on MAYSTRO silently dropped
+        // the chosen agency from every Yalidine order that went through an admin edit.
+        let nextPickupPoint: ResolvedShippingPickupPoint
+        if (!nextShippingProvider || nextDeliveryMode !== 'pickup') {
+            nextPickupPoint = EMPTY_PICKUP_POINT
         } else if (input.shippingPickupPoint === undefined) {
-            nextShippingPickupPoint = existing.shippingPickupPoint ?? null
+            nextPickupPoint = {
+                pointId: existing.shippingPickupPoint ?? null,
+                kind: (existing.shippingPickupPointKind as 'desk' | 'relay' | null) ?? null,
+                communeCode: existing.shippingPickupPointCommune ?? null,
+                name: existing.shippingPickupPointName ?? null
+            }
         } else {
-            nextShippingPickupPoint = await this.resolveShippingPickupPoint({
+            nextPickupPoint = await this.resolveShippingPickupPoint({
                 tenantId,
                 shippingProvider: nextShippingProvider,
                 deliveryMode: nextDeliveryMode,
@@ -1899,7 +1963,10 @@ export class OrdersService {
                 shippingServiceLevel: nextShippingServiceLevel || null,
                 shippingAmount: nextShippingAmount,
                 shippingCurrency: nextShippingCurrency || null,
-                shippingPickupPoint: nextShippingPickupPoint,
+                shippingPickupPoint: nextPickupPoint.pointId,
+                shippingPickupPointKind: nextPickupPoint.kind,
+                shippingPickupPointCommune: nextPickupPoint.communeCode,
+                shippingPickupPointName: nextPickupPoint.name,
                 shippingWilayaCode: nextShippingWilayaCode,
                 shippingCommuneCode: nextShippingCommuneCode,
                 shippingAddressLine1: nextShippingAddressLine1,
@@ -2803,7 +2870,10 @@ export class OrdersService {
                     shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: normalizedShippingAddressLine1,
                     shippingNotes: input.shippingNotes || null,
-                    shippingPickupPoint: shippingPickupPoint ?? undefined,
+                    shippingPickupPoint: shippingPickupPoint.pointId ?? undefined,
+                    shippingPickupPointKind: shippingPickupPoint.kind ?? undefined,
+                    shippingPickupPointCommune: shippingPickupPoint.communeCode ?? undefined,
+                    shippingPickupPointName: shippingPickupPoint.name ?? undefined,
                     totalAmount,
                     totalWithShippingAmount,
                     earnedPointsTotal: pointsPreview.totalPoints,
@@ -3259,7 +3329,10 @@ export class OrdersService {
                     shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: normalizedShippingAddressLine1,
                     shippingNotes: input.shippingNotes || null,
-                    shippingPickupPoint: shippingPickupPoint ?? undefined,
+                    shippingPickupPoint: shippingPickupPoint.pointId ?? undefined,
+                    shippingPickupPointKind: shippingPickupPoint.kind ?? undefined,
+                    shippingPickupPointCommune: shippingPickupPoint.communeCode ?? undefined,
+                    shippingPickupPointName: shippingPickupPoint.name ?? undefined,
                     totalAmount,
                     totalWithShippingAmount,
                     earnedPointsTotal: pointsPreview.totalPoints,

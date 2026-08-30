@@ -106,6 +106,8 @@ export class MaystroOrderService {
         noteToDriver?: string
         deliveryType: 1 | 2 | 3
         pickupPoint?: number
+        /** The commune the relay itself sits in, when it differs from the shopper's. */
+        pickupPointCommune?: string | number
     }): Promise<{ externalId: string; payload: MaystroOrderPayload }> {
         const order = await this.prisma.order.findFirst({
             where: { tenantId: input.tenantId, id: input.localOrderId },
@@ -170,16 +172,28 @@ export class MaystroOrderService {
             commune: input.commune
         })
 
-        // Maystro runs one stop desk per wilaya and it sits in the wilaya's center
-        // commune, so a delivery_type=2 order addressed to any other commune is refused
-        // with "SD delivery type is not allowed outside center commune" (error 45).
-        // The parcel goes to that same desk whichever commune the shopper lives in, so
-        // retarget the payload instead of failing the push — their own address is
-        // already carried by destination_text.
+        // A relay parcel travels to the relay, so it is addressed to the relay's own
+        // commune whenever that differs from the shopper's. Validating the pickup_point
+        // against the shopper's commune instead is what rejected a relay the storefront
+        // had legitimately offered from a neighbouring commune.
+        const relayCommune =
+            input.deliveryType === 3 && input.pickupPointCommune != null
+                ? await this.resolveRelayCommune({
+                    apiToken: input.apiToken,
+                    wilaya: normalizedLocation.wilaya,
+                    commune: input.pickupPointCommune
+                })
+                : null
+
+        // Where the parcel is actually addressed. For a stop desk that is the wilaya's
+        // center commune: Maystro runs one desk per wilaya and it sits there, so a
+        // delivery_type=2 order addressed anywhere else is refused with "SD delivery type
+        // is not allowed outside center commune" (error 45). For a relay it is the relay's
+        // commune. Either way the shopper's own address is carried by destination_text.
         const destinationCommune =
             input.deliveryType === 2 && normalizedLocation.centerCommune != null
                 ? normalizedLocation.centerCommune
-                : normalizedLocation.commune
+                : relayCommune ?? normalizedLocation.commune
 
         if (input.deliveryType === 3) {
             if (!input.pickupPoint) {
@@ -240,6 +254,34 @@ export class MaystroOrderService {
         return { externalId, payload }
     }
 
+    /**
+     * The relay's commune as a Maystro id. It arrives as whatever the order recorded —
+     * an id, or the name the storefront showed — so both forms are accepted here.
+     * Returns null when it cannot be placed, leaving the shopper's own commune to stand.
+     */
+    private async resolveRelayCommune(input: {
+        apiToken: string
+        wilaya: string | number
+        commune: string | number
+    }): Promise<number | null> {
+        const raw = String(input.commune ?? '').trim()
+        if (!raw) return null
+
+        const numeric = Number.parseInt(raw, 10)
+        if (Number.isFinite(numeric) && String(numeric) === raw) return numeric
+
+        try {
+            const resolved = await this.location.resolveWilayaAndCommune({
+                apiToken: input.apiToken,
+                wilaya: input.wilaya,
+                commune: raw
+            })
+            return resolved.communeId
+        } catch {
+            return null
+        }
+    }
+
     private async persistOrderMapping(input: {
         tenantId: string
         localOrderId: string
@@ -294,6 +336,8 @@ export class MaystroOrderService {
         noteToDriver?: string
         deliveryType: 1 | 2 | 3
         pickupPoint?: number
+        /** The commune the relay itself sits in, when it differs from the shopper's. */
+        pickupPointCommune?: string | number
     }) {
         const existing = await this.prisma.maystroOrderMapping.findUnique({
             where: { tenantId_localOrderId: { tenantId: input.tenantId, localOrderId: input.localOrderId } }

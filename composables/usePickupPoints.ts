@@ -1,7 +1,9 @@
 import { computed, ref, watch } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 
 export type PickupPoint = {
+  /** Stable key for the list. Never sent to the carrier — see `ProviderPickupPoint`. */
   id: string
   name: string
   address?: string
@@ -29,6 +31,7 @@ type Accessors = {
  * selected delivery option and the generic route answers for any of them.
  */
 export const usePickupPoints = (input: Accessors) => {
+  const { t } = useI18n({ useScope: 'global' })
   const points = ref<PickupPoint[]>([])
   const loading = ref(false)
   const error = ref('')
@@ -84,6 +87,12 @@ export const usePickupPoints = (input: Accessors) => {
               }))
               .filter((p) => p.name.trim().length > 0)
           : []
+
+        // An empty list is an answer, not a loading state. Leaving it blank and silent
+        // is why picking a commune sometimes looked like nothing happened at all.
+        if (points.value.length === 0) {
+          error.value = t('storefront.checkout.delivery.noPickupPoints')
+        }
 
         // Preselect only when there is nothing to choose between. With several
         // agencies the shopper picks; they don't get one assigned silently.

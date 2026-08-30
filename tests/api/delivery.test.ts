@@ -1,7 +1,7 @@
 import request from 'supertest'
 import jwt from 'jsonwebtoken'
 import { createHmac } from 'node:crypto'
-import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, beforeEach, vi } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
 import { MaystroProvider } from '../../backend/src/modules/delivery/providers/maystro.provider'
@@ -12,10 +12,17 @@ import { MaystroPickupPointService } from '../../backend/src/modules/delivery/ma
 import { YalidineLocationService } from '../../backend/src/modules/delivery/yalidine/yalidine-location.service'
 import { YalidineClient } from '../../backend/src/modules/delivery/yalidine/yalidine.client'
 import { YalidineIntegrationError } from '../../backend/src/modules/delivery/yalidine/yalidine.errors'
+import { resetProviderCommunesCache } from '../../backend/src/modules/delivery/delivery.service'
 
 const JWT_SECRET = process.env.JWT_SECRET!
 
 describe('Delivery API', () => {
+    // Carrier commune catalogues are cached for an hour in production. Tests re-stub the
+    // same tenant+wilaya with different answers, so the cache has to go between cases.
+    beforeEach(() => {
+        resetProviderCommunesCache()
+    })
+
     let tenantA: any
     let tenantB: any
     let tokenA: string
@@ -1003,6 +1010,48 @@ describe('Delivery API', () => {
         expect(names).toEqual(['Birkhadem', 'Es Senia', 'Hydra'])
     })
 
+    it('GET /api/delivery/communes falls back to the static Algeria dataset when only Self delivery is offered', async () => {
+        vi.restoreAllMocks()
+
+        await prisma.storeSettings.upsert({
+            where: { tenantId: tenantA.id },
+            create: { tenantId: tenantA.id, allowedDeliveryProviders: ['SELF'] },
+            update: { allowedDeliveryProviders: ['SELF'] }
+        })
+
+        const res = await request(app)
+            .get('/api/delivery/communes?wilaya=16')
+            .set('Host', `${tenantA.slug}.swekly.com`)
+
+        expect(res.status).toBe(200)
+        const names = res.body.map((c: any) => c.name)
+        expect(names.length).toBeGreaterThan(50)
+        expect(names).toContain('Hydra')
+        expect(names).toContain('Birkhadem')
+        // sorted
+        expect([...names]).toEqual([...names].sort((a, b) => a.localeCompare(b)))
+    })
+
+    it('GET /api/delivery/communes falls back to the static dataset when every carrier is unreachable', async () => {
+        vi.restoreAllMocks()
+
+        await prisma.storeSettings.upsert({
+            where: { tenantId: tenantA.id },
+            create: { tenantId: tenantA.id, allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] },
+            update: { allowedDeliveryProviders: ['MAYSTRO', 'YALIDINE'] }
+        })
+
+        vi.spyOn(MaystroProvider.prototype, 'listCommunes').mockRejectedValue(new Error('Maystro unreachable'))
+        vi.spyOn(YalidineProvider.prototype, 'listCommunes').mockRejectedValue(new Error('Yalidine unreachable'))
+
+        const res = await request(app)
+            .get('/api/delivery/communes?wilaya=16')
+            .set('Host', `${tenantA.slug}.swekly.com`)
+
+        expect(res.status).toBe(200)
+        expect(res.body.map((c: any) => c.name)).toContain('Hydra')
+    })
+
     it('GET /api/delivery/communes tolerates one provider being unreachable', async () => {
         vi.restoreAllMocks()
 
@@ -1254,6 +1303,10 @@ describe('Delivery API', () => {
             expect(res.body).toHaveLength(2)
             expect(res.body[0]).toEqual({
                 id: '160101',
+                // A Yalidine agency has a real id of its own — it is the stopdesk_id the
+                // order carries. A Maystro stop desk has none, which is why the two are
+                // now kept apart instead of both being squeezed into `id`.
+                carrierPointId: '160101',
                 name: 'Agence Sacré-Cœur',
                 address: '116 Didouche Mourad',
                 communeId: '1601',

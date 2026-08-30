@@ -40,9 +40,9 @@ const { t } = useI18n({ useScope: 'global' })
               <li
                 v-for="item in cartStore.items"
                 :key="item.variantId || item.productId"
-                class="bg-white border-4 border-black p-4 flex gap-6 relative group hover:-translate-y-1 hover:shadow-[8px_8px_0_0_var(--brand)] transition-all"
+                class="bg-white border-4 border-black p-4 flex gap-4 sm:gap-6 relative group hover:-translate-y-1 hover:shadow-[8px_8px_0_0_var(--brand)] transition-all"
               >
-                <div class="w-32 aspect-square border-2 border-black bg-gray-100 flex-shrink-0 overflow-hidden">
+                <div class="w-24 sm:w-32 aspect-square border-2 border-black bg-gray-100 flex-shrink-0 overflow-hidden">
                   <img
                     v-if="item.image"
                     :src="item.image"
@@ -57,17 +57,17 @@ const { t } = useI18n({ useScope: 'global' })
                   </div>
                 </div>
 
-                <div class="flex-grow flex flex-col justify-between">
+                <div class="flex-grow min-w-0 flex flex-col justify-between">
                   <div>
-                    <div class="flex justify-between items-start">
-                      <h3 class="font-street text-2xl uppercase leading-none mb-2">
+                    <div class="flex justify-between items-start gap-2">
+                      <h3 class="font-street text-2xl uppercase leading-none mb-2 min-w-0 break-words">
                         <NuxtLink :to="`/product/${item.slug}`" class="hover:text-brand transition-colors">
                           {{ item.title }}
                         </NuxtLink>
                       </h3>
                       <button
                         type="button"
-                        class="text-xs font-mono uppercase underline hover:bg-black hover:text-white px-1 transition-colors"
+                        class="shrink-0 text-xs font-mono uppercase underline hover:bg-black hover:text-white px-1 transition-colors"
                         @click="cartStore.removeItem(item.productId, item.variantId)"
                       >
                         <span class="sr-only">{{ storefrontContent.cart.item.remove }}</span>
@@ -79,8 +79,8 @@ const { t } = useI18n({ useScope: 'global' })
                     </p>
                   </div>
 
-                  <div class="flex justify-between items-end mt-4">
-                    <div class="flex items-center border-2 border-black">
+                  <div class="flex flex-wrap justify-between items-end gap-2 mt-4">
+                    <div class="flex items-center border-2 border-black shrink-0">
                       <button
                         :disabled="item.quantity <= 1"
                         class="px-3 py-1 hover:bg-brand font-bold disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
@@ -97,7 +97,7 @@ const { t } = useI18n({ useScope: 'global' })
                         <Icon name="lucide:plus" class="w-4 h-4" />
                       </button>
                     </div>
-                    <div class="font-mono font-bold text-xl">
+                    <div class="font-mono font-bold text-lg sm:text-xl shrink-0">
                       {{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}
                     </div>
                   </div>

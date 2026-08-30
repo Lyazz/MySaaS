@@ -10,8 +10,10 @@ import { MaystroLocationService } from './maystro/maystro-location.service'
 import { MaystroIntegrationError } from './maystro/maystro.errors'
 import { normalizeLocationName } from './shared/normalize-location-name'
 import { moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
+import { listDzCommunes } from '../../../../shared/geo/dz-communes'
 import { OrdersService } from '../orders/orders.service'
 import type {
+    ProviderCommune,
     CreateShipmentInput,
     ProviderCommune,
     ProviderPickupPoint,
@@ -56,6 +58,32 @@ type ProviderApiConfig = {
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
     typeof value === 'object' && value !== null && !Array.isArray(value)
+
+/**
+ * What one carrier calls a commune, if it carries it at all.
+ *
+ * Carriers share no commune identifier — Maystro issues its own sequential ids and
+ * exposes no postal code, Yalidine uses its own — so the only join is the name, and the
+ * names disagree ("Aït Maouche" is Maystro's "Beni Maouch"). A carrier must therefore be
+ * asked using *its own* id, and "this carrier does not carry that commune" has to be a
+ * first-class answer rather than an excuse to substitute a different one.
+ */
+type ProviderCommuneMatch =
+    | { kind: 'resolved'; id: string }
+    | { kind: 'not-carried' }
+    /** The carrier prices without a commune catalogue at all (e.g. SELF) — nothing to resolve. */
+    | { kind: 'no-catalogue' }
+
+// resolveProvider() builds a fresh adapter per call, so the adapters' own caches never
+// survive. Cache the commune catalogue here instead, keyed by tenant+provider+wilaya.
+const providerCommunesCache = new Map<string, { value: ProviderCommune[]; expiresAt: number }>()
+const PROVIDER_COMMUNES_TTL_MS = 60 * 60 * 1000
+
+/**
+ * Drop the cached carrier catalogues. Needed when a carrier's answer for a wilaya changes
+ * within the TTL — a tenant switching credentials, and tests re-stubbing a provider.
+ */
+export const resetProviderCommunesCache = () => providerCommunesCache.clear()
 
 const normalizeOrderDeliveryMode = (value: unknown): 'home' | 'office' | undefined => {
     const raw = typeof value === 'string' ? value.trim().toLowerCase() : ''
@@ -199,7 +227,74 @@ export class DeliveryService {
         throw new Error(`Unsupported provider: ${provider}`)
     }
 
-    async listCommuneNames(tenantId: string, wilayaCode: string): Promise<{ name: string }[]> {
+    /**
+     * The commune catalogue one carrier publishes for a wilaya, cached for an hour.
+     * Returns [] rather than throwing when the carrier is unreachable, and does not cache
+     * that emptiness — a carrier being down for one request must not blank it for an hour.
+     */
+    private async cachedProviderCommunes(
+        tenantId: string,
+        provider: ShipmentProvider,
+        wilayaCode: string
+    ): Promise<ProviderCommune[]> {
+        const key = `${tenantId}:${provider}:${wilayaCode}`
+        const cached = providerCommunesCache.get(key)
+        if (cached && cached.expiresAt > Date.now()) return cached.value
+
+        try {
+            const { impl } = await this.resolveProvider(tenantId, provider)
+            if (!impl.listCommunes) return []
+            const communes = await impl.listCommunes(wilayaCode)
+            if (!Array.isArray(communes)) return []
+            providerCommunesCache.set(key, { value: communes, expiresAt: Date.now() + PROVIDER_COMMUNES_TTL_MS })
+            return communes
+        } catch {
+            return []
+        }
+    }
+
+    /**
+     * Translate a commune — as the shopper picked it, which is a name — into the id this
+     * carrier uses, so no carrier is ever handed another carrier's string.
+     *
+     * A value that is already numeric is taken as this carrier's own id and passed through.
+     */
+    async matchProviderCommune(input: {
+        tenantId: string
+        provider: ShipmentProvider
+        wilayaCode: string
+        commune?: string | null
+    }): Promise<ProviderCommuneMatch> {
+        const raw = String(input.commune ?? '').trim()
+        if (!raw) return { kind: 'no-catalogue' }
+
+        const numeric = Number.parseInt(raw, 10)
+        if (Number.isFinite(numeric) && String(numeric) === raw) return { kind: 'resolved', id: raw }
+
+        const communes = await this.cachedProviderCommunes(input.tenantId, input.provider, input.wilayaCode)
+        // A carrier that publishes no catalogue (SELF) prices by wilaya or a flat rate, so
+        // there is nothing to resolve against and the value passes through untouched.
+        if (!communes.length) return { kind: 'no-catalogue' }
+
+        const wanted = normalizeLocationName(raw)
+        const match = communes.find((c) => normalizeLocationName(c.name) === wanted)
+        if (!match?.id) return { kind: 'not-carried' }
+        return { kind: 'resolved', id: String(match.id) }
+    }
+
+    /**
+     * The commune dropdown: the union of every offered carrier's catalogue.
+     *
+     * Each entry carries the id of every carrier that publishes it, so checkout can address
+     * each carrier in its own terms. Carriers spelling the same commune differently still
+     * produce two entries — nothing can join them without a shared key — but each entry now
+     * works correctly for the carriers behind it instead of being a bare name that may
+     * resolve against none of them.
+     */
+    async listCommuneNames(
+        tenantId: string,
+        wilayaCode: string
+    ): Promise<{ name: string; ids: Record<string, string> }[]> {
         const offeredProviders = await this.getOfferedProviders(tenantId)
 
         const preferenceOrder: ShipmentProvider[] = ['MAYSTRO', 'YALIDINE']
@@ -208,26 +303,32 @@ export class DeliveryService {
             ...offeredProviders.filter((p) => !preferenceOrder.includes(p))
         ]
 
-        const byNormalizedName = new Map<string, string>()
+        const byNormalizedName = new Map<string, { name: string; ids: Record<string, string> }>()
 
         for (const provider of orderedProviders) {
-            try {
-                const { impl } = await this.resolveProvider(tenantId, provider)
-                if (!impl.listCommunes) continue
-                const communes = await impl.listCommunes(wilayaCode)
-                for (const commune of communes) {
-                    const key = normalizeLocationName(commune.name)
-                    if (!key || byNormalizedName.has(key)) continue
-                    byNormalizedName.set(key, commune.name)
-                }
-            } catch {
-                // A misconfigured/unreachable provider must not break the merged list for the others.
+            // Unreachable or misconfigured carriers yield [] and must not break the others.
+            const communes = await this.cachedProviderCommunes(tenantId, provider, wilayaCode)
+            for (const commune of communes) {
+                const key = normalizeLocationName(commune.name)
+                if (!key) continue
+                const entry = byNormalizedName.get(key) ?? { name: commune.name, ids: {} }
+                if (commune.id != null) entry.ids[provider] = String(commune.id)
+                byNormalizedName.set(key, entry)
             }
         }
 
-        return Array.from(byNormalizedName.values())
-            .sort((a, b) => a.localeCompare(b))
-            .map((name) => ({ name }))
+        // No carrier could supply a commune list for this wilaya -- e.g. the store only offers
+        // Self delivery, or every configured carrier was unreachable. Fall back to the static
+        // Algeria wilaya -> commune dataset so the storefront can still collect an address.
+        if (byNormalizedName.size === 0) {
+            for (const name of listDzCommunes(wilayaCode)) {
+                const key = normalizeLocationName(name)
+                if (!key || byNormalizedName.has(key)) continue
+                byNormalizedName.set(key, { name, ids: {} })
+            }
+        }
+
+        return Array.from(byNormalizedName.values()).sort((a, b) => a.name.localeCompare(b.name))
     }
 
     private resolveServiceLevel(input: { serviceLevel?: string; deliveryMode?: 'home' | 'office' }) {
@@ -316,16 +417,35 @@ export class DeliveryService {
         const { impl, apiConfig } = await this.resolveProvider(input.tenantId, input.provider)
         const requiresCredentials = getProviderCatalogItem(input.provider).credentialFields.some((f) => f.required)
 
+        // Ask the carrier in its own terms. A commune it does not carry under that name
+        // must not be quoted by substituting a different one — the shopper would be shown a
+        // price for somewhere else.
+        const communeMatch = await this.matchProviderCommune({
+            tenantId: input.tenantId,
+            provider: input.provider,
+            wilayaCode: input.destination.wilayaCode,
+            commune: input.destination.communeCode
+        })
+
         const quoteInput: QuoteRequest = {
             ...input,
+            destination:
+                communeMatch.kind === 'resolved'
+                    ? { ...input.destination, communeCode: communeMatch.id }
+                    : input.destination,
             serviceLevel: effectiveServiceLevel,
             originWilayaCode: input.originWilayaCode
         }
 
         // Same reasoning as rateShopOptions: fall through to the tenant's own saved
         // rate rather than failing the checkout when the carrier is unreachable.
+        // A commune the carrier does not carry cannot be priced for home delivery. Desk
+        // collection still can, where the carrier's desk is wilaya-scoped — the carrier
+        // decides that, since only it knows how its desks are organised.
+        const canQuoteCommune = communeMatch.kind !== 'not-carried' || effectiveDeliveryMode === 'office'
+
         let providerQuotes: QuoteOption[] = []
-        if (impl.quote && (!requiresCredentials || apiConfig)) {
+        if (impl.quote && (!requiresCredentials || apiConfig) && canQuoteCommune) {
             try {
                 providerQuotes = await impl.quote(quoteInput)
             } catch (error) {
@@ -375,17 +495,31 @@ export class DeliveryService {
             const { impl, apiConfig } = await this.resolveProvider(input.tenantId, provider)
             const requiresCredentials = getProviderCatalogItem(provider).credentialFields.some((f) => f.required)
 
+            const communeMatch = await this.matchProviderCommune({
+                tenantId: input.tenantId,
+                provider,
+                wilayaCode: input.destination.wilayaCode,
+                commune: input.destination.communeCode
+            })
+
             const quoteInput: QuoteRequest = {
                 ...input,
                 provider,
+                destination:
+                    communeMatch.kind === 'resolved'
+                        ? { ...input.destination, communeCode: communeMatch.id }
+                        : input.destination,
                 serviceLevel: effectiveServiceLevel,
                 originWilayaCode: input.originWilayaCode
             }
 
             // Rate-shopping is a shopper-facing path: one carrier being down, throttled
-            // or misconfigured must never block the others or the checkout itself.
+            // or misconfigured must never block the others or the checkout itself. A carrier
+            // that does not carry this commune simply does not quote it.
+            const canQuoteCommune = communeMatch.kind !== 'not-carried' || input.deliveryMode === 'office'
+
             let providerQuotes: QuoteOption[] = []
-            if (impl.quote && (!requiresCredentials || apiConfig)) {
+            if (impl.quote && (!requiresCredentials || apiConfig) && canQuoteCommune) {
                 try {
                     providerQuotes = await impl.quote(quoteInput)
                 } catch (error) {
@@ -685,7 +819,20 @@ export class DeliveryService {
         if (!impl.listPickupPoints) {
             throw new DeliveryConfigurationError(400, 'Provider does not offer pickup points')
         }
-        return impl.listPickupPoints({ wilayaCode: input.wilayaCode, communeCode: input.communeCode })
+
+        // Hand the carrier its own commune id rather than the name the shopper picked,
+        // which may have come from a different carrier's catalogue entirely.
+        const communeMatch = await this.matchProviderCommune({
+            tenantId: input.tenantId,
+            provider: input.provider,
+            wilayaCode: input.wilayaCode,
+            commune: input.communeCode
+        })
+
+        return impl.listPickupPoints({
+            wilayaCode: input.wilayaCode,
+            communeCode: communeMatch.kind === 'resolved' ? communeMatch.id : input.communeCode
+        })
     }
 
     /**
@@ -820,6 +967,14 @@ export class DeliveryService {
             typeof (order as any).shippingPickupPoint === 'number' && Number.isFinite((order as any).shippingPickupPoint)
                 ? Math.trunc((order as any).shippingPickupPoint)
                 : null
+        const storedPickupKind =
+            (order as any).shippingPickupPointKind === 'desk' || (order as any).shippingPickupPointKind === 'relay'
+                ? ((order as any).shippingPickupPointKind as 'desk' | 'relay')
+                : null
+        const orderPickupCommune =
+            typeof (order as any).shippingPickupPointCommune === 'string'
+                ? (order as any).shippingPickupPointCommune.trim() || null
+                : null
 
         const offeredProviders = await this.getOfferedProviders(input.tenantId)
         if (!offeredProviders.includes(baseInput.provider)) {
@@ -833,18 +988,47 @@ export class DeliveryService {
             throw new DeliveryConfigurationError(400, 'Delivery provider credentials are not configured')
         }
 
+        // Orders written before a pickup point recorded its kind hold a bare number, and for
+        // a Maystro stop desk that number is a commune id standing in for a pickup_point the
+        // carrier never issued. Ask the carrier which it is rather than assuming a relay.
+        const pickupKind =
+            baseInput.provider === 'MAYSTRO' && orderPickupPoint && !storedPickupKind
+                ? await this.classifyLegacyMaystroPickupPoint({
+                    tenantId: baseInput.tenantId,
+                    wilayaCode: baseInput.wilayaCode,
+                    communeCode: baseInput.communeCode,
+                    pickupPoint: orderPickupPoint
+                })
+                : storedPickupKind
+
+        // A Maystro stop desk takes no pickup_point at all — the wilaya has one desk and the
+        // carrier routes to it by commune. Sending the id anyway is what came back as
+        // "Invalid pickup_point for commune". Yalidine agencies do carry a real stopdesk_id.
+        const carrierPickupPointId =
+            baseInput.provider === 'MAYSTRO' && pickupKind === 'desk' ? null : orderPickupPoint
+
         // The chosen pickup point belongs to every carrier that has one, not just
         // Maystro. Leaving it out of Yalidine's metadata meant a confirmed agency order
         // reached the carrier with no stopdesk_id and was refused.
         const metadataWithPickupPoint =
-            orderPickupPoint && baseInput.metadata?.pickupPoint == null
-                ? { ...(baseInput.metadata || {}), pickupPoint: orderPickupPoint }
+            carrierPickupPointId && baseInput.metadata?.pickupPoint == null
+                ? { ...(baseInput.metadata || {}), pickupPoint: carrierPickupPointId }
                 : baseInput.metadata
+
+        // delivery_type follows what the shopper picked, not merely whether an id exists:
+        // 2 is the wilaya stop desk, 3 a third-party relay.
+        const maystroDeliveryType = pickupKind === 'relay' ? 3 : pickupKind === 'desk' ? 2 : undefined
 
         const maybeAugmentedMetadata =
             baseInput.provider === 'MAYSTRO'
-                ? orderPickupPoint
-                    ? { ...(metadataWithPickupPoint || {}), maystroDeliveryType: 3 }
+                ? maystroDeliveryType
+                    ? {
+                        ...(metadataWithPickupPoint || {}),
+                        maystroDeliveryType,
+                        // A relay is priced and addressed against its own commune, which is
+                        // not always the shopper's.
+                        ...(orderPickupCommune ? { pickupPointCommune: orderPickupCommune } : {})
+                    }
                     : metadataWithPickupPoint
                 : baseInput.provider === 'YALIDINE'
                     ? {
@@ -934,14 +1118,51 @@ export class DeliveryService {
                 shippingNotes: baseInput.notes || undefined,
                 deliveryMode: inferredDeliveryMode === 'office' ? 'pickup' : inferredDeliveryMode ?? (order as any).deliveryMode,
                 totalWithShippingAmount: totalWithShippingAmount ?? undefined,
+                // Clear the id a legacy stop desk order should never have carried, so the
+                // repair sticks and the next push does not have to ask the carrier again.
                 shippingPickupPoint:
-                    typeof (maybeAugmentedMetadata as any)?.pickupPoint === 'number'
-                        ? Math.trunc((maybeAugmentedMetadata as any).pickupPoint)
-                        : undefined
+                    baseInput.provider === 'MAYSTRO' && pickupKind === 'desk'
+                        ? null
+                        : typeof (maybeAugmentedMetadata as any)?.pickupPoint === 'number'
+                            ? Math.trunc((maybeAugmentedMetadata as any).pickupPoint)
+                            : undefined,
+                shippingPickupPointKind: pickupKind ?? undefined
             } as any
         })
 
         return shipment
+    }
+
+    /**
+     * Which kind of collection point a pre-existing order refers to.
+     *
+     * Orders created before the kind was recorded hold a bare number. A relay's number is
+     * a real Maystro pickup_point; a stop desk's is the commune id that used to stand in
+     * for one. Matching against the carrier's own list is the only way to tell them apart
+     * after the fact — anything the carrier does not know as a relay is a desk.
+     */
+    private async classifyLegacyMaystroPickupPoint(input: {
+        tenantId: string
+        wilayaCode: string
+        communeCode?: string
+        pickupPoint: number
+    }): Promise<'desk' | 'relay' | null> {
+        try {
+            const points = await this.listProviderPickupPoints({
+                tenantId: input.tenantId,
+                provider: 'MAYSTRO',
+                wilayaCode: input.wilayaCode,
+                communeCode: input.communeCode
+            })
+            const isKnownRelay = points.some(
+                (p) => p.kind === 'relay' && p.carrierPointId != null && Number(p.carrierPointId) === input.pickupPoint
+            )
+            return isKnownRelay ? 'relay' : 'desk'
+        } catch {
+            // Carrier unreachable: say nothing rather than guess, and let the push proceed
+            // on whatever the caller already supplied.
+            return null
+        }
     }
 
     private async createMaystroShipment(
@@ -997,7 +1218,13 @@ export class DeliveryService {
             wilaya: input.wilayaCode,
             commune: input.communeCode,
             deliveryType,
-            pickupPoint: Number.isFinite(pickupPoint as any) ? (pickupPoint as number) : undefined
+            pickupPoint: Number.isFinite(pickupPoint as any) ? (pickupPoint as number) : undefined,
+            // A relay sits in its own commune, which is not always the shopper's — the
+            // parcel is addressed there and the id is only valid against it.
+            pickupPointCommune:
+                typeof input.metadata?.pickupPointCommune === 'string' && input.metadata.pickupPointCommune.trim()
+                    ? input.metadata.pickupPointCommune.trim()
+                    : undefined
         })
 
         return {

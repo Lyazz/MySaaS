@@ -151,6 +151,7 @@ export function useStorefrontContent() {
           pickupPoint: i18n.t('storefront.checkout.delivery.description.pickupPoint'),
           storePickup: i18n.t('storefront.checkout.delivery.description.storePickup')
         },
+        noPickupPoints: i18n.t('storefront.checkout.delivery.noPickupPoints'),
         provider: {
           self: i18n.t('storefront.checkout.delivery.provider.self'),
           storePickup: i18n.t('storefront.checkout.delivery.provider.storePickup'),

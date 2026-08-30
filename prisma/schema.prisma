@@ -1026,7 +1026,21 @@ model Order {
   shippingNotes        String?
   shippingEtaMinDays   Int?
   shippingEtaMaxDays   Int?
-  shippingPickupPoint  Int?
+
+  // The carrier's own id for the chosen collection point, and null when the carrier has
+  // none for it — a Maystro stop desk is reached through the wilaya's center commune
+  // with no pickup_point at all. The three fields below say which point was chosen well
+  // enough to rebuild the carrier payload without asking the carrier again.
+  shippingPickupPoint        Int?
+  // 'desk' (carrier counter) or 'relay' (third-party shop). Decides Maystro's
+  // delivery_type: 2 for a desk, 3 for a relay.
+  shippingPickupPointKind    String?
+  // The commune the point itself sits in, which is not always the shopper's: a relay
+  // may be offered from a neighbouring commune, and the parcel is addressed to it.
+  shippingPickupPointCommune String?
+  // The label the shopper actually picked, kept for bordereaux and admin screens —
+  // a Maystro stop desk has no numeric id to show in their place.
+  shippingPickupPointName    String?
 
   items              OrderItem[]
   pointsLedger       CustomerPointsLedger[]

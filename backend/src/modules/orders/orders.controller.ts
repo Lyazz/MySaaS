@@ -61,8 +61,11 @@ export class OrdersController {
                         addressLine2: undefined,
                         notes: order.shippingNotes ?? undefined,
                         deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
-                        metadata: provider === 'MAYSTRO' && order.shippingPickupPoint
-                            ? { pickupPoint: order.shippingPickupPoint, maystroDeliveryType: 3 }
+                        // The delivery type is derived from the recorded pickup point kind
+                        // in DeliveryService — hardcoding 3 here pushed every stop desk
+                        // order as a relay and the carrier refused it.
+                        metadata: order.shippingPickupPoint
+                            ? { pickupPoint: order.shippingPickupPoint }
                             : undefined
                     })
                 } catch (shipmentErr: any) {
@@ -267,13 +270,11 @@ export class OrdersController {
                             addressLine2: undefined,
                             notes: order.shippingNotes ?? undefined,
                             deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
-                            // The pickup point travels for whichever carrier holds it;
-                            // maystroDeliveryType is the only Maystro-specific part.
+                            // The pickup point travels for whichever carrier holds it.
+                            // Its Maystro delivery type is derived from the recorded kind
+                            // in DeliveryService, not assumed to be a relay here.
                             metadata: order.shippingPickupPoint
-                                ? {
-                                    pickupPoint: order.shippingPickupPoint,
-                                    ...(provider === 'MAYSTRO' ? { maystroDeliveryType: 3 } : {})
-                                }
+                                ? { pickupPoint: order.shippingPickupPoint }
                                 : undefined
                         })
                         return res.json(updated)
