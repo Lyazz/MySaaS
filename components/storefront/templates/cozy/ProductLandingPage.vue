@@ -105,39 +105,32 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div
-    class="min-h-screen bg-gradient-to-b from-amber-50/50 to-white pb-32 md:pb-12"
-  >
-    <!-- Full Width Description Section -->
-    <div
-      class="w-full mb-8 bg-white/80 backdrop-blur-sm border-b border-amber-100"
-    >
-      <SafeRichText
-        v-if="product?.description"
-        class="prose prose-lg md:prose-xl prose-headings:font-cozy prose-headings:text-slate-800 max-w-4xl mx-auto text-slate-600 p-8 md:p-12"
-        :html="product.description"
-      />
-      <p v-else class="text-slate-500 text-lg max-w-4xl mx-auto p-8 md:p-12">
-        Experience premium quality with our latest collection. Crafted with care
-        for your comfort.
-      </p>
+  <div class="ed-theme pb-28 md:pb-12">
+    <!-- Full-width editorial description -->
+    <div class="border-b border-[#DAD2C4]">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-14">
+        <SafeRichText
+          v-if="product?.description"
+          class="ed-prose text-[17px]"
+          :html="product.description"
+        />
+        <p v-else class="ed-prose text-[17px] text-[#4A4038]">
+          {{ storefrontContent.product.descriptionFallback }}
+        </p>
+      </div>
     </div>
 
-    <div class="max-w-6xl mx-auto px-4 md:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-        <!-- Left Column: Gallery -->
-        <div>
+    <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-14">
+      <div class="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16 items-start">
+        <div class="lg:col-span-7">
           <ProductGallery :images="images" :title="product?.title" />
         </div>
-
-        <!-- Right Column: Details + Form -->
-        <div class="lg:sticky lg:top-24 h-fit space-y-8">
+        <div class="lg:col-span-5 lg:sticky lg:top-24 self-start mt-10 lg:mt-0 space-y-8">
           <ProductDetails
             :product="product"
             :current-price="currentPrice"
             v-model:selected-options="selectedOptions"
           />
-
           <ProductOrderForm
             :product="product"
             :current-variant="currentVariant"
@@ -149,22 +142,18 @@ onUnmounted(() => {
       </div>
     </div>
 
-    <!-- Mobile Sticky Bottom Bar -->
+    <!-- Mobile sticky bar -->
     <div
       v-if="cartEnabled"
-      class="fixed bottom-0 start-0 w-full p-4 bg-white/95 backdrop-blur-lg border-t border-amber-100 md:hidden z-40 flex items-center justify-between shadow-2xl"
+      class="fixed bottom-0 start-0 w-full px-4 py-3 bg-[#F4EFE6] border-t border-[#262019] md:hidden z-40 flex items-center justify-between gap-4"
     >
       <div class="flex flex-col">
-        <span class="text-xs text-slate-400">{{
-          storefrontContent.productForm.totalPrice
-        }}</span>
-        <span class="font-cozy font-bold text-xl text-slate-800">{{
-          formatPrice(currentPrice)
-        }}</span>
+        <span class="ed-ui text-[10px] uppercase tracking-[0.14em] text-[#8A7E6E]">{{ storefrontContent.productForm.totalPrice }}</span>
+        <span class="ed-display text-xl text-[#B8532E]">{{ formatPrice(currentPrice) }}</span>
       </div>
       <button
+        class="ed-btn-solid"
         onclick="window.scrollTo({ top: 0, behavior: 'smooth' })"
-        class="bg-brand-500 text-white px-8 py-3 rounded-full font-bold shadow-lg shadow-brand-200 hover:bg-brand-600 transition-all"
       >
         {{ storefrontContent.actions.orderNow }}
       </button>

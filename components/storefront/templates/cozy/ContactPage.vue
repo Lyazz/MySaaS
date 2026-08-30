@@ -1,84 +1,67 @@
 <script setup lang="ts">
-const { t } = useI18n({ useScope: 'global' })
+import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 
-const form = reactive({
-    name: '',
-    email: '',
-    message: ''
+const tenant = useState<any>('tenant')
+const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
+
+useTenantSeo({
+  title: t('storefront.pages.contact.seo.title', { tenant: tenantName.value }),
+  description: t('storefront.pages.contact.seo.description', { tenant: tenantName.value })
 })
 
-const submitForm = () => {
-    alert(t('storefront.templates.cozy.contact.alert.sentWithLove'))
-}
+type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; isActive?: boolean }
+const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
+const rows = computed(() =>
+  (contactInfos.value || [])
+    .filter((i) => i && (i.isActive ?? true) !== false)
+    .map((i) => ({ ...i, href: buildContactInfoHref(i.kind, i.value), def: CONTACT_INFO_DEF_BY_KIND[i.kind] }))
+)
+const isExternalHref = (href?: string | null) => Boolean(href && /^https?:\/\//i.test(href))
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto px-4 py-16">
-    <div class="bg-white rounded-[4rem] shadow-soft overflow-hidden grid grid-cols-1 md:grid-cols-2">
-        
-        <!-- Info Side -->
-        <div class="bg-brand-500 p-12 md:p-16 text-white flex flex-col justify-center relative overflow-hidden">
-            <div class="absolute -top-24 -end-24 w-64 h-64 bg-brand-400 rounded-full opacity-50"></div>
-            <div class="absolute -bottom-24 -start-24 w-64 h-64 bg-brand-600 rounded-full opacity-50"></div>
-            
-            <div class="relative z-10">
-                <h1 class="font-cozy font-black text-5xl mb-6 leading-tight">{{ t('storefront.templates.cozy.contact.heading') }}</h1>
-                <p class="text-brand-100 text-lg mb-12 font-medium">{{ t('storefront.templates.cozy.contact.subtitle') }}</p>
-                
-                <div class="space-y-6">
-                    <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                            <Icon name="lucide:map-pin" class="w-5 h-5" />
-                        </div>
-                        <span class="font-bold">123 Serenity Lane, Cloud City</span>
-                    </div>
-                    <div class="flex items-center gap-4">
-                         <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm">
-                            <Icon name="lucide:mail" class="w-5 h-5" />
-                        </div>
-                        <span class="font-bold">hello@cozy.store</span>
-                    </div>
-                </div>
+  <div class="ed-theme">
+    <div class="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-10 py-14 md:py-24">
+      <div class="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+        <!-- Marque plate -->
+        <div class="lg:col-span-5 order-2 lg:order-1">
+          <div class="bg-[#FBF8F2] border border-[#DAD2C4] p-2">
+            <div class="aspect-[4/5] bg-[#EFE8DA] flex items-center justify-center">
+              <Icon name="lucide:mail" class="w-16 h-16 md:w-24 md:h-24 text-[#C4B8A4]" />
             </div>
+          </div>
         </div>
 
-        <!-- Form Side -->
-        <div class="p-12 md:p-16 bg-white">
-            <form @submit.prevent="submitForm" class="space-y-6">
-                <div>
-                    <label class="block text-sm font-bold text-slate-500 mb-2 ms-4">{{ t('storefront.templates.cozy.contact.form.nameLabel') }}</label>
-                    <input 
-                        v-model="form.name"
-                        type="text" 
-                        class="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-700 focus:ring-2 focus:ring-brand-200 focus:bg-white transition-all outline-none"
-                    >
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-500 mb-2 ms-4">{{ t('storefront.templates.cozy.contact.form.emailLabel') }}</label>
-                    <input 
-                        v-model="form.email"
-                        type="email" 
-                        class="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-700 focus:ring-2 focus:ring-brand-200 focus:bg-white transition-all outline-none"
-                    >
-                </div>
-                <div>
-                    <label class="block text-sm font-bold text-slate-500 mb-2 ms-4">{{ t('storefront.templates.cozy.contact.form.messageLabel') }}</label>
-                    <textarea 
-                        v-model="form.message"
-                        rows="4"
-                        class="w-full bg-slate-50 border-none rounded-2xl px-6 py-4 font-bold text-slate-700 focus:ring-2 focus:ring-brand-200 focus:bg-white transition-all outline-none resize-none"
-                    ></textarea>
-                </div>
+        <!-- Text -->
+        <div class="lg:col-span-7 order-1 lg:order-2">
+          <p class="ed-kicker mb-6">{{ t('storefront.footer.contact') }}</p>
+          <h1 class="ed-display text-4xl md:text-[3.5rem] leading-[1.06] text-[#262019]">
+            {{ t('storefront.pages.contact.heading', { tenant: tenantName }) }}
+          </h1>
+          <span class="block h-px w-24 bg-[#B8532E] my-8" />
+          <p class="text-[17px] leading-[1.75] text-[#4A4038] max-w-xl">
+            {{ t('storefront.pages.contact.placeholder') }}
+          </p>
 
-                <button 
-                    type="submit"
-                    class="w-full bg-slate-800 text-white font-bold py-4 rounded-full shadow-lg hover:shadow-xl hover:bg-brand-500 hover:-translate-y-1 transition-all duration-300"
-                >
-                    {{ t('storefront.templates.cozy.contact.form.sendMessage') }}
-                </button>
-            </form>
+          <dl v-if="rows.length" class="mt-10 divide-y divide-[#DAD2C4] border-y border-[#DAD2C4]">
+            <div v-for="info in rows" :key="info.id" class="py-4 flex items-center gap-4">
+              <Icon :name="info.def.iconName" class="w-4 h-4 text-[#B8532E] shrink-0" />
+              <dt class="ed-label !mb-0 w-28 shrink-0">{{ info.label || info.def.label }}</dt>
+              <dd class="min-w-0">
+                <a
+                  v-if="info.href"
+                  :href="info.href"
+                  class="ed-link ed-ui text-sm break-words"
+                  :target="isExternalHref(info.href) ? '_blank' : undefined"
+                  :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
+                >{{ info.value }}</a>
+                <span v-else class="ed-ui text-sm text-[#4A4038]">{{ info.value }}</span>
+              </dd>
+            </div>
+          </dl>
         </div>
-
+      </div>
     </div>
   </div>
 </template>

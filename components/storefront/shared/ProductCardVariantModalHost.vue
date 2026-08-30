@@ -130,18 +130,18 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
     unavailable: 'text-red-600'
   },
   cozy: {
-    overlay: 'bg-amber-900/35',
-    panel: 'bg-white border border-amber-100 rounded-[2rem]',
-    font: 'font-cozy',
-    title: 'text-amber-900',
-    subtitle: 'text-amber-700/80',
-    row: 'border-amber-200 hover:border-brand-300 hover:bg-amber-50/60',
-    rowLabel: 'text-amber-900',
-    rowMeta: 'text-amber-700/80',
-    price: 'text-brand-700',
-    addBtn: 'bg-brand-600 text-white hover:bg-brand-700',
-    closeBtn: 'text-amber-700 hover:text-amber-900',
-    unavailable: 'text-red-600'
+    overlay: 'bg-[#1E1912]/55',
+    panel: 'bg-[#F4EFE6] border border-[#262019] rounded-none',
+    font: 'font-cozy-ui',
+    title: 'text-[#262019]',
+    subtitle: 'text-[#8A7E6E]',
+    row: 'border-[#DAD2C4] hover:border-[#262019] hover:bg-[#FBF8F2]',
+    rowLabel: 'text-[#262019]',
+    rowMeta: 'text-[#8A7E6E]',
+    price: 'text-[#B8532E]',
+    addBtn: 'bg-[#262019] text-[#F4EFE6] hover:bg-[#97401F] rounded-none',
+    closeBtn: 'text-[#8A7E6E] hover:text-[#262019]',
+    unavailable: 'text-[#B8532E]'
   },
   cyber: {
     overlay: 'bg-black/80',

@@ -138,7 +138,7 @@ const maystroPrices = useDeliveryPrices({
 // Unified delivery options combining provider and mode
 const deliveryOptions = computed(() => {
   const options: any[] = []
-  
+
   availableProviders.value.forEach((provider: any) => {
     const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
     const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
@@ -155,7 +155,7 @@ const deliveryOptions = computed(() => {
       price: homePrice,
       description: storefrontContent.value.checkout.delivery.description.homeDelivery
     })
-    
+
     options.push({
       id: `${provider.key}-pickup`,
       provider: provider.key,
@@ -168,7 +168,7 @@ const deliveryOptions = computed(() => {
       description: storefrontContent.value.checkout.delivery.description.pickupPoint
     })
   })
-  
+
   if (storeSettings.value?.storePickupEnabled === true) {
     options.push({
       id: 'store-pickup',
@@ -182,11 +182,11 @@ const deliveryOptions = computed(() => {
       description: storefrontContent.value.checkout.delivery.description.storePickup
     })
   }
-  
+
   return options
 })
 
-const selectedDelivery = computed(() => 
+const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption)
 )
 
@@ -228,7 +228,7 @@ watch([() => props.currentStock, () => props.currentVariant], () => {
 
 function getVariantTitle(variant: any) {
     if (!variant.optionValues || variant.optionValues.length === 0) return ''
-    
+
     const values = [...variant.optionValues]
     if (props.product.options && props.product.options.length > 0) {
        const optionPos = new Map(props.product.options.map((o: any) => [o.id, o.position]))
@@ -238,7 +238,7 @@ function getVariantTitle(variant: any) {
             return (posA as number) - (posB as number)
         })
     }
-    
+
     return values.map((ov: any) => ov.optionValue?.label).join(' / ')
 }
 
@@ -290,7 +290,7 @@ const handleOrderSubmit = async () => {
           : null
 
         if (isMaystro) {
-          
+
           if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() ) {
             orderError.value = storefrontContent.value.checkout.errors.deliveryRequired
             orderSubmitting.value = false
@@ -412,56 +412,33 @@ const handleAddToCart = async () => {
 
 <template>
   <div class="space-y-6">
-    <!-- Quantity Selector -->
-    <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+    <!-- Quantity -->
+    <div class="flex items-center justify-between border-y border-[#DAD2C4] py-4">
       <div class="flex flex-col gap-0.5">
-        <span class="font-medium text-slate-700">{{ storefrontContent.productForm.quantity.label }}</span>
-        <span
-          v-if="product?.isActive === false"
-          class="text-xs text-slate-400"
-        >{{ storefrontContent.productForm.stock.unavailable }}</span>
-        <span
-          v-else-if="needsVariantChoice"
-          class="text-xs text-slate-400"
-        >{{ storefrontContent.productForm.stock.selectOptions }}</span>
-        <span
-          v-else-if="isOutOfStock"
-          class="text-xs text-red-500 font-medium"
-        >{{ storefrontContent.productForm.stock.outOfStock }}</span>
-        <span
-          v-else-if="isLowStock"
-          class="text-xs text-amber-600 font-medium"
-        >
-          {{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}
-        </span>
-        <span
-          v-else
-          class="text-xs text-green-600 font-medium"
-        >{{ storefrontContent.product.inStock }}</span>
+        <span class="ed-label !mb-0">{{ storefrontContent.productForm.quantity.label }}</span>
+        <span v-if="product?.isActive === false" class="ed-ui text-xs text-[#8A7E6E]">{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span v-else-if="needsVariantChoice" class="ed-ui text-xs text-[#8A7E6E]">{{ storefrontContent.productForm.stock.selectOptions }}</span>
+        <span v-else-if="isOutOfStock" class="ed-ui text-xs text-[#B8532E] font-semibold">{{ storefrontContent.productForm.stock.outOfStock }}</span>
+        <span v-else-if="isLowStock" class="ed-ui text-xs text-[#97401F] font-semibold">{{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}</span>
+        <span v-else class="ed-ui text-xs text-[#4A4038]">{{ storefrontContent.product.inStock }}</span>
       </div>
-      <div class="flex items-center bg-white rounded-full border border-slate-200">
-        <button 
+      <div class="flex items-center border border-[#C4B8A4]">
+        <button
           type="button"
-          class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-s-full transition-colors disabled:opacity-30"
+          class="w-10 h-10 flex items-center justify-center text-[#4A4038] hover:bg-[#EFE8DA] transition-colors disabled:opacity-30"
           :disabled="!canPurchase || quantity <= 1"
           @click="decrementQuantity"
         >
-          <Icon
-            name="lucide:minus"
-            class="w-4 h-4 text-slate-500"
-          />
+          <Icon name="lucide:minus" class="w-4 h-4" />
         </button>
-        <span class="w-12 text-center font-bold text-slate-700">{{ quantity }}</span>
-        <button 
+        <span class="w-12 text-center ed-ui font-semibold text-[#262019] tabular-nums border-x border-[#C4B8A4]">{{ quantity }}</span>
+        <button
           type="button"
-          class="w-10 h-10 flex items-center justify-center hover:bg-slate-50 rounded-e-full transition-colors disabled:opacity-30"
+          class="w-10 h-10 flex items-center justify-center text-[#4A4038] hover:bg-[#EFE8DA] transition-colors disabled:opacity-30"
           :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
           @click="incrementQuantity"
         >
-          <Icon
-            name="lucide:plus"
-            class="w-4 h-4 text-slate-500"
-          />
+          <Icon name="lucide:plus" class="w-4 h-4" />
         </button>
       </div>
     </div>
@@ -476,164 +453,100 @@ const handleAddToCart = async () => {
 
     <div
       v-if="isClearanceEligible"
-      class="flex items-center gap-2 px-4 py-3 rounded-2xl border border-amber-200 bg-amber-50 text-amber-700 text-xs font-medium"
+      class="flex items-center gap-2 px-4 py-3 border border-[#DBC7B2] bg-[#EFE0D5] text-[#97401F] ed-ui text-xs font-medium"
     >
-      <Icon
-        name="lucide:package-open"
-        class="w-4 h-4 flex-shrink-0"
-      />
+      <Icon name="lucide:package-open" class="w-4 h-4 flex-shrink-0" />
       <span v-if="clearance.remainingForNextThreshold.value > 0">
         {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
       </span>
       <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
     </div>
 
-    <!-- Quick COD Order Form -->
+    <!-- Quick COD order -->
     <div
       v-if="codEnabled"
       data-test="cod-order-card"
-      class="bg-white p-6 rounded-[2rem] shadow-soft border border-slate-100"
+      class="border border-[#262019] bg-[#FBF8F2]"
     >
-      <div class="flex items-center gap-3 mb-6">
-        <div class="w-10 h-10 rounded-full flex items-center justify-center bg-brand-100 text-brand-500">
-          <Icon
-            name="lucide:banknote"
-            class="w-5 h-5"
-          />
-        </div>
+      <div class="flex items-center gap-3 px-6 py-4 border-b border-[#DAD2C4]">
+        <Icon name="lucide:banknote" class="w-5 h-5 text-[#B8532E]" />
         <div>
-          <h3 class="font-bold text-slate-800">
-            {{ storefrontContent.productForm.cod.title }}
-          </h3>
-          <span class="text-xs text-slate-400">{{ storefrontContent.productForm.cod.badge }}</span>
+          <h3 class="ed-display text-[19px] text-[#262019]">{{ storefrontContent.productForm.cod.title }}</h3>
+          <span class="ed-ui text-[11px] uppercase tracking-[0.12em] text-[#8A7E6E]">{{ storefrontContent.productForm.cod.badge }}</span>
         </div>
       </div>
-      
-      <form
-        class="space-y-4"
-        @submit.prevent="handleOrderSubmit"
-      >
+
+      <form class="p-6 space-y-4" @submit.prevent="handleOrderSubmit">
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.fullName.label }}</label>
-          <input 
-            v-model="quickForm.fullName"
-            type="text" 
-            :placeholder="storefrontContent.checkout.form.fullName.placeholder" 
-            class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all"
-          >
+          <label class="ed-label">{{ storefrontContent.checkout.form.fullName.label }}</label>
+          <input v-model="quickForm.fullName" type="text" :placeholder="storefrontContent.checkout.form.fullName.placeholder" class="ed-input">
         </div>
-        
+
         <div>
-          <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.phone.label }}</label>
-          <input
-            v-model="quickForm.phone"
-            type="tel"
-            :placeholder="storefrontContent.checkout.form.phone.placeholder"
-            class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all"
-          >
+          <label class="ed-label">{{ storefrontContent.checkout.form.phone.label }}</label>
+          <input v-model="quickForm.phone" type="tel" :placeholder="storefrontContent.checkout.form.phone.placeholder" class="ed-input">
         </div>
 
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+            <label class="ed-label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
             <WilayaField
               v-model="quickForm.wilaya"
-              input-class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none appearance-none cursor-pointer"
+              input-class="ed-input ed-select"
               :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
             />
           </div>
           <div>
-            <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.commune.label }}</label>
+            <label class="ed-label">{{ storefrontContent.checkout.form.commune.label }}</label>
             <CommuneField
               v-model="quickForm.commune"
               :wilaya-code="quickForm.wilaya"
               :placeholder="storefrontContent.checkout.form.commune.placeholder"
-              :input-class="'block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all'"
-              :select-class="'block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all'"
+              :input-class="'ed-input'"
+              :select-class="'ed-input ed-select'"
             />
           </div>
         </div>
 
         <div v-if="!hideOptionalAddress">
-          <label class="block text-sm font-medium text-slate-600 mb-2">{{ storefrontContent.checkout.form.address.label }}</label>
-          <input
-            v-model="quickForm.address"
-            type="text"
-            :placeholder="storefrontContent.checkout.form.address.placeholder"
-            class="block w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 focus:ring-2 focus:ring-brand-200 focus:border-brand-400 outline-none transition-all"
-          >
+          <label class="ed-label">{{ storefrontContent.checkout.form.address.label }}</label>
+          <input v-model="quickForm.address" type="text" :placeholder="storefrontContent.checkout.form.address.placeholder" class="ed-input">
         </div>
-        <div
-          v-if="quickForm.wilaya && quickForm.commune"
-          class="space-y-3 mt-6"
-        >
-          <label class="block text-sm font-semibold text-slate-700 ms-1">
-            {{ storefrontContent.checkout.sections.deliveryOptions }}
-          </label>
-          <div 
+
+        <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-2.5 pt-2">
+          <label class="ed-label">{{ storefrontContent.checkout.sections.deliveryOptions }}</label>
+          <div
             v-for="option in deliveryOptions"
             :key="option.id"
-            class="cursor-pointer relative rounded-2xl p-4 border-2 transition-all duration-300 group hover:scale-[1.005]"
-            :class="quickForm.selectedDeliveryOption === option.id 
-              ? 'border-brand-500 bg-brand-50/50 shadow-md' 
-              : 'border-slate-100 hover:border-brand-200 hover:shadow-sm'"
+            class="cursor-pointer border p-4 transition-colors"
+            :class="quickForm.selectedDeliveryOption === option.id
+              ? 'border-[#262019] bg-[#F4EFE6]'
+              : 'border-[#DAD2C4] hover:border-[#8A7E6E]'"
             @click="quickForm.selectedDeliveryOption = option.id"
           >
             <div class="flex items-center gap-4">
-              <div 
-                class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
-                :class="quickForm.selectedDeliveryOption === option.id 
-                  ? `bg-${option.color}-100` 
-                  : 'bg-slate-100 group-hover:bg-slate-200'"
-              >
-                <CarrierMark
-                  :provider="option.provider"
-                  :icon="option.icon"
-                  :alt="option.providerLabel"
-                  class="w-7 h-7 transition-colors duration-300"
-                  :class="quickForm.selectedDeliveryOption === option.id ? `text-${option.color}-600` : 'text-slate-400 group-hover:text-slate-600'"
-                />
-              </div>
-                        
+              <CarrierMark
+                :provider="option.provider"
+                :icon="option.icon"
+                :alt="option.providerLabel"
+                class="w-6 h-6 shrink-0"
+                :class="quickForm.selectedDeliveryOption === option.id ? 'text-[#262019]' : 'text-[#8A7E6E]'"
+              />
               <div class="flex-1 min-w-0">
-                <div class="flex items-center gap-2 mb-1">
-                  <h4 class="font-bold text-slate-900 text-sm">
-                    {{ option.providerLabel }}
-                  </h4>
-                  <span
-                    class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                    :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
-                  >
-                    {{ option.modeLabel }}
-                  </span>
+                <div class="flex items-center gap-2">
+                  <h4 class="ed-display text-[15px] text-[#262019]">{{ option.providerLabel }}</h4>
+                  <span class="ed-ui text-[9px] font-semibold uppercase tracking-[0.12em] border border-[#C4B8A4] text-[#8A7E6E] px-1.5 py-0.5">{{ option.modeLabel }}</span>
                 </div>
-                <p class="text-xs text-slate-500 leading-relaxed">
-                  {{ option.description }}
-                </p>
+                <p class="ed-ui text-xs text-[#8A7E6E] leading-relaxed mt-0.5">{{ option.description }}</p>
               </div>
-                        
-              <div class="flex items-center gap-3 flex-shrink-0">
-                <div class="text-end">
-                  <div class="font-bold text-brand-600 text-base">
-                    {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
-                  </div>
-                </div>
-                <span
-                  class="block w-5 h-5 rounded-full border-2 transition-colors duration-300 flex-shrink-0"
-                  :class="quickForm.selectedDeliveryOption === option.id 
-                    ? 'border-brand-600 bg-brand-600 ring-4 ring-brand-100' 
-                    : 'border-slate-300'"
-                >
-                  <span 
-                    v-if="quickForm.selectedDeliveryOption === option.id"
-                    class="block w-full h-full rounded-full flex items-center justify-center"
-                  >
-                    <Icon
-                      name="lucide:check"
-                      class="w-3 h-3 text-white"
-                    />
-                  </span>
+              <div class="flex items-center gap-3 shrink-0">
+                <span class="ed-display text-[15px] text-[#B8532E]">
+                  {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
                 </span>
+                <span
+                  class="block w-4 h-4 rounded-full border transition-colors"
+                  :class="quickForm.selectedDeliveryOption === option.id ? 'border-[#262019] border-[5px]' : 'border-[#C4B8A4]'"
+                />
               </div>
             </div>
           </div>
@@ -649,98 +562,70 @@ const handleAddToCart = async () => {
             @change="syncPickupPointCommune"
           />
         </div>
-        <div
-          v-else
-          class="mt-6 px-4 py-3 border border-dashed border-slate-200 text-center text-xs text-slate-400"
-        >
-          <Icon
-            name="lucide:map-pin"
-            class="w-4 h-4 mx-auto mb-1 text-slate-300"
-          />
+        <div v-else class="px-4 py-3 border border-dashed border-[#C4B8A4] text-center ed-ui text-xs text-[#8A7E6E]">
+          <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-[#C4B8A4]" />
           {{ storefrontContent.checkout.help.deliveryOptions }}
         </div>
 
-
-
-        <div
-          v-if="orderError"
-          class="p-3 bg-red-50 rounded-xl text-red-600 text-sm"
-        >
+        <div v-if="orderError" class="px-4 py-3 border border-[#B8532E] bg-[#EFE0D5] text-[#97401F] ed-ui text-sm">
           {{ orderError }}
         </div>
 
-        <!-- Clearance discount -->
-        <div
-          v-if="quickOrderClearanceDiscount > 0"
-          class="flex items-center justify-between py-2 text-sm"
-        >
-          <span class="text-amber-700 uppercase tracking-wider text-xs font-bold">{{ t('storefront.clearance.discountLine') }}</span>
-          <span class="font-medium text-amber-700">-{{ formatCurrency(quickOrderClearanceDiscount) }}</span>
+        <div v-if="quickOrderClearanceDiscount > 0" class="flex items-center justify-between py-1 ed-ui text-sm">
+          <span class="text-[#97401F] uppercase tracking-[0.12em] text-xs font-semibold">{{ t('storefront.clearance.discountLine') }}</span>
+          <span class="text-[#97401F] font-medium">−{{ formatCurrency(quickOrderClearanceDiscount) }}</span>
         </div>
 
-        <!-- Total Price Display -->
-        <div class="flex items-center justify-between p-4 bg-brand-50 rounded-xl">
-          <span class="text-slate-600 font-medium">{{ storefrontContent.productForm.totalPrice }}</span>
-          <span class="font-bold text-xl text-brand-500">{{ formatCurrency(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }}</span>
+        <div class="flex items-center justify-between border-t border-[#262019] pt-4">
+          <span class="ed-label !mb-0">{{ storefrontContent.productForm.totalPrice }}</span>
+          <span class="ed-display text-2xl text-[#B8532E]">
+            {{ formatCurrency(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }}
+          </span>
         </div>
 
-        <button 
+        <button
           type="submit"
           :disabled="orderSubmitting || (!canPurchase && !needsVariantChoice)"
-          class="w-full bg-brand-500 text-white font-bold py-4 rounded-full shadow-lg shadow-brand-200 hover:bg-brand-600 hover:shadow-xl hover:-translate-y-0.5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+          class="ed-btn-solid w-full"
         >
-          <Icon
-            v-if="orderSubmitting"
-            name="lucide:loader-2"
-            class="w-5 h-5 animate-spin"
-          />
+          <Icon v-if="orderSubmitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
         </button>
       </form>
     </div>
 
-    <!-- Add to Cart Button -->
+    <!-- Add to cart -->
     <div v-if="cartEnabled">
-      <button 
+      <button
         type="button"
         :disabled="addToCartSubmitting || (!canPurchase && !needsVariantChoice)"
-        class="w-full bg-slate-800 text-white font-bold py-4 rounded-full hover:bg-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+        class="ed-btn-line w-full"
         @click="handleAddToCart"
       >
-        <Icon
-          name="lucide:handbag"
-          class="w-5 h-5"
-        />
+        <Icon name="lucide:shopping-bag" class="w-4 h-4" />
         <span>{{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}</span>
       </button>
     </div>
-    
-    <!-- Success Toast -->
+
+    <!-- Toast -->
     <Transition
-      enter-active-class="transform ease-out duration-300 transition"
-      enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-      enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
+      enter-active-class="transition ease-out duration-300"
+      enter-from-class="translate-y-2 opacity-0"
+      enter-to-class="translate-y-0 opacity-100"
       leave-active-class="transition ease-in duration-100"
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 end-4 z-50 bg-white px-6 py-4 rounded-2xl shadow-2xl border border-slate-100 flex items-center gap-4"
+        class="fixed bottom-4 end-4 z-50 bg-[#FBF8F2] border border-[#C4B8A4] px-5 py-4 shadow-[0_20px_44px_-28px_rgba(38,32,25,0.5)] flex items-center gap-4"
       >
-        <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center shrink-0">
-          <Icon
-            name="lucide:check"
-            class="w-5 h-5 text-green-600"
-          />
+        <div class="w-9 h-9 bg-[#EFE0D5] flex items-center justify-center shrink-0">
+          <Icon name="lucide:check" class="w-4 h-4 text-[#97401F]" />
         </div>
         <div>
-          <div class="font-bold text-slate-800">
-            {{ successTitle }}
-          </div>
-          <div class="text-sm text-slate-500">
-            {{ successMessage }}
-          </div>
+          <div class="ed-display text-[15px] text-[#262019]">{{ successTitle }}</div>
+          <div class="ed-ui text-xs text-[#8A7E6E]">{{ successMessage }}</div>
         </div>
       </div>
     </Transition>

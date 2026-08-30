@@ -6,60 +6,54 @@ const props = defineProps<{
 const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const selectedImage = ref(0)
+const handleImageClick = (index: number) => { selectedImage.value = index }
 
-const handleImageClick = (index: number) => {
-  selectedImage.value = index
-}
-
-// Reset selected index if images change
-watch(() => props.images, () => {
-  selectedImage.value = 0
-}, { deep: true })
+watch(() => props.images, () => { selectedImage.value = 0 }, { deep: true })
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- Main Image -->
-    <div
-      class="relative w-full aspect-[4/5] bg-slate-50 rounded-[2rem] overflow-hidden shadow-soft cursor-zoom-in"
-      @mousemove="onPointerMove"
-      @mouseleave="onPointerLeave"
-    >
-      <img
-        v-if="images && images.length > 0"
-        :src="images[selectedImage]"
-        :alt="title"
-        class="w-full h-full object-contain transition-transform duration-500"
-        :style="zoomStyle"
-      />
-      <div v-else class="w-full h-full flex items-center justify-center text-slate-300">
-        <Icon name="lucide:image" class="w-16 h-16" />
-      </div>
-      
-      <!-- Image Counter -->
-      <div 
-        v-if="images && images.length > 1"
-        class="absolute bottom-4 end-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-slate-600 font-medium"
-      >
-        {{ selectedImage + 1 }} / {{ images.length }}
-      </div>
-    </div>
-
+  <div class="flex flex-col-reverse md:flex-row gap-4">
     <!-- Thumbnails -->
-    <div v-if="images && images.length > 1" class="flex gap-3 overflow-x-auto pb-2">
+    <div
+      v-if="images && images.length > 1"
+      class="flex md:flex-col gap-3 overflow-x-auto md:overflow-visible scrollbar-hide"
+    >
       <button
         v-for="(image, index) in images"
         :key="index"
+        class="relative w-16 h-16 md:w-[74px] md:h-[74px] flex-shrink-0 overflow-hidden border transition-colors"
+        :class="selectedImage === index ? 'border-[#B8532E]' : 'border-[#DAD2C4] hover:border-[#8A7E6E]'"
         @click="handleImageClick(index)"
-        class="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden transition-all hover:opacity-90"
-        :class="selectedImage === index ? 'ring-2 ring-brand-400 ring-offset-2 shadow-lg' : 'opacity-70'"
+      >
+        <img :src="image" :alt="`${title} — ${index + 1}`" class="w-full h-full object-cover">
+      </button>
+    </div>
+
+    <!-- Main -->
+    <div class="flex-1">
+      <div
+        class="relative w-full aspect-[4/5] bg-[#FBF8F2] border border-[#DAD2C4] overflow-hidden cursor-zoom-in"
+        @mousemove="onPointerMove"
+        @mouseleave="onPointerLeave"
       >
         <img
-          :src="image"
-          :alt="`${title} - Image ${index + 1}`"
-          class="w-full h-full object-cover"
-        />
-      </button>
+          v-if="images && images.length > 0"
+          :src="images[selectedImage]"
+          :alt="title"
+          class="w-full h-full object-contain transition-transform duration-500"
+          :style="zoomStyle"
+        >
+        <div v-else class="w-full h-full flex items-center justify-center text-[#C4B8A4]">
+          <Icon name="lucide:image" class="w-14 h-14" />
+        </div>
+
+        <div
+          v-if="images && images.length > 1"
+          class="absolute bottom-3 end-3 ed-ui text-[11px] tabular-nums bg-[#F4EFE6]/90 border border-[#C4B8A4] text-[#4A4038] px-2.5 py-1"
+        >
+          {{ String(selectedImage + 1).padStart(2, '0') }} / {{ String(images.length).padStart(2, '0') }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
