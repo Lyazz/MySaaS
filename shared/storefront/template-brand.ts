@@ -7,7 +7,7 @@ export const TEMPLATE_ORIGINAL_BRAND_COLORS = {
   stationnery: '#334155',
   food: '#EA580C',
   wellness: '#84CC16',
-  playful: '#9333EA',
+  playful: '#ED5A96',
   activewear: '#EAB308',
   chrono: '#A67C52',
   maison: '#0B4A25',

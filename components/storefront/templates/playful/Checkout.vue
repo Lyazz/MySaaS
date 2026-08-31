@@ -264,173 +264,189 @@ async function handleSubmit() {
     }
 }
 </script>
-
 <template>
-  <div class="bg-[#faf5ff] min-h-screen py-10 font-sans text-slate-600">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <div class="mb-8">
-        <h1 class="text-3xl font-bold text-slate-900">
+  <div class="bg-[var(--kw-cream)] min-h-screen pb-16">
+    <!-- ══ Head ═══════════════════════════════════════════════════════ -->
+    <section class="kw-band-mint kw-scallop pt-10 pb-14 md:pt-12 md:pb-16 mb-10">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <p class="kw-kicker mb-3">
+          {{ storefrontContent.checkout.sections.customerInformation }}
+        </p>
+        <h1 class="kw-display text-3xl md:text-[2.8rem] mb-2">
           {{ storefrontContent.checkout.title }}
         </h1>
-        <p class="text-lg text-slate-500 font-medium">
+        <p class="kw-lede">
           {{ storefrontContent.cart.itemsCount(cartStore.itemCount) }}
         </p>
+
         <div
           v-if="!cartEnabled"
-          class="mt-3 rounded-lg border border-amber-200 bg-amber-50 text-amber-800 text-sm px-4 py-3"
+          class="mt-5 rounded-[var(--kw-r)] px-4 py-3.5 text-sm font-bold text-[var(--kw-ink)]"
+          style="background: var(--kw-lemon-soft)"
         >
           {{ storefrontContent.checkout.disabled }}
         </div>
       </div>
+    </section>
 
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- Left Column: Attributes & Delivery -->
-        <div class="lg:col-span-7 space-y-8">
-          <!-- Personal Info -->
-          <div class="bg-white p-6 rounded-[2rem] border-4 border-purple-100">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
+        <!-- ══ Left: details ════════════════════════════════════════════ -->
+        <div class="lg:col-span-7 space-y-6">
+          <div class="kw-card p-6 md:p-7">
+            <div class="flex items-center gap-3.5 mb-7">
+              <span
+                class="w-10 h-10 kw-blob flex items-center justify-center flex-shrink-0"
+                style="background: var(--kw-pink-soft)"
+              >
+                <Icon
+                  name="lucide:user-round"
+                  class="w-5 h-5 text-[var(--kw-pink-deep)]"
+                />
+              </span>
+              <h2 class="kw-title text-lg">
+                {{ storefrontContent.checkout.sections.customerInformation }}
+              </h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label class="kw-label">{{ storefrontContent.checkout.form.fullName.label }}</label>
                 <input
                   v-model="form.fullName"
                   type="text"
-                  class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                  class="kw-field"
                   :placeholder="storefrontContent.checkout.form.fullName.placeholder"
                 >
               </div>
-              <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.phone.label }}</label>
+              <div>
+                <label class="kw-label">{{ storefrontContent.checkout.form.phone.label }}</label>
                 <input
                   v-model="form.phone"
                   type="tel"
-                  class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                  class="kw-field"
                   :placeholder="storefrontContent.checkout.form.phone.placeholder"
                 >
               </div>
-              <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+              <div>
+                <label class="kw-label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
                 <WilayaField
                   v-model="form.wilaya"
-                  input-class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none appearance-none cursor-pointer shadow-sm"
+                  input-class="kw-field appearance-none cursor-pointer"
                   :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
                 />
               </div>
-              <div class="col-span-2 md:col-span-1 space-y-2">
-                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
+              <div>
+                <label class="kw-label">{{ storefrontContent.checkout.form.commune.label }}</label>
                 <CommuneField
                   v-model="form.commune"
                   :wilaya-code="form.wilaya"
                   :placeholder="storefrontContent.checkout.form.commune.placeholder"
-                  :input-class="'w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
-                  :select-class="'w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm'"
+                  input-class="kw-field"
+                  select-class="kw-field"
                 />
               </div>
               <div
                 v-if="!hideOptionalAddress"
-                class="col-span-2 space-y-2"
+                class="md:col-span-2"
               >
-                <label class="block text-sm font-semibold text-slate-700 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
+                <label class="kw-label">{{ storefrontContent.checkout.form.address.label }}</label>
                 <input
                   v-model="form.address"
                   type="text"
-                  class="w-full h-12 rounded-xl border border-slate-200 bg-white px-4 text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm"
+                  class="kw-field"
                   :placeholder="storefrontContent.checkout.form.address.placeholder"
                 >
               </div>
             </div>
           </div>
 
-          <!-- Delivery Options -->
+          <!-- Delivery -->
           <div
             v-if="form.wilaya && form.commune"
-            class="bg-white p-6 rounded-[2rem] border-4 border-purple-100"
+            class="kw-card p-6 md:p-7"
           >
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wide">
-                {{ storefrontContent.checkout.sections.deliveryOptions }}
-              </h3>
-              <span class="text-[10px] font-bold text-brand-600 bg-brand-100 px-2 py-1 rounded-full uppercase">
-                {{ storefrontContent.checkout.required }}
-              </span>
+            <div class="flex items-center justify-between gap-4 mb-2">
+              <div class="flex items-center gap-3.5">
+                <span
+                  class="w-10 h-10 kw-blob flex items-center justify-center flex-shrink-0"
+                  style="background: var(--kw-sky-soft)"
+                >
+                  <Icon
+                    name="lucide:truck"
+                    class="w-5 h-5 text-[var(--kw-sky-deep)]"
+                  />
+                </span>
+                <h2 class="kw-title text-lg">
+                  {{ storefrontContent.checkout.sections.deliveryOptions }}
+                </h2>
+              </div>
+              <span class="kw-badge kw-badge-sale">{{ storefrontContent.checkout.required }}</span>
             </div>
-            <p class="text-xs text-slate-500 mb-6 font-medium">
+            <p class="kw-lede text-sm mb-6 ms-[3.4rem]">
               {{ storefrontContent.checkout.help.deliveryOptions }}
             </p>
-                    
+
             <div class="space-y-3">
-              <div 
+              <div
                 v-for="option in deliveryOptions"
                 :key="option.id"
-                class="cursor-pointer relative rounded-2xl p-4 border-2 transition-all duration-300 group hover:scale-[1.005]"
-                :class="form.selectedDeliveryOption === option.id 
-                  ? 'border-brand-500 bg-brand-50/50 shadow-md' 
-                  : 'border-slate-100 hover:border-brand-200 hover:shadow-sm'"
-                @click="form.selectedDeliveryOption = option.id"
+                class="rounded-[var(--kw-r)] border-2 transition-all duration-300 overflow-hidden"
+                :class="form.selectedDeliveryOption === option.id
+                  ? 'border-[var(--kw-pink-deep)] bg-[var(--kw-pink-soft)]'
+                  : 'border-[var(--kw-line)] bg-white hover:border-[var(--kw-pink)]'"
               >
-                <div class="flex items-center gap-4">
-                  <!-- Icon -->
-                  <div 
-                    class="w-14 h-14 rounded-xl flex items-center justify-center flex-shrink-0 transition-all duration-300"
-                    :class="form.selectedDeliveryOption === option.id 
-                      ? `bg-${option.color}-100` 
-                      : 'bg-slate-100 group-hover:bg-slate-200'"
+                <button
+                  type="button"
+                  class="w-full text-start p-4 flex items-center gap-4"
+                  @click="form.selectedDeliveryOption = option.id"
+                >
+                  <span
+                    class="w-12 h-12 kw-blob flex items-center justify-center flex-shrink-0"
+                    :style="{ background: form.selectedDeliveryOption === option.id ? 'var(--kw-surface)' : 'var(--kw-cream-2)' }"
                   >
                     <CarrierMark
                       :provider="option.provider"
                       :icon="option.icon"
                       :alt="option.providerLabel"
-                      class="w-7 h-7 transition-colors duration-300"
-                      :class="form.selectedDeliveryOption === option.id ? `text-${option.color}-600` : 'text-slate-400 group-hover:text-slate-600'"
+                      class="w-6 h-6"
+                      :class="form.selectedDeliveryOption === option.id ? 'text-[var(--kw-pink-deep)]' : 'text-[var(--kw-ink-faint)]'"
                     />
-                  </div>
-                  
-                  <!-- Details -->
-                  <div class="flex-1 min-w-0">
-                    <div class="flex items-center gap-2 mb-1">
-                      <h4 class="font-bold text-slate-900 text-sm">
-                        {{ option.providerLabel }}
-                      </h4>
+                  </span>
+
+                  <span class="flex-1 min-w-0">
+                    <span class="flex items-center gap-2 mb-1">
+                      <span class="kw-title text-sm">{{ option.providerLabel }}</span>
                       <span
-                        class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
-                        :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
-                      >
-                        {{ option.modeLabel }}
-                      </span>
-                    </div>
-                    <p class="text-xs text-slate-500 leading-relaxed">
-                      {{ option.description }}
-                    </p>
-                  </div>
-                  
-                  <!-- Price & Radio -->
-                  <div class="flex items-center gap-3 flex-shrink-0">
-                    <div class="text-end">
-                      <div class="font-black text-brand-600 text-base">
-                        {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
-                      </div>
-                    </div>
-                    <span
-                      class="block w-6 h-6 rounded-full border-4 transition-colors duration-300 flex-shrink-0"
-                      :class="form.selectedDeliveryOption === option.id
-                        ? 'border-brand-500 bg-brand-500 ring-4 ring-brand-100 shadow-[0_2px_0_0_#7e22ce]'
-                        : 'border-slate-200 bg-white'"
-                    >
-                      <span
-                        v-if="form.selectedDeliveryOption === option.id"
-                        class="block w-full h-full rounded-full flex items-center justify-center transform scale-100"
-                      >
-                        <Icon
-                          name="lucide:check"
-                          class="w-3 h-3 text-white stroke-[4]"
-                        />
-                      </span>
+                        class="kw-badge"
+                        :class="option.mode === 'pickup' ? 'kw-badge-new' : 'kw-badge-low'"
+                      >{{ option.modeLabel }}</span>
                     </span>
-                  </div>
-                </div>
+                    <span class="block text-xs font-semibold text-[var(--kw-ink-soft)]">{{ option.description }}</span>
+                  </span>
+
+                  <span class="flex items-center gap-3 flex-shrink-0">
+                    <span class="kw-num text-[var(--kw-pink-deep)]">
+                      {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
+                    </span>
+                    <span
+                      class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                      :class="form.selectedDeliveryOption === option.id
+                        ? 'border-[var(--kw-pink-deep)] bg-[var(--kw-pink-deep)]'
+                        : 'border-[var(--kw-line)] bg-white'"
+                    >
+                      <Icon
+                        v-if="form.selectedDeliveryOption === option.id"
+                        name="lucide:check"
+                        class="w-3.5 h-3.5 text-white"
+                      />
+                    </span>
+                  </span>
+                </button>
+
                 <div
                   v-if="option.mode === 'pickup' && option.provider && form.selectedDeliveryOption === option.id"
-                  class="mt-3 pt-3 border-t border-slate-200"
+                  class="px-4 pb-4 pt-1"
                 >
                   <StorefrontSharedPickupPointField
                     v-model="form.pickupPoint"
@@ -446,179 +462,210 @@ async function handleSubmit() {
               </div>
             </div>
           </div>
+
           <div
             v-else
-            class="bg-white p-6 rounded-[2rem] border-4 border-purple-100 text-center text-sm text-slate-400"
+            class="kw-card p-8 text-center"
           >
-            <Icon
-              name="lucide:map-pin"
-              class="w-5 h-5 mx-auto mb-2 text-slate-300"
-            />
-            {{ storefrontContent.checkout.help.deliveryOptions }}
+            <span
+              class="w-14 h-14 kw-blob mx-auto mb-4 flex items-center justify-center"
+              style="background: var(--kw-sky-soft)"
+            >
+              <Icon
+                name="lucide:map-pin"
+                class="w-6 h-6 text-[var(--kw-sky-deep)]"
+              />
+            </span>
+            <p class="kw-lede text-sm">
+              {{ storefrontContent.checkout.help.deliveryOptions }}
+            </p>
           </div>
         </div>
 
-        <!-- Right Column: Summary -->
+        <!-- ══ Right: summary ═══════════════════════════════════════════ -->
         <div class="lg:col-span-5">
-          <div class="bg-white p-7 rounded-[2rem] border-4 border-purple-100 sticky top-24">
-            <div class="flex items-center justify-between mb-6 pb-4 border-b border-slate-100">
-              <h2 class="text-xl font-bold text-slate-900">
-                Order Summary
+          <div class="kw-card p-6 md:p-7 lg:sticky lg:top-[9.5rem] relative overflow-hidden">
+            <div
+              class="absolute top-0 inset-x-0 h-1.5"
+              style="background: linear-gradient(90deg, var(--kw-pink), var(--kw-lemon), var(--kw-mint), var(--kw-sky))"
+            />
+
+            <div class="flex items-center justify-between gap-3 mb-6 mt-1.5">
+              <h2 class="kw-display text-xl">
+                {{ storefrontContent.checkout.sections.orderSummary }}
               </h2>
-              <div class="flex items-center gap-1.5 text-sm font-semibold text-brand-600 bg-brand-50 px-3 py-1.5 rounded-full">
+              <span class="kw-chip !cursor-default">
                 <Icon
-                  name="lucide:handbag"
-                  class="w-4 h-4"
+                  name="lucide:shopping-bag"
+                  class="w-3.5 h-3.5"
                 />
-                <span>{{ cartStore.itemCount }} {{ cartStore.itemCount === 1 ? 'item' : 'items' }}</span>
-              </div>
+                {{ storefrontContent.checkout.itemsInCart(cartStore.itemCount) }}
+              </span>
             </div>
 
-            <!-- Cart Items -->
-            <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pe-2">
+            <div class="space-y-3 mb-6 max-h-80 overflow-y-auto pe-1 kw-hide-scroll">
               <div
                 v-for="item in cartStore.items"
                 :key="item.productId"
-                class="flex items-center gap-4 py-2 border-b border-slate-50 last:border-0"
+                class="flex items-center gap-3.5"
               >
-                <div class="h-16 w-16 bg-slate-100 rounded-lg flex-shrink-0 overflow-hidden relative border border-slate-200">
+                <span
+                  class="h-14 w-14 kw-blob flex-shrink-0 overflow-hidden"
+                  style="background: var(--kw-pink-soft)"
+                >
                   <img
                     v-if="item.image"
                     :src="item.image"
                     :alt="item.title"
-                    class="h-full w-full object-cover object-center"
+                    class="h-full w-full object-cover"
                   >
-                  <div
+                  <span
                     v-else
-                    class="h-full w-full flex items-center justify-center bg-slate-100 text-slate-300"
+                    class="h-full w-full flex items-center justify-center text-[var(--kw-pink)]"
                   >
                     <Icon
                       name="lucide:image"
-                      class="w-8 h-8"
+                      class="w-6 h-6"
                     />
-                  </div>
-                </div>
+                  </span>
+                </span>
                 <div class="flex-1 min-w-0">
-                  <h4 class="font-bold text-slate-900 text-sm truncate">
+                  <h4 class="kw-title text-sm truncate">
                     {{ item.title }}
                   </h4>
-                  <p class="text-xs text-slate-500 mt-1">
-                    x{{ item.quantity }}
+                  <p class="text-xs font-bold text-[var(--kw-ink-faint)] mt-0.5">
+                    {{ storefrontContent.checkout.summary.quantityShort }}{{ item.quantity }}
                   </p>
                 </div>
-                <div class="font-bold text-brand-600 text-sm whitespace-nowrap">
-                  {{ formatAmount(item.price) }} {{ currencyCode }}
-                </div>
+                <span class="kw-num text-sm text-[var(--kw-pink-deep)] whitespace-nowrap">{{ formatAmount(item.price) }} {{ currencyCode }}</span>
               </div>
             </div>
 
             <!-- Coupon -->
-            <div class="bg-gradient-to-br from-brand-50/30 to-brand-100/20 p-5 rounded-2xl border border-brand-200/50 mb-6 backdrop-blur-sm">
-              <div class="flex justify-between items-center mb-3">
-                <div class="flex items-center gap-2">
+            <div
+              class="rounded-[var(--kw-r)] p-4 mb-6"
+              style="background: var(--kw-lemon-soft)"
+            >
+              <div class="flex items-center justify-between gap-2 mb-3">
+                <span class="flex items-center gap-2">
                   <Icon
                     name="lucide:ticket-percent"
-                    class="w-4 h-4 text-brand-600"
+                    class="w-4 h-4 text-[var(--kw-lemon-deep)]"
                   />
-                  <h4 class="text-sm font-bold text-slate-800">
-                    {{ storefrontContent.checkout.coupon.title }}
-                  </h4>
-                </div>
-                <span class="text-[10px] font-bold text-brand-700 bg-brand-200/60 px-2.5 py-1 rounded-full uppercase tracking-wide">
-                  • {{ storefrontContent.checkout.coupon.badge }}
+                  <span class="kw-title text-sm">{{ storefrontContent.checkout.coupon.title }}</span>
                 </span>
+                <span class="kw-badge kw-badge-low">{{ storefrontContent.checkout.coupon.badge }}</span>
               </div>
               <div class="flex gap-2">
                 <input
                   v-model="couponCode"
                   type="text"
                   :placeholder="storefrontContent.checkout.coupon.placeholder"
-                  class="flex-1 h-11 rounded-xl border-2 border-slate-200 bg-white px-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/10 transition-all duration-200 outline-none shadow-sm font-medium"
+                  class="kw-field h-11 flex-1 min-w-0"
                 >
-                <button class="px-5 h-11 bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-brand-200 hover:-translate-y-0.5 active:translate-y-0 whitespace-nowrap">
+                <button class="kw-btn kw-btn-sm kw-btn-lemon flex-shrink-0">
                   {{ storefrontContent.actions.apply }}
                 </button>
               </div>
             </div>
 
             <!-- Totals -->
-            <div class="space-y-3 pt-4 border-t border-slate-100">
+            <dl class="space-y-3 pt-1">
               <div
                 v-if="selectedDelivery"
-                class="flex justify-between text-sm"
+                class="flex items-start justify-between gap-3 text-sm"
               >
-                <span class="text-slate-500">{{ storefrontContent.checkout.summary.deliveryOption }}</span>
-                <div class="flex items-center gap-2">
-                  <Icon
-                    :name="selectedDelivery.icon"
-                    class="w-4 h-4 text-slate-600"
-                  />
-                  <span class="font-medium text-slate-900">{{ selectedDelivery.providerLabel }} - {{ selectedDelivery.modeLabel }}</span>
-                </div>
+                <dt class="font-bold text-[var(--kw-ink-soft)]">
+                  {{ storefrontContent.checkout.summary.deliveryOption }}
+                </dt>
+                <dd class="font-bold text-end">
+                  {{ selectedDelivery.providerLabel }} — {{ selectedDelivery.modeLabel }}
+                </dd>
               </div>
-              <div class="flex justify-between text-sm">
-                <span class="text-slate-500">{{ storefrontContent.cart.summary.subtotal }}</span>
-                <span class="font-bold text-slate-900">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</span>
+              <div class="flex items-center justify-between text-sm">
+                <dt class="font-bold text-[var(--kw-ink-soft)]">
+                  {{ storefrontContent.cart.summary.subtotal }}
+                </dt>
+                <dd class="kw-num">
+                  {{ formatAmount(cartStore.total) }} {{ currencyCode }}
+                </dd>
               </div>
               <div
                 v-if="cartStore.clearanceDiscount > 0"
-                class="flex justify-between text-sm"
+                class="flex items-center justify-between text-sm"
               >
-                <span class="text-amber-700 font-bold">{{ t('storefront.clearance.discountLine') }}</span>
-                <span class="font-black text-amber-700">-{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}</span>
+                <dt class="font-bold text-[var(--kw-lemon-deep)]">
+                  {{ t('storefront.clearance.discountLine') }}
+                </dt>
+                <dd class="kw-num text-[var(--kw-lemon-deep)]">
+                  -{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}
+                </dd>
               </div>
               <div
                 v-if="selectedDelivery"
-                class="flex justify-between text-sm"
+                class="flex items-center justify-between text-sm"
               >
-                <span class="text-slate-500">{{ storefrontContent.checkout.summary.shippingFee }}</span>
-                <span class="font-bold text-brand-600">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</span>
+                <dt class="font-bold text-[var(--kw-ink-soft)]">
+                  {{ storefrontContent.checkout.summary.shippingFee }}
+                </dt>
+                <dd class="kw-num text-[var(--kw-sky-deep)]">
+                  {{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}
+                </dd>
               </div>
-                        
-              <div class="flex justify-between items-end pt-4 border-t border-slate-100 mt-4">
-                <span class="font-bold text-xl text-slate-900">{{ storefrontContent.cart.summary.total }}</span>
-                <span class="font-bold text-xl text-slate-900">{{ formatAmount(grandTotal) }} {{ currencyCode }}</span>
+
+              <div
+                class="flex items-center justify-between rounded-[var(--kw-r)] px-4 py-3.5 mt-2"
+                style="background: var(--kw-cream-2)"
+              >
+                <dt class="kw-title">
+                  {{ storefrontContent.cart.summary.total }}
+                </dt>
+                <dd class="kw-num text-2xl text-[var(--kw-pink-deep)]">
+                  {{ formatAmount(grandTotal) }} {{ currencyCode }}
+                </dd>
               </div>
-              <p class="text-xs text-slate-400 mt-1">
-                {{ storefrontContent.checkout.minimumOrder(formatAmount(minimumOrderAmount), currencyCode) }}
-              </p>
-            </div>
+            </dl>
+
+            <p class="text-xs font-semibold text-[var(--kw-ink-faint)] mt-3 text-center">
+              {{ storefrontContent.checkout.minimumOrder(formatAmount(minimumOrderAmount), currencyCode) }}
+            </p>
 
             <div
               v-if="errorMessage"
-              class="mt-4 rounded-xl border-2 border-red-300 bg-red-50 text-red-800 text-sm px-4 py-3.5 flex items-start gap-3"
+              class="mt-5 rounded-[var(--kw-r)] bg-red-50 border-2 border-red-200 text-red-700 text-sm font-bold px-4 py-3.5 flex items-start gap-3"
             >
               <Icon
                 name="lucide:alert-circle"
-                class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"
+                class="w-5 h-5 flex-shrink-0 mt-0.5"
               />
-              <span class="font-medium">{{ errorMessage }}</span>
+              <span>{{ errorMessage }}</span>
             </div>
 
-            <!-- Checkout Button -->
-            <button 
+            <button
               :disabled="submitting || !cartEnabled || !hasRequiredFields"
-              class="w-full mt-8 flex items-center justify-center gap-3 px-8 py-5 rounded-full font-black text-xl transition-all shadow-[0_8px_0_0_#d97706] active:translate-y-2 active:shadow-none hover:-translate-y-1 relative overflow-hidden"
-              :class="[
-                (!submitting && cartEnabled && hasRequiredFields) ? 'bg-[#fbbf24] text-amber-900 animate-pulse hover:animate-none hover:bg-amber-300' : 'bg-slate-200 text-slate-400 shadow-none -translate-y-0 cursor-not-allowed'
-              ]"
+              class="kw-btn kw-btn-lg w-full mt-7"
               @click="handleSubmit"
             >
-              <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 -translate-x-full hover:animate-[shimmer_1.5s_infinite]" />
               <Icon
                 v-if="submitting"
                 name="lucide:loader-2"
-                class="w-6 h-6 animate-spin relative z-10"
+                class="w-5 h-5 animate-spin"
               />
-              <span class="relative z-10">
-                {{ submitting ? storefrontContent.checkout.actions.placingOrder : (!cartEnabled ? storefrontContent.checkout.disabledShort : storefrontContent.checkout.actions.placeOrder) }}
-              </span>
+              <span>{{ submitting ? storefrontContent.checkout.actions.placingOrder : (!cartEnabled ? storefrontContent.checkout.disabledShort : storefrontContent.checkout.actions.placeOrder) }}</span>
               <Icon
                 v-if="!submitting && cartEnabled && hasRequiredFields"
                 name="lucide:check-circle-2"
-                class="w-6 h-6 relative z-10"
+                class="w-5 h-5"
               />
             </button>
+
+            <p class="flex items-center justify-center gap-1.5 text-xs font-bold text-[var(--kw-ink-faint)] mt-4">
+              <Icon
+                name="lucide:shield-check"
+                class="w-3.5 h-3.5"
+              />
+              {{ storefrontContent.checkout.secureTransaction }}
+            </p>
           </div>
         </div>
       </div>

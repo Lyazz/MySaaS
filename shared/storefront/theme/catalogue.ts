@@ -99,8 +99,8 @@ export const STORE_THEMES: StoreThemeCard[] = [
     key: 'playful',
     mood: 'light',
     voice: 'sans',
-    fontName: 'Nunito',
-    swatches: ['#FAF5FF', '#3B0764', '#9333EA']
+    fontName: 'Baloo 2',
+    swatches: ['#FFF6FA', '#4A2E4D', '#ED5A96']
   },
   {
     key: 'activewear',

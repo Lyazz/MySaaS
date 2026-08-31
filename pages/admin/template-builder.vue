@@ -345,7 +345,7 @@ const templateCatalog: TemplateMeta[] = [
   { key: 'stationnery', name: 'Stationery', short: 'PA', fit: 'Books, paper, gifts, editorial stores', primary: '#334155', accent: '#fdfbf7', bg: '#fdfbf7' },
   { key: 'food', name: 'Food', short: 'FD', fit: 'Restaurants, grocery, artisanal food', primary: '#ea580c', accent: '#fed7aa', bg: '#f5f5f4' },
   { key: 'wellness', name: 'Wellness', short: 'WE', fit: 'Beauty, natural products, calm retail', primary: '#84CC16', accent: '#ECFCCB', bg: '#f8fafc' },
-  { key: 'playful', name: 'Playful', short: 'PL', fit: 'Kids, toys, colorful gift shops', primary: '#9333EA', accent: '#FBBF24', bg: '#faf5ff' },
+  { key: 'playful', name: 'Playful', short: 'PL', fit: 'Kids, toys, colorful gift shops', primary: '#ED5A96', accent: '#FFDD8A', bg: '#FFF6FA' },
   { key: 'activewear', name: 'Activewear', short: 'AW', fit: 'Sports, performance, sharp drops', primary: '#EAB308', accent: '#000000', bg: '#000000' },
   { key: 'chrono', name: 'Chrono Luxe', short: 'CH', fit: 'Watches, jewelry, luxury accessories', primary: '#A67C52', accent: '#E8E0D5', bg: '#0E1117' },
   { key: 'maison', name: 'Pistachio', short: 'PI', fit: 'Premium food, nuts, refined retail', primary: '#0B4A25', accent: '#B38335', bg: '#FAF2E3' },

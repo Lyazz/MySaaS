@@ -207,10 +207,11 @@ import StationneryProductLandingPage from './stationnery/ProductLandingPage.vue'
 import FoodProductLandingPage from './food/ProductLandingPage.vue'
 import WellnessProductLandingPage from './wellness/ProductLandingPage.vue'
 
-// Wishlist: wellness and street define their own; everything else keeps the shared one.
+// Wishlist: playful, wellness and street define their own; everything else keeps the shared one.
 import WishlistDefault from '~/components/storefront/shared/WishlistDefault.vue'
 import WellnessWishlist from './wellness/Wishlist.vue'
 import StreetWishlist from './street/Wishlist.vue'
+import PlayfulWishlist from './playful/Wishlist.vue'
 import PlayfulProductLandingPage from './playful/ProductLandingPage.vue'
 import ActivewearProductLandingPage from './activewear/ProductLandingPage.vue'
 
@@ -453,7 +454,7 @@ export const wishlistTemplates = {
   stationnery: WishlistDefault,
   food: WishlistDefault,
   wellness: WellnessWishlist,
-  playful: WishlistDefault,
+  playful: PlayfulWishlist,
   activewear: WishlistDefault,
   chrono: WishlistDefault,
   maison: WishlistDefault,
