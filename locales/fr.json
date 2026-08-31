@@ -19,6 +19,13 @@
         "backHome": "Retour à l'accueil"
       },
       "details": "Détails de l'erreur"
+    },
+    "siteClosed": {
+      "badge": "Site en pause",
+      "title": "Notre site est temporairement fermé",
+      "message": "Le site vitrine de Swekly est momentanément indisponible. Nous serons de retour très bientôt — merci de votre patience.",
+      "haveAccount": "Vous avez déjà une boutique ?",
+      "logIn": "Se connecter"
     }
   },
   "i18n": {

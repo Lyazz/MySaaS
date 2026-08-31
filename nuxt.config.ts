@@ -52,8 +52,10 @@ export default defineNuxtConfig({
         process.env.NUXT_PUBLIC_PLATFORM_BASE_DOMAIN ||
         process.env.PLATFORM_BASE_DOMAIN ||
         'swekly.com',
-      // Set to "false" to close self-serve store registration on the marketing site.
-      // The /register page then shows a "temporarily closed" notice instead of the form.
+      // Set to "false" to close the public marketing site ("site vitrine"): every
+      // vitrine page redirects to /site-closed and POST /api/register returns 403.
+      // /login, /forgot-password, /admin/** and /super-admin/** stay reachable, and
+      // tenant storefronts are unaffected. Remove the var (or set "true") to reopen.
       registrationsOpen:
         (process.env.NUXT_PUBLIC_REGISTRATIONS_OPEN ??
           process.env.REGISTRATIONS_OPEN ??

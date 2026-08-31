@@ -19,6 +19,13 @@
         "backHome": "Back to Home"
       },
       "details": "Error details"
+    },
+    "siteClosed": {
+      "badge": "Site paused",
+      "title": "Our site is temporarily closed",
+      "message": "The Swekly marketing site is briefly unavailable. We'll be back very soon — thanks for your patience.",
+      "haveAccount": "Already have a store?",
+      "logIn": "Log in"
     }
   },
   "i18n": {
