@@ -24,6 +24,10 @@ export default {
                 cozy: ['Newsreader', 'Georgia', 'Cambria', 'Times New Roman', 'serif'],
                 cozyUi: ['Hanken Grotesk', 'ui-sans-serif', 'system-ui', 'sans-serif'],
                 food: ['Nunito', 'sans-serif'],
+                // Playful (candy kawaii): Baloo 2 is the rounded display voice,
+                // Nunito carries body + UI microtype.
+                playful: ['Baloo 2', 'Nunito', 'ui-rounded', 'system-ui', 'sans-serif'],
+                playfulBody: ['Nunito', 'ui-rounded', 'system-ui', 'sans-serif'],
                 cyber: ['Orbitron', 'sans-serif'],
                 jetbrains: ['JetBrains Mono', 'monospace'],
                 // Wellness (apothecary): Archivo carries UI + body, Fraunces is the

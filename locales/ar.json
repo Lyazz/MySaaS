@@ -1111,7 +1111,11 @@
       "home": "الرئيسية",
       "shop": "المتجر",
       "contact": "اتصل بنا",
-      "categories": "الفئات"
+      "categories": "الفئات",
+      "menu": "القائمة",
+      "closeMenu": "إغلاق القائمة",
+      "previous": "السابق",
+      "next": "التالي"
     },
     "cart": {
       "label": "السلة",

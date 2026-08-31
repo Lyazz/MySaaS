@@ -1093,7 +1093,11 @@
       "home": "Accueil",
       "shop": "Boutique",
       "contact": "Contact",
-      "categories": "Catégories"
+      "categories": "Catégories",
+      "menu": "Menu",
+      "closeMenu": "Fermer le menu",
+      "previous": "Précédent",
+      "next": "Suivant"
     },
     "cart": {
       "label": "Panier",

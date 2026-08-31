@@ -1107,7 +1107,11 @@
       "home": "Home",
       "shop": "Shop",
       "contact": "Contact",
-      "categories": "Categories"
+      "categories": "Categories",
+      "menu": "Menu",
+      "closeMenu": "Close menu",
+      "previous": "Previous",
+      "next": "Next"
     },
     "cart": {
       "label": "Cart",
