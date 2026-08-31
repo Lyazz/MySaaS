@@ -40,10 +40,28 @@ const currentSlide = ref(0)
 const hasMultipleSlides = computed(() => heroSlides.value.length > 1)
 const activeSlide = computed(() => heroSlides.value[currentSlide.value] || heroSlides.value[0])
 
+/*
+ * Only slides that have actually been shown get an <img>. All three sit inside
+ * the viewport, so `loading="lazy"` would not defer them — mounting on demand
+ * is what keeps the first load fetching one cover instead of three.
+ */
+const mountedSlides = ref(new Set<number>([0]))
+/* Filtered here rather than with `v-if` on the `v-for`: Vue evaluates `v-if`
+ * first, so `index` would not exist yet. */
+const mountedHeroSlides = computed(() =>
+  heroSlides.value
+    .map((slide, index) => ({ slide, index }))
+    .filter(({ index }) => mountedSlides.value.has(index))
+)
+
 const goToSlide = (index: number) => {
   const total = heroSlides.value.length
   if (total === 0) return
-  currentSlide.value = (index + total) % total
+  const next = (index + total) % total
+  if (!mountedSlides.value.has(next)) {
+    mountedSlides.value = new Set(mountedSlides.value).add(next)
+  }
+  currentSlide.value = next
 }
 const nextSlide = () => goToSlide(currentSlide.value + 1)
 const prevSlide = () => goToSlide(currentSlide.value - 1)
@@ -60,7 +78,18 @@ const startAutoplay = () => {
   slideTimer = setInterval(nextSlide, 6000)
 }
 
-onMounted(startAutoplay)
+/* The rest of the covers come in once the page has settled, so first paint
+ * spends its bandwidth on the one slide the visitor can actually see — and
+ * they are in the DOM before any cross-fade needs them. */
+const mountAllSlides = () => {
+  mountedSlides.value = new Set(heroSlides.value.map((_, index) => index))
+}
+
+onMounted(() => {
+  startAutoplay()
+  if (document.readyState === 'complete') setTimeout(mountAllSlides, 200)
+  else window.addEventListener('load', () => setTimeout(mountAllSlides, 200), { once: true })
+})
 onUnmounted(stopAutoplay)
 
 /* ── Categories ────────────────────────────────────────────────────── */
@@ -127,22 +156,30 @@ const reassurance = computed(() => [
     <section
       v-if="heroSlides.length"
       class="kw-scallop relative min-h-[62vh] md:min-h-[78vh] flex items-end overflow-hidden"
+      style="background: linear-gradient(140deg, var(--kw-lilac-deep) 0%, var(--kw-pink-deep) 55%, var(--kw-peach) 100%)"
       @mouseenter="stopAutoplay"
       @mouseleave="startAutoplay"
       @touchstart.passive="stopAutoplay"
       @touchend.passive="startAutoplay"
     >
       <img
-        v-for="(slide, index) in heroSlides"
+        v-for="{ slide, index } in mountedHeroSlides"
         :key="'cover-' + index"
         :src="slide.imageUrl"
         :alt="slide.title"
+        :fetchpriority="index === 0 ? 'high' : 'auto'"
         class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out"
         :class="index === currentSlide ? 'opacity-100' : 'opacity-0'"
       >
+      <!--
+        The scrim is inline so it paints with the first frame — which is exactly
+        why the section carries a candy gradient underneath. Without it the very
+        first paint was a near-opaque plum block sitting on nothing, and the page
+        appeared to open dark until the cover photo decoded.
+      -->
       <div
         class="absolute inset-0"
-        style="background: linear-gradient(to top, rgba(74,46,77,.82) 0%, rgba(74,46,77,.35) 42%, rgba(74,46,77,.08) 100%)"
+        style="background: linear-gradient(to top, rgba(74,46,77,.78) 0%, rgba(74,46,77,.3) 45%, rgba(74,46,77,0) 100%)"
       />
 
       <!-- Floating candy dots: the only always-on motion, and it is decorative -->
