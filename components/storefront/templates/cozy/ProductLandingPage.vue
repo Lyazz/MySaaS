@@ -121,6 +121,33 @@ onUnmounted(() => {
     </div>
 
     <div class="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-14">
+      <!-- Headline: the name runs the full measure, the price sits in the margin -->
+      <header class="grid md:grid-cols-12 gap-6 md:gap-10 items-end pb-7 border-b border-[#262019] mb-10 md:mb-14">
+        <div class="md:col-span-8">
+          <span class="ed-ui text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8A7E6E]">
+            {{ product?.category?.title || storefrontContent.common.collection }}
+          </span>
+          <h1 class="ed-display text-4xl md:text-[3.75rem] leading-[1.04] text-[#262019] mt-3">
+            {{ product?.title }}
+          </h1>
+        </div>
+        <div class="md:col-span-4 md:text-end">
+          <div class="flex md:justify-end items-baseline gap-3">
+            <span class="ed-display text-[2rem] md:text-[2.5rem] text-[#B8532E]">{{ formatPrice(currentPrice) }}</span>
+            <span v-if="product?.compareAtPrice" class="ed-ui text-lg text-[#8A7E6E] line-through">
+              {{ formatPrice(product.compareAtPrice) }}
+            </span>
+          </div>
+          <StorefrontSharedCountdownTimer
+            v-if="product?.showCountdown && product?.promotionEndDate"
+            :end-date="product.promotionEndDate"
+            theme="danger"
+            show-icon
+            class="mt-4 md:flex md:justify-end"
+          />
+        </div>
+      </header>
+
       <div class="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16 items-start">
         <div class="lg:col-span-7">
           <ProductGallery :images="images" :title="product?.title" />
@@ -129,6 +156,7 @@ onUnmounted(() => {
           <ProductDetails
             :product="product"
             :current-price="currentPrice"
+            hide-header
             v-model:selected-options="selectedOptions"
           />
           <ProductOrderForm

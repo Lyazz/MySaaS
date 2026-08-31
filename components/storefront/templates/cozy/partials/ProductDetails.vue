@@ -9,6 +9,12 @@ const props = defineProps<{
   product: any;
   currentPrice: number;
   selectedOptions: SelectedOptions;
+  /*
+   * The page sets the name and price as a full-width headline above the
+   * columns, so the panel drops its own header and opens straight on the
+   * options.
+   */
+  hideHeader?: boolean;
 }>();
 
 const emit = defineEmits(['update:selectedOptions']);
@@ -63,7 +69,7 @@ watch(inviteTick, () => {
 <template>
   <div class="space-y-7">
     <!-- Title block -->
-    <div>
+    <div v-if="!hideHeader">
       <span class="ed-ui text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8A7E6E]">
         {{ product?.category?.title || storefrontContent.common.collection }}
       </span>

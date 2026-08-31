@@ -164,6 +164,38 @@ onMounted(() => {
   background: var(--ed-rule);
 }
 
+/*
+ * The contents-page leader: the run of dots between an entry and its page
+ * number. Sits on its own flex child so the two ends stay hard-aligned.
+ */
+.ed-leader {
+  flex: 1 1 auto;
+  min-width: 24px;
+  align-self: flex-end;
+  margin: 0 14px 6px;
+  border-bottom: 1px dotted var(--ed-rule-strong);
+}
+
+/* Standing figure for a ranked entry — big, quiet, set in the accent */
+.ed-rank {
+  font-family: var(--ed-serif);
+  font-weight: 400;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--ed-rule-strong);
+}
+
+/* Opening capital for an editorial paragraph */
+.ed-dropcap::first-letter {
+  font-family: var(--ed-serif);
+  font-size: 3.6em;
+  line-height: 0.8;
+  float: inline-start;
+  margin-inline-end: 0.12em;
+  margin-top: 0.06em;
+  color: var(--ed-accent);
+}
+
 /* Field labels */
 .ed-label {
   display: block;
@@ -267,6 +299,27 @@ onMounted(() => {
   box-shadow: 0 0 0 3px var(--ed-accent-wash);
 }
 .ed-select option { background: var(--ed-card); color: var(--ed-ink); }
+
+/*
+ * A select that reads as a line of type rather than a control — used in
+ * toolbars. Declared here rather than fought for with Tailwind `!` utilities,
+ * which lose to the `background: … !important` above on source order.
+ */
+.ed-select.ed-select--bare {
+  background: transparent !important;
+  border: 0;
+  border-radius: 0;
+  padding: 8px 24px 8px 0;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ed-ink-2) !important;
+  width: auto;
+}
+.ed-select.ed-select--bare:hover { color: var(--ed-ink) !important; }
+.ed-select.ed-select--bare:focus { box-shadow: none; }
+[dir='rtl'] .ed-select.ed-select--bare { padding: 8px 0 8px 24px; }
 
 /* ── Inline link ───────────────────────────────────────────────────────── */
 .ed-link {

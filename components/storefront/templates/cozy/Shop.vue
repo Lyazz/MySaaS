@@ -43,7 +43,16 @@ const maxPriceInput = ref<number | null>(null)
 
 const isQuickViewOpen = ref(false)
 const quickViewProduct = ref<any>(null)
-const isFilterDrawerOpen = ref(false)
+
+/* One panel serves every breakpoint — there is no permanent sidebar. */
+const isFilterPanelOpen = ref(false)
+
+const activeFilterCount = computed(() => {
+  let n = selectedCategories.value.length
+  if (minPriceInput.value != null) n++
+  if (maxPriceInput.value != null) n++
+  return n
+})
 
 const filteredProducts = computed(() => {
   let result = [...props.products]
@@ -83,6 +92,9 @@ const {
   goToNextPage
 } = useProductPagination(filteredProducts, 12)
 
+/* Every third cell opens a row wide, so the grid never reads as a catalogue. */
+const isWideCell = (index: number) => index % 3 === 0
+
 const toggleCategory = (catId: string) => {
   const idx = selectedCategories.value.indexOf(catId)
   if (idx === -1) selectedCategories.value.push(catId)
@@ -112,63 +124,9 @@ const closeQuickView = () => {
 
 <template>
   <div class="ed-theme">
-    <!-- Mobile filter drawer -->
-    <Transition
-      enter-active-class="transition-opacity duration-300"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-300"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
-    >
-      <div v-if="isFilterDrawerOpen" class="fixed inset-0 bg-[#1E1912]/55 z-40 lg:hidden" @click="isFilterDrawerOpen = false" />
-    </Transition>
-    <Transition
-      enter-active-class="transition-transform duration-300"
-      enter-from-class="translate-x-full"
-      enter-to-class="translate-x-0"
-      leave-active-class="transition-transform duration-300"
-      leave-from-class="translate-x-0"
-      leave-to-class="translate-x-full"
-    >
-      <aside v-if="isFilterDrawerOpen" class="fixed inset-y-0 end-0 w-[320px] bg-[#F4EFE6] z-50 p-6 overflow-y-auto lg:hidden shadow-2xl border-s border-[#C4B8A4]">
-        <div class="flex items-center justify-between mb-8">
-          <h3 class="ed-display text-2xl text-[#262019]">{{ storefrontContent.actions.filters }}</h3>
-          <button class="p-2 text-[#8A7E6E] hover:text-[#262019]" @click="isFilterDrawerOpen = false">
-            <Icon name="lucide:x" class="w-5 h-5" />
-          </button>
-        </div>
-
-        <div class="space-y-8">
-          <div>
-            <h4 class="ed-label">{{ storefrontContent.shop.categories }}</h4>
-            <div class="space-y-2.5">
-              <label v-for="cat in filters.categories" :key="cat.id" class="flex items-center gap-3 cursor-pointer group select-none">
-                <input v-model="selectedCategories" type="checkbox" :value="cat.id" class="ed-check">
-                <span class="ed-ui text-sm text-[#4A4038] group-hover:text-[#97401F] transition-colors">{{ categoryDisplayTitle(cat) }}</span>
-              </label>
-            </div>
-          </div>
-          <div>
-            <h4 class="ed-label">{{ storefrontContent.shop.priceRange.label }}</h4>
-            <StorefrontPriceRangeFilter
-              v-model:min-price="minPriceInput"
-              v-model:max-price="maxPriceInput"
-              :min-bound="priceRange.min"
-              :max-bound="priceRange.max"
-              :step="1"
-            />
-          </div>
-          <button class="ed-btn-solid w-full" @click="isFilterDrawerOpen = false">
-            {{ storefrontContent.shop.showResults(filteredProducts.length) }}
-          </button>
-        </div>
-      </aside>
-    </Transition>
-
     <div class="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-14">
       <!-- Masthead -->
-      <div class="border-b border-[#262019] pb-6 mb-10">
+      <div class="border-b border-[#262019] pb-6 mb-8">
         <p class="ed-kicker mb-3">{{ storefrontContent.common.collection }}</p>
         <div class="flex items-end justify-between gap-6 flex-wrap">
           <h1 class="ed-display text-4xl md:text-6xl text-[#262019]">{{ storefrontContent.shop.catalogTitle }}</h1>
@@ -178,28 +136,97 @@ const closeQuickView = () => {
         </div>
       </div>
 
-      <div class="flex flex-col lg:flex-row gap-10 lg:gap-14">
-        <!-- Sidebar -->
-        <aside class="hidden lg:block w-60 flex-shrink-0">
-          <div class="sticky top-24 space-y-8">
-            <div class="flex items-center justify-between pb-3 border-b border-[#262019]">
-              <h3 class="ed-label !mb-0">{{ storefrontContent.actions.filters }}</h3>
-              <button class="ed-link ed-ui text-[10px] font-semibold uppercase tracking-[0.14em]" @click="resetFilters">
-                {{ storefrontContent.actions.reset }}
-              </button>
-            </div>
+      <!-- Rayons: the departments run across the page, not down a sidebar -->
+      <div v-if="filters.categories.length" class="flex flex-wrap items-center gap-x-7 gap-y-2 mb-7">
+        <button
+          class="ed-ui text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors"
+          :class="selectedCategories.length === 0 ? 'text-[#B8532E]' : 'text-[#8A7E6E] hover:text-[#262019]'"
+          @click="selectedCategories = []"
+        >{{ storefrontContent.shop.allProducts }}</button>
+        <button
+          v-for="(cat, index) in filters.categories"
+          :key="cat.id"
+          class="ed-ui text-[11px] font-semibold uppercase tracking-[0.16em] transition-colors flex items-baseline gap-2"
+          :class="selectedCategories.includes(cat.id) ? 'text-[#B8532E]' : 'text-[#8A7E6E] hover:text-[#262019]'"
+          @click="toggleCategory(cat.id)"
+        >
+          <span class="tabular-nums opacity-50">{{ String(index + 1).padStart(2, '0') }}</span>
+          {{ categoryDisplayTitle(cat) }}
+        </button>
+      </div>
 
-            <div>
+      <!-- Toolbar -->
+      <div class="flex flex-col sm:flex-row sm:items-center gap-3 pb-4 border-b border-[#DAD2C4]">
+        <div class="relative flex-1">
+          <input
+            v-model="searchQuery"
+            type="text"
+            :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder"
+            class="w-full bg-transparent border-0 border-b border-transparent ed-ui text-sm text-[#262019] placeholder:text-[#8A7E6E] focus:ring-0 focus:border-[#B8532E] ps-0 pe-8 py-2 transition-colors"
+          >
+          <Icon name="lucide:search" class="w-4 h-4 text-[#8A7E6E] absolute end-0 top-1/2 -translate-y-1/2 pointer-events-none" />
+        </div>
+
+        <div class="flex items-center gap-4 shrink-0">
+          <button
+            class="ed-ui text-[11px] font-semibold uppercase tracking-[0.16em] flex items-center gap-2 transition-colors"
+            :class="isFilterPanelOpen || activeFilterCount ? 'text-[#B8532E]' : 'text-[#4A4038] hover:text-[#262019]'"
+            @click="isFilterPanelOpen = !isFilterPanelOpen"
+          >
+            <Icon name="lucide:sliders-horizontal" class="w-4 h-4" />
+            {{ storefrontContent.actions.filters }}
+            <span v-if="activeFilterCount" class="tabular-nums">({{ activeFilterCount }})</span>
+          </button>
+
+          <span class="h-4 w-px bg-[#DAD2C4]" />
+
+          <div class="relative">
+            <select
+              v-model="sortOption"
+              class="ed-select ed-select--bare"
+            >
+              <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
+              <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
+              <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
+            </select>
+            <Icon name="lucide:chevron-down" class="w-3.5 h-3.5 text-[#8A7E6E] absolute end-0 top-1/2 -translate-y-1/2 pointer-events-none" />
+          </div>
+
+          <div class="hidden md:flex border border-[#C4B8A4]">
+            <button
+              class="w-8 h-8 flex items-center justify-center transition-colors"
+              :class="viewMode === 'grid' ? 'bg-[#262019] text-[#F4EFE6]' : 'text-[#8A7E6E] hover:text-[#262019]'"
+              :title="storefrontContent.shop.view.gridTitle"
+              @click="viewMode = 'grid'"
+            >
+              <Icon name="lucide:layout-grid" class="w-3.5 h-3.5" />
+            </button>
+            <button
+              class="w-8 h-8 flex items-center justify-center transition-colors border-s border-[#C4B8A4]"
+              :class="viewMode === 'list' ? 'bg-[#262019] text-[#F4EFE6]' : 'text-[#8A7E6E] hover:text-[#262019]'"
+              :title="storefrontContent.shop.view.listTitle"
+              @click="viewMode = 'list'"
+            >
+              <Icon name="lucide:rows-3" class="w-3.5 h-3.5" />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter panel: unfolds in place, full width, same on every screen -->
+      <Transition name="panel">
+        <div v-if="isFilterPanelOpen" class="overflow-hidden border-b border-[#DAD2C4]">
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-8 py-8">
+            <div class="md:col-span-7">
               <h4 class="ed-label">{{ storefrontContent.shop.categories }}</h4>
-              <div class="space-y-2.5">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-x-6 gap-y-2.5">
                 <label v-for="cat in filters.categories" :key="cat.id" class="flex items-center gap-3 cursor-pointer group select-none">
                   <input v-model="selectedCategories" type="checkbox" :value="cat.id" class="ed-check">
                   <span class="ed-ui text-[13px] text-[#4A4038] group-hover:text-[#97401F] transition-colors">{{ categoryDisplayTitle(cat) }}</span>
                 </label>
               </div>
             </div>
-
-            <div>
+            <div class="md:col-span-5">
               <h4 class="ed-label">{{ storefrontContent.shop.priceRange.label }}</h4>
               <StorefrontPriceRangeFilter
                 v-model:min-price="minPriceInput"
@@ -208,110 +235,75 @@ const closeQuickView = () => {
                 :max-bound="priceRange.max"
                 :step="1"
               />
-            </div>
-          </div>
-        </aside>
-
-        <!-- Main -->
-        <div class="flex-1 min-w-0">
-          <!-- Active chips -->
-          <div v-if="selectedCategories.length > 0" class="flex flex-wrap gap-2 mb-6">
-            <button
-              v-for="catId in selectedCategories"
-              :key="catId"
-              class="flex items-center gap-2 px-3 py-1.5 border border-[#C4B8A4] ed-ui text-[11px] uppercase tracking-[0.12em] text-[#4A4038] hover:border-[#262019] transition-colors"
-              @click="removeCategory(catId)"
-            >
-              {{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}
-              <Icon name="lucide:x" class="w-3.5 h-3.5" />
-            </button>
-            <button class="ed-link ed-ui text-[11px] uppercase tracking-[0.12em] text-[#8A7E6E]" @click="resetFilters">
-              {{ storefrontContent.actions.clearAll }}
-            </button>
-          </div>
-
-          <!-- Toolbar -->
-          <div class="flex flex-col sm:flex-row sm:items-center gap-3 mb-9 pb-5 border-b border-[#DAD2C4]">
-            <div class="sm:hidden">
-              <button class="ed-btn-line w-full" @click="isFilterDrawerOpen = true">
-                <Icon name="lucide:sliders-horizontal" class="w-4 h-4" />
-                {{ storefrontContent.shop.filtersAndSort }}
+              <button class="ed-link ed-ui text-[10px] font-semibold uppercase tracking-[0.16em] mt-5" @click="resetFilters">
+                {{ storefrontContent.actions.reset }}
               </button>
             </div>
-
-            <div class="relative flex-1">
-              <input
-                v-model="searchQuery"
-                type="text"
-                :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder"
-                class="w-full bg-transparent border-0 border-b border-[#C4B8A4] ed-ui text-sm text-[#262019] placeholder:text-[#8A7E6E] focus:ring-0 focus:border-[#B8532E] ps-0 pe-8 py-2.5 transition-colors"
-              >
-              <Icon name="lucide:search" class="w-4 h-4 text-[#8A7E6E] absolute end-0 top-1/2 -translate-y-1/2 pointer-events-none" />
-            </div>
-
-            <div class="flex items-center gap-3 shrink-0">
-              <span class="ed-ui text-[11px] uppercase tracking-[0.14em] text-[#8A7E6E] whitespace-nowrap hidden sm:inline">{{ storefrontContent.shop.sortBy }}</span>
-              <div class="relative">
-                <select v-model="sortOption" class="ed-select !border-0 !border-b !border-[#C4B8A4] !bg-transparent !rounded-none !px-0 !pe-7 !py-2.5 text-sm w-full sm:w-44">
-                  <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
-                  <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
-                  <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
-                </select>
-                <Icon name="lucide:chevron-down" class="w-4 h-4 text-[#8A7E6E] absolute end-0 top-1/2 -translate-y-1/2 pointer-events-none" />
-              </div>
-              <div class="hidden md:flex border border-[#C4B8A4]">
-                <button
-                  class="w-9 h-9 flex items-center justify-center transition-colors"
-                  :class="viewMode === 'grid' ? 'bg-[#262019] text-[#F4EFE6]' : 'text-[#8A7E6E] hover:text-[#262019]'"
-                  :title="storefrontContent.shop.view.gridTitle"
-                  @click="viewMode = 'grid'"
-                >
-                  <Icon name="lucide:layout-grid" class="w-4 h-4" />
-                </button>
-                <button
-                  class="w-9 h-9 flex items-center justify-center transition-colors border-s border-[#C4B8A4]"
-                  :class="viewMode === 'list' ? 'bg-[#262019] text-[#F4EFE6]' : 'text-[#8A7E6E] hover:text-[#262019]'"
-                  :title="storefrontContent.shop.view.listTitle"
-                  @click="viewMode = 'list'"
-                >
-                  <Icon name="lucide:rows-3" class="w-4 h-4" />
-                </button>
-              </div>
-            </div>
           </div>
+        </div>
+      </Transition>
 
-          <!-- Empty -->
-          <div v-if="filteredProducts.length === 0" class="border border-dashed border-[#C4B8A4] py-16 text-center">
-            <Icon name="lucide:package-open" class="w-8 h-8 mx-auto mb-4 text-[#C4B8A4]" />
-            <h3 class="ed-display text-xl text-[#262019]">{{ storefrontContent.shop.results.noResults }}</h3>
-            <p class="ed-ui text-sm text-[#8A7E6E] mt-1">{{ storefrontContent.shop.results.noResultsHint }}</p>
-            <button class="ed-btn-line mt-6" @click="resetFilters">{{ storefrontContent.actions.clearAll }}</button>
-          </div>
+      <!-- Active chips -->
+      <div v-if="selectedCategories.length > 0" class="flex flex-wrap gap-2 mt-6">
+        <button
+          v-for="catId in selectedCategories"
+          :key="catId"
+          class="flex items-center gap-2 px-3 py-1.5 border border-[#C4B8A4] ed-ui text-[11px] uppercase tracking-[0.12em] text-[#4A4038] hover:border-[#262019] transition-colors"
+          @click="removeCategory(catId)"
+        >
+          {{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}
+          <Icon name="lucide:x" class="w-3.5 h-3.5" />
+        </button>
+        <button class="ed-link ed-ui text-[11px] uppercase tracking-[0.12em] text-[#8A7E6E]" @click="resetFilters">
+          {{ storefrontContent.actions.clearAll }}
+        </button>
+      </div>
 
-          <!-- Grid / list -->
+      <!-- Results -->
+      <div class="mt-10 md:mt-14">
+        <div v-if="filteredProducts.length === 0" class="border border-dashed border-[#C4B8A4] py-16 text-center">
+          <Icon name="lucide:package-open" class="w-8 h-8 mx-auto mb-4 text-[#C4B8A4]" />
+          <h3 class="ed-display text-xl text-[#262019]">{{ storefrontContent.shop.results.noResults }}</h3>
+          <p class="ed-ui text-sm text-[#8A7E6E] mt-1">{{ storefrontContent.shop.results.noResultsHint }}</p>
+          <button class="ed-btn-line mt-6" @click="resetFilters">{{ storefrontContent.actions.clearAll }}</button>
+        </div>
+
+        <!-- Staggered plate -->
+        <div
+          v-else-if="viewMode === 'grid'"
+          class="grid grid-cols-2 md:grid-cols-12 gap-x-5 gap-y-10 md:gap-x-8 md:gap-y-14 items-start"
+        >
           <div
-            v-else
-            :class="viewMode === 'list'
-              ? 'flex flex-col divide-y divide-[#DAD2C4]'
-              : 'grid grid-cols-2 lg:grid-cols-3 gap-x-5 gap-y-12 md:gap-x-8 md:gap-y-16'"
+            v-for="(product, index) in paginatedProducts"
+            :key="product.id"
+            :class="isWideCell(index) ? 'col-span-2 md:col-span-6' : 'col-span-1 md:col-span-3'"
           >
-            <div v-for="product in paginatedProducts" :key="product.id" :class="viewMode === 'list' ? 'py-8 first:pt-0' : ''">
-              <ProductCard :product="product" :view-mode="viewMode" @quick-view="openQuickView" />
-            </div>
-          </div>
-
-          <div v-if="filteredProducts.length > 0" class="mt-14">
-            <StorefrontProductPagination
-              :current-page="currentPage"
-              :total-pages="totalPages"
-              :page-numbers="pageNumbers"
-              :can-go-prev="canGoPrev"
-              :can-go-next="canGoNext"
-              @go-to-page="goToPage"
-              @go-prev="goToPrevPage"
-              @go-next="goToNextPage"
+            <ProductCard
+              :product="product"
+              :view-mode="isWideCell(index) ? 'feature' : 'grid'"
+              @quick-view="openQuickView"
             />
           </div>
+        </div>
+
+        <!-- Editorial rows -->
+        <div v-else class="border-t border-[#262019] max-w-4xl">
+          <div v-for="product in paginatedProducts" :key="product.id" class="py-6 md:py-7 border-b border-[#DAD2C4]">
+            <ProductCard :product="product" view-mode="list" @quick-view="openQuickView" />
+          </div>
+        </div>
+
+        <div v-if="filteredProducts.length > 0" class="mt-14">
+          <StorefrontProductPagination
+            :current-page="currentPage"
+            :total-pages="totalPages"
+            :page-numbers="pageNumbers"
+            :can-go-prev="canGoPrev"
+            :can-go-next="canGoNext"
+            @go-to-page="goToPage"
+            @go-prev="goToPrevPage"
+            @go-next="goToNextPage"
+          />
         </div>
       </div>
     </div>
@@ -376,5 +368,13 @@ const closeQuickView = () => {
 .ed-check:focus-visible {
   outline: 2px solid rgb(var(--brand-rgb, 184 83 46) / 1);
   outline-offset: 2px;
+}
+
+.panel-enter-active, .panel-leave-active { transition: max-height 0.32s ease, opacity 0.32s ease; }
+.panel-enter-from, .panel-leave-to { opacity: 0; max-height: 0; }
+.panel-enter-to, .panel-leave-from { opacity: 1; max-height: 720px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .panel-enter-active, .panel-leave-active { transition: none; }
 }
 </style>

@@ -1,10 +1,21 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 
+/*
+ * Three layouts share one card so the cart + variant-guard logic lives in a
+ * single place:
+ *   grid    — the standard cell (portrait plate, type under)
+ *   feature — the wide cell that opens each row of the staggered grid
+ *   list    — a full-width editorial row; pass `rank` to stand a figure beside it
+ */
 const props = defineProps<{
   product: any
-  viewMode?: 'grid' | 'list'
+  viewMode?: 'grid' | 'list' | 'feature'
+  rank?: number
 }>()
+
+const isFeature = computed(() => props.viewMode === 'feature')
+const isList = computed(() => props.viewMode === 'list')
 
 const isPromoValid = computed(() => {
   if (!props.product?.isPromotionActive) return false
@@ -67,12 +78,21 @@ async function handleAddToCart() {
 <template>
   <div
     class="group relative"
-    :class="viewMode === 'list' ? 'flex gap-6 items-start' : 'flex flex-col'"
+    :class="isList ? 'flex gap-5 md:gap-8 items-center' : 'flex flex-col'"
   >
-    <!-- Image -->
+    <!-- Standing figure (ranked rows only) -->
+    <span
+      v-if="isList && rank"
+      class="ed-rank text-[2rem] md:text-[3.25rem] w-10 md:w-16 shrink-0 text-center"
+    >{{ String(rank).padStart(2, '0') }}</span>
+
+    <!-- Plate -->
     <div
-      class="relative bg-[#FBF8F2] border border-[#DAD2C4] overflow-hidden"
-      :class="viewMode === 'list' ? 'w-40 sm:w-48 flex-shrink-0 aspect-[4/5]' : 'w-full aspect-[4/5]'"
+      class="relative bg-[#FBF8F2] border border-[#DAD2C4] overflow-hidden shrink-0"
+      :class="[
+        isList ? 'w-28 h-32 md:w-40 md:h-48' : 'w-full',
+        isFeature ? 'aspect-[16/11]' : (isList ? '' : 'aspect-[4/5]')
+      ]"
     >
       <NuxtLink :to="`/product/${product.slug}`" class="block w-full h-full">
         <img
@@ -83,6 +103,7 @@ async function handleAddToCart() {
       </NuxtLink>
 
       <StorefrontSharedFavoriteButton
+        v-if="!isList"
         :product-id="product.id"
         button-class="absolute top-2.5 end-2.5 w-9 h-9 bg-[#F4EFE6]/90 border border-[#C4B8A4] text-[#262019] hover:bg-[#B8532E] hover:text-[#F4EFE6] hover:border-[#B8532E] transition-colors flex items-center justify-center"
         icon-class="w-4 h-4"
@@ -94,13 +115,14 @@ async function handleAddToCart() {
           class="ed-ui text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#B8532E] text-[#F4EFE6] px-2 py-1"
         >−{{ Math.round((1 - displayPrice / originalPrice) * 100) }}%</span>
         <span
-          v-if="isClearanceEligible"
+          v-if="isClearanceEligible && !isList"
           class="ed-ui text-[10px] font-semibold uppercase tracking-[0.14em] bg-[#262019] text-[#F4EFE6] px-2 py-1"
         >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
-      <!-- Add -->
+      <!-- Quick add -->
       <button
+        v-if="!isList"
         class="absolute bottom-0 inset-x-0 bg-[#262019] text-[#F4EFE6] ed-ui text-[10px] font-semibold uppercase tracking-[0.18em] py-3 translate-y-full opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300 hover:bg-[#97401F]"
         @click.prevent="handleAddToCart"
       >
@@ -109,7 +131,7 @@ async function handleAddToCart() {
 
       <!-- Countdown -->
       <div
-        v-if="product.showCountdown && product.promotionEndDate && isPromoValid"
+        v-if="product.showCountdown && product.promotionEndDate && isPromoValid && !isList"
         class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-[#1E1912]/70 via-[#1E1912]/20 to-transparent pt-8 pb-2.5 pointer-events-none group-hover:opacity-0 transition-opacity"
       >
         <div class="scale-[0.85] sm:scale-90 origin-bottom">
@@ -118,21 +140,39 @@ async function handleAddToCart() {
       </div>
     </div>
 
-    <!-- Text -->
-    <div class="flex-grow pt-3" :class="viewMode === 'list' ? '' : 'flex flex-col'">
+    <!-- Type -->
+    <div
+      class="flex-grow min-w-0"
+      :class="isList ? '' : 'pt-3 flex flex-col'"
+    >
       <div class="ed-ui text-[10px] font-semibold uppercase tracking-[0.16em] text-[#8A7E6E] mb-1.5">
         {{ product.category?.title || storefrontContent.common.collection }}
       </div>
-      <h3 class="ed-display text-[18px] leading-snug text-[#262019] mb-2">
+      <h3
+        class="ed-display leading-snug text-[#262019] mb-2"
+        :class="isFeature ? 'text-[22px] md:text-[26px]' : (isList ? 'text-[19px] md:text-[24px]' : 'text-[18px]')"
+      >
         <NuxtLink :to="`/product/${product.slug}`" class="hover:text-[#97401F] transition-colors">{{ product.title }}</NuxtLink>
       </h3>
+
+      <p
+        v-if="(isFeature || isList) && product.miniDescription"
+        class="text-[15px] text-[#4A4038] leading-relaxed mb-3 line-clamp-2 max-w-md"
+      >{{ product.miniDescription }}</p>
+
       <div class="flex items-baseline gap-2.5 mt-auto">
-        <span class="ed-display text-[17px] text-[#B8532E]">{{ formatPrice(displayPrice) }}</span>
+        <span class="ed-display text-[17px] text-[#B8532E]" :class="{ 'md:text-[19px]': isFeature || isList }">{{ formatPrice(displayPrice) }}</span>
         <span v-if="hasDiscount" class="ed-ui text-[13px] text-[#8A7E6E] line-through">{{ formatPrice(originalPrice) }}</span>
       </div>
-      <p v-if="viewMode === 'list' && product.miniDescription" class="text-[15px] text-[#4A4038] leading-relaxed mt-3 line-clamp-2">
-        {{ product.miniDescription }}
-      </p>
+
+      <button
+        v-if="isList"
+        class="ed-link ed-ui text-[10px] font-semibold uppercase tracking-[0.16em] mt-3 inline-flex items-center gap-2"
+        @click.prevent="handleAddToCart"
+      >
+        {{ storefrontContent.actions.addToCart }}
+        <Icon name="lucide:plus" class="w-3.5 h-3.5" />
+      </button>
     </div>
 
     <!-- Toast -->

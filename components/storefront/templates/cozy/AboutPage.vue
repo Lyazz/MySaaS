@@ -45,15 +45,3 @@ const aboutBody = computed(() => storeSettings.value?.description || t('storefro
     </div>
   </div>
 </template>
-
-<style scoped>
-.ed-dropcap::first-letter {
-  font-family: var(--ed-serif, Georgia, serif);
-  font-size: 3.4rem;
-  line-height: 0.82;
-  float: inline-start;
-  margin-inline-end: 0.5rem;
-  margin-top: 0.4rem;
-  color: var(--ed-accent, #B8532E);
-}
-</style>
