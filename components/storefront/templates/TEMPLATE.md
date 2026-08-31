@@ -44,11 +44,21 @@ Create all of the following files:
 - `components/storefront/templates/<template-key>/AboutPage.vue`
 - `components/storefront/templates/<template-key>/ContactPage.vue`
 - `components/storefront/templates/<template-key>/ProductLandingPage.vue`
+- `components/storefront/templates/<template-key>/Wishlist.vue`
 - `components/storefront/templates/<template-key>/variant-ux.ts`
 - `components/storefront/templates/<template-key>/partials/ProductDetails.vue`
 - `components/storefront/templates/<template-key>/partials/ProductGallery.vue`
 - `components/storefront/templates/<template-key>/partials/ProductOrderForm.vue`
 - `components/storefront/templates/<template-key>/partials/RelatedProducts.vue`
+
+`Wishlist.vue` is the one file with no `modern` counterpart: `modern` — and most
+other templates — fall back to `components/storefront/shared/WishlistDefault.vue`.
+Treat that shared file as the behavioural reference (same `products` and `card`
+props, same `useFavorites()` usage, product cards still rendered through the
+injected `card` component) and give it this template's own presentation. Leaving
+the new key mapped to `WishlistDefault` is not acceptable: the fallback is silent,
+so the page renders generic chrome inside the new shell and nobody notices until a
+customer taps the heart.
 
 ## Registration Requirement
 Update `components/storefront/templates/registry.ts` so the new template is fully wired into:
@@ -67,6 +77,7 @@ Update `components/storefront/templates/registry.ts` so the new template is full
 - `aboutPageTemplates`
 - `contactPageTemplates`
 - `themeProviderTemplates`
+- `wishlistTemplates`
 
 If another page/component registry in the repo depends on the template catalog, update it too, but do not change existing behavior for other templates.
 
@@ -114,11 +125,13 @@ If another page/component registry in the repo depends on the template catalog, 
 Verify all of the following:
 
 1. The new folder has the full required file set.
-2. Each file has a corresponding `modern` source file and remains behaviorally compatible.
+2. Each file has a corresponding `modern` source file and remains behaviorally
+   compatible — except `Wishlist.vue`, whose reference is `WishlistDefault.vue`.
 3. The new template is registered in `components/storefront/templates/registry.ts`.
 4. No tenant-safe helper usage was removed or bypassed.
 5. No business logic was invented that differs from `modern`.
-6. No required storefront surface is missing.
+6. No required storefront surface is missing — including `/wishlist`, which is
+   reachable only from the header heart and is therefore the easiest to overlook.
 7. The code is clean, consistent, and ready for review.
 
 ## Output Format
