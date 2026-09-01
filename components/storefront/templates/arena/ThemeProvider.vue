@@ -21,7 +21,15 @@ const storeStyle = computed(() => {
   return {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Inter', 'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+    fontFamily: "'Inter', 'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
+    // Shared LocaleSwitcher — dark chrome for the near-black arena storefront
+    '--ls-surface': '#0f141c',
+    '--ls-border': 'rgba(255,255,255,0.10)',
+    '--ls-shadow': '0 20px 46px -16px rgba(0,0,0,0.7)',
+    '--ls-radius': '12px',
+    '--ls-text': '#94a3b8',
+    '--ls-text-strong': '#f1f5f9',
+    '--ls-hover-bg': 'rgba(255,255,255,0.06)'
   } as Record<string, string>
 })
 

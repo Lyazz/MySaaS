@@ -3,16 +3,16 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-bold text-primary">
           {{ t('admin.nav.suppliers') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ t('admin.pages.suppliers.index.subtitle') }}
         </p>
       </div>
       <NuxtLink
         to="/admin/suppliers/create"
-        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center space-x-2"
+        class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center space-x-2"
       >
         <Icon name="lucide:plus" class="w-5 h-5" />
         <span>{{ t('admin.pages.suppliers.index.addSupplier') }}</span>
@@ -20,18 +20,13 @@
     </div>
 
     <!-- Filters -->
-    <div class="p-4 rounded-lg mb-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="ui-label mb-1 block">{{ t('admin.pages.suppliers.index.filters.searchLabel') }}</label>
-          <BaseInput
-            v-model="searchQuery"
-            type="text"
-            :placeholder="t('admin.pages.suppliers.index.filters.searchPlaceholder')"
-          />
-        </div>
-      </div>
-    </div>
+    <AdminFilterBar
+      v-model:search="searchQuery"
+      :search-label="t('admin.pages.suppliers.index.filters.searchLabel')"
+      :search-placeholder="t('admin.pages.suppliers.index.filters.searchPlaceholder')"
+      testid="suppliers-filters"
+      @clear="searchQuery = ''"
+    />
 
     <!-- Loading State -->
     <div
@@ -39,7 +34,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.suppliers.index.loading') }}
       </p>
     </div>
@@ -49,11 +44,11 @@
       v-else-if="filteredSuppliers.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:users" class="mx-auto h-12 w-12" style="color: var(--text-muted)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:users" class="mx-auto h-12 w-12 text-muted" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.suppliers.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ t('admin.pages.suppliers.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -118,18 +113,18 @@
                   </div>
                   <div class="ms-4">
                     <NuxtLink
-                      :to="`/admin/suppliers/${supplier.id}`"
-                      class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)"
-                    >
+ :to="`/admin/suppliers/${supplier.id}`"
+ class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors text-primary" 
+>
                       {{ supplier.name }}
                     </NuxtLink>
                   </div>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="flex flex-col text-sm" style="color: var(--text-secondary)">
+                <div class="flex flex-col text-sm text-secondary">
                    <div v-if="supplier.email" class="flex items-center gap-1">
-                     <Icon name="lucide:mail" class="w-3 h-3" style="color: var(--text-muted)" />
+                     <Icon name="lucide:mail" class="w-3 h-3 text-muted" />
                      <a
                        :href="`mailto:${supplier.email}`"
                        class="hover:[color:var(--brand)] transition-colors"
@@ -138,7 +133,7 @@
                      </a>
                    </div>
                    <div v-if="supplier.phone" class="flex items-center gap-1 mt-1">
-                     <Icon name="lucide:phone" class="w-3 h-3" style="color: var(--text-muted)" />
+                     <Icon name="lucide:phone" class="w-3 h-3 text-muted" />
                      <a
                        :href="`tel:${supplier.phone}`"
                        class="hover:[color:var(--brand)] transition-colors"
@@ -146,10 +141,10 @@
                        {{ supplier.phone }}
                      </a>
                    </div>
-                   <span v-if="!supplier.email && !supplier.phone" style="color: var(--text-muted)">—</span>
+                   <span class="text-muted" v-if="!supplier.email && !supplier.phone">—</span>
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                  <a
                    v-if="supplier.address"
                    :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(supplier.address)}`"
@@ -158,7 +153,7 @@
                  >
                    {{ supplier.address }}
                  </a>
-                 <span v-else style="color: var(--text-muted)">—</span>
+                 <span class="text-muted" v-else>—</span>
               </td>
               <td class="ui-td whitespace-nowrap text-end">
                 <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
@@ -184,7 +179,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-slate-200 sm:px-6">
+      <div class="surface-1 px-4 py-3 flex items-center justify-between border-t border-line sm:px-6">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -193,7 +188,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm text-slate-600">
+          <span class="text-sm text-secondary">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -206,7 +201,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm text-slate-700">
+            <p class="text-sm text-secondary">
               {{ t('admin.pages.suppliers.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredSuppliers.length),
@@ -215,10 +210,10 @@
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
               <button
                 :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-s-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-s-lg border border-line surface-1 text-sm font-medium text-secondary hover:bg-hover disabled:opacity-50"
                 @click="currentPage--"
               >
                 {{ t('admin.common.previous') }}
@@ -230,7 +225,7 @@
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
                     ? 'z-10 [background:rgba(var(--brand-rgb)/0.08)] [border-color:var(--brand)] [color:var(--brand)]'
-                    : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50'
+                    : 'surface-1 border-line text-secondary hover:bg-hover'
                 ]"
                 @click="currentPage = page"
               >
@@ -238,7 +233,7 @@
               </button>
               <button
                 :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-e-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50 disabled:opacity-50"
+                class="relative inline-flex items-center px-2 py-2 rounded-e-lg border border-line surface-1 text-sm font-medium text-secondary hover:bg-hover disabled:opacity-50"
                 @click="currentPage++"
               >
                 {{ t('admin.common.next') }}
@@ -265,7 +260,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import BaseInput from '~/components/ui/BaseInput.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
 
 definePageMeta({
   middleware: 'auth',

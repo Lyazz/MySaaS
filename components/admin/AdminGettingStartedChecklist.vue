@@ -1,34 +1,34 @@
 <template>
-  <div v-if="!dismissed" class="rounded-xl p-5 mb-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+  <div v-if="!dismissed" class="rounded-xl p-5 mb-4 surface-1 border border-line">
     <!-- Header -->
     <div class="flex items-center justify-between mb-4">
       <div>
-        <h3 class="font-semibold text-sm" style="color: var(--text-primary)">
+        <h3 class="font-semibold text-sm text-primary">
           {{ t('admin.pages.gettingStarted.title') }}
         </h3>
-        <p class="text-xs mt-0.5" style="color: var(--text-secondary)">
+        <p class="text-xs mt-0.5 text-secondary">
           {{ t('admin.pages.gettingStarted.progress', { done: completedCount, total: items.length }) }}
         </p>
       </div>
       <div class="flex items-center gap-2">
-        <span v-if="allDone" class="text-xs font-medium flex items-center gap-1" style="color: var(--brand)">
+        <span v-if="allDone" class="text-xs font-medium flex items-center gap-1 text-brand">
           <Icon name="lucide:check-circle" class="w-4 h-4" />
           {{ t('admin.pages.gettingStarted.complete') }}
         </span>
         <button
-          type="button"
-          class="text-xs px-2 py-1 rounded"
-          style="color: var(--text-muted); background: var(--surface-3)"
-          data-testid="getting-started-dismiss"
-          @click="dismiss"
-        >
+ type="button"
+ class="text-xs px-2 py-1 rounded-lg text-muted surface-3"
+ 
+ data-testid="getting-started-dismiss"
+ @click="dismiss"
+>
           {{ t('admin.pages.gettingStarted.dismiss') }}
         </button>
       </div>
     </div>
 
     <!-- Progress bar -->
-    <div class="h-1.5 rounded-full mb-4 overflow-hidden" style="background: var(--surface-3)">
+    <div class="h-1.5 rounded-full mb-4 overflow-hidden surface-3">
       <div
         class="h-1.5 rounded-full transition-all duration-500 [background:var(--brand)]"
         :style="{ width: `${(completedCount / items.length) * 100}%` }"
@@ -42,7 +42,7 @@
           class="w-5 h-5 rounded-full flex items-center justify-center shrink-0 transition-colors"
           :style="item.done ? 'background: var(--brand)' : 'border: 2px solid var(--surface-border)'"
         >
-          <Icon v-if="item.done" name="lucide:check" class="w-3 h-3" style="color: #05070A" />
+          <Icon v-if="item.done" name="lucide:check" class="w-3 h-3 text-brand-contrast" />
         </div>
         <span
           class="text-sm flex-1"
@@ -53,7 +53,7 @@
           v-if="item.key === 'publish' && !item.done"
           type="button"
           :disabled="publishing"
-          class="text-xs px-2.5 py-1 rounded-lg font-medium [background:var(--brand)] text-white disabled:opacity-50"
+          class="text-xs px-2.5 py-1 rounded-lg font-medium [background:var(--brand)] text-brand-contrast disabled:opacity-50"
           @click="publishStore"
         >
           {{ publishing ? t('admin.pages.gettingStarted.publishing') : t('admin.pages.gettingStarted.publishBtn') }}
@@ -61,7 +61,7 @@
         <NuxtLink
           v-else-if="!item.done && item.href"
           :to="item.href"
-          class="text-xs px-2.5 py-1 rounded-lg font-medium [background:var(--brand)] text-white"
+          class="text-xs px-2.5 py-1 rounded-lg font-medium [background:var(--brand)] text-brand-contrast"
         >
           →
         </NuxtLink>

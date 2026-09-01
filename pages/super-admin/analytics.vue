@@ -4,13 +4,13 @@
 
     <!-- Revenue Overview -->
     <div class="ui-card p-6">
-      <h2 class="mb-2 text-sm font-semibold uppercase tracking-wider" style="color: var(--text-tertiary)">
+      <h2 class="mb-2 text-sm font-semibold uppercase tracking-wider text-tertiary">
         {{ t('superAdmin.analytics.revenue.title') }}
       </h2>
-      <div class="text-4xl font-bold sm:text-5xl" style="color: var(--brand)">
+      <div class="text-4xl font-bold sm:text-5xl text-brand">
         {{ formatMoney(revenueStats?.totalRevenue) }}
       </div>
-      <p class="mt-2 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-2 text-sm text-tertiary">
         {{ t('superAdmin.analytics.revenue.subtitle') }}
       </p>
     </div>
@@ -45,7 +45,7 @@
 
     <!-- Revenue by Tenant -->
     <div class="ui-card p-6">
-      <h2 class="mb-4 text-base font-semibold" style="color: var(--text-primary)">
+      <h2 class="mb-4 text-base font-semibold text-primary">
         {{ t('superAdmin.analytics.byTenant.title') }}
       </h2>
 
@@ -68,28 +68,28 @@
         >
           <div class="flex items-baseline justify-between gap-4">
             <div class="min-w-0">
-              <p class="truncate font-medium" style="color: var(--text-primary)">
+              <p class="truncate font-medium text-primary">
                 {{ getTenantName(item.tenantId) }}
               </p>
-              <p class="text-xs" style="color: var(--text-tertiary)">
+              <p class="text-xs text-tertiary">
                 {{ item.tenantSlug }}
               </p>
             </div>
             <div class="shrink-0 text-end">
-              <p class="font-semibold" style="color: var(--brand)">
+              <p class="font-semibold text-brand">
                 {{ formatMoney(item.revenue) }}
               </p>
-              <p class="text-xs" style="color: var(--text-tertiary)">
+              <p class="text-xs text-tertiary">
                 {{ revenueShare(item.revenue) }}%
               </p>
             </div>
           </div>
-          <div class="mt-2 h-1.5 overflow-hidden rounded-full" style="background: var(--surface-2)">
+          <div class="mt-2 h-1.5 overflow-hidden rounded-full surface-2">
             <div
-              class="h-full rounded-full transition-all"
-              style="background: var(--brand)"
-              :style="{ width: `${revenueShare(item.revenue)}%` }"
-            />
+ class="h-full rounded-full transition-all bg-brand"
+ 
+ :style="{ width: `${revenueShare(item.revenue)}%` }"
+ />
           </div>
         </div>
       </div>
@@ -98,7 +98,7 @@
     <!-- Top Performing Tenants -->
     <div class="ui-card overflow-hidden">
       <div class="ui-card-header">
-        <h2 class="text-base font-semibold" style="color: var(--text-primary)">
+        <h2 class="text-base font-semibold text-primary">
           {{ t('superAdmin.analytics.topTenants.title') }}
         </h2>
       </div>
@@ -117,7 +117,7 @@
         class="overflow-x-auto"
       >
         <table class="ui-table">
-          <thead class="ui-thead border-b border-slate-200">
+          <thead class="ui-thead border-b border-line">
             <tr>
               <th class="ui-th">
                 {{ t('superAdmin.analytics.topTenants.table.rank') }}
@@ -151,20 +151,20 @@
                 </span>
               </td>
               <td class="ui-td">
-                <p class="font-medium" style="color: var(--text-primary)">
+                <p class="font-medium text-primary">
                   {{ tenant.name }}
                 </p>
-                <p class="text-sm" style="color: var(--text-tertiary)">
+                <p class="text-sm text-tertiary">
                   {{ tenant.slug }}
                 </p>
               </td>
-              <td class="ui-td text-end font-semibold" style="color: var(--brand)">
+              <td class="ui-td text-end font-semibold text-brand">
                 {{ formatMoney(tenant.revenue) }}
               </td>
-              <td class="ui-td text-end" style="color: var(--text-secondary)">
+              <td class="ui-td text-end text-secondary">
                 {{ tenant._count?.orders || 0 }}
               </td>
-              <td class="ui-td text-end" style="color: var(--text-secondary)">
+              <td class="ui-td text-end text-secondary">
                 {{ tenant._count?.products || 0 }}
               </td>
             </tr>

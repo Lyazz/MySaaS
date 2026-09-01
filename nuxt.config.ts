@@ -10,7 +10,9 @@ const cspReportOnly = [
   "img-src 'self' data: https:",
   "font-src 'self' https://fonts.gstatic.com data:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+  // connect.facebook.net serves the SDK behind WhatsApp Embedded Signup, loaded
+  // on demand from the integrations screen.
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://connect.facebook.net",
   "connect-src 'self' https:"
 ].join('; ')
 const securityHeaders = {
@@ -62,6 +64,15 @@ export default defineNuxtConfig({
           'true') !== 'false'
     }
   },
+  /*
+   * The design-kit primitives are registered without the directory prefix, so
+   * they read as `<UiButton>` rather than `<UiUiButton>` and no template needs
+   * an explicit import. Everything else keeps Nuxt's default path prefixing.
+   */
+  components: [
+    { path: '~/components/ui', pathPrefix: false },
+    '~/components'
+  ],
   modules: [
     '@nuxtjs/tailwindcss',
     '@pinia/nuxt',

@@ -2,47 +2,47 @@
   <div class="space-y-6 text-center py-4">
     <div class="flex justify-center">
       <div class="w-16 h-16 rounded-full flex items-center justify-center" style="background: var(--accent-soft)">
-        <Icon name="lucide:check" class="w-8 h-8" style="color: var(--brand)" />
+        <Icon name="lucide:check" class="w-8 h-8 text-brand" />
       </div>
     </div>
 
     <div>
-      <h3 class="text-2xl font-bold" style="color: var(--text-primary)">
+      <h3 class="text-2xl font-bold text-primary">
         {{ t('admin.pages.onboarding.done.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+      <p class="mt-1 text-sm text-secondary">
         {{ t('admin.pages.onboarding.done.subtitle') }}
       </p>
     </div>
 
     <!-- Summary cards -->
     <div class="grid grid-cols-2 md:grid-cols-3 gap-3 text-start">
-      <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border)">
-        <p class="text-xs" style="color: var(--text-tertiary)">Template</p>
-        <p class="font-semibold text-sm capitalize" style="color: var(--text-primary)">{{ modelValue.templateKey }}</p>
+      <div class="rounded-xl p-3 border border-line">
+        <p class="text-xs text-tertiary">Template</p>
+        <p class="font-semibold text-sm capitalize text-primary">{{ modelValue.templateKey }}</p>
       </div>
-      <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border)">
-        <p class="text-xs" style="color: var(--text-tertiary)">Color</p>
+      <div class="rounded-xl p-3 border border-line">
+        <p class="text-xs text-tertiary">Color</p>
         <div class="flex items-center gap-2">
-          <span class="w-4 h-4 rounded" :style="{ background: modelValue.primaryColor }"></span>
-          <p class="font-semibold text-sm" style="color: var(--text-primary)">{{ modelValue.primaryColor }}</p>
+          <span class="w-4 h-4 rounded-lg" :style="{ background: modelValue.primaryColor }"></span>
+          <p class="font-semibold text-sm text-primary">{{ modelValue.primaryColor }}</p>
         </div>
       </div>
-      <div class="rounded-xl p-3" style="border: 1px solid var(--surface-border)">
-        <p class="text-xs" style="color: var(--text-tertiary)">Language</p>
-        <p class="font-semibold text-sm uppercase" style="color: var(--text-primary)">{{ modelValue.language }}</p>
+      <div class="rounded-xl p-3 border border-line">
+        <p class="text-xs text-tertiary">Language</p>
+        <p class="font-semibold text-sm uppercase text-primary">{{ modelValue.language }}</p>
       </div>
     </div>
 
     <!-- Store URL -->
-    <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border); background: var(--surface-2)">
-      <p class="text-xs mb-1" style="color: var(--text-tertiary)">{{ t('admin.pages.onboarding.done.storeUrlLabel') }}</p>
-      <p class="font-mono font-semibold text-sm" style="color: var(--text-primary)">
+    <div class="rounded-xl p-4 border border-line surface-2">
+      <p class="text-xs mb-1 text-tertiary">{{ t('admin.pages.onboarding.done.storeUrlLabel') }}</p>
+      <p class="font-mono font-semibold text-sm text-primary">
         https://{{ tenantSlug }}.swekly.com
       </p>
     </div>
 
-    <p class="text-xs" style="color: var(--text-muted)">
+    <p class="text-xs text-muted">
       {{ t('admin.pages.onboarding.done.offlineNote') }}
     </p>
   </div>

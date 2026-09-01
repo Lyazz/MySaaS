@@ -2,10 +2,10 @@
   <div class="space-y-5">
     <div class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
       <div>
-        <p class="text-[9.5px] font-bold uppercase tracking-[0.1em] mb-1" style="color: var(--text-muted)">
+        <p class="text-micro font-bold uppercase tracking-[0.1em] mb-1 text-muted">
           {{ t('admin.pages.statistics.subtitle') }}
         </p>
-        <h2 class="text-[20px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em">
+        <h2 class="text-xl font-semibold text-primary tracking-tight">
           {{ t('admin.pages.statistics.title') }}
         </h2>
       </div>
@@ -34,52 +34,64 @@
       </div>
     </div>
 
+    <AdminTabFilter v-model="activeTab" :tabs="tabDefs" />
+
     <!-- Filters -->
-    <div class="rounded-2xl p-4 flex flex-wrap items-end gap-3" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <DateFilter
+    <AdminFilterBar
+      hide-search
+      :chips="filterChips"
+      :advanced-count="advancedFilterCount"
+      :clearable="advancedFilterCount > 0"
+      testid="statistics-filters"
+      @clear="clearFilters"
+      @remove-chip="removeFilterChip"
+    >
+      <AdminDateRangeFilter
         v-model:start-date="customFrom"
         v-model:end-date="customTo"
         v-model:range="selectedRange"
-        :label="t('admin.pages.statistics.filters.range')"
-        class="w-full sm:w-auto"
         testid="statistics"
       />
 
-      <div v-if="activeTab !== 'delivery' && activeTab !== 'customers'" class="w-auto">
-        <label class="ui-label block mb-1">{{ t('admin.pages.statistics.filters.channel') }}</label>
-        <select v-model="channel" class="ui-input h-9 py-1 text-[12px]">
+      <template #advanced>
+        <BaseSelect
+          v-if="showChannelFilter"
+          v-model="channel"
+          :label="t('admin.pages.statistics.filters.channel')"
+        >
           <option value="all">{{ t('admin.pages.statistics.filters.channels.all') }}</option>
           <option value="online">{{ t('admin.pages.statistics.filters.channels.online') }}</option>
           <option value="pos">{{ t('admin.pages.statistics.filters.channels.pos') }}</option>
-        </select>
-      </div>
+        </BaseSelect>
 
-      <div v-if="activeTab === 'sales' || activeTab === 'products'" class="w-auto">
-        <label class="ui-label block mb-1">{{ t('admin.pages.statistics.filters.category') }}</label>
-        <select v-model="categoryId" class="ui-input h-9 py-1 text-[12px]">
+        <BaseSelect
+          v-if="showCategoryFilter"
+          v-model="categoryId"
+          :label="t('admin.pages.statistics.filters.category')"
+        >
           <option value="">{{ t('admin.pages.statistics.filters.allCategories') }}</option>
           <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.title }}</option>
-        </select>
-      </div>
+        </BaseSelect>
 
-      <div v-if="activeTab === 'delivery'" class="w-auto">
-        <label class="ui-label block mb-1">{{ t('admin.pages.statistics.filters.provider') }}</label>
-        <select v-model="provider" class="ui-input h-9 py-1 text-[12px]">
+        <BaseSelect
+          v-if="showProviderFilter"
+          v-model="provider"
+          :label="t('admin.pages.statistics.filters.provider')"
+        >
           <option value="">{{ t('admin.pages.statistics.filters.allProviders') }}</option>
           <option v-for="p in providerOptions" :key="p" :value="p">{{ providerLabel(p) }}</option>
-        </select>
-      </div>
+        </BaseSelect>
 
-      <div v-if="activeTab === 'delivery' || activeTab === 'customers'" class="w-auto">
-        <label class="ui-label block mb-1">{{ t('admin.pages.statistics.filters.wilaya') }}</label>
-        <select v-model="wilayaCode" class="ui-input h-9 py-1 text-[12px]">
+        <BaseSelect
+          v-if="showWilayaFilter"
+          v-model="wilayaCode"
+          :label="t('admin.pages.statistics.filters.wilaya')"
+        >
           <option value="">{{ t('admin.pages.statistics.filters.allWilayas') }}</option>
           <option v-for="w in DZ_WILAYAS" :key="w.code" :value="w.code">{{ w.name }}</option>
-        </select>
-      </div>
-    </div>
-
-    <AdminTabFilter v-model="activeTab" :tabs="tabDefs" />
+        </BaseSelect>
+      </template>
+    </AdminFilterBar>
 
     <div
       v-if="error && !pending"
@@ -144,20 +156,20 @@
         :format-value="formatMoney"
       />
 
-      <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-        <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-          <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.statistics.sales.byCategory.title') }}</h3>
+      <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+        <div class="px-5 py-4 border-b border-line">
+          <h3 class="text-sm font-semibold text-primary">{{ t('admin.pages.statistics.sales.byCategory.title') }}</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="min-w-full">
             <tbody>
               <tr v-if="sales.byCategory.length === 0">
-                <td class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.sales.byCategory.empty') }}</td>
+                <td class="px-5 py-8 text-center text-xs text-tertiary">{{ t('admin.pages.statistics.sales.byCategory.empty') }}</td>
               </tr>
               <tr v-for="row in sales.byCategory" :key="row.categoryId" class="table-row-hover">
-                <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.title }}</td>
-                <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ row.quantity }}</td>
-                <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ formatMoney(row.revenue) }}</td>
+                <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ row.title }}</td>
+                <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ row.quantity }}</td>
+                <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ formatMoney(row.revenue) }}</td>
               </tr>
             </tbody>
           </table>
@@ -180,54 +192,54 @@
       </div>
 
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-            <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.statistics.delivery.byProvider.title') }}</h3>
+        <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+          <div class="px-5 py-4 border-b border-line">
+            <h3 class="text-sm font-semibold text-primary">{{ t('admin.pages.statistics.delivery.byProvider.title') }}</h3>
           </div>
           <div class="overflow-x-auto">
             <table class="min-w-full">
               <thead>
-                <tr style="background: var(--surface-2)">
-                  <th class="px-5 py-2.5 text-start text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.delivery.table.provider') }}</th>
-                  <th class="px-5 py-2.5 text-end text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.delivery.table.total') }}</th>
-                  <th class="px-5 py-2.5 text-end text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.delivery.table.rate') }}</th>
+                <tr class="surface-2">
+                  <th class="px-5 py-2.5 text-start text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.delivery.table.provider') }}</th>
+                  <th class="px-5 py-2.5 text-end text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.delivery.table.total') }}</th>
+                  <th class="px-5 py-2.5 text-end text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.delivery.table.rate') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="delivery.byProvider.length === 0">
-                  <td colspan="3" class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.delivery.byProvider.empty') }}</td>
+                  <td colspan="3" class="px-5 py-8 text-center text-xs text-tertiary">{{ t('admin.pages.statistics.delivery.byProvider.empty') }}</td>
                 </tr>
                 <tr v-for="row in delivery.byProvider" :key="row.provider" class="table-row-hover">
-                  <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ providerLabel(row.provider) }}</td>
-                  <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ row.total }}</td>
-                  <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.deliveredRate }}%</td>
+                  <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ providerLabel(row.provider) }}</td>
+                  <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ row.total }}</td>
+                  <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ row.deliveredRate }}%</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-            <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.statistics.delivery.byWilaya.title') }}</h3>
+        <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+          <div class="px-5 py-4 border-b border-line">
+            <h3 class="text-sm font-semibold text-primary">{{ t('admin.pages.statistics.delivery.byWilaya.title') }}</h3>
           </div>
           <div class="overflow-x-auto max-h-[360px]">
             <table class="min-w-full">
               <thead>
-                <tr style="background: var(--surface-2)">
-                  <th class="px-5 py-2.5 text-start text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.delivery.table.wilaya') }}</th>
-                  <th class="px-5 py-2.5 text-end text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.delivery.table.total') }}</th>
-                  <th class="px-5 py-2.5 text-end text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.delivery.table.rate') }}</th>
+                <tr class="surface-2">
+                  <th class="px-5 py-2.5 text-start text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.delivery.table.wilaya') }}</th>
+                  <th class="px-5 py-2.5 text-end text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.delivery.table.total') }}</th>
+                  <th class="px-5 py-2.5 text-end text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.delivery.table.rate') }}</th>
                 </tr>
               </thead>
               <tbody>
                 <tr v-if="delivery.byWilaya.length === 0">
-                  <td colspan="3" class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.delivery.byWilaya.empty') }}</td>
+                  <td colspan="3" class="px-5 py-8 text-center text-xs text-tertiary">{{ t('admin.pages.statistics.delivery.byWilaya.empty') }}</td>
                 </tr>
                 <tr v-for="row in delivery.byWilaya" :key="row.wilayaCode" class="table-row-hover">
-                  <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ wilayaName(row.wilayaCode) }}</td>
-                  <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ row.total }}</td>
-                  <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.deliveredRate }}%</td>
+                  <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ wilayaName(row.wilayaCode) }}</td>
+                  <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ row.total }}</td>
+                  <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ row.deliveredRate }}%</td>
                 </tr>
               </tbody>
             </table>
@@ -249,55 +261,55 @@
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <StatsTableCard :title="t('admin.pages.statistics.products.top.title')" :empty="t('admin.pages.statistics.products.top.empty')" :rows="products.topProducts">
           <template #row="{ row }">
-            <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.title }}</td>
-            <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ row.quantity }}</td>
-            <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ formatMoney(row.revenue) }}</td>
+            <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ row.title }}</td>
+            <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ row.quantity }}</td>
+            <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ formatMoney(row.revenue) }}</td>
           </template>
         </StatsTableCard>
 
         <StatsTableCard :title="t('admin.pages.statistics.products.flop.title')" :empty="t('admin.pages.statistics.products.flop.empty')" :rows="products.flopProducts">
           <template #row="{ row }">
-            <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.title }}</td>
-            <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ row.quantity }}</td>
-            <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ formatMoney(row.revenue) }}</td>
+            <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ row.title }}</td>
+            <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ row.quantity }}</td>
+            <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ formatMoney(row.revenue) }}</td>
           </template>
         </StatsTableCard>
 
-        <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-            <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.statistics.products.rotation.title') }}</h3>
-            <p class="mt-0.5 text-[11.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.products.rotation.hint') }}</p>
+        <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+          <div class="px-5 py-4 border-b border-line">
+            <h3 class="text-sm font-semibold text-primary">{{ t('admin.pages.statistics.products.rotation.title') }}</h3>
+            <p class="mt-0.5 text-mini text-tertiary">{{ t('admin.pages.statistics.products.rotation.hint') }}</p>
           </div>
           <div class="overflow-x-auto max-h-[360px]">
             <table class="min-w-full">
               <tbody>
                 <tr v-if="products.stockRotation.length === 0">
-                  <td class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.products.rotation.empty') }}</td>
+                  <td class="px-5 py-8 text-center text-xs text-tertiary">{{ t('admin.pages.statistics.products.rotation.empty') }}</td>
                 </tr>
                 <tr v-for="row in products.stockRotation" :key="row.productId" class="table-row-hover">
-                  <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.title }}</td>
-                  <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ t('admin.pages.statistics.products.table.stock') }}: {{ row.stock }}</td>
-                  <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.rotation === null ? '—' : row.rotation }}</td>
+                  <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ row.title }}</td>
+                  <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ t('admin.pages.statistics.products.table.stock') }}: {{ row.stock }}</td>
+                  <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ row.rotation === null ? '—' : row.rotation }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-            <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.statistics.products.criticalStock.title') }}</h3>
+        <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+          <div class="px-5 py-4 border-b border-line">
+            <h3 class="text-sm font-semibold text-primary">{{ t('admin.pages.statistics.products.criticalStock.title') }}</h3>
           </div>
           <div class="overflow-x-auto max-h-[360px]">
             <table class="min-w-full">
               <tbody>
                 <tr v-if="products.criticalStock.length === 0">
-                  <td class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.products.criticalStock.empty') }}</td>
+                  <td class="px-5 py-8 text-center text-xs text-tertiary">{{ t('admin.pages.statistics.products.criticalStock.empty') }}</td>
                 </tr>
                 <tr v-for="row in products.criticalStock" :key="row.productId" class="table-row-hover">
-                  <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.title }}</td>
-                  <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ t('admin.pages.statistics.products.table.threshold') }}: {{ row.lowStockThreshold }}</td>
-                  <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.stock }}</td>
+                  <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ row.title }}</td>
+                  <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ t('admin.pages.statistics.products.table.threshold') }}: {{ row.lowStockThreshold }}</td>
+                  <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ row.stock }}</td>
                 </tr>
               </tbody>
             </table>
@@ -330,29 +342,29 @@
       <div class="grid grid-cols-1 gap-4 lg:grid-cols-2">
         <StatsTableCard :title="t('admin.pages.statistics.customers.top.title')" :empty="t('admin.pages.statistics.customers.top.empty')" :rows="customersStats.topCustomers">
           <template #row="{ row }">
-            <td class="px-5 py-3" style="border-bottom: 1px solid var(--surface-border)">
-              <p class="text-[13px] font-medium" style="color: var(--text-primary)">{{ row.name }}</p>
-              <p class="text-[11px] mt-0.5" style="color: var(--text-tertiary)">{{ row.phone }}</p>
+            <td class="px-5 py-3 border-b border-line">
+              <p class="text-sm font-medium text-primary">{{ row.name }}</p>
+              <p class="text-mini mt-0.5 text-tertiary">{{ row.phone }}</p>
             </td>
-            <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ row.ordersCount }}</td>
-            <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ formatMoney(row.revenue) }}</td>
+            <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ row.ordersCount }}</td>
+            <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ formatMoney(row.revenue) }}</td>
           </template>
         </StatsTableCard>
 
-        <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-            <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.statistics.customers.byWilaya.title') }}</h3>
+        <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+          <div class="px-5 py-4 border-b border-line">
+            <h3 class="text-sm font-semibold text-primary">{{ t('admin.pages.statistics.customers.byWilaya.title') }}</h3>
           </div>
           <div class="overflow-x-auto max-h-[360px]">
             <table class="min-w-full">
               <tbody>
                 <tr v-if="customersStats.byWilaya.length === 0">
-                  <td class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.customers.byWilaya.empty') }}</td>
+                  <td class="px-5 py-8 text-center text-xs text-tertiary">{{ t('admin.pages.statistics.customers.byWilaya.empty') }}</td>
                 </tr>
                 <tr v-for="row in customersStats.byWilaya" :key="row.wilayaCode" class="table-row-hover">
-                  <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ wilayaName(row.wilayaCode) }}</td>
-                  <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ row.customers }}</td>
-                  <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ formatMoney(row.revenue) }}</td>
+                  <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ wilayaName(row.wilayaCode) }}</td>
+                  <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ row.customers }}</td>
+                  <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line text-primary">{{ formatMoney(row.revenue) }}</td>
                 </tr>
               </tbody>
             </table>
@@ -365,7 +377,7 @@
     <template v-if="activeTab === 'profitability' && profitability">
       <div
         v-if="profitability.kpis.costDataCoverage < 100"
-        class="rounded-xl px-4 py-2.5 text-[12px] flex items-center gap-2"
+        class="rounded-xl px-4 py-2.5 text-xs flex items-center gap-2"
         style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.2); color: #f59e0b"
       >
         <Icon name="lucide:info" class="h-3.5 w-3.5 shrink-0" />
@@ -389,29 +401,29 @@
         />
       </div>
 
-      <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-        <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-          <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.statistics.profitability.byProduct.title') }}</h3>
+      <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+        <div class="px-5 py-4 border-b border-line">
+          <h3 class="text-sm font-semibold text-primary">{{ t('admin.pages.statistics.profitability.byProduct.title') }}</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="min-w-full">
             <thead>
-              <tr style="background: var(--surface-2)">
-                <th class="px-5 py-2.5 text-start text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.profitability.table.product') }}</th>
-                <th class="px-5 py-2.5 text-end text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.profitability.table.revenue') }}</th>
-                <th class="px-5 py-2.5 text-end text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.profitability.table.cogs') }}</th>
-                <th class="px-5 py-2.5 text-end text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">{{ t('admin.pages.statistics.profitability.table.margin') }}</th>
+              <tr class="surface-2">
+                <th class="px-5 py-2.5 text-start text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.profitability.table.product') }}</th>
+                <th class="px-5 py-2.5 text-end text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.profitability.table.revenue') }}</th>
+                <th class="px-5 py-2.5 text-end text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.profitability.table.cogs') }}</th>
+                <th class="px-5 py-2.5 text-end text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">{{ t('admin.pages.statistics.profitability.table.margin') }}</th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="profitability.byProduct.length === 0">
-                <td colspan="4" class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ t('admin.pages.statistics.profitability.byProduct.empty') }}</td>
+                <td colspan="4" class="px-5 py-8 text-center text-xs text-tertiary">{{ t('admin.pages.statistics.profitability.byProduct.empty') }}</td>
               </tr>
               <tr v-for="row in profitability.byProduct" :key="row.productId" class="table-row-hover">
-                <td class="px-5 py-3 text-[13px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-primary)">{{ row.title }}</td>
-                <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ formatMoney(row.revenue) }}</td>
-                <td class="px-5 py-3 text-end text-[12px] font-mono-nums" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">{{ formatMoney(row.cogs) }}</td>
-                <td class="px-5 py-3 text-end text-[13px] font-semibold font-mono-nums" style="border-bottom: 1px solid var(--surface-border)" :style="{ color: row.margin >= 0 ? 'var(--text-primary)' : '#f87171' }">
+                <td class="px-5 py-3 text-sm border-b border-line text-primary">{{ row.title }}</td>
+                <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ formatMoney(row.revenue) }}</td>
+                <td class="px-5 py-3 text-end text-xs font-mono-nums border-b border-line text-tertiary">{{ formatMoney(row.cogs) }}</td>
+                <td class="px-5 py-3 text-end text-sm font-semibold font-mono-nums border-b border-line" :style="{ color: row.margin>= 0 ? 'var(--text-primary)' : '#f87171' }">
                   {{ formatMoney(row.margin) }} <span v-if="row.marginPct !== null" class="opacity-60">({{ row.marginPct }}%)</span>
                 </td>
               </tr>
@@ -435,7 +447,9 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { buildDashboardRangeQuery, defaultCustomDateRange, type DashboardRange } from '~/composables/admin/dashboardRange'
-import DateFilter from '~/components/ui/DateFilter.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
+import AdminDateRangeFilter from '~/components/admin/AdminDateRangeFilter.vue'
+import BaseSelect from '~/components/ui/BaseSelect.vue'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
 import StatsTableCard from '~/components/admin/StatsTableCard.vue'
 
@@ -533,6 +547,68 @@ function providerLabel(p: string) {
   if (p === 'SELF') return t('admin.pages.statistics.delivery.selfProvider')
   const labels: Record<string, string> = { MAYSTRO: 'Maystro', YALIDINE: 'Yalidine', ECOTRACK: 'Ecotrack', ZR_EXPRESS: 'ZR Express' }
   return labels[p] || p
+}
+
+const showChannelFilter = computed(() => activeTab.value !== 'delivery' && activeTab.value !== 'customers')
+const showCategoryFilter = computed(() => activeTab.value === 'sales' || activeTab.value === 'products')
+const showProviderFilter = computed(() => activeTab.value === 'delivery')
+const showWilayaFilter = computed(() => activeTab.value === 'delivery' || activeTab.value === 'customers')
+
+const advancedFilterCount = computed(() => {
+  let count = 0
+  if (showChannelFilter.value && channel.value !== 'all') count += 1
+  if (showCategoryFilter.value && categoryId.value) count += 1
+  if (showProviderFilter.value && provider.value) count += 1
+  if (showWilayaFilter.value && wilayaCode.value) count += 1
+  return count
+})
+
+const filterChips = computed(() => {
+  const chips: { key: string; label: string; value: string }[] = []
+  if (showChannelFilter.value && channel.value !== 'all') {
+    chips.push({
+      key: 'channel',
+      label: t('admin.pages.statistics.filters.channel'),
+      value: t(`admin.pages.statistics.filters.channels.${channel.value}`)
+    })
+  }
+  if (showCategoryFilter.value && categoryId.value) {
+    const category = categories.value.find((c) => c.id === categoryId.value)
+    chips.push({
+      key: 'category',
+      label: t('admin.pages.statistics.filters.category'),
+      value: category ? category.title : categoryId.value
+    })
+  }
+  if (showProviderFilter.value && provider.value) {
+    chips.push({
+      key: 'provider',
+      label: t('admin.pages.statistics.filters.provider'),
+      value: providerLabel(provider.value)
+    })
+  }
+  if (showWilayaFilter.value && wilayaCode.value) {
+    chips.push({
+      key: 'wilaya',
+      label: t('admin.pages.statistics.filters.wilaya'),
+      value: wilayaName(wilayaCode.value)
+    })
+  }
+  return chips
+})
+
+function removeFilterChip(key: string) {
+  if (key === 'channel') channel.value = 'all'
+  if (key === 'category') categoryId.value = ''
+  if (key === 'provider') provider.value = ''
+  if (key === 'wilaya') wilayaCode.value = ''
+}
+
+function clearFilters() {
+  channel.value = 'all'
+  categoryId.value = ''
+  provider.value = ''
+  wilayaCode.value = ''
 }
 
 const wilayaNameByCode = new Map(DZ_WILAYAS.map((w) => [w.code, w.name]))

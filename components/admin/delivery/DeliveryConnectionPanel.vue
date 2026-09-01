@@ -6,14 +6,14 @@
       class="delivery-empty"
     >
       <Icon
-        name="lucide:plug-zap"
-        class="h-5 w-5"
-        style="color: var(--text-tertiary)"
-      />
+ name="lucide:plug-zap"
+ class="h-5 w-5 text-tertiary"
+ 
+ />
       <p
-        class="text-sm"
-        style="color: var(--text-secondary)"
-      >
+ class="text-sm text-secondary"
+ 
+>
         {{ t('admin.pages.delivery.credentials.noCredentials') }}
       </p>
     </div>
@@ -23,15 +23,15 @@
       <div class="delivery-liveline">
         <div class="min-w-0">
           <p
-            class="text-[13px] font-semibold"
-            style="color: var(--text-primary)"
-          >
+ class="text-sm font-semibold text-primary"
+ 
+>
             {{ t('admin.pages.delivery.credentials.enableLabel') }}
           </p>
           <p
-            class="mt-0.5 text-xs"
-            style="color: var(--text-tertiary)"
-          >
+ class="mt-0.5 text-xs text-tertiary"
+ 
+>
             {{ t('admin.pages.delivery.credentials.enableHint') }}
           </p>
         </div>
@@ -52,10 +52,10 @@
             :for="`cred-${field.key}`"
           >
             {{ field.label }}
-            <span
-              v-if="field.required"
-              style="color: var(--status-cancelled-text)"
-            >*</span>
+            <span class="text-danger"
+ v-if="field.required"
+ 
+>*</span>
           </label>
           <div class="flex gap-2">
             <input
@@ -76,10 +76,10 @@
             </button>
           </div>
           <p
-            v-if="field.secret"
-            class="mt-1 flex items-center gap-1.5 text-[11px]"
-            style="color: var(--text-muted)"
-          >
+ v-if="field.secret"
+ class="mt-1 flex items-center gap-1.5 text-mini text-muted"
+ 
+>
             <span
               class="inline-block h-1.5 w-1.5 rounded-full"
               :style="{

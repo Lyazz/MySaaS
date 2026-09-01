@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4">
-    <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+    <h3 class="text-lg font-semibold text-primary">
       {{ t('admin.pages.onboarding.language.title') }}
     </h3>
     <div>
@@ -8,7 +8,7 @@
       <BaseSelect :value="modelValue.language" @change="onLanguageChange">
         <option v-for="l in languages" :key="l.key" :value="l.key">{{ l.label }}</option>
       </BaseSelect>
-      <p class="mt-1 text-xs" style="color: var(--text-muted)">
+      <p class="mt-1 text-xs text-muted">
         {{ t('admin.pages.onboarding.language.rtlHint') }}
       </p>
     </div>

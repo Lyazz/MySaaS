@@ -2,21 +2,21 @@
   <section class="delivery-note">
     <header class="flex items-start gap-2.5">
       <Icon
-        name="lucide:refresh-cw"
-        class="mt-0.5 h-4 w-4 shrink-0"
-        style="color: var(--text-tertiary)"
-      />
+ name="lucide:refresh-cw"
+ class="mt-0.5 h-4 w-4 shrink-0 text-tertiary"
+ 
+ />
       <div>
         <h4
-          class="text-[13px] font-semibold"
-          style="color: var(--text-primary)"
-        >
+ class="text-sm font-semibold text-primary"
+ 
+>
           {{ t('admin.pages.delivery.maystro.resync.title') }}
         </h4>
         <p
-          class="mt-0.5 text-xs leading-relaxed"
-          style="color: var(--text-tertiary)"
-        >
+ class="mt-0.5 text-xs leading-relaxed text-tertiary"
+ 
+>
           {{ t('admin.pages.delivery.maystro.resync.hint') }}
         </p>
       </div>
@@ -39,10 +39,10 @@
         {{ message }}
       </p>
       <p
-        v-else-if="disabled"
-        class="text-xs"
-        style="color: var(--text-muted)"
-      >
+ v-else-if="disabled"
+ class="text-xs text-muted"
+ 
+>
         {{ t('admin.pages.delivery.maystro.resync.needsConnection') }}
       </p>
     </div>

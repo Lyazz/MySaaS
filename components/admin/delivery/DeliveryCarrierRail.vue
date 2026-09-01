@@ -90,9 +90,9 @@
       </div>
 
       <p
-        class="mt-2 text-[11px] leading-relaxed"
-        style="color: var(--text-tertiary)"
-      >
+ class="mt-2 text-mini leading-relaxed text-tertiary"
+ 
+>
         {{ t('admin.pages.delivery.storePickup.hint') }}
       </p>
     </div>

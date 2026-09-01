@@ -255,30 +255,30 @@ onMounted(load)
       </NuxtLink>
     </div>
 
-    <h1 class="text-xl font-semibold text-slate-900">Devices &amp; licence</h1>
+    <h1 class="text-xl font-semibold text-primary">Devices &amp; licence</h1>
 
     <p v-if="error" class="rounded-lg bg-rose-50 px-4 py-3 text-sm text-rose-700">{{ error }}</p>
     <p v-if="notice" class="rounded-lg bg-emerald-50 px-4 py-3 text-sm text-emerald-700">{{ notice }}</p>
-    <p v-if="loading" class="text-sm text-slate-500">Loading…</p>
+    <p v-if="loading" class="text-sm text-secondary">Loading…</p>
 
     <!-- Devices -->
     <section v-if="!loading" class="space-y-3">
-      <p v-if="!devices.length" class="rounded-lg border border-dashed border-slate-300 px-4 py-8 text-center text-sm text-slate-500">
+      <p v-if="!devices.length" class="rounded-lg border border-dashed border-line px-4 py-8 text-center text-sm text-secondary">
         This tenant has no activated devices.
       </p>
 
       <article
         v-for="device in devices"
         :key="device.id"
-        class="rounded-xl border border-slate-200 bg-white p-4"
+        class="rounded-xl border border-line surface-1 p-4"
       >
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p class="font-medium text-slate-900">
+            <p class="font-medium text-primary">
               {{ device.deviceName }}
-              <span class="ml-2 text-xs font-normal text-slate-500">{{ device.devicePlatform }}</span>
+              <span class="ml-2 text-xs font-normal text-secondary">{{ device.devicePlatform }}</span>
             </p>
-            <p class="mt-0.5 font-mono text-xs text-slate-400">{{ device.hardwareIdMasked }}</p>
+            <p class="mt-0.5 font-mono text-xs text-tertiary">{{ device.hardwareIdMasked }}</p>
           </div>
 
           <span
@@ -286,7 +286,7 @@ onMounted(load)
             :class="{
               'bg-emerald-100 text-emerald-800': licenceState(device) === 'active',
               'bg-amber-100 text-amber-800': licenceState(device) === 'grace',
-              'bg-slate-200 text-slate-700': licenceState(device) === 'read-only',
+              'surface-2 text-secondary': licenceState(device) === 'read-only',
               'bg-rose-100 text-rose-800': licenceState(device) === 'revoked'
             }"
           >
@@ -296,23 +296,23 @@ onMounted(load)
 
         <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-3">
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Licence expires</dt>
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Licence expires</dt>
             <dd>{{ fmt(device.licenseExpiresAt) }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Read-only after</dt>
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Read-only after</dt>
             <dd>{{ fmt(device.graceUntil) }}</dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Last seen</dt>
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Last seen</dt>
             <dd>{{ fmt(device.lastSeenAt) }}<span v-if="device.appVersion"> · v{{ device.appVersion }}</span></dd>
           </div>
           <div v-if="device.revokedReason" class="sm:col-span-3">
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Deactivated</dt>
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Deactivated</dt>
             <dd>{{ device.revokedReason }} ({{ fmt(device.revokedAt) }})</dd>
           </div>
           <div v-if="device.drainUntil" class="sm:col-span-3">
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Still syncing until</dt>
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Still syncing until</dt>
             <dd>{{ fmt(device.drainUntil) }} — queued offline work can still reach the server</dd>
           </div>
         </dl>
@@ -338,7 +338,7 @@ onMounted(load)
           </button>
           <button
             type="button"
-            class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50"
+            class="rounded-lg border border-line px-3 py-1.5 text-sm disabled:opacity-50"
             :disabled="busyId === device.id"
             @click="act(device, 'extend-grace')"
           >
@@ -349,35 +349,35 @@ onMounted(load)
     </section>
 
     <!-- Licence settings -->
-    <section v-if="licenseId" class="rounded-xl border border-slate-200 bg-white p-4">
-      <h2 class="font-medium text-slate-900">Licence</h2>
-      <p class="mt-1 text-sm text-slate-500">
+    <section v-if="licenseId" class="rounded-xl border border-line surface-1 p-4">
+      <h2 class="font-medium text-primary">Licence</h2>
+      <p class="mt-1 text-sm text-secondary">
         Seats cannot be cut below the devices already running — deactivate one first.
       </p>
 
       <div class="mt-3 flex flex-wrap items-end gap-3">
         <label class="text-sm">
-          <span class="block text-slate-500 mb-1">Devices allowed</span>
-          <input v-model.number="seatForm.maxDevices" type="number" min="1" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <span class="block text-secondary mb-1">Devices allowed</span>
+          <input v-model.number="seatForm.maxDevices" type="number" min="1" class="w-24 rounded-lg border border-line px-3 py-2 text-sm">
         </label>
         <label class="text-sm">
-          <span class="block text-slate-500 mb-1">Offline days</span>
-          <input v-model.number="seatForm.offlineValidityDays" type="number" min="0" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <span class="block text-secondary mb-1">Offline days</span>
+          <input v-model.number="seatForm.offlineValidityDays" type="number" min="0" class="w-24 rounded-lg border border-line px-3 py-2 text-sm">
         </label>
         <label class="text-sm">
-          <span class="block text-slate-500 mb-1">Grace days</span>
-          <input v-model.number="seatForm.graceDays" type="number" min="0" class="w-24 rounded-lg border border-slate-300 px-3 py-2 text-sm">
+          <span class="block text-secondary mb-1">Grace days</span>
+          <input v-model.number="seatForm.graceDays" type="number" min="0" class="w-24 rounded-lg border border-line px-3 py-2 text-sm">
         </label>
-        <button type="button" class="rounded-lg bg-slate-900 px-4 py-2 text-sm text-white" @click="saveLicence">
+        <button type="button" class="rounded-lg surface-1 px-4 py-2 text-sm text-primary" @click="saveLicence">
           Save
         </button>
       </div>
     </section>
 
     <!-- Migration -->
-    <section class="rounded-xl border border-slate-200 bg-white p-4">
-      <h2 class="font-medium text-slate-900">Move to an online tier</h2>
-      <p class="mt-1 text-sm text-slate-500">
+    <section class="rounded-xl border border-line surface-1 p-4">
+      <h2 class="font-medium text-primary">Move to an online tier</h2>
+      <p class="mt-1 text-sm text-secondary">
         The tenant exports their data from the app ("Move to an online plan"),
         then you upload that file here, check the dry run, and apply. The tier
         flips only if everything lands.
@@ -390,29 +390,29 @@ onMounted(load)
           class="text-sm"
           @change="onMigrationFile"
         >
-        <button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50" :disabled="migrationBusy || !migrationFile" @click="uploadExport">
+        <button type="button" class="rounded-lg border border-line px-3 py-1.5 text-sm disabled:opacity-50" :disabled="migrationBusy || !migrationFile" @click="uploadExport">
           1 · Upload export
         </button>
-        <button type="button" class="rounded-lg border border-slate-300 px-3 py-1.5 text-sm disabled:opacity-50" :disabled="migrationBusy || !migrationJobId" @click="migration('validate')">
+        <button type="button" class="rounded-lg border border-line px-3 py-1.5 text-sm disabled:opacity-50" :disabled="migrationBusy || !migrationJobId" @click="migration('validate')">
           2 · Dry run
         </button>
-        <button type="button" class="rounded-lg bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50" :disabled="migrationBusy || !migrationReport?.ready" @click="migration('apply')">
+        <button type="button" class="ui-btn ui-btn--primary ui-btn--sm" :disabled="migrationBusy || !migrationReport?.ready" @click="migration('apply')">
           3 · Apply
         </button>
       </div>
 
-      <p v-if="migrationJobId" class="mt-2 font-mono text-xs text-slate-400">
+      <p v-if="migrationJobId" class="mt-2 font-mono text-xs text-tertiary">
         job {{ migrationJobId }}
       </p>
 
-      <div v-if="migrationReport" class="mt-4 rounded-lg bg-slate-50 p-3 text-sm">
+      <div v-if="migrationReport" class="mt-4 rounded-lg surface-2 p-3 text-sm">
         <p class="font-medium">
           {{ migrationReport.ready ? 'Ready to apply.' : 'Not ready.' }}
         </p>
         <ul v-if="migrationReport.problems?.length" class="mt-2 list-disc pl-5 text-rose-700">
           <li v-for="problem in migrationReport.problems" :key="problem">{{ problem }}</li>
         </ul>
-        <pre class="mt-2 overflow-x-auto text-xs text-slate-600">{{ JSON.stringify(migrationReport.counts, null, 2) }}</pre>
+        <pre class="mt-2 overflow-x-auto text-xs text-secondary">{{ JSON.stringify(migrationReport.counts, null, 2) }}</pre>
       </div>
     </section>
   </div>

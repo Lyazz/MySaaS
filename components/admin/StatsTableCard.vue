@@ -1,13 +1,13 @@
 <template>
-  <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-    <div class="px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
-      <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">{{ title }}</h3>
+  <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+    <div class="px-5 py-4 border-b border-line">
+      <h3 class="text-sm font-semibold text-primary">{{ title }}</h3>
     </div>
     <div class="overflow-x-auto max-h-[420px]">
       <table class="min-w-full">
         <tbody>
           <tr v-if="rows.length === 0">
-            <td class="px-5 py-8 text-center text-[12.5px]" style="color: var(--text-tertiary)">{{ empty }}</td>
+            <td class="px-5 py-8 text-center text-xs text-tertiary">{{ empty }}</td>
           </tr>
           <tr v-for="(row, index) in rows" :key="rowKey(row, index)" class="table-row-hover">
             <slot name="row" :row="row" :index="index" />

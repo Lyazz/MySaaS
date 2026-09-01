@@ -29,7 +29,16 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial"
+    fontFamily: "'Outfit', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial",
+    // Shared LocaleSwitcher
+    '--ls-surface': '#ffffff',
+    '--ls-border': 'rgba(15,23,42,0.10)',
+    '--ls-shadow': '0 12px 30px -14px rgba(15,23,42,0.18)',
+    '--ls-radius': '8px',
+    '--ls-text': '#475569',
+    '--ls-text-strong': '#0f172a',
+    '--ls-hover-bg': 'rgba(15,23,42,0.04)',
+    '--ls-accent': 'color-mix(in srgb, var(--brand) 58%, #0f172a)'
   } as Record<string, string>
 
   return result

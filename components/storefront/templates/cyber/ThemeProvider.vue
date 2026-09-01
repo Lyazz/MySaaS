@@ -21,7 +21,17 @@ const storeStyle = computed(() => {
     fontFamily: "'Orbitron', sans-serif",
     backgroundColor: '#0d0515',
     color: '#e9d5ff',
-    minHeight: '100vh'
+    minHeight: '100vh',
+    // Shared LocaleSwitcher — deep violet chrome with a neon edge
+    '--ls-surface': '#1a0a2e',
+    '--ls-border': 'rgba(var(--brand-rgb) / 0.45)',
+    '--ls-shadow': '0 0 0 1px rgba(var(--brand-rgb) / 0.25), 0 20px 46px -16px rgba(0,0,0,0.8)',
+    '--ls-radius': '4px',
+    '--ls-text': '#c4b5fd',
+    '--ls-text-strong': '#f5f3ff',
+    '--ls-hover-bg': 'rgba(233,213,255,0.08)',
+    '--ls-accent': 'rgb(var(--brand-rgb))',
+    '--ls-accent-soft': 'rgba(var(--brand-rgb) / 0.16)'
   } as Record<string, string>
 })
 </script>

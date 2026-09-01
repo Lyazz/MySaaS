@@ -134,7 +134,7 @@ const fontFamily = computed(() => {
       return "'DM Sans', system-ui, sans-serif"
     case 'editorial':
       return "'Playfair Display', Georgia, serif"
-    case 'rounded':
+    case 'rounded-lg':
       return "'Nunito', system-ui, sans-serif"
     default:
       return ''

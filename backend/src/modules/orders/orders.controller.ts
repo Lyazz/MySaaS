@@ -7,7 +7,6 @@ import { MaystroOrderService } from '../delivery/maystro/maystro-order.service'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
 import { YalidineIntegrationError } from '../delivery/yalidine/yalidine.errors'
 import prisma from '../../lib/prisma'
-import { NotificationsService } from '../notifications/notifications.service'
 import {
   fetchForExport,
   toRows,
@@ -21,7 +20,6 @@ import {
 
 const service = new OrdersService()
 const deliveryService = new DeliveryService()
-const notificationsService = new NotificationsService()
 const blacklistService = new BlacklistService()
 
 export class OrdersController {
@@ -42,52 +40,18 @@ export class OrdersController {
             const { token } = req.body
             if (!token) return res.status(400).json({ message: 'Token is required' })
 
-            // 1. Validate token and get order without consuming
-            const order = await service.getOrderByToken(token)
-
-            // 2. Try pushing to delivery if applicable
-            if (['MAYSTRO', 'YALIDINE'].includes(String(order.shippingProvider))) {
-                const provider = String(order.shippingProvider) as 'MAYSTRO' | 'YALIDINE'
-                try {
-                    await deliveryService.createShipment({
-                        tenantId: order.tenantId,
-                        provider,
-                        orderId: order.id,
-                        contactName: order.customerName ?? '',
-                        contactPhone: order.customerPhone ?? '',
-                        wilayaCode: order.shippingWilayaCode ?? '',
-                        communeCode: order.shippingCommuneCode ?? undefined,
-                        addressLine1: order.shippingAddressLine1 ?? order.customerAddress ?? '',
-                        addressLine2: undefined,
-                        notes: order.shippingNotes ?? undefined,
-                        deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
-                        // The delivery type is derived from the recorded pickup point kind
-                        // in DeliveryService — hardcoding 3 here pushed every stop desk
-                        // order as a relay and the carrier refused it.
-                        metadata: order.shippingPickupPoint
-                            ? { pickupPoint: order.shippingPickupPoint }
-                            : undefined
-                    })
-                } catch (shipmentErr: any) {
-                    console.error('Auto shipment failed after WhatsApp confirm:', shipmentErr)
-                    return res.status(400).json({ message: 'Delivery integration failed. Order not confirmed.' })
-                }
-            }
-
-            // 3. If delivery succeeded (or wasn't needed), consume token and confirm
-            const confirmedOrder = await service.confirmOrderByToken(token)
-
-            try {
-                await notificationsService.emitOrderConfirmed(confirmedOrder.tenantId, confirmedOrder.id)
-            } catch (notifyErr) {
-                console.error('Failed to emit order confirmed notification:', notifyErr)
-            }
+            // The delivery push, the token consumption and the notification all live
+            // in the service, so the WhatsApp buttons confirm exactly like this link.
+            const confirmedOrder = await service.confirmOrderFromCustomer(token, { via: 'link' })
 
             res.json({ success: true, orderId: confirmedOrder.id, publicOrderId: confirmedOrder.publicId })
         } catch (error: any) {
             console.error('Confirm order token error:', error)
             if (error.message === 'INVALID_TOKEN') {
                 return res.status(400).json({ message: 'Invalid or already used token' })
+            }
+            if (error instanceof OrderValidationError) {
+                return res.status(error.statusCode).json({ message: error.statusMessage })
             }
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }

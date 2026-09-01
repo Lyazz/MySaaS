@@ -2,10 +2,10 @@
   <div class="max-w-7xl mx-auto space-y-6">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-semibold tracking-tight text-primary">
           {{ t('admin.nav.inventory') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ t('admin.pages.inventory.subtitle') }}
         </p>
       </div>
@@ -55,37 +55,24 @@
       </div>
     </div>
 
-    <div class="rounded-2xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <div class="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div>
-          <BaseInput
-            v-model="search"
-            :label="t('admin.common.search')"
-            :placeholder="t('admin.pages.inventory.filters.searchPlaceholder')"
-          />
-        </div>
-        <div class="flex items-end gap-2">
-          <button
-            type="button"
-            class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2 text-sm font-medium text-white shadow-sm hover:opacity-95"
-            :disabled="loading"
-            @click="fetchVariants"
-          >
-            <Icon name="lucide:search" class="h-4 w-4" />
-            {{ t('admin.common.searchAction') }}
-          </button>
-          <button
-            type="button"
-            class="ui-btn ui-btn--secondary text-sm"
-            :disabled="loading"
-            @click="clearSearch"
-          >
-            <Icon name="lucide:x" class="h-4 w-4" />
-            {{ t('admin.common.clear') }}
-          </button>
-        </div>
-      </div>
-    </div>
+    <AdminFilterBar
+      v-model:search="search"
+      :search-label="t('admin.common.search')"
+      :search-placeholder="t('admin.pages.inventory.filters.searchPlaceholder')"
+      :clearable="Boolean(search)"
+      testid="inventory-filters"
+      @clear="clearSearch"
+    >
+      <button
+        type="button"
+        class="ui-btn ui-btn--primary h-9 py-0 text-sm"
+        :disabled="loading"
+        @click="fetchVariants"
+      >
+        <Icon name="lucide:search" class="h-4 w-4" />
+        {{ t('admin.common.searchAction') }}
+      </button>
+    </AdminFilterBar>
 
     <div
       v-if="errorMessage"
@@ -94,11 +81,11 @@
       {{ errorMessage }}
     </div>
 
-    <div class="overflow-hidden rounded-2xl" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+    <div class="overflow-hidden rounded-2xl surface-1 border border-line">
       <div
-        v-if="loading"
-        class="p-8 text-center text-sm" style="color: var(--text-secondary)"
-      >
+ v-if="loading"
+ class="p-8 text-center text-sm text-secondary" 
+>
         {{ t('admin.pages.inventory.loading') }}
       </div>
 
@@ -106,8 +93,8 @@
         v-else-if="variants.length === 0"
         class="p-10 text-center"
       >
-        <Icon name="lucide:package-search" class="mx-auto h-10 w-10" style="color: var(--text-muted)" />
-        <p class="mt-3 text-sm" style="color: var(--text-secondary)">
+        <Icon name="lucide:package-search" class="mx-auto h-10 w-10 text-muted" />
+        <p class="mt-3 text-sm text-secondary">
           {{ t('admin.pages.inventory.empty') }}
         </p>
       </div>
@@ -117,63 +104,63 @@
         class="overflow-x-auto"
       >
         <table class="min-w-full divide-y">
-          <thead style="background: var(--surface-2)">
+          <thead class="surface-2">
             <tr>
               <th
-                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
-                @click="setSort('productTitle')"
-              >
+ class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80 text-muted" 
+ @click="setSort('productTitle')"
+>
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.variant') }}
                   <Icon v-if="sortBy === 'productTitle'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
-                @click="setSort('trackInventory')"
-              >
+ class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80 text-muted" 
+ @click="setSort('trackInventory')"
+>
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.track') }}
                   <Icon v-if="sortBy === 'trackInventory'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
-                @click="setSort('stock')"
-              >
+ class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80 text-muted" 
+ @click="setSort('stock')"
+>
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.onHand') }}
                   <Icon v-if="sortBy === 'stock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
-                @click="setSort('reserved')"
-              >
+ class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80 text-muted" 
+ @click="setSort('reserved')"
+>
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.reserved') }}
                   <Icon v-if="sortBy === 'reserved'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
-                @click="setSort('safetyStock')"
-              >
+ class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80 text-muted" 
+ @click="setSort('safetyStock')"
+>
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.safety') }}
                   <Icon v-if="sortBy === 'safetyStock'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
               <th
-                class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80" style="color: var(--text-muted)"
-                @click="setSort('available')"
-              >
+ class="px-5 py-3 text-start text-xs font-semibold uppercase tracking-wider cursor-pointer transition-colors hover:opacity-80 text-muted" 
+ @click="setSort('available')"
+>
                 <div class="flex items-center gap-1">
                   {{ t('admin.pages.inventory.table.available') }}
                   <Icon v-if="sortBy === 'available'" :name="sortOrder === 'asc' ? 'lucide:arrow-up' : 'lucide:arrow-down'" class="h-3 w-3 [color:var(--brand)]" />
                 </div>
               </th>
-              <th class="px-5 py-3 text-end text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-5 py-3 text-end text-xs font-semibold uppercase tracking-wider text-muted">
                 {{ t('admin.common.actions') }}
               </th>
             </tr>
@@ -186,10 +173,10 @@
             >
               <td class="px-5 py-4">
                 <div class="min-w-0">
-                  <p class="truncate text-sm font-medium" style="color: var(--text-primary)">
+                  <p class="truncate text-sm font-medium text-primary">
                     {{ v.productTitle }} — {{ v.optionTitle }}
                   </p>
-                  <p class="mt-0.5 truncate text-xs" style="color: var(--text-muted)">
+                  <p class="mt-0.5 truncate text-xs text-muted">
                     {{ t('admin.pages.inventory.table.sku') }}: {{ v.sku || '—' }}
                   </p>
                 </div>
@@ -204,12 +191,12 @@
                 >
               </td>
               <td class="px-5 py-4">
-                <span class="text-sm font-mono" style="color: var(--text-secondary)">
+                <span class="text-sm font-mono text-secondary">
                   {{ v.stock }}
                 </span>
               </td>
-              <td class="px-5 py-4 text-sm" style="color: var(--text-secondary)">
-                <span class="text-sm font-mono" style="color: var(--text-secondary)">
+              <td class="px-5 py-4 text-sm text-secondary">
+                <span class="text-sm font-mono text-secondary">
                   {{ v.reserved }}
                 </span>
               </td>
@@ -234,9 +221,9 @@
                   {{ v.available }}
                 </span>
                 <span
-                  v-else
-                  class="text-xs" style="color: var(--text-muted)"
-                >
+ v-else
+ class="text-xs text-muted" 
+>
                   ∞
                 </span>
               </td>
@@ -262,36 +249,36 @@
         v-if="movementsVariant"
         class="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-4 py-8"
       >
-        <div class="w-full max-w-3xl rounded-2xl flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+        <div class="w-full max-w-3xl rounded-2xl flex flex-col max-h-[90vh] surface-2 border border-line shadow-overlay">
           <div class="flex items-start justify-between gap-4 border-b px-6 py-4 shrink-0">
           <div class="min-w-0">
-            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
+            <h3 class="truncate text-lg font-semibold text-primary">
               {{ t('admin.pages.inventory.movements.title', { product: movementsVariant.productTitle, option: movementsVariant.optionTitle }) }}
             </h3>
-            <p class="mt-0.5 text-sm" style="color: var(--text-tertiary)">
+            <p class="mt-0.5 text-sm text-tertiary">
               {{ t('admin.pages.inventory.movements.hint') }}
             </p>
           </div>
           <button
-            type="button"
-            class="rounded-lg p-2 transition-colors hover:opacity-70" style="color: var(--text-muted)"
-            @click="closeMovements"
-          >
+ type="button"
+ class="rounded-lg p-2 transition-colors hover:opacity-70 text-muted" 
+ @click="closeMovements"
+>
             <Icon name="lucide:x" class="h-5 w-5" />
           </button>
         </div>
 
         <div class="overflow-y-auto p-6 flex-1 min-h-0">
           <div
-            v-if="movementsLoading"
-            class="py-8 text-center text-sm" style="color: var(--text-secondary)"
-          >
+ v-if="movementsLoading"
+ class="py-8 text-center text-sm text-secondary" 
+>
             {{ t('admin.pages.inventory.movements.loading') }}
           </div>
           <div
-            v-else-if="movements.length === 0"
-            class="rounded-xl p-6 text-sm" style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-secondary)"
-          >
+ v-else-if="movements.length === 0"
+ class="rounded-xl p-6 text-sm surface-3 border border-line text-secondary" 
+>
             {{ t('admin.pages.inventory.movements.empty') }}
           </div>
           <div
@@ -299,27 +286,27 @@
             class="overflow-x-auto"
           >
             <table class="min-w-full divide-y">
-              <thead style="background: var(--surface-3)">
+              <thead class="surface-3">
                 <tr>
-                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.inventory.movements.table.date') }}
                   </th>
-                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.inventory.movements.table.type') }}
                   </th>
-                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.inventory.movements.table.deltaStock') }}
                   </th>
-                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.inventory.movements.table.deltaReserved') }}
                   </th>
-                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.inventory.movements.table.deltaSafety') }}
                   </th>
-                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.inventory.movements.table.after') }}
                   </th>
-                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <th class="px-4 py-2 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.inventory.movements.table.by') }}
                   </th>
                 </tr>
@@ -329,42 +316,42 @@
                   v-for="m in movements"
                   :key="m.id"
                 >
-                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
+                  <td class="px-4 py-2 text-sm text-secondary">
                     {{ formatDate(m.createdAt) }}
                   </td>
-                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
+                  <td class="px-4 py-2 text-sm text-secondary">
                     <div class="min-w-0">
                       <p class="truncate font-medium">
                         {{ m.type }}
                       </p>
                       <p
-                        v-if="m.orderId"
-                        class="truncate text-xs" style="color: var(--text-muted)"
-                      >
+ v-if="m.orderId"
+ class="truncate text-xs text-muted" 
+>
                         {{ t('admin.pages.inventory.movements.table.order') }}: {{ m.orderId }}
                       </p>
                     </div>
                   </td>
-                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
+                  <td class="px-4 py-2 text-sm text-secondary">
                     {{ m.delta }}
                   </td>
-                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
+                  <td class="px-4 py-2 text-sm text-secondary">
                     {{ m.reservedDelta }}
                   </td>
-                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
+                  <td class="px-4 py-2 text-sm text-secondary">
                     {{ m.safetyStockDelta }}
                   </td>
-                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
+                  <td class="px-4 py-2 text-sm text-secondary">
                     <span v-if="m.stockAfter !== null">S={{ m.stockAfter }}</span>
                     <span v-else>—</span>
-                    <span style="color: var(--text-muted)"> · </span>
+                    <span class="text-muted"> · </span>
                     <span v-if="m.reservedAfter !== null">R={{ m.reservedAfter }}</span>
                     <span v-else>—</span>
-                    <span style="color: var(--text-muted)"> · </span>
+                    <span class="text-muted"> · </span>
                     <span v-if="m.safetyStockAfter !== null">SS={{ m.safetyStockAfter }}</span>
                     <span v-else>—</span>
                   </td>
-                  <td class="px-4 py-2 text-sm" style="color: var(--text-secondary)">
+                  <td class="px-4 py-2 text-sm text-secondary">
                     {{ m.createdBy?.email || t('admin.pages.inventory.movements.system') }}
                   </td>
                 </tr>
@@ -390,7 +377,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import BaseInput from '~/components/ui/BaseInput.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
 
 definePageMeta({
   middleware: 'auth',

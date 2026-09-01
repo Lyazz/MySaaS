@@ -1,15 +1,15 @@
 <template>
   <div class="mx-auto max-w-7xl space-y-6">
     <section
-      class="rounded-[28px] p-6 sm:p-7"
+      class="rounded-2xl p-6 sm:p-7"
       style="background: linear-gradient(135deg, rgba(var(--brand-rgb) / 0.1), rgba(134, 239, 172, 0.06)); border: 1px solid rgba(var(--brand-rgb) / 0.18); box-shadow: var(--card-shadow)"
     >
       <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         <div class="flex items-start gap-4">
           <div
-            class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--brand)] to-[#86EFAC]"
-            style="color: var(--brand-contrast)"
-          >
+ class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-[var(--brand)] to-[#86EFAC] text-brand-contrast"
+ 
+>
             <Icon
               name="lucide:bell"
               class="h-6 w-6"
@@ -18,33 +18,33 @@
 
           <div class="min-w-0">
             <h2
-              class="text-[24px] font-bold tracking-[-0.03em]"
-              style="color: var(--text-primary)"
-            >
+ class="text-2xl font-bold tracking-[-0.03em] text-primary"
+ 
+>
               All Notifications
             </h2>
             <p
-              class="mt-1 text-[14px]"
-              style="color: var(--text-secondary)"
-            >
+ class="mt-1 text-sm text-secondary"
+ 
+>
               Manage and view your store activity.
             </p>
 
             <div class="mt-3 flex flex-wrap items-center gap-2">
               <span
-                class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-semibold"
-                style="background: rgba(var(--brand-rgb) / 0.14); color: var(--brand)"
-              >
+ class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-mini font-semibold ui-wash"
+ 
+>
                 <span
-                  class="h-2 w-2 rounded-full"
-                  style="background: var(--brand)"
-                />
+ class="h-2 w-2 rounded-full bg-brand"
+ 
+ />
                 {{ unreadCount === 0 ? 'All caught up' : `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}` }}
               </span>
               <span
-                class="inline-flex items-center rounded-full px-3 py-1.5 text-[11px] font-medium"
-                style="background: var(--surface-1); color: var(--text-secondary); border: 1px solid var(--surface-border)"
-              >
+ class="inline-flex items-center rounded-full px-3 py-1.5 text-mini font-medium surface-1 text-secondary border border-line"
+ 
+>
                 {{ items.length }} total
               </span>
             </div>
@@ -101,34 +101,34 @@
     </div>
 
     <section
-      class="overflow-hidden rounded-3xl"
-      style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)"
-    >
+ class="overflow-hidden rounded-2xl surface-1 border border-line shadow-card"
+ 
+>
       <div
         v-if="isLoading && items.length === 0"
         class="space-y-4 p-6"
       >
         <div
-          v-for="index in 4"
-          :key="`notifications-page-loading-${index}`"
-          class="flex items-start gap-4 rounded-2xl border p-4"
-          style="border-color: var(--surface-border); background: var(--surface-2)"
-        >
+ v-for="index in 4"
+ :key="`notifications-page-loading-${index}`"
+ class="flex items-start gap-4 rounded-2xl border p-4 border-line surface-2"
+ 
+>
           <div
-            class="h-10 w-10 animate-pulse rounded-xl"
-            style="background: rgba(255,255,255,0.08)"
-          />
+ class="h-10 w-10 animate-pulse rounded-xl ui-skeleton"
+ 
+ />
           <div class="flex-1 space-y-2 pt-0.5">
             <div
-              class="h-3 animate-pulse rounded"
+              class="h-3 animate-pulse rounded-lg"
               style="width: 34%; background: rgba(255,255,255,0.08)"
             />
             <div
-              class="h-2.5 animate-pulse rounded"
+              class="h-2.5 animate-pulse rounded-lg"
               style="width: 78%; background: rgba(255,255,255,0.05)"
             />
             <div
-              class="h-2.5 animate-pulse rounded"
+              class="h-2.5 animate-pulse rounded-lg"
               style="width: 52%; background: rgba(255,255,255,0.04)"
             />
           </div>
@@ -150,15 +150,15 @@
           />
         </div>
         <h3
-          class="mt-4 text-[18px] font-semibold"
-          style="color: var(--text-primary)"
-        >
+ class="mt-4 text-lg font-semibold text-primary"
+ 
+>
           No notifications
         </h3>
         <p
-          class="mt-1 text-[13px]"
-          style="color: var(--text-secondary)"
-        >
+ class="mt-1 text-sm text-secondary"
+ 
+>
           No new notifications right now.
         </p>
       </div>
@@ -169,9 +169,9 @@
       >
         <template v-if="groupedItems.today.length">
           <p
-            class="px-2 pb-2 text-[10px] font-bold uppercase tracking-[0.14em]"
-            style="color: var(--text-tertiary)"
-          >
+ class="px-2 pb-2 text-micro font-bold uppercase tracking-[0.14em] text-tertiary"
+ 
+>
             Today
           </p>
           <div class="space-y-2">
@@ -199,37 +199,37 @@
               <span class="min-w-0 flex-1">
                 <span class="flex flex-wrap items-center gap-2">
                   <span
-                    class="text-[15px] tracking-[-0.02em]"
+                    class="text-base tracking-[-0.02em]"
                     :style="item.readAt ? 'color: var(--text-primary); font-weight: 600' : 'color: var(--text-primary); font-weight: 700'"
                   >
                     {{ item.title }}
                   </span>
                   <span
-                    v-if="!item.readAt"
-                    class="inline-flex h-2 w-2 rounded-full"
-                    style="background: var(--brand)"
-                  />
+ v-if="!item.readAt"
+ class="inline-flex h-2 w-2 rounded-full bg-brand"
+ 
+ />
                   <span
-                    class="ms-auto text-[12px]"
-                    style="color: var(--text-tertiary)"
-                  >
+ class="ms-auto text-xs text-tertiary"
+ 
+>
                     {{ formatAdminNotificationAbsolute(item.createdAt, locale) }}
                   </span>
                 </span>
                 <span
-                  class="mt-1 block text-[14px] leading-[1.45]"
-                  style="color: var(--text-secondary)"
-                >
+ class="mt-1 block text-sm leading-[1.45] text-secondary"
+ 
+>
                   {{ item.body }}
                 </span>
               </span>
 
               <span class="notification-page-row-arrow pt-1">
                 <Icon
-                  name="lucide:arrow-right"
-                  class="h-4 w-4"
-                  style="color: var(--text-tertiary)"
-                />
+ name="lucide:arrow-right"
+ class="h-4 w-4 text-tertiary"
+ 
+ />
               </span>
             </button>
           </div>
@@ -237,9 +237,9 @@
 
         <template v-if="groupedItems.earlier.length">
           <p
-            class="px-2 pb-2 pt-6 text-[10px] font-bold uppercase tracking-[0.14em]"
-            style="color: var(--text-tertiary)"
-          >
+ class="px-2 pb-2 pt-6 text-micro font-bold uppercase tracking-[0.14em] text-tertiary"
+ 
+>
             Earlier
           </p>
           <div class="space-y-2">
@@ -267,37 +267,37 @@
               <span class="min-w-0 flex-1">
                 <span class="flex flex-wrap items-center gap-2">
                   <span
-                    class="text-[15px] tracking-[-0.02em]"
+                    class="text-base tracking-[-0.02em]"
                     :style="item.readAt ? 'color: var(--text-primary); font-weight: 600' : 'color: var(--text-primary); font-weight: 700'"
                   >
                     {{ item.title }}
                   </span>
                   <span
-                    v-if="!item.readAt"
-                    class="inline-flex h-2 w-2 rounded-full"
-                    style="background: var(--brand)"
-                  />
+ v-if="!item.readAt"
+ class="inline-flex h-2 w-2 rounded-full bg-brand"
+ 
+ />
                   <span
-                    class="ms-auto text-[12px]"
-                    style="color: var(--text-tertiary)"
-                  >
+ class="ms-auto text-xs text-tertiary"
+ 
+>
                     {{ formatAdminNotificationAbsolute(item.createdAt, locale) }}
                   </span>
                 </span>
                 <span
-                  class="mt-1 block text-[14px] leading-[1.45]"
-                  style="color: var(--text-secondary)"
-                >
+ class="mt-1 block text-sm leading-[1.45] text-secondary"
+ 
+>
                   {{ item.body }}
                 </span>
               </span>
 
               <span class="notification-page-row-arrow pt-1">
                 <Icon
-                  name="lucide:arrow-right"
-                  class="h-4 w-4"
-                  style="color: var(--text-tertiary)"
-                />
+ name="lucide:arrow-right"
+ class="h-4 w-4 text-tertiary"
+ 
+ />
               </span>
             </button>
           </div>

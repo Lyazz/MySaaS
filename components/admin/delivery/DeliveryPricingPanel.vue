@@ -10,15 +10,15 @@
       <div class="flex flex-wrap items-center gap-3">
         <div class="min-w-0 flex-1">
           <p
-            class="text-[13px] font-semibold"
-            style="color: var(--text-primary)"
-          >
+ class="text-sm font-semibold text-primary"
+ 
+>
             {{ t('admin.pages.delivery.pricing.carrierSource.title') }}
           </p>
           <p
-            class="mt-0.5 text-xs"
-            style="color: var(--text-tertiary)"
-          >
+ class="mt-0.5 text-xs text-tertiary"
+ 
+>
             {{
               carrierRatesFetched
                 ? carrierRatesAge
@@ -107,10 +107,10 @@
     <div class="flex flex-col gap-3 lg:flex-row lg:items-center">
       <div class="relative flex-1">
         <Icon
-          name="lucide:search"
-          class="pointer-events-none absolute inset-y-0 start-3 my-auto h-4 w-4"
-          style="color: var(--text-muted)"
-        />
+ name="lucide:search"
+ class="pointer-events-none absolute inset-y-0 start-3 my-auto h-4 w-4 text-muted"
+ 
+ />
         <input
           v-model="query"
           type="search"
@@ -152,9 +152,9 @@
           style="border-block-start-color: var(--brand); border-inline-start-color: var(--brand)"
         />
         <p
-          class="text-sm"
-          style="color: var(--text-tertiary)"
-        >
+ class="text-sm text-tertiary"
+ 
+>
           {{ t('admin.pages.delivery.pricing.loading') }}
         </p>
       </div>
@@ -164,14 +164,14 @@
         class="flex flex-col items-center gap-2 py-16 text-center"
       >
         <Icon
-          name="lucide:map-pin-off"
-          class="h-6 w-6"
-          style="color: var(--text-muted)"
-        />
+ name="lucide:map-pin-off"
+ class="h-6 w-6 text-muted"
+ 
+ />
         <p
-          class="text-sm"
-          style="color: var(--text-secondary)"
-        >
+ class="text-sm text-secondary"
+ 
+>
           {{ t('admin.pages.delivery.pricing.noMatches') }}
         </p>
         <button
@@ -239,16 +239,16 @@
               >
                 <td class="delivery-table__td delivery-table__td--num">
                   <span
-                    v-if="carrierRates[mode][wilaya.code] != null"
-                    class="font-mono-nums"
-                    style="color: var(--text-secondary)"
-                  >
+ v-if="carrierRates[mode][wilaya.code] != null"
+ class="font-mono-nums text-secondary"
+ 
+>
                     {{ Math.round(Number(carrierRates[mode][wilaya.code])) }}
                   </span>
-                  <span
-                    v-else
-                    style="color: var(--text-muted)"
-                  >—</span>
+                  <span class="text-muted"
+ v-else
+ 
+>—</span>
                 </td>
 
                 <td class="delivery-table__td">
@@ -272,10 +272,10 @@
                   >
                     {{ formatMargin(margin(mode, wilaya.code) as number) }}
                   </span>
-                  <span
-                    v-else
-                    style="color: var(--text-muted)"
-                  >—</span>
+                  <span class="text-muted"
+ v-else
+ 
+>—</span>
                 </td>
               </template>
             </tr>
@@ -286,14 +286,14 @@
       <!-- Save bar -->
       <div class="delivery-savebar">
         <p
-          class="text-xs"
-          style="color: var(--text-tertiary)"
-        >
+ class="text-xs text-tertiary"
+ 
+>
           <template v-if="dirtyCount > 0">
             <span
-              class="font-mono-nums font-semibold"
-              style="color: var(--text-primary)"
-            >{{ dirtyCount }}</span>
+ class="font-mono-nums font-semibold text-primary"
+ 
+>{{ dirtyCount }}</span>
             {{ t('admin.pages.delivery.pricing.unsaved', dirtyCount) }}
           </template>
           <template v-else-if="saveMessage">

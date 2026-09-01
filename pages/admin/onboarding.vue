@@ -1,16 +1,16 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <div class="mb-8">
-      <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+      <h2 class="text-2xl font-bold text-primary">
         {{ t('admin.pages.onboarding.title') }}
       </h2>
-      <p class="mt-1" style="color: var(--text-secondary)">
+      <p class="mt-1 text-secondary">
         {{ t('admin.pages.onboarding.subtitle') }}
       </p>
     </div>
 
-    <div v-if="loading" class="rounded-xl p-8" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <div class="flex items-center gap-3" style="color: var(--text-secondary)">
+    <div v-if="loading" class="rounded-xl p-8 surface-1 border border-line">
+      <div class="flex items-center gap-3 text-secondary">
         <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 [border-color:var(--brand)]" />
         <span>{{ t('admin.pages.onboarding.loadingSettings') }}</span>
       </div>
@@ -18,20 +18,20 @@
 
     <div v-else class="space-y-6">
       <!-- Progress bar -->
-      <div class="rounded-xl p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="rounded-xl p-6 surface-1 border border-line">
         <div class="flex items-center justify-between mb-4">
-          <p class="text-sm font-medium" style="color: var(--text-secondary)">
+          <p class="text-sm font-medium text-secondary">
             {{ t('admin.pages.onboarding.progress.stepOf', { current: step + 1, total: STEPS.length }) }}
           </p>
-          <p class="text-sm" style="color: var(--text-tertiary)">{{ STEPS[step].label }}</p>
+          <p class="text-sm text-tertiary">{{ STEPS[step].label }}</p>
         </div>
-        <div class="h-2 rounded-full overflow-hidden" style="background: var(--surface-3)">
+        <div class="h-2 rounded-full overflow-hidden surface-3">
           <div class="h-2 [background:var(--brand)] transition-all" :style="{ width: `${progressPercent}%` }" />
         </div>
       </div>
 
       <!-- Step content -->
-      <div class="rounded-xl p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="rounded-xl p-6 surface-1 border border-line">
         <AdminOnboardingStepStoreInfo v-if="step === 0" v-model="form" />
         <AdminOnboardingStepTemplate v-else-if="step === 1" v-model="form" />
         <AdminOnboardingStepBrandColor v-else-if="step === 2" v-model="form" />
@@ -58,7 +58,7 @@
           <button
             v-if="step < STEPS.length - 1"
             type="button"
-            class="px-4 py-2 rounded-lg [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-white font-medium disabled:opacity-50"
+            class="px-4 py-2 rounded-lg [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-brand-contrast font-medium disabled:opacity-50"
             :disabled="saving"
             @click="nextStep"
           >
@@ -67,7 +67,7 @@
           <button
             v-else
             type="button"
-            class="px-4 py-2 rounded-lg [background:var(--brand)] hover:opacity-90 font-medium disabled:opacity-50" style="color: #05070A"
+            class="px-4 py-2 rounded-lg [background:var(--brand)] hover:opacity-90 font-medium disabled:opacity-50 text-brand-contrast"
             :disabled="saving"
             @click="finish"
           >

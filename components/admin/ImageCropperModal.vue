@@ -1,22 +1,22 @@
 <template>
   <Teleport to="body">
     <div v-if="open" class="fixed inset-0 z-[120] flex items-center justify-center bg-black/70 p-4" @click.self="cancel">
-      <div class="w-full max-w-5xl overflow-hidden rounded-xl" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-        <div class="flex items-center justify-between border-b px-4 py-3" style="border-color: var(--surface-border)">
+      <div class="w-full max-w-5xl overflow-hidden rounded-xl surface-1 border border-line">
+        <div class="flex items-center justify-between border-b px-4 py-3 border-line">
           <div>
-            <h3 class="text-sm font-semibold" style="color: var(--text-primary)">
+            <h3 class="text-sm font-semibold text-primary">
               {{ title || t('admin.components.imageCropper.title') }}
             </h3>
-            <p class="text-xs" style="color: var(--text-tertiary)">
+            <p class="text-xs text-tertiary">
               {{ subtitleText }}
             </p>
           </div>
           <button
-            type="button"
-            class="rounded p-1.5" style="color: var(--text-tertiary); border: 1px solid var(--surface-border)"
-            :disabled="processing"
-            @click="cancel"
-          >
+ type="button"
+ class="rounded-lg p-1.5 text-tertiary border border-line" 
+ :disabled="processing"
+ @click="cancel"
+>
             <Icon name="lucide:x" class="h-4 w-4" />
           </button>
         </div>
@@ -27,9 +27,9 @@
               v-for="preset in cropPresets"
               :key="preset"
               type="button"
-              class="rounded-md px-2.5 py-1.5 text-xs font-medium transition"
+              class="rounded-lg px-2.5 py-1.5 text-xs font-medium transition"
               :disabled="processing"
-              :class="selectedPreset === preset ? '[background:var(--brand)] text-white' : 'hover:bg-white/10'"
+              :class="selectedPreset === preset ? '[background:var(--brand)] text-brand-contrast' : 'hover:bg-hover'"
               :style="selectedPreset !== preset ? 'border: 1px solid var(--surface-border); color: var(--text-secondary)' : ''"
               @click="selectedPreset = preset"
             >
@@ -37,7 +37,7 @@
             </button>
           </div>
 
-          <div class="overflow-hidden rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+          <div class="overflow-hidden rounded-lg surface-2 border border-line">
             <ClientOnly>
               <Cropper
                 v-if="sourceUrl"
@@ -65,7 +65,7 @@
             </button>
             <button
               type="button"
-              class="rounded-md [background:var(--brand)] px-4 py-2 text-sm font-medium text-white hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:cursor-not-allowed disabled:opacity-50"
+              class="rounded-lg [background:var(--brand)] px-4 py-2 text-sm font-medium text-brand-contrast hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:cursor-not-allowed disabled:opacity-50"
               :disabled="processing"
               @click="confirm"
             >

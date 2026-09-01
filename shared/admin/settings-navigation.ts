@@ -44,10 +44,7 @@ export type SettingsNavGroup = {
 export const SETTINGS_HUB_RESOURCES: AdminSettingsResource[] = [
   'storeSettings',
   'homepageSettings',
-  'contactInfos',
-  'integrations',
-  'users',
-  'billing'
+  'contactInfos'
 ]
 
 // Flat, grouped sidebar nav for the settings area. Each item is one honest
@@ -95,16 +92,13 @@ export const SETTINGS_NAV_GROUPS: SettingsNavGroup[] = [
     id: 'connections',
     labelKey: 'admin.settingsNav.groups.connections',
     items: [
-      { key: 'domains', to: '/admin/settings/domains', labelKey: 'admin.settingsNav.items.domains', icon: 'lucide:globe-2', resource: 'storeSettings' },
-      { key: 'integrations', to: '/admin/integrations', labelKey: 'admin.settingsNav.items.integrations', icon: 'lucide:puzzle', resource: 'integrations', external: true }
+      { key: 'domains', to: '/admin/settings/domains', labelKey: 'admin.settingsNav.items.domains', icon: 'lucide:globe-2', resource: 'storeSettings' }
     ]
   },
   {
     id: 'administration',
     labelKey: 'admin.settingsNav.groups.administration',
     items: [
-      { key: 'team', to: '/admin/users', labelKey: 'admin.settingsNav.items.team', icon: 'lucide:user-cog', resource: 'users', external: true },
-      { key: 'billing', to: '/admin/billing', labelKey: 'admin.settingsNav.items.billing', icon: 'lucide:credit-card', resource: 'billing', external: true },
       { key: 'maintenance', to: '/admin/settings/functional?section=maintenance', labelKey: 'admin.settingsNav.items.maintenance', icon: 'lucide:power-off', resource: 'storeSettings' }
     ]
   }

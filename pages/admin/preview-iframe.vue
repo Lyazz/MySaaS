@@ -158,7 +158,7 @@ const capturePreviewClicks = (e: MouseEvent) => {
 </script>
 
 <template>
-  <div class="w-full min-h-screen bg-white" @click="capturePreviewClicks">
+  <div class="w-full min-h-screen surface-1" @click="capturePreviewClicks">
     <template v-if="activeTemplateDef && isPreviewReady">
        <component 
          :is="storeShellTemplates[activeTemplateDef.key as keyof typeof storeShellTemplates]" 

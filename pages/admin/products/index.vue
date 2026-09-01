@@ -10,7 +10,7 @@
         <MenuButton class="ui-btn ui-btn--secondary ui-btn--md">
           <Icon name="lucide:arrow-down-up" class="w-5 h-5" />
           <span>Import/Export</span>
-          <Icon name="lucide:chevron-down" class="w-4 h-4 ms-1 -me-1" style="color: var(--text-tertiary)" />
+          <Icon name="lucide:chevron-down" class="w-4 h-4 ms-1 -me-1 text-tertiary" />
         </MenuButton>
         <transition
           enter-active-class="transition ease-out duration-100"
@@ -20,7 +20,7 @@
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
-          <MenuItems class="absolute end-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+          <MenuItems class="absolute end-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-lg shadow-lg focus:outline-none surface-2 border border-line">
             <div class="py-1">
               <MenuItem v-slot="{ active }">
                 <button
@@ -29,7 +29,7 @@
                   :disabled="loading"
                   @click="openImportModal"
                 >
-                  <Icon name="lucide:download" class="me-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  <Icon name="lucide:download" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
                   {{ t('admin.pages.products.index.bulk.import') }}
                 </button>
               </MenuItem>
@@ -40,7 +40,7 @@
                   :disabled="loading"
                   @click="exportProductsCsv"
                 >
-                  <Icon name="lucide:upload" class="me-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  <Icon name="lucide:upload" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
                   {{ t('admin.pages.products.index.bulk.export') }}
                 </button>
               </MenuItem>
@@ -51,7 +51,7 @@
                   :disabled="loading || exportingArchive"
                   @click="exportProductsArchive"
                 >
-                  <Icon name="lucide:archive" class="me-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  <Icon name="lucide:archive" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
                   {{ t('admin.pages.products.index.bulk.exportArchive') }}
                 </button>
               </MenuItem>
@@ -74,53 +74,53 @@
     <AdminTabFilter v-model="activeTab" :tabs="productTabs" />
  
     <!-- Filters -->
-    <div data-tour="products-search" class="ui-card p-4 mb-6">
-      <div class="flex flex-wrap items-end gap-4">
-        <div class="flex-1 min-w-[200px]">
-          <label class="ui-label mb-1">{{ t('admin.pages.products.index.filters.searchLabel') }}</label>
-          <BaseInput
-            v-model="searchQuery"
-            :placeholder="t('admin.pages.products.index.filters.searchPlaceholder')"
-          />
-        </div>
-        <div class="w-full sm:w-auto min-w-[200px]">
-          <BaseSelect
-            v-model="selectedCategory"
-            :label="t('admin.pages.products.index.filters.category')"
+    <AdminFilterBar
+      v-model:search="searchQuery"
+      :search-label="t('admin.pages.products.index.filters.searchLabel')"
+      :search-placeholder="t('admin.pages.products.index.filters.searchPlaceholder')"
+      :chips="filterChips"
+      :advanced-count="advancedFilterCount"
+      :clearable="hasActiveFilters"
+      data-tour="products-search"
+      testid="products-filters"
+      @clear="clearFilters"
+      @remove-chip="removeFilterChip"
+    >
+      <template #advanced>
+        <BaseSelect
+          v-model="selectedCategory"
+          :label="t('admin.pages.products.index.filters.category')"
+        >
+          <option value="">
+            {{ t('admin.pages.products.index.filters.allCategories') }}
+          </option>
+          <option
+            v-for="cat in orderedCategories"
+            :key="cat.id"
+            :value="cat.id"
           >
-            <option value="">
-              {{ t('admin.pages.products.index.filters.allCategories') }}
-            </option>
-            <option
-              v-for="cat in orderedCategories"
-              :key="cat.id"
-              :value="cat.id"
-            >
-              {{ categoryOptionLabel(cat) }}
-            </option>
-          </BaseSelect>
-        </div>
-        <div class="w-full sm:w-auto min-w-[200px]">
-          <BaseSelect
-            v-model="selectedStatus"
-            :label="t('admin.pages.products.index.filters.status')"
-          >
-            <option value="">
-              {{ t('admin.pages.products.index.filters.allStatus') }}
-            </option>
-            <option value="active">
-              {{ t('admin.common.active') }}
-            </option>
-            <option value="inactive">
-              {{ t('admin.common.inactive') }}
-            </option>
-            <option value="lowStock">
-              {{ t('admin.pages.products.index.filters.lowStock') }}
-            </option>
-          </BaseSelect>
-        </div>
-      </div>
-    </div>
+            {{ categoryOptionLabel(cat) }}
+          </option>
+        </BaseSelect>
+        <BaseSelect
+          v-model="selectedStatus"
+          :label="t('admin.pages.products.index.filters.status')"
+        >
+          <option value="">
+            {{ t('admin.pages.products.index.filters.allStatus') }}
+          </option>
+          <option value="active">
+            {{ t('admin.common.active') }}
+          </option>
+          <option value="inactive">
+            {{ t('admin.common.inactive') }}
+          </option>
+          <option value="lowStock">
+            {{ t('admin.pages.products.index.filters.lowStock') }}
+          </option>
+        </BaseSelect>
+      </template>
+    </AdminFilterBar>
  
     <!-- Loading State -->
     <div
@@ -128,7 +128,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.products.index.loading') }}
       </p>
     </div>
@@ -138,11 +138,11 @@
       v-else-if="filteredProducts.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:package" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:package" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.products.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ t('admin.pages.products.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -162,8 +162,8 @@
       data-tour="products-table"
       class="ui-card overflow-hidden"
     >
-      <div v-if="selectedIds.length > 0" class="ui-card-header flex flex-wrap items-center gap-3 justify-between" style="background: var(--surface-2)">
-        <div class="text-sm font-medium" style="color: var(--text-secondary)">
+      <div v-if="selectedIds.length> 0" class="ui-card-header flex flex-wrap items-center gap-3 justify-between surface-2">
+        <div class="text-sm font-medium text-secondary">
           {{ t('admin.pages.products.index.bulk.selected', { count: selectedIds.length }) }}
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -270,7 +270,7 @@
 	              </td>
 	              <td class="ui-td whitespace-nowrap">
 	                <div class="flex items-center">
-	                  <div class="flex-shrink-0 h-10 w-10 rounded-md flex items-center justify-center overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+	                  <div class="flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center overflow-hidden surface-2 border border-line">
                     <img 
                       v-if="getProductMainImage(product)" 
                       :src="getProductMainImage(product)" 
@@ -278,13 +278,13 @@
                       class="h-10 w-10 object-cover" 
                     >
                     <Icon
-                      v-else
-                      name="lucide:image"
-                      class="w-5 h-5" style="color: var(--text-tertiary)"
-                    />
+ v-else
+ name="lucide:image"
+ class="w-5 h-5 text-tertiary" 
+ />
                   </div>
                   <div class="ms-4">
-                    <div class="font-medium flex items-center gap-1.5" style="color: var(--text-primary)">
+                    <div class="font-medium flex items-center gap-1.5 text-primary">
                       {{ product.title }}
                       <span
                         v-if="product.isClearance"
@@ -292,7 +292,7 @@
                         style="background: color-mix(in srgb, #d97706 15%, transparent); color: #d97706"
                       >{{ t('admin.pages.products.index.table.clearance', 'Destockage') }}</span>
                     </div>
-                    <div class="text-sm" style="color: var(--text-tertiary)">
+                    <div class="text-sm text-tertiary">
                       {{ product.slug }}
                     </div>
                   </div>
@@ -312,21 +312,21 @@
                   </span>
                 </div>
                 <span
-                  v-else
-                  class="text-sm" style="color: var(--text-tertiary)"
-                >{{ t('admin.pages.products.index.table.uncategorized') }}</span>
+ v-else
+ class="text-sm text-tertiary" 
+>{{ t('admin.pages.products.index.table.uncategorized') }}</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <template v-if="buildProductPricing(product).promotionApplied">
                   <div class="flex items-center gap-1.5">
-                    <span class="font-medium" style="color: var(--brand)">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
-                    <span class="text-xs line-through" style="color: var(--text-tertiary)">{{ formatCurrency(buildProductPricing(product).originalPrice) }}</span>
+                    <span class="font-medium text-brand">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
+                    <span class="text-xs line-through text-tertiary">{{ formatCurrency(buildProductPricing(product).originalPrice) }}</span>
                   </div>
-                  <div v-if="product.promotionEndDate" class="text-xs mt-0.5" style="color: var(--text-tertiary)">
+                  <div v-if="product.promotionEndDate" class="text-xs mt-0.5 text-tertiary">
                     exp. {{ new Date(product.promotionEndDate).toLocaleDateString() }}
                   </div>
                 </template>
-                <span v-else style="color: var(--text-primary)">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
+                <span class="text-primary" v-else>{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <!-- Out of stock -->
@@ -345,7 +345,7 @@
                   {{ product.stock }} en stock
                 </span>
                 <!-- Normal stock -->
-                <span v-else style="color: var(--text-secondary)">{{ product.stock }} en stock</span>
+                <span class="text-secondary" v-else>{{ product.stock }} en stock</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center gap-2">
@@ -355,7 +355,7 @@
                     :sr-label="`${t('admin.forms.product.isActive.label')} ${product.title}`"
                     @update:model-value="(nextValue) => toggleProductStatus(product, nextValue)"
                   />
-                  <span class="text-xs" style="color: var(--text-secondary)">
+                  <span class="text-xs text-secondary">
                     {{ product.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
                   </span>
                   <span
@@ -381,7 +381,7 @@
                     leave-from-class="transform opacity-100 scale-100"
                     leave-to-class="transform opacity-0 scale-95"
                   >
-                    <MenuItems class="absolute end-0 z-10 mt-2 w-56 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+                    <MenuItems class="absolute end-0 z-10 mt-2 w-56 origin-top-right rounded-lg shadow-lg focus:outline-none surface-2 border border-line">
                       <div class="py-1">
                         <!-- Product Links -->
                         <div class="flex items-center px-1">
@@ -389,17 +389,17 @@
                             <a
                               :href="getProductUrl(product.slug)"
                               target="_blank"
-                              :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :class="['group flex items-center px-3 py-2 text-sm rounded-lg transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="me-3 h-4 w-4" style="color: var(--text-tertiary)" />
+                              <Icon name="lucide:external-link" class="me-3 h-4 w-4 text-tertiary" />
                               {{ t('admin.pages.products.index.links.openProduct') }}
                             </a>
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/product/${product.slug}`)"
-                              :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
+                              :class="['p-2 rounded-lg hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyProduct')"
                             >
@@ -408,7 +408,7 @@
                           </MenuItem>
                         </div>
 
-                        <div class="my-1" style="border-top: 1px solid var(--surface-border)"></div>
+                        <div class="my-1 border-t border-line"></div>
 
                         <!-- Landing Links -->
                         <div class="flex items-center px-1">
@@ -416,17 +416,17 @@
                             <a
                               :href="getLandingUrl(product.slug)"
                               target="_blank"
-                              :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :class="['group flex items-center px-3 py-2 text-sm rounded-lg transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="me-3 h-4 w-4" style="color: var(--text-tertiary)" />
+                              <Icon name="lucide:external-link" class="me-3 h-4 w-4 text-tertiary" />
                               {{ t('admin.pages.products.index.links.openLanding') }}
                             </a>
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/product/${product.slug}?mode=landing`)"
-                              :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
+                              :class="['p-2 rounded-lg hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyLanding')"
                             >
@@ -463,7 +463,7 @@
       </div>
  
       <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6 border-t border-line">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -472,7 +472,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm" style="color: var(--text-secondary)">
+          <span class="text-sm text-secondary">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -485,7 +485,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm" style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.pages.products.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredProducts.length),
@@ -494,13 +494,13 @@
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
               <button
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-s-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage--"
-              >
+ :disabled="currentPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg border text-sm font-medium disabled:opacity-50 border-line surface-2 text-tertiary"
+ 
+ @click="currentPage--"
+>
                 {{ t('admin.common.previous') }}
               </button>
               <button
@@ -518,11 +518,11 @@
                 {{ page }}
               </button>
               <button
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-e-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage++"
-              >
+ :disabled="currentPage === totalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg border text-sm font-medium disabled:opacity-50 border-line surface-2 text-tertiary"
+ 
+ @click="currentPage++"
+>
                 {{ t('admin.common.next') }}
               </button>
             </nav>
@@ -548,84 +548,84 @@
 	      v-if="showImportCsvModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh]" style="background: var(--surface-1)">
-	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
+	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh] surface-1">
+	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0 border-b border-line">
 	          <div class="min-w-0">
-	            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
+	            <h3 class="truncate text-lg font-semibold text-primary">
 	              {{ t('admin.pages.products.index.bulk.importTitle') }}
 	            </h3>
-	            <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+	            <p class="mt-1 text-sm text-secondary">
 	              {{ t('admin.pages.products.index.bulk.importHint') }}
 	            </p>
 	          </div>
 	          <button
-	            v-if="!importingCsv"
-	            type="button"
-	            class="rounded-md p-2" style="color: var(--text-tertiary)"
-	            @click="closeImportModal"
-	          >
+	 v-if="!importingCsv"
+	 type="button"
+	 class="rounded-lg p-2 text-tertiary" 
+	 @click="closeImportModal"
+	>
 	            <Icon name="lucide:x" class="h-5 w-5" />
 	          </button>
 	        </div>
 	        <div class="px-6 py-5 space-y-4 overflow-y-auto">
 	          <input
-	            ref="importCsvInput"
-	            type="file"
-	            accept=".csv,.zip,text/csv,application/zip,application/x-zip-compressed"
-	            class="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:[background:rgba(var(--brand-rgb)/0.08)] file:px-4 file:py-2 file:text-sm file:font-semibold file:[color:var(--brand)] hover:file:[background:rgba(var(--brand-rgb)/0.12)]" style="color: var(--text-secondary)"
-	            :disabled="importingCsv"
-	            @change="onImportCsvFileChange"
-	          >
+	 ref="importCsvInput"
+	 type="file"
+	 accept=".csv,.zip,text/csv,application/zip,application/x-zip-compressed"
+	 class="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:[background:rgba(var(--brand-rgb)/0.08)] file:px-4 file:py-2 file:text-sm file:font-semibold file:[color:var(--brand)] hover:file:[background:rgba(var(--brand-rgb)/0.12)] text-secondary" 
+	 :disabled="importingCsv"
+	 @change="onImportCsvFileChange"
+	>
 
 	          <div
-	            v-if="importingCsv"
-	            class="rounded-md p-4 space-y-2" style="border: 1px solid var(--surface-border); background: var(--surface-1)"
-	          >
-	            <div class="flex items-center justify-between text-sm" style="color: var(--text-primary)">
+	 v-if="importingCsv"
+	 class="rounded-lg p-4 space-y-2 border border-line surface-1" 
+	>
+	            <div class="flex items-center justify-between text-sm text-primary">
 	              <span>{{ importProgressLabel }}</span>
 	              <span v-if="importProgress.total > 0">{{ importProgress.processed }} / {{ importProgress.total }}</span>
 	            </div>
-	            <div class="h-2 w-full overflow-hidden rounded-full" style="background: var(--surface-3)">
+	            <div class="h-2 w-full overflow-hidden rounded-full surface-3">
 	              <div
-	                class="h-full rounded-full transition-all duration-200"
-	                style="background: var(--brand)"
-	                :style="{ width: importProgressPercent + '%' }"
-	              />
+	 class="h-full rounded-full transition-all duration-200 bg-brand"
+	 
+	 :style="{ width: importProgressPercent + '%' }"
+	 />
 	            </div>
-	            <p class="text-xs" style="color: var(--text-tertiary)">
+	            <p class="text-xs text-tertiary">
 	              {{ t('admin.pages.products.index.bulk.progressDoNotClose') }}
 	            </p>
 	          </div>
 
-	          <div v-if="!importingCsv" class="rounded-md p-4" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
+	          <div v-if="!importingCsv" class="rounded-lg p-4 border border-line surface-1">
 	            <div class="flex items-start justify-between gap-3">
 	              <div class="min-w-0">
-	                <div class="text-sm font-semibold" style="color: var(--text-primary)">
+	                <div class="text-sm font-semibold text-primary">
 	                  {{ t('admin.pages.products.index.bulk.importTemplateTitle') }}
 	                </div>
-	                <div class="mt-1 text-xs" style="color: var(--text-secondary)">
+	                <div class="mt-1 text-xs text-secondary">
 	                  {{ t('admin.pages.products.index.bulk.importTemplateHint') }}
 	                </div>
 	              </div>
 	              <button
-	                type="button"
-	                class="shrink-0 rounded-md px-3 py-1.5 text-xs font-medium" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	                @click="downloadProductsImportTemplate"
-	              >
+	 type="button"
+	 class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium border border-line surface-2 text-secondary" 
+	 @click="downloadProductsImportTemplate"
+	>
 	                {{ t('admin.pages.products.index.bulk.importTemplateDownload') }}
 	              </button>
 	            </div>
 
-	            <pre class="mt-3 overflow-auto rounded-md p-3 text-xs" style="background: var(--surface-2); color: var(--text-primary)"><code>{{ productsImportTemplateCsv }}</code></pre>
+	            <pre class="mt-3 overflow-auto rounded-lg p-3 text-xs surface-2 text-primary"><code>{{ productsImportTemplateCsv }}</code></pre>
 	          </div>
 
 	          <div
-	            v-if="importCsvResult"
-	            class="rounded-md p-3 text-sm" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	          >
+	 v-if="importCsvResult"
+	 class="rounded-lg p-3 text-sm border border-line surface-2 text-secondary" 
+	>
 	            <div>{{ t('admin.pages.products.index.bulk.importResult', importCsvResult) }}</div>
 	            <div v-if="importCsvResult.warnings?.length" class="mt-3">
-	              <details class="rounded-md border border-amber-200 bg-amber-50 p-3">
+	              <details class="rounded-lg border border-amber-200 bg-amber-50 p-3">
 	                <summary class="cursor-pointer text-xs font-semibold text-amber-900">
 	                  Warnings ({{ importCsvResult.warnings.length }})
 	                </summary>
@@ -641,7 +641,7 @@
 	            </div>
 
 	            <div v-if="importCsvResult.errors?.length" class="mt-3">
-	              <details open class="rounded-md border border-red-200 bg-red-50 p-3">
+	              <details open class="rounded-lg border border-red-200 bg-red-50 p-3">
 	                <summary class="cursor-pointer text-xs font-semibold text-red-900">
 	                  Errors ({{ importCsvResult.errors.length }})
 	                </summary>
@@ -660,13 +660,13 @@
 	            </div>
 	          </div>
 	        </div>
-	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
+	        <div class="flex justify-end gap-2 px-6 py-4 border-t border-line">
 	          <button
-	            v-if="!importingCsv"
-	            type="button"
-	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	            @click="closeImportModal"
-	          >
+	 v-if="!importingCsv"
+	 type="button"
+	 class="px-4 py-2 rounded-lg border border-line surface-2 text-secondary" 
+	 @click="closeImportModal"
+	>
 	            {{ t('admin.common.close') }}
 	          </button>
 	        </div>
@@ -680,9 +680,9 @@
 	      v-if="showExportArchiveModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-md rounded-lg shadow-xl flex flex-col" style="background: var(--surface-1)">
-	        <div class="px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
-	          <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
+	      <div class="w-full max-w-md rounded-lg shadow-xl flex flex-col surface-1">
+	        <div class="px-6 py-4 shrink-0 border-b border-line">
+	          <h3 class="truncate text-lg font-semibold text-primary">
 	            {{ t('admin.pages.products.index.bulk.exportArchive') }}
 	          </h3>
 	        </div>
@@ -691,29 +691,29 @@
 	            <p class="text-sm text-red-700">{{ exportArchiveError }}</p>
 	          </template>
 	          <template v-else>
-	            <div class="flex items-center justify-between text-sm" style="color: var(--text-primary)">
+	            <div class="flex items-center justify-between text-sm text-primary">
 	              <span>{{ exportArchiveStatus === 'completed' ? t('admin.pages.products.index.bulk.progressDone') : t('admin.pages.products.index.bulk.progressExporting') }}</span>
 	              <span v-if="exportArchiveProgress.total > 0">{{ exportArchiveProgress.processed }} / {{ exportArchiveProgress.total }}</span>
 	            </div>
-	            <div class="h-2 w-full overflow-hidden rounded-full" style="background: var(--surface-3)">
+	            <div class="h-2 w-full overflow-hidden rounded-full surface-3">
 	              <div
-	                class="h-full rounded-full transition-all duration-200"
-	                style="background: var(--brand)"
-	                :style="{ width: exportArchiveProgressPercent + '%' }"
-	              />
+	 class="h-full rounded-full transition-all duration-200 bg-brand"
+	 
+	 :style="{ width: exportArchiveProgressPercent + '%' }"
+	 />
 	            </div>
-	            <p v-if="exportArchiveStatus === 'processing'" class="text-xs" style="color: var(--text-tertiary)">
+	            <p v-if="exportArchiveStatus === 'processing'" class="text-xs text-tertiary">
 	              {{ t('admin.pages.products.index.bulk.progressDoNotClose') }}
 	            </p>
 	          </template>
 	        </div>
-	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
+	        <div class="flex justify-end gap-2 px-6 py-4 border-t border-line">
 	          <button
-	            v-if="exportArchiveStatus !== 'processing'"
-	            type="button"
-	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	            @click="showExportArchiveModal = false"
-	          >
+	 v-if="exportArchiveStatus !== 'processing'"
+	 type="button"
+	 class="px-4 py-2 rounded-lg border border-line surface-2 text-secondary" 
+	 @click="showExportArchiveModal = false"
+	>
 	            {{ t('admin.common.close') }}
 	          </button>
 	        </div>
@@ -727,21 +727,21 @@
 	      v-if="showBulkUpdateModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh]" style="background: var(--surface-1)">
-	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
+	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh] surface-1">
+	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0 border-b border-line">
 	          <div class="min-w-0">
-	            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
+	            <h3 class="truncate text-lg font-semibold text-primary">
 	              {{ t('admin.pages.products.index.bulk.updateTitle') }}
 	            </h3>
-	            <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+	            <p class="mt-1 text-sm text-secondary">
 	              {{ t('admin.pages.products.index.bulk.updateHint') }}
 	            </p>
 	          </div>
 	          <button
-	            type="button"
-	            class="rounded-md p-2" style="color: var(--text-tertiary)"
-	            @click="closeBulkUpdateModal"
-	          >
+	 type="button"
+	 class="rounded-lg p-2 text-tertiary" 
+	 @click="closeBulkUpdateModal"
+	>
 	            <Icon name="lucide:x" class="h-5 w-5" />
 	          </button>
 	        </div>
@@ -797,7 +797,7 @@
 	              </option>
 	          </BaseSelect>
 
-	          <label class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
+	          <label class="flex items-center gap-2 text-sm text-secondary">
 	            <input
 	              v-model="bulkPropagatePriceToVariants"
 	              type="checkbox"
@@ -824,31 +824,31 @@
 
 	          <div
 	            v-if="bulkClearanceSkipped.length > 0"
-	            class="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+	            class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
 	          >
 	            {{ bulkClearanceSkipped.length }} {{ t('admin.pages.products.index.bulk.fields.clearanceSkippedSuffix', 'produit(s) ignore(s) car en promotion active.') }}
 	          </div>
 
 	          <div
 	            v-if="bulkError"
-	            class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+	            class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
 	          >
 	            {{ bulkError }}
 	          </div>
 	        </div>
 
-	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
+	        <div class="flex justify-end gap-2 px-6 py-4 border-t border-line">
 	          <button
-	            type="button"
-	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	            :disabled="bulkSaving"
-	            @click="closeBulkUpdateModal"
-	          >
+	 type="button"
+	 class="px-4 py-2 rounded-lg border border-line surface-2 text-secondary" 
+	 :disabled="bulkSaving"
+	 @click="closeBulkUpdateModal"
+	>
 	            {{ t('admin.common.cancel') }}
 	          </button>
 	          <button
 	            type="button"
-	            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+	            class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
 	            :disabled="bulkSaving"
 	            @click="submitBulkUpdate"
 	          >
@@ -867,6 +867,7 @@ import { toTenantHost, useRequestOrigin } from '~/composables/host'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseToggle from '~/components/ui/BaseToggle.vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
@@ -1183,6 +1184,48 @@ const productTabs = computed(() => [
   { key: 'outOfStock', label: 'Out of Stock', count: products.value.filter(p => p.stock === 0).length },
   { key: 'clearance', label: t('admin.pages.products.index.filters.clearance', 'Destockage'), count: products.value.filter(p => p.isClearance === true).length },
 ])
+
+const statusFilterLabel = (value: string) => {
+  if (value === 'active') return t('admin.common.active')
+  if (value === 'inactive') return t('admin.common.inactive')
+  if (value === 'lowStock') return t('admin.pages.products.index.filters.lowStock')
+  return value
+}
+
+const advancedFilterCount = computed(() => [selectedCategory.value, selectedStatus.value].filter(Boolean).length)
+
+const hasActiveFilters = computed(() => Boolean(searchQuery.value) || advancedFilterCount.value > 0)
+
+const filterChips = computed(() => {
+  const chips: { key: string; label: string; value: string }[] = []
+  if (selectedCategory.value) {
+    const category = orderedCategories.value.find((c) => c.id === selectedCategory.value)
+    chips.push({
+      key: 'category',
+      label: t('admin.pages.products.index.filters.category'),
+      value: category ? category.title : selectedCategory.value
+    })
+  }
+  if (selectedStatus.value) {
+    chips.push({
+      key: 'status',
+      label: t('admin.pages.products.index.filters.status'),
+      value: statusFilterLabel(selectedStatus.value)
+    })
+  }
+  return chips
+})
+
+function removeFilterChip(key: string) {
+  if (key === 'category') selectedCategory.value = ''
+  if (key === 'status') selectedStatus.value = ''
+}
+
+function clearFilters() {
+  searchQuery.value = ''
+  selectedCategory.value = ''
+  selectedStatus.value = ''
+}
 
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
 

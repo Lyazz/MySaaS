@@ -1,11 +1,11 @@
 <template>
   <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" @click.self="$emit('close')">
-    <div class="rounded-2xl w-full max-w-md overflow-hidden flex flex-col" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-      <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid var(--surface-border)">
-        <h2 class="text-xl font-bold" style="color: var(--text-primary)">
+    <div class="rounded-2xl w-full max-w-md overflow-hidden flex flex-col surface-2 border border-line shadow-overlay">
+      <div class="px-6 py-4 flex items-center justify-between border-b border-line">
+        <h2 class="text-xl font-bold text-primary">
           {{ t('admin.pages.pos.customer.addClient') }}
         </h2>
-        <button class="p-2 rounded-lg transition-colors" style="color: var(--text-muted)" @click="$emit('close')">
+        <button class="p-2 rounded-lg transition-colors text-muted" @click="$emit('close')">
           <Icon name="lucide:x" class="w-5 h-5" />
         </button>
       </div>
@@ -45,7 +45,7 @@
           {{ t('admin.common.cancel') }}
         </button>
         <button
-          class="px-4 py-2 rounded-lg font-medium text-white [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] transition-colors flex items-center justify-center min-w-[100px]"
+          class="ui-btn ui-btn--primary ui-btn--md min-w-[100px]"
           :disabled="loading"
           @click="submit"
         >

@@ -2,23 +2,22 @@
   <div class="space-y-5">
     <div class="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
       <div>
-        <p class="text-[9.5px] font-bold uppercase tracking-[0.1em] mb-1" style="color: var(--text-muted)">
+        <p class="text-micro font-bold uppercase tracking-[0.1em] mb-1 text-muted">
           {{ t('admin.pages.dashboard.snapshot') }}
         </p>
-        <h2 class="text-[20px] font-semibold" style="color: var(--text-primary); letter-spacing: -0.02em">
+        <h2 class="text-xl font-semibold text-primary tracking-tight">
           {{ t('admin.pages.dashboard.welcomeBack', { tenant: tenantName }) }}
         </h2>
-        <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
+        <p class="mt-0.5 text-xs text-tertiary">
           {{ t('admin.pages.dashboard.periodLabel', { from: dashboard.period.from, to: dashboard.period.to, days: dashboard.period.days }) }}
         </p>
       </div>
 
       <div class="flex flex-wrap items-center gap-2 shrink-0">
-        <DateFilter
+        <AdminDateRangeFilter
           v-model:start-date="customFrom"
           v-model:end-date="customTo"
           v-model:range="selectedRange"
-          class="w-full sm:w-auto"
           testid="dashboard"
         />
 
@@ -124,13 +123,13 @@
     />
 
     <div class="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <div class="lg:col-span-2 rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
-        <div class="flex items-center justify-between gap-4 px-5 py-4" style="border-bottom: 1px solid var(--surface-border)">
+      <div class="lg:col-span-2 rounded-2xl overflow-hidden surface-1 border border-line shadow-card">
+        <div class="flex items-center justify-between gap-4 px-5 py-4 border-b border-line">
           <div class="min-w-0">
-            <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
+            <h3 class="text-sm font-semibold text-primary">
               {{ t('admin.pages.dashboard.recentOrders.title') }}
             </h3>
-            <p class="mt-0.5 text-[11.5px]" style="color: var(--text-tertiary)">
+            <p class="mt-0.5 text-mini text-tertiary">
               {{ t('admin.pages.dashboard.recentOrders.hint') }}
             </p>
           </div>
@@ -143,52 +142,52 @@
         <div class="overflow-x-auto">
           <table class="min-w-full">
             <thead>
-              <tr style="background: var(--surface-2)">
-                <th v-for="col in tableColumns" :key="col" class="px-5 py-2.5 text-start text-[9.5px] font-bold uppercase tracking-[0.08em]" style="color: var(--text-muted); border-bottom: 1px solid var(--surface-border)">
+              <tr class="surface-2">
+                <th v-for="col in tableColumns" :key="col" class="px-5 py-2.5 text-start text-micro font-bold uppercase tracking-[0.08em] text-muted border-b border-line">
                   {{ col }}
                 </th>
               </tr>
             </thead>
             <tbody>
               <tr v-if="pending" v-for="n in 5" :key="`dash-sk-${n}`">
-                <td v-for="m in 6" :key="`dash-sk-cell-${n}-${m}`" class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
-                  <div class="h-3.5 rounded animate-pulse" style="background: rgba(255,255,255,0.06)" />
+                <td v-for="m in 6" :key="`dash-sk-cell-${n}-${m}`" class="px-5 py-3.5 border-b border-line">
+                  <div class="h-3.5 rounded-lg animate-pulse ui-skeleton" />
                 </td>
               </tr>
 
               <tr v-else-if="dashboard.recentOrders.length === 0">
                 <td colspan="6" class="px-5 py-14 text-center">
-                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
-                    <Icon name="lucide:inbox" class="h-5 w-5" style="color: var(--text-muted)" />
+                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-3 surface-2 border border-line">
+                    <Icon name="lucide:inbox" class="h-5 w-5 text-muted" />
                   </div>
-                  <p class="text-[13px] font-semibold" style="color: var(--text-secondary)">
+                  <p class="text-sm font-semibold text-secondary">
                     {{ t('admin.pages.dashboard.recentOrders.empty.title') }}
                   </p>
-                  <p class="mt-1 text-[12px]" style="color: var(--text-tertiary)">
+                  <p class="mt-1 text-xs text-tertiary">
                     {{ t('admin.pages.dashboard.recentOrders.empty.hint') }}
                   </p>
                 </td>
               </tr>
 
               <tr v-else v-for="order in dashboard.recentOrders" :key="order.id" class="table-row-hover">
-                <td class="px-5 py-3.5 whitespace-nowrap" style="border-bottom: 1px solid var(--surface-border)">
-                  <span class="text-[12px] font-semibold font-mono-nums" style="color: var(--text-primary)">#{{ order.id.substring(0, 8) }}</span>
+                <td class="px-5 py-3.5 whitespace-nowrap border-b border-line">
+                  <span class="text-xs font-semibold font-mono-nums text-primary">#{{ order.id.substring(0, 8) }}</span>
                 </td>
-                <td class="px-5 py-3.5" style="border-bottom: 1px solid var(--surface-border)">
-                  <p class="text-[13px] font-medium" style="color: var(--text-primary)">{{ order.customerName }}</p>
-                  <p class="text-[11px] mt-0.5" style="color: var(--text-tertiary)">{{ order.customerPhone }}</p>
+                <td class="px-5 py-3.5 border-b border-line">
+                  <p class="text-sm font-medium text-primary">{{ order.customerName }}</p>
+                  <p class="text-mini mt-0.5 text-tertiary">{{ order.customerPhone }}</p>
                 </td>
-                <td class="px-5 py-3.5 whitespace-nowrap" style="border-bottom: 1px solid var(--surface-border)">
-                  <span class="text-[13px] font-semibold font-mono-nums" style="color: var(--text-primary)">{{ formatMoney(order.totalAmount) }}</span>
+                <td class="px-5 py-3.5 whitespace-nowrap border-b border-line">
+                  <span class="text-sm font-semibold font-mono-nums text-primary">{{ formatMoney(order.totalAmount) }}</span>
                 </td>
-                <td class="px-5 py-3.5 whitespace-nowrap" style="border-bottom: 1px solid var(--surface-border)">
+                <td class="px-5 py-3.5 whitespace-nowrap border-b border-line">
                   <AdminOrderStatusBadge :status="order.status" />
                 </td>
-                <td class="px-5 py-3.5 whitespace-nowrap text-[12px]" style="border-bottom: 1px solid var(--surface-border); color: var(--text-tertiary)">
+                <td class="px-5 py-3.5 whitespace-nowrap text-xs border-b border-line text-tertiary">
                   {{ formatDateTime(order.createdAt) }}
                 </td>
-                <td class="px-5 py-3.5 whitespace-nowrap text-end" style="border-bottom: 1px solid var(--surface-border)">
-                  <NuxtLink :to="`/admin/orders/${order.id}`" class="inline-flex items-center gap-1.5 text-[12px] font-medium transition-colors hover:opacity-70" style="color: var(--brand)">
+                <td class="px-5 py-3.5 whitespace-nowrap text-end border-b border-line">
+                  <NuxtLink :to="`/admin/orders/${order.id}`" class="inline-flex items-center gap-1.5 text-xs font-medium transition-colors hover:opacity-70 text-brand">
                     <Icon name="lucide:eye" class="h-3.5 w-3.5" />
                     {{ t('common.view') }}
                   </NuxtLink>
@@ -200,11 +199,11 @@
       </div>
 
       <div class="space-y-4">
-        <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
-          <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
+        <div class="rounded-2xl p-5 surface-1 border border-line shadow-card">
+          <h3 class="text-sm font-semibold text-primary">
             {{ t('admin.pages.dashboard.orderStatus.title') }}
           </h3>
-          <p class="mt-0.5 text-[11.5px]" style="color: var(--text-tertiary)">
+          <p class="mt-0.5 text-mini text-tertiary">
             {{ t('admin.pages.dashboard.orderStatus.hint') }}
           </p>
 
@@ -215,20 +214,20 @@
               :to="`/admin/orders?status=${encodeURIComponent(s.status)}`"
               class="status-row flex items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-150"
             >
-              <span class="inline-flex items-center gap-2.5 text-[12.5px] font-medium" style="color: var(--text-secondary)">
+              <span class="inline-flex items-center gap-2.5 text-xs font-medium text-secondary">
                 <span class="h-2 w-2 rounded-full shrink-0" :class="s.dotClass" />
                 {{ t(s.labelKey) }}
               </span>
-              <span class="text-[12px] font-semibold font-mono-nums" style="color: var(--text-primary)">{{ s.count }}</span>
+              <span class="text-xs font-semibold font-mono-nums text-primary">{{ s.count }}</span>
             </NuxtLink>
           </div>
         </div>
 
-        <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: var(--card-shadow)">
-          <h3 class="text-[13px] font-semibold" style="color: var(--text-primary)">
+        <div class="rounded-2xl p-5 surface-1 border border-line shadow-card">
+          <h3 class="text-sm font-semibold text-primary">
             {{ t('admin.pages.dashboard.quickLinks.title') }}
           </h3>
-          <p class="mt-0.5 text-[11.5px]" style="color: var(--text-tertiary)">
+          <p class="mt-0.5 text-mini text-tertiary">
             {{ t('admin.pages.dashboard.quickLinks.hint') }}
           </p>
 
@@ -239,11 +238,11 @@
               :to="link.to"
               class="status-row flex items-center justify-between rounded-xl px-3 py-2.5 transition-all duration-150"
             >
-              <span class="inline-flex items-center gap-2.5 text-[12.5px] font-medium" style="color: var(--text-secondary)">
-                <Icon :name="link.icon" class="h-3.5 w-3.5 shrink-0" style="color: var(--text-tertiary)" />
+              <span class="inline-flex items-center gap-2.5 text-xs font-medium text-secondary">
+                <Icon :name="link.icon" class="h-3.5 w-3.5 shrink-0 text-tertiary" />
                 {{ link.label }}
               </span>
-              <Icon name="lucide:chevron-right" class="h-3.5 w-3.5" style="color: var(--text-muted)" />
+              <Icon name="lucide:chevron-right" class="h-3.5 w-3.5 text-muted" />
             </NuxtLink>
           </div>
         </div>
@@ -271,7 +270,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { buildDashboardRangeQuery, defaultCustomDateRange, getDashboardPresetDateRange, type DashboardRange } from '~/composables/admin/dashboardRange'
-import DateFilter from '~/components/ui/DateFilter.vue'
+import AdminDateRangeFilter from '~/components/admin/AdminDateRangeFilter.vue'
 
 definePageMeta({
   middleware: 'auth',

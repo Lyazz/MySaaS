@@ -10,6 +10,15 @@ config.global.mocks = {
 process.env.JWT_SECRET ||= 'test-jwt-secret'
 process.env.TRUST_PROXY ||= 'true'
 
+// Self-serve registration is gated in real deployments: `REGISTRATIONS_OPEN`
+// closes signups outright and `REGISTER_PHONE_LOCK_ENABLED` narrows them to one
+// whitelisted phone number. Both are go-live switches, not behaviour the suite
+// should inherit from whichever .env the machine happens to have — a developer
+// with the lock on saw every e2e suite that registers a tenant fail with 403.
+// A test that wants to exercise a gate sets it for itself.
+process.env.REGISTRATIONS_OPEN = 'true'
+process.env.REGISTER_PHONE_LOCK_ENABLED = 'false'
+
 // Activation licenses are RS256-signed and `assertRequiredEnv()` refuses to boot
 // without a keypair. Generate an ephemeral one per test worker rather than
 // committing a fixture: a checked-in test key is exactly the mistake that put a

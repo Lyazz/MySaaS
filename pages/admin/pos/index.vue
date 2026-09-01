@@ -1,5 +1,5 @@
 <template>
-  <div class="h-[calc(100vh-4rem)] relative flex overflow-hidden" style="background: var(--surface-2)">
+  <div class="h-[calc(100vh-4rem)] relative flex overflow-hidden surface-2">
     <!-- Mobile Cart Overlay -->
     <div
       v-if="showCart"
@@ -8,17 +8,17 @@
     />
 
     <!-- Left: Catalog (flex-1) -->
-    <div class="flex-1 flex flex-col min-w-0 transition-all duration-300" style="background: var(--admin-content-bg)">
+    <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 bg-admin">
 
       <!-- Top Bar -->
-      <header class="p-3 md:p-4 flex items-center gap-3 md:gap-4 shrink-0 z-10" style="background: var(--surface-1); border-bottom: 1px solid var(--surface-border)">
-        <h1 class="text-xl font-bold hidden md:block" style="color: var(--text-primary)">
+      <header class="p-3 md:p-4 flex items-center gap-3 md:gap-4 shrink-0 z-10 surface-1 border-b border-line">
+        <h1 class="text-xl font-bold hidden md:block text-primary">
           {{ categoryDisplayTitle(selectedCategory) || t('admin.pages.pos.catalog.title') }}
         </h1>
 
         <!-- Search -->
         <div class="flex-1 max-w-md mx-auto relative group">
-          <Icon name="lucide:search" class="absolute start-3 top-1/2 -translate-y-1/2 transition-colors w-5 h-5" style="color: var(--text-muted)" />
+          <Icon name="lucide:search" class="absolute start-3 top-1/2 -translate-y-1/2 transition-colors w-5 h-5 text-muted" />
           <input
             v-model="productSearch"
             type="text"
@@ -26,11 +26,11 @@
             class="ui-input w-full ps-10 pe-10 py-2 text-sm"
           >
           <button
-            v-if="productSearch"
-            class="absolute end-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors"
-            style="color: var(--text-muted)"
-            @click="productSearch = ''"
-          >
+ v-if="productSearch"
+ class="absolute end-2 top-1/2 -translate-y-1/2 p-1 rounded-full transition-colors text-muted"
+ 
+ @click="productSearch = ''"
+>
             <Icon name="lucide:x" class="w-4 h-4" />
           </button>
         </div>
@@ -54,7 +54,7 @@
             <span class="hidden 2xl:inline">{{ t('admin.pages.pos.catalog.actions.reprint') }}</span>
           </button>
           <button
-            class="h-9 px-3 text-sm rounded-lg [background:var(--brand)] text-white font-medium hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] shadow-sm transition-all flex items-center gap-1.5 shrink-0"
+            class="h-9 px-3 text-sm rounded-lg [background:var(--brand)] text-brand-contrast font-medium hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] shadow-sm transition-all flex items-center gap-1.5 shrink-0"
             :title="t('admin.pages.pos.catalog.actions.customAmount')"
             @click="openExampleDialog(t('admin.pages.pos.catalog.actions.customAmount'))"
           >
@@ -62,7 +62,7 @@
             <span class="hidden xl:inline">{{ t('admin.pages.pos.catalog.actions.customAmount') }}</span>
           </button>
 
-          <div class="h-6 w-px mx-1 shrink-0" style="background: var(--surface-border)" />
+          <div class="h-6 w-px mx-1 shrink-0 bg-line" />
 
           <!-- Product View Controls -->
           <div class="flex items-center gap-1.5">
@@ -80,11 +80,11 @@
               <Icon name="lucide:grid-3x3" class="w-4 h-4" />
               <span>{{ productsPerRow }}</span>
             </button>
-            <div class="flex p-0.5 rounded-lg shrink-0" style="background: var(--surface-3)">
+            <div class="flex p-0.5 rounded-lg shrink-0 surface-3">
               <button
                 v-for="view in ['grid', 'list']"
                 :key="view"
-                class="p-1.5 rounded-md transition-all"
+                class="p-1.5 rounded-lg transition-all"
                 :class="productsView === view ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
                 :style="productsView === view ? 'background: var(--surface-1)' : 'color: var(--text-muted)'"
                 @click="productsView = view as 'grid' | 'list'"
@@ -96,7 +96,7 @@
         </div>
 
         <!-- Mobile Menu Toggle -->
-        <button class="lg:hidden p-2" style="color: var(--text-secondary)">
+        <button class="lg:hidden p-2 text-secondary">
           <Icon name="lucide:more-vertical" class="w-6 h-6" />
         </button>
       </header>
@@ -105,7 +105,7 @@
       <div class="flex-1 flex overflow-hidden relative">
 
         <!-- Category Sidebar -->
-        <div class="w-20 md:w-24 lg:w-40 border-e overflow-y-auto shrink-0 flex flex-col no-scrollbar" style="background: var(--surface-1); border-color: var(--surface-border)">
+        <div class="w-20 md:w-24 lg:w-40 border-e overflow-y-auto shrink-0 flex flex-col no-scrollbar surface-1 border-line">
           <button
             class="p-2 md:p-3 border-b flex flex-col items-center gap-2 text-center group transition-colors"
             :class="!selectedCategoryId ? 'border-r-4 [border-right-color:var(--brand)]' : ''"
@@ -120,7 +120,7 @@
               <Icon name="lucide:layout-grid" class="w-5 h-5" />
             </div>
             <span
-              class="text-[10px] md:text-xs font-semibold leading-tight line-clamp-2"
+              class="text-micro md:text-xs font-semibold leading-tight line-clamp-2"
               :class="!selectedCategoryId ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
               :style="!selectedCategoryId ? '' : 'color: var(--text-secondary)'"
             >
@@ -136,19 +136,19 @@
             :style="`border-color: var(--surface-border); ${selectedCategoryId === cat.id ? 'background: rgba(var(--brand-rgb)/0.08)' : ''}`"
             @click="selectCategory(cat.id)"
           >
-            <div class="w-10 h-10 rounded-full overflow-hidden relative transition-all" style="background: var(--surface-3)">
+            <div class="w-10 h-10 rounded-full overflow-hidden relative transition-all surface-3">
               <img
                 v-if="cat.imageUrl"
                 :src="cat.imageUrl"
                 :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover"
               >
-              <div v-else class="w-full h-full flex items-center justify-center" style="color: var(--text-muted)">
+              <div v-else class="w-full h-full flex items-center justify-center text-muted">
                 <Icon name="lucide:image" class="w-5 h-5" />
               </div>
             </div>
             <span
-              class="text-[10px] md:text-xs font-semibold leading-tight line-clamp-2"
+              class="text-micro md:text-xs font-semibold leading-tight line-clamp-2"
               :class="selectedCategoryId === cat.id ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
               :style="selectedCategoryId !== cat.id ? 'color: var(--text-secondary)' : ''"
             >
@@ -158,16 +158,16 @@
         </div>
 
         <!-- Products Area -->
-        <div class="flex-1 overflow-y-auto p-3 md:p-6 pb-24 lg:pb-6" style="background: var(--admin-content-bg)">
+        <div class="flex-1 overflow-y-auto p-3 md:p-6 pb-24 lg:pb-6 bg-admin">
           <!-- Loading State -->
           <div v-if="loadingProducts" class="flex justify-center items-center h-full">
             <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin [color:var(--brand)]" />
           </div>
 
           <!-- Empty State -->
-          <div v-else-if="filteredProducts.length === 0" class="flex flex-col items-center justify-center h-full gap-4" style="color: var(--text-muted)">
-            <div class="w-20 h-20 rounded-full flex items-center justify-center" style="background: var(--surface-3)">
-              <Icon name="lucide:package-search" class="w-10 h-10" style="color: var(--text-muted)" />
+          <div v-else-if="filteredProducts.length === 0" class="flex flex-col items-center justify-center h-full gap-4 text-muted">
+            <div class="w-20 h-20 rounded-full flex items-center justify-center surface-3">
+              <Icon name="lucide:package-search" class="w-10 h-10 text-muted" />
             </div>
             <p class="font-medium text-lg">{{ t('admin.pages.pos.catalog.noProducts') }}</p>
             <button
@@ -188,11 +188,11 @@
           >
             <!-- Back Card (Grid View Only) -->
             <button
-              v-if="selectedCategoryId && productsView === 'grid'"
-              class="h-full min-h-[160px] rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group p-4"
-              style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-              @click="selectCategory(null)"
-            >
+ v-if="selectedCategoryId && productsView === 'grid'"
+ class="h-full min-h-[160px] rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center gap-3 group p-4 surface-1 border border-line"
+ 
+ @click="selectCategory(null)"
+>
               <div class="w-12 h-12 rounded-full [background:var(--brand)]/10 flex items-center justify-center group-hover:[background:var(--brand)]/20 transition-colors">
                 <Icon name="lucide:arrow-left" class="w-6 h-6 [color:rgba(var(--brand-rgb)/0.85)]" />
               </div>
@@ -201,11 +201,11 @@
 
             <!-- Back Item (List View Only) -->
             <button
-              v-if="selectedCategoryId && productsView === 'list'"
-              class="p-4 rounded-xl shadow-sm hover:shadow-md flex items-center gap-4 [color:rgba(var(--brand-rgb)/0.85)] font-bold transition-all"
-              style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-              @click="selectCategory(null)"
-            >
+ v-if="selectedCategoryId && productsView === 'list'"
+ class="p-4 rounded-xl shadow-sm hover:shadow-md flex items-center gap-4 [color:rgba(var(--brand-rgb)/0.85)] font-bold transition-all surface-1 border border-line"
+ 
+ @click="selectCategory(null)"
+>
               <div class="p-2 rounded-full [background:var(--brand)]/10">
                 <Icon name="lucide:arrow-left" class="w-5 h-5" />
               </div>
@@ -214,36 +214,38 @@
 
             <!-- Products -->
             <button
-              v-for="product in filteredProducts"
-              :key="product.id"
-              class="relative group rounded-xl shadow-sm hover:shadow-md transition-all text-start overflow-hidden flex h-full min-h-[180px]"
-              :class="productsView === 'grid' ? 'flex-col' : 'flex-row items-center p-2 min-h-[80px]'"
-              style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-              @click="handleAddProduct(product)"
-            >
+ v-for="product in filteredProducts"
+ :key="product.id"
+ class="relative group rounded-xl shadow-sm hover:shadow-md transition-all text-start overflow-hidden flex h-full min-h-[180px] surface-1 border border-line"
+ :class="productsView === 'grid' ? 'flex-col' : 'flex-row items-center p-2 min-h-[80px]'"
+ 
+ @click="handleAddProduct(product)"
+>
               <!-- Badge -->
+              <!-- eslint-disable vue/no-restricted-class -- stock warning on a solid red/orange fill: white reads in both themes -->
               <div
                 v-if="product.stock <= 5"
-                class="absolute top-2 end-2 z-10 px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide text-white shadow-sm"
+                class="absolute top-2 end-2 z-10 px-1.5 py-0.5 rounded-lg text-micro font-bold uppercase tracking-wide text-white shadow-sm"
                 :class="product.stock <= 0 ? 'bg-red-500' : 'bg-orange-500'"
               >
                 {{ product.stock <= 0 ? t('admin.pages.pos.catalog.badges.outOfStock') : t('admin.pages.pos.catalog.badges.lowStock', { count: product.stock }) }}
               </div>
+              <!-- eslint-enable vue/no-restricted-class -->
 
               <!-- Image -->
               <div
-                class="overflow-hidden shrink-0 relative flex-1"
-                :class="productsView === 'grid' ? 'w-full aspect-square p-2 md:p-3' : 'w-16 h-16 rounded-xl flex-none'"
-                style="background: var(--surface-2)"
-              >
-                <div class="w-full h-full rounded-lg overflow-hidden relative flex items-center justify-center" style="background: var(--surface-3)">
+ class="overflow-hidden shrink-0 relative flex-1 surface-2"
+ :class="productsView === 'grid' ? 'w-full aspect-square p-2 md:p-3' : 'w-16 h-16 rounded-xl flex-none'"
+ 
+>
+                <div class="w-full h-full rounded-lg overflow-hidden relative flex items-center justify-center surface-3">
                   <img
                     v-if="getProductMainImage(product)"
                     :src="getProductMainImage(product)"
                     :alt="product.title"
                     class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   >
-                  <div v-else class="w-full h-full flex items-center justify-center" style="color: var(--text-muted)">
+                  <div v-else class="w-full h-full flex items-center justify-center text-muted">
                     <Icon name="lucide:image" class="w-8 h-8" />
                   </div>
                 </div>
@@ -253,13 +255,13 @@
               <div class="flex-1 flex flex-col justify-between px-3 pb-3 md:px-4 md:pb-4 pt-0 min-w-0" :class="productsView === 'list' ? 'py-0 px-0' : ''">
                 <div class="mb-1 md:mb-2">
                   <h3
-                    class="font-semibold leading-snug"
-                    :class="productsView === 'grid' ? 'line-clamp-2 text-xs md:text-sm' : 'truncate text-base'"
-                    style="color: var(--text-primary)"
-                  >
+ class="font-semibold leading-snug text-primary"
+ :class="productsView === 'grid' ? 'line-clamp-2 text-xs md:text-sm' : 'truncate text-base'"
+ 
+>
                     {{ product.title }}
                   </h3>
-                  <p v-if="productsView === 'list'" class="text-xs truncate" style="color: var(--text-muted)">{{ product.sku }}</p>
+                  <p v-if="productsView === 'list'" class="text-xs truncate text-muted">{{ product.sku }}</p>
                 </div>
                 <div class="font-bold [color:rgba(var(--brand-rgb)/0.85)] text-sm md:text-lg">
                   {{ formatCurrency(getProductListPrice(product)) }}
@@ -273,11 +275,11 @@
       <!-- Mobile Bottom Bar -->
       <div v-if="cartTotal >= 0" class="lg:hidden p-4 border-t flex items-center justify-between gap-4 z-30" style="background: var(--surface-1); border-color: var(--surface-border); box-shadow: 0 -4px 12px rgba(0,0,0,0.3)">
         <div class="flex-1">
-          <div class="text-xs font-medium uppercase" style="color: var(--text-muted)">{{ cartItems.length }} {{ t('admin.pages.pos.cart.itemsCount', { count: '' }) }}</div>
+          <div class="text-xs font-medium uppercase text-muted">{{ cartItems.length }} {{ t('admin.pages.pos.cart.itemsCount', { count: '' }) }}</div>
           <div class="text-xl font-bold [color:rgba(var(--brand-rgb)/0.85)]">{{ formatCurrency(cartTotal) }}</div>
         </div>
         <button
-          class="h-12 px-6 rounded-xl [background:var(--brand)] text-white font-bold shadow-lg flex items-center gap-2"
+          class="h-12 px-6 rounded-xl [background:var(--brand)] text-brand-contrast font-bold shadow-lg flex items-center gap-2"
           @click="showCart = true"
         >
           <Icon name="lucide:shopping-bag" class="w-5 h-5" />
@@ -288,21 +290,21 @@
 
     <!-- Right: Cart & Checkout -->
     <div
-      class="fixed inset-y-0 end-0 z-30 w-full sm:w-[400px] border-s flex flex-col shadow-2xl lg:shadow-xl transform transition-transform duration-300 lg:relative lg:transform-none lg:w-[400px] lg:block"
-      :class="showCart ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
-      style="background: var(--surface-1); border-color: var(--surface-border)"
-    >
+ class="fixed inset-y-0 end-0 z-30 w-full sm:w-[400px] border-s flex flex-col shadow-2xl lg:shadow-xl transform transition-transform duration-300 lg:relative lg:transform-none lg:w-[400px] lg:block surface-1 border-line"
+ :class="showCart ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'"
+ 
+>
       <!-- Mobile Close Button -->
       <button
-        class="lg:hidden absolute top-4 start-4 p-2 rounded-full z-50"
-        style="background: var(--surface-3); color: var(--text-secondary)"
-        @click="showCart = false"
-      >
+ class="lg:hidden absolute top-4 start-4 p-2 rounded-full z-50 surface-3 text-secondary"
+ 
+ @click="showCart = false"
+>
         <Icon name="lucide:x" class="w-5 h-5" />
       </button>
 
       <!-- Session Tabs -->
-      <div class="flex border-b lg:pt-0 pt-16" style="border-color: var(--surface-border)">
+      <div class="flex border-b lg:pt-0 pt-16 border-line">
         <button
           v-for="i in 3"
           :key="i"
@@ -320,7 +322,7 @@
       </div>
 
       <!-- Customer & Scan -->
-      <div class="p-4 border-b space-y-3" style="border-color: var(--surface-border)">
+      <div class="p-4 border-b space-y-3 border-line">
         <div class="flex gap-2">
           <div class="flex-1 relative">
             <BaseSelect
@@ -338,7 +340,7 @@
               <option value="NEW" class="[color:rgba(var(--brand-rgb)/0.85)] font-bold">+ {{ t('admin.pages.pos.customer.addClient') }}</option>
               <option v-for="c in customers" :key="c.id" :value="c.id">{{ c.name }}</option>
             </BaseSelect>
-            <Icon name="lucide:user" class="absolute start-3 top-3 w-4 h-4" style="color: var(--text-muted)" />
+            <Icon name="lucide:user" class="absolute start-3 top-3 w-4 h-4 text-muted" />
           </div>
           <button
             class="ui-btn ui-btn--secondary w-10 h-10 flex items-center justify-center"
@@ -347,11 +349,11 @@
             <Icon name="lucide:image" class="w-5 h-5" />
           </button>
           <button
-            class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors hover:text-red-400 hover:bg-red-500/10"
-            style="border: 1px solid var(--surface-border); color: var(--text-muted)"
-            :title="t('admin.pages.pos.cart.actions.clearCart')"
-            @click="clearCart"
-          >
+ class="w-10 h-10 rounded-lg flex items-center justify-center transition-colors hover:text-red-400 hover:bg-red-500/10 border border-line text-muted"
+ 
+ :title="t('admin.pages.pos.cart.actions.clearCart')"
+ @click="clearCart"
+>
             <Icon name="lucide:trash-2" class="w-5 h-5" />
           </button>
         </div>
@@ -359,46 +361,46 @@
 
       <!-- Cart Items -->
       <div class="flex-1 overflow-y-auto p-4 content-start">
-        <div v-if="cartItems.length === 0" class="h-full flex flex-col items-center justify-center space-y-4" style="color: var(--text-muted)">
+        <div v-if="cartItems.length === 0" class="h-full flex flex-col items-center justify-center space-y-4 text-muted">
           <Icon name="lucide:shopping-bag" class="w-12 h-12 stroke-1" />
           <p class="font-medium">{{ t('admin.pages.pos.cart.empty') }}</p>
         </div>
         <div v-else class="space-y-3">
           <div
-            v-for="item in cartItems"
-            :key="item.key"
-            class="group rounded-xl p-3 flex items-center gap-3 transition-all"
-            style="background: var(--surface-2); border: 1px solid var(--surface-border)"
-          >
+ v-for="item in cartItems"
+ :key="item.key"
+ class="group rounded-xl p-3 flex items-center gap-3 transition-all surface-2 border border-line"
+ 
+>
             <div class="flex-1 min-w-0">
-              <h4 class="font-semibold text-sm leading-tight truncate" style="color: var(--text-primary)">{{ item.title }}</h4>
-              <p v-if="item.variantLabel" class="text-xs mt-0.5" style="color: var(--text-muted)">{{ item.variantLabel }}</p>
+              <h4 class="font-semibold text-sm leading-tight truncate text-primary">{{ item.title }}</h4>
+              <p v-if="item.variantLabel" class="text-xs mt-0.5 text-muted">{{ item.variantLabel }}</p>
             </div>
 
             <div class="flex items-center gap-2">
-              <div class="flex items-center h-8 rounded-lg border" style="background: var(--surface-3); border-color: var(--surface-border)">
+              <div class="flex items-center h-8 rounded-lg border surface-3 border-line">
                 <button
-                  class="w-8 h-full flex items-center justify-center hover:[color:rgba(var(--brand-rgb)/0.85)] rounded-l-lg transition-colors"
-                  style="color: var(--text-secondary)"
-                  @click="decrementQty(item.key)"
-                >
+ class="w-8 h-full flex items-center justify-center hover:[color:rgba(var(--brand-rgb)/0.85)] rounded-s-lg transition-colors text-secondary"
+ 
+ @click="decrementQty(item.key)"
+>
                   <Icon name="lucide:minus" class="w-3 h-3" />
                 </button>
-                <div class="w-8 text-center text-sm font-bold" style="color: var(--text-primary)">{{ item.quantity }}</div>
+                <div class="w-8 text-center text-sm font-bold text-primary">{{ item.quantity }}</div>
                 <button
-                  class="w-8 h-full flex items-center justify-center hover:[color:rgba(var(--brand-rgb)/0.85)] rounded-r-lg transition-colors"
-                  style="color: var(--text-secondary)"
-                  @click="incrementQty(item.key)"
-                >
+ class="w-8 h-full flex items-center justify-center hover:[color:rgba(var(--brand-rgb)/0.85)] rounded-e-lg transition-colors text-secondary"
+ 
+ @click="incrementQty(item.key)"
+>
                   <Icon name="lucide:plus" class="w-3 h-3" />
                 </button>
               </div>
 
               <button
-                class="w-8 h-8 flex items-center justify-center hover:text-red-400 transition-colors"
-                style="color: var(--text-muted)"
-                @click="removeFromCart(item.key)"
-              >
+ class="w-8 h-8 flex items-center justify-center hover:text-red-400 transition-colors text-muted"
+ 
+ @click="removeFromCart(item.key)"
+>
                 <Icon name="lucide:x" class="w-4 h-4" />
               </button>
             </div>
@@ -407,9 +409,9 @@
       </div>
 
       <!-- Footer -->
-      <div class="border-t p-6 space-y-6 z-20" style="background: var(--surface-1); border-color: var(--surface-border)">
+      <div class="border-t p-6 space-y-6 z-20 surface-1 border-line">
         <div class="flex items-end justify-between">
-          <span class="font-medium text-lg mb-1" style="color: var(--text-secondary)">{{ t('admin.pages.pos.cart.total') }}</span>
+          <span class="font-medium text-lg mb-1 text-secondary">{{ t('admin.pages.pos.cart.total') }}</span>
           <span class="text-3xl font-bold [color:rgba(var(--brand-rgb)/0.85)] tracking-tight leading-none">{{ formatCurrency(cartSubtotal) }}</span>
         </div>
 
@@ -423,7 +425,7 @@
             {{ t('admin.pages.pos.cart.actions.payment') }}
           </button>
           <button
-            class="h-12 rounded-xl font-bold text-white shadow-lg transition-all flex items-center justify-center gap-2"
+            class="h-12 rounded-xl font-bold text-brand-contrast shadow-lg transition-all flex items-center justify-center gap-2"
             :class="canCreateSale ? '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]' : 'cursor-not-allowed opacity-40'"
             :style="canCreateSale ? '' : 'background: var(--surface-3); color: var(--text-muted)'"
             :disabled="!canCreateSale"
@@ -468,27 +470,27 @@
               enter="duration-300 ease-out" enter-from="opacity-0 scale-95" enter-to="opacity-100 scale-100"
               leave="duration-200 ease-in" leave-from="opacity-100 scale-100" leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-                <DialogTitle as="h3" class="text-lg font-bold leading-6 flex justify-between items-center" style="color: var(--text-primary)">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle transition-all surface-2 border border-line shadow-overlay">
+                <DialogTitle as="h3" class="text-lg font-bold leading-6 flex justify-between items-center text-primary">
                   {{ variantModal.productTitle }}
-                  <button class="p-1 rounded-full transition-colors" style="color: var(--text-muted)" @click="closeVariantModal">
+                  <button class="p-1 rounded-full transition-colors text-muted" @click="closeVariantModal">
                     <Icon name="lucide:x" class="w-5 h-5" />
                   </button>
                 </DialogTitle>
                 <div class="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
-                  <div v-if="variantModal.loading" class="py-8 text-center" style="color: var(--text-secondary)">
+                  <div v-if="variantModal.loading" class="py-8 text-center text-secondary">
                     {{ t('admin.pages.pos.variants.loading') }}
                   </div>
                   <button
-                    v-for="v in variantModal.variants"
-                    :key="v.id"
-                    class="w-full p-4 rounded-xl transition-all flex justify-between items-center group hover:[border-color:var(--brand)]"
-                    style="border: 1px solid var(--surface-border); background: var(--surface-3)"
-                    @click="addVariantToCart(variantModal.productId, variantModal.productTitle, v)"
-                  >
+ v-for="v in variantModal.variants"
+ :key="v.id"
+ class="w-full p-4 rounded-xl transition-all flex justify-between items-center group hover:[border-color:var(--brand)] border border-line surface-3"
+ 
+ @click="addVariantToCart(variantModal.productId, variantModal.productTitle, v)"
+>
                     <div class="text-start">
-                      <div class="font-semibold group-hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)">{{ v.label }}</div>
-                      <div class="text-xs mt-0.5" style="color: var(--text-muted)">
+                      <div class="font-semibold group-hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors text-primary">{{ v.label }}</div>
+                      <div class="text-xs mt-0.5 text-muted">
                         {{ v.trackInventory ? t('admin.pages.pos.variants.inStockCount', { count: v.availableStock }) : t('admin.pages.pos.variants.inStock') }}
                       </div>
                     </div>

@@ -40,15 +40,26 @@ const switchLocale = async (code: string) => {
 </script>
 
 <template>
+  <!--
+    Every colour here reads from a `--ls-*` token with a fallback that
+    reproduces the original neutral look, so untouched templates are
+    unchanged. A storefront theme (see playful's ThemeProvider) maps the
+    tokens to its own palette to make the whole control match.
+  -->
   <Menu as="div" class="relative inline-block text-start" data-testid="locale-switcher">
     <div>
       <MenuButton
         data-testid="locale-switch-toggle"
-        class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium rounded-lg transition-all duration-150"
+        class="flex items-center gap-1.5 px-2 sm:px-2.5 py-1.5 text-[12px] font-medium transition-all duration-150"
         :class="props.class"
-        style="color: var(--text-secondary); border: 1px solid var(--surface-border); background: transparent"
-        @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
-        @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)' }"
+        :style="{
+          color: 'var(--ls-text, var(--text-secondary))',
+          border: '1px solid var(--ls-border, var(--surface-border))',
+          background: 'transparent',
+          borderRadius: 'var(--ls-radius, 0.5rem)'
+        }"
+        @mouseenter="(e: MouseEvent) => { const t = e.currentTarget as HTMLElement; t.style.background = 'var(--ls-hover-bg, rgba(255,255,255,0.04))'; t.style.color = 'var(--ls-text-strong, var(--text-primary))' }"
+        @mouseleave="(e: MouseEvent) => { const t = e.currentTarget as HTMLElement; t.style.background = 'transparent'; t.style.color = 'var(--ls-text, var(--text-secondary))' }"
       >
         <Icon name="lucide:languages" class="h-3.5 w-3.5 sm:h-3 sm:w-3 opacity-70" aria-hidden="true" />
         <span v-if="showLabels" class="hidden sm:inline-block">{{ currentLocale.label }}</span>
@@ -67,7 +78,14 @@ const switchLocale = async (code: string) => {
       leave-to-class="transform opacity-0 scale-95 translate-y-[-4px]"
     >
       <MenuItems
-        class="absolute end-0 z-50 mt-2 w-40 origin-top-right overflow-hidden rounded-xl border border-slate-200/60 bg-white/95 backdrop-blur-xl shadow-lg shadow-slate-200/50 ring-1 ring-black/5 focus:outline-none"
+        class="absolute end-0 z-50 mt-2 w-40 origin-top-right overflow-hidden focus:outline-none"
+        :style="{
+          borderRadius: 'var(--ls-radius, 0.75rem)',
+          border: '1px solid var(--ls-border, rgba(148,163,184,0.35))',
+          background: 'var(--ls-surface, rgba(255,255,255,0.98))',
+          backdropFilter: 'blur(12px)',
+          boxShadow: 'var(--ls-shadow, 0 10px 30px -10px rgba(15,23,42,0.25))'
+        }"
       >
         <div class="p-1.5">
           <MenuItem
@@ -78,18 +96,25 @@ const switchLocale = async (code: string) => {
             <button
               type="button"
               :data-testid="`locale-switch-${locale.code}`"
-              :class="[
-                active ? 'bg-slate-100/80 text-lime-700' : 'text-slate-600',
-                i18n.locale.value === locale.code ? 'font-semibold bg-lime-50/50 text-lime-700' : '',
-                'group flex w-full items-center rounded-md px-3 py-2 text-sm text-start transition-all duration-150'
-              ]"
+              class="group flex w-full items-center px-3 py-2 text-sm text-start transition-all duration-150"
+              :style="{
+                borderRadius: 'calc(var(--ls-radius, 0.75rem) - 0.35rem)',
+                color: i18n.locale.value === locale.code
+                  ? 'var(--ls-accent, var(--brand, #4d7c0f))'
+                  : (active ? 'var(--ls-text-strong, var(--text-primary, #334155))' : 'var(--ls-text, var(--text-secondary, #475569))'),
+                fontWeight: i18n.locale.value === locale.code ? 600 : 400,
+                background: i18n.locale.value === locale.code
+                  ? 'var(--ls-accent-soft, color-mix(in srgb, var(--ls-accent, var(--brand, #4d7c0f)) 14%, transparent))'
+                  : (active ? 'var(--ls-hover-bg, rgba(148,163,184,0.16))' : 'transparent')
+              }"
               @click="switchLocale(locale.code)"
             >
               <span class="flex-1">{{ locale.label }}</span>
-              <Icon 
+              <Icon
                 v-if="i18n.locale.value === locale.code"
-                name="lucide:check" 
-                class="ms-2 h-4 w-4 text-lime-600" 
+                name="lucide:check"
+                class="ms-2 h-4 w-4"
+                :style="{ color: 'var(--ls-accent, var(--brand, #4d7c0f))' }"
               />
             </button>
           </MenuItem>

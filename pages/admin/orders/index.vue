@@ -78,51 +78,20 @@
     </div>
 
     <!-- Filters -->
-    <div class="ui-card p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="ui-label mb-1">{{ t('admin.pages.orders.index.filters.searchLabel') }}</label>
-          <BaseInput
-            v-model="searchQuery"
-            :placeholder="t('admin.pages.orders.index.filters.searchPlaceholder')"
-          />
-        </div>
-        <div>
-          <DateFilter
-            v-model:startDate="startDate"
-            v-model:endDate="endDate"
-          />
-        </div>
-        <div>
-          <BaseSelect
-            v-model="selectedStatus"
-            :label="t('admin.pages.orders.index.filters.statusLabel')"
-          >
-            <option value="">
-              {{ t('admin.pages.orders.index.filters.allOrders') }}
-            </option>
-            <option value="PENDING">
-              {{ t('admin.orderStatus.pending') }}
-            </option>
-            <option value="CONFIRMED">
-              {{ t('admin.orderStatus.confirmed') }}
-            </option>
-            <option value="SHIPPED">
-              {{ t('admin.orderStatus.shipped') }}
-            </option>
-            <option value="DELIVERED">
-              {{ t('admin.orderStatus.delivered') }}
-            </option>
-            <option value="CANCELLED">
-              {{ t('admin.orderStatus.cancelled') }}
-            </option>
-            <option value="RETURNED">
-              {{ t('admin.orderStatus.returned') }}
-            </option>
-          </BaseSelect>
-        </div>
-      </div>
-    </div>
+    <AdminFilterBar
+      v-model:search="searchQuery"
+      :search-label="t('admin.pages.orders.index.filters.searchLabel')"
+      :search-placeholder="t('admin.pages.orders.index.filters.searchPlaceholder')"
+      :clearable="hasActiveFilters"
+      testid="orders-filters"
+      @clear="clearFilters"
+    >
+      <AdminDateRangeFilter
+        v-model:startDate="startDate"
+        v-model:endDate="endDate"
+        testid="orders-filters"
+      />
+    </AdminFilterBar>
 
     <!-- Loading State -->
     <div
@@ -130,7 +99,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.orders.index.loading') }}
       </p>
     </div>
@@ -140,11 +109,11 @@
       v-else-if="orders.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.orders.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ emptyHint }}
       </p>
     </div>
@@ -239,56 +208,56 @@
               <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center gap-2">
                   <NuxtLink
-                    :to="`/admin/orders/${order.id}`"
-                    class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
-                  >
+ :to="`/admin/orders/${order.id}`"
+ class="font-medium hover:[color:var(--brand)] transition-colors text-primary" 
+>
                     {{ order.publicId || `#${order.id.substring(0, 8)}` }}
                   </NuxtLink>
                   <AdminDestockageBadge :active="hasDestockage(order)" />
                 </div>
-                <div v-if="order.publicId" class="text-xs font-mono" style="color: var(--text-tertiary)">
+                <div v-if="order.publicId" class="text-xs font-mono text-tertiary">
                   {{ order.id.substring(0, 8) }}
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
-                  v-if="order.customerId"
-                  :to="`/admin/customers/${order.customerId}`"
-                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
-                >
+ v-if="order.customerId"
+ :to="`/admin/customers/${order.customerId}`"
+ class="hover:[color:var(--brand)] transition-colors text-primary" 
+>
                   {{ order.customerName }}
                 </NuxtLink>
-                <div v-else style="color: var(--text-primary)">
+                <div class="text-primary" v-else>
                   {{ order.customerName }}
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <a
-                  v-if="order.customerPhone"
-                  :href="`tel:${order.customerPhone}`"
-                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-secondary)"
-                >
+ v-if="order.customerPhone"
+ :href="`tel:${order.customerPhone}`"
+ class="hover:[color:var(--brand)] transition-colors text-secondary" 
+>
                   {{ order.customerPhone }}
                 </a>
-                <div v-else style="color: var(--text-tertiary)">
+                <div class="text-tertiary" v-else>
                   -
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <div class="flex flex-col gap-1">
-                  <div class="text-sm" style="color: var(--text-primary)">
+                  <div class="text-sm text-primary">
                     {{ order.shippingProvider || '—' }}
                   </div>
-                  <div class="text-xs" style="color: var(--text-tertiary)">
+                  <div class="text-xs text-tertiary">
                     {{ deliveryModeLabel(order.deliveryMode) }}
                   </div>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium" style="color: var(--text-primary)">
+                <div class="font-medium text-primary">
                   {{ formatCurrency(order.totalWithShippingAmount ?? order.totalAmount) }}
                 </div>
-                <div v-if="order.shippingAmount != null && Number(order.shippingAmount) > 0" class="text-xs" style="color: var(--text-tertiary)">
+                <div v-if="order.shippingAmount != null && Number(order.shippingAmount)> 0" class="text-xs text-tertiary">
                   +{{ formatCurrency(Number(order.shippingAmount)) }}
                 </div>
               </td>
@@ -296,9 +265,9 @@
                 <div class="flex flex-col gap-1 items-start">
                   <AdminOrderStatusBadge :status="order.status" :detail="order.providerStatusDetail" />
                   <span
-                    v-if="order.status === 'PENDING' && order.callStatus"
-                    class="text-xs truncate max-w-[120px]" style="color: var(--text-tertiary)"
-                  >
+ v-if="order.status === 'PENDING' && order.callStatus"
+ class="text-xs truncate max-w-[120px] text-tertiary" 
+>
                     {{ t(`admin.pages.orders.detail.fields.callStatusValues.${order.callStatus}`) }}
                   </span>
                 </div>
@@ -306,7 +275,7 @@
               <td class="ui-td whitespace-nowrap">
                 <AdminPaymentStatusBadge :status="order.paymentStatus || 'UNPAID'" />
               </td>
-              <td class="ui-td whitespace-nowrap" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-secondary">
                 {{ formatDate(order.createdAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-end">
@@ -343,7 +312,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6 border-t border-line">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -352,7 +321,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm" style="color: var(--text-secondary)">
+          <span class="text-sm text-secondary">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -365,7 +334,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm" style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.common.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, total),
@@ -374,13 +343,13 @@
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
               <button
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-s-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage--"
-              >
+ :disabled="currentPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg border text-sm font-medium disabled:opacity-50 border-line surface-2 text-tertiary"
+ 
+ @click="currentPage--"
+>
                 {{ t('admin.common.previous') }}
               </button>
               <button
@@ -398,11 +367,11 @@
                 {{ page }}
               </button>
               <button
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-e-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage++"
-              >
+ :disabled="currentPage === totalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg border text-sm font-medium disabled:opacity-50 border-line surface-2 text-tertiary"
+ 
+ @click="currentPage++"
+>
                 {{ t('admin.common.next') }}
               </button>
             </nav>
@@ -416,9 +385,8 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import { useToast } from '~/composables/useToast'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
-import BaseInput from '~/components/ui/BaseInput.vue'
-import DateFilter from '~/components/ui/DateFilter.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
+import AdminDateRangeFilter from '~/components/admin/AdminDateRangeFilter.vue'
 import AdminOrderExportButton from '~/components/admin/AdminOrderExportButton.vue'
 import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
 
@@ -523,7 +491,23 @@ const orderTabs = computed(() => [
   { key: 'SHIPPED', label: t('admin.orderStatus.shipped'), count: stats.value['SHIPPED'] || 0 },
   { key: 'DELIVERED', label: t('admin.orderStatus.delivered'), count: stats.value['DELIVERED'] || 0 },
   { key: 'CANCELLED', label: t('admin.orderStatus.cancelled'), count: stats.value['CANCELLED'] || 0 },
+  { key: 'RETURNED', label: t('admin.orderStatus.returned'), count: stats.value['RETURNED'] || 0 },
 ])
+
+const hasActiveFilters = computed(() => Boolean(
+  searchQuery.value
+  || selectedStatus.value
+  || startDate.value !== defaultDateRange.from
+  || endDate.value !== defaultDateRange.to
+))
+
+function clearFilters() {
+  searchQuery.value = ''
+  activeTab.value = 'all'
+  selectedStatus.value = ''
+  startDate.value = defaultDateRange.from
+  endDate.value = defaultDateRange.to
+}
 
 async function fetchOrders() {
   loading.value = true

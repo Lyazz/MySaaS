@@ -81,6 +81,17 @@ onMounted(() => {
 
   --kw-brand: #ED5A96;
 
+  /* Shared LocaleSwitcher — map its neutral tokens onto the candy palette */
+  --ls-surface: var(--kw-surface);
+  --ls-border: var(--kw-line);
+  --ls-shadow: 0 18px 40px -20px rgba(74, 46, 77, .55);
+  --ls-radius: var(--kw-r);
+  --ls-text: var(--kw-ink-soft);
+  --ls-text-strong: var(--kw-ink);
+  --ls-hover-bg: var(--kw-pink-soft);
+  --ls-accent: var(--kw-pink-deep);
+  --ls-accent-soft: var(--kw-pink-soft);
+
   /* Shape + motion */
   --kw-r-sm: 14px;
   --kw-r: 22px;

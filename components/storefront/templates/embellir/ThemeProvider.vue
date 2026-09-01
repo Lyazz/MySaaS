@@ -73,6 +73,17 @@ onMounted(() => {
   --emb-ink-faint: #8E9793;
   --emb-radius: 2px;
   -webkit-font-smoothing: antialiased;
+
+  /* Shared LocaleSwitcher — marble tile, glazed-green accent */
+  --ls-surface: var(--emb-marble);
+  --ls-border: var(--emb-clay);
+  --ls-shadow: 0 18px 40px -18px rgba(22, 33, 30, 0.3);
+  --ls-radius: var(--emb-radius);
+  --ls-text: var(--emb-ink-soft);
+  --ls-text-strong: var(--emb-ink);
+  --ls-hover-bg: rgba(223, 162, 84, 0.12);
+  --ls-accent: var(--emb-glaze);
+  --ls-accent-soft: rgba(14, 63, 58, 0.08);
 }
 
 /* Bodoni is the cosmetics-counter voice: high contrast, set tight. */

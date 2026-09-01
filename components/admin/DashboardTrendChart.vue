@@ -1,34 +1,34 @@
 <template>
-  <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+  <div class="rounded-2xl p-5 surface-1 border border-line">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
-        <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+        <h3 class="text-sm font-semibold text-primary">
           {{ title }}
         </h3>
-        <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
+        <p class="mt-0.5 text-xs text-tertiary">
           {{ hint }}
         </p>
       </div>
-      <span class="text-[11px] font-mono-nums rounded-md px-2 py-1" style="color: var(--text-secondary); background: var(--surface-2); border: 1px solid var(--surface-border)">
+      <span class="text-mini font-mono-nums rounded-lg px-2 py-1 text-secondary surface-2 border border-line">
         {{ trends.length }}
       </span>
     </div>
 
     <div class="mt-4">
-      <div v-if="loading" class="h-[180px] rounded-xl animate-pulse" style="background: rgba(255,255,255,0.04)" />
+      <div v-if="loading" class="h-[180px] rounded-xl animate-pulse ui-skeleton" />
       <div
-        v-else-if="trends.length === 0"
-        data-testid="trend-empty"
-        class="h-[180px] rounded-xl flex items-center justify-center text-[12px]"
-        style="color: var(--text-tertiary); background: var(--surface-2); border: 1px dashed var(--surface-border)"
-      >
+ v-else-if="trends.length === 0"
+ data-testid="trend-empty"
+ class="h-[180px] rounded-xl flex items-center justify-center text-xs ui-dropzone"
+ 
+>
         {{ emptyLabel }}
       </div>
 
-      <div v-else data-testid="trend-populated" class="rounded-xl p-3" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+      <div v-else data-testid="trend-populated" class="rounded-xl p-3 surface-2 border border-line">
         <div class="flex gap-2">
           <div class="flex flex-col justify-between h-[140px] text-end shrink-0" style="min-width: 38px">
-            <span v-for="tick in reversedTicks" :key="tick" class="text-[10px] font-mono-nums leading-none" style="color: var(--text-muted)">
+            <span v-for="tick in reversedTicks" :key="tick" class="text-micro font-mono-nums leading-none text-muted">
               {{ formatTick(tick) }}
             </span>
           </div>
@@ -64,16 +64,16 @@
 
             <div
               v-if="hoveredIndex !== null"
-              class="absolute z-10 pointer-events-none rounded-lg px-2.5 py-1.5 text-[11px] whitespace-nowrap -translate-x-1/2"
+              class="absolute z-10 pointer-events-none rounded-lg px-2.5 py-1.5 text-mini whitespace-nowrap -translate-x-1/2"
               :style="tooltipStyle"
             >
-              <div class="font-medium" style="color: var(--text-tertiary)">{{ trends[hoveredIndex].date }}</div>
-              <div class="font-semibold font-mono-nums" style="color: var(--text-primary)">{{ formatTick(values[hoveredIndex]) }}</div>
+              <div class="font-medium text-tertiary">{{ trends[hoveredIndex].date }}</div>
+              <div class="font-semibold font-mono-nums text-primary">{{ formatTick(values[hoveredIndex]) }}</div>
             </div>
           </div>
         </div>
 
-        <div class="mt-2 flex items-center justify-between text-[11px] font-mono-nums ps-[46px]" style="color: var(--text-tertiary)">
+        <div class="mt-2 flex items-center justify-between text-mini font-mono-nums ps-[46px] text-tertiary">
           <span>{{ firstLabel }}</span>
           <span>{{ lastLabel }}</span>
         </div>

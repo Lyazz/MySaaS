@@ -82,20 +82,20 @@
               leave-to="opacity-0 scale-95"
             >
               <DialogPanel
-                class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle shadow-xl transition-all"
-                style="background: var(--surface-2); border: 1px solid var(--surface-border)"
-              >
+ class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle shadow-xl transition-all surface-2 border border-line"
+ 
+>
                 <DialogTitle
-                  as="h3"
-                  class="od-display text-lg leading-6 flex justify-between items-center"
-                  style="color: var(--text-primary)"
-                >
+ as="h3"
+ class="od-display text-lg leading-6 flex justify-between items-center text-primary"
+ 
+>
                   {{ selectedProductForVariant?.title || t('admin.pages.orders.detail.variantSelect', 'Select Variant') }}
                   <button
-                    class="p-1 rounded-full"
-                    style="color: var(--text-tertiary)"
-                    @click="variantModalOpen = false"
-                  >
+ class="p-1 rounded-full text-tertiary"
+ 
+ @click="variantModalOpen = false"
+>
                     <Icon
                       name="lucide:x"
                       class="w-5 h-5"
@@ -104,25 +104,25 @@
                 </DialogTitle>
                 <div class="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
                   <div
-                    v-if="loadingVariants"
-                    class="py-8 text-center"
-                    style="color: var(--text-tertiary)"
-                  >
+ v-if="loadingVariants"
+ class="py-8 text-center text-tertiary"
+ 
+>
                     {{ t('admin.common.loading', 'Loading...') }}
                   </div>
                   <button
-                    v-for="v in availableVariantsForSelection"
-                    :key="v.id"
-                    type="button"
-                    class="w-full p-4 rounded-xl hover:[border-color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] hover:ring-1 hover:[--tw-ring-color:var(--brand)] transition-all flex justify-between items-center group"
-                    style="border: 1px solid var(--surface-border)"
-                    @click="onVariantSelected(v)"
-                  >
+ v-for="v in availableVariantsForSelection"
+ :key="v.id"
+ type="button"
+ class="w-full p-4 rounded-xl hover:[border-color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] hover:ring-1 hover:[--tw-ring-color:var(--brand)] transition-all flex justify-between items-center group border border-line"
+ 
+ @click="onVariantSelected(v)"
+>
                     <div class="text-start">
-                      <div class="font-semibold group-hover:[color:var(--brand)]" style="color: var(--text-primary)">
+                      <div class="font-semibold group-hover:[color:var(--brand)] text-primary">
                         {{ v.label }}
                       </div>
-                      <div class="text-xs mt-0.5" style="color: var(--text-tertiary)">
+                      <div class="text-xs mt-0.5 text-tertiary">
                         {{ v.availableStock }} {{ t('admin.pages.orders.create.inStock', 'in stock') }}
                       </div>
                     </div>
@@ -131,10 +131,10 @@
                         {{ formatCurrency(v.displayPrice ?? v.price) }}
                       </div>
                       <div
-                        v-if="v.promotionApplied"
-                        class="text-[11px]"
-                        style="color: var(--text-tertiary)"
-                      >
+ v-if="v.promotionApplied"
+ class="text-mini text-tertiary"
+ 
+>
                         <span class="line-through">{{ formatCurrency(v.originalPrice ?? v.price) }}</span>
                         <span
                           v-if="v.promotionDiscountPercent != null"
@@ -155,9 +155,9 @@
     <div v-if="loading" class="od-shell">
       <div class="ui-card p-6">
         <div class="animate-pulse space-y-6">
-          <div class="h-8 w-72 max-w-full rounded" style="background: var(--surface-3)" />
-          <div class="h-4 w-96 max-w-full rounded" style="background: var(--surface-3)" />
-          <div class="h-32 rounded-xl" style="background: var(--surface-3)" />
+          <div class="h-8 w-72 max-w-full rounded-lg surface-3" />
+          <div class="h-4 w-96 max-w-full rounded-lg surface-3" />
+          <div class="h-32 rounded-xl surface-3" />
         </div>
       </div>
     </div>
@@ -322,11 +322,11 @@
             </div>
             <div v-if="order.customerAddress || order.shippingWilayaCode || order.shippingCommuneCode" class="od-customer-card__location">
               <div v-if="order.customerAddress" class="od-customer-card__address">
-                <Icon name="lucide:map-pin" class="w-3.5 h-3.5" style="color: var(--text-tertiary); flex-shrink: 0" />
+                <Icon name="lucide:map-pin" class="w-3.5 h-3.5 text-tertiary shrink-0" />
                 <span>{{ order.customerAddress }}</span>
               </div>
               <div v-if="order.shippingWilayaCode || order.shippingCommuneCode" class="od-customer-card__geo">
-                <Icon name="lucide:navigation" class="w-3.5 h-3.5" style="color: var(--text-tertiary); flex-shrink: 0" />
+                <Icon name="lucide:navigation" class="w-3.5 h-3.5 text-tertiary shrink-0" />
                 <span>{{ shippingWilayaCommuneLabel }}</span>
               </div>
             </div>
@@ -335,7 +335,7 @@
           <!-- Call Panel + Notes -->
           <div class="od-call-card">
             <div class="od-call-card__header">
-              <Icon name="lucide:phone-call" class="w-3.5 h-3.5" style="color: var(--text-tertiary)" />
+              <Icon name="lucide:phone-call" class="w-3.5 h-3.5 text-tertiary" />
               <span>{{ t('admin.pages.orders.detail.sections.callPanel', 'Call panel') }}</span>
               <Transition name="od-fade">
                 <span v-if="savingCallStatus || callStatusSavedMessage" class="od-saved">
@@ -483,10 +483,10 @@
             <div v-if="editing" class="od-section__body space-y-4">
               <div class="relative">
                 <Icon
-                  name="lucide:search"
-                  class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4"
-                  style="color: var(--text-tertiary)"
-                />
+ name="lucide:search"
+ class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-tertiary"
+ 
+ />
                 <input
                   v-model="productSearch"
                   type="text"
@@ -504,13 +504,13 @@
                     @click="addProductToCart(product)"
                   >
                     <div class="flex-1 min-w-0">
-                      <div class="font-medium text-sm truncate" style="color: var(--text-primary)">
+                      <div class="font-medium text-sm truncate text-primary">
                         {{ product.title }}
                       </div>
                       <div class="mt-0.5 text-xs">
                         <span class="font-semibold [color:var(--brand)]">{{ formatCurrency(product.effectivePrice) }}</span>
                         <template v-if="product.promotionApplied">
-                          <span class="line-through ms-2" style="color: var(--text-tertiary)">{{ formatCurrency(product.originalPrice) }}</span>
+                          <span class="line-through ms-2 text-tertiary">{{ formatCurrency(product.originalPrice) }}</span>
                           <span
                             v-if="product.promotionDiscountPercent != null"
                             class="ms-1 font-semibold text-emerald-600"
@@ -518,13 +518,13 @@
                         </template>
                       </div>
                     </div>
-                    <Icon name="lucide:plus" class="w-4 h-4" style="color: var(--text-tertiary)" />
+                    <Icon name="lucide:plus" class="w-4 h-4 text-tertiary" />
                   </div>
                   <div
-                    v-if="searchedProducts.length === 0"
-                    class="p-4 text-center text-sm"
-                    style="color: var(--text-tertiary)"
-                  >
+ v-if="searchedProducts.length === 0"
+ class="p-4 text-center text-sm text-tertiary"
+ 
+>
                     {{ t('admin.pages.pos.catalog.noProducts', 'No products found') }}
                   </div>
                 </div>
@@ -546,7 +546,7 @@
                   class="od-cart__row"
                 >
                   <div class="flex-1 min-w-0">
-                    <div class="font-medium leading-tight" style="color: var(--text-primary)">{{ item.title }}</div>
+                    <div class="font-medium leading-tight text-primary">{{ item.title }}</div>
                     <div v-if="item.variantLabel" class="od-cart__variant">{{ item.variantLabel }}</div>
                   </div>
                   <div class="od-qty">
@@ -686,7 +686,7 @@
                 <div
                   v-if="editPriceLoading || editPriceError"
                   class="rounded-lg border px-3 py-2 text-xs"
-                  :class="editPriceError ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-slate-200 bg-slate-50 text-slate-600'"
+                  :class="editPriceError ? 'border-amber-200 bg-amber-50 text-amber-700' : 'border-line surface-2 text-secondary'"
                 >
                   <span v-if="editPriceLoading">{{ t('admin.common.loading', 'Loading...') }}</span>
                   <span v-else>{{ editPriceError }}</span>
@@ -936,8 +936,8 @@
     <div v-else class="od-shell">
       <div class="ui-card p-12 text-center">
         <Icon name="lucide:alert-circle" class="mx-auto h-10 w-10 text-red-400" />
-        <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">{{ t('admin.pages.orders.detail.notFound.title') }}</h3>
-        <p class="mt-1 text-sm" style="color: var(--text-tertiary)">{{ t('admin.pages.orders.detail.notFound.hint') }}</p>
+        <h3 class="mt-2 text-sm font-medium text-primary">{{ t('admin.pages.orders.detail.notFound.title') }}</h3>
+        <p class="mt-1 text-sm text-tertiary">{{ t('admin.pages.orders.detail.notFound.hint') }}</p>
         <NuxtLink to="/admin/orders" class="mt-6 inline-block [color:var(--brand)] hover:[color:var(--brand)] font-medium">{{ t('admin.pages.orders.detail.backToOrders') }}</NuxtLink>
       </div>
     </div>
@@ -1208,8 +1208,61 @@ function orderStatusLabel(code: string) {
   })
 
   const generatingWhatsapp = ref(false)
+  const whatsappApiStatus = ref<any>(null)
+  // True only when this store has its own WABA connected and an approved
+  // template. Everything else keeps the wa.me behaviour it has today.
+  const whatsappApiReady = computed(() => Boolean(whatsappApiStatus.value?.canSend))
 
+  async function loadWhatsappApiStatus() {
+    try {
+      whatsappApiStatus.value = await $fetch('/api/admin/whatsapp/status', {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      })
+    } catch {
+      whatsappApiStatus.value = null
+    }
+  }
+
+  async function markWhatsappSent() {
+    if (order.value && order.value.callStatus !== 'whatsapp_sms_sent' && order.value.callStatus !== 'whatsapp_link_confirmed') {
+      order.value.callStatus = 'whatsapp_sms_sent'
+      await handleUpdateCallStatus()
+    }
+  }
+
+  /**
+   * Sends through the store's own WhatsApp number when the Cloud API is
+   * connected, and falls back to opening wa.me — the historical behaviour —
+   * whenever it is not, or when the send is refused.
+   */
   async function generateAndSendWhatsapp() {
+    if (generatingWhatsapp.value) return
+    const o = order.value
+    if (!o || !o.customerPhone) return
+
+    if (whatsappApiReady.value) {
+      generatingWhatsapp.value = true
+      try {
+        const sent: any = await $fetch(`/api/admin/whatsapp/orders/${o.id}/confirmation`, {
+          method: 'POST',
+          headers: { Authorization: `Bearer ${authStore.token}` }
+        })
+        if (sent?.ok) {
+          await markWhatsappSent()
+          return
+        }
+        console.warn('WhatsApp API refused the send, falling back to wa.me', sent)
+      } catch (err) {
+        console.error('WhatsApp API send failed, falling back to wa.me', err)
+      } finally {
+        generatingWhatsapp.value = false
+      }
+    }
+
+    await openWhatsappLink()
+  }
+
+  async function openWhatsappLink() {
     if (generatingWhatsapp.value) return
     const o = order.value
     if (!o || !o.customerPhone) return
@@ -1290,10 +1343,7 @@ ${confirmLink}`
         window.location.href = whatsappUrl
       }
       
-      if (order.value && order.value.callStatus !== 'whatsapp_sms_sent' && order.value.callStatus !== 'whatsapp_link_confirmed') {
-        order.value.callStatus = 'whatsapp_sms_sent'
-        await handleUpdateCallStatus()
-      }
+      await markWhatsappSent()
     } catch (err: any) {
       if (newWin) newWin.close()
       console.error('Failed to generate WhatsApp link', err)
@@ -2596,7 +2646,8 @@ async function applyNBAAction(action: NBAAction) {
 onMounted(() => {
   void Promise.all([
     loadEditAvailableCompanies(),
-    fetchOrder()
+    fetchOrder(),
+    loadWhatsappApiStatus()
   ])
 })
 

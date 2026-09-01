@@ -2,10 +2,10 @@
   <div class="space-y-3">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-[13px] font-medium" style="color: var(--text-secondary)">
+        <p class="text-sm font-medium text-secondary">
           {{ label }}
         </p>
-        <p v-if="hint" class="mt-0.5 text-xs" style="color: var(--text-tertiary)">
+        <p v-if="hint" class="mt-0.5 text-xs text-tertiary">
           {{ hint }}
         </p>
       </div>
@@ -15,25 +15,25 @@
       </div>
     </div>
 
-    <div class="group relative overflow-hidden rounded-xl transition-colors" style="background: var(--surface-2); border: 2px dashed var(--surface-border)">
+    <div class="group relative overflow-hidden rounded-xl transition-colors ui-dropzone border-2">
       <div v-if="modelValue" class="relative transition-opacity group-hover:opacity-90">
         <img
-          :src="modelValue"
-          alt="Preview"
-          class="max-h-[300px] w-full object-contain"
-          style="background: var(--surface-3)"
-        >
+ :src="modelValue"
+ alt="Preview"
+ class="max-h-[300px] w-full object-contain surface-3"
+ 
+>
 
         <div class="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
           <button
-            type="button"
-            class="rounded-lg p-2 transition-colors"
-            style="background: var(--surface-2); color: var(--text-secondary)"
-            :title="t('admin.common.remove')"
-            @mouseenter="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.color = '#f87171')"
-            @mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)')"
-            @click="removeImage"
-          >
+ type="button"
+ class="rounded-lg p-2 transition-colors surface-2 text-secondary"
+ 
+ :title="t('admin.common.remove')"
+ @mouseenter="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.color = '#f87171')"
+ @mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)')"
+ @click="removeImage"
+>
             <Icon name="lucide:trash-2" class="h-5 w-5" />
           </button>
         </div>
@@ -45,13 +45,13 @@
         @mouseenter="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.03)')"
         @mouseleave="(e: MouseEvent) => ((e.currentTarget as HTMLElement).style.background = '')"
       >
-        <div class="mb-3 rounded-full p-3" style="background: var(--surface-3)">
+        <div class="mb-3 rounded-full p-3 surface-3">
           <Icon name="lucide:image-plus" class="h-6 w-6 [color:var(--brand)]" />
         </div>
-        <span class="text-[13px] font-medium" style="color: var(--text-secondary)">
+        <span class="text-sm font-medium text-secondary">
           {{ t('admin.components.imageUploader.clickToUpload') }}
         </span>
-        <span class="mt-1 text-xs" style="color: var(--text-tertiary)">
+        <span class="mt-1 text-xs text-tertiary">
           {{ t('admin.components.imageUploader.dragDrop') }}
         </span>
         <input

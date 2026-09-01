@@ -1,57 +1,57 @@
 <template>
   <div class="relative flex items-center">
     <!-- Split button: left = quick export, right = dropdown arrow -->
-    <div class="flex rounded-lg overflow-hidden" style="border: 1px solid var(--surface-border)">
+    <div class="flex rounded-lg overflow-hidden border border-line">
       <!-- Left: quick export (re-run last settings) -->
       <button
-        :disabled="exporting"
-        class="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors hover:opacity-80"
-        style="background: var(--surface-2); color: var(--text-primary)"
-        @click="quickExport"
-      >
+ :disabled="exporting"
+ class="flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors hover:opacity-80 surface-2 text-primary"
+ 
+ @click="quickExport"
+>
         <Icon v-if="exporting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
         <Icon v-else name="lucide:download" class="w-4 h-4" />
         Export
       </button>
 
       <!-- Divider -->
-      <div class="w-px self-stretch" style="background: var(--surface-border)" />
+      <div class="w-px self-stretch bg-line" />
 
       <!-- Right: dropdown toggle -->
       <button
-        :disabled="exporting"
-        class="px-2 py-2 text-sm transition-colors hover:opacity-80"
-        style="background: var(--surface-2); color: var(--text-primary)"
-        @click="dropdownOpen = !dropdownOpen"
-      >
+ :disabled="exporting"
+ class="px-2 py-2 text-sm transition-colors hover:opacity-80 surface-2 text-primary"
+ 
+ @click="dropdownOpen = !dropdownOpen"
+>
         <Icon name="lucide:chevron-down" class="w-4 h-4" />
       </button>
     </div>
 
     <!-- Dropdown -->
     <div
-      v-if="dropdownOpen"
-      class="absolute top-full end-0 mt-1 z-20 w-48 rounded-lg shadow-lg overflow-hidden"
-      style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-    >
+ v-if="dropdownOpen"
+ class="absolute top-full end-0 mt-1 z-20 w-48 rounded-lg shadow-lg overflow-hidden surface-1 border border-line"
+ 
+>
       <button
-        v-for="fmt in formats"
-        :key="fmt.value"
-        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-start"
-        style="color: var(--text-primary)"
-        @click="exportAs(fmt.value)"
-      >
-        <Icon :name="fmt.icon" class="w-4 h-4" style="color: var(--text-tertiary)" />
+ v-for="fmt in formats"
+ :key="fmt.value"
+ class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-start text-primary"
+ 
+ @click="exportAs(fmt.value)"
+>
+        <Icon :name="fmt.icon" class="w-4 h-4 text-tertiary" />
         {{ fmt.label }}
       </button>
 
-      <div class="h-px mx-3 my-1" style="background: var(--surface-border)" />
+      <div class="h-px mx-3 my-1 bg-line" />
 
       <button
-        class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-start"
-        style="color: var(--brand)"
-        @click="openModal"
-      >
+ class="w-full flex items-center gap-2 px-4 py-2.5 text-sm hover:opacity-80 transition-opacity text-start text-brand"
+ 
+ @click="openModal"
+>
         <Icon name="lucide:settings-2" class="w-4 h-4" />
         Export options…
       </button>

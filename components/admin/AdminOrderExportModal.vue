@@ -14,25 +14,25 @@
 
       <!-- Modal panel -->
       <div
-        class="relative z-10 w-full max-w-lg rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto"
-        style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-      >
+ class="relative z-10 w-full max-w-lg rounded-xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto surface-1 border border-line"
+ 
+>
         <div class="flex items-center justify-between mb-5">
-          <h2 class="text-lg font-semibold" style="color: var(--text-primary)">
+          <h2 class="text-lg font-semibold text-primary">
             Export Orders
           </h2>
           <button
-            class="p-1 rounded hover:opacity-70 transition-opacity"
-            style="color: var(--text-tertiary)"
-            @click="$emit('update:modelValue', false)"
-          >
+ class="p-1 rounded-lg hover:opacity-70 transition-opacity text-tertiary"
+ 
+ @click="$emit('update:modelValue', false)"
+>
             <Icon name="lucide:x" class="w-5 h-5" />
           </button>
         </div>
 
         <!-- Format selector -->
         <div class="mb-5">
-          <p class="text-sm font-medium mb-2" style="color: var(--text-secondary)">Format</p>
+          <p class="text-sm font-medium mb-2 text-secondary">Format</p>
           <div class="grid grid-cols-5 gap-2">
             <button
               v-for="fmt in formats"
@@ -55,20 +55,20 @@
         <!-- Column picker -->
         <div class="mb-5">
           <div class="flex items-center justify-between mb-2">
-            <p class="text-sm font-medium" style="color: var(--text-secondary)">Columns</p>
+            <p class="text-sm font-medium text-secondary">Columns</p>
             <div class="flex gap-3">
               <button
-                class="text-xs hover:opacity-70"
-                style="color: var(--brand)"
-                @click="selectAll"
-              >
+ class="text-xs hover:opacity-70 text-brand"
+ 
+ @click="selectAll"
+>
                 Select all
               </button>
               <button
-                class="text-xs hover:opacity-70"
-                style="color: var(--text-tertiary)"
-                @click="selectNone"
-              >
+ class="text-xs hover:opacity-70 text-tertiary"
+ 
+ @click="selectNone"
+>
                 None
               </button>
             </div>
@@ -76,11 +76,11 @@
 
           <div class="grid grid-cols-2 gap-1 max-h-56 overflow-y-auto pe-1">
             <label
-              v-for="col in allColumns"
-              :key="col.key"
-              class="flex items-center gap-2 rounded px-2 py-1.5 cursor-pointer hover:opacity-80 transition-opacity"
-              style="color: var(--text-primary)"
-            >
+ v-for="col in allColumns"
+ :key="col.key"
+ class="flex items-center gap-2 rounded-lg px-2 py-1.5 cursor-pointer hover:opacity-80 transition-opacity text-primary"
+ 
+>
               <input
                 type="checkbox"
                 class="admin-checkbox"

@@ -1,17 +1,17 @@
 <template>
   <div class="w-full overflow-x-auto mb-5 scrollbar-hide">
-    <div class="inline-flex items-center border-b min-w-full" style="border-color: var(--surface-border)">
+    <div class="inline-flex items-center border-b min-w-full border-line">
       <button
         v-for="tab in tabs"
         :key="tab.key"
-        class="relative flex items-center gap-1.5 px-4 py-2.5 text-[12px] font-medium transition-all duration-150 whitespace-nowrap shrink-0"
+        class="relative flex items-center gap-1.5 px-4 py-2.5 text-xs font-medium transition-all duration-150 whitespace-nowrap shrink-0"
         :class="tab.key === modelValue ? 'tab-active' : 'tab-idle'"
         @click="$emit('update:modelValue', tab.key)"
       >
         {{ tab.label }}
         <span
           v-if="tab.count !== undefined"
-          class="text-[10px] font-bold px-1.5 py-0.5 rounded-full"
+          class="text-micro font-bold px-1.5 py-0.5 rounded-full"
           :style="countStyle(tab.key)"
         >{{ tab.count }}</span>
         <!-- Active underline -->

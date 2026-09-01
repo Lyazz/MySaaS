@@ -1,17 +1,17 @@
 <template>
-  <div class="h-[calc(100vh-4rem)] relative flex overflow-hidden" style="background: var(--surface-2)">
-    <div class="flex-1 flex flex-col min-w-0 transition-all duration-300" style="background: var(--surface-2)">
+  <div class="h-[calc(100vh-4rem)] relative flex overflow-hidden surface-2">
+    <div class="flex-1 flex flex-col min-w-0 transition-all duration-300 surface-2">
       
       <!-- Top header -->
-      <header class="p-3 md:p-4 flex items-center gap-3 shrink-0 z-10 sticky top-0" style="background: var(--surface-1); border-bottom: 1px solid var(--surface-border)">
+      <header class="p-3 md:p-4 flex items-center gap-3 shrink-0 z-10 sticky top-0 surface-1 border-b border-line">
         <NuxtLink
-          to="/admin/orders"
-          class="p-2 rounded-lg transition-colors" style="color: var(--text-tertiary)"
-          :title="t('admin.nav.orders')"
-        >
+ to="/admin/orders"
+ class="p-2 rounded-lg transition-colors text-tertiary" 
+ :title="t('admin.nav.orders')"
+>
           <Icon name="lucide:arrow-left" class="w-5 h-5" />
         </NuxtLink>
-        <h1 class="text-xl font-bold" style="color: var(--text-primary)">
+        <h1 class="text-xl font-bold text-primary">
           {{ t('admin.pages.orders.create.title') }}
         </h1>
       </header>
@@ -23,8 +23,8 @@
         <div class="flex-1 space-y-6 max-w-4xl max-w-full">
           <!-- Customer Selection / Details -->
           <div class="ui-card">
-            <div class="p-4 flex justify-between items-center rounded-t-xl" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
-              <h2 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
+            <div class="p-4 flex justify-between items-center rounded-t-xl border-b border-line surface-2">
+              <h2 class="font-bold flex items-center gap-2 text-primary">
                 <div class="w-8 h-8 rounded-lg [background:rgba(var(--brand-rgb)/0.08)] flex items-center justify-center [color:var(--brand)]">
                   <Icon name="lucide:user" class="w-4 h-4" />
                 </div>
@@ -83,8 +83,8 @@
 
           <!-- Shipping Details -->
           <div class="ui-card">
-            <div class="p-4 flex justify-between items-center rounded-t-xl" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
-              <h2 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
+            <div class="p-4 flex justify-between items-center rounded-t-xl border-b border-line surface-2">
+              <h2 class="font-bold flex items-center gap-2 text-primary">
                 <div class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
                   <Icon name="lucide:truck" class="w-4 h-4" />
                 </div>
@@ -212,10 +212,10 @@
                     {{ t('admin.pages.orders.create.notes') }}
                   </label>
                   <textarea
-                    v-model="form.shippingNotes"
-                    rows="2"
-                    class="block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm transition-colors p-2.5" style="border-color: var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
-                  />
+ v-model="form.shippingNotes"
+ rows="2"
+ class="block w-full rounded-lg shadow-sm focus:[border-color:var(--brand)] focus:[--tw-ring-color:var(--brand)] sm:text-sm transition-colors p-2.5 border-line surface-1 text-primary" 
+ />
                </div>
             </div>
           </div>
@@ -224,8 +224,8 @@
         <!-- Right Column: Cart & Summary -->
         <div class="w-full lg:w-[450px] space-y-6 mt-6 lg:mt-0 shrink-0">
           <div class="ui-card flex flex-col max-h-[calc(100vh-8rem)]">
-            <div class="p-4 rounded-t-xl flex justify-between items-center" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
-              <h2 class="font-bold flex items-center gap-2" style="color: var(--text-primary)">
+            <div class="p-4 rounded-t-xl flex justify-between items-center border-b border-line surface-2">
+              <h2 class="font-bold flex items-center gap-2 text-primary">
                 <div class="w-8 h-8 rounded-lg bg-indigo-50 flex items-center justify-center text-indigo-600">
                   <Icon name="lucide:shopping-bag" class="w-4 h-4" />
                 </div>
@@ -234,41 +234,41 @@
             </div>
 
             <!-- Product Search input inside cart panel to quickly add -->
-            <div class="p-4" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
+            <div class="p-4 border-b border-line surface-1">
                <div class="relative group">
                   <Icon
-                    name="lucide:search"
-                    class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--text-muted)"
-                  />
+ name="lucide:search"
+ class="absolute start-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted" 
+ />
                   <input
-                    v-model="productSearch"
-                    type="text"
-                    :placeholder="t('admin.pages.pos.catalog.searchPlaceholder')"
-                    class="w-full pl-9 pr-3 py-2 rounded-lg focus:[border-color:var(--brand)] focus:ring-1 focus:[--tw-ring-color:var(--brand)] transition-all text-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border); color: var(--text-primary)"
-                  >
+ v-model="productSearch"
+ type="text"
+ :placeholder="t('admin.pages.pos.catalog.searchPlaceholder')"
+ class="w-full pl-9 pr-3 py-2 rounded-lg focus:[border-color:var(--brand)] focus:ring-1 focus:[--tw-ring-color:var(--brand)] transition-all text-sm surface-2 border border-line text-primary" 
+>
                   <!-- Search Results Dropdown -->
                   <div 
-                    v-if="productSearch.length > 0" 
-                    class="absolute start-0 end-0 top-full mt-1 shadow-xl rounded-lg z-50 max-h-60 overflow-y-auto" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
-                  >
+ v-if="productSearch.length> 0" 
+ class="absolute start-0 end-0 top-full mt-1 shadow-xl rounded-lg z-50 max-h-60 overflow-y-auto surface-2 border border-line" 
+>
                      <div 
-                      v-for="product in searchedProducts" 
-                      :key="product.id"
-                      class="p-2 cursor-pointer flex items-center gap-3" style="border-bottom: 1px solid var(--surface-border)"
-                      @click="addProductToCart(product)"
-                     >
-                        <div class="w-10 h-10 rounded overflow-hidden shrink-0" style="background: var(--surface-3)">
+ v-for="product in searchedProducts" 
+ :key="product.id"
+ class="p-2 cursor-pointer flex items-center gap-3 border-b border-line" 
+ @click="addProductToCart(product)"
+>
+                        <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 surface-3">
                            <img 
                             :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" 
                             class="w-full h-full object-cover"
                            >
                         </div>
                         <div class="flex-1 min-w-0">
-                           <div class="font-medium text-sm truncate" style="color: var(--text-primary)">{{ product.title }}</div>
-                           <div class="text-xs" style="color: var(--text-tertiary)">{{ formatCurrency(product.effectivePrice ?? product.price) }}</div>
+                           <div class="font-medium text-sm truncate text-primary">{{ product.title }}</div>
+                           <div class="text-xs text-tertiary">{{ formatCurrency(product.effectivePrice ?? product.price) }}</div>
                         </div>
                      </div>
-                     <div v-if="searchedProducts.length === 0" class="p-4 text-center text-sm" style="color: var(--text-tertiary)">
+                     <div v-if="searchedProducts.length === 0" class="p-4 text-center text-sm text-tertiary">
                         {{ t('admin.pages.pos.catalog.noProducts') }}
                      </div>
                   </div>
@@ -276,51 +276,51 @@
             </div>
 
             <!-- Cart Items -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[150px]" style="background: var(--surface-2)">
-               <div v-if="cartItems.length === 0" class="text-center text-sm py-8 flex flex-col items-center gap-2" style="color: var(--text-tertiary)">
-                 <Icon name="lucide:shopping-cart" class="w-8 h-8" style="color: var(--text-tertiary)" />
+            <div class="flex-1 overflow-y-auto p-4 space-y-3 min-h-[150px] surface-2">
+               <div v-if="cartItems.length === 0" class="text-center text-sm py-8 flex flex-col items-center gap-2 text-tertiary">
+                 <Icon name="lucide:shopping-cart" class="w-8 h-8 text-tertiary" />
                  {{ t('admin.pages.orders.create.emptyCart') }}
                </div>
 
-               <div v-for="(item, index) in cartItems" :key="index" class="text-sm rounded-lg p-3 flex flex-col gap-3" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+               <div v-for="(item, index) in cartItems" :key="index" class="text-sm rounded-lg p-3 flex flex-col gap-3 surface-1 border border-line">
                   <div class="flex justify-between items-start gap-2">
                     <div class="flex-1 min-w-0">
-                      <div class="font-medium line-clamp-2 leading-tight" style="color: var(--text-primary)">
+                      <div class="font-medium line-clamp-2 leading-tight text-primary">
                         {{ item.title }}
                       </div>
-                      <div v-if="item.variantLabel" class="text-xs mt-0.5" style="color: var(--text-tertiary)">
+                      <div v-if="item.variantLabel" class="text-xs mt-0.5 text-tertiary">
                         {{ item.variantLabel }}
                       </div>
                     </div>
                     <!-- Remove item -->
                     <button
-                      @click="removeCartItem(index)"
-                      class="hover:text-red-500 p-1 -m-1 transition-colors" style="color: var(--text-tertiary)"
-                    >
+ @click="removeCartItem(index)"
+ class="hover:text-red-500 p-1 -m-1 transition-colors text-tertiary" 
+>
                       <Icon name="lucide:x" class="w-4 h-4" />
                     </button>
                   </div>
 
-                  <div class="flex items-center justify-between mt-auto pt-2" style="border-top: 1px solid var(--surface-border)">
+                  <div class="flex items-center justify-between mt-auto pt-2 border-t border-line">
                     <div class="font-bold text-indigo-600">
                       {{ formatCurrency(item.price * item.quantity) }}
                     </div>
                     
-                    <div class="flex items-center rounded-lg p-0.5 shadow-sm" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+                    <div class="flex items-center rounded-lg p-0.5 shadow-sm surface-2 border border-line">
                       <button
-                        class="w-6 h-6 flex items-center justify-center rounded-md hover:shadow-sm disabled:opacity-50 transition-all font-medium" style="color: var(--text-secondary)"
-                        @click="item.quantity--"
-                        :disabled="item.quantity <= 1"
-                      >
+ class="w-6 h-6 flex items-center justify-center rounded-lg hover:shadow-sm disabled:opacity-50 transition-all font-medium text-secondary" 
+ @click="item.quantity--"
+ :disabled="item.quantity <= 1"
+>
                         <Icon name="lucide:minus" class="w-3 h-3" />
                       </button>
-                      <span class="w-8 text-center text-sm font-semibold" style="color: var(--text-secondary)">
+                      <span class="w-8 text-center text-sm font-semibold text-secondary">
                         {{ item.quantity }}
                       </span>
                       <button
-                        class="w-6 h-6 flex items-center justify-center rounded-md hover:shadow-sm transition-all font-medium" style="color: var(--text-secondary)"
-                        @click="item.quantity++"
-                      >
+ class="w-6 h-6 flex items-center justify-center rounded-lg hover:shadow-sm transition-all font-medium text-secondary" 
+ @click="item.quantity++"
+>
                         <Icon name="lucide:plus" class="w-3 h-3" />
                       </button>
                     </div>
@@ -329,20 +329,20 @@
             </div>
 
             <!-- Summary & Submit -->
-            <div class="p-4 rounded-b-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
+            <div class="p-4 rounded-b-xl shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] z-20 surface-1 border-t border-line">
               <div class="space-y-2 mb-4">
-                <div class="flex justify-between text-sm font-medium" style="color: var(--text-secondary)">
+                <div class="flex justify-between text-sm font-medium text-secondary">
                   <span>{{ t('admin.pages.orders.create.itemsTotal') }}</span>
                   <span>{{ formatCurrency(cartTotal) }}</span>
                 </div>
                 <div class="flex justify-between items-center text-lg font-bold">
-                  <span style="color: var(--text-primary)">{{ t('admin.common.total') }}</span>
+                  <span class="text-primary">{{ t('admin.common.total') }}</span>
                   <span class="text-indigo-600">{{ formatCurrency(cartTotal) }}</span>
                 </div>
               </div>
 
               <button
-                class="w-full h-12 rounded-xl text-white font-bold flex items-center justify-center gap-2 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2"
+                class="w-full h-12 rounded-xl text-brand-contrast font-bold flex items-center justify-center gap-2 transition-all shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2"
                 :class="canSubmit ? '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:[--tw-ring-color:var(--brand)] [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.3)] hover:shadow-lg' : 'cursor-not-allowed shadow-none'" :style="!canSubmit ? 'background: var(--surface-3); color: var(--text-muted)' : ''"
                 :disabled="!canSubmit || submitting"
                 @click="submitOrder"
@@ -392,16 +392,16 @@
               leave-from="opacity-100 scale-100"
               leave-to="opacity-0 scale-95"
             >
-              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle shadow-xl transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+              <DialogPanel class="w-full max-w-md transform overflow-hidden rounded-2xl p-6 text-start align-middle shadow-xl transition-all surface-2 border border-line">
                 <DialogTitle
-                  as="h3"
-                  class="text-lg font-bold leading-6 flex justify-between items-center" style="color: var(--text-primary)"
-                >
+ as="h3"
+ class="text-lg font-bold leading-6 flex justify-between items-center text-primary" 
+>
                   {{ selectedProductForVariant?.title || 'Select Variant' }}
                   <button
-                    class="p-1 rounded-full" style="color: var(--text-tertiary)"
-                    @click="variantModalOpen = false"
-                  >
+ class="p-1 rounded-full text-tertiary" 
+ @click="variantModalOpen = false"
+>
                     <Icon
                       name="lucide:x"
                       class="w-5 h-5"
@@ -410,22 +410,22 @@
                 </DialogTitle>
                 <div class="mt-4 space-y-2 max-h-[60vh] overflow-y-auto">
                   <div
-                    v-if="loadingVariants"
-                    class="py-8 text-center" style="color: var(--text-tertiary)"
-                  >
+ v-if="loadingVariants"
+ class="py-8 text-center text-tertiary" 
+>
                     Loading variants...
                   </div>
                   <button
-                    v-for="v in availableVariantsForSelection"
-                    :key="v.id"
-                    class="w-full p-4 rounded-xl hover:[border-color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] hover:ring-1 hover:[--tw-ring-color:var(--brand)] transition-all flex justify-between items-center group" style="border: 1px solid var(--surface-border)"
-                    @click="onVariantSelected(v)"
-                  >
+ v-for="v in availableVariantsForSelection"
+ :key="v.id"
+ class="w-full p-4 rounded-xl hover:[border-color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] hover:ring-1 hover:[--tw-ring-color:var(--brand)] transition-all flex justify-between items-center group border border-line" 
+ @click="onVariantSelected(v)"
+>
                     <div class="text-start">
-                      <div class="font-semibold group-hover:[color:var(--brand)]" style="color: var(--text-primary)">
+                      <div class="font-semibold group-hover:[color:var(--brand)] text-primary">
                         {{ v.label }}
                       </div>
-                      <div class="text-xs mt-0.5" style="color: var(--text-tertiary)">
+                      <div class="text-xs mt-0.5 text-tertiary">
                         {{ v.availableStock }} in stock
                       </div>
                     </div>

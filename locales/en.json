@@ -22,8 +22,8 @@
     },
     "siteClosed": {
       "badge": "Site paused",
-      "title": "Our site is temporarily closed",
-      "message": "The Swekly marketing site is briefly unavailable. We'll be back very soon — thanks for your patience.",
+      "title": "The platform is temporarily closed",
+      "message": "",
       "haveAccount": "Already have a store?",
       "logIn": "Log in"
     }
@@ -964,6 +964,11 @@
         "description": "For brands handling larger volumes every month",
         "cta": "Get 15 days for free"
       }
+    },
+    "billing": {
+      "monthly": "Billed every month",
+      "yearly": "Billed {total} once a year",
+      "free": "Free, no payment needed"
     }
   },
   "storefront": {
@@ -1421,6 +1426,8 @@
       "search": "Search",
       "searchAction": "Search",
       "clear": "Clear",
+      "filters": "Filters",
+      "clearFilters": "Clear filters",
       "reset": "Reset",
       "startDate": "Start date",
       "endDate": "End date",
@@ -1457,7 +1464,6 @@
       "processing": "Processing…",
       "error": "An error occurred. Please try again.",
       "saved": "Saved!",
-      "filters": "Filters",
       "noDataAvailable": "No data available",
       "unsavedChanges": "Unsaved changes",
       "unsavedChangesHint": "Don't forget to save your changes.",
@@ -1475,7 +1481,8 @@
       "keepEditing": "Keep editing",
       "leaveTitle": "Leave without saving?",
       "leaveMessage": "You have unsaved changes. They'll be lost if you leave this page.",
-      "leaveConfirm": "Leave page"
+      "leaveConfirm": "Leave page",
+      "clickToUpload": "Click to upload your receipt"
     },
     "confirmModal": {
       "defaults": {
@@ -1548,13 +1555,6 @@
           "loadFailed": "Failed to load image in cropper."
         }
       }
-    },
-    "help": {
-      "button": "Help Center",
-      "title": "Swekly Support",
-      "subtitle": "How can we help you today?",
-      "greeting": "Hi there! I'm the Swekly assistant. How can I help you manage your store today?",
-      "inputPlaceholder": "Type your message..."
     },
     "storeSettingsForm": {
       "title": "Store appearance & settings",
@@ -2946,6 +2946,47 @@
               "addPixel": "Add Pixel"
             }
           }
+        },
+        "whatsapp": {
+          "title": "WhatsApp Business",
+          "description": "Confirm orders from your own WhatsApp number, with Confirm and Cancel buttons.",
+          "modal": {
+            "title": "WhatsApp Business",
+            "intro": "Connect your WhatsApp Business account to send order confirmations automatically from your own number. Customers confirm or cancel with a button, and orders left unanswered are chased after 6 hours and again after 24 hours.",
+            "unavailable": "WhatsApp sign-up is not configured on this platform yet. Contact Swekly support.",
+            "connect": "Connect WhatsApp",
+            "connecting": "Connecting...",
+            "reconnect": "Connect a different number",
+            "number": "Connected number",
+            "businessName": "Business name",
+            "autoSend": {
+              "label": "Send automatically on new orders",
+              "hint": "Storefront orders only. Orders you create yourself still use the button on the order page."
+            },
+            "reminders": {
+              "label": "Chase unanswered orders",
+              "hint": "One reminder after 6 hours, a second after 24 hours."
+            },
+            "templates": {
+              "title": "Message templates",
+              "hint": "Meta reviews each template before it can be sent. This usually takes a few minutes.",
+              "confirmation": "Order confirmation",
+              "reminder": "Reminder",
+              "refresh": "Refresh statuses",
+              "resubmit": "Resubmit templates"
+            },
+            "templateStatus": {
+              "APPROVED": "Approved",
+              "PENDING": "Under review",
+              "REJECTED": "Rejected",
+              "PAUSED": "Paused",
+              "DISABLED": "Disabled",
+              "MISSING": "Not submitted"
+            },
+            "disconnect": "Disconnect",
+            "disconnectConfirm": "Disconnect this WhatsApp account? Orders will fall back to the manual WhatsApp link.",
+            "error": "Something went wrong. Please try again."
+          }
         }
       },
       "users": {
@@ -3295,106 +3336,166 @@
       },
       "billing": {
         "metaTitle": "Billing",
-        "title": "Billing",
-        "subtitle": "View your current plan, limits, and usage.",
-        "seePricing": "See Pricing",
+        "title": "Billing & subscription",
+        "subtitle": "Your plan, what it costs, when it renews and how much of it you are using.",
+        "seePricing": "See public pricing",
+        "perMonth": "/ month",
         "errors": {
-          "loadFailed": "Failed to load billing info."
+          "loadFailed": "Failed to load your billing information.",
+          "updateFailed": "Could not update your subscription. Please try again."
         },
         "status": {
+          "active": "Active",
+          "trialing": "Free trial",
+          "pastDue": "Expired",
+          "canceling": "Ends at period end"
+        },
+        "state": {
+          "pastDue": {
+            "title": "Your subscription has expired",
+            "desc": "Your term ended on {date}. Your storefront and admin stay limited until a new payment is approved.",
+            "action": "Renew now"
+          },
           "pending": {
             "title": "Payment under review",
-            "desc": "We received your payment proof and our team is reviewing it. Your subscription will be updated once approved.",
-            "badge": "pending"
+            "desc": "We received {amount} DA by {method} on {date}. Your plan updates as soon as our team approves it.",
+            "action": "View"
           },
-          "approved": {
-            "title": "Payment approved",
-            "desc": "Your latest payment was approved and your subscription is active."
+          "rejected": {
+            "title": "Your last payment was rejected",
+            "desc": "The receipt submitted on {date} could not be validated. Check the amount and the account details, then send it again.",
+            "action": "Try again"
+          },
+          "canceling": {
+            "title": "Automatic renewal is off",
+            "desc": "You keep full access until {date}. After that your store falls back to the free limits.",
+            "action": "Turn renewal back on"
+          },
+          "trial": {
+            "title": "{days} days left in your free trial",
+            "desc": "Your trial ends on {date}. Pick a plan before then to keep your store running without interruption.",
+            "action": "Choose a plan"
           }
         },
-        "currentPlan": {
-          "title": "Current Plan",
-          "hint": "You can switch plans for testing (monthly only).",
-          "changePlan": "Change plan",
-          "paySimulate": "Pay (Simulate) & Apply",
-          "cards": {
-            "plan": "Plan",
-            "interval": "Billing interval",
-            "source": "Source: {source}",
-            "ordersThisPeriod": "Orders this period"
-          },
-          "limitsTitle": "Plan Limits"
+        "current": {
+          "eyebrow": "Current plan",
+          "billedAs": "Billing",
+          "renewsOn": "Renews on",
+          "trialEnds": "Trial ends",
+          "accessEnds": "Access ends",
+          "nextCharge": "Next charge",
+          "daysLeft": "in {days} days",
+          "today": "today",
+          "expiredAgo": "{days} days ago",
+          "savingPerYear": "saves {amount} DA vs monthly",
+          "stopRenewal": "Turn off automatic renewal",
+          "resumeRenewal": "Turn renewal back on"
         },
-        "limits": {
-          "ordersPerMonth": "Orders / month"
-        },
-        "planOption": "{name} ({orders} orders/mo)",
-        "availablePlans": {
-          "title": "Available Plans",
-          "ordersPerMonth": "{count} Orders / month",
-          "perMonth": "/mo"
+        "usage": {
+          "title": "Usage",
+          "window": "This month · {range}",
+          "orders": "Orders",
+          "products": "Products",
+          "pixels": "Meta pixels",
+          "unlimited": "Unlimited",
+          "ordersBlocked": "Limit reached — new storefront orders are refused until the next window or an upgrade."
         },
         "interval": {
-          "monthly": "Monthly Billing",
-          "yearly": "Yearly Billing",
+          "monthly": "Monthly",
+          "yearly": "Yearly",
           "annual": "Annual",
           "save": "Save {pct}%"
         },
-        "mo": "mo",
-        "yr": "yr",
-        "currentPlanBadge": "Your Plan",
-        "unlimitedOrders": "Unlimited Orders",
-        "upToOrders": "Up to {count} orders/mo",
-        "selectedBtn": "Selected",
-        "selectBtn": "Select Plan",
-        "prioritySupport": "Priority support",
-        "customBranding": "Custom branding & SMS config",
+        "plans": {
+          "title": "Change plan",
+          "subtitle": "Prices are per month. Yearly terms are paid upfront for twelve months.",
+          "currentBadge": "Your plan",
+          "freeForever": "Free, no payment needed",
+          "billedMonthly": "Billed every month",
+          "billedYearly": "Billed {total} once a year",
+          "ordersLine": "{count} orders / month",
+          "productsLine": "{count} products",
+          "pixelsLine": "{count} Meta pixels",
+          "cta": {
+            "current": "Current plan",
+            "upgrade": "Upgrade",
+            "downgrade": "Switch to this plan",
+            "switchToYearly": "Switch to yearly",
+            "switchToMonthly": "Switch to monthly"
+          }
+        },
+        "checkout": {
+          "eyebrow": "Order summary",
+          "emptyTitle": "No plan selected",
+          "emptyDesc": "Pick a plan on the left to see what it costs and how to pay.",
+          "monthlyTerm": "Monthly term",
+          "yearlyTerm": "Yearly term, paid upfront",
+          "unitLine": "{price} DA x {months} month(s)",
+          "listLine": "Instead of {price} DA month by month",
+          "total": "Total to transfer",
+          "termNote": "Covers {start} to {end}. Days left on your current term are kept.",
+          "methodLabel": "How are you paying?",
+          "soon": "Soon",
+          "copy": "Copy",
+          "eurNote": "Indicative conversion at 1 EUR = {rate} DA. The amount owed is the DZD total above.",
+          "instructions": {
+            "dzd": "Transfer exactly {amount} to the account below, then upload the receipt.",
+            "eur": "Transfer about {amount} to the account below, then upload the receipt."
+          },
+          "fileHint": "PNG, JPG, WEBP or PDF, up to 10 MB",
+          "submit": "Submit {amount} for review",
+          "submitSuccess": "Payment submitted. Our team reviews receipts within one business day and your plan updates automatically once approved.",
+          "blocked": {
+            "pending": "You already have a payment awaiting review.",
+            "noMethod": "Choose a payment method to continue.",
+            "noProof": "Attach your transfer receipt to continue."
+          },
+          "downgradeToFree": "The free plan takes no payment. Your paid term runs to {date} — turn off automatic renewal and your store moves to the free limits then.",
+          "turnOffRenewal": "Turn off automatic renewal",
+          "renewalAlreadyOff": "Automatic renewal is already off"
+        },
         "payment": {
           "methods": {
             "myfin": "MyFin",
             "paysera": "Paysera",
             "baridimob": "BaridiMob",
             "ccp": "CCP / Poste",
-            "chargily": "Chargily (CIB/Edahabia)"
+            "chargily": "Chargily"
           },
-          "emptyTitle": "Checkout",
-          "emptyDesc": "Select a plan from the list to start your upgrade.",
-          "instructions": {
-            "myfin": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our MyFin account:\nIBAN: BG98MYFI123123123\nName: MySaaS LLC",
-            "paysera": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our Paysera account:\nEmail: payments{'@'}mysaas.com\nName: MySaaS LLC",
-            "baridimob": "Please send {amount} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +XX X XXX XXXX",
-            "ccp": "Please deposit {amount} DZD to our CCP account:\nAccount: 12345678 99\nName: MySaaS LLC"
+          "account": {
+            "rip": "RIP",
+            "ccp": "CCP account",
+            "iban": "IBAN",
+            "email": "Email",
+            "holder": "Account holder"
           },
-          "title": "Complete your upgrade",
-          "subtitle": "Select a payment method to proceed.",
-          "totalLabel": "Total to pay",
-          "uploadProof": "Upload Receipt/Proof",
-          "uploadSuccess": "Receipt attached successfully",
-          "chargilyNote": "Automatic payment gateway integration is currently unavailable. Please choose another manual method like CCP or BaridiMob in the meantime.",
-          "submitBtn": "Confirm & Submit Payment",
-          "submitting": "Submitting…",
-          "success": "Payment submitted! Our team will review your receipt and activate your subscription.",
+          "uploadProof": "Transfer receipt",
+          "uploadSuccess": "Receipt attached",
           "errors": {
-            "proofRequired": "Please attach a payment proof.",
-            "submitFailed": "Failed to submit payment. Please try again."
+            "uploadFailed": "Upload failed. Please try another file.",
+            "submitFailed": "Could not submit your payment. Please try again."
           }
         },
         "history": {
           "title": "Payment history",
-          "entries": "entries",
+          "count": "{count} payment(s)",
+          "empty": "No payment recorded yet.",
+          "viewProof": "View",
+          "status": {
+            "pending": "Pending",
+            "paid": "Paid",
+            "rejected": "Rejected",
+            "imported": "Imported"
+          },
           "col": {
             "date": "Date",
             "plan": "Plan",
+            "period": "Covers",
             "amount": "Amount",
             "method": "Method",
             "status": "Status",
-            "proof": "Proof"
-          },
-          "viewProof": "View"
-        },
-        "common": {
-          "uploading": "Uploading...",
-          "clickToUpload": "Click to upload receipt"
+            "proof": "Receipt"
+          }
         }
       },
       "products": {
@@ -3781,7 +3882,8 @@
               "attempt_3": "3rd Attempt",
               "switched_off": "Switched Off",
               "whatsapp_sms_sent": "WhatsApp SMS Sent",
-              "whatsapp_link_confirmed": "WhatsApp Link Confirmed"
+              "whatsapp_link_confirmed": "WhatsApp Link Confirmed",
+              "whatsapp_declined": "Declined on WhatsApp"
             },
             "internalNotesPlaceholder": "Add private remarks about this order...",
             "currency": "Currency",

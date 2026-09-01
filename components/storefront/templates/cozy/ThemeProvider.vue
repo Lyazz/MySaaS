@@ -80,6 +80,17 @@ onMounted(() => {
 
   --ed-radius: 2px;
 
+  /* Shared LocaleSwitcher — printed on the same paper stock */
+  --ls-surface: var(--ed-card);
+  --ls-border: var(--ed-rule-strong);
+  --ls-shadow: 0 18px 40px -18px rgba(38, 32, 25, 0.32);
+  --ls-radius: var(--ed-radius);
+  --ls-text: var(--ed-ink-2);
+  --ls-text-strong: var(--ed-ink);
+  --ls-hover-bg: var(--ed-card-2);
+  --ls-accent: var(--ed-accent-deep);
+  --ls-accent-soft: var(--ed-accent-wash);
+
   background-color: var(--ed-paper);
   color: var(--ed-ink-2);
   font-family: var(--ed-serif);

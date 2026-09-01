@@ -62,6 +62,17 @@ onMounted(() => {
 
 .nour-theme {
   -webkit-font-smoothing: antialiased;
+
+  /* Shared LocaleSwitcher — ivory card, gold hairline, rose accent */
+  --ls-surface: #fffdf8;
+  --ls-border: rgba(201, 162, 75, 0.38);
+  --ls-shadow: 0 16px 38px -16px rgba(46, 30, 32, 0.24);
+  --ls-radius: 4px;
+  --ls-text: #6b5658;
+  --ls-text-strong: #2e1e20;
+  --ls-hover-bg: rgba(201, 162, 75, 0.12);
+  --ls-accent: color-mix(in srgb, var(--brand) 62%, #2e1e20);
+  --ls-accent-soft: rgba(122, 59, 70, 0.1);
 }
 
 .nour-theme ::selection {

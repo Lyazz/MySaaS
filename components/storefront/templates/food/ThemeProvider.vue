@@ -30,7 +30,16 @@ const brandColor = useStorefrontTemplateBrandColor('food')
       '--brand': primaryColor,
       '--brand-rgb': hexToRgb(primaryColor),
       fontFamily: "'Nunito', sans-serif",
-      '--font-serif': "'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif"
+      '--font-serif': "'Playfair Display', Georgia, Cambria, 'Times New Roman', Times, serif",
+      // Shared LocaleSwitcher — warm, rounded to match the food chrome
+      '--ls-surface': '#ffffff',
+      '--ls-border': 'rgba(28,25,23,0.12)',
+      '--ls-shadow': '0 16px 38px -14px rgba(28,25,23,0.22)',
+      '--ls-radius': '14px',
+      '--ls-text': '#57534e',
+      '--ls-text-strong': '#1c1917',
+      '--ls-hover-bg': 'rgba(28,25,23,0.05)',
+      '--ls-accent': 'color-mix(in srgb, var(--brand) 58%, #1c1917)'
     } as Record<string, string>
 
   return result

@@ -2,10 +2,10 @@
   <div class="max-w-5xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-bold text-primary">
           {{ t('admin.pages.orders.blacklist.title', 'Order blacklist') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ t('admin.pages.orders.blacklist.subtitle', 'Phone numbers, IP addresses and customers blocked from checking out.') }}
         </p>
       </div>
@@ -62,11 +62,11 @@
 
     <!-- Empty -->
     <div v-else-if="entries.length === 0" class="ui-card p-12 text-center">
-      <Icon name="lucide:shield-check" class="mx-auto h-12 w-12" style="color: var(--text-muted)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:shield-check" class="mx-auto h-12 w-12 text-muted" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.orders.blacklist.empty.title', 'No blacklisted entries') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ t('admin.pages.orders.blacklist.empty.hint', 'Phone numbers, IPs, and customers you block will show up here.') }}
       </p>
     </div>
@@ -89,13 +89,13 @@
               <td class="ui-td whitespace-nowrap">
                 <span class="ui-badge">{{ t(`admin.pages.orders.blacklist.types.${entry.type}`, entry.type) }}</span>
               </td>
-              <td class="ui-td whitespace-nowrap" style="color: var(--text-primary)">
+              <td class="ui-td whitespace-nowrap text-primary">
                 {{ entry.type === 'CUSTOMER' ? (entry.customer?.name || entry.value) : entry.value }}
               </td>
-              <td class="ui-td text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td text-sm text-secondary">
                 {{ entry.reason || '—' }}
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 {{ formatDate(entry.createdAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-end">

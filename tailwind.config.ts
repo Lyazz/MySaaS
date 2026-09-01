@@ -12,6 +12,16 @@ export default {
     ],
     theme: {
         extend: {
+            /*
+             * The admin runs denser than Tailwind's default scale starts, so it
+             * had grown 16 one-off `text-[9.5px]`-style sizes. These two steps
+             * are what was actually missing below `text-xs`; everything else
+             * maps onto the stock scale. See docs/design-system.md.
+             */
+            fontSize: {
+                micro: ['10px', { lineHeight: '14px' }],
+                mini: ['11px', { lineHeight: '16px' }],
+            },
             fontFamily: {
                 sans: ['DM Sans', 'system-ui', 'sans-serif'],
                 display: ['Outfit', 'system-ui', 'sans-serif'],

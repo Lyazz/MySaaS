@@ -1,27 +1,27 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center p-4 font-sans" style="background: var(--admin-content-bg);">
+  <div class="min-h-screen flex items-center justify-center p-4 font-sans bg-admin">
     <div class="w-full max-w-md">
       <div class="text-center mb-8">
-        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg" style="background: var(--brand)">
-          <Icon name="lucide:shield-check" class="h-8 w-8" style="color: var(--brand-contrast)" />
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4 shadow-lg bg-brand">
+          <Icon name="lucide:shield-check" class="h-8 w-8 text-brand-contrast" />
         </div>
-        <h1 class="text-3xl font-bold mb-2" style="color: var(--text-primary)">
+        <h1 class="text-3xl font-bold mb-2 text-primary">
           {{ t('superAdmin.login.title') }}
         </h1>
-        <p style="color: var(--text-secondary)">
+        <p class="text-secondary">
           {{ t('superAdmin.login.subtitle') }}
         </p>
       </div>
 
-      <div class="rounded-xl p-8 shadow-xl" style="background: var(--surface-1); border: 1px solid var(--surface-border);">
+      <div class="rounded-xl p-8 shadow-xl surface-1 border border-line">
         <!-- Error Alert -->
         <div
           v-if="error"
           class="mb-6 p-4 rounded-lg flex items-start gap-3"
           style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);"
         >
-          <Icon name="lucide:alert-circle" class="h-5 w-5 flex-shrink-0 mt-0.5" style="color: #f87171" />
-          <p class="text-sm" style="color: #f87171">
+          <Icon name="lucide:alert-circle" class="h-5 w-5 flex-shrink-0 mt-0.5 text-danger" />
+          <p class="text-sm text-danger">
             {{ error }}
           </p>
         </div>
@@ -31,7 +31,7 @@
           @submit.prevent="handleLogin"
         >
           <div>
-            <label class="block text-sm font-medium mb-1.5" style="color: var(--text-secondary)">{{ t('superAdmin.login.form.email.label') }}</label>
+            <label class="block text-sm font-medium mb-1.5 text-secondary">{{ t('superAdmin.login.form.email.label') }}</label>
             <div class="relative">
               <input
                 v-model="email"
@@ -40,12 +40,12 @@
                 class="ui-input ps-10"
                 :placeholder="t('superAdmin.login.form.email.placeholder')"
               >
-              <Icon name="lucide:mail" class="h-5 w-5 absolute start-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary)" />
+              <Icon name="lucide:mail" class="h-5 w-5 absolute start-3 top-1/2 -translate-y-1/2 text-tertiary" />
             </div>
           </div>
 
           <div>
-            <label class="block text-sm font-medium mb-1.5" style="color: var(--text-secondary)">{{ t('superAdmin.login.form.password.label') }}</label>
+            <label class="block text-sm font-medium mb-1.5 text-secondary">{{ t('superAdmin.login.form.password.label') }}</label>
             <div class="relative">
               <input
                 v-model="password"
@@ -54,7 +54,7 @@
                 class="ui-input ps-10"
                 placeholder="••••••••"
               >
-              <Icon name="lucide:lock" class="h-5 w-5 absolute start-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary)" />
+              <Icon name="lucide:lock" class="h-5 w-5 absolute start-3 top-1/2 -translate-y-1/2 text-tertiary" />
             </div>
           </div>
 
@@ -68,12 +68,12 @@
           </button>
         </form>
 
-        <div class="mt-8 pt-6 text-center" style="border-top: 1px solid var(--surface-border);">
+        <div class="mt-8 pt-6 text-center border-t border-line">
           <NuxtLink
-            to="/"
-            class="inline-flex items-center text-sm hover:text-lime-600 font-medium transition-colors"
-            style="color: var(--text-secondary)"
-          >
+ to="/"
+ class="inline-flex items-center text-sm hover:text-lime-600 font-medium transition-colors text-secondary"
+ 
+>
             <Icon name="lucide:arrow-left" class="h-4 w-4 me-1.5" />
             {{ t('superAdmin.login.backToSite') }}
           </NuxtLink>

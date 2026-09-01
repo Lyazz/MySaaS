@@ -20,7 +20,17 @@ const storeStyle = computed(() => {
   return {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Anton', sans-serif"
+    fontFamily: "'Anton', sans-serif",
+    // Shared LocaleSwitcher — hard-edged, high-contrast to match street
+    '--ls-surface': '#ffffff',
+    '--ls-border': '#000000',
+    '--ls-shadow': '4px 4px 0 rgba(0,0,0,1)',
+    '--ls-radius': '0px',
+    '--ls-text': '#171717',
+    '--ls-text-strong': '#000000',
+    '--ls-hover-bg': 'rgba(0,0,0,0.06)',
+    '--ls-accent': '#000000',
+    '--ls-accent-soft': 'rgba(0,0,0,0.08)'
   } as Record<string, string>
 })
 

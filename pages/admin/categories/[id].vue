@@ -8,16 +8,16 @@
       <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink
-            to="/admin/categories"
-            class="hover:[color:var(--brand)]" style="color: var(--text-secondary)"
-          >
+ to="/admin/categories"
+ class="hover:[color:var(--brand)] text-secondary" 
+>
             {{ t('admin.nav.categories') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ms-1" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-tertiary" />
+            <span class="ms-1 text-tertiary">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -29,7 +29,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.categories.edit.loading') }}
       </p>
     </div>
@@ -38,44 +38,44 @@
       <!-- Header -->
       <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+          <h2 class="text-2xl font-bold text-primary">
             {{ t('admin.pages.categories.edit.title') }}
           </h2>
-          <p class="mt-1" style="color: var(--text-secondary)">
+          <p class="mt-1 text-secondary">
             {{ t('admin.pages.categories.edit.subtitle') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center space-x-2 p-1.5 rounded-lg rtl:space-x-reverse" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
-            <span class="text-xs font-medium px-2" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.links.label') }}:</span>
+          <div class="flex items-center space-x-2 p-1.5 rounded-lg rtl:space-x-reverse surface-2 border border-line">
+            <span class="text-xs font-medium px-2 text-tertiary">{{ t('admin.pages.categories.edit.links.label') }}:</span>
             <a
               :href="categoryUrl"
               target="_blank"
-              class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded"
+              class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-lg"
               :title="t('admin.pages.categories.edit.links.openCategory')"
             >
               <Icon name="lucide:external-link" class="w-4 h-4" />
             </a>
             <button
-              class="p-1 rounded" style="color: var(--text-tertiary)"
-              :title="t('admin.pages.categories.edit.links.copyCategory')"
-              @click="copyUrl(categoryUrl)"
-            >
+ class="p-1 rounded-lg text-tertiary" 
+ :title="t('admin.pages.categories.edit.links.copyCategory')"
+ @click="copyUrl(categoryUrl)"
+>
               <Icon name="lucide:copy" class="w-4 h-4" />
             </button>
           </div>
 
           <NuxtLink
-            to="/admin/categories"
-            class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
-          >
+ to="/admin/categories"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary surface-1" 
+>
             {{ t('admin.common.cancel') }}
           </NuxtLink>
           <button
             form="category-edit-form"
             type="submit"
             :disabled="submitting || loading"
-            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+            class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
           >
             <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
             {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}
@@ -146,7 +146,7 @@
 
         <div
           v-if="form.visibility === 'UNLISTED'"
-          class="flex items-start gap-2 rounded-md p-3 text-sm"
+          class="flex items-start gap-2 rounded-lg p-3 text-sm"
           style="background: color-mix(in srgb, var(--warning, #d97706) 12%, transparent); color: var(--text-primary)"
         >
           <Icon name="lucide:eye-off" class="w-4 h-4 mt-0.5 shrink-0" />
@@ -155,14 +155,14 @@
 
         <div
           v-if="errorMessage"
-          class="p-4 bg-red-50 border border-red-200 rounded-md"
+          class="p-4 bg-red-50 border border-red-200 rounded-lg"
         >
           <p class="text-sm text-red-800">
             {{ errorMessage }}
           </p>
         </div>
 
-        <div class="flex justify-between items-center pt-4" style="border-top: 1px solid var(--surface-border)">
+        <div class="flex justify-between items-center pt-4 border-t border-line">
           <button
             type="button"
             class="text-red-600 hover:text-red-700 text-sm font-medium"
@@ -172,15 +172,15 @@
           </button>
           <div class="space-x-3 rtl:space-x-reverse">
             <NuxtLink
-              to="/admin/categories"
-              class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
-            >
+ to="/admin/categories"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary surface-1" 
+>
               {{ t('admin.common.cancel') }}
             </NuxtLink>
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+              class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
             >
               <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
               {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}

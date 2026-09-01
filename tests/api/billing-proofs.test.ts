@@ -5,6 +5,7 @@ import jwt from 'jsonwebtoken'
 import crypto from 'crypto'
 import { promises as fs } from 'fs'
 import path from 'path'
+import { getPlanByCode, quotePlan } from '../../shared/pricing/plans'
 
 describe('Billing proof uploads (private)', async () => {
     // Ensure local fallback works in test runs even if S3/MinIO isn't available.
@@ -115,11 +116,12 @@ describe('Billing proof uploads (private)', async () => {
                 Authorization: `Bearer ${ownerAToken}`,
                 'Content-Type': 'application/json'
             },
+            // A paid plan: 'basic' is free, and submitting a payment for it is
+            // now rejected rather than writing a made-up amount to the ledger.
             body: JSON.stringify({
-                planCode: 'basic',
+                planCode: 'merchant',
                 interval: 'month',
                 method: 'CCP',
-                amountDzd: 1000,
                 proofUrl: uploadBody.url
             })
         })
@@ -128,6 +130,8 @@ describe('Billing proof uploads (private)', async () => {
         expect(submitRes.status).toBe(200)
         expect(payment).toHaveProperty('id')
         expect(payment).toHaveProperty('proofUrl')
+        // Priced from the catalogue, not from the request body.
+        expect(payment.amountDzd).toBe(quotePlan(getPlanByCode('merchant')!, 'month').totalDzd)
         paymentId = payment.id
     })
 

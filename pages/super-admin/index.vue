@@ -38,16 +38,16 @@
       <div class="ui-card overflow-hidden">
         <div class="ui-card-header flex items-center justify-between">
           <h3
-            class="text-base font-semibold"
-            style="color: var(--text-primary)"
-          >
+ class="text-base font-semibold text-primary"
+ 
+>
             {{ t('superAdmin.dashboard.recentActivity.title') }}
           </h3>
           <NuxtLink
-            to="/super-admin/audit-logs"
-            class="text-sm font-medium hover:underline"
-            style="color: var(--brand)"
-          >
+ to="/super-admin/audit-logs"
+ class="text-sm font-medium hover:underline text-brand"
+ 
+>
             {{ t('superAdmin.dashboard.recentActivity.viewAll') }}
           </NuxtLink>
         </div>
@@ -62,10 +62,10 @@
           :title="t('superAdmin.dashboard.recentActivity.empty')"
         />
         <div
-          v-else
-          class="divide-y"
-          style="border-color: var(--surface-border)"
-        >
+ v-else
+ class="divide-y border-line"
+ 
+>
           <div
             v-for="log in recentLogs"
             :key="log.id"
@@ -85,21 +85,21 @@
             </div>
             <div class="min-w-0 flex-1">
               <p
-                class="text-sm font-medium"
-                style="color: var(--text-primary)"
-              >
+ class="text-sm font-medium text-primary"
+ 
+>
                 {{ formatAction(log.action) }}
               </p>
               <p
-                class="truncate text-sm"
-                style="color: var(--text-secondary)"
-              >
+ class="truncate text-sm text-secondary"
+ 
+>
                 {{ log.details }}
               </p>
               <p
-                class="mt-1 text-xs"
-                style="color: var(--text-tertiary)"
-              >
+ class="mt-1 text-xs text-tertiary"
+ 
+>
                 {{ formatDate(log.createdAt) }}
               </p>
             </div>
@@ -111,22 +111,22 @@
       <div class="ui-card overflow-hidden">
         <div class="ui-card-header">
           <h3
-            class="text-base font-semibold"
-            style="color: var(--text-primary)"
-          >
+ class="text-base font-semibold text-primary"
+ 
+>
             {{ t('superAdmin.dashboard.quickActions.title') }}
           </h3>
         </div>
         <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
           <NuxtLink
-            v-for="action in quickActions"
-            :key="action.to"
-            :to="action.to"
-            class="group flex items-center gap-4 rounded-xl p-4 transition-all"
-            style="border: 1px solid var(--surface-border); background: var(--surface-2)"
-            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--surface-border-hover)' }"
-            @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--surface-border)' }"
-          >
+ v-for="action in quickActions"
+ :key="action.to"
+ :to="action.to"
+ class="group flex items-center gap-4 rounded-xl p-4 transition-all border border-line surface-2"
+ 
+ @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--surface-border-hover)' }"
+ @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--surface-border)' }"
+>
             <div
               class="ui-icon-tile"
               :class="`ui-icon-tile--${action.color}`"
@@ -138,15 +138,15 @@
             </div>
             <div class="min-w-0">
               <p
-                class="font-medium"
-                style="color: var(--text-primary)"
-              >
+ class="font-medium text-primary"
+ 
+>
                 {{ action.title }}
               </p>
               <p
-                class="mt-0.5 text-xs"
-                style="color: var(--text-tertiary)"
-              >
+ class="mt-0.5 text-xs text-tertiary"
+ 
+>
                 {{ action.subtitle }}
               </p>
             </div>

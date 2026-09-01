@@ -5,29 +5,29 @@
   >
     <summary class="delivery-probe__summary">
       <Icon
-        name="lucide:search-check"
-        class="h-4 w-4 shrink-0"
-        style="color: var(--text-tertiary)"
-      />
+ name="lucide:search-check"
+ class="h-4 w-4 shrink-0 text-tertiary"
+ 
+ />
       <span class="flex-1">
         <span
-          class="block text-[13px] font-semibold"
-          style="color: var(--text-primary)"
-        >
+ class="block text-sm font-semibold text-primary"
+ 
+>
           {{ t('admin.pages.delivery.probe.title') }}
         </span>
         <span
-          class="block text-xs"
-          style="color: var(--text-tertiary)"
-        >
+ class="block text-xs text-tertiary"
+ 
+>
           {{ t('admin.pages.delivery.probe.hint') }}
         </span>
       </span>
       <Icon
-        name="lucide:chevron-down"
-        class="delivery-probe__chevron h-4 w-4"
-        style="color: var(--text-tertiary)"
-      />
+ name="lucide:chevron-down"
+ class="delivery-probe__chevron h-4 w-4 text-tertiary"
+ 
+ />
     </summary>
 
     <div class="delivery-probe__body">
@@ -107,10 +107,10 @@
       </div>
 
       <p
-        v-if="error"
-        class="mt-2 text-xs"
-        style="color: var(--status-cancelled-text)"
-      >
+ v-if="error"
+ class="mt-2 text-xs text-danger"
+ 
+>
         {{ error }}
       </p>
     </div>

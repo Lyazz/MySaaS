@@ -31,15 +31,15 @@
             />
             <div class="min-w-0 flex-1">
               <h3
-                class="truncate text-[15px] font-semibold"
-                style="color: var(--text-primary)"
-              >
+ class="truncate text-base font-semibold text-primary"
+ 
+>
                 {{ selectedProvider.name }}
               </h3>
               <p
-                class="mt-0.5 text-xs"
-                style="color: var(--text-tertiary)"
-              >
+ class="mt-0.5 text-xs text-tertiary"
+ 
+>
                 {{
                   selectedProvider.offered
                     ? t('admin.pages.delivery.workspace.offered')
@@ -100,20 +100,20 @@
           class="delivery-workspace__empty"
         >
           <Icon
-            name="lucide:truck"
-            class="h-7 w-7"
-            style="color: var(--text-muted)"
-          />
+ name="lucide:truck"
+ class="h-7 w-7 text-muted"
+ 
+ />
           <p
-            class="text-sm font-medium"
-            style="color: var(--text-secondary)"
-          >
+ class="text-sm font-medium text-secondary"
+ 
+>
             {{ t('admin.pages.delivery.workspace.emptyTitle') }}
           </p>
           <p
-            class="max-w-xs text-xs leading-relaxed"
-            style="color: var(--text-tertiary)"
-          >
+ class="max-w-xs text-xs leading-relaxed text-tertiary"
+ 
+>
             {{ t('admin.pages.delivery.workspace.emptyHint') }}
           </p>
         </div>

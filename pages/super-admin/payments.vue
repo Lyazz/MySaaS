@@ -47,7 +47,7 @@
       <!-- Table -->
       <div class="ui-card overflow-hidden">
         <div class="ui-card-header flex items-center justify-between">
-          <h2 class="font-semibold text-sm" style="color: var(--text-primary)">
+          <h2 class="font-semibold text-sm text-primary">
             {{ t('superAdmin.pendingPayments.table.title', 'Submitted proofs awaiting review') }}
           </h2>
           <span v-if="payments.length > 0" class="ui-badge ui-badge--amber">
@@ -69,7 +69,7 @@
         <!-- Table -->
         <div v-else class="overflow-x-auto">
           <table class="ui-table">
-            <thead class="ui-thead border-b border-slate-200">
+            <thead class="ui-thead border-b border-line">
               <tr>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.tenant', 'Tenant') }}</th>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.plan', 'Plan') }}</th>
@@ -93,29 +93,29 @@
                     :to="`/super-admin/tenants/${p.tenant.id}/payments`"
                     class="group flex items-center gap-2"
                   >
-                    <div class="w-7 h-7 rounded-md bg-lime-100 flex items-center justify-center shrink-0">
+                    <div class="w-7 h-7 rounded-lg bg-lime-100 flex items-center justify-center shrink-0">
                       <span class="text-xs font-bold text-lime-700">{{ p.tenant.name?.charAt(0).toUpperCase() }}</span>
                     </div>
                     <div>
-                      <div class="font-semibold text-slate-800 text-sm group-hover:text-lime-700 transition-colors">{{ p.tenant.name }}</div>
-                      <div class="text-xs text-slate-400">{{ p.tenant.slug }}</div>
+                      <div class="font-semibold text-primary text-sm group-hover:text-lime-700 transition-colors">{{ p.tenant.name }}</div>
+                      <div class="text-xs text-tertiary">{{ p.tenant.slug }}</div>
                     </div>
                   </NuxtLink>
                 </td>
 
                 <!-- Plan -->
                 <td class="ui-td">
-                  <div class="font-semibold text-slate-700 text-sm capitalize">{{ p.planCode }}</div>
-                  <div class="text-xs text-slate-400">{{ p.interval }}</div>
+                  <div class="font-semibold text-secondary text-sm capitalize">{{ p.planCode }}</div>
+                  <div class="text-xs text-tertiary">{{ p.interval }}</div>
                 </td>
 
                 <!-- Amount -->
-                <td class="ui-td text-sm font-semibold text-slate-700 whitespace-nowrap">
+                <td class="ui-td text-sm font-semibold text-secondary whitespace-nowrap">
                   {{ formatMoney(p.amountDzd) }}
                 </td>
 
                 <!-- Date -->
-                <td class="ui-td text-sm text-slate-500 whitespace-nowrap">
+                <td class="ui-td text-sm text-secondary whitespace-nowrap">
                   {{ formatDateTime(p.createdAt) }}
                 </td>
 
@@ -140,14 +140,14 @@
                     <Icon name="lucide:external-link" class="h-3.5 w-3.5" />
                     {{ t('superAdmin.paymentsPage.history.proof.open', 'Open') }}
                   </button>
-                  <span v-else class="text-slate-300 text-xs italic">{{ t('superAdmin.pendingPayments.noProof', 'No file') }}</span>
+                  <span v-else class="text-tertiary text-xs italic">{{ t('superAdmin.pendingPayments.noProof', 'No file') }}</span>
                 </td>
 
                 <!-- Notes -->
-                <td class="ui-td text-sm text-slate-500 max-w-[160px]">
+                <td class="ui-td text-sm text-secondary max-w-[160px]">
                   <span v-if="p.notes" class="truncate block" :title="p.notes">{{ p.notes }}</span>
-                  <span v-else-if="p.externalReference" class="text-xs font-mono text-slate-400">{{ p.externalReference }}</span>
-                  <span v-else class="text-slate-300">—</span>
+                  <span v-else-if="p.externalReference" class="text-xs font-mono text-tertiary">{{ p.externalReference }}</span>
+                  <span v-else class="text-tertiary">—</span>
                 </td>
 
                 <!-- Actions -->

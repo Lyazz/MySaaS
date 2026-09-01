@@ -44,6 +44,8 @@ import activationRouter from './modules/activation/routes';
 import activationSuperAdminRouter from './modules/activation/superadmin.routes';
 import tenantMigrationRouter from './modules/tenant-migration/routes';
 import notificationsRouter from './modules/notifications/routes';
+import whatsappWebhookRouter from './modules/whatsapp/webhook.routes';
+import whatsappRouter from './modules/whatsapp/routes';
 
 const router = Router();
 
@@ -62,6 +64,11 @@ router.use('/store', publicHomepageSettingsRouter);
 router.use('/store', publicContactInfosRouter);
 router.use('/pixel', integrationsPublicRouter);
 router.use('/activation', activationRouter);
+
+// Meta calls this one: no tenant in the Host header, no session. The tenant is
+// resolved from the number the event was delivered to, and the request is
+// authenticated by the app-secret signature inside the controller.
+router.use('/webhooks/whatsapp', whatsappWebhookRouter);
 
 // Admin Modules
 // Note: These modules have internal RBAC checks, but we could wrap them here too.
@@ -91,6 +98,7 @@ router.use('/admin/homepage-settings', homepageSettingsRouter);
 router.use('/upload', uploadRouter);
 router.use('/', deliveryRouter);
 router.use('/admin/integrations', integrationsRouter);
+router.use('/admin/whatsapp', whatsappRouter);
 router.use('/admin/meta-pixels', metaPixelsRouter);
 router.use('/admin/users', usersRouter);
 router.use('/admin/staff-roles', staffRolesRouter);

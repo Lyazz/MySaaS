@@ -2,21 +2,21 @@
   <section class="delivery-note">
     <header class="flex items-start gap-2.5">
       <Icon
-        name="lucide:webhook"
-        class="mt-0.5 h-4 w-4 shrink-0"
-        style="color: var(--text-tertiary)"
-      />
+ name="lucide:webhook"
+ class="mt-0.5 h-4 w-4 shrink-0 text-tertiary"
+ 
+ />
       <div>
         <h4
-          class="text-[13px] font-semibold"
-          style="color: var(--text-primary)"
-        >
+ class="text-sm font-semibold text-primary"
+ 
+>
           {{ t('admin.pages.delivery.yalidine.title') }}
         </h4>
         <p
-          class="mt-0.5 text-xs leading-relaxed"
-          style="color: var(--text-tertiary)"
-        >
+ class="mt-0.5 text-xs leading-relaxed text-tertiary"
+ 
+>
           {{ t('admin.pages.delivery.yalidine.hint') }}
         </p>
       </div>
@@ -50,23 +50,23 @@
         </button>
       </div>
       <p
-        class="mt-1.5 text-[11px] leading-relaxed"
-        style="color: var(--text-muted)"
-      >
+ class="mt-1.5 text-mini leading-relaxed text-muted"
+ 
+>
         {{ t('admin.pages.delivery.yalidine.urlHint') }}
       </p>
       <p
-        v-if="isLocalOrigin"
-        class="mt-1 text-[11px]"
-        style="color: var(--status-pending-text)"
-      >
+ v-if="isLocalOrigin"
+ class="mt-1 text-mini text-warning"
+ 
+>
         {{ t('admin.pages.delivery.yalidine.localhostNotice') }}
       </p>
       <p
-        v-if="copyError"
-        class="mt-1 text-[11px]"
-        style="color: var(--status-cancelled-text)"
-      >
+ v-if="copyError"
+ class="mt-1 text-mini text-danger"
+ 
+>
         {{ t('admin.pages.delivery.yalidine.copyFailed') }}
       </p>
     </div>
@@ -77,18 +77,18 @@
           {{ t('admin.pages.delivery.yalidine.stepsTitle') }}
         </p>
         <ol
-          class="mt-1.5 space-y-1 text-xs leading-relaxed"
-          style="color: var(--text-secondary)"
-        >
+ class="mt-1.5 space-y-1 text-xs leading-relaxed text-secondary"
+ 
+>
           <li
             v-for="(step, i) in steps"
             :key="i"
             class="flex gap-2"
           >
             <span
-              class="font-mono-nums shrink-0"
-              style="color: var(--text-muted)"
-            >{{ i + 1 }}</span>
+ class="font-mono-nums shrink-0 text-muted"
+ 
+>{{ i + 1 }}</span>
             <span>{{ step }}</span>
           </li>
         </ol>
@@ -99,11 +99,11 @@
         </p>
         <ul class="mt-1.5 flex flex-wrap gap-1.5">
           <li
-            v-for="event in WEBHOOK_EVENTS"
-            :key="event"
-            class="rounded-md px-1.5 py-0.5 font-mono text-[11px]"
-            style="background: var(--surface-3); color: var(--text-secondary)"
-          >
+ v-for="event in WEBHOOK_EVENTS"
+ :key="event"
+ class="rounded-lg px-1.5 py-0.5 font-mono text-mini surface-3 text-secondary"
+ 
+>
             {{ event }}
           </li>
         </ul>

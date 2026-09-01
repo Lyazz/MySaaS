@@ -2,6 +2,7 @@ import prisma from '../../lib/prisma'
 import { RETRY_CONFLICT } from '../../lib/conflict-codes'
 import { Prisma, type ShipmentProvider } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
+import { currentUsageWindow } from '../../../../shared/pricing/billing-period'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
 import { computeClearanceDiscount, type ClearanceDiscountResult } from '../../../../shared/pricing/clearance-pricing'
 import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
@@ -15,6 +16,7 @@ import { DeliveryService } from '../delivery/delivery.service'
 import { maystroOrderStatusToString } from '../delivery/maystro/maystro-status'
 import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
 import { MaystroPickupPointService } from '../delivery/maystro/maystro-pickup-point.service'
+import { MaystroOrderService } from '../delivery/maystro/maystro-order.service'
 import { LoyaltyCheckoutError, LoyaltyCheckoutService } from '../loyalty/loyalty-checkout.service'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
@@ -22,6 +24,7 @@ import { PhoneNormalizationError, PhoneNormalizationService } from '../loyalty/p
 import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
 import { notificationsService } from '../notifications/notifications.service'
 import { BlacklistService } from '../blacklist/blacklist.service'
+import { whatsappService } from '../whatsapp/whatsapp.service'
 
 const telegramService = new TelegramService()
 const cashService = new CashService()
@@ -40,6 +43,15 @@ export class OrderValidationError extends Error {
         this.code = opts?.code
         this.meta = opts?.meta
     }
+}
+
+/** What became of the carrier's parcel when a customer declined their order. */
+export type CarrierCancellation = {
+    /** False when there was nothing at the carrier to cancel. */
+    attempted: boolean
+    ok: boolean
+    provider: string
+    message: string | null
 }
 
 type ShipmentDetailEvent = { code: string | null; description: string | null; details: Prisma.JsonValue | null }
@@ -212,34 +224,12 @@ const computeTotalWithShipping = (itemsTotal: number, shippingAmount: number | n
 const normalizeCustomerPhoneForOrder = (phone: unknown) =>
     phoneNormalization.tryNormalizeAlgerianPhone(phone)?.normalized ?? null
 
-const addUtcMonths = (date: Date, months: number) =>
-    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
 
-const addUtcYears = (date: Date, years: number) =>
-    new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
-
-import crypto from 'crypto'
+import { ensureOrderConfirmationToken } from './order-confirmation-token'
 
 export class OrdersService {
   async generateConfirmationToken(tenantId: string, orderId: string): Promise<string> {
-    const order = await prisma.order.findUnique({
-      where: { tenantId, id: orderId }
-    })
-    if (!order) throw new Error('Order not found')
-
-    if (order.confirmationToken && !order.confirmationTokenUsed) {
-      return order.confirmationToken
-    }
-
-    const token = crypto.randomBytes(32).toString('hex')
-    await prisma.order.update({
-      where: { id: orderId },
-      data: {
-        confirmationToken: token,
-        confirmationTokenUsed: false
-      }
-    })
-    return token
+    return ensureOrderConfirmationToken(tenantId, orderId)
   }
 
   async getOrderByToken(token: string): Promise<any> {
@@ -252,7 +242,7 @@ export class OrdersService {
     return order
   }
 
-  async confirmOrderByToken(token: string): Promise<any> {
+  async confirmOrderByToken(token: string, opts?: { via?: 'link' | 'whatsapp' }): Promise<any> {
     const order = await prisma.order.findUnique({
       where: { confirmationToken: token }
     })
@@ -260,7 +250,8 @@ export class OrdersService {
       throw new Error('INVALID_TOKEN')
     }
 
-    const newNote = `\n[${new Date().toISOString()}] ✅ Order confirmed by customer via secure link`
+    const via = opts?.via === 'whatsapp' ? 'via the WhatsApp button' : 'via secure link'
+    const newNote = `\n[${new Date().toISOString()}] ✅ Order confirmed by customer ${via}`
     const updatedNotes = (order.internalNotes || '') + newNote
 
     const updatedOrder = await prisma.order.update({
@@ -284,6 +275,160 @@ export class OrdersService {
     telegramService.sendOrderNotification(updatedOrder.tenantId, updatedOrder, true).catch(console.error)
 
     return updatedOrder
+  }
+
+  /**
+   * Fire-and-forget WhatsApp confirmation for a freshly created order.
+   *
+   * Storefront orders only: an order the seller keys in themselves usually means
+   * the customer is already on the phone, so that one waits for the button. Only
+   * the tenant's auto-send toggle decides here; the button sends regardless. Nothing about it can fail an order: a missing
+   * WABA, a template still under review or a dead token all resolve to a
+   * logged result, never a rejected checkout.
+   */
+  private sendWhatsAppConfirmation(tenantId: string, orderId: string) {
+    whatsappService
+      .getConfig(tenantId)
+      .then((config) => (config?.autoSendEnabled ? whatsappService.sendOrderConfirmation(tenantId, orderId) : null))
+      .catch((error) => console.error('[Orders] WhatsApp confirmation failed:', error))
+  }
+
+  /**
+   * Everything that happens when the customer themselves confirms an order.
+   *
+   * The secure link and the WhatsApp button both land here, so the parcel is
+   * pushed to the carrier before the token is spent — a carrier that refuses the
+   * shipment leaves the order confirmable again rather than half-confirmed.
+   */
+  async confirmOrderFromCustomer(token: string, opts?: { via?: 'link' | 'whatsapp' }): Promise<any> {
+    const order = await this.getOrderByToken(token)
+
+    if (['MAYSTRO', 'YALIDINE'].includes(String(order.shippingProvider))) {
+      const provider = String(order.shippingProvider) as 'MAYSTRO' | 'YALIDINE'
+      try {
+        await this.delivery.createShipment({
+          tenantId: order.tenantId,
+          provider,
+          orderId: order.id,
+          contactName: order.customerName ?? '',
+          contactPhone: order.customerPhone ?? '',
+          wilayaCode: order.shippingWilayaCode ?? '',
+          communeCode: order.shippingCommuneCode ?? undefined,
+          addressLine1: order.shippingAddressLine1 ?? order.customerAddress ?? '',
+          addressLine2: undefined,
+          notes: order.shippingNotes ?? undefined,
+          deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
+          // The delivery type is derived from the recorded pickup point kind
+          // in DeliveryService — hardcoding 3 here pushed every stop desk
+          // order as a relay and the carrier refused it.
+          metadata: order.shippingPickupPoint
+            ? { pickupPoint: order.shippingPickupPoint }
+            : undefined
+        })
+      } catch (shipmentErr: any) {
+        console.error('Auto shipment failed after customer confirmation:', shipmentErr)
+        throw new OrderValidationError(400, 'Delivery integration failed. Order not confirmed.')
+      }
+    }
+
+    const confirmedOrder = await this.confirmOrderByToken(token, opts)
+
+    try {
+      await notificationsService.emitOrderConfirmed(confirmedOrder.tenantId, confirmedOrder.id)
+    } catch (notifyErr) {
+      console.error('Failed to emit order confirmed notification:', notifyErr)
+    }
+
+    return confirmedOrder
+  }
+
+  /**
+   * The customer declining the order from WhatsApp.
+   *
+   * Only a PENDING order can be declined this way, and the carrier is told
+   * first: a parcel already handed over is the one case the seller has to fix
+   * by hand, so it is written into the notes and pushed to Telegram rather than
+   * swallowed. The token is spent either way, so a second tap changes nothing.
+   */
+  async cancelOrderFromCustomer(token: string): Promise<{ order: any; carrier: CarrierCancellation }> {
+    const order = await this.getOrderByToken(token)
+    if (order.status !== 'PENDING') {
+      throw new OrderValidationError(409, 'Order can no longer be cancelled by the customer')
+    }
+
+    const carrier = await this.cancelCarrierShipmentQuietly(order)
+
+    const stamp = new Date().toISOString()
+    let notes = (order.internalNotes || '') + `\n[${stamp}] ❌ Order cancelled by customer via WhatsApp`
+    if (carrier.attempted) {
+      notes += carrier.ok
+        ? `\n[${stamp}] 📦 ${carrier.provider} shipment cancelled`
+        : `\n[${stamp}] ⚠️ ${carrier.provider} shipment NOT cancelled (${carrier.message}) — cancel it manually`
+    }
+
+    const cancelled = await this.updateStatus(
+      order.tenantId,
+      order.id,
+      'CANCELLED',
+      { userId: null },
+      { callStatus: 'whatsapp_declined', internalNotes: notes }
+    )
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { confirmationTokenUsed: true }
+    })
+
+    telegramService.sendOrderCancelledNotification(order.tenantId, cancelled ?? order, carrier).catch(console.error)
+
+    return { order: cancelled, carrier }
+  }
+
+  /**
+   * Best-effort cancellation on the carrier's side. Never throws: the local
+   * cancellation must happen even when the carrier refuses, and what happened
+   * is reported back so the seller can be told.
+   */
+  private async cancelCarrierShipmentQuietly(order: any): Promise<CarrierCancellation> {
+    const provider = String(order.shippingProvider || '').toUpperCase()
+
+    if (provider === 'MAYSTRO') {
+      const mapping = await prisma.maystroOrderMapping.findUnique({
+        where: { tenantId_localOrderId: { tenantId: order.tenantId, localOrderId: order.id } }
+      })
+      if (!mapping?.maystroOrderId) {
+        return { attempted: false, ok: true, provider, message: null }
+      }
+
+      try {
+        const creds = await getMaystroCredentials(order.tenantId)
+        await new MaystroOrderService().cancelMaystroOrder({
+          tenantId: order.tenantId,
+          apiToken: creds.apiToken,
+          localOrderId: order.id
+        })
+        return { attempted: true, ok: true, provider, message: null }
+      } catch (error: any) {
+        const message = error?.statusMessage || error?.message || 'Maystro cancellation failed'
+        console.error('Maystro cancellation failed after customer decline:', message)
+        return { attempted: true, ok: false, provider, message }
+      }
+    }
+
+    if (provider === 'YALIDINE') {
+      const shipment = await prisma.shipment.findFirst({
+        where: { tenantId: order.tenantId, orderId: order.id },
+        select: { id: true }
+      })
+      if (!shipment) {
+        return { attempted: false, ok: true, provider, message: null }
+      }
+      // Yalidine exposes no cancellation endpoint through the integration, so
+      // the parcel has to be pulled from their dashboard by hand.
+      return { attempted: true, ok: false, provider, message: 'no cancellation API' }
+    }
+
+    return { attempted: false, ok: true, provider: provider || 'SELF', message: null }
   }
     private maystroBordereau = new MaystroBordereauService()
     private maystroPickupPoints = new MaystroPickupPointService()
@@ -2635,15 +2780,15 @@ export class OrdersService {
             const plan = getPlanByCode(subscription.planCode as any) ?? getPlanByCode('basic')
             const limit = plan?.ordersPerMonth ?? 0
 
-            const periodStart = subscription.currentPeriodStart
-            const periodEnd =
-                subscription.currentPeriodEnd ??
-                (subscription.interval === 'year' ? addUtcYears(periodStart, 1) : addUtcMonths(periodStart, 1))
+            // The allowance is quoted per month, so it is counted per month. This
+            // used to span the whole billing period, which handed an annual
+            // tenant one month's worth of orders to last twelve months.
+            const quota = currentUsageWindow(subscription.currentPeriodStart)
 
             const ordersInPeriod = await prisma.order.count({
                 where: {
                     tenantId: input.tenantId,
-                    createdAt: { gte: periodStart, lt: periodEnd }
+                    createdAt: { gte: quota.start, lt: quota.end }
                 }
             })
 
@@ -2957,6 +3102,7 @@ export class OrdersService {
         if (finalOrder) {
             telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
             notificationsService.emitOrderCreated(input.tenantId, finalOrder.id).catch(console.error)
+            this.sendWhatsAppConfirmation(input.tenantId, finalOrder.id)
         }
 
         return {

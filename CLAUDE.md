@@ -31,7 +31,8 @@ npm run generate     # Static site generation (SSG)
 ```bash
 npm run test         # Vitest unit + integration tests
 npm run typecheck    # Vue-tsc type checking
-npm run lint         # ESLint
+npm run lint         # ESLint + admin design-kit scale check
+npm run lint:design  # Design-kit check on its own (see docs/design-system.md)
 ```
 
 ### Mobile
@@ -78,6 +79,16 @@ routes.ts                — Route definitions with middleware
 - `composables/` — Vue 3 composables
 - `layouts/` — Nuxt layouts (admin, storefront, auth)
 - `locales/` — i18n translations (en.json, fr.json, ar.json)
+
+### Admin Design Kit
+The admin, super-admin and their layouts are built from one token-driven kit —
+tokens and `.ui-*` classes in `assets/css/main.css`, components in
+`components/ui/` (auto-imported, no import needed). **Read `docs/design-system.md`
+before touching admin UI.** In short: no raw Tailwind palette classes
+(`text-slate-500`, `bg-white`), no one-off `text-[13px]` sizes, no static inline
+`style` for a colour a utility covers. `npm run lint` enforces all three.
+
+Storefront templates are exempt — each theme owns its own palette on purpose.
 
 ### Storefront Templates
 Located at `components/storefront/templates/<theme>/`. Current themes: activewear, chrono, classic, cozy, cyber, food, minimal, modern, playful, stationnery. Each theme has `Checkout.vue` and `partials/ProductOrderForm.vue` among others.

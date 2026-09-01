@@ -21,9 +21,9 @@
             :placeholder="t('superAdmin.tenants.search.placeholder')"
             class="ui-input ps-10"
           >
-          <Icon name="lucide:search" class="h-4 w-4 absolute start-3 top-1/2 -translate-y-1/2" style="color: var(--text-tertiary)" />
+          <Icon name="lucide:search" class="h-4 w-4 absolute start-3 top-1/2 -translate-y-1/2 text-tertiary" />
         </div>
-        <label class="flex items-center gap-2 text-sm whitespace-nowrap px-1" style="color: var(--text-secondary)">
+        <label class="flex items-center gap-2 text-sm whitespace-nowrap px-1 text-secondary">
           <input v-model="includeArchived" type="checkbox" @change="loadTenants">
           {{ t('superAdmin.tenants.actions.showArchived') }}
         </label>
@@ -42,7 +42,7 @@
         />
         <div v-else class="overflow-x-auto">
         <table class="ui-table">
-          <thead class="ui-thead border-b border-slate-200">
+          <thead class="ui-thead border-b border-line">
             <tr>
               <th class="ui-th">
                 {{ t('superAdmin.tenants.table.name') }}
@@ -76,13 +76,13 @@
               :key="tenant.id"
               class="ui-tr transition-colors"
             >
-              <td class="ui-td text-slate-900 font-medium whitespace-nowrap">
+              <td class="ui-td text-primary font-medium whitespace-nowrap">
                 <NuxtLink :to="`/super-admin/tenants/${tenant.id}`" class="hover:text-lime-700 hover:underline">
                   {{ tenant.name }}
                 </NuxtLink>
               </td>
-              <td class="ui-td text-slate-600">
-                <code class="px-2 py-1 bg-slate-100 rounded text-sm text-slate-700 border border-slate-200">{{ tenant.slug }}</code>
+              <td class="ui-td text-secondary">
+                <code class="px-2 py-1 surface-2 rounded-lg text-sm text-secondary border border-line">{{ tenant.slug }}</code>
               </td>
               <td class="ui-td">
                 <span
@@ -104,16 +104,16 @@
                   {{ t('superAdmin.tenants.status.active') }}
                 </span>
               </td>
-              <td class="ui-td text-slate-600">
+              <td class="ui-td text-secondary">
                 {{ tenant._count?.users || 0 }}
               </td>
-              <td class="ui-td text-slate-600">
+              <td class="ui-td text-secondary">
                 {{ tenant._count?.products || 0 }}
               </td>
-              <td class="ui-td text-slate-600">
+              <td class="ui-td text-secondary">
                 {{ tenant._count?.orders || 0 }}
               </td>
-              <td class="ui-td text-slate-600 text-sm whitespace-nowrap">
+              <td class="ui-td text-secondary text-sm whitespace-nowrap">
                 {{ formatDate(tenant.createdAt) }}
               </td>
               <td class="ui-td">
@@ -202,7 +202,7 @@
       @click.self="closeModal"
     >
       <div class="ui-card w-full max-w-md p-6 shadow-xl">
-        <h2 class="mb-4 text-xl font-bold" style="color: var(--text-primary)">
+        <h2 class="mb-4 text-xl font-bold text-primary">
           {{ showEditModal ? t('superAdmin.tenants.modal.editTitle') : t('superAdmin.tenants.modal.createTitle') }}
         </h2>
 
@@ -236,7 +236,7 @@
               :disabled="!!showEditModal"
               :placeholder="t('superAdmin.tenants.modal.fields.slug.placeholder')"
             />
-            <p class="mt-1 text-xs" style="color: var(--text-tertiary)">
+            <p class="mt-1 text-xs text-tertiary">
               {{ t('superAdmin.tenants.modal.fields.slug.hint', { domain: slugPreview }) }}
             </p>
           </div>

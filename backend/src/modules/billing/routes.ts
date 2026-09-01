@@ -18,6 +18,7 @@ router.get('/subscription', controller.getSubscription.bind(controller))
 router.get('/payments', controller.listPayments.bind(controller))
 router.post('/payments/submit', controller.submitPayment.bind(controller))
 router.post('/payments/simulate', controller.simulatePayment.bind(controller))
+router.post('/subscription/cancel-at-period-end', controller.setCancelAtPeriodEnd.bind(controller))
 
 const proofUpload = multer({
     storage: multer.memoryStorage(),

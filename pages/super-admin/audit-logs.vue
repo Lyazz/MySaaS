@@ -68,7 +68,7 @@
           class="overflow-x-auto"
         >
           <table class="ui-table">
-            <thead class="ui-thead border-b border-slate-200">
+            <thead class="ui-thead border-b border-line">
               <tr>
                 <th class="ui-th">
                   {{ t('superAdmin.auditLogs.table.timestamp') }}
@@ -93,7 +93,7 @@
                 :key="log.id"
                 class="ui-tr transition-colors"
                 >
-                <td class="ui-td text-slate-600 text-sm whitespace-nowrap">
+                <td class="ui-td text-secondary text-sm whitespace-nowrap">
                   {{ formatDateTime(log.createdAt) }}
                 </td>
                 <td class="ui-td">
@@ -105,13 +105,13 @@
                     {{ getActionLabel(log.action) }}
                   </span>
                 </td>
-                <td class="ui-td text-slate-600 text-sm">
+                <td class="ui-td text-secondary text-sm">
                   {{ log.details || '-' }}
                 </td>
-                <td class="ui-td text-slate-500 font-mono text-xs">
+                <td class="ui-td text-secondary font-mono text-xs">
                   {{ log.userId ? log.userId.substring(0, 8) + '...' : '-' }}
                 </td>
-                <td class="ui-td text-slate-500 font-mono text-xs">
+                <td class="ui-td text-secondary font-mono text-xs">
                   {{ log.targetId ? log.targetId.substring(0, 8) + '...' : '-' }}
                 </td>
               </tr>
@@ -121,11 +121,11 @@
 
         <!-- Pagination -->
         <div
-          v-if="filteredLogs.length > 0"
-          class="flex items-center justify-between px-5 py-4"
-          style="border-top: 1px solid var(--surface-border); background: var(--surface-2)"
-        >
-          <p class="text-sm" style="color: var(--text-tertiary)">
+ v-if="filteredLogs.length> 0"
+ class="flex items-center justify-between px-5 py-4 border-t border-line surface-2"
+ 
+>
+          <p class="text-sm text-tertiary">
             {{ t('superAdmin.auditLogs.pagination.showing', { from: (currentPage - 1) * perPage + 1, to: Math.min(currentPage * perPage, filteredLogs.length), total: filteredLogs.length }) }}
           </p>
           <div class="flex gap-2">

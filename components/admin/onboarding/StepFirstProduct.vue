@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-5">
     <div>
-      <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+      <h3 class="text-lg font-semibold text-primary">
         {{ t('admin.pages.onboarding.firstProduct.title') }}
       </h3>
-      <p class="text-sm mt-1" style="color: var(--text-secondary)">
+      <p class="text-sm mt-1 text-secondary">
         {{ t('admin.pages.onboarding.firstProduct.subtitle') }}
       </p>
     </div>
@@ -39,14 +39,14 @@
       <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.firstProduct.imageLabel') }}</label>
       <div class="flex items-center gap-4">
         <div
-          v-if="modelValue.product.imageUrl"
-          class="w-16 h-16 rounded-lg overflow-hidden border shrink-0"
-          style="border-color: var(--surface-border)"
-        >
+ v-if="modelValue.product.imageUrl"
+ class="w-16 h-16 rounded-lg overflow-hidden border shrink-0 border-line"
+ 
+>
           <img :src="modelValue.product.imageUrl" alt="product" class="w-full h-full object-cover">
         </div>
-        <div v-else class="w-16 h-16 rounded-lg flex items-center justify-center shrink-0" style="background: var(--surface-3); border: 1px dashed var(--surface-border)">
-          <Icon name="lucide:image" class="w-6 h-6" style="color: var(--text-muted)" />
+        <div v-else class="w-16 h-16 rounded-lg flex items-center justify-center shrink-0 ui-dropzone surface-3">
+          <Icon name="lucide:image" class="w-6 h-6 text-muted" />
         </div>
         <div>
           <label class="ui-btn ui-btn--secondary px-3 py-1.5 text-sm cursor-pointer inline-flex items-center gap-2">
@@ -55,7 +55,7 @@
             <input type="file" accept="image/*" class="sr-only" @change="onImageChange">
           </label>
         </div>
-        <div v-if="uploading" class="text-sm" style="color: var(--text-secondary)">
+        <div v-if="uploading" class="text-sm text-secondary">
           <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 [border-color:var(--brand)]" />
         </div>
       </div>
@@ -67,7 +67,7 @@
 
     <!-- Skip link -->
     <div class="pt-1">
-      <button type="button" class="text-sm underline" style="color: var(--text-muted)" @click="emit('skip')">
+      <button type="button" class="text-sm underline text-muted" @click="emit('skip')">
         {{ t('admin.pages.onboarding.firstProduct.skipLink') }}
       </button>
     </div>

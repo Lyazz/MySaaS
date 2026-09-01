@@ -17,7 +17,7 @@
           </div>
           <button
             type="button"
-            class="rounded-md p-2 text-tertiary hover:surface-2 hover:text-primary transition-colors"
+            class="rounded-lg p-2 text-tertiary hover:surface-2 hover:text-primary transition-colors"
             @click="handleCancel"
           >
             <Icon name="lucide:x" class="h-5 w-5" />
@@ -25,7 +25,7 @@
         </div>
 
         <div class="p-6 space-y-4 overflow-y-auto flex-1 min-h-0">
-          <div class="rounded-md border border-[var(--surface-border)] surface-2 px-4 py-3">
+          <div class="rounded-lg border border-[var(--surface-border)] surface-2 px-4 py-3">
             <p class="text-xs font-medium uppercase tracking-wide text-tertiary">
               {{ t('admin.pages.cash.modals.delivery.amountLabel') }}
             </p>

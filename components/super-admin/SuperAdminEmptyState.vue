@@ -5,16 +5,16 @@
     </div>
     <div>
       <p
-        class="text-sm font-semibold"
-        style="color: var(--text-primary)"
-      >
+ class="text-sm font-semibold text-primary"
+ 
+>
         {{ title }}
       </p>
       <p
-        v-if="subtitle"
-        class="mt-1 text-sm"
-        style="color: var(--text-tertiary)"
-      >
+ v-if="subtitle"
+ class="mt-1 text-sm text-tertiary"
+ 
+>
         {{ subtitle }}
       </p>
     </div>

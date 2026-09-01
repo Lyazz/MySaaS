@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client'
 import { RETRY_CONFLICT } from '../../lib/conflict-codes'
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
+import { currentUsageWindow } from '../../../../shared/pricing/billing-period'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
@@ -49,12 +50,6 @@ export type CreatePosSaleInput = {
     items: PosOrderItemInput[]
 }
 
-const addUtcMonths = (date: Date, months: number) =>
-    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
-
-const addUtcYears = (date: Date, years: number) =>
-    new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
-
 const normalizeClientRequestId = (value?: string | null) => {
     const normalized = typeof value === 'string' ? value.trim() : ''
     if (!normalized) return null
@@ -76,22 +71,21 @@ export class PosService {
         const limit = plan?.ordersPerMonth ?? 0
         if (limit <= 0) return
 
-        const periodStart = subscription.currentPeriodStart
-        const periodEnd =
-            subscription.currentPeriodEnd ??
-            (subscription.interval === 'year' ? addUtcYears(periodStart, 1) : addUtcMonths(periodStart, 1))
+        // Counted over the monthly quota window, not the billing term -- see
+        // currentUsageWindow. An annual tenant gets their allowance every month.
+        const quota = currentUsageWindow(subscription.currentPeriodStart)
 
         const [ordersInPeriod, salesInPeriod] = await Promise.all([
             prisma.order.count({
                 where: {
                     tenantId,
-                    createdAt: { gte: periodStart, lt: periodEnd }
+                    createdAt: { gte: quota.start, lt: quota.end }
                 }
             }),
             prisma.sale.count({
                 where: {
                     tenantId,
-                    createdAt: { gte: periodStart, lt: periodEnd }
+                    createdAt: { gte: quota.start, lt: quota.end }
                 }
             })
         ])

@@ -103,6 +103,12 @@ const options = computed(() => [
     label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_link_confirmed'),
     icon: 'lucide:check-square',
     tone: 'tone-emerald'
+  },
+  {
+    value: 'whatsapp_declined',
+    label: t('admin.pages.orders.detail.fields.callStatusValues.whatsapp_declined'),
+    icon: 'lucide:x-square',
+    tone: 'tone-rose'
   }
 ])
 

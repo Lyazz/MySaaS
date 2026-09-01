@@ -1,14 +1,14 @@
 <template>
-  <div class="h-[calc(100vh-4rem)] selection:[background:var(--brand)] selection:text-white overflow-hidden relative rounded-xl flex" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+  <div class="h-[calc(100vh-4rem)] selection:[background:var(--brand)] selection:text-brand-contrast overflow-hidden relative rounded-xl flex surface-2 border border-line">
 
     <!-- LEFT SIDEBAR: CONFIGURATION (35%) -->
-    <div class="w-[400px] flex-shrink-0 flex flex-col h-full z-20" style="border-right: 1px solid var(--surface-border); background: var(--surface-1)">
+    <div class="w-[400px] flex-shrink-0 flex flex-col h-full z-20 border-e border-line surface-1">
         <!-- Header -->
-        <header class="p-5 sticky top-0 z-10" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
+        <header class="p-5 sticky top-0 z-10 border-b border-line surface-1">
             <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r [--tw-gradient-from:var(--brand)] to-emerald-500">
                 Landing Page Architect
             </h1>
-            <p class="text-xs mt-0.5" style="color: var(--text-muted)">Autonomous Design Engine</p>
+            <p class="text-xs mt-0.5 text-muted">Autonomous Design Engine</p>
         </header>
 
         <!-- Scrollable Form Area -->
@@ -17,58 +17,58 @@
             <!-- SECTION 1: Product -->
             <section>
                 <div class="flex items-center justify-between mb-3">
-                    <label class="text-sm font-bold uppercase tracking-wider flex items-center" style="color: var(--text-primary)">
+                    <label class="text-sm font-bold uppercase tracking-wider flex items-center text-primary">
                         <Icon name="lucide:package" class="w-4 h-4 mr-2 [color:var(--brand)]" />
                         Product
                     </label>
-                    <span v-if="selectedProduct" class="text-xs font-bold [color:var(--brand)] [background:rgba(var(--brand-rgb)/0.08)] px-2 py-0.5 rounded-md">
+                    <span v-if="selectedProduct" class="text-xs font-bold [color:var(--brand)] [background:rgba(var(--brand-rgb)/0.08)] px-2 py-0.5 rounded-lg">
                         Selected
                     </span>
                 </div>
 
                 <!-- Product Search -->
                 <div class="relative mb-3">
-                    <div class="relative flex items-center rounded-lg overflow-hidden border focus-within:[border-color:var(--brand)] focus-within:ring-1 focus-within:[--tw-ring-color:var(--brand)]/20 transition-all" style="background: var(--surface-2); border-color: var(--surface-border)">
-                        <Icon name="lucide:search" class="w-4 h-4 ms-3" style="color: var(--text-muted)" />
+                    <div class="relative flex items-center rounded-lg overflow-hidden border focus-within:[border-color:var(--brand)] focus-within:ring-1 focus-within:[--tw-ring-color:var(--brand)]/20 transition-all surface-2 border-line">
+                        <Icon name="lucide:search" class="w-4 h-4 ms-3 text-muted" />
                         <input
-                            v-model="searchQuery"
-                            type="text"
-                            placeholder="Find product..."
-                            class="w-full bg-transparent border-none text-sm px-3 py-2.5 focus:ring-0 outline-none"
-                            style="color: var(--text-primary)"
-                        >
+ v-model="searchQuery"
+ type="text"
+ placeholder="Find product..."
+ class="w-full bg-transparent border-none text-sm px-3 py-2.5 focus:ring-0 outline-none text-primary"
+ 
+>
                     </div>
                 </div>
 
                 <!-- Compact Product List -->
                 <div v-if="!selectedProduct" class="space-y-2 max-h-[300px] overflow-y-auto pe-1">
-                    <div v-if="loading" class="py-4 text-center text-sm" style="color: var(--text-muted)">Loading products...</div>
+                    <div v-if="loading" class="py-4 text-center text-sm text-muted">Loading products...</div>
                     <div
-                        v-else
-                        v-for="product in filteredProducts"
-                        :key="product.id"
-                        @click="selectProduct(product)"
-                        class="flex items-center p-2 rounded-lg border cursor-pointer transition-all gap-3 group hover:[border-color:rgba(var(--brand-rgb)/0.4)]"
-                        style="border-color: var(--surface-border); background: var(--surface-2)"
-                    >
-                        <div class="w-10 h-10 rounded-md overflow-hidden shrink-0" style="background: var(--surface-3)">
+ v-else
+ v-for="product in filteredProducts"
+ :key="product.id"
+ @click="selectProduct(product)"
+ class="flex items-center p-2 rounded-lg border cursor-pointer transition-all gap-3 group hover:[border-color:rgba(var(--brand-rgb)/0.4)] border-line surface-2"
+ 
+>
+                        <div class="w-10 h-10 rounded-lg overflow-hidden shrink-0 surface-3">
                             <img :src="getProductMainImage(product) || '/blank.svg?v=2'" class="w-full h-full object-cover">
                         </div>
                         <div class="min-w-0">
-                            <h4 class="text-sm font-bold truncate" style="color: var(--text-secondary)">{{ product.title }}</h4>
-                            <p class="text-xs truncate" style="color: var(--text-muted)">{{ formatCurrency(product.effectivePrice ?? product.price) }}</p>
+                            <h4 class="text-sm font-bold truncate text-secondary">{{ product.title }}</h4>
+                            <p class="text-xs truncate text-muted">{{ formatCurrency(product.effectivePrice ?? product.price) }}</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Selected Product Card -->
                 <div v-else class="relative rounded-lg p-3 flex items-start gap-3" style="background: rgba(var(--brand-rgb)/0.06); border: 1px solid rgba(var(--brand-rgb)/0.25)">
-                    <div class="w-16 h-16 rounded-md overflow-hidden shrink-0" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
+                    <div class="w-16 h-16 rounded-lg overflow-hidden shrink-0 surface-3 border border-line">
                         <img :src="getProductMainImage(selectedProduct) || '/blank.svg?v=2'" class="w-full h-full object-cover">
                     </div>
                     <div class="flex-1 min-w-0">
-                        <h4 class="text-sm font-bold truncate" style="color: var(--text-primary)">{{ selectedProduct.title }}</h4>
-                        <p class="text-xs line-clamp-2 mt-0.5" style="color: var(--text-secondary)">{{ selectedProduct.description }}</p>
+                        <h4 class="text-sm font-bold truncate text-primary">{{ selectedProduct.title }}</h4>
+                        <p class="text-xs line-clamp-2 mt-0.5 text-secondary">{{ selectedProduct.description }}</p>
                         <button @click="selectedProduct = null" class="text-xs text-red-400 hover:text-red-300 font-medium mt-2 flex items-center">
                             <Icon name="lucide:x" class="w-3 h-3 me-1" />
                             Change Product
@@ -77,11 +77,11 @@
                 </div>
             </section>
 
-            <div class="h-px" style="background: var(--surface-border)"></div>
+            <div class="h-px bg-line"></div>
 
             <!-- SECTION 2: Design -->
             <section>
-                <label class="text-sm font-bold uppercase tracking-wider mb-3 flex items-center" style="color: var(--text-primary)">
+                <label class="text-sm font-bold uppercase tracking-wider mb-3 flex items-center text-primary">
                     <Icon name="lucide:palette" class="w-4 h-4 mr-2 [color:var(--brand)]" />
                     Style
                 </label>
@@ -102,11 +102,11 @@
                 </div>
             </section>
 
-            <div class="h-px" style="background: var(--surface-border)"></div>
+            <div class="h-px bg-line"></div>
 
             <!-- SECTION 3: Content -->
             <section>
-                <label class="text-sm font-bold uppercase tracking-wider mb-3 flex items-center" style="color: var(--text-primary)">
+                <label class="text-sm font-bold uppercase tracking-wider mb-3 flex items-center text-primary">
                     <Icon name="lucide:wand-2" class="w-4 h-4 mr-2 [color:var(--brand)]" />
                     Content
                 </label>
@@ -130,7 +130,7 @@
                             v-for="lang in languages"
                             :key="lang.code"
                             @click="config.language = lang.code"
-                            class="flex-1 py-1.5 px-2 rounded border text-xs font-bold transition-all"
+                            class="flex-1 py-1.5 px-2 rounded-lg border text-xs font-bold transition-all"
                             :class="config.language === lang.code ? '[border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]' : ''"
                             :style="config.language === lang.code ? 'background: rgba(var(--brand-rgb)/0.08)' : 'background: var(--surface-2); border-color: var(--surface-border); color: var(--text-tertiary)'"
                         >
@@ -140,20 +140,20 @@
                 </div>
             </section>
 
-            <div class="h-px" style="background: var(--surface-border)"></div>
+            <div class="h-px bg-line"></div>
 
             <!-- SECTION 4: Assets -->
             <section>
-                <label class="text-sm font-bold uppercase tracking-wider mb-3 flex items-center" style="color: var(--text-primary)">
+                <label class="text-sm font-bold uppercase tracking-wider mb-3 flex items-center text-primary">
                     <Icon name="lucide:image" class="w-4 h-4 mr-2 [color:var(--brand)]" />
                     Asset
                 </label>
 
                 <!-- Toggle Source -->
-                <div class="p-1 rounded-lg flex mb-4" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
+                <div class="p-1 rounded-lg flex mb-4 surface-3 border border-line">
                     <button
                         @click="imageSource = 'product'"
-                        class="flex-1 py-1.5 rounded-md text-xs font-bold transition-all"
+                        class="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
                         :class="imageSource === 'product' ? '[color:var(--brand)]' : ''"
                         :style="imageSource === 'product' ? 'background: var(--surface-1); border: 1px solid var(--surface-border)' : 'color: var(--text-muted)'"
                     >
@@ -161,7 +161,7 @@
                     </button>
                     <button
                         @click="imageSource = 'custom'"
-                        class="flex-1 py-1.5 rounded-md text-xs font-bold transition-all"
+                        class="flex-1 py-1.5 rounded-lg text-xs font-bold transition-all"
                         :class="imageSource === 'custom' ? '[color:var(--brand)]' : ''"
                         :style="imageSource === 'custom' ? 'background: var(--surface-1); border: 1px solid var(--surface-border)' : 'color: var(--text-muted)'"
                     >
@@ -181,12 +181,12 @@
                     >
                         <img :src="img" class="w-full h-full object-cover" />
                         <div v-if="selectedValidationImage === img" class="absolute inset-0 flex items-center justify-center" style="background: rgba(var(--brand-rgb)/0.2)">
-                            <div class="rounded-full p-1 shadow-sm [background:var(--brand)]">
-                                <Icon name="lucide:check" class="w-3 h-3 text-white" />
+                            <div class="rounded-full p-1 shadow-sm [background:var(--brand)] text-brand-contrast">
+                                <Icon name="lucide:check" class="w-3 h-3 text-brand-contrast" />
                             </div>
                         </div>
                     </div>
-                    <div v-if="!selectedProduct" class="col-span-3 text-center py-4 text-xs italic rounded-lg border border-dashed" style="color: var(--text-muted); background: var(--surface-2); border-color: var(--surface-border)">
+                    <div v-if="!selectedProduct" class="col-span-3 text-center py-4 text-xs italic rounded-lg border border-dashed text-muted surface-2 border-line">
                         Select a product to view images
                     </div>
                 </div>
@@ -199,15 +199,15 @@
         </div>
 
         <!-- Footer Actions -->
-        <div class="p-5" style="border-top: 1px solid var(--surface-border); background: var(--surface-2)">
+        <div class="p-5 border-t border-line surface-2">
             <button
-                @click="startGeneration"
-                :disabled="!canProceed || isGenerating"
-                class="w-full py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center group"
-                style="background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary)"
-            >
+ @click="startGeneration"
+ :disabled="!canProceed || isGenerating"
+ class="w-full py-3 rounded-xl font-bold disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center group surface-3 border border-line text-primary"
+ 
+>
                 <div v-if="isGenerating" class="flex items-center">
-                    <Icon name="lucide:loader-2" class="w-4 h-4 me-2 animate-spin" style="color: var(--text-muted)" />
+                    <Icon name="lucide:loader-2" class="w-4 h-4 me-2 animate-spin text-muted" />
                     <span>Processing...</span>
                 </div>
                 <div v-else class="flex items-center">
@@ -219,23 +219,23 @@
     </div>
 
     <!-- RIGHT PREVIEW AREA (65%) -->
-    <div class="flex-1 relative flex flex-col h-full overflow-hidden" style="background: var(--admin-content-bg)">
+    <div class="flex-1 relative flex flex-col h-full overflow-hidden bg-admin">
 
         <!-- Background Pattern -->
         <div class="absolute inset-0 z-0 opacity-[0.03]" style="background-image: radial-gradient(#64748b 1px, transparent 1px); background-size: 24px 24px;"></div>
 
         <!-- Toolbar -->
-        <div class="h-16 flex items-center justify-between px-6 z-10 shrink-0" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
-            <div class="text-sm font-bold" style="color: var(--text-muted)">
+        <div class="h-16 flex items-center justify-between px-6 z-10 shrink-0 border-b border-line surface-1">
+            <div class="text-sm font-bold text-muted">
                 Preview
             </div>
 
             <div class="flex items-center space-x-3 rtl:space-x-reverse">
-                <button v-if="hasGenerated" @click="downloadImage" class="text-xs font-bold flex items-center px-3 py-1.5 rounded-lg transition-all" style="color: var(--text-secondary); background: var(--surface-2); border: 1px solid var(--surface-border)">
+                <button v-if="hasGenerated" @click="downloadImage" class="text-xs font-bold flex items-center px-3 py-1.5 rounded-lg transition-all text-secondary surface-2 border border-line">
                     <Icon name="lucide:download" class="w-3.5 h-3.5 me-1.5" />
                     Download
                 </button>
-                <button v-if="hasGenerated" class="px-4 py-1.5 [background:var(--brand)] hover:opacity-90 text-black text-xs font-bold rounded-lg transition-all flex items-center">
+                <button v-if="hasGenerated" class="px-4 py-1.5 [background:var(--brand)] hover:opacity-90 text-brand-contrast text-xs font-bold rounded-lg transition-all flex items-center">
                     Publish
                     <Icon name="lucide:arrow-right" class="w-3.5 h-3.5 ms-1.5" />
                 </button>
@@ -248,38 +248,38 @@
             <!-- Generation Overlay -->
             <div v-if="isGenerating" class="absolute inset-0 z-50 flex flex-col items-center justify-center" style="background: rgba(0,0,0,0.5); backdrop-filter: blur(4px)">
                 <div class="relative w-32 h-32 mb-8">
-                    <div class="absolute inset-0 border-4 rounded-full" style="border-color: var(--surface-border)"></div>
+                    <div class="absolute inset-0 border-4 rounded-full border-line"></div>
                     <div class="absolute inset-0 border-4 [border-color:var(--brand)] rounded-full border-t-transparent animate-spin"></div>
                     <Icon name="lucide:wand-2" class="absolute inset-0 m-auto w-10 h-10 [color:var(--brand)] animate-pulse" />
                 </div>
-                <h2 class="text-2xl font-bold mb-2" style="color: var(--text-primary)">Designing your page...</h2>
-                <p class="font-mono text-sm" style="color: var(--text-secondary)">{{ currentPhase }}</p>
-                <div class="w-64 h-1.5 rounded-full mt-6 overflow-hidden" style="background: var(--surface-3)">
+                <h2 class="text-2xl font-bold mb-2 text-primary">Designing your page...</h2>
+                <p class="font-mono text-sm text-secondary">{{ currentPhase }}</p>
+                <div class="w-64 h-1.5 rounded-full mt-6 overflow-hidden surface-3">
                     <div class="h-full [background:var(--brand)] transition-all duration-300" :style="{ width: progress + '%' }"></div>
                 </div>
             </div>
 
             <!-- Empty State -->
             <div v-if="!hasGenerated && !isGenerating" class="text-center max-w-sm">
-                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6" style="background: var(--surface-3); color: var(--text-muted)">
+                <div class="w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6 surface-3 text-muted">
                     <Icon name="lucide:layout-template" class="w-10 h-10" />
                 </div>
-                <h3 class="font-bold text-lg mb-2" style="color: var(--text-primary)">Ready to Design</h3>
-                <p class="text-sm" style="color: var(--text-secondary)">Configure your preferences in the sidebar and click "Generate Page" to see the magic happen.</p>
+                <h3 class="font-bold text-lg mb-2 text-primary">Ready to Design</h3>
+                <p class="text-sm text-secondary">Configure your preferences in the sidebar and click "Generate Page" to see the magic happen.</p>
             </div>
 
             <!-- PREVIEW -->
             <template v-if="hasGenerated && !isGenerating">
-                <div class="relative h-[85vh] w-auto aspect-[9/19] shadow-2xl overflow-hidden group mx-auto animate-fade-in shrink-0 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
+                <div class="relative h-[85vh] w-auto aspect-[9/19] shadow-2xl overflow-hidden group mx-auto animate-fade-in shrink-0 rounded-lg border border-line surface-1">
                     <div class="flex-1 relative overflow-y-auto custom-scrollbar h-full">
                         <img src="/vertical-placeholder.png" class="w-full h-auto object-cover min-h-full">
 
                         <!-- Overlay Content -->
                         <div class="absolute inset-x-0 bottom-0 top-auto bg-gradient-to-t from-slate-900 via-slate-900/80 to-transparent p-6 z-20 pointer-events-none pb-20 pt-32">
-                            <div class="inline-block px-3 py-1 [background:var(--brand)] text-white text-[10px] font-bold rounded mb-3">NEW ARRIVAL</div>
-                            <h1 class="text-2xl font-bold text-white mb-2 leading-tight">{{ selectedProduct?.title }}</h1>
-                            <p class="text-xs text-slate-300 mb-6 line-clamp-3">{{ config.prompt || selectedProduct?.description }}</p>
-                            <button class="w-full py-3 bg-white text-slate-900 font-bold rounded text-sm shadow-lg pointer-events-auto">
+                            <div class="inline-block px-3 py-1 [background:var(--brand)] text-brand-contrast text-micro font-bold rounded-lg mb-3">NEW ARRIVAL</div>
+                            <h1 class="text-2xl font-bold text-brand-contrast mb-2 leading-tight">{{ selectedProduct?.title }}</h1>
+                            <p class="text-xs text-tertiary mb-6 line-clamp-3">{{ config.prompt || selectedProduct?.description }}</p>
+                            <button class="w-full py-3 surface-1 text-primary font-bold rounded-lg text-sm shadow-lg pointer-events-auto">
                                 Shop Now
                             </button>
                         </div>

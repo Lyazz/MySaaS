@@ -13,19 +13,19 @@
         />
 
         <!-- Modal -->
-        <div class="relative rounded-2xl max-w-md w-full p-6 z-10" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
+        <div class="relative rounded-2xl max-w-md w-full p-6 z-10 surface-2 border border-line shadow-overlay">
           <!-- Icon -->
           <div class="mx-auto flex items-center justify-center h-11 w-11 rounded-xl mb-4" style="background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.2)">
             <Icon name="lucide:alert-triangle" class="h-5 w-5 text-red-400" />
           </div>
 
           <!-- Title -->
-          <h3 class="text-[15px] font-semibold text-center mb-2" style="color: var(--text-primary)">
+          <h3 class="text-base font-semibold text-center mb-2 text-primary">
             {{ resolvedTitle }}
           </h3>
 
           <!-- Message -->
-          <p class="text-[13px] text-center mb-4" style="color: var(--text-secondary)">
+          <p class="text-sm text-center mb-4 text-secondary">
             {{ resolvedMessage }}
           </p>
 

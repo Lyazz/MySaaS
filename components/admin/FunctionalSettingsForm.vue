@@ -169,8 +169,8 @@
             ></textarea>
             
             <div class="p-4 rounded-xl border h-full" style="background-color: var(--bg-secondary); border-color: var(--border-color);">
-              <p class="text-xs font-bold mb-2 uppercase tracking-wide" style="color: var(--text-tertiary);">{{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.preview') }}</p>
-              <div class="whitespace-pre-wrap text-sm" style="color: var(--text-primary); font-family: monospace;">{{ whatsappTemplatePreview }}</div>
+              <p class="text-xs font-bold mb-2 uppercase tracking-wide text-tertiary">{{ t('admin.functionalSettingsForm.messaging.whatsappTemplate.preview') }}</p>
+              <div class="whitespace-pre-wrap text-sm text-primary font-mono">{{ whatsappTemplatePreview }}</div>
             </div>
           </div>
         </div>

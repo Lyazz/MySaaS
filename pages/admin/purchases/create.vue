@@ -4,14 +4,14 @@
     <nav class="flex mb-6" aria-label="Breadcrumb">
       <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/purchases" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">
+          <NuxtLink to="/admin/purchases" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors text-secondary">
             {{ t('admin.nav.purchases') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ms-1" style="color: var(--text-tertiary)">{{ t('admin.pages.purchases.create.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-tertiary" />
+            <span class="ms-1 text-tertiary">{{ t('admin.pages.purchases.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -20,8 +20,8 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.purchases.create.title') }}</h2>
-        <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.purchases.create.subtitle') }}</p>
+        <h2 class="text-2xl font-bold text-primary">{{ t('admin.pages.purchases.create.title') }}</h2>
+        <p class="mt-1 text-secondary">{{ t('admin.pages.purchases.create.subtitle') }}</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <NuxtLink
@@ -33,7 +33,7 @@
         <button
           type="button"
           :disabled="submitting || !form.supplierId"
-          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
           @click="handleSubmit"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Form -->
-    <div class="rounded-lg p-6 space-y-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+    <div class="rounded-lg p-6 space-y-6 surface-1 border border-line">
       <BaseSelect
         v-model="form.supplierId"
         :label="t('admin.pages.purchases.create.supplier.label')"
@@ -54,14 +54,14 @@
         <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
       </BaseSelect>
 
-      <div class="bg-blue-50 border border-blue-200 rounded-md p-4">
+      <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <p class="text-sm text-blue-800">
           <Icon name="lucide:info" class="w-4 h-4 inline me-1" />
           {{ t('admin.pages.purchases.create.info') }}
         </p>
       </div>
 
-      <div v-if="errorMessage" class="p-4 bg-red-50 border border-red-200 rounded-md">
+      <div v-if="errorMessage" class="p-4 bg-red-50 border border-red-200 rounded-lg">
         <p class="text-sm text-red-800">{{ errorMessage }}</p>
       </div>
 
@@ -75,7 +75,7 @@
         <button
           type="button"
           :disabled="submitting || !form.supplierId"
-          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
           @click="handleSubmit"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />

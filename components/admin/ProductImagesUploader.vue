@@ -27,13 +27,14 @@
         >
 
         <div v-if="image.isMain" class="absolute start-2 top-2">
-          <span class="inline-flex items-center rounded-md [background:var(--brand)] px-2 py-1 text-xs font-medium text-white shadow-sm">
+          <span class="inline-flex items-center rounded-lg [background:var(--brand)] px-2 py-1 text-xs font-medium text-brand-contrast shadow-sm">
             <Icon name="lucide:star" class="me-1 h-3 w-3" />
             {{ t('admin.imageUploader.mainBadge') }}
           </span>
         </div>
 
         <div class="absolute bottom-2 start-2">
+          <!-- eslint-disable-next-line vue/no-restricted-class -- ordinal badge on a black scrim over the photo: white in both themes -->
           <span class="inline-flex h-6 w-6 items-center justify-center rounded-full bg-black/60 text-xs font-semibold text-white">
             {{ index + 1 }}
           </span>
@@ -44,7 +45,7 @@
             v-if="!image.isMain"
             type="button"
             :title="t('admin.imageUploader.actions.setAsMain')"
-            class="rounded-full [background:var(--brand)] p-1.5 text-white shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
+            class="rounded-full [background:var(--brand)] p-1.5 text-brand-contrast shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
             @click.stop="setAsMain(index)"
           >
             <Icon name="lucide:star" class="h-3.5 w-3.5" />
@@ -52,7 +53,7 @@
           <button
             type="button"
             :title="t('admin.imageUploader.actions.remove')"
-            class="rounded-full bg-red-500 p-1.5 text-white shadow-sm hover:bg-red-600"
+            class="rounded-full bg-red-500 p-1.5 text-primary shadow-sm hover:bg-red-600"
             @click.stop="removeImage(index)"
           >
             <Icon name="lucide:trash" class="h-3.5 w-3.5" />
@@ -61,18 +62,18 @@
 
         <div class="pointer-events-none absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
           <div class="rounded-lg bg-black/40 px-3 py-2">
-            <Icon name="lucide:grip-vertical" class="h-6 w-6 text-white" />
+            <Icon name="lucide:grip-vertical" class="h-6 w-6 text-primary" />
           </div>
         </div>
       </div>
 
       <label
-        class="relative aspect-square cursor-pointer rounded-lg border-2 border-dashed transition-colors"
-        style="background: var(--surface-2); border-color: var(--surface-border)"
-      >
+ class="relative aspect-square cursor-pointer rounded-lg border-2 border-dashed transition-colors surface-2 border-line"
+ 
+>
         <div class="flex h-full flex-col items-center justify-center text-center">
-          <Icon name="lucide:plus" class="mx-auto h-8 w-8" style="color: var(--text-muted)" />
-          <span class="mt-2 block text-xs font-medium" style="color: var(--text-tertiary)">
+          <Icon name="lucide:plus" class="mx-auto h-8 w-8 text-muted" />
+          <span class="mt-2 block text-xs font-medium text-tertiary">
             {{ t('admin.imageUploader.actions.addImage') }}
           </span>
         </div>
@@ -88,7 +89,7 @@
       </label>
     </div>
 
-    <p class="text-xs" style="color: var(--text-tertiary)">
+    <p class="text-xs text-tertiary">
       <strong>{{ t('admin.imageUploader.tip.title') }}</strong> {{ t('admin.imageUploader.tip.body') }}
     </p>
 

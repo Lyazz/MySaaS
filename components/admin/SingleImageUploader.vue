@@ -2,10 +2,10 @@
   <div class="space-y-3">
     <div class="flex items-center justify-between">
       <div>
-        <p class="text-[13px] font-medium" style="color: var(--text-secondary)">
+        <p class="text-sm font-medium text-secondary">
           {{ label }}
         </p>
-        <p v-if="hint" class="mt-0.5 text-xs" style="color: var(--text-tertiary)">
+        <p v-if="hint" class="mt-0.5 text-xs text-tertiary">
           {{ hint }}
         </p>
       </div>
@@ -15,10 +15,10 @@
     </div>
 
     <div
-      class="relative overflow-hidden rounded-xl"
-      :class="policy.requireSquare ? 'aspect-square max-w-[22rem]' : 'h-56 w-full'"
-      style="background: var(--surface-2); border: 2px dashed var(--surface-border)"
-    >
+ class="relative overflow-hidden rounded-xl ui-dropzone border-2"
+ :class="policy.requireSquare ? 'aspect-square max-w-[22rem]' : 'h-56 w-full'"
+ 
+>
       <template v-if="modelValue">
         <img
           :src="modelValue"
@@ -26,19 +26,19 @@
           class="h-full w-full object-contain p-2"
         >
         <button
-          type="button"
-          class="absolute end-2 top-2 rounded-full p-1.5"
-          style="background: var(--surface-3); border: 1px solid var(--surface-border)"
-          @click="removeImage"
-        >
-          <Icon name="lucide:x" class="h-4 w-4" style="color: var(--text-secondary)" />
+ type="button"
+ class="absolute end-2 top-2 rounded-full p-1.5 surface-3 border border-line"
+ 
+ @click="removeImage"
+>
+          <Icon name="lucide:x" class="h-4 w-4 text-secondary" />
         </button>
       </template>
 
       <template v-else>
         <label class="flex h-full w-full cursor-pointer flex-col items-center justify-center">
-          <Icon name="lucide:upload" class="h-10 w-10" style="color: var(--text-muted)" />
-          <span class="mt-2 text-xs" style="color: var(--text-tertiary)">
+          <Icon name="lucide:upload" class="h-10 w-10 text-muted" />
+          <span class="mt-2 text-xs text-tertiary">
             {{ t('admin.components.singleImageUploader.uploadCta') }}
           </span>
           <input

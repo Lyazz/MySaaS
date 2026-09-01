@@ -1,6 +1,6 @@
 <template>
   <div class="space-y-4">
-    <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+    <h3 class="text-lg font-semibold text-primary">
       {{ t('admin.pages.onboarding.template.title') }}
     </h3>
 
@@ -28,42 +28,42 @@
                 {{ tpl.emoji }}
               </div>
               <div class="px-2.5 py-2" :style="{ fontFamily: tpl.fontStyle }">
-                <p class="text-[11px] font-semibold leading-tight truncate" :style="{ color: tpl.textColor }">{{ tpl.sampleDesc }}</p>
-                <p class="text-[11px] mt-0.5 font-bold" :style="{ color: tpl.color }">{{ tpl.samplePrice }}</p>
-                <div class="mt-2 w-full text-center text-[9px] font-bold py-1 leading-none" :style="{ background: tpl.color, color: tpl.btnText, borderRadius: tpl.radius }">BUY</div>
+                <p class="text-mini font-semibold leading-tight truncate" :style="{ color: tpl.textColor }">{{ tpl.sampleDesc }}</p>
+                <p class="text-mini mt-0.5 font-bold" :style="{ color: tpl.color }">{{ tpl.samplePrice }}</p>
+                <div class="mt-2 w-full text-center text-micro font-bold py-1 leading-none" :style="{ background: tpl.color, color: tpl.btnText, borderRadius: tpl.radius }">BUY</div>
               </div>
             </div>
           </div>
           <div class="absolute inset-0 z-10 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col justify-end p-3">
             <NuxtLink
-              :to="`/admin/preview?template=${tpl.key}`"
-              target="_blank"
-              class="pointer-events-auto py-2 px-4 backdrop-blur-sm font-medium text-sm rounded-lg shadow flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300"
-              style="background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--surface-border)"
-              @click.stop
-            >
+ :to="`/admin/preview?template=${tpl.key}`"
+ target="_blank"
+ class="pointer-events-auto py-2 px-4 backdrop-blur-sm font-medium text-sm rounded-lg shadow flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300 surface-2 text-primary border border-line"
+ 
+ @click.stop
+>
               <Icon name="lucide:external-link" class="w-4 h-4" />
               Prévisualiser
             </NuxtLink>
           </div>
         </div>
-        <div class="p-3 flex flex-col gap-2" style="background: var(--surface-3); border-top: 1px solid var(--surface-border)">
+        <div class="p-3 flex flex-col gap-2 surface-3 border-t border-line">
           <div class="flex items-center justify-between">
-            <span class="font-bold text-sm" :class="tpl.fontClass" style="color: var(--text-primary)">{{ tpl.label }}</span>
+            <span class="font-bold text-sm text-primary" :class="tpl.fontClass">{{ tpl.label }}</span>
             <div v-if="modelValue.templateKey === tpl.key" class="[color:rgba(var(--brand-rgb)/0.85)]">
               <Icon name="lucide:check-circle-2" class="w-5 h-5" />
             </div>
           </div>
           <div class="flex flex-col gap-0.5">
-            <p class="text-[11px] font-medium leading-snug" style="color: var(--text-secondary)">{{ tpl.storeTypes }}</p>
-            <p class="text-[11px] leading-snug" style="color: var(--text-tertiary)">{{ tpl.description }}</p>
+            <p class="text-mini font-medium leading-snug text-secondary">{{ tpl.storeTypes }}</p>
+            <p class="text-mini leading-snug text-tertiary">{{ tpl.description }}</p>
           </div>
           <div class="flex items-center gap-1.5 flex-wrap">
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border" :style="{ borderColor: tpl.color + '40', background: tpl.color + '12', color: tpl.color }">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-micro font-medium border" :style="{ borderColor: tpl.color + '40', background: tpl.color + '12', color: tpl.color }">
               <span class="w-2 h-2 rounded-full inline-block" :style="{ background: tpl.color }"></span>
               {{ tpl.color.toUpperCase() }}
             </span>
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium" style="background: var(--surface-1); border: 1px solid var(--surface-border); color: var(--text-tertiary)">
+            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-micro font-medium surface-1 border border-line text-tertiary">
               <Icon name="lucide:type" class="w-2.5 h-2.5" />
               {{ tpl.fontName }}
             </span>

@@ -22,8 +22,8 @@
     },
     "siteClosed": {
       "badge": "Site en pause",
-      "title": "Notre site est temporairement fermé",
-      "message": "Le site vitrine de Swekly est momentanément indisponible. Nous serons de retour très bientôt — merci de votre patience.",
+      "title": "La plateforme est temporairement fermée",
+      "message": "",
       "haveAccount": "Vous avez déjà une boutique ?",
       "logIn": "Se connecter"
     }
@@ -950,6 +950,11 @@
         "description": "Pour les marques qui gèrent un plus gros volume chaque mois",
         "cta": "15 jours gratuits"
       }
+    },
+    "billing": {
+      "monthly": "Facturé chaque mois",
+      "yearly": "Facturé {total} une fois par an",
+      "free": "Gratuit, aucun paiement"
     }
   },
   "storefront": {
@@ -1407,6 +1412,8 @@
       "search": "Rechercher",
       "searchAction": "Rechercher",
       "clear": "Effacer",
+      "filters": "Filtres",
+      "clearFilters": "Effacer les filtres",
       "reset": "Réinitialiser",
       "startDate": "Date de début",
       "endDate": "Date de fin",
@@ -1443,7 +1450,6 @@
       "processing": "Traitement en cours…",
       "error": "Une erreur s'est produite. Veuillez réessayer.",
       "saved": "Enregistré !",
-      "filters": "Filtres",
       "noDataAvailable": "Aucune donnée disponible",
       "unsavedChanges": "Modifications non enregistrées",
       "unsavedChangesHint": "N'oubliez pas d'enregistrer vos modifications.",
@@ -1461,7 +1467,8 @@
       "keepEditing": "Continuer à modifier",
       "leaveTitle": "Quitter sans enregistrer ?",
       "leaveMessage": "Vous avez des modifications non enregistrées. Elles seront perdues si vous quittez cette page.",
-      "leaveConfirm": "Quitter la page"
+      "leaveConfirm": "Quitter la page",
+      "clickToUpload": "Cliquez pour téléverser votre reçu"
     },
     "confirmModal": {
       "defaults": {
@@ -1534,13 +1541,6 @@
           "loadFailed": "Impossible de charger l’image dans le recadreur."
         }
       }
-    },
-    "help": {
-      "button": "Centre d'aide",
-      "title": "Support Swekly",
-      "subtitle": "Comment pouvons-nous vous aider aujourd'hui ?",
-      "greeting": "Bonjour ! Je suis l'assistant Swekly. Comment puis-je vous aider à gérer votre boutique aujourd'hui ?",
-      "inputPlaceholder": "Tapez votre message..."
     },
     "storeSettingsForm": {
       "title": "Apparence et paramètres de la boutique",
@@ -2321,6 +2321,7 @@
       "legalPages": "Pages legales",
       "functional": "Vente & checkout",
       "domains": "Domaines",
+      "integrations": "Intégrations",
       "users": "Utilisateurs",
       "storefront": "Boutique",
       "account": "Compte",
@@ -2927,6 +2928,47 @@
               "addPixel": "Ajouter le Pixel"
             }
           }
+        },
+        "whatsapp": {
+          "title": "WhatsApp Business",
+          "description": "Confirmez les commandes depuis votre propre numéro WhatsApp, avec des boutons Confirmer et Annuler.",
+          "modal": {
+            "title": "WhatsApp Business",
+            "intro": "Connectez votre compte WhatsApp Business pour envoyer les confirmations de commande automatiquement depuis votre numéro. Le client confirme ou annule d'un bouton, et les commandes sans réponse sont relancées après 6 heures puis après 24 heures.",
+            "unavailable": "L'inscription WhatsApp n'est pas encore configurée sur la plateforme. Contactez le support Swekly.",
+            "connect": "Connecter WhatsApp",
+            "connecting": "Connexion...",
+            "reconnect": "Connecter un autre numéro",
+            "number": "Numéro connecté",
+            "businessName": "Nom de l'entreprise",
+            "autoSend": {
+              "label": "Envoyer automatiquement aux nouvelles commandes",
+              "hint": "Commandes de la boutique uniquement. Les commandes que vous créez vous-même passent par le bouton de la fiche commande."
+            },
+            "reminders": {
+              "label": "Relancer les commandes sans réponse",
+              "hint": "Une relance après 6 heures, une seconde après 24 heures."
+            },
+            "templates": {
+              "title": "Modèles de message",
+              "hint": "Meta valide chaque modèle avant qu’il puisse être envoyé. Cela prend généralement quelques minutes.",
+              "confirmation": "Confirmation de commande",
+              "reminder": "Relance",
+              "refresh": "Actualiser les statuts",
+              "resubmit": "Renvoyer les modèles"
+            },
+            "templateStatus": {
+              "APPROVED": "Approuvé",
+              "PENDING": "En validation",
+              "REJECTED": "Refusé",
+              "PAUSED": "En pause",
+              "DISABLED": "Désactivé",
+              "MISSING": "Non soumis"
+            },
+            "disconnect": "Déconnecter",
+            "disconnectConfirm": "Déconnecter ce compte WhatsApp ? Les commandes repasseront par le lien WhatsApp manuel.",
+            "error": "Une erreur s’est produite. Réessayez."
+          }
         }
       },
       "users": {
@@ -3276,106 +3318,166 @@
       },
       "billing": {
         "metaTitle": "Facturation",
-        "title": "Facturation",
-        "subtitle": "Consultez votre forfait actuel, ses limites et votre utilisation.",
-        "seePricing": "Voir les tarifs",
+        "title": "Facturation et abonnement",
+        "subtitle": "Votre forfait, son prix, sa date de renouvellement et ce que vous en consommez.",
+        "seePricing": "Voir les tarifs publics",
+        "perMonth": "/ mois",
         "errors": {
-          "loadFailed": "Impossible de charger les informations de facturation."
+          "loadFailed": "Impossible de charger vos informations de facturation.",
+          "updateFailed": "Impossible de mettre à jour votre abonnement. Réessayez."
         },
         "status": {
+          "active": "Actif",
+          "trialing": "Essai gratuit",
+          "pastDue": "Expiré",
+          "canceling": "Se termine à l'échéance"
+        },
+        "state": {
+          "pastDue": {
+            "title": "Votre abonnement a expiré",
+            "desc": "Votre période s'est terminée le {date}. Votre boutique et votre admin restent limités tant qu'un nouveau paiement n'est pas validé.",
+            "action": "Renouveler"
+          },
           "pending": {
             "title": "Paiement en cours de vérification",
-            "desc": "Nous avons bien reçu votre justificatif de paiement. Notre équipe le vérifie en ce moment. Votre abonnement sera mis à jour dès validation.",
-            "badge": "en attente"
+            "desc": "Nous avons reçu {amount} DA par {method} le {date}. Votre forfait sera mis à jour dès validation par notre équipe.",
+            "action": "Voir"
           },
-          "approved": {
-            "title": "Paiement approuvé",
-            "desc": "Votre dernier paiement a été validé et votre abonnement est actif."
+          "rejected": {
+            "title": "Votre dernier paiement a été refusé",
+            "desc": "Le reçu envoyé le {date} n'a pas pu être validé. Vérifiez le montant et les coordonnées, puis renvoyez-le.",
+            "action": "Réessayer"
+          },
+          "canceling": {
+            "title": "Le renouvellement automatique est désactivé",
+            "desc": "Vous gardez l'accès complet jusqu'au {date}. Ensuite, votre boutique repasse aux limites gratuites.",
+            "action": "Réactiver le renouvellement"
+          },
+          "trial": {
+            "title": "Il vous reste {days} jours d'essai gratuit",
+            "desc": "Votre essai se termine le {date}. Choisissez un forfait avant cette date pour éviter toute interruption.",
+            "action": "Choisir un forfait"
           }
         },
-        "currentPlan": {
-          "title": "Forfait actuel",
-          "hint": "Vous pouvez changer de forfait pour tester (mensuel uniquement).",
-          "changePlan": "Changer de forfait",
-          "paySimulate": "Payer (simulation) et appliquer",
-          "cards": {
-            "plan": "Forfait",
-            "interval": "Période de facturation",
-            "source": "Source : {source}",
-            "ordersThisPeriod": "Commandes sur la période"
-          },
-          "limitsTitle": "Limites du forfait"
+        "current": {
+          "eyebrow": "Forfait actuel",
+          "billedAs": "Facturation",
+          "renewsOn": "Renouvellement le",
+          "trialEnds": "Fin de l'essai",
+          "accessEnds": "Fin de l'accès",
+          "nextCharge": "Prochain paiement",
+          "daysLeft": "dans {days} jours",
+          "today": "aujourd'hui",
+          "expiredAgo": "il y a {days} jours",
+          "savingPerYear": "économise {amount} DA vs mensuel",
+          "stopRenewal": "Désactiver le renouvellement automatique",
+          "resumeRenewal": "Réactiver le renouvellement"
         },
-        "limits": {
-          "ordersPerMonth": "Commandes / mois"
-        },
-        "planOption": "{name} ({orders} commandes/mois)",
-        "availablePlans": {
-          "title": "Forfaits disponibles",
-          "ordersPerMonth": "{count} commandes / mois",
-          "perMonth": "/mois"
+        "usage": {
+          "title": "Utilisation",
+          "window": "Ce mois-ci · {range}",
+          "orders": "Commandes",
+          "products": "Produits",
+          "pixels": "Pixels Meta",
+          "unlimited": "Illimité",
+          "ordersBlocked": "Limite atteinte — les nouvelles commandes sont refusées jusqu'à la prochaine période ou une montée en gamme."
         },
         "interval": {
-          "monthly": "Facturation mensuelle",
-          "yearly": "Facturation annuelle",
+          "monthly": "Mensuel",
+          "yearly": "Annuel",
           "annual": "Annuel",
-          "save": "Économisez {pct}%"
+          "save": "-{pct}%"
         },
-        "mo": "mois",
-        "yr": "an",
-        "currentPlanBadge": "Votre forfait",
-        "unlimitedOrders": "Commandes illimitées",
-        "upToOrders": "Jusqu'à {count} commandes/mois",
-        "selectedBtn": "Sélectionné",
-        "selectBtn": "Choisir ce forfait",
-        "prioritySupport": "Support prioritaire",
-        "customBranding": "Marque personnalisée & SMS",
+        "plans": {
+          "title": "Changer de forfait",
+          "subtitle": "Les prix sont mensuels. Les forfaits annuels sont payés en une fois pour douze mois.",
+          "currentBadge": "Votre forfait",
+          "freeForever": "Gratuit, aucun paiement",
+          "billedMonthly": "Facturé chaque mois",
+          "billedYearly": "Facturé {total} une fois par an",
+          "ordersLine": "{count} commandes / mois",
+          "productsLine": "{count} produits",
+          "pixelsLine": "{count} pixels Meta",
+          "cta": {
+            "current": "Forfait actuel",
+            "upgrade": "Monter en gamme",
+            "downgrade": "Passer à ce forfait",
+            "switchToYearly": "Passer à l'annuel",
+            "switchToMonthly": "Passer au mensuel"
+          }
+        },
+        "checkout": {
+          "eyebrow": "Récapitulatif",
+          "emptyTitle": "Aucun forfait sélectionné",
+          "emptyDesc": "Choisissez un forfait pour voir son prix et comment le régler.",
+          "monthlyTerm": "Période mensuelle",
+          "yearlyTerm": "Période annuelle, payée d'avance",
+          "unitLine": "{price} DA × {months} mois",
+          "listLine": "Au lieu de {price} DA mois par mois",
+          "total": "Total à transférer",
+          "termNote": "Couvre du {start} au {end}. Les jours restants de votre période actuelle sont conservés.",
+          "methodLabel": "Comment payez-vous ?",
+          "soon": "Bientôt",
+          "copy": "Copier",
+          "eurNote": "Conversion indicative à 1 EUR = {rate} DA. Le montant dû est le total en DZD ci-dessus.",
+          "instructions": {
+            "dzd": "Transférez exactement {amount} sur le compte ci-dessous, puis téléversez le reçu.",
+            "eur": "Transférez environ {amount} sur le compte ci-dessous, puis téléversez le reçu."
+          },
+          "fileHint": "PNG, JPG, WEBP ou PDF, 10 Mo maximum",
+          "submit": "Envoyer {amount} pour vérification",
+          "submitSuccess": "Paiement envoyé. Notre équipe vérifie les reçus sous un jour ouvré et votre forfait se met à jour automatiquement.",
+          "blocked": {
+            "pending": "Un paiement est déjà en attente de vérification.",
+            "noMethod": "Choisissez un moyen de paiement pour continuer.",
+            "noProof": "Joignez votre reçu de transfert pour continuer."
+          },
+          "downgradeToFree": "Le forfait gratuit ne demande aucun paiement. Votre période payée court jusqu'au {date} — désactivez le renouvellement automatique et votre boutique passera alors aux limites gratuites.",
+          "turnOffRenewal": "Désactiver le renouvellement automatique",
+          "renewalAlreadyOff": "Le renouvellement automatique est déjà désactivé"
+        },
         "payment": {
           "methods": {
             "myfin": "MyFin",
             "paysera": "Paysera",
             "baridimob": "BaridiMob",
             "ccp": "CCP / Poste",
-            "chargily": "Chargily (CIB/Edahabia)"
+            "chargily": "Chargily"
           },
-          "emptyTitle": "Caisse",
-          "emptyDesc": "Sélectionnez un forfait dans la liste pour commencer la mise à niveau.",
-          "instructions": {
-            "myfin": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte MyFin :\nIBAN : BG98MYFI123123123\nNom : MySaaS LLC",
-            "paysera": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte Paysera :\nEmail : payments{'@'}mysaas.com\nNom : MySaaS LLC",
-            "baridimob": "Veuillez envoyer {amount} DZD via BaridiMob à :\nRIP : 00799999000000000012\nTéléphone : +XX X XXX XXXX",
-            "ccp": "Veuillez déposer {amount} DZD sur notre compte CCP :\nCompte : 12345678 99\nNom : MySaaS LLC"
+          "account": {
+            "rip": "RIP",
+            "ccp": "Compte CCP",
+            "iban": "IBAN",
+            "email": "E-mail",
+            "holder": "Titulaire"
           },
-          "title": "Finaliser votre abonnement",
-          "subtitle": "Sélectionnez un mode de paiement pour continuer.",
-          "totalLabel": "Total à payer",
-          "uploadProof": "Joindre le justificatif de paiement",
-          "uploadSuccess": "Justificatif joint avec succès",
-          "chargilyNote": "L'intégration automatique est actuellement indisponible. Veuillez choisir une autre méthode manuelle comme CCP ou BaridiMob.",
-          "submitBtn": "Confirmer et soumettre le paiement",
-          "submitting": "Envoi en cours…",
-          "success": "Paiement soumis ! Notre équipe va examiner votre justificatif et activer votre abonnement.",
+          "uploadProof": "Reçu de transfert",
+          "uploadSuccess": "Reçu joint",
           "errors": {
-            "proofRequired": "Veuillez joindre un justificatif de paiement.",
-            "submitFailed": "L'envoi du paiement a échoué. Veuillez réessayer."
+            "uploadFailed": "Échec du téléversement. Essayez un autre fichier.",
+            "submitFailed": "Impossible d'envoyer votre paiement. Réessayez."
           }
         },
         "history": {
           "title": "Historique des paiements",
-          "entries": "entrées",
+          "count": "{count} paiement(s)",
+          "empty": "Aucun paiement enregistré.",
+          "viewProof": "Voir",
+          "status": {
+            "pending": "En attente",
+            "paid": "Payé",
+            "rejected": "Refusé",
+            "imported": "Importé"
+          },
           "col": {
             "date": "Date",
             "plan": "Forfait",
+            "period": "Période",
             "amount": "Montant",
-            "method": "Méthode",
+            "method": "Moyen",
             "status": "Statut",
-            "proof": "Justificatif"
-          },
-          "viewProof": "Voir"
-        },
-        "common": {
-          "uploading": "Téléversement…",
-          "clickToUpload": "Cliquez pour joindre le justificatif"
+            "proof": "Reçu"
+          }
         }
       },
       "products": {
@@ -3762,7 +3864,8 @@
               "attempt_3": "3ème tentative",
               "switched_off": "Hors réseau",
               "whatsapp_sms_sent": "SMS WhatsApp envoyé",
-              "whatsapp_link_confirmed": "Lien WhatsApp confirmé"
+              "whatsapp_link_confirmed": "Lien WhatsApp confirmé",
+              "whatsapp_declined": "Refusé sur WhatsApp"
             },
             "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande...",
             "currency": "Devise",

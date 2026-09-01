@@ -119,6 +119,17 @@ onMounted(() => {
                      color-mix(in srgb, var(--at-green) 60%, #04150B) 100%);
   --at-shadow-green: 0 22px 48px -22px color-mix(in srgb, var(--at-green) 42%, transparent);
 
+  /* Shared LocaleSwitcher — pressed shell paper, gold accent */
+  --ls-surface: var(--at-surface);
+  --ls-border: var(--at-border);
+  --ls-shadow: var(--at-shadow-md);
+  --ls-radius: var(--at-r-sm);
+  --ls-text: var(--at-sub);
+  --ls-text-strong: var(--at-text);
+  --ls-hover-bg: var(--at-surface-2);
+  --ls-accent: var(--at-gold-700);
+  --ls-accent-soft: var(--at-gold-dim);
+
   background-color: var(--at-bg);
   background-image:
     radial-gradient(1100px 620px at 8% -12%, rgba(179,131,53,0.13), transparent 62%),

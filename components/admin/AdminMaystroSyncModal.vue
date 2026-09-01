@@ -12,14 +12,14 @@
         />
 
         <!-- Modal -->
-        <div class="relative rounded-2xl max-w-md w-full p-6 z-10" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
+        <div class="relative rounded-2xl max-w-md w-full p-6 z-10 surface-2 border border-line shadow-overlay">
           
           <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-semibold" style="color: var(--text-primary)">
+            <h3 class="text-base font-semibold text-primary">
               Sync Maystro Orders
             </h3>
             <button
-              class="text-gray-400 hover:text-gray-500 disabled:opacity-50"
+              class="text-tertiary hover:text-secondary disabled:opacity-50"
               :disabled="isSyncing"
               @click="isOpen = false"
             >
@@ -29,36 +29,36 @@
 
           <div class="space-y-4 min-h-[150px]">
             <div v-if="loadingCandidates" class="flex justify-center items-center h-full py-8">
-              <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin" style="color: var(--text-tertiary)" />
+              <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin text-tertiary" />
             </div>
 
             <div v-else-if="candidates.length === 0" class="text-center py-8">
-              <p style="color: var(--text-secondary)">
+              <p class="text-secondary">
                 No active Maystro orders require manual synchronization.
               </p>
             </div>
 
             <div v-else>
-              <p class="mb-4 text-sm" style="color: var(--text-secondary)">
+              <p class="mb-4 text-sm text-secondary">
                 Found <strong>{{ candidates.length }}</strong> active Maystro order(s) that might need synchronization.
                 Click Start to check their latest status from Maystro.
               </p>
 
               <div v-if="hasStarted" class="space-y-2 mt-4">
-                <div class="flex justify-between text-sm" style="color: var(--text-primary)">
+                <div class="flex justify-between text-sm text-primary">
                   <span>Syncing...</span>
                   <span>{{ currentIndex }} / {{ candidates.length }}</span>
                 </div>
-                <div class="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 overflow-hidden">
+                <div class="w-full surface-2 rounded-full h-2.5 overflow-hidden">
                   <div class="bg-blue-600 h-2.5 rounded-full transition-all duration-300" :style="{ width: `${progressPercentage}%` }"></div>
                 </div>
               </div>
             </div>
 
             <div v-if="syncResults.length > 0 && !isSyncing" class="mt-4">
-              <p class="text-sm font-medium mb-2" style="color: var(--text-primary)">Sync Complete!</p>
-              <ul class="text-sm space-y-1 max-h-32 overflow-y-auto" style="color: var(--text-secondary)">
-                <li v-for="res in syncResults" :key="res.id" class="p-2 rounded bg-gray-50 dark:bg-gray-800">
+              <p class="text-sm font-medium mb-2 text-primary">Sync Complete!</p>
+              <ul class="text-sm space-y-1 max-h-32 overflow-y-auto text-secondary">
+                <li v-for="res in syncResults" :key="res.id" class="p-2 rounded-lg surface-2">
                   <span class="font-medium">Order {{ res.publicId }}:</span> {{ res.statusMessage }}
                 </li>
               </ul>

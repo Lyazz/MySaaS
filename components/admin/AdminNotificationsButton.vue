@@ -1,14 +1,14 @@
 <template>
   <div class="relative">
     <button
-      class="notification-trigger relative flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-150"
-      :class="{ 'notification-trigger--pulse': unreadCount > 0 }"
-      style="border-color: var(--surface-border); color: var(--text-secondary)"
-      aria-label="Notifications"
-      :aria-expanded="isOpen ? 'true' : 'false'"
-      aria-haspopup="dialog"
-      @click="togglePanel"
-    >
+ class="notification-trigger relative flex h-8 w-8 items-center justify-center rounded-lg border transition-all duration-150 border-line text-secondary"
+ :class="{ 'notification-trigger--pulse': unreadCount> 0 }"
+ 
+ aria-label="Notifications"
+ :aria-expanded="isOpen ? 'true' : 'false'"
+ aria-haspopup="dialog"
+ @click="togglePanel"
+>
       <Icon
         name="lucide:bell"
         class="h-4 w-4"
@@ -16,7 +16,7 @@
       <span
         v-if="unreadCount > 0"
         :key="badgeAnimationKey"
-        class="notification-badge absolute -end-1 -top-1 flex min-w-[17px] items-center justify-center rounded-full px-1 text-[9px] font-extrabold leading-[17px]"
+        class="notification-badge absolute -end-1 -top-1 flex min-w-[17px] items-center justify-center rounded-full px-1 text-micro font-extrabold leading-[17px]"
         style="background: var(--brand); color: var(--brand-contrast); border: 1px solid var(--admin-topbar-bg)"
       >
         {{ unreadCount > 9 ? '9+' : unreadCount }}
@@ -36,7 +36,7 @@
           />
 
           <div
-            class="notification-panel absolute start-4 end-4 top-[60px] overflow-hidden rounded-[14px] sm:start-auto sm:end-4 sm:w-[380px]"
+            class="notification-panel absolute start-4 end-4 top-[60px] overflow-hidden rounded-xl sm:start-auto sm:end-4 sm:w-[380px]"
             style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: 0 8px 28px rgba(0,0,0,0.2), 0 2px 6px rgba(0,0,0,0.08)"
             role="dialog"
             aria-modal="true"
@@ -46,9 +46,9 @@
 
             <div class="flex items-center gap-3 px-4 py-3">
               <div
-                class="flex h-[34px] w-[34px] items-center justify-center rounded-[10px] bg-gradient-to-br from-[var(--brand)] to-[#86EFAC]"
-                style="color: var(--brand-contrast)"
-              >
+ class="flex h-[34px] w-[34px] items-center justify-center rounded-xl bg-gradient-to-br from-[var(--brand)] to-[#86EFAC] text-brand-contrast"
+ 
+>
                 <Icon
                   name="lucide:bell"
                   class="h-4 w-4"
@@ -58,46 +58,46 @@
               <div class="min-w-0 flex-1">
                 <div class="flex items-center gap-2">
                   <p
-                    class="truncate text-[13px] font-bold tracking-[-0.02em]"
-                    style="color: var(--text-primary)"
-                  >
+ class="truncate text-sm font-bold tracking-[-0.02em] text-primary"
+ 
+>
                     Notifications
                   </p>
                   <span
-                    v-if="unreadCount > 0"
-                    class="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
-                    style="background: rgba(var(--brand-rgb) / 0.15); color: var(--brand)"
-                  >
+ v-if="unreadCount> 0"
+ class="rounded-full px-1.5 py-0.5 text-micro font-bold ui-wash"
+ 
+>
                     {{ unreadCount }} new
                   </span>
                 </div>
                 <p
-                  class="text-[11px]"
-                  style="color: var(--text-tertiary)"
-                >
+ class="text-mini text-tertiary"
+ 
+>
                   {{ unreadCount === 0 ? 'All caught up' : `${unreadCount} unread notification${unreadCount === 1 ? '' : 's'}` }}
                 </p>
               </div>
 
               <div class="flex items-center gap-1">
                 <button
-                  v-if="unreadCount > 0"
-                  class="notification-action flex h-7 w-7 items-center justify-center rounded-[7px] border transition-all duration-150"
-                  style="border-color: var(--surface-border); color: var(--text-tertiary)"
-                  aria-label="Mark all read"
-                  @click="handleMarkAllRead"
-                >
+ v-if="unreadCount> 0"
+ class="notification-action flex h-7 w-7 items-center justify-center rounded-lg border transition-all duration-150 border-line text-tertiary"
+ 
+ aria-label="Mark all read"
+ @click="handleMarkAllRead"
+>
                   <Icon
                     name="lucide:check-check"
                     class="h-[13px] w-[13px]"
                   />
                 </button>
                 <button
-                  class="notification-action flex h-7 w-7 items-center justify-center rounded-[7px] border transition-all duration-150"
-                  style="border-color: var(--surface-border); color: var(--text-tertiary)"
-                  aria-label="Refresh notifications"
-                  @click="handleRefresh"
-                >
+ class="notification-action flex h-7 w-7 items-center justify-center rounded-lg border transition-all duration-150 border-line text-tertiary"
+ 
+ aria-label="Refresh notifications"
+ @click="handleRefresh"
+>
                   <Icon
                     name="lucide:refresh-cw"
                     class="h-[13px] w-[13px]"
@@ -105,11 +105,11 @@
                   />
                 </button>
                 <button
-                  class="notification-action flex h-7 w-7 items-center justify-center rounded-[7px] border transition-all duration-150"
-                  style="border-color: var(--surface-border); color: var(--text-tertiary)"
-                  aria-label="Close notifications"
-                  @click="closePanel"
-                >
+ class="notification-action flex h-7 w-7 items-center justify-center rounded-lg border transition-all duration-150 border-line text-tertiary"
+ 
+ aria-label="Close notifications"
+ @click="closePanel"
+>
                   <Icon
                     name="lucide:x"
                     class="h-[13px] w-[13px]"
@@ -118,7 +118,7 @@
               </div>
             </div>
 
-            <div style="border-top: 1px solid var(--surface-border)" />
+            <div class="border-t border-line" />
 
             <div class="max-h-[560px] overflow-y-auto">
               <div
@@ -131,16 +131,16 @@
                   class="flex items-start gap-3"
                 >
                   <div
-                    class="h-9 w-9 animate-pulse rounded-[10px]"
-                    style="background: rgba(255,255,255,0.08)"
-                  />
+ class="h-9 w-9 animate-pulse rounded-xl ui-skeleton"
+ 
+ />
                   <div class="flex-1 space-y-2 pt-1">
                     <div
-                      class="h-[11px] animate-pulse rounded"
+                      class="h-[11px] animate-pulse rounded-lg"
                       style="width: 72%; background: rgba(255,255,255,0.08)"
                     />
                     <div
-                      class="h-[9px] animate-pulse rounded"
+                      class="h-[9px] animate-pulse rounded-lg"
                       style="width: 46%; background: rgba(255,255,255,0.05)"
                     />
                   </div>
@@ -162,15 +162,15 @@
                   />
                 </div>
                 <p
-                  class="mt-3 text-[13px] font-bold"
-                  style="color: var(--text-primary)"
-                >
+ class="mt-3 text-sm font-bold text-primary"
+ 
+>
                   All caught up!
                 </p>
                 <p
-                  class="mt-1 text-[11.5px]"
-                  style="color: var(--text-secondary)"
-                >
+ class="mt-1 text-mini text-secondary"
+ 
+>
                   No new notifications right now.
                 </p>
               </div>
@@ -178,9 +178,9 @@
               <div v-else>
                 <template v-if="groupedItems.today.length">
                   <p
-                    class="px-4 pb-1 pt-3 text-[9.5px] font-bold uppercase tracking-[0.12em]"
-                    style="color: var(--text-tertiary)"
-                  >
+ class="px-4 pb-1 pt-3 text-micro font-bold uppercase tracking-[0.12em] text-tertiary"
+ 
+>
                     Today
                   </p>
                   <button
@@ -191,7 +191,7 @@
                     @click="openNotification(item)"
                   >
                     <span
-                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                       :style="item.readAt
                         ? 'background: var(--nav-hover-bg); color: var(--text-tertiary)'
                         : 'background: rgba(var(--brand-rgb) / 0.15); color: var(--brand); border: 1px solid rgba(var(--brand-rgb) / 0.3)'"
@@ -205,46 +205,46 @@
                     <span class="min-w-0 flex-1">
                       <span class="flex items-center gap-1.5">
                         <span
-                          class="truncate text-[12.5px] tracking-[-0.01em]"
+                          class="truncate text-xs tracking-[-0.01em]"
                           :style="item.readAt ? 'color: var(--text-primary); font-weight: 600' : 'color: var(--text-primary); font-weight: 700'"
                         >
                           {{ item.title }}
                         </span>
                         <span
-                          class="ms-auto shrink-0 text-[10px]"
-                          style="color: var(--text-tertiary)"
-                        >
+ class="ms-auto shrink-0 text-micro text-tertiary"
+ 
+>
                           {{ formatAdminNotificationRelative(item.createdAt, locale) }}
                         </span>
                         <span
-                          v-if="!item.readAt"
-                          class="h-1.5 w-1.5 shrink-0 rounded-full"
-                          style="background: var(--brand)"
-                        />
+ v-if="!item.readAt"
+ class="h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
+ 
+ />
                       </span>
                       <span
-                        class="mt-1 line-clamp-2 block text-[11.5px] leading-[1.4]"
-                        style="color: var(--text-secondary)"
-                      >
+ class="mt-1 line-clamp-2 block text-mini leading-[1.4] text-secondary"
+ 
+>
                         {{ item.body }}
                       </span>
                     </span>
 
                     <span class="notification-row-arrow pt-1.5">
                       <Icon
-                        name="lucide:arrow-right"
-                        class="h-[13px] w-[13px]"
-                        style="color: var(--text-tertiary)"
-                      />
+ name="lucide:arrow-right"
+ class="h-[13px] w-[13px] text-tertiary"
+ 
+ />
                     </span>
                   </button>
                 </template>
 
                 <template v-if="groupedItems.earlier.length">
                   <p
-                    class="px-4 pb-1 pt-3 text-[9.5px] font-bold uppercase tracking-[0.12em]"
-                    style="color: var(--text-tertiary)"
-                  >
+ class="px-4 pb-1 pt-3 text-micro font-bold uppercase tracking-[0.12em] text-tertiary"
+ 
+>
                     Earlier
                   </p>
                   <button
@@ -255,7 +255,7 @@
                     @click="openNotification(item)"
                   >
                     <span
-                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-[10px]"
+                      class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl"
                       :style="item.readAt
                         ? 'background: var(--nav-hover-bg); color: var(--text-tertiary)'
                         : 'background: rgba(var(--brand-rgb) / 0.15); color: var(--brand); border: 1px solid rgba(var(--brand-rgb) / 0.3)'"
@@ -269,37 +269,37 @@
                     <span class="min-w-0 flex-1">
                       <span class="flex items-center gap-1.5">
                         <span
-                          class="truncate text-[12.5px] tracking-[-0.01em]"
+                          class="truncate text-xs tracking-[-0.01em]"
                           :style="item.readAt ? 'color: var(--text-primary); font-weight: 600' : 'color: var(--text-primary); font-weight: 700'"
                         >
                           {{ item.title }}
                         </span>
                         <span
-                          class="ms-auto shrink-0 text-[10px]"
-                          style="color: var(--text-tertiary)"
-                        >
+ class="ms-auto shrink-0 text-micro text-tertiary"
+ 
+>
                           {{ formatAdminNotificationRelative(item.createdAt, locale) }}
                         </span>
                         <span
-                          v-if="!item.readAt"
-                          class="h-1.5 w-1.5 shrink-0 rounded-full"
-                          style="background: var(--brand)"
-                        />
+ v-if="!item.readAt"
+ class="h-1.5 w-1.5 shrink-0 rounded-full bg-brand"
+ 
+ />
                       </span>
                       <span
-                        class="mt-1 line-clamp-2 block text-[11.5px] leading-[1.4]"
-                        style="color: var(--text-secondary)"
-                      >
+ class="mt-1 line-clamp-2 block text-mini leading-[1.4] text-secondary"
+ 
+>
                         {{ item.body }}
                       </span>
                     </span>
 
                     <span class="notification-row-arrow pt-1.5">
                       <Icon
-                        name="lucide:arrow-right"
-                        class="h-[13px] w-[13px]"
-                        style="color: var(--text-tertiary)"
-                      />
+ name="lucide:arrow-right"
+ class="h-[13px] w-[13px] text-tertiary"
+ 
+ />
                     </span>
                   </button>
                 </template>
@@ -307,12 +307,12 @@
             </div>
 
             <template v-if="items.length > 0">
-              <div style="border-top: 1px solid var(--surface-border)" />
+              <div class="border-t border-line" />
               <button
-                class="notification-footer flex w-full items-center justify-center gap-1 px-4 py-[11px] text-[12px] font-semibold transition-all duration-150"
-                style="color: var(--text-tertiary)"
-                @click="goToAllNotifications"
-              >
+ class="notification-footer flex w-full items-center justify-center gap-1 px-4 py-[11px] text-xs font-semibold transition-all duration-150 text-tertiary"
+ 
+ @click="goToAllNotifications"
+>
                 <span>View all notifications</span>
                 <Icon
                   name="lucide:arrow-right"

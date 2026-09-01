@@ -1,24 +1,24 @@
 <template>
   <div
-    class="super-admin-shell admin-shell min-h-screen flex font-sans"
-    style="background: var(--admin-content-bg); color: var(--text-secondary);"
-    :style="superAdminStyle"
-  >
+ class="super-admin-shell admin-shell min-h-screen flex font-sans bg-admin text-secondary"
+ 
+ :style="superAdminStyle"
+>
     <!-- Mobile Backdrop -->
     <div 
       v-if="sidebarOpen" 
-      class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-20 lg:hidden transition-opacity"
+      class="fixed inset-0 surface-1 backdrop-blur-sm z-20 lg:hidden transition-opacity"
       @click="sidebarOpen = false"
     ></div>
 
     <!-- Sidebar -->
-    <aside :class="[
-      'text-white transition-all duration-300 flex flex-col shadow-2xl z-30',
-      'fixed inset-y-0 start-0 lg:static', // Mobile fixed, Desktop static
-      sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'
-    ]" style="background: var(--admin-sidebar-bg); border-right: 1px solid var(--admin-sidebar-border);">
+    <aside class="bg-sidebar border-e border-sidebar" :class="[
+ 'text-primary transition-all duration-300 flex flex-col shadow-2xl z-30',
+ 'fixed inset-y-0 start-0 lg:static', // Mobile fixed, Desktop static
+ sidebarOpen ? 'translate-x-0 w-72' : '-translate-x-full lg:translate-x-0 lg:w-20'
+ ]">
       <!-- Logo/Brand -->
-      <div class="h-16 flex items-center justify-between px-6 border-b border-white/5" style="background: var(--admin-sidebar-bg);">
+      <div class="h-16 flex items-center justify-between px-6 border-b border-line bg-sidebar">
         <div class="flex items-center gap-3 overflow-hidden">
           <SaaSLogo
             size="md"
@@ -35,7 +35,7 @@
         </div>
         <button 
           @click="toggleSidebar" 
-          class="p-1.5 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors lg:hidden"
+          class="p-1.5 text-tertiary hover:text-primary hover:bg-hover rounded-lg transition-colors lg:hidden"
           :aria-label="t('superAdmin.layout.closeSidebar')"
         >
           <Icon name="lucide:x" class="w-5 h-5" />
@@ -49,13 +49,13 @@
           :key="item.path"
           :to="item.path"
           class="group flex items-center px-3 py-2.5 rounded-lg transition-all duration-200 mb-1 relative overflow-hidden h-11"
-          active-class="text-white bg-white/10 shadow-sm ring-1 ring-white/20"
-          :class="['text-slate-400 hover:text-white hover:bg-white/5', sidebarOpen ? 'justify-start gap-3' : 'justify-center gap-0']"
+          active-class="text-primary surface-3 shadow-sm ring-1 ring-white/20"
+          :class="['text-tertiary hover:text-primary hover:bg-hover', sidebarOpen ? 'justify-start gap-3' : 'justify-center gap-0']"
         >
           <!-- Active Indicator Strip -->
           <div 
             v-if="route.path === item.path"
-            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full [background:var(--brand)]"
+            class="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-e-full [background:var(--brand)]"
           ></div>
 
           <div class="relative shrink-0">
@@ -66,10 +66,10 @@
             />
             <!-- Pending badge on collapsed icon -->
             <span
-              v-if="item.badge && !sidebarOpen"
-              class="absolute -top-1.5 -end-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-[9px] font-bold leading-none text-white"
-              style="background: var(--brand)"
-            >
+ v-if="item.badge && !sidebarOpen"
+ class="absolute -top-1.5 -end-1.5 flex h-[14px] min-w-[14px] items-center justify-center rounded-full px-0.5 text-micro font-bold leading-none text-brand-contrast bg-brand"
+ 
+>
               {{ item.badge }}
             </span>
           </div>
@@ -83,20 +83,20 @@
 
           <!-- Pending badge on expanded label -->
           <span
-            v-if="item.badge && sidebarOpen"
-            class="ms-auto flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full px-1.5 text-[10px] font-bold leading-none text-white"
-            style="background: var(--brand)"
-          >
+ v-if="item.badge && sidebarOpen"
+ class="ms-auto flex h-5 min-w-[20px] shrink-0 items-center justify-center rounded-full px-1.5 text-micro font-bold leading-none text-brand-contrast bg-brand"
+ 
+>
             {{ item.badge }}
           </span>
           
           <!-- Tooltip for collapsed state -->
           <div 
             v-if="!sidebarOpen" 
-            class="fixed start-16 px-3 py-1.5 bg-slate-800 text-white text-xs font-medium rounded-md opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-white/10 ms-2"
+            class="fixed start-16 px-3 py-1.5 surface-2 text-brand-contrast text-xs font-medium rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-50 pointer-events-none shadow-xl border border-line ms-2"
           >
             {{ item.label }}
-            <span v-if="item.badge" class="ms-1.5 rounded-full px-1.5 py-0.5 text-[10px] font-bold text-white" style="background: var(--brand)">
+            <span v-if="item.badge" class="ms-1.5 rounded-full px-1.5 py-0.5 text-micro font-bold text-brand-contrast bg-brand">
               {{ item.badge }}
             </span>
           </div>
@@ -104,20 +104,20 @@
       </nav>
 
       <!-- User Section -->
-      <div class="p-4 border-t border-white/5 bg-black/20">
+      <div class="p-4 border-t border-line bg-black/20">
         <div 
-          class="flex items-center rounded-xl hover:bg-white/5 transition-colors cursor-pointer group"
+          class="flex items-center rounded-xl hover:bg-hover transition-colors cursor-pointer group"
           :class="sidebarOpen ? 'gap-3 p-2' : 'gap-0 justify-center p-2'"
         >
-          <div class="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-sm font-bold text-slate-300 ring-2 ring-transparent group-hover:ring-white/20 transition-all shrink-0">
+          <div class="w-10 h-10 rounded-full surface-2 flex items-center justify-center text-sm font-bold text-tertiary ring-2 ring-transparent group-hover:ring-white/20 transition-all shrink-0">
             {{ userInitial }}
           </div>
           <div 
             class="min-w-0 transition-all duration-300 overflow-hidden"
             :class="sidebarOpen ? 'w-auto opacity-100 ms-3' : 'w-0 opacity-0 ms-0'"
           >
-            <p class="text-sm font-medium text-slate-200 truncate">{{ authStore.user?.email }}</p>
-            <p class="text-xs text-slate-500 truncate mt-0.5">{{ t('superAdmin.layout.role') }}</p>
+            <p class="text-sm font-medium text-secondary truncate">{{ authStore.user?.email }}</p>
+            <p class="text-xs text-secondary truncate mt-0.5">{{ t('superAdmin.layout.role') }}</p>
           </div>
         </div>
       </div>
@@ -133,21 +133,21 @@
         <div class="px-6 h-16 flex items-center justify-between">
           <div class="flex items-center gap-4">
             <button 
-              @click="toggleSidebar" 
-              class="p-2 -ms-2 rounded-lg transition-colors"
-              style="color: var(--text-secondary)"
-              @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }"
-              @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }"
-              :aria-label="t('superAdmin.layout.toggleSidebar')"
-            >
+ @click="toggleSidebar" 
+ class="p-2 -ms-2 rounded-lg transition-colors text-secondary"
+ 
+ @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)'; (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }"
+ @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.color = 'var(--text-secondary)'; (e.currentTarget as HTMLElement).style.background = 'transparent' }"
+ :aria-label="t('superAdmin.layout.toggleSidebar')"
+>
               <Icon name="lucide:menu" class="w-6 h-6" />
             </button>
-            <h1 class="text-xl font-sans font-semibold tracking-tight" style="color: var(--text-primary)">{{ pageTitle }}</h1>
+            <h1 class="text-xl font-sans font-semibold tracking-tight text-primary">{{ pageTitle }}</h1>
             <span
-              class="hidden sm:inline-block text-[10px] font-mono tracking-wide"
-              style="color: var(--text-muted)"
-              :title="`Build ${buildMarker}`"
-            >
+ class="hidden sm:inline-block text-micro font-mono tracking-wide text-muted"
+ 
+ :title="`Build ${buildMarker}`"
+>
               {{ buildMarker }}
             </span>
           </div>
@@ -167,7 +167,7 @@
       </header>
 
       <!-- Page Content -->
-      <main class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar" style="background: var(--admin-content-bg);">
+      <main class="flex-1 overflow-y-auto p-6 md:p-8 custom-scrollbar bg-admin">
         <div class="super-admin-content max-w-7xl mx-auto animate-fadeIn">
           <slot />
         </div>
@@ -297,64 +297,21 @@ function handleLogout() {
 </script>
 
 <style>
-.super-admin-shell .super-admin-content .bg-white {
-  background: var(--surface-1) !important;
-}
-
-.super-admin-shell .super-admin-content .bg-slate-50,
-.super-admin-shell .super-admin-content .bg-slate-50\/50,
-.super-admin-shell .super-admin-content .bg-slate-50\/60,
-.super-admin-shell .super-admin-content .bg-slate-100 {
-  background: var(--surface-2) !important;
-}
-
-.super-admin-shell .super-admin-content .text-gray-900,
-.super-admin-shell .super-admin-content .text-gray-800,
-.super-admin-shell .super-admin-content .text-slate-900,
-.super-admin-shell .super-admin-content .text-slate-800 {
-  color: var(--text-primary) !important;
-}
-
-.super-admin-shell .super-admin-content .text-gray-700,
-.super-admin-shell .super-admin-content .text-gray-600,
-.super-admin-shell .super-admin-content .text-gray-500,
-.super-admin-shell .super-admin-content .text-slate-700,
-.super-admin-shell .super-admin-content .text-slate-600,
-.super-admin-shell .super-admin-content .text-slate-500,
-.super-admin-shell .super-admin-content .text-slate-400 {
-  color: var(--text-secondary) !important;
-}
-
-.super-admin-shell .super-admin-content .placeholder-gray-400,
-.super-admin-shell .super-admin-content .placeholder-slate-400 {
-  --tw-placeholder-opacity: 1 !important;
-  color: var(--text-tertiary) !important;
-}
-
-.super-admin-shell .super-admin-content .border-slate-100,
-.super-admin-shell .super-admin-content .border-slate-200,
-.super-admin-shell .super-admin-content .border-slate-300,
-.super-admin-shell .super-admin-content .divide-slate-100 {
-  border-color: var(--surface-border) !important;
-}
-
-.super-admin-shell .super-admin-content .hover\:bg-slate-50:hover,
-.super-admin-shell .super-admin-content .hover\:bg-slate-100:hover,
-.super-admin-shell .super-admin-content .hover\:bg-slate-200:hover {
-  background: var(--nav-hover-bg) !important;
-}
-
-.super-admin-shell .super-admin-content input,
-.super-admin-shell .super-admin-content select,
-.super-admin-shell .super-admin-content textarea {
+/*
+ * The shell used to carry ~30 rules whose only job was repainting hardcoded
+ * `bg-white` / `text-slate-*` back to dark. Those screens now use the token
+ * utilities directly, so the overrides are gone. What is left is the input
+ * styling for the handful of native controls that are not `.ui-input` yet.
+ */
+.super-admin-shell .super-admin-content :is(input, select, textarea):not(.ui-input) {
   background: var(--surface-2);
   border-color: var(--surface-border);
   color: var(--text-primary);
 }
 
 .super-admin-shell .super-admin-content code {
-  background: var(--surface-2) !important;
-  color: var(--text-secondary) !important;
-  border-color: var(--surface-border) !important;
+  background: var(--surface-2);
+  color: var(--text-secondary);
+  border-color: var(--surface-border);
 }
 </style>

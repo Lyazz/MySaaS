@@ -1,25 +1,25 @@
 <template>
   <Teleport to="body">
     <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 py-8 bg-black/70 backdrop-blur-sm" @click.self="$emit('close')">
-      <div class="rounded-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
+      <div class="rounded-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh] surface-2 border border-line shadow-overlay">
         <!-- Header -->
         <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
-          <h2 class="text-xl font-bold" style="color: var(--text-primary)">
+          <h2 class="text-xl font-bold text-primary">
             {{ t('admin.pages.pos.paymentModal.title') }}
           </h2>
-          <button class="p-2 rounded-lg transition-colors" style="color: var(--text-muted)" @click="$emit('close')">
+          <button class="p-2 rounded-lg transition-colors text-muted" @click="$emit('close')">
             <Icon name="lucide:x" class="w-6 h-6" />
           </button>
         </div>
 
-        <div class="flex flex-1 min-h-0" style="border-color: var(--surface-border)">
+        <div class="flex flex-1 min-h-0 border-line">
           <!-- Left: Payment Details -->
           <div class="flex-1 p-4 lg:p-5 flex flex-col overflow-y-auto">
             <div class="text-center mb-4">
-              <div class="text-sm font-medium lg:mb-1" style="color: var(--text-tertiary)">
+              <div class="text-sm font-medium lg:mb-1 text-tertiary">
                 {{ t('admin.pages.pos.paymentModal.totalToPay') }}
               </div>
-              <div class="text-4xl font-extrabold tracking-tight" style="color: var(--text-primary)">
+              <div class="text-4xl font-extrabold tracking-tight text-primary">
                 {{ formatCurrency(total) }}
               </div>
             </div>
@@ -52,11 +52,11 @@
                 <label class="ui-label block mb-1.5">{{ t('admin.pages.pos.paymentModal.cashReceived') }}</label>
                 <div class="flex items-center px-4 py-2 rounded-xl border-2 [border-color:var(--brand)]" style="background: var(--surface-3); box-shadow: 0 0 0 3px rgba(var(--brand-rgb)/0.1)">
                   <Icon name="lucide:banknote" class="w-5 h-5 [color:rgba(var(--brand-rgb)/0.85)] mr-3" />
-                  <div class="flex-1 text-2xl font-bold" style="color: var(--text-primary)">
-                    <span v-if="!cashReceivedString" style="color: var(--text-muted)">0</span>
+                  <div class="flex-1 text-2xl font-bold text-primary">
+                    <span class="text-muted" v-if="!cashReceivedString">0</span>
                     {{ cashReceivedString }}
                   </div>
-                  <button v-if="cashReceivedString" class="p-1 rounded-full transition-colors hover:text-red-400" style="color: var(--text-muted)" @click="clearCash">
+                  <button v-if="cashReceivedString" class="p-1 rounded-full transition-colors hover:text-red-400 text-muted" @click="clearCash">
                     <Icon name="lucide:delete" class="w-5 h-5" />
                   </button>
                 </div>
@@ -95,13 +95,13 @@
             <!-- Card View -->
             <template v-else>
               <div class="flex-1 flex flex-col items-center justify-center text-center p-8">
-                <div class="w-24 h-24 rounded-full flex items-center justify-center mb-6 animate-pulse" style="background: var(--surface-3)">
-                  <Icon name="lucide:credit-card" class="w-12 h-12" style="color: var(--text-muted)" />
+                <div class="w-24 h-24 rounded-full flex items-center justify-center mb-6 animate-pulse surface-3">
+                  <Icon name="lucide:credit-card" class="w-12 h-12 text-muted" />
                 </div>
-                <h3 class="text-xl font-bold mb-2" style="color: var(--text-primary)">
+                <h3 class="text-xl font-bold mb-2 text-primary">
                   {{ t('admin.pages.pos.paymentModal.card.chargeToCard', { amount: formatCurrency(total) }) }}
                 </h3>
-                <p style="color: var(--text-secondary)">{{ t('admin.pages.pos.paymentModal.card.waiting') }}</p>
+                <p class="text-secondary">{{ t('admin.pages.pos.paymentModal.card.waiting') }}</p>
               </div>
             </template>
           </div>
@@ -109,7 +109,7 @@
           <!-- Right: Numpad -->
           <div class="w-72 p-4 lg:p-5 flex flex-col justify-center" style="background: var(--surface-3); border-left: 1px solid var(--surface-border)">
             <div class="mb-2 text-center">
-              <span class="text-[10px] font-bold uppercase tracking-wider" style="color: var(--text-muted)">{{ t('admin.pages.pos.paymentModal.keypad') }}</span>
+              <span class="text-micro font-bold uppercase tracking-wider text-muted">{{ t('admin.pages.pos.paymentModal.keypad') }}</span>
             </div>
             <PosNumberPad
               :allow-decimal="true"
@@ -125,7 +125,7 @@
         <div class="p-4" style="border-top: 1px solid var(--surface-border); background: var(--surface-2)">
           <button
             class="w-full h-12 rounded-xl font-bold text-base flex items-center justify-center gap-2 transition-all transform active:scale-[0.98]"
-            :class="canConfirm ? '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-white' : 'cursor-not-allowed opacity-40'"
+            :class="canConfirm ? '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-brand-contrast' : 'cursor-not-allowed opacity-40'"
             :style="!canConfirm ? 'background: var(--surface-3); color: var(--text-muted)' : ''"
             :disabled="!canConfirm"
             @click="confirmPayment"

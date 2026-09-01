@@ -94,10 +94,10 @@ onMounted(load)
   <div class="space-y-6">
     <div class="flex items-center justify-between gap-4">
       <div>
-        <h1 class="text-xl font-semibold text-slate-900 dark:text-slate-100">
+        <h1 class="text-xl font-semibold text-primary">
           Device requests
         </h1>
-        <p class="mt-1 text-sm text-slate-500">
+        <p class="mt-1 text-sm text-secondary">
           A tenant is limited to its licensed number of devices. Approving a
           request that replaces a device frees the old seat and revokes it.
         </p>
@@ -105,7 +105,7 @@ onMounted(load)
 
       <select
         v-model="statusFilter"
-        class="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-900"
+        class="rounded-lg border border-line surface-1 px-3 py-2 text-sm"
         @change="load"
       >
         <option value="PENDING">Pending</option>
@@ -122,11 +122,11 @@ onMounted(load)
       {{ error }}
     </p>
 
-    <p v-if="loading" class="text-sm text-slate-500">Loading…</p>
+    <p v-if="loading" class="text-sm text-secondary">Loading…</p>
 
     <p
       v-else-if="!requests.length"
-      class="rounded-lg border border-dashed border-slate-300 px-4 py-10 text-center text-sm text-slate-500 dark:border-slate-700"
+      class="rounded-lg border border-dashed border-line px-4 py-10 text-center text-sm text-secondary"
     >
       Nothing waiting.
     </p>
@@ -135,17 +135,17 @@ onMounted(load)
       <article
         v-for="request in requests"
         :key="request.id"
-        class="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900"
+        class="rounded-xl border border-line surface-1 p-4"
       >
         <div class="flex flex-wrap items-start justify-between gap-3">
           <div class="min-w-0">
-            <p class="font-medium text-slate-900 dark:text-slate-100">
+            <p class="font-medium text-primary">
               {{ request.deviceName || 'Unnamed device' }}
-              <span class="ml-2 text-xs font-normal text-slate-500">
+              <span class="ml-2 text-xs font-normal text-secondary">
                 {{ request.devicePlatform || 'unknown' }}
               </span>
             </p>
-            <p class="mt-0.5 text-sm text-slate-500">
+            <p class="mt-0.5 text-sm text-secondary">
               <NuxtLink
                 v-if="request.tenant"
                 :to="`/super-admin/tenants/${request.tenantId}`"
@@ -156,7 +156,7 @@ onMounted(load)
               <span v-else>{{ request.tenantId }}</span>
               · seats: {{ request.license?.maxDevices ?? '?' }}
             </p>
-            <p class="mt-1 font-mono text-xs text-slate-400">
+            <p class="mt-1 font-mono text-xs text-tertiary">
               {{ mask(request.hardwareId) }}
             </p>
           </div>
@@ -166,7 +166,7 @@ onMounted(load)
             :class="{
               'bg-amber-100 text-amber-800': request.status === 'PENDING',
               'bg-emerald-100 text-emerald-800': request.status === 'APPROVED',
-              'bg-slate-200 text-slate-700': !['PENDING', 'APPROVED'].includes(request.status)
+              'surface-2 text-secondary': !['PENDING', 'APPROVED'].includes(request.status)
             }"
           >
             {{ request.status }}
@@ -175,24 +175,24 @@ onMounted(load)
 
         <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-2">
           <div v-if="request.reason">
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Reason</dt>
-            <dd class="text-slate-700 dark:text-slate-300">{{ request.reason }}</dd>
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Reason</dt>
+            <dd class="text-secondary">{{ request.reason }}</dd>
           </div>
           <div v-if="request.replacesDeviceId">
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Replaces</dt>
-            <dd class="font-mono text-xs text-slate-700 dark:text-slate-300">
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Replaces</dt>
+            <dd class="font-mono text-xs text-secondary">
               {{ request.replacesDeviceId }}
             </dd>
           </div>
           <div>
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Requested</dt>
-            <dd class="text-slate-700 dark:text-slate-300">
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Requested</dt>
+            <dd class="text-secondary">
               {{ formatDate(request.createdAt) }}
             </dd>
           </div>
           <div v-if="request.decidedAt">
-            <dt class="text-xs uppercase tracking-wide text-slate-400">Decided</dt>
-            <dd class="text-slate-700 dark:text-slate-300">
+            <dt class="text-xs uppercase tracking-wide text-tertiary">Decided</dt>
+            <dd class="text-secondary">
               {{ formatDate(request.decidedAt) }}
               <span v-if="request.decisionNote"> — {{ request.decisionNote }}</span>
             </dd>
@@ -203,11 +203,11 @@ onMounted(load)
           <input
             v-model="notes[request.id]"
             placeholder="Note (optional)"
-            class="min-w-0 flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm dark:border-slate-700 dark:bg-slate-950"
+            class="min-w-0 flex-1 rounded-lg border border-line px-3 py-2 text-sm"
           >
           <button
             type="button"
-            class="rounded-lg bg-emerald-600 px-4 py-2 text-sm font-medium text-white disabled:opacity-50"
+            class="ui-btn ui-btn--primary ui-btn--md"
             :disabled="busyId === request.id"
             @click="decide(request, 'approve')"
           >
@@ -215,7 +215,7 @@ onMounted(load)
           </button>
           <button
             type="button"
-            class="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 disabled:opacity-50 dark:border-slate-700 dark:text-slate-200"
+            class="rounded-lg border border-line px-4 py-2 text-sm font-medium text-secondary disabled:opacity-50"
             :disabled="busyId === request.id"
             @click="decide(request, 'deny')"
           >

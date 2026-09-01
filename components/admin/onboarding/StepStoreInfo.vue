@@ -1,7 +1,7 @@
 <template>
   <div class="space-y-5">
     <div>
-      <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+      <h3 class="text-lg font-semibold text-primary">
         {{ t('admin.pages.onboarding.storeInfo.title') }}
       </h3>
     </div>
@@ -23,14 +23,14 @@
       <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.storeInfo.logoLabel') }}</label>
       <div class="flex items-center gap-4">
         <div
-          v-if="modelValue.logoUrl"
-          class="w-16 h-16 rounded-lg overflow-hidden border shrink-0"
-          style="border-color: var(--surface-border)"
-        >
+ v-if="modelValue.logoUrl"
+ class="w-16 h-16 rounded-lg overflow-hidden border shrink-0 border-line"
+ 
+>
           <img :src="modelValue.logoUrl" alt="logo" class="w-full h-full object-contain">
         </div>
-        <div v-else class="w-16 h-16 rounded-lg flex items-center justify-center shrink-0" style="background: var(--surface-3); border: 1px dashed var(--surface-border)">
-          <Icon name="lucide:image" class="w-6 h-6" style="color: var(--text-muted)" />
+        <div v-else class="w-16 h-16 rounded-lg flex items-center justify-center shrink-0 ui-dropzone surface-3">
+          <Icon name="lucide:image" class="w-6 h-6 text-muted" />
         </div>
         <div class="flex flex-col gap-1">
           <label class="ui-btn ui-btn--secondary px-3 py-1.5 text-sm cursor-pointer inline-flex items-center gap-2">
@@ -38,9 +38,9 @@
             {{ modelValue.logoUrl ? t('admin.pages.onboarding.storeInfo.logoChange') : t('admin.pages.onboarding.storeInfo.logoUpload') }}
             <input type="file" accept="image/*" class="sr-only" @change="onLogoChange">
           </label>
-          <p class="text-xs" style="color: var(--text-muted)">{{ t('admin.pages.onboarding.storeInfo.logoHint') }}</p>
+          <p class="text-xs text-muted">{{ t('admin.pages.onboarding.storeInfo.logoHint') }}</p>
         </div>
-        <div v-if="uploading" class="text-sm" style="color: var(--text-secondary)">
+        <div v-if="uploading" class="text-sm text-secondary">
           <div class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 [border-color:var(--brand)]" />
         </div>
       </div>

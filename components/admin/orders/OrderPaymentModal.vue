@@ -17,7 +17,7 @@
           </div>
           <button
             type="button"
-            class="rounded-md p-2 text-tertiary hover:surface-2 hover:text-primary transition-colors"
+            class="rounded-lg p-2 text-tertiary hover:surface-2 hover:text-primary transition-colors"
             @click="handleCancel"
           >
             <Icon name="lucide:x" class="h-5 w-5" />

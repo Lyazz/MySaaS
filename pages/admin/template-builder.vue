@@ -358,7 +358,7 @@ const fontOptions = [
   { value: 'template', label: 'Template', stack: 'inherit' },
   { value: 'sans', label: 'Sans', stack: "'DM Sans', system-ui, sans-serif" },
   { value: 'editorial', label: 'Editorial', stack: "'Playfair Display', Georgia, serif" },
-  { value: 'rounded', label: 'Rounded', stack: "'Nunito', system-ui, sans-serif" }
+  { value: 'rounded-lg', label: 'Rounded', stack: "'Nunito', system-ui, sans-serif" }
 ]
 
 const surfaceOptions = [

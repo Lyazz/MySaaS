@@ -19,21 +19,13 @@ definePageMeta({
             <SaaSLogo size="sm" />
           </div>
 
-          <span class="cinematic-pill mx-auto">
-            <span class="cinematic-pill__dot" />
-            {{ t('common.siteClosed.badge') }}
-          </span>
-
-          <div class="mx-auto mt-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
+          <div class="mx-auto mt-2 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
             <Icon name="lucide:lock" class="h-6 w-6 text-lime-neon" />
           </div>
 
           <h1 class="cinematic-headline mt-6 !text-3xl md:!text-4xl">
             {{ t('common.siteClosed.title') }}
           </h1>
-          <p class="cinematic-subhead mx-auto mt-4 max-w-md">
-            {{ t('common.siteClosed.message') }}
-          </p>
 
           <div class="mt-8 text-sm text-[color:var(--m-text-dim)]">
             {{ t('common.siteClosed.haveAccount') }}

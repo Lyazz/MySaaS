@@ -1,10 +1,13 @@
 /*
- * Settings design system.
+ * Settings-page layout.
  *
- * Every settings page renders inside `.settings-page` (see SettingsShell), so
- * these primitives are namespaced under it rather than leaking into the rest of
- * the admin. Each form used to carry its own private copy of the field, toggle
- * row and toast styles; they live here once now.
+ * The look of fields, buttons, toggle rows, focus rings and touch targets now
+ * lives once in `main.css` alongside the rest of the `.ui-*` kit — the legacy
+ * `.field-*` / `.settings-btn` / `.toggle-row` spellings are listed there as
+ * extra selectors so this screen keeps working while its markup migrates.
+ *
+ * What remains here is what is genuinely settings-only: the save-bar clearance
+ * and the grid/adornment layout its forms are built on.
  *
  * Directional values use logical properties throughout — the admin ships in
  * Arabic and every one of these rules mirrors under `dir="rtl"`.
@@ -15,7 +18,7 @@
   padding-block-end: 132px;
 }
 
-/* ── Fields ─────────────────────────────────────────────────────────── */
+/* ── Field layout ───────────────────────────────────────────── */
 
 .settings-page .field-grid {
   display: grid;
@@ -32,75 +35,6 @@
   flex-direction: column;
   gap: 6px;
   min-width: 0;
-}
-
-.settings-page .field-label {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  letter-spacing: -0.005em;
-}
-
-.settings-page .field-input,
-.settings-page .field-textarea,
-.settings-page .field-select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-1);
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 13.5px;
-  /* 16px on coarse pointers stops iOS Safari zooming the page on focus. */
-  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
-}
-
-.settings-page .field-textarea {
-  min-height: 110px;
-  resize: vertical;
-  line-height: 1.6;
-}
-
-.settings-page .field-input::placeholder,
-.settings-page .field-textarea::placeholder {
-  color: var(--text-muted);
-}
-
-.settings-page .field-input:focus,
-.settings-page .field-textarea:focus,
-.settings-page .field-select:focus {
-  outline: none;
-  border-color: var(--brand);
-  box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.18);
-}
-
-.settings-page .field-input:disabled,
-.settings-page .field-textarea:disabled {
-  opacity: 0.55;
-  cursor: not-allowed;
-}
-
-.settings-page .field-input[aria-invalid='true'],
-.settings-page .field-textarea[aria-invalid='true'] {
-  border-color: #f87171;
-}
-
-.settings-page .field-input[aria-invalid='true']:focus,
-.settings-page .field-textarea[aria-invalid='true']:focus {
-  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.2);
-}
-
-.settings-page .field-hint {
-  font-size: 11.5px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
-}
-
-.settings-page .field-error {
-  font-size: 11.5px;
-  color: #f87171;
-  line-height: 1.5;
 }
 
 /* Input + suffix pairs (store slug, order prefixes, unit labels). */
@@ -122,8 +56,9 @@
   padding: 0 12px;
   background: var(--surface-3);
   border: 1px solid var(--surface-border);
-  border-start-end-radius: 10px;
-  border-end-end-radius: 10px;
+  /* Matches the 8px of `rounded-lg` on `.ui-input`. */
+  border-start-end-radius: 0.5rem;
+  border-end-end-radius: 0.5rem;
   font-size: 13px;
   color: var(--text-tertiary);
   font-family: ui-monospace, monospace;
@@ -140,76 +75,15 @@
   max-width: 160px;
 }
 
-/* ── Toggle rows ────────────────────────────────────────────────────── */
-
-.settings-page .toggle-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.settings-page .toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 14px 16px;
-  background: var(--surface-1);
-  border: 1px solid var(--surface-border);
-  border-radius: 12px;
-  transition: border-color 0.15s ease, background 0.15s ease;
-}
-
-.settings-page .toggle-row:hover {
-  border-color: var(--surface-border-hover);
-}
-
-.settings-page .toggle-row-disabled {
-  opacity: 0.55;
-}
-
-.settings-page .toggle-row-info {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  min-width: 0;
-}
+/* ── Toggle row modifiers ─────────────────────────────────────── */
 
 .settings-page .toggle-row-flex {
   flex-wrap: wrap;
 }
 
-.settings-page .toggle-row-icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  flex-shrink: 0;
-  border-radius: 9px;
-  background: var(--surface-3);
-  color: var(--text-secondary);
-}
-
-.settings-page .toggle-row-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.settings-page .toggle-row-subtitle {
-  margin-top: 3px;
-  font-size: 11.5px;
-  color: var(--text-tertiary);
-  line-height: 1.5;
-}
-
+/* "Coming soon" marker on a row that is present but not yet switchable. */
 .settings-page .toggle-row-soon {
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
@@ -217,163 +91,4 @@
   border-radius: 999px;
   background: var(--surface-3);
   color: var(--text-tertiary);
-}
-
-/* A toggle row whose body reveals extra fields when switched on. */
-.settings-page .toggle-row-expanded {
-  flex-direction: column;
-  align-items: stretch;
-}
-
-.settings-page .toggle-row-expanded-body {
-  margin-block-start: 16px;
-  padding-block-start: 16px;
-  border-block-start: 1px solid var(--surface-border);
-}
-
-/* ── Inline actions ─────────────────────────────────────────────────── */
-
-.settings-page .settings-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  padding: 9px 14px;
-  min-height: 38px;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  border-radius: 10px;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-2);
-  color: var(--text-secondary);
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.settings-page .settings-btn:hover:not(:disabled) {
-  background: var(--nav-hover-bg);
-  border-color: var(--surface-border-hover);
-  color: var(--text-primary);
-}
-
-.settings-page .settings-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.settings-page .settings-btn-primary {
-  background: var(--brand);
-  border-color: var(--brand);
-  color: var(--brand-contrast);
-}
-
-.settings-page .settings-btn-primary:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--brand) 88%, #fff);
-  border-color: color-mix(in srgb, var(--brand) 88%, #fff);
-  color: var(--brand-contrast);
-}
-
-.settings-page .settings-btn-danger {
-  background: rgba(239, 68, 68, 0.12);
-  border-color: rgba(239, 68, 68, 0.28);
-  color: #f87171;
-}
-
-.settings-page .settings-btn-danger:hover:not(:disabled) {
-  background: rgba(239, 68, 68, 0.2);
-  border-color: rgba(239, 68, 68, 0.4);
-  color: #fca5a5;
-}
-
-/* ── Focus ──────────────────────────────────────────────────────────── */
-
-/*
- * Every interactive element in settings gets the same ring. Inputs opt out
- * because they already render a border + glow on :focus.
- */
-.settings-page a:focus-visible,
-.settings-page button:focus-visible,
-.settings-page [role='switch']:focus-visible,
-.settings-page summary:focus-visible {
-  outline: 2px solid var(--brand);
-  outline-offset: 2px;
-  border-radius: 8px;
-}
-
-/* ── Motion ─────────────────────────────────────────────────────────── */
-
-@media (prefers-reduced-motion: reduce) {
-  .settings-page *,
-  .settings-page *::before,
-  .settings-page *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-/* ── Touch targets ──────────────────────────────────────────────────── */
-
-/*
- * Coarse pointers get 44px targets and 16px input text (below 16px, iOS Safari
- * zooms the viewport when a field takes focus and never zooms back out).
- */
-@media (pointer: coarse) {
-  .settings-page .field-input,
-  .settings-page .field-textarea,
-  .settings-page .field-select {
-    font-size: 16px;
-    padding: 11px 13px;
-  }
-
-  .settings-page .settings-btn {
-    min-height: 44px;
-    padding: 11px 16px;
-  }
-}
-
-/* ── Page header actions ────────────────────────────────────────────── */
-
-/*
- * The buttons that sit next to a settings page title. Shared base; forms add
- * their own modifier for anything that needs to stand out (Appearance's magic
- * identity, Contact's add-contact).
- */
-.settings-page .header-action {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 9px 14px;
-  min-height: 38px;
-  font-family: inherit;
-  font-size: 12.5px;
-  font-weight: 600;
-  border-radius: 10px;
-  border: 1px solid var(--surface-border);
-  background: var(--surface-2);
-  color: var(--text-secondary);
-  text-decoration: none;
-  cursor: pointer;
-  white-space: nowrap;
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-
-.settings-page .header-action:hover:not(:disabled) {
-  background: var(--nav-hover-bg);
-  border-color: var(--surface-border-hover);
-  color: var(--text-primary);
-}
-
-.settings-page .header-action:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-@media (pointer: coarse) {
-  .settings-page .header-action {
-    min-height: 44px;
-  }
 }

@@ -57,10 +57,10 @@
           style="background: var(--surface-1); border: 1px solid var(--surface-border); --tw-ring-color: var(--surface-border)"
         >
           <div
-            v-if="model.lockedNote"
-            class="px-3 py-2 text-xs"
-            style="color: var(--text-tertiary); background: var(--surface-2); border-bottom: 1px solid var(--surface-border)"
-          >
+ v-if="model.lockedNote"
+ class="px-3 py-2 text-xs text-tertiary surface-2 border-b border-line"
+ 
+>
             <Icon
               name="lucide:lock"
               class="w-3 h-3 inline-block me-1 -mt-0.5"

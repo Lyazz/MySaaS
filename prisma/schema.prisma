@@ -75,6 +75,7 @@ model Tenant {
   notificationDeliveries    NotificationDelivery[]
   blacklistEntries          BlacklistEntry[]
   idempotencyKeys           IdempotencyKey[]
+  whatsappMessages          WhatsAppMessage[]
 }
 
 model Cashbox {
@@ -1056,12 +1057,23 @@ model Order {
   confirmationToken     String? @unique
   confirmationTokenUsed Boolean @default(false)
 
+  // WhatsApp Cloud API confirmation. The manual wa.me flow leaves these null:
+  // only a message actually sent through the API writes here, so the reminder
+  // job never chases an order the seller confirmed by hand.
+  whatsappMessages      WhatsAppMessage[]
+  whatsappConfirmSentAt DateTime?
+  /// Reminders already sent (0, then 1 after 6h, 2 after 24h).
+  whatsappRemindersSent Int               @default(0)
+  /// When the last confirmation/reminder went out — the reminder job's clock.
+  whatsappLastMessageAt DateTime?
+
   @@unique([tenantId, id])
   @@unique([tenantId, publicId])
   @@index([tenantId])
   @@index([tenantId, customerId])
   @@index([tenantId, customerPhoneNormalized])
   @@index([tenantId, readAt])
+  @@index([tenantId, status, whatsappLastMessageAt])
 }
 
 enum BlacklistType {
@@ -1691,10 +1703,10 @@ model TenantMigrationJob {
 /// as one transaction. A link that drops mid-upload leaves a partial *staging*
 /// set, which is discardable; it must never leave a partially migrated tenant.
 model TenantMigrationStagingRow {
-  id     String             @id @default(uuid())
-  jobId  String
-  job    TenantMigrationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
-  domain String
+  id      String             @id @default(uuid())
+  jobId   String
+  job     TenantMigrationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  domain  String
   /// One page of rows, exactly as the device sent them.
   payload Json
 
@@ -1754,7 +1766,6 @@ model DeviceActivationRequest {
   @@index([tenantId, createdAt])
 }
 
-
 /// Replay cache for writes that carry an `Idempotency-Key` header.
 ///
 /// A device that queues writes while offline resends them on reconnect. If the
@@ -1781,4 +1792,59 @@ model IdempotencyKey {
   @@unique([tenantId, key])
   @@index([tenantId])
   @@index([createdAt])
+}
+
+/// One WhatsApp Cloud API message sent for an order.
+///
+/// Two jobs at once. It is the delivery log the seller sees (sent / delivered /
+/// read / failed, with Meta's error), and it is the idempotence guard: the
+/// unique key below means a retried send — a double click, a cron tick that
+/// overlaps the previous one — cannot bill a second conversation to the tenant.
+model WhatsAppMessage {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId  String
+  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// CONFIRMATION | REMINDER
+  kind    String
+  /// 0 for the first send, then 1..n for reminders.
+  attempt Int    @default(0)
+
+  toPhone      String
+  templateName String
+  languageCode String
+
+  /// Meta's message id (wamid...), used to match incoming status webhooks.
+  wamid        String? @unique
+  /// QUEUED | SENT | DELIVERED | READ | FAILED
+  status       String  @default("QUEUED")
+  errorCode    String?
+  errorMessage String?
+
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, orderId, kind, attempt])
+  @@index([tenantId, orderId])
+  @@index([tenantId, status])
+}
+
+/// Cooperative lock for platform-wide background jobs.
+///
+/// The reminder job runs inside the API process, so every instance behind the
+/// load balancer would otherwise fire the same reminders. A worker takes the
+/// row only when the previous lease has expired, which also releases the lock
+/// on its own if the process that held it died mid-run.
+model JobLock {
+  name        String   @id
+  owner       String
+  lockedAt    DateTime @default(now())
+  lockedUntil DateTime
+  updatedAt   DateTime @updatedAt
 }

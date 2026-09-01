@@ -97,6 +97,17 @@ onMounted(() => {
   --wl-shadow: 0 1px 1px rgba(27, 26, 22, 0.03), 0 10px 26px -18px rgba(22, 65, 62, 0.32);
   --wl-shadow-lg: 0 2px 3px rgba(27, 26, 22, 0.04), 0 28px 60px -30px rgba(22, 65, 62, 0.45);
 
+  /* Shared LocaleSwitcher — label stock, squared, olive accent */
+  --ls-surface: var(--wl-card);
+  --ls-border: var(--wl-rule-strong);
+  --ls-shadow: var(--wl-shadow-lg);
+  --ls-radius: 0px;
+  --ls-text: var(--wl-muted);
+  --ls-text-strong: var(--wl-ink);
+  --ls-hover-bg: var(--wl-olive-wash);
+  --ls-accent: var(--wl-olive-deep);
+  --ls-accent-soft: var(--wl-olive-wash);
+
   position: relative;
   /*
     Pressed-paper tooth. It lives in the root background, behind every panel,

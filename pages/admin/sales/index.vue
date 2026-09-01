@@ -2,51 +2,51 @@
   <div class="max-w-7xl mx-auto">
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-semibold tracking-tight text-primary">
           {{ t('admin.nav.salesItem') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ t('admin.pages.sales.index.subtitle') }}
         </p>
       </div>
     </div>
 
-    <div class="ui-card p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="ui-label mb-1">{{ t('admin.pages.sales.index.filters.searchLabel') }}</label>
-          <BaseInput
-            v-model="searchQuery"
-            :placeholder="t('admin.pages.sales.index.filters.searchPlaceholder')"
-          />
-        </div>
-        <div>
-          <BaseSelect
-            v-model="selectedUser"
-            :label="t('admin.pages.sales.index.filters.userLabel')"
-            :placeholder="t('admin.pages.sales.index.filters.allUsers')"
-          >
-            <option value="">{{ t('admin.pages.sales.index.filters.allUsers') }}</option>
-            <option v-for="user in users" :key="user.id" :value="user.id">
-              {{ user.email }}
-            </option>
-          </BaseSelect>
-        </div>
-        <div>
-          <DateFilter
-            v-model:startDate="startDate"
-            v-model:endDate="endDate"
-          />
-        </div>
-      </div>
-    </div>
+    <AdminFilterBar
+      v-model:search="searchQuery"
+      :search-label="t('admin.pages.sales.index.filters.searchLabel')"
+      :search-placeholder="t('admin.pages.sales.index.filters.searchPlaceholder')"
+      :chips="filterChips"
+      :advanced-count="advancedFilterCount"
+      :clearable="hasActiveFilters"
+      testid="sales-filters"
+      @clear="clearFilters"
+      @remove-chip="removeFilterChip"
+    >
+      <AdminDateRangeFilter
+        v-model:startDate="startDate"
+        v-model:endDate="endDate"
+        testid="sales-filters"
+      />
+
+      <template #advanced>
+        <BaseSelect
+          v-model="selectedUser"
+          :label="t('admin.pages.sales.index.filters.userLabel')"
+        >
+          <option value="">{{ t('admin.pages.sales.index.filters.allUsers') }}</option>
+          <option v-for="user in users" :key="user.id" :value="user.id">
+            {{ user.email }}
+          </option>
+        </BaseSelect>
+      </template>
+    </AdminFilterBar>
 
     <div
       v-if="loading"
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.sales.index.loading') }}
       </p>
     </div>
@@ -55,11 +55,11 @@
       v-else-if="sales.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.sales.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ emptyHint }}
       </p>
     </div>
@@ -122,42 +122,42 @@
             >
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
-                  :to="`/admin/sales/${sale.id}`"
-                  class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
-                >
+ :to="`/admin/sales/${sale.id}`"
+ class="font-medium hover:[color:var(--brand)] transition-colors text-primary" 
+>
                   #{{ sale.id.substring(0, 8) }}
                 </NuxtLink>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
-                  v-if="sale.customerId"
-                  :to="`/admin/customers/${sale.customerId}`"
-                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
-                >
+ v-if="sale.customerId"
+ :to="`/admin/customers/${sale.customerId}`"
+ class="hover:[color:var(--brand)] transition-colors text-primary" 
+>
                   {{ sale.customerName }}
                 </NuxtLink>
-                <div v-else style="color: var(--text-primary)">
+                <div class="text-primary" v-else>
                   {{ sale.customerName }}
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <a
-                  v-if="sale.customerPhone"
-                  :href="`tel:${sale.customerPhone}`"
-                  class="hover:[color:var(--brand)] transition-colors" style="color: var(--text-secondary)"
-                >
+ v-if="sale.customerPhone"
+ :href="`tel:${sale.customerPhone}`"
+ class="hover:[color:var(--brand)] transition-colors text-secondary" 
+>
                   {{ sale.customerPhone }}
                 </a>
-                <div v-else style="color: var(--text-tertiary)">
+                <div class="text-tertiary" v-else>
                   -
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium" style="color: var(--text-primary)">
+                <div class="font-medium text-primary">
                   {{ formatCurrency(sale.totalAmount) }}
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 <a
                   v-if="sale.createdByEmail"
                   :href="`mailto:${sale.createdByEmail}`"
@@ -167,7 +167,7 @@
                 </a>
                 <span v-else>System</span>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 {{ formatDate(sale.updatedAt) }}
               </td>
               <td class="ui-td whitespace-nowrap text-end">
@@ -225,7 +225,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border); background: var(--surface-1)">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6 border-t border-line surface-1">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -234,7 +234,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm" style="color: var(--text-secondary)">
+          <span class="text-sm text-secondary">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -247,7 +247,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm" style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.common.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, total),
@@ -256,13 +256,13 @@
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
               <button
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-s-md text-sm font-medium disabled:opacity-50"
-                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage--"
-              >
+ :disabled="currentPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-tertiary"
+ 
+ @click="currentPage--"
+>
                 {{ t('admin.common.previous') }}
               </button>
               <button
@@ -276,11 +276,11 @@
                 {{ page }}
               </button>
               <button
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-e-md text-sm font-medium disabled:opacity-50"
-                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage++"
-              >
+ :disabled="currentPage === totalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-tertiary"
+ 
+ @click="currentPage++"
+>
                 {{ t('admin.common.next') }}
               </button>
             </nav>
@@ -292,11 +292,11 @@
     <div v-if="refundModalOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeRefundModal">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="closeRefundModal" />
-        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.sales.refundModal.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+          <p class="mt-1 text-sm text-tertiary">
             {{ t('admin.pages.sales.refundModal.subtitle') }}
           </p>
 
@@ -376,7 +376,8 @@ import { useAuthStore } from '~/stores/auth'
 import { useToast } from '~/composables/useToast'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
-import DateFilter from '~/components/ui/DateFilter.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
+import AdminDateRangeFilter from '~/components/admin/AdminDateRangeFilter.vue'
 import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
 
 definePageMeta({
@@ -426,6 +427,36 @@ const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'asc' ? 'asc' : 
 const defaultDateRange = getDashboardPresetDateRange('today')
 const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
 const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
+
+const advancedFilterCount = computed(() => (selectedUser.value ? 1 : 0))
+
+const hasActiveFilters = computed(() => Boolean(
+  searchQuery.value
+  || selectedUser.value
+  || startDate.value !== defaultDateRange.from
+  || endDate.value !== defaultDateRange.to
+))
+
+const filterChips = computed(() => {
+  if (!selectedUser.value) return []
+  const user = users.value.find((u) => u.id === selectedUser.value)
+  return [{
+    key: 'user',
+    label: t('admin.pages.sales.index.filters.userLabel'),
+    value: user ? user.email : selectedUser.value
+  }]
+})
+
+function removeFilterChip(key: string) {
+  if (key === 'user') selectedUser.value = ''
+}
+
+function clearFilters() {
+  searchQuery.value = ''
+  selectedUser.value = ''
+  startDate.value = defaultDateRange.from
+  endDate.value = defaultDateRange.to
+}
 const cashboxes = ref<Cashbox[]>([])
 const cashboxesLoaded = ref(false)
 const refundModalOpen = ref(false)

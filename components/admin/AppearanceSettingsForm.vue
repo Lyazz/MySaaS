@@ -427,10 +427,10 @@
             <header class="quick-view-head">
               <div class="quick-view-head-left">
                 <Icon
-                  name="lucide:monitor"
-                  class="w-4 h-4"
-                  style="color: var(--text-muted)"
-                />
+ name="lucide:monitor"
+ class="w-4 h-4 text-muted"
+ 
+ />
                 <h3>{{ quickViewTemplateName }}</h3>
               </div>
               <button

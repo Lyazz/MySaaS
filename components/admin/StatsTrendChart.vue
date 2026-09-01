@@ -1,34 +1,34 @@
 <template>
-  <div class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+  <div class="rounded-2xl p-5 surface-1 border border-line">
     <div class="flex items-start justify-between gap-3">
       <div class="min-w-0">
-        <h3 class="text-[13.5px] font-semibold" style="color: var(--text-primary)">
+        <h3 class="text-sm font-semibold text-primary">
           {{ title }}
         </h3>
-        <p class="mt-0.5 text-[12px]" style="color: var(--text-tertiary)">
+        <p class="mt-0.5 text-xs text-tertiary">
           {{ hint }}
         </p>
       </div>
-      <span class="text-[11px] font-mono-nums rounded-md px-2 py-1" style="color: var(--text-secondary); background: var(--surface-2); border: 1px solid var(--surface-border)">
+      <span class="text-mini font-mono-nums rounded-lg px-2 py-1 text-secondary surface-2 border border-line">
         {{ points.length }}
       </span>
     </div>
 
     <div class="mt-4">
-      <div v-if="loading" class="h-[200px] rounded-xl animate-pulse" style="background: rgba(255,255,255,0.04)" />
+      <div v-if="loading" class="h-[200px] rounded-xl animate-pulse ui-skeleton" />
       <div
-        v-else-if="points.length === 0"
-        class="h-[200px] rounded-xl flex items-center justify-center text-[12px]"
-        style="color: var(--text-tertiary); background: var(--surface-2); border: 1px dashed var(--surface-border)"
-      >
+ v-else-if="points.length === 0"
+ class="h-[200px] rounded-xl flex items-center justify-center text-xs ui-dropzone"
+ 
+>
         {{ emptyLabel }}
       </div>
 
-      <div v-else class="rounded-xl p-3" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+      <div v-else class="rounded-xl p-3 surface-2 border border-line">
         <div class="flex gap-2">
           <!-- Y-axis ticks -->
           <div class="flex flex-col justify-between h-[160px] text-end shrink-0" style="min-width: 44px">
-            <span v-for="tick in reversedTicks" :key="tick" class="text-[10px] font-mono-nums leading-none" style="color: var(--text-muted)">
+            <span v-for="tick in reversedTicks" :key="tick" class="text-micro font-mono-nums leading-none text-muted">
               {{ formatValue(tick) }}
             </span>
           </div>
@@ -81,24 +81,24 @@
             <!-- Tooltip -->
             <div
               v-if="activeIndex !== null"
-              class="absolute z-10 pointer-events-none rounded-lg px-2.5 py-1.5 text-[11px] whitespace-nowrap -translate-x-1/2"
+              class="absolute z-10 pointer-events-none rounded-lg px-2.5 py-1.5 text-mini whitespace-nowrap -translate-x-1/2"
               :style="tooltipStyle"
             >
-              <div class="font-medium" style="color: var(--text-tertiary)">{{ points[activeIndex].date }}</div>
-              <div class="font-semibold font-mono-nums" style="color: var(--text-primary)">{{ formatValue(values[activeIndex]) }}</div>
+              <div class="font-medium text-tertiary">{{ points[activeIndex].date }}</div>
+              <div class="font-semibold font-mono-nums text-primary">{{ formatValue(values[activeIndex]) }}</div>
             </div>
           </div>
         </div>
 
-        <div class="mt-2 flex items-center justify-between text-[11px] font-mono-nums ps-[52px]" style="color: var(--text-tertiary)">
+        <div class="mt-2 flex items-center justify-between text-mini font-mono-nums ps-[52px] text-tertiary">
           <span>{{ firstLabel }}</span>
           <span>{{ lastLabel }}</span>
         </div>
 
-        <div v-if="selectedDate" class="mt-3 flex items-center justify-between rounded-lg px-3 py-2" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <span class="text-[11.5px] font-medium" style="color: var(--text-secondary)">{{ selectedDate }}</span>
-          <span class="text-[12px] font-semibold font-mono-nums" style="color: var(--text-primary)">{{ formatValue(selectedValue) }}</span>
-          <button type="button" class="text-[11px] font-medium" style="color: var(--brand)" @click="emit('update:selectedDate', null)">
+        <div v-if="selectedDate" class="mt-3 flex items-center justify-between rounded-lg px-3 py-2 surface-1 border border-line">
+          <span class="text-mini font-medium text-secondary">{{ selectedDate }}</span>
+          <span class="text-xs font-semibold font-mono-nums text-primary">{{ formatValue(selectedValue) }}</span>
+          <button type="button" class="text-mini font-medium text-brand" @click="emit('update:selectedDate', null)">
             ×
           </button>
         </div>

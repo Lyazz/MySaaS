@@ -5,12 +5,12 @@
     >
       <div>
         <h2
-          class="text-2xl font-semibold tracking-tight"
-          style="color: var(--text-primary)"
-        >
+ class="text-2xl font-semibold tracking-tight text-primary"
+ 
+>
           {{ t('admin.pages.devices.title', 'Device Management') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{
             t(
               'admin.pages.devices.subtitle',
@@ -60,20 +60,20 @@
         "
       >
         <p
-          class="text-xs font-semibold uppercase tracking-[0.18em]"
-          style="color: var(--text-tertiary)"
-        >
+ class="text-xs font-semibold uppercase tracking-[0.18em] text-tertiary"
+ 
+>
           {{ card.label }}
         </p>
         <div class="mt-3 flex items-end justify-between gap-3">
           <div>
             <p
-              class="text-3xl font-semibold leading-none"
-              style="color: var(--text-primary)"
-            >
+ class="text-3xl font-semibold leading-none text-primary"
+ 
+>
               {{ card.value }}
             </p>
-            <p class="mt-2 text-sm" style="color: var(--text-secondary)">
+            <p class="mt-2 text-sm text-secondary">
               {{ card.help }}
             </p>
           </div>
@@ -100,25 +100,25 @@
       "
     >
       <div
-        class="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between"
-        style="border-bottom: 1px solid var(--surface-border)"
-      >
+ class="flex flex-col gap-3 p-5 md:flex-row md:items-center md:justify-between border-b border-line"
+ 
+>
         <div>
           <h3
-            class="text-base font-semibold"
-            style="color: var(--text-primary)"
-          >
+ class="text-base font-semibold text-primary"
+ 
+>
             Tenant Devices
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             Saved devices are scoped to this tenant only. Each row shows
             activation status, workspace binding, and license capacity.
           </p>
         </div>
         <div
-          class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium"
-          style="background: var(--surface-3); color: var(--text-secondary)"
-        >
+ class="inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-medium surface-3 text-secondary"
+ 
+>
           <span
             class="inline-flex h-2 w-2 rounded-full"
             :style="summaryDotStyle"
@@ -147,19 +147,19 @@
           <tbody class="ui-tbody">
             <tr v-if="devicesPending">
               <td
-                class="px-4 py-6"
-                colspan="7"
-                style="color: var(--text-tertiary)"
-              >
+ class="px-4 py-6 text-tertiary"
+ colspan="7"
+ 
+>
                 {{ t('admin.common.loading', 'Loading...') }}
               </td>
             </tr>
             <tr v-else-if="devices.length === 0">
               <td
-                class="px-4 py-6"
-                colspan="7"
-                style="color: var(--text-tertiary)"
-              >
+ class="px-4 py-6 text-tertiary"
+ colspan="7"
+ 
+>
                 No devices are registered for this tenant yet.
               </td>
             </tr>
@@ -167,11 +167,11 @@
               <td class="ui-td">
                 <div class="space-y-1">
                   <div class="flex items-center gap-2">
-                    <p class="font-medium" style="color: var(--text-primary)">
+                    <p class="font-medium text-primary">
                       {{ device.deviceName }}
                     </p>
                     <span
-                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      class="inline-flex items-center rounded-full px-2 py-0.5 text-mini font-medium"
                       style="
                         background: rgba(59, 130, 246, 0.12);
                         color: rgb(37, 99, 235);
@@ -180,7 +180,7 @@
                       {{ formatDevicePlatform(device.devicePlatform) }}
                     </span>
                   </div>
-                  <p class="text-xs" style="color: var(--text-tertiary)">
+                  <p class="text-xs text-tertiary">
                     ID {{ shortId(device.id) }}
                   </p>
                 </div>
@@ -197,17 +197,17 @@
                   >
                     {{ device.status }}
                   </span>
-                  <p class="text-xs" style="color: var(--text-tertiary)">
+                  <p class="text-xs text-tertiary">
                     Updated {{ formatDateTime(device.updatedAt) }}
                   </p>
                 </div>
               </td>
               <td class="ui-td">
                 <div class="space-y-1">
-                  <p style="color: var(--text-primary)">
+                  <p class="text-primary">
                     {{ formatDateTime(device.activatedAt) }}
                   </p>
-                  <p class="text-xs" style="color: var(--text-secondary)">
+                  <p class="text-xs text-secondary">
                     {{
                       summary.subscriptionTier === 'offlineOnly'
                         ? 'Offline activation supported'
@@ -220,16 +220,13 @@
                 <div class="space-y-1">
                   <div class="flex items-center gap-2">
                     <code
-                      class="rounded-md px-2 py-1 text-xs"
-                      style="
-                        background: var(--surface-3);
-                        color: var(--text-primary);
-                      "
-                    >
+ class="rounded-lg px-2 py-1 text-xs surface-3 text-primary"
+ 
+>
                       {{ device.license.keyMasked }}
                     </code>
                     <span
-                      class="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium"
+                      class="inline-flex items-center rounded-full px-2 py-0.5 text-mini font-medium"
                       :style="
                         device.license.isActive
                           ? 'background: rgba(52, 211, 153, 0.12); color: rgb(16, 185, 129)'
@@ -239,11 +236,11 @@
                       {{ device.license.isActive ? 'Active' : 'Inactive' }}
                     </span>
                   </div>
-                  <p class="text-xs" style="color: var(--text-secondary)">
+                  <p class="text-xs text-secondary">
                     {{ device.license.activeDeviceCount }} /
                     {{ device.license.maxDevices }} slots in use
                   </p>
-                  <p class="text-xs" style="color: var(--text-tertiary)">
+                  <p class="text-xs text-tertiary">
                     {{
                       device.license.kind === 'auto'
                         ? 'Auto-created online license'
@@ -256,25 +253,22 @@
                 </div>
               </td>
               <td class="ui-td">
-                <span
-                  v-if="device.lastSyncAt"
-                  style="color: var(--text-primary)"
-                >
+                <span class="text-primary"
+ v-if="device.lastSyncAt"
+ 
+>
                   {{ formatDateTime(device.lastSyncAt) }}
                 </span>
-                <span v-else style="color: var(--text-tertiary)">
+                <span class="text-tertiary" v-else>
                   Never synced
                 </span>
               </td>
               <td class="ui-td">
                 <div class="flex items-center gap-2">
                   <code
-                    class="rounded-md px-2 py-1 text-xs"
-                    style="
-                      background: var(--surface-3);
-                      color: var(--text-primary);
-                    "
-                  >
+ class="rounded-lg px-2 py-1 text-xs surface-3 text-primary"
+ 
+>
                     {{ shortId(device.workspaceId) }}
                   </code>
                   <button
@@ -297,12 +291,9 @@
               <td class="ui-td">
                 <div class="flex items-center gap-2">
                   <code
-                    class="rounded-md px-2 py-1 text-xs"
-                    style="
-                      background: var(--surface-3);
-                      color: var(--text-primary);
-                    "
-                  >
+ class="rounded-lg px-2 py-1 text-xs surface-3 text-primary"
+ 
+>
                     {{ device.hardwareIdMasked }}
                   </code>
                   <button
@@ -336,12 +327,12 @@
         box-shadow: var(--card-shadow);
       "
     >
-      <h3 class="text-base font-medium mb-4" style="color: var(--text-primary)">
+      <h3 class="text-base font-medium mb-4 text-primary">
         Offline Activation
       </h3>
 
       <div v-if="!activationCode" class="space-y-4 max-w-2xl">
-        <p class="text-sm" style="color: var(--text-secondary)">
+        <p class="text-sm text-secondary">
           Paste the Request Code generated by the Flutter app. The server will
           validate the tenant admin session, bind that device to this tenant,
           assign an active tenant license, and return a signed activation code.
@@ -349,9 +340,9 @@
 
         <div>
           <label
-            class="block text-sm font-medium mb-1.5"
-            style="color: var(--text-primary)"
-            >Request Code</label
+ class="block text-sm font-medium mb-1.5 text-primary"
+ 
+>Request Code</label
           >
           <textarea
             v-model="requestCode"
@@ -396,7 +387,7 @@
               >Activation Code Generated Successfully</span
             >
           </div>
-          <p class="text-sm" style="color: var(--text-secondary)">
+          <p class="text-sm text-secondary">
             Copy the code below and paste it into the offline device. The device
             registry above will update after the device completes activation.
           </p>
@@ -406,7 +397,7 @@
           <textarea
             readonly
             rows="4"
-            class="ui-input w-full font-mono text-sm bg-gray-50/50"
+            class="ui-input w-full font-mono text-sm surface-2"
             :value="activationCode"
           />
           <button

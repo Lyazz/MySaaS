@@ -132,6 +132,76 @@ export class TelegramService {
         }
     }
 
+    /**
+     * The seller hearing that a customer declined an order from WhatsApp.
+     *
+     * Separate from `sendOrderNotification` because the one thing the seller
+     * must not miss is a parcel the carrier would not cancel: that order is
+     * dead on Swekly's side but still moving on theirs.
+     */
+    async sendOrderCancelledNotification(
+        tenantId: string,
+        order: any,
+        carrier?: { attempted: boolean; ok: boolean; provider: string; message: string | null }
+    ) {
+        const integration = await this.integrationsService.getIntegration(tenantId, 'TELEGRAM')
+
+        if (!integration || !integration.isActive || !integration.config) {
+            return
+        }
+
+        const { botToken, chatId } = integration.config as any
+        if (!botToken || !chatId) {
+            console.warn(`[TelegramService] Missing config for tenant ${tenantId}`)
+            return
+        }
+
+        try {
+            const tenant = await prisma.tenant.findUnique({
+                where: { id: tenantId },
+                select: {
+                    slug: true,
+                    domains: {
+                        take: 1,
+                        orderBy: { createdAt: 'asc' },
+                        select: { domain: true }
+                    }
+                }
+            })
+            if (!tenant) return
+
+            const adminUrl = this.buildOrderAdminUrl({
+                slug: tenant.slug,
+                customDomain: tenant.domains[0]?.domain ?? null,
+                orderId: order.id
+            })
+            const orderReference =
+                typeof order.publicId === 'string' && order.publicId.trim().length > 0
+                    ? order.publicId.trim()
+                    : String(order.id).slice(0, 8)
+
+            const lines = [
+                `❌ *Commande #${orderReference} annulée par le client via WhatsApp*`,
+                `👤 ${order.customerName ?? ''} (${order.customerPhone ?? ''})`
+            ]
+
+            if (carrier?.attempted && !carrier.ok) {
+                lines.push(
+                    `⚠️ *Le colis ${carrier.provider} n\u2019a PAS pu être annulé* (${carrier.message ?? 'erreur'}). Annulez-le manuellement.`
+                )
+            } else if (carrier?.attempted && carrier.ok) {
+                lines.push(`📦 Colis ${carrier.provider} annulé chez le transporteur.`)
+            }
+
+            lines.push(`🔗 [Voir la commande](${adminUrl})`)
+
+            const bot = new Telegraf(botToken)
+            await bot.telegram.sendMessage(chatId, lines.join('\n'), { parse_mode: 'Markdown' })
+        } catch (error) {
+            console.error(`[TelegramService] Failed to send cancellation for tenant ${tenantId}:`, error)
+        }
+    }
+
     async testConnection(botToken: string, chatId: string) {
         try {
             const bot = new Telegraf(botToken)

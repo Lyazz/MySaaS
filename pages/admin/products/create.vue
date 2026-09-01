@@ -2,16 +2,16 @@
   <div class="min-h-[60vh] flex flex-col items-center justify-center px-4">
     <template v-if="creating">
       <div class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 [border-color:var(--brand)] mb-4" />
-      <h2 class="text-xl font-medium text-center" style="color: var(--text-primary)">{{ t('admin.pages.products.create.title', 'Création du produit...') }}</h2>
-      <p class="text-sm mt-2 text-center" style="color: var(--text-tertiary)">{{ t('admin.pages.products.create.subtitle', 'Préparation de l\'espace de travail...') }}</p>
+      <h2 class="text-xl font-medium text-center text-primary">{{ t('admin.pages.products.create.title', 'Création du produit...') }}</h2>
+      <p class="text-sm mt-2 text-center text-tertiary">{{ t('admin.pages.products.create.subtitle', 'Préparation de l\'espace de travail...') }}</p>
     </template>
 
     <div v-else class="w-full max-w-lg ui-card p-6 text-center">
       <Icon name="lucide:triangle-alert" class="w-10 h-10 mx-auto mb-3 text-red-500" />
-      <h2 class="text-lg font-semibold" style="color: var(--text-primary)">
+      <h2 class="text-lg font-semibold text-primary">
         {{ t('admin.pages.products.create.errors.title', 'Unable to create draft product') }}
       </h2>
-      <p class="text-sm mt-2" style="color: var(--text-tertiary)">
+      <p class="text-sm mt-2 text-tertiary">
         {{ createErrorMessage }}
       </p>
 
