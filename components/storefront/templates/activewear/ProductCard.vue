@@ -177,7 +177,7 @@ async function handleAddToCart() {
         <!-- Quick View -->
         <button
            class="w-10 h-10 bg-black border-2 border-[#333] flex items-center justify-center text-white hover:border-brand-500 hover:text-brand-500 uppercase font-bold skew-x-[-10deg] transition-colors shadow-[2px_2px_0_#222] hover:shadow-[2px_2px_0_theme(colors.brand.500)]" 
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4 skew-x-[10deg]" />
@@ -202,11 +202,11 @@ async function handleAddToCart() {
         <span
           v-if="isLowStock"
           class="px-3 py-1 bg-red-500 text-white text-[11px] font-black uppercase tracking-widest skew-x-[-10deg] block"
-        >Low Stock</span>
+        >{{ storefrontContent.product.lowStock }}</span>
         <span
           v-else
           class="px-3 py-1 bg-[#111] border border-[#333] text-white text-[11px] font-black uppercase tracking-widest skew-x-[-10deg] block"
-        >In Stock</span>
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
 
       <div

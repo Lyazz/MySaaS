@@ -908,7 +908,7 @@ const scrollToForm = () => {
         class="fixed bottom-0 left-0 right-0 z-40 bg-[#FFFDF9] border-t border-[#C9A24B]/30 shadow-[0_-4px_20px_-10px_rgba(46,30,32,0.15)] p-4 md:hidden flex items-center justify-between gap-4"
       >
         <div class="flex flex-col">
-          <span class="text-xs text-[#6B5850] font-medium">Total</span>
+          <span class="text-xs text-[#6B5850] font-medium">{{ storefrontContent.cart.summary.total }}</span>
           <span class="text-xl font-bold text-brand-700 leading-none">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
         </div>
         <button

@@ -159,7 +159,7 @@ watch(() => props.images, () => {
                 <img
                 :src="img"
                 class="w-full h-full object-cover"
-                alt="Thumbnail"
+                :alt="title"
                 >
             </button>
         </div>

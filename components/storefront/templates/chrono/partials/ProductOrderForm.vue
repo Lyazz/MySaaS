@@ -812,7 +812,7 @@ const scrollToForm = () => {
           <span
             class="text-xs"
             style="color:#5A5450;"
-          >Total</span>
+          >{{ storefrontContent.cart.summary.total }}</span>
           <span
             class="text-xl font-light"
             style="color:#D4C5A9; font-family:'Cormorant Garamond',serif;"

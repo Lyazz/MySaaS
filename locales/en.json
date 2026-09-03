@@ -1267,6 +1267,7 @@
       "detailsTitle": "Product Details",
       "addedToCart": "{title} added to cart!",
       "inStock": "In stock",
+      "lowStock": "Low stock",
       "perUnit": "per unit",
       "descriptionFallback": "Experience the perfect blend of style and functionality.",
       "viewFullDetails": "View full details",

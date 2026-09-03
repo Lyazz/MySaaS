@@ -213,6 +213,7 @@ export function useStorefrontContent() {
     product: {
       addedToCart: (title: string) => i18n.t('storefront.product.addedToCart', { title }),
       inStock: i18n.t('storefront.product.inStock'),
+      lowStock: i18n.t('storefront.product.lowStock'),
       perUnit: i18n.t('storefront.product.perUnit'),
       detailsTitle: i18n.t('storefront.product.detailsTitle'),
       descriptionTitle: i18n.t('storefront.product.descriptionTitle'),

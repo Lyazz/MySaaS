@@ -161,7 +161,7 @@ async function handleAddToCart() {
       <button
         type="button"
         class="p-3 rounded-full bg-purple-900/50 border border-purple-500/30 hover:bg-pink-500/20 hover:border-pink-500/50 transition-all"
-        title="Quick View"
+        :title="storefrontContent.actions.quickView"
         @click.prevent="emit('quick-view', product)"
       >
         <Icon name="lucide:eye" class="w-5 h-5 text-purple-300" />
@@ -202,7 +202,7 @@ async function handleAddToCart() {
       <button
         type="button"
         class="absolute bottom-4 end-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
-        title="Quick View"
+        :title="storefrontContent.actions.quickView"
         @click.prevent="emit('quick-view', product)"
       >
         <Icon name="lucide:eye" class="w-5 h-5 text-white" />

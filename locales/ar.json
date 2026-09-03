@@ -1271,6 +1271,7 @@
       "detailsTitle": "تفاصيل المنتج",
       "addedToCart": "تمت إضافة {title} إلى السلة",
       "inStock": "متوفر",
+      "lowStock": "الكمية محدودة",
       "perUnit": "للوحدة",
       "descriptionFallback": "استمتع بالمزيج المثالي بين الأناقة والعملية.",
       "viewFullDetails": "عرض التفاصيل",

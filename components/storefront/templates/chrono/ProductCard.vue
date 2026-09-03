@@ -170,7 +170,7 @@ async function handleAddToCart() {
         <button
            class="w-9 h-9 backdrop-blur-md flex items-center justify-center shadow-md transition-all duration-200" 
            style="background-color: rgba(14,17,23,0.85); border: 1px solid rgba(212,197,169,0.2); color: #D4C5A9; border-radius: 1px;"
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4" />
@@ -197,12 +197,12 @@ async function handleAddToCart() {
           v-if="isLowStock"
           class="px-2 py-1 text-[10px] font-medium tracking-wider uppercase"
           style="background-color: rgba(120,60,10,0.9); color: #FCD34D; border-radius: 1px;"
-        >Low Stock</span>
+        >{{ storefrontContent.product.lowStock }}</span>
         <span
           v-else
           class="px-2 py-1 text-[10px] font-medium tracking-wider uppercase"
           style="background-color: rgba(14,17,23,0.85); color: #A67C52; border: 1px solid rgba(166,124,82,0.25); border-radius: 1px;"
-        >In Stock</span>
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
 
       <div
@@ -212,7 +212,7 @@ async function handleAddToCart() {
         <span 
           class="px-2 py-1 text-[10px] font-medium tracking-wider uppercase"
           style="background-color: rgba(139,20,20,0.85); color: #FCA5A5; border-radius: 1px;"
-        >Out of Stock</span>
+        >{{ storefrontContent.actions.outOfStock }}</span>
       </div>
     
       <!-- Countdown Overlay -->

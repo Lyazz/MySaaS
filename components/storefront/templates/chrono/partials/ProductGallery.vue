@@ -108,7 +108,7 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
                     : 'border-color:rgba(212,197,169,0.08);border-radius:1px;'"
                 @click="setActiveImage(idx)"
             >
-                <img :src="img" class="w-full h-full object-cover" alt="Thumbnail">
+                <img :src="img" class="w-full h-full object-cover" :alt="title">
             </button>
         </div>
     </div>

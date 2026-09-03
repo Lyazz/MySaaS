@@ -1253,6 +1253,7 @@
       "detailsTitle": "Détails du produit",
       "addedToCart": "{title} ajouté au panier !",
       "inStock": "En stock",
+      "lowStock": "Stock faible",
       "perUnit": "par unité",
       "descriptionFallback": "Découvrez le parfait équilibre entre style et fonctionnalité.",
       "viewFullDetails": "Voir les détails",
