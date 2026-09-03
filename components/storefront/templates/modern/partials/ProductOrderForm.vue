@@ -302,7 +302,7 @@ const handleOrderSubmit = async () => {
 
         if (isMaystro) {
           if (maystroShippingAmount == null) {
-            orderError.value = 'Maystro shipping price unavailable for selected commune'
+            orderError.value = storefrontContent.value.checkout.errors.shippingUnavailable
             orderSubmitting.value = false
             return
           }

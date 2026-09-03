@@ -10,6 +10,20 @@ export default {
         "./app.vue",
         "./error.vue",
     ],
+    /*
+     * Storefront checkouts tint each carrier chip with `bg-${option.color}-100`
+     * and friends. The scanner only sees literal class names, so those built
+     * only when some unrelated file happened to use the same utility — Ecotrack
+     * (purple) and ZR Express (orange) rendered untinted. Keep the carrier
+     * palette generated explicitly.
+     */
+    safelist: [
+        ...['emerald', 'blue', 'purple', 'orange', 'lime', 'green'].flatMap((color) => [
+            `bg-${color}-50`,
+            `bg-${color}-100`,
+            `text-${color}-600`,
+        ]),
+    ],
     theme: {
         extend: {
             /*

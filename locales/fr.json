@@ -1160,7 +1160,8 @@
         "phoneRequired": "Le numéro de téléphone est requis pour passer la commande.",
         "deliveryRequired": "Veuillez sélectionner une option de livraison.",
         "requiredFields": "Veuillez remplir tous les champs requis.",
-        "submitFailed": "Impossible de passer la commande. Veuillez réessayer."
+        "submitFailed": "Impossible de passer la commande. Veuillez réessayer.",
+        "shippingUnavailable": "La livraison n'est pas disponible pour la commune choisie. Veuillez sélectionner une autre option."
       },
       "actions": {
         "returnToCart": "Retour au panier",

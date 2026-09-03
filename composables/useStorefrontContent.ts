@@ -103,7 +103,8 @@ export function useStorefrontContent() {
         phoneRequired: i18n.t('storefront.checkout.errors.phoneRequired'),
         deliveryRequired: i18n.t('storefront.checkout.errors.deliveryRequired'),
         requiredFields: i18n.t('storefront.checkout.errors.requiredFields'),
-        submitFailed: i18n.t('storefront.checkout.errors.submitFailed')
+        submitFailed: i18n.t('storefront.checkout.errors.submitFailed'),
+        shippingUnavailable: i18n.t('storefront.checkout.errors.shippingUnavailable')
       },
       actions: {
         returnToCart: i18n.t('storefront.checkout.actions.returnToCart'),
