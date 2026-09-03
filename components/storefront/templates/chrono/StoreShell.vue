@@ -154,7 +154,7 @@ const props = defineProps<{
               </template>
               <div class="flex flex-col leading-tight">
                 <span class="text-lg font-semibold tracking-[0.18em] uppercase" style="color: #E8E0D5; letter-spacing: 0.18em;">{{ tenantName }}</span>
-                <span class="text-[9px] tracking-[0.35em] uppercase" style="color: #A67C52;">MAISON DE PRESTIGE</span>
+                <span v-if="storeSettings?.description" class="text-[9px] tracking-[0.35em] uppercase truncate max-w-[200px]" style="color: #A67C52;">{{ storeSettings.description }}</span>
               </div>
             </NuxtLink>
 

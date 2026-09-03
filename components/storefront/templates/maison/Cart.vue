@@ -12,7 +12,7 @@ const { t } = useI18n({ useScope: 'global' })
     <div class="cart__inner">
       <!-- Header -->
       <div class="cart__head">
-        <span class="at-label">Votre sélection</span>
+        <span class="at-label">{{ storefrontContent.cart.sections.items }}</span>
         <h1 class="cart__title">{{ storefrontContent.cart.title }}</h1>
       </div>
 
@@ -23,7 +23,7 @@ const { t } = useI18n({ useScope: 'global' })
           <circle cx="21" cy="39" r="3" stroke="currentColor" stroke-width="0.75"/>
           <circle cx="36" cy="39" r="3" stroke="currentColor" stroke-width="0.75"/>
         </svg>
-        <p class="cart__empty-title">Votre panier est vide</p>
+        <p class="cart__empty-title">{{ storefrontContent.cart.empty.title }}</p>
         <p class="cart__empty-sub">{{ storefrontContent.cart.empty.subtitle }}</p>
         <NuxtLink to="/products" class="at-btn-primary">
           <span>{{ storefrontContent.cart.empty.cta }}</span>

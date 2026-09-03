@@ -144,7 +144,7 @@ watch(searchQuery, async (q) => {
 
             <div class="shell-nav__dropdown-wrap">
               <button class="shell-nav__link shell-nav__dropdown-trigger">
-                {{ storefrontContent.nav.categories || 'Collections' }}
+                {{ storefrontContent.nav.categories }}
                 <svg width="8" height="5" viewBox="0 0 8 5" fill="none">
                   <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
                 </svg>
@@ -226,8 +226,8 @@ watch(searchQuery, async (q) => {
             </div>
             <!-- Results -->
             <div v-show="isSearchDropdownOpen" class="shell-search-results pointer-events-auto">
-              <div v-if="searchLoading" class="shell-search-results__state">Recherche…</div>
-              <div v-else-if="searchResults.length === 0" class="shell-search-results__state">Aucun résultat.</div>
+              <div v-if="searchLoading" class="shell-search-results__state">{{ storefrontContent.search.searching }}</div>
+              <div v-else-if="searchResults.length === 0" class="shell-search-results__state">{{ storefrontContent.search.noResults }}</div>
               <NuxtLink
                 v-for="product in visibleSearchResults"
                 :key="product.id"
@@ -286,7 +286,7 @@ watch(searchQuery, async (q) => {
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
     <h4 class="shell-drawer__cats-title">
-      {{ storefrontContent.nav.categories || 'Collections' }}
+      {{ storefrontContent.nav.categories }}
     </h4>
     <Icon
       name="lucide:chevron-down"
@@ -350,7 +350,7 @@ watch(searchQuery, async (q) => {
 
             <!-- Collections -->
             <div>
-              <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
+              <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.nav.categories }}</span>
               <ul class="shell-footer__links">
                 <li v-for="cat in (tenantCategories || []).slice(0, 5)" :key="cat.id">
                   <NuxtLink :to="`/category/${cat.slug}`" class="shell-footer__link">{{ categoryDisplayTitle(cat) }}</NuxtLink>
@@ -379,7 +379,7 @@ watch(searchQuery, async (q) => {
 
           <div class="shell-footer__bottom">
             <span>{{ storefrontContent.footer.copyright(tenantName) }}</span>
-            <span>Atelier · Algérie</span>
+            <span>{{ tenantName }}</span>
             <StorefrontSharedPoweredBy />
           </div>
         </div>

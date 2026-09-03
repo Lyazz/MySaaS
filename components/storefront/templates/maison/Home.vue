@@ -12,6 +12,7 @@ const props = defineProps<{
 }>()
 
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -123,7 +124,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
       <!-- Slide counter + nav -->
       <div v-if="hasMultipleSlides" class="atelier-hero__nav">
-        <button class="atelier-hero__arrow" @click="prevSlide" aria-label="Précédent">
+        <button class="atelier-hero__arrow" @click="prevSlide" :aria-label="t('storefront.nav.previous')">
           <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
             <path d="M15 5H1M6 1L1 5l5 4" stroke="currentColor" stroke-width="1"/>
           </svg>
@@ -131,7 +132,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
         <span class="atelier-hero__count">
           {{ String(currentSlide + 1).padStart(2, '0') }} / {{ String(heroSlides.length).padStart(2, '0') }}
         </span>
-        <button class="atelier-hero__arrow" @click="nextSlide" aria-label="Suivant">
+        <button class="atelier-hero__arrow" @click="nextSlide" :aria-label="t('storefront.nav.next')">
           <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
             <path d="M1 5h14M10 1l5 4-5 4" stroke="currentColor" stroke-width="1"/>
           </svg>
@@ -153,17 +154,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
     <div class="atelier-strip">
       <div class="atelier-strip__item">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" stroke="currentColor" stroke-width="0.75"/><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="0.75"/></svg>
-        <span>Livraison partout en Algérie</span>
+        <span>{{ t('storefront.templates.maison.home.trust.delivery') }}</span>
       </div>
       <div class="atelier-strip__sep" />
       <div class="atelier-strip__item">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="0.75"/><path d="M5 7l2 2 3-3" stroke="currentColor" stroke-width="0.75"/></svg>
-        <span>Sélection rigoureuse</span>
+        <span>{{ t('storefront.templates.maison.home.trust.curation') }}</span>
       </div>
       <div class="atelier-strip__sep" />
       <div class="atelier-strip__item">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7c0-2.76 2.24-5 5-5s5 2.24 5 5-2.24 5-5 5" stroke="currentColor" stroke-width="0.75"/><path d="M5 10l-3 2V9" stroke="currentColor" stroke-width="0.75"/></svg>
-        <span>Retours facilités</span>
+        <span>{{ t('storefront.templates.maison.home.trust.returns') }}</span>
       </div>
     </div>
 
@@ -270,18 +271,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
     <section class="atelier-manifesto">
       <div class="atelier-manifesto__inner">
         <div class="atelier-manifesto__eyebrow">
-          <span class="atelier-label atelier-label--light">Notre Univers</span>
+          <span class="atelier-label atelier-label--light">{{ t('storefront.templates.maison.home.manifestoKicker') }}</span>
           <div class="atelier-manifesto__line" />
         </div>
         <blockquote class="atelier-manifesto__quote">
-          L'art de décorer<br><em>votre espace</em>
+          {{ t('storefront.templates.maison.home.manifestoTitle') }}<br><em>{{ t('storefront.templates.maison.home.manifestoAccent') }}</em>
         </blockquote>
         <p class="atelier-manifesto__body">
-          Des pièces pensées pour embellir chaque coin de votre maison.<br class="hidden md:block">
-          Du salon à la chambre, de la cuisine au bureau.
+          {{ t('storefront.templates.maison.home.manifestoBody') }}
         </p>
         <NuxtLink to="/products" class="atelier-cta atelier-cta--light">
-          <span>Découvrir la boutique</span>
+          <span>{{ t('storefront.templates.maison.home.manifestoCta') }}</span>
           <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
             <path d="M1 5h16M12 1l5 4-5 4" stroke="currentColor" stroke-width="1"/>
           </svg>

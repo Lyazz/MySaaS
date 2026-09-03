@@ -1396,6 +1396,43 @@
       "dismissAria": "Fermer l’annonce"
     },
     "templates": {
+      "maison": {
+        "about": {
+          "kicker": "Notre histoire",
+          "body": "Nous croyons que chaque espace de vie mérite d'être beau, fonctionnel et inspirant. C'est pourquoi nous sélectionnons avec soin chaque produit pour vous offrir le meilleur de la décoration et des accessoires maison.",
+          "lead": "Une boutique dédiée à l'art de vivre, à la décoration intérieure et aux accessoires maison soigneusement sélectionnés.",
+          "valuesTitle": "Nos valeurs",
+          "values": {
+            "quality": {
+              "title": "Qualité",
+              "text": "Des produits sélectionnés pour leur qualité de fabrication et leur durabilité."
+            },
+            "living": {
+              "title": "Art de vivre",
+              "text": "Chaque pièce est pensée pour embellir et améliorer votre quotidien."
+            },
+            "passion": {
+              "title": "Passion",
+              "text": "Une équipe passionnée par la décoration intérieure et le design."
+            }
+          },
+          "ctaTitle": "Découvrir",
+          "ctaAccent": "notre boutique",
+          "ctaAction": "Explorer les produits"
+        },
+        "home": {
+          "trust": {
+            "delivery": "Livraison partout en Algérie",
+            "curation": "Sélection rigoureuse",
+            "returns": "Retours facilités"
+          },
+          "manifestoKicker": "Notre Univers",
+          "manifestoTitle": "L'art de décorer",
+          "manifestoAccent": "votre espace",
+          "manifestoBody": "Des pièces pensées pour embellir chaque coin de votre maison. Du salon à la chambre, de la cuisine au bureau.",
+          "manifestoCta": "Découvrir la boutique"
+        }
+      },
       "food": {
         "badges": {
           "organic": "Bio",

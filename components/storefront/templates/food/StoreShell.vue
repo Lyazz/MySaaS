@@ -271,7 +271,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     <Icon name="lucide:shopping-basket" class="w-5 h-5 group-hover:animate-bounce" />
                     <span v-if="cartStore.itemCount > 0" class="absolute -top-1 -end-1 w-2.5 h-2.5 bg-red-500 rounded-full border-2 border-stone-900 group-hover:border-brand-600"></span>
                 </div>
-                <span class="font-bold text-sm">{{ cartStore.itemCount }} <span class="hidden xl:inline text-xs opacity-70 font-normal">items</span></span>
+                <span class="font-bold text-sm">{{ cartStore.itemCount }} <span class="hidden xl:inline text-xs opacity-70 font-normal">{{ storefrontContent.cart.sections.items }}</span></span>
               </NuxtLink>
             </div>
           </div>

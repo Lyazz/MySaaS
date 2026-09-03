@@ -95,9 +95,9 @@ onUnmounted(() => {
     <div class="border-b border-white/[0.06]">
       <div class="max-w-[1400px] mx-auto px-5 lg:px-10 py-4">
         <nav class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.22em]">
-          <NuxtLink to="/" class="text-slate-500 hover:text-brand-500 transition-colors">Home</NuxtLink>
+          <NuxtLink to="/" class="text-slate-500 hover:text-brand-500 transition-colors">{{ storefrontContent.nav.home }}</NuxtLink>
           <Icon name="lucide:chevron-right" class="w-3 h-3 text-slate-600" />
-          <NuxtLink to="/products" class="text-slate-500 hover:text-brand-500 transition-colors">Shop</NuxtLink>
+          <NuxtLink to="/products" class="text-slate-500 hover:text-brand-500 transition-colors">{{ storefrontContent.nav.shop }}</NuxtLink>
           <Icon name="lucide:chevron-right" class="w-3 h-3 text-slate-600" />
           <span class="text-brand-500 truncate max-w-xs">{{ product?.title }}</span>
         </nav>

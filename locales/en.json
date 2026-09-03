@@ -1410,6 +1410,43 @@
       "dismissAria": "Dismiss announcement"
     },
     "templates": {
+      "maison": {
+        "about": {
+          "kicker": "Our story",
+          "body": "We believe every living space deserves to be beautiful, useful and inspiring. That is why each product is chosen with care, to bring you the best in decoration and home accessories.",
+          "lead": "A store devoted to the art of living, to interior decoration and to carefully chosen home accessories.",
+          "valuesTitle": "Our values",
+          "values": {
+            "quality": {
+              "title": "Quality",
+              "text": "Products chosen for how they are made and how long they last."
+            },
+            "living": {
+              "title": "Art of living",
+              "text": "Every piece is meant to make your day-to-day both better and lovelier."
+            },
+            "passion": {
+              "title": "Passion",
+              "text": "A team that genuinely cares about interiors and design."
+            }
+          },
+          "ctaTitle": "Discover",
+          "ctaAccent": "our store",
+          "ctaAction": "Browse the products"
+        },
+        "home": {
+          "trust": {
+            "delivery": "Delivery across Algeria",
+            "curation": "Carefully curated",
+            "returns": "Easy returns"
+          },
+          "manifestoKicker": "Our world",
+          "manifestoTitle": "The art of decorating",
+          "manifestoAccent": "your space",
+          "manifestoBody": "Pieces meant to make every corner of your home better. From the living room to the bedroom, from the kitchen to the study.",
+          "manifestoCta": "Browse the store"
+        }
+      },
       "food": {
         "badges": {
           "organic": "Organic",

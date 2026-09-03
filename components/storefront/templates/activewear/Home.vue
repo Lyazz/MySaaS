@@ -302,7 +302,7 @@ const displayedProducts = computed(() => {
             to="/products"
             class="inline-flex px-8 py-3 bg-brand-500 text-black font-black skew-x-[-15deg] uppercase tracking-widest hover:bg-white transition-all transform hover:-translate-y-1 shadow-[4px_4px_0_theme(colors.zinc.700)] hover:shadow-[8px_8px_0_#fff] items-center gap-3 group"
           >
-            <span class="block skew-x-[15deg]">View all products</span>
+            <span class="block skew-x-[15deg]">{{ storefrontContent.shop.allProducts }}</span>
             <Icon name="lucide:zap" class="w-5 h-5 skew-x-[15deg] transition-transform group-hover:scale-110" />
           </NuxtLink>
         </div>
@@ -325,7 +325,7 @@ const displayedProducts = computed(() => {
             to="/products"
             class="hidden sm:flex px-8 py-3 bg-brand-500 text-black font-black skew-x-[-15deg] uppercase tracking-widest hover:bg-white transition-all transform hover:-translate-y-1 shadow-[4px_4px_0_theme(colors.zinc.700)] hover:shadow-[8px_8px_0_#fff] items-center gap-2 group"
           >
-            <span class="block skew-x-[15deg]">View all products</span>
+            <span class="block skew-x-[15deg]">{{ storefrontContent.shop.allProducts }}</span>
             <Icon name="lucide:zap" class="w-5 h-5 skew-x-[15deg] transition-transform group-hover:scale-110" />
           </NuxtLink>
         </div>
@@ -357,7 +357,7 @@ const displayedProducts = computed(() => {
             to="/products"
             class="inline-flex px-8 py-3 bg-brand-500 text-black font-black skew-x-[-15deg] uppercase tracking-widest hover:bg-white transition-all transform hover:-translate-y-1 shadow-[4px_4px_0_theme(colors.zinc.700)] hover:shadow-[8px_8px_0_#fff] items-center gap-2 group"
           >
-            <span class="block skew-x-[15deg]">View all products</span>
+            <span class="block skew-x-[15deg]">{{ storefrontContent.shop.allProducts }}</span>
             <Icon name="lucide:zap" class="w-5 h-5 skew-x-[15deg] transition-transform group-hover:scale-110" />
           </NuxtLink>
         </div>

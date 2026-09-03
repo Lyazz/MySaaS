@@ -280,7 +280,7 @@ const displayedProducts = computed(() => {
           </NuxtLink>
         </div>
 
-        <div v-if="bestSellersDisplayed.length === 0" class="text-sm text-slate-500">No best sellers yet.</div>
+        <div v-if="bestSellersDisplayed.length === 0" class="text-sm text-slate-500">{{ storefrontContent.shop.results.noResults }}</div>
 
         <div
           v-else
