@@ -36,6 +36,24 @@ const themeMap: Record<TemplateKey, TagTheme> = {
     iconClass: 'w-3 h-3 mr-1.5 opacity-60',
   },
 
+  // ── Interior / Minimal (modern's chrome, lime accent)
+  interior: {
+    wrapper: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-0',
+    inner: 'border-t border-slate-100 pt-8',
+    label: 'text-xs font-bold uppercase tracking-widest text-slate-500 mb-4',
+    tag: 'inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold bg-lime-50 text-lime-700 border border-lime-200 hover:bg-lime-100 hover:border-lime-400 transition-colors',
+    icon: 'lucide:tag',
+    iconClass: 'w-3 h-3 mr-1.5 opacity-60',
+  },
+  minimal: {
+    wrapper: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mt-0',
+    inner: 'border-t border-slate-100 pt-8',
+    label: 'text-xs font-bold uppercase tracking-widest text-slate-500 mb-4',
+    tag: 'inline-flex items-center px-4 py-1.5 rounded-full text-xs font-semibold bg-lime-50 text-lime-700 border border-lime-200 hover:bg-lime-100 hover:border-lime-400 transition-colors',
+    icon: 'lucide:tag',
+    iconClass: 'w-3 h-3 mr-1.5 opacity-60',
+  },
+
   // ── Classic (serif, understated)
   classic: {
     wrapper: 'max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 mt-0',

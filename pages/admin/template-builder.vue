@@ -339,6 +339,8 @@ definePageMeta({
 const templateCatalog: TemplateMeta[] = [
   { key: 'classic', name: 'Classic', short: 'CL', fit: 'Elegant catalogs and premium basics', primary: '#0f172a', accent: '#f8fafc', bg: '#f8fafc' },
   { key: 'modern', name: 'Modern', short: 'MO', fit: 'Clean fashion, electronics, and general retail', primary: '#0D9488', accent: '#99F6E4', bg: '#f8fafc' },
+  { key: 'interior', name: 'Interior', short: 'IN', fit: 'Home and interior-decor stores wanting a soft emerald accent', primary: '#65A30D', accent: '#D9F99D', bg: '#f8fafc' },
+  { key: 'minimal', name: 'Minimal', short: 'MI', fit: 'General retail wanting the plainest possible layout', primary: '#65A30D', accent: '#D9F99D', bg: '#f8fafc' },
   { key: 'street', name: 'Street', short: 'ST', fit: 'Streetwear, drops, bold youth brands', primary: '#FACC15', accent: '#000000', bg: '#ffffff' },
   { key: 'cozy', name: 'Cozy', short: 'CZ', fit: 'Home goods, handmade, soft lifestyle', primary: '#A4C3B2', accent: '#F5F2EA', bg: '#F5F2EA' },
   { key: 'cyber', name: 'Cyber', short: 'CY', fit: 'Gaming, tech, electronics, gadgets', primary: '#F43F5E', accent: '#A855F7', bg: '#0d0515' },

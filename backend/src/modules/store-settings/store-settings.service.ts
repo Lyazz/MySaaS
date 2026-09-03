@@ -10,6 +10,8 @@ import {
 export type StoreTemplateKey =
     | 'classic'
     | 'modern'
+    | 'interior'
+    | 'minimal'
     | 'street'
     | 'cozy'
     | 'cyber'
@@ -29,6 +31,8 @@ export type StoreLanguage = 'ar' | 'fr' | 'en'
 export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; description: string }[] = [
     { key: 'classic', label: 'Classic', description: 'Clean layout, ideal for most stores.' },
     { key: 'modern', label: 'Modern', description: 'Bolder typography and more visual spacing.' },
+    { key: 'interior', label: 'Interior', description: 'A modern layout tuned for home and interior-decor stores, with a soft emerald accent.' },
+    { key: 'minimal', label: 'Minimal', description: 'A pared-back take on the modern layout, with tighter corners and a quieter accent.' },
     { key: 'street', label: 'Street', description: 'High-energy, bold layout with high-contrast elements.' },
     { key: 'cozy', label: 'Cozy', description: 'Soft, minimalist design with warm colors.' },
     { key: 'cyber', label: 'Cyber', description: 'Futuristic dark mode with neon accents.' },

@@ -529,6 +529,8 @@ type StoreTemplate = {
 const templates: StoreTemplate[] = [
   { key: 'classic', category: 'classic', mood: 'light', voice: 'serif', display: "'Alice', serif", color: '#0f172a', bg: '#f8fafc', surface: '#ffffff', border: '#e2e8f0', ink: '#0f172a', inkSoft: '#64748b', radius: '4px' },
   { key: 'modern', category: 'minimalist', mood: 'light', voice: 'sans', display: "'Outfit', system-ui, sans-serif", color: '#0d9488', bg: '#f8fafc', surface: '#ffffff', border: '#e2e8f0', ink: '#0f172a', inkSoft: '#64748b', radius: '8px' },
+  { key: 'interior', category: 'minimalist', mood: 'light', voice: 'sans', display: "'Outfit', system-ui, sans-serif", color: '#65a30d', bg: '#f8fafc', surface: '#ffffff', border: '#e2e8f0', ink: '#0f172a', inkSoft: '#64748b', radius: '10px' },
+  { key: 'minimal', category: 'minimalist', mood: 'light', voice: 'sans', display: "'Outfit', system-ui, sans-serif", color: '#65a30d', bg: '#f8fafc', surface: '#ffffff', border: '#e2e8f0', ink: '#0f172a', inkSoft: '#64748b', radius: '8px' },
   { key: 'street', category: 'bold', mood: 'light', voice: 'display', display: "'Anton', sans-serif", color: '#facc15', bg: '#ffffff', surface: '#ffffff', border: '#111111', ink: '#000000', inkSoft: '#52525b', radius: '0px' },
   { key: 'cozy', category: 'minimalist', mood: 'light', voice: 'sans', display: "'Nunito', sans-serif", color: '#a4c3b2', bg: '#f5f2ea', surface: '#fffdf8', border: '#e0dccf', ink: '#3f3a33', inkSoft: '#736a5e', radius: '16px' },
   { key: 'cyber', category: 'tech', mood: 'dark', voice: 'display', display: "'Orbitron', sans-serif", color: '#f43f5e', bg: '#0d0515', surface: '#1a0a2e', border: '#3b1d63', ink: '#f5e9ff', inkSoft: '#a78bd0', radius: '4px' },
