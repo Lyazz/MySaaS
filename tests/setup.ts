@@ -19,6 +19,12 @@ process.env.TRUST_PROXY ||= 'true'
 process.env.REGISTRATIONS_OPEN = 'true'
 process.env.REGISTER_PHONE_LOCK_ENABLED = 'false'
 
+// Signup now demands a verified email or phone. The suite has no inbox and no
+// SMS gateway, so it registers with the gate off -- exactly as it does for the
+// phone lock above. `tests/api/account-verification.test.ts` turns it back on
+// for the cases that are about the gate itself.
+process.env.REGISTER_REQUIRE_VERIFICATION = 'false'
+
 // Activation licenses are RS256-signed and `assertRequiredEnv()` refuses to boot
 // without a keypair. Generate an ephemeral one per test worker rather than
 // committing a fixture: a checked-in test key is exactly the mistake that put a

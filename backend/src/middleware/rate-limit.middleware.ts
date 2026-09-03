@@ -53,6 +53,25 @@ export const registerRateLimiter = createLimiter({
     message: 'Too many registration attempts, please try again later.'
 })
 
+/**
+ * Guards the one-time-code endpoints.
+ *
+ * `VerificationService` already caps sends per destination, which is what stops
+ * one phone being billed a hundred SMS. This is the other half: one IP walking
+ * a list of *different* addresses, which the per-destination limit never sees.
+ * Verify attempts share the bucket because a code is only six digits — the
+ * per-code attempt counter burns at five, but nothing stops an attacker asking
+ * for a fresh code and trying five more.
+ */
+export const verificationRateLimiter = createLimiter({
+    windowMs: 15 * 60 * 1000,
+    max: process.env.NODE_ENV === 'test' ? 10_000 : 20,
+    message: 'Too many verification requests, please try again later.',
+    // GET /auth/otp/channels is a page-load read with nothing to abuse, and
+    // counting it would spend the budget the actual sends need.
+    skip: (req) => req.method.toUpperCase() !== 'POST'
+})
+
 export const publicOrderRateLimiter = createLimiter({
     windowMs: 60 * 60 * 1000,
     max: 30,

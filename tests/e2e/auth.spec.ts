@@ -16,8 +16,20 @@ test.describe('Authentication Flow', () => {
         await page.getByTestId('register-slug').fill(slug)
         await page.getByTestId('register-email').fill(email)
         await page.getByTestId('register-phone').fill(phone)
+        // Signup now demands a verified contact. The dev server echoes the code
+        // back (OTP_DEV_ECHO, set in playwright.config.ts) because there is no
+        // inbox to read here; a hardcoded 123456 has not worked since the flow
+        // stopped being a placeholder.
+        const otpResponsePromise = page.waitForResponse(
+            (r) => r.url().includes('/api/auth/otp/send') && r.request().method() === 'POST'
+        )
         await page.getByTestId('register-send-otp').click()
-        await page.getByTestId('register-otp').fill('123456')
+        const otpResponse = await otpResponsePromise
+        const { devCode } = (await otpResponse.json()) as { devCode?: string }
+        if (!devCode) {
+            throw new Error('The dev server did not echo an OTP code; is OTP_DEV_ECHO set?')
+        }
+        await page.getByTestId('register-otp').fill(devCode)
         await page.getByTestId('register-verify-otp').click()
         await page.getByTestId('register-password').fill(password)
         await page.getByTestId('register-confirm-password').fill(password)

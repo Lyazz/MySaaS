@@ -818,8 +818,12 @@
           "placeholder": "Entrez le code OTP",
           "send": "Envoyer le code",
           "verify": "Vérifier le code",
-          "placeholderNotice": "Code OTP envoyé.",
-          "verified": "Téléphone confirmé."
+          "verified": "Contact confirmé.",
+          "channelPrompt": "Où souhaitez-vous recevoir votre code ?",
+          "sentTo": "Code envoyé à {destination}. Il expire dans {minutes} minutes.",
+          "sending": "Envoi…",
+          "verifying": "Vérification…",
+          "resendIn": "Renvoyer dans {seconds}s"
         },
         "password": {
           "label": "Mot de passe"
@@ -863,17 +867,59 @@
     },
     "forgotPassword": {
       "title": "Mot de passe oublié",
-      "subtitle": "Entrez votre e-mail et nous enverrons les instructions de réinitialisation quand cette fonctionnalité sera activée.",
-      "placeholderNotice": "Cet écran est un placeholder pour le moment. Les e-mails de réinitialisation ne sont pas encore actifs.",
+      "subtitle": "Nous vous envoyons un code à usage unique pour confirmer votre identité, puis vous choisissez un nouveau mot de passe.",
+      "backToLogin": "Retour à la connexion",
       "email": {
         "label": "Adresse e-mail",
-        "placeholder": "name{'@'}company.com"
+        "placeholder": "nom{'@'}entreprise.com"
+      },
+      "phone": {
+        "label": "Numéro de téléphone",
+        "placeholder": "05 55 55 55 55"
+      },
+      "password": {
+        "label": "Nouveau mot de passe",
+        "placeholder": "Au moins 8 caractères"
+      },
+      "confirmPassword": {
+        "label": "Confirmer le nouveau mot de passe",
+        "placeholder": "Répétez votre nouveau mot de passe"
+      },
+      "otp": {
+        "channelLabel": "Envoyer mon code par",
+        "label": "Code de vérification",
+        "placeholder": "000000",
+        "sentTo": "Si un compte correspond, un code part vers {destination}. Il expire dans {minutes} minutes.",
+        "resend": "Renvoyer le code",
+        "resendIn": "Renvoyer dans {seconds}s",
+        "changeDestination": "Utiliser une autre adresse"
       },
       "submit": {
-        "send": "Envoyer le lien de réinitialisation",
-        "sent": "Demande enregistrée (placeholder)"
+        "send": "Envoyer le code",
+        "sending": "Envoi…",
+        "verify": "Vérifier le code",
+        "verifying": "Vérification…",
+        "save": "Enregistrer le mot de passe",
+        "saving": "Enregistrement…"
       },
-      "backToLogin": "Retour à la connexion"
+      "done": {
+        "title": "Mot de passe mis à jour",
+        "subtitle": "Vous avez été déconnecté partout. Connectez-vous avec votre nouveau mot de passe.",
+        "logIn": "Aller à la connexion"
+      },
+      "errors": {
+        "emailInvalid": "Saisissez une adresse e-mail valide.",
+        "phoneRequired": "Saisissez votre numéro de téléphone.",
+        "codeRequired": "Saisissez le code reçu.",
+        "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères.",
+        "passwordMismatch": "Les mots de passe ne correspondent pas.",
+        "generic": "Votre mot de passe n'a pas pu être mis à jour. Réessayez."
+      }
+    },
+    "channels": {
+      "email": "E-mail",
+      "sms": "SMS",
+      "whatsapp": "WhatsApp"
     }
   },
   "pricing": {
@@ -1145,7 +1191,20 @@
       "coupon": {
         "title": "Code promo",
         "badge": "Remise",
-        "placeholder": "Entrez le code (ex : BIENVENUE10)"
+        "placeholder": "Entrez le code (ex : BIENVENUE10)",
+        "checking": "Vérification…",
+        "remove": "Retirer",
+        "invalid": "Ce code promo n'est pas valide",
+        "freeShipping": "Livraison offerte",
+        "applied": "Code {code} appliqué",
+        "errors": {
+          "notStarted": "Ce code promo n'est pas encore actif",
+          "expired": "Ce code promo a expiré",
+          "usageLimit": "Ce code promo a atteint sa limite d'utilisation",
+          "customerLimit": "Vous avez déjà utilisé ce code promo",
+          "notApplicable": "Ce code promo ne s'applique pas aux articles de votre panier",
+          "minOrder": "Ce code promo exige une commande minimum de {amount} {currency}"
+        }
       },
       "summary": {
         "deliveryOption": "Option de livraison",
@@ -2325,7 +2384,8 @@
       "users": "Utilisateurs",
       "storefront": "Boutique",
       "account": "Compte",
-      "connections": "Connexions"
+      "connections": "Connexions",
+      "promoCodes": "Codes promo"
     },
     "settingsNav": {
       "ariaLabel": "Paramètres",
@@ -3050,7 +3110,8 @@
           },
           "resources": {
             "variants": "Variants",
-            "metaPixels": "Pixels Meta"
+            "metaPixels": "Pixels Meta",
+            "promoCodes": "Codes promo"
           },
           "validation": {
             "invalidName": "Nom invalide (min 2 caractères).",
@@ -3927,7 +3988,8 @@
             "subtotal": "Sous-total",
             "total": "Total",
             "fallbackProduct": "Produit",
-            "clearance": "Destockage : {count} unité(s) offerte(s)"
+            "clearance": "Destockage : {count} unité(s) offerte(s)",
+            "promoCode": "Code promo {code}"
           },
           "statusUpdate": {
             "title": "Mettre à jour le statut",
@@ -4684,6 +4746,91 @@
             "loadFailed": "Impossible de charger les détails du fournisseur.",
             "updateFailed": "Impossible de mettre à jour le fournisseur. Veuillez réessayer."
           }
+        }
+      },
+      "promoCodes": {
+        "title": "Codes promo",
+        "subtitle": "Codes de reduction saisis par les clients au paiement.",
+        "actions": {
+          "create": "Nouveau code promo"
+        },
+        "filters": {
+          "search": "Rechercher",
+          "searchPlaceholder": "Code ou description",
+          "status": "Statut",
+          "all": "Tous"
+        },
+        "status": {
+          "active": "Actif",
+          "inactive": "Inactif",
+          "scheduled": "Programme",
+          "expired": "Expire",
+          "exhausted": "Limite atteinte"
+        },
+        "types": {
+          "PERCENTAGE": "Pourcentage",
+          "FIXED": "Montant fixe",
+          "FREE_SHIPPING": "Livraison offerte"
+        },
+        "stats": {
+          "total": "codes",
+          "active": "actifs",
+          "redemptions": "utilisations"
+        },
+        "empty": {
+          "title": "Aucun code promo",
+          "description": "Creez un code et vos clients pourront le saisir au paiement."
+        },
+        "table": {
+          "code": "Code",
+          "discount": "Reduction",
+          "conditions": "Conditions",
+          "usage": "Utilise",
+          "window": "Periode",
+          "status": "Statut",
+          "cappedAt": "Plafonne a {amount}",
+          "minOrder": "Commande min. {amount}",
+          "perCustomer": "{count} par client",
+          "noStart": "Pas de date de debut",
+          "noEnd": "Pas de date de fin",
+          "wholeCatalog": "Tout le catalogue",
+          "categoriesCount": "{count} categories",
+          "productsCount": "{count} produits"
+        },
+        "form": {
+          "createTitle": "Nouveau code promo",
+          "editTitle": "Modifier le code promo",
+          "description": "Definissez ce que le code retire et quand il peut etre utilise.",
+          "code": "Code",
+          "codeHint": "Lettres, chiffres, points, tirets. La casse n'a pas d'importance.",
+          "descriptionPlaceholder": "Note interne, ex. campagne Ramadan",
+          "discountType": "Type de reduction",
+          "percentValue": "Reduction (%)",
+          "fixedValue": "Montant retire ({currency})",
+          "maxDiscount": "Reduction maximale ({currency})",
+          "maxDiscountHint": "Plafonne une reduction en pourcentage. Laissez vide pour aucun plafond.",
+          "minOrder": "Commande minimum ({currency})",
+          "minOrderHint": "Sous-total requis avant que le code s'applique.",
+          "startsAt": "Debut",
+          "startsAtHint": "Laissez vide pour demarrer immediatement.",
+          "endsAt": "Fin",
+          "endsAtHint": "Laissez vide pour aucune expiration.",
+          "usageLimit": "Utilisations totales",
+          "usageLimitHint": "Laissez vide pour illimite.",
+          "usageLimitPerCustomer": "Utilisations par client",
+          "usageLimitPerCustomerHint": "Comptees par numero de telephone. Laissez vide pour illimite.",
+          "scope": "Ou il s'applique",
+          "scopeHint": "Ne selectionnez rien pour reduire tout le panier. Sinon seuls les produits et categories choisis sont reduits.",
+          "categories": "Categories",
+          "products": "Produits",
+          "noCategories": "Aucune categorie",
+          "noProducts": "Aucun produit",
+          "active": "Actif",
+          "activeHint": "Les codes inactifs sont refuses au paiement."
+        },
+        "delete": {
+          "title": "Supprimer ce code promo ?",
+          "message": "{code} ne fonctionnera plus au paiement. Les commandes passees gardent le code utilise."
         }
       }
     },

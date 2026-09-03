@@ -4,9 +4,12 @@ import bcrypt from 'bcryptjs'
 import prisma from '../../lib/prisma'
 import { signAccessToken } from '../../lib/jwt'
 import { seedStaffRolePresets } from '../staff-roles/presets'
+import { seedDefaultPromoCodes } from '../promo-codes/presets'
 import { PhoneNormalizationService } from '../loyalty/phone-normalization.service'
 import { ActivationError, ActivationService } from '../activation/activation.service'
 import { ensureSubscription } from '../billing/subscription.service'
+import { AuthServiceError } from './auth.errors'
+import { verificationService } from './verification.service'
 
 const MIN_PASSWORD_LENGTH = 8
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -21,18 +24,7 @@ type StaffRoleWithPermissions = {
     permissions: Array<{ resource: string; action: string }>
 } | null
 
-export class AuthServiceError extends Error {
-    constructor(
-        public statusCode: number,
-        public statusMessage: string,
-        /** Stable machine-readable reason, e.g. DEVICE_LIMIT_REACHED. */
-        public code?: string,
-        /** Extra fields merged into the response body, e.g. canRequestAccess. */
-        public details?: Record<string, unknown>
-    ) {
-        super(statusMessage)
-    }
-}
+export { AuthServiceError } from './auth.errors'
 
 /**
  * Kill switch for device seat enforcement.
@@ -54,6 +46,8 @@ export type RegisterInput = {
     email?: unknown
     password?: unknown
     phone?: unknown
+    /** Minted by `POST /api/auth/otp/verify`. Spent here, exactly once. */
+    verificationToken?: unknown
 }
 
 export type LoginInput = {
@@ -111,6 +105,54 @@ export class AuthService {
         return (process.env.REGISTRATIONS_OPEN ?? 'true') !== 'false'
     }
 
+    /**
+     * Whether a signup must carry a verified email or phone.
+     *
+     * On by default: an unverified owner address means a tenant nobody can
+     * reset a password for. The switch exists because the test suite registers
+     * hundreds of tenants and has no inbox, and because a deployment with no
+     * messaging provider configured at all would otherwise be unable to sign
+     * anyone up. `tests/setup.ts` turns it off for the same reason it turns off
+     * the phone lock.
+     */
+    private isSignupVerificationRequired() {
+        return (process.env.REGISTER_REQUIRE_VERIFICATION ?? 'true') !== 'false'
+    }
+
+    /**
+     * Spends the signup token and reports which contact it proved.
+     *
+     * The destination is re-checked against the form rather than trusted: a
+     * token verified for one address must not be able to create an account on
+     * another, which is exactly what "verify a throwaway inbox, sign up as
+     * someone else" would look like.
+     */
+    private async consumeSignupVerification(input: {
+        token: unknown
+        email: string
+        phone: string | null
+    }): Promise<{ emailVerifiedAt: Date | null; phoneVerifiedAt: Date | null }> {
+        const record = await verificationService.consumeToken({
+            token: input.token,
+            purpose: 'REGISTRATION'
+        })
+
+        const expected = record.channel === 'EMAIL' ? input.email : input.phone
+
+        if (!expected || record.destination !== expected) {
+            throw new AuthServiceError(
+                400,
+                'Verify the email address or phone number you are signing up with',
+                'VERIFICATION_MISMATCH'
+            )
+        }
+
+        const now = new Date()
+        return record.channel === 'EMAIL'
+            ? { emailVerifiedAt: now, phoneVerifiedAt: null }
+            : { emailVerifiedAt: null, phoneVerifiedAt: now }
+    }
+
     async register(input: RegisterInput, tenant?: Tenant) {
         if (tenant) {
             throw new AuthServiceError(403, 'Registration is only allowed from the SaaS landing domain')
@@ -141,11 +183,12 @@ export class AuthService {
             throw new AuthServiceError(400, 'Invalid slug format. Use lowercase letters, numbers, and hyphens only.')
         }
 
+        const normalizedPhone = this.phoneNormalization.tryNormalizeAlgerianPhone(input.phone)?.normalized ?? null
+
         if (this.isTemporaryPhoneLockEnabled()) {
-            const normalizedPhone = this.phoneNormalization.tryNormalizeAlgerianPhone(input.phone)
             const allowedPhone = this.getAllowedRegistrationPhoneNormalized()
 
-            if (!allowedPhone || !normalizedPhone || normalizedPhone.normalized !== allowedPhone) {
+            if (!allowedPhone || !normalizedPhone || normalizedPhone !== allowedPhone) {
                 throw new AuthServiceError(403, 'Registration is currently unavailable')
             }
         }
@@ -157,6 +200,17 @@ export class AuthService {
         if (existingTenant) {
             throw new AuthServiceError(409, 'Tenant URL is already taken')
         }
+
+        // Last gate before anything is written. Spending the token here rather
+        // than earlier means a signup rejected for a taken slug does not cost
+        // the visitor their code.
+        const verification = this.isSignupVerificationRequired()
+            ? await this.consumeSignupVerification({
+                  token: input.verificationToken,
+                  email: normalizedEmail,
+                  phone: normalizedPhone
+              })
+            : { emailVerifiedAt: null, phoneVerifiedAt: null }
 
         const passwordHash = await bcrypt.hash(password, 10)
 
@@ -187,12 +241,17 @@ export class AuthService {
                     passwordHash,
                     role: 'owner',
                     isSuperAdmin: false,
+                    phone: normalizedPhone,
+                    emailVerifiedAt: verification.emailVerifiedAt,
+                    phoneVerifiedAt: verification.phoneVerifiedAt,
                     tenantId: createdTenant.id,
                     cashboxId: defaultCashbox.id
                 }
             })
 
             await seedStaffRolePresets(tx, createdTenant.id)
+            // Inactive by default — see backend/src/modules/promo-codes/presets.ts.
+            await seedDefaultPromoCodes(tx, createdTenant.id)
 
             await tx.storeSettings.create({
                 data: {

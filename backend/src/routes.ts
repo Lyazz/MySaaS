@@ -38,6 +38,7 @@ import adminAuditLogsRouter from './modules/audit-logs/routes';
 import staffRolesRouter from './modules/staff-roles/routes';
 import filesRouter from './modules/files/routes';
 import loyaltyRouter from './modules/loyalty/routes';
+import promoCodesRouter from './modules/promo-codes/routes';
 import googleOAuthRouter from './modules/google-oauth/routes';
 import syncRouter from './modules/sync/routes';
 import activationRouter from './modules/activation/routes';
@@ -104,6 +105,7 @@ router.use('/admin/users', usersRouter);
 router.use('/admin/staff-roles', staffRolesRouter);
 router.use('/admin/audit-logs', adminAuditLogsRouter);
 router.use('/admin/loyalty', loyaltyRouter);
+router.use('/admin/promo-codes', promoCodesRouter);
 router.use('/admin/sync', syncRouter);
 router.use('/admin/notifications', notificationsRouter);
 

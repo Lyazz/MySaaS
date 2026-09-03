@@ -2,6 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 process.env.JWT_SECRET ||= 'test-jwt-secret'
 process.env.TRUST_PROXY ||= 'true'
+// The signup spec completes a real OTP round trip and has no inbox, so the dev
+// server echoes the code back in the send response. `isDevEchoEnabled()` also
+// requires a non-production NODE_ENV, so this cannot leak from here.
+process.env.OTP_DEV_ECHO ||= 'true'
 const port = process.env.PLAYWRIGHT_PORT || '3000'
 const baseURL = process.env.PLAYWRIGHT_BASE_URL || `http://localhost:${port}`
 const reuseExistingServer = process.env.PLAYWRIGHT_REUSE_SERVER === 'true' || (!process.env.CI && port === '3000')

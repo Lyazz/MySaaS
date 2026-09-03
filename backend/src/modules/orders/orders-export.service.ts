@@ -26,6 +26,9 @@ export const EXPORT_COLUMNS: ExportColumn[] = [
   { key: 'earnedPointsTotal',      label: 'Points Earned' },
   { key: 'redeemedPointsTotal',    label: 'Points Redeemed' },
   { key: 'redeemedAmount',         label: 'Redeemed Amount' },
+  { key: 'promoCode',              label: 'Promo Code' },
+  { key: 'promoDiscountAmount',    label: 'Promo Discount' },
+  { key: 'promoShippingDiscount',  label: 'Promo Shipping Discount' },
   { key: 'internalNotes',          label: 'Internal Notes' },
   { key: 'itemsSummary',           label: 'Items' },
 ]
@@ -97,6 +100,9 @@ export async function fetchForExport(
       earnedPointsTotal: true,
       redeemedPointsTotal: true,
       redeemedAmount: true,
+      promoCode: true,
+      promoDiscountAmount: true,
+      promoShippingDiscount: true,
       internalNotes: true,
       ...(needItems ? {
         items: {

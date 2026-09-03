@@ -836,8 +836,12 @@
           "placeholder": "أدخل رمز OTP",
           "send": "إرسال الرمز",
           "verify": "تأكيد الرمز",
-          "placeholderNotice": "تم إرسال رمز OTP.",
-          "verified": "تم تأكيد الهاتف."
+          "verified": "تم تأكيد جهة الاتصال.",
+          "channelPrompt": "أين تريد استلام رمزك؟",
+          "sentTo": "تم إرسال الرمز إلى {destination}. ينتهي خلال {minutes} دقائق.",
+          "sending": "جارٍ الإرسال…",
+          "verifying": "جارٍ التحقق…",
+          "resendIn": "إعادة الإرسال خلال {seconds} ث"
         },
         "password": {
           "label": "كلمة المرور"
@@ -881,17 +885,59 @@
     },
     "forgotPassword": {
       "title": "نسيت كلمة المرور",
-      "subtitle": "أدخل بريدك الإلكتروني وسنرسل تعليمات إعادة التعيين عند تفعيل هذه الميزة.",
-      "placeholderNotice": "هذه الصفحة مجرد Placeholder حاليًا. رسائل إعادة التعيين غير مفعلة بعد.",
+      "subtitle": "سنرسل لك رمزًا لمرة واحدة للتأكد من هويتك، ثم يمكنك اختيار كلمة مرور جديدة.",
+      "backToLogin": "العودة إلى تسجيل الدخول",
       "email": {
         "label": "البريد الإلكتروني",
-        "placeholder": "name{'@'}company.com"
+        "placeholder": "nom{'@'}entreprise.com"
+      },
+      "phone": {
+        "label": "رقم الهاتف",
+        "placeholder": "05 55 55 55 55"
+      },
+      "password": {
+        "label": "كلمة المرور الجديدة",
+        "placeholder": "8 أحرف على الأقل"
+      },
+      "confirmPassword": {
+        "label": "تأكيد كلمة المرور الجديدة",
+        "placeholder": "أعد إدخال كلمة المرور الجديدة"
+      },
+      "otp": {
+        "channelLabel": "أرسل الرمز عبر",
+        "label": "رمز التحقق",
+        "placeholder": "000000",
+        "sentTo": "إذا كان هناك حساب مطابق، فالرمز في طريقه إلى {destination}. ينتهي خلال {minutes} دقائق.",
+        "resend": "إعادة إرسال الرمز",
+        "resendIn": "إعادة الإرسال خلال {seconds} ث",
+        "changeDestination": "استخدام عنوان آخر"
       },
       "submit": {
-        "send": "إرسال رابط إعادة التعيين",
-        "sent": "تم حفظ الطلب (تجريبي)"
+        "send": "إرسال الرمز",
+        "sending": "جارٍ الإرسال…",
+        "verify": "تحقق من الرمز",
+        "verifying": "جارٍ التحقق…",
+        "save": "حفظ كلمة المرور",
+        "saving": "جارٍ الحفظ…"
       },
-      "backToLogin": "الرجوع لتسجيل الدخول"
+      "done": {
+        "title": "تم تحديث كلمة المرور",
+        "subtitle": "تم تسجيل خروجك من كل الأجهزة. سجّل الدخول بكلمة المرور الجديدة.",
+        "logIn": "الذهاب إلى تسجيل الدخول"
+      },
+      "errors": {
+        "emailInvalid": "أدخل بريدًا إلكترونيًا صالحًا.",
+        "phoneRequired": "أدخل رقم هاتفك.",
+        "codeRequired": "أدخل الرمز الذي استلمته.",
+        "passwordTooShort": "يجب أن تتكون كلمة المرور من {min} أحرف على الأقل.",
+        "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+        "generic": "تعذر تحديث كلمة المرور. حاول مرة أخرى."
+      }
+    },
+    "channels": {
+      "email": "البريد الإلكتروني",
+      "sms": "رسالة نصية",
+      "whatsapp": "واتساب"
     }
   },
   "pricing": {
@@ -1163,7 +1209,20 @@
       "coupon": {
         "title": "كود الخصم",
         "badge": "خصم",
-        "placeholder": "أدخل الكود (مثال: WELCOME10)"
+        "placeholder": "أدخل الكود (مثال: WELCOME10)",
+        "checking": "جارٍ التحقق…",
+        "remove": "إزالة",
+        "invalid": "كود الخصم غير صالح",
+        "freeShipping": "الشحن مجاني",
+        "applied": "تم تطبيق الكود {code}",
+        "errors": {
+          "notStarted": "كود الخصم هذا غير مفعّل بعد",
+          "expired": "انتهت صلاحية كود الخصم",
+          "usageLimit": "بلغ كود الخصم حد الاستخدام",
+          "customerLimit": "لقد استخدمت هذا الكود من قبل",
+          "notApplicable": "كود الخصم لا ينطبق على منتجات سلتك",
+          "minOrder": "يتطلب هذا الكود طلبًا بحد أدنى {amount} {currency}"
+        }
       },
       "summary": {
         "deliveryOption": "خيار التوصيل",
@@ -2343,7 +2402,8 @@
       "users": "المستخدمون",
       "storefront": "المتجر",
       "account": "الحساب",
-      "connections": "التكاملات"
+      "connections": "التكاملات",
+      "promoCodes": "أكواد الخصم"
     },
     "settingsNav": {
       "ariaLabel": "الإعدادات",
@@ -3067,7 +3127,8 @@
           },
           "resources": {
             "variants": "المنتجات المتغيرة",
-            "metaPixels": "بيكسلات ميتا"
+            "metaPixels": "بيكسلات ميتا",
+            "promoCodes": "أكواد الخصم"
           },
           "validation": {
             "invalidName": "اسم غير صالح (حد أدنى حرفان).",
@@ -3944,7 +4005,8 @@
             "subtotal": "الإجمالي الفرعي",
             "total": "الإجمالي",
             "fallbackProduct": "منتج",
-            "clearance": "تصفية: {count} وحدة مجانية"
+            "clearance": "تصفية: {count} وحدة مجانية",
+            "promoCode": "كود الخصم {code}"
           },
           "statusUpdate": {
             "title": "تحديث حالة الطلب",
@@ -4701,6 +4763,91 @@
             "loadFailed": "تعذر تحميل تفاصيل المورّد.",
             "updateFailed": "تعذر تحديث المورّد. حاول مرة أخرى."
           }
+        }
+      },
+      "promoCodes": {
+        "title": "أكواد الخصم",
+        "subtitle": "أكواد التخفيض التي يدخلها الزبون عند الدفع.",
+        "actions": {
+          "create": "كود خصم جديد"
+        },
+        "filters": {
+          "search": "بحث",
+          "searchPlaceholder": "الكود أو الوصف",
+          "status": "الحالة",
+          "all": "الكل"
+        },
+        "status": {
+          "active": "نشط",
+          "inactive": "غير نشط",
+          "scheduled": "مجدول",
+          "expired": "منتهٍ",
+          "exhausted": "بلغ الحد"
+        },
+        "types": {
+          "PERCENTAGE": "نسبة مئوية",
+          "FIXED": "مبلغ ثابت",
+          "FREE_SHIPPING": "شحن مجاني"
+        },
+        "stats": {
+          "total": "كود",
+          "active": "نشط",
+          "redemptions": "استخدام"
+        },
+        "empty": {
+          "title": "لا توجد أكواد خصم",
+          "description": "أنشئ كودًا ليتمكن الزبائن من إدخاله عند الدفع."
+        },
+        "table": {
+          "code": "الكود",
+          "discount": "الخصم",
+          "conditions": "الشروط",
+          "usage": "الاستخدام",
+          "window": "الفترة",
+          "status": "الحالة",
+          "cappedAt": "بحد أقصى {amount}",
+          "minOrder": "أدنى طلب {amount}",
+          "perCustomer": "{count} لكل زبون",
+          "noStart": "بدون تاريخ بداية",
+          "noEnd": "بدون تاريخ نهاية",
+          "wholeCatalog": "كل الكتالوج",
+          "categoriesCount": "{count} فئات",
+          "productsCount": "{count} منتجات"
+        },
+        "form": {
+          "createTitle": "كود خصم جديد",
+          "editTitle": "تعديل كود الخصم",
+          "description": "حدّد ما يخصمه الكود ومتى يمكن استعماله.",
+          "code": "الكود",
+          "codeHint": "حروف وأرقام ونقاط وشرطات. لا فرق بين الحروف الكبيرة والصغيرة.",
+          "descriptionPlaceholder": "ملاحظة داخلية، مثال: حملة رمضان",
+          "discountType": "نوع الخصم",
+          "percentValue": "نسبة الخصم (%)",
+          "fixedValue": "المبلغ المخصوم ({currency})",
+          "maxDiscount": "أقصى خصم ({currency})",
+          "maxDiscountHint": "يحدّ من الخصم بالنسبة المئوية. اتركه فارغًا بلا حد.",
+          "minOrder": "أدنى مبلغ للطلب ({currency})",
+          "minOrderHint": "المجموع المطلوب قبل تطبيق الكود.",
+          "startsAt": "يبدأ في",
+          "startsAtHint": "اتركه فارغًا ليبدأ فورًا.",
+          "endsAt": "ينتهي في",
+          "endsAtHint": "اتركه فارغًا بلا انتهاء.",
+          "usageLimit": "إجمالي الاستخدامات",
+          "usageLimitHint": "اتركه فارغًا لعدد غير محدود.",
+          "usageLimitPerCustomer": "الاستخدامات لكل زبون",
+          "usageLimitPerCustomerHint": "تُحسب حسب رقم الهاتف. اتركه فارغًا لعدد غير محدود.",
+          "scope": "أين يُطبّق",
+          "scopeHint": "لا تختر شيئًا لخصم كامل السلة. وإلا فالخصم يشمل المنتجات والفئات المختارة فقط.",
+          "categories": "الفئات",
+          "products": "المنتجات",
+          "noCategories": "لا توجد فئات",
+          "noProducts": "لا توجد منتجات",
+          "active": "نشط",
+          "activeHint": "الأكواد غير النشطة تُرفض عند الدفع."
+        },
+        "delete": {
+          "title": "حذف كود الخصم؟",
+          "message": "لن يعمل {code} عند الدفع. الطلبات السابقة تحتفظ بالكود الذي استُخدم فيها."
         }
       }
     },

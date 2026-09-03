@@ -612,6 +612,14 @@
                 <span class="od-items__sub-label">{{ t('admin.pages.orders.detail.itemsTable.clearance', { count: order.clearanceBreakdown.freeCount }) }}</span>
                 <span class="od-items__sub-value od-display">-{{ formatCurrency(order.clearanceDiscountAmount || 0) }}</span>
               </li>
+              <li v-if="Number(order.promoDiscountAmount || 0) > 0 || Number(order.promoShippingDiscount || 0) > 0" class="od-items__sub">
+                <span class="od-items__sub-label">
+                  {{ t('admin.pages.orders.detail.itemsTable.promoCode', { code: order.promoCode || '' }) }}
+                </span>
+                <span class="od-items__sub-value od-display">
+                  -{{ formatCurrency(Number(order.promoDiscountAmount || 0) + Number(order.promoShippingDiscount || 0)) }}
+                </span>
+              </li>
               <li class="od-items__sub">
                 <span class="od-items__sub-label">{{ t('admin.pages.orders.detail.itemsTable.total') }}</span>
                 <span class="od-items__sub-value od-display">{{ formatCurrency(order.totalAmount) }}</span>
@@ -1040,6 +1048,9 @@ type PreviousOrdersMatch =
     totalWithShippingAmount?: number | null
     clearanceDiscountAmount?: number | null
     clearanceBreakdown?: { freeCount: number; eligibleQuantity: number; discountCents: number } | null
+    promoCode?: string | null
+    promoDiscountAmount?: number | null
+    promoShippingDiscount?: number | null
     shippingAmount?: number | null
     shippingCurrency?: string | null
     shippingProvider?: string | null

@@ -76,6 +76,8 @@ model Tenant {
   blacklistEntries          BlacklistEntry[]
   idempotencyKeys           IdempotencyKey[]
   whatsappMessages          WhatsAppMessage[]
+  promoCodes                PromoCode[]
+  promoCodeRedemptions      PromoCodeRedemption[]
 }
 
 model Cashbox {
@@ -400,6 +402,11 @@ model User {
   isSuperAdmin       Boolean          @default(false)
   isActive           Boolean          @default(true)
   tokenInvalidBefore DateTime?
+  /// Normalized Algerian MSISDN (213XXXXXXXXX), captured at signup. Nullable
+  /// because staff accounts are created by an owner who may not know it.
+  phone              String?
+  emailVerifiedAt    DateTime?
+  phoneVerifiedAt    DateTime?
   tenantId           String
   tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   cashboxId          String?
@@ -422,11 +429,15 @@ model User {
   notificationSubscriptions NotificationSubscription[]
   notificationDeliveries    NotificationDelivery[]
   blacklistEntriesCreated   BlacklistEntry[]
+  promoCodesCreated         PromoCode[]                @relation("PromoCodeCreatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, isActive])
+  /// Cross-tenant on purpose: "forgot my password" arrives on the SaaS domain
+  /// with no tenant context, so the lookup is by phone alone.
+  @@index([phone])
   @@index([tenantId, cashboxId])
   @@index([tenantId, staffRoleId])
 }
@@ -1002,6 +1013,15 @@ model Order {
   clearanceDiscountAmount Float   @default(0)
   clearanceBreakdown      Json?
 
+  // Promo code applied at checkout. `promoCode` keeps the literal code typed by
+  // the shopper so the order still reads correctly after the code is renamed or
+  // deleted; `promoCodeId` is null in that case.
+  promoCodeId           String?
+  promoCodeRef          PromoCode? @relation(fields: [tenantId, promoCodeId], references: [tenantId, id], onDelete: SetNull)
+  promoCode             String?
+  promoDiscountAmount   Float      @default(0)
+  promoShippingDiscount Float      @default(0)
+
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
 
@@ -1050,6 +1070,7 @@ model Order {
   inventoryMovements InventoryMovement[]
   cashTransactions   CashTransaction[]      @relation("CashTxOrder")
   sale               Sale?                  @relation("SaleOrder")
+  promoRedemption    PromoCodeRedemption?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1074,6 +1095,95 @@ model Order {
   @@index([tenantId, customerPhoneNormalized])
   @@index([tenantId, readAt])
   @@index([tenantId, status, whatsappLastMessageAt])
+  @@index([tenantId, promoCodeId])
+}
+
+enum PromoDiscountType {
+  PERCENTAGE
+  FIXED
+  FREE_SHIPPING
+}
+
+/// Tenant-owned discount code redeemed at checkout. Codes are stored uppercase
+/// and matched case-insensitively — shoppers type them by hand.
+model PromoCode {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  code        String
+  description String?
+
+  discountType      PromoDiscountType @default(PERCENTAGE)
+  /// Percent (0-100) for PERCENTAGE, a DZD amount for FIXED, ignored for FREE_SHIPPING.
+  discountValue     Decimal           @default(0)
+  /// Caps a PERCENTAGE discount. Null means uncapped.
+  maxDiscountAmount Decimal?
+  /// The cart subtotal the code needs before it applies at all.
+  minOrderAmount    Decimal           @default(0)
+
+  startsAt DateTime?
+  endsAt   DateTime?
+  isActive Boolean   @default(true)
+
+  /// Total redemptions allowed across the store. Null means unlimited.
+  usageLimit            Int?
+  /// Redemptions allowed per phone number. Null means unlimited.
+  usageLimitPerCustomer Int?
+  /// Live counter, incremented inside the order transaction and decremented
+  /// when the order is cancelled or returned.
+  usedCount             Int  @default(0)
+
+  /// Empty arrays mean "the whole catalogue". When either is filled the discount
+  /// only ever eats the matching lines of the cart.
+  productIds  String[] @default([])
+  categoryIds String[] @default([])
+
+  createdByUserId String?
+  createdBy       User?   @relation("PromoCodeCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: SetNull)
+
+  orders      Order[]
+  redemptions PromoCodeRedemption[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, code])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, isActive])
+}
+
+/// One row per order that used a code. Also the per-customer usage ledger:
+/// CANCELLED rows stop counting against the limits.
+model PromoCodeRedemption {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  promoCodeId String
+  promoCode   PromoCode @relation(fields: [tenantId, promoCodeId], references: [tenantId, id], onDelete: Cascade)
+
+  orderId String
+  order   Order  @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+
+  customerId              String?
+  customer                Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
+  customerPhoneNormalized String?
+
+  code             String
+  discountAmount   Float  @default(0)
+  shippingDiscount Float  @default(0)
+  /// ACTIVE | CANCELLED
+  status           String @default("ACTIVE")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, orderId])
+  @@index([tenantId])
+  @@index([tenantId, promoCodeId])
+  @@index([tenantId, promoCodeId, customerPhoneNormalized])
 }
 
 enum BlacklistType {
@@ -1127,6 +1237,7 @@ model Customer {
   payments         CustomerPayment[]
   cashTransactions CashTransaction[]      @relation("CashTxCustomer")
   blacklistEntries BlacklistEntry[]
+  promoRedemptions PromoCodeRedemption[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1847,4 +1958,70 @@ model JobLock {
   lockedAt    DateTime @default(now())
   lockedUntil DateTime
   updatedAt   DateTime @updatedAt
+}
+
+enum VerificationPurpose {
+  REGISTRATION
+  PASSWORD_RESET
+}
+
+enum VerificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+/// One one-time code sent to prove control of an email address or phone number.
+///
+/// Deliberately NOT tenant-scoped, and the single exception to the isolation
+/// rule in CLAUDE.md: a registration code is issued before the tenant it will
+/// create exists, and a password reset arrives on the SaaS domain with no
+/// tenant in the Host header. `tenantId` is therefore a record of which tenant
+/// a reset resolved to, never the scope of the query — the scope is
+/// (purpose, destination), and `userId` is what pins a reset to one account so
+/// a verified code can never be redirected at a different one.
+///
+/// The code itself is never stored: `codeHash` is an HMAC keyed by a
+/// server-side secret, so a database leak does not hand an attacker six digits
+/// they can walk in reverse.
+model VerificationCode {
+  id      String              @id @default(uuid())
+  purpose VerificationPurpose
+  channel VerificationChannel
+
+  /// Lowercased email, or a normalized MSISDN (213XXXXXXXXX). What the code was
+  /// actually sent to, and half the lookup key.
+  destination String
+  codeHash    String
+
+  /// HMAC of the single-use token handed back on a successful verify. That
+  /// token — not the six digits — is what `/register` and the password reset
+  /// accept, so the code cannot be replayed after it has been spent.
+  tokenHash String?
+
+  /// Wrong guesses. The row burns at `MAX_ATTEMPTS`; without this a six-digit
+  /// code is a ten-second brute force.
+  attempts    Int @default(0)
+  /// How many codes this destination has been sent in the current window.
+  resendCount Int @default(0)
+
+  expiresAt  DateTime
+  verifiedAt DateTime?
+  /// Set when the token was spent (account created, password changed).
+  consumedAt DateTime?
+
+  /// Resolved at send time for PASSWORD_RESET. Null for REGISTRATION.
+  userId   String?
+  tenantId String?
+
+  requestIp String?
+  /// Locale the message was rendered in, kept for support requests.
+  locale String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([purpose, destination, createdAt])
+  @@index([tokenHash])
+  @@index([expiresAt])
 }

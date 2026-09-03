@@ -24,6 +24,7 @@ import { PhoneNormalizationError, PhoneNormalizationService } from '../loyalty/p
 import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
 import { notificationsService } from '../notifications/notifications.service'
 import { BlacklistService } from '../blacklist/blacklist.service'
+import { PromoCodeError, PromoCodesService } from '../promo-codes/promo-codes.service'
 import { whatsappService } from '../whatsapp/whatsapp.service'
 
 const telegramService = new TelegramService()
@@ -129,6 +130,7 @@ export type PublicOrderInput = {
     shippingProvider?: string | null
     shippingPickupPoint?: number | string | null
     redeemPointsRequested?: number | null
+    promoCode?: string | null
     clientIp?: string | null
     items: PublicOrderItemInput[]
 }
@@ -437,6 +439,7 @@ export class OrdersService {
     private loyaltyLedger = new LoyaltyLedgerService()
     private loyaltyCheckout = new LoyaltyCheckoutService()
     private blacklist = new BlacklistService()
+    private promoCodes = new PromoCodesService()
 
     private async generateUniquePublicId(tx: Prisma.TransactionClient, tenantId: string, configuredPrefix: unknown) {
         const prefix = normalizeOrderIdPrefix(configuredPrefix)
@@ -1042,6 +1045,67 @@ export class OrdersService {
         }
     }
 
+    /**
+     * Prices a promo code against a cart without placing an order — what the
+     * "Apply" button next to the code field calls. Never throws for a bad code:
+     * the shopper gets `valid: false` and a reason to read.
+     */
+    async previewPromoCode(input: {
+        tenantId: string
+        code?: string | null
+        customerPhone?: string | null
+        shippingAmount?: number | null
+        items: PublicOrderItemInput[]
+    }) {
+        const code = String(input.code ?? '').trim()
+        if (!code) {
+            return { valid: false, code: '', discountAmount: 0, shippingDiscount: 0, message: null, reason: null }
+        }
+
+        const normalizedItems = this.normalizePublicOrderItems(input.items)
+        const { validatedItems, totalAmount } = await this.preparePublicOrderItems(input.tenantId, normalizedItems)
+        const customerPhoneNormalized = normalizeCustomerPhoneForOrder(input.customerPhone)
+
+        try {
+            const promo = await this.promoCodes.evaluateForCheckout(prisma, {
+                tenantId: input.tenantId,
+                code,
+                lines: validatedItems.map((item) => ({ productId: item.productId, lineTotal: item.lineTotal })),
+                cartSubtotal: totalAmount,
+                shippingAmount: input.shippingAmount ?? 0,
+                customerPhoneNormalized
+            })
+
+            if (!promo) {
+                return { valid: false, code: '', discountAmount: 0, shippingDiscount: 0, message: null, reason: null }
+            }
+
+            return {
+                valid: true,
+                code: promo.code,
+                discountType: promo.discountType,
+                discountAmount: promo.discountAmount,
+                shippingDiscount: promo.shippingDiscount,
+                cartSubtotal: totalAmount,
+                message: null,
+                reason: null
+            }
+        } catch (error) {
+            if (error instanceof PromoCodeError) {
+                return {
+                    valid: false,
+                    code: code.toUpperCase(),
+                    discountAmount: 0,
+                    shippingDiscount: 0,
+                    message: error.statusMessage,
+                    reason: error.code ?? null,
+                    meta: error.meta ?? null
+                }
+            }
+            throw error
+        }
+    }
+
     private async ensureDeliveredOrderSale(
         tx: any,
         tenantId: string,
@@ -1513,6 +1577,8 @@ export class OrdersService {
             }
 
             await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, id)
+            // Hands the code back before the cascade takes the redemption row with the order.
+            await this.promoCodes.releaseOrderRedemption(tx, tenantId, id)
             await tx.orderItem.deleteMany({ where: { tenantId, orderId: id } })
             const deleted = await tx.order.deleteMany({ where: { tenantId, id } })
             if (deleted.count !== 1) throw new OrderValidationError(404, 'Order not found')
@@ -1563,6 +1629,7 @@ export class OrdersService {
 
             for (const orderId of deletableIds) {
                 await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, orderId)
+                await this.promoCodes.releaseOrderRedemption(tx, tenantId, orderId)
             }
             await tx.orderItem.deleteMany({ where: { tenantId, orderId: { in: deletableIds } } })
             const deleted = await tx.order.deleteMany({ where: { tenantId, id: { in: deletableIds }, status: 'PENDING' } })
@@ -1654,6 +1721,11 @@ export class OrdersService {
                 totalWithShippingAmount: true,
                 redeemedPointsTotal: true,
                 redeemedAmount: true,
+                promoCodeId: true,
+                promoCode: true,
+                promoDiscountAmount: true,
+                promoShippingDiscount: true,
+                customerPhoneNormalized: true,
                 customerId: true,
                 customerName: true,
                 customerPhone: true,
@@ -2124,7 +2196,68 @@ export class OrdersService {
                 updateData.clearanceBreakdown = clearanceBreakdown as any
             }
 
-            updateData.totalWithShippingAmount = computeTotalWithShipping(nextTotalAmount, nextShippingAmount)
+            // A promo code was priced against the cart as it stood. Editing the
+            // order re-prices it, and a code the edited cart no longer earns is
+            // dropped and handed back rather than left over-discounting.
+            let nextPromoDiscount = Number(existing.promoDiscountAmount || 0)
+            let nextPromoShippingDiscount = Number(existing.promoShippingDiscount || 0)
+
+            if (existing.promoCodeId && existing.promoCode) {
+                const promoLines = shouldUpdateItems
+                    ? validatedItems.map((item) => ({ productId: item.productId, lineTotal: item.lineTotal }))
+                    : (await tx.orderItem.findMany({
+                        where: { tenantId, orderId: id },
+                        select: { productId: true, lineTotal: true, price: true, quantity: true }
+                    })).map((item) => ({
+                        productId: item.productId,
+                        lineTotal: Number(item.lineTotal ?? Number(item.price) * item.quantity)
+                    }))
+
+                let repriced = null
+                try {
+                    repriced = await this.promoCodes.evaluateForCheckout(tx, {
+                        tenantId,
+                        code: existing.promoCode,
+                        lines: promoLines,
+                        cartSubtotal: nextTotalAmount,
+                        shippingAmount: nextShippingAmount,
+                        customerPhoneNormalized:
+                            normalizeCustomerPhoneForOrder(nextCustomerPhone) ?? existing.customerPhoneNormalized,
+                        ignoreOrderId: id
+                    })
+                } catch (error) {
+                    if (!(error instanceof PromoCodeError)) throw error
+                    repriced = null
+                }
+
+                if (repriced) {
+                    nextPromoDiscount = repriced.discountAmount
+                    nextPromoShippingDiscount = repriced.shippingDiscount
+                    await tx.promoCodeRedemption.updateMany({
+                        where: { tenantId, orderId: id, status: 'ACTIVE' },
+                        data: {
+                            discountAmount: repriced.discountAmount,
+                            shippingDiscount: repriced.shippingDiscount
+                        }
+                    })
+                } else {
+                    nextPromoDiscount = 0
+                    nextPromoShippingDiscount = 0
+                    updateData.promoCodeId = null
+                    updateData.promoCode = null
+                    await this.promoCodes.releaseOrderRedemption(tx, tenantId, id)
+                }
+
+                updateData.promoDiscountAmount = nextPromoDiscount
+                updateData.promoShippingDiscount = nextPromoShippingDiscount
+            }
+
+            const payableItemsTotal = Math.max(0, Number((nextTotalAmount - nextPromoDiscount).toFixed(2)))
+            const payableShipping = Math.max(
+                0,
+                Number((Number(nextShippingAmount || 0) - nextPromoShippingDiscount).toFixed(2))
+            )
+            updateData.totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, payableShipping)
 
             const updated = await tx.order.updateMany({ where: { tenantId, id, status: 'PENDING' }, data: updateData })
             if (updated.count !== 1) throw new OrderValidationError(409, 'Order can no longer be edited')
@@ -2473,6 +2606,7 @@ export class OrdersService {
 
             if (toStatus === 'CANCELLED' || toStatus === 'RETURNED') {
                 await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, id)
+                await this.promoCodes.releaseOrderRedemption(tx, tenantId, id)
             }
 
             if (fromStatus === 'SHIPPED' && toStatus === 'DELIVERED') {
@@ -2977,13 +3111,40 @@ export class OrdersService {
                 throw error
             }
 
+            // The promo code is priced before the points: it discounts the cart,
+            // and the points then eat what is left of it.
+            let promo
+            try {
+                promo = await this.promoCodes.evaluateForCheckout(tx, {
+                    tenantId: input.tenantId,
+                    code: input.promoCode,
+                    lines: validatedItems.map((item) => ({ productId: item.productId, lineTotal: item.lineTotal })),
+                    cartSubtotal: totalAmount,
+                    shippingAmount: effectiveShippingAmount,
+                    customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? customerPhoneNormalized,
+                    // This is the one call site that books the code, so it is the
+                    // one that has to hold the per-customer limit rather than
+                    // just read it.
+                    lockPromo: true
+                })
+            } catch (error) {
+                if (error instanceof PromoCodeError) {
+                    throw new OrderValidationError(error.statusCode, error.statusMessage, { code: error.code })
+                }
+                throw error
+            }
+
+            const promoDiscountAmount = promo?.discountAmount ?? 0
+            const promoShippingDiscount = promo?.shippingDiscount ?? 0
+            const itemsTotalAfterPromo = Math.max(0, Number((totalAmount - promoDiscountAmount).toFixed(2)))
+
             let redemption
             try {
                 redemption = await this.loyaltyCheckout.evaluateRedemption(tx, {
                     tenantId: input.tenantId,
                     customerId: resolvedCustomer?.id ?? null,
                     requestedPoints: input.redeemPointsRequested,
-                    itemsSubtotal: totalAmount,
+                    itemsSubtotal: itemsTotalAfterPromo,
                     settings: storeSettings
                 })
             } catch (error) {
@@ -2993,8 +3154,12 @@ export class OrdersService {
                 throw error
             }
 
-            const payableItemsTotal = Math.max(0, Number((totalAmount - redemption.redeemedAmount).toFixed(2)))
-            const totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, effectiveShippingAmount)
+            const payableItemsTotal = Math.max(0, Number((itemsTotalAfterPromo - redemption.redeemedAmount).toFixed(2)))
+            const payableShipping = Math.max(
+                0,
+                Number((Number(effectiveShippingAmount || 0) - promoShippingDiscount).toFixed(2))
+            )
+            const totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, payableShipping)
             const publicId = await this.generateUniquePublicId(tx, input.tenantId, orderIdPrefix)
             const createdOrder = await tx.order.create({
                 data: {
@@ -3026,6 +3191,10 @@ export class OrdersService {
                     redeemedAmount: redemption.redeemedAmount,
                     clearanceDiscountAmount,
                     clearanceBreakdown: clearanceBreakdown as any,
+                    promoCodeId: promo?.promoId ?? null,
+                    promoCode: promo?.code ?? null,
+                    promoDiscountAmount,
+                    promoShippingDiscount,
                     status: 'PENDING',
                     readAt: null
                 }
@@ -3064,6 +3233,29 @@ export class OrdersService {
                 }
             }
 
+            if (promo) {
+                // Claims the slot, and refuses if a concurrent checkout took the
+                // last one between the pricing above and here. Losing that race
+                // rolls the order back rather than overselling the code.
+                try {
+                    await this.promoCodes.recordRedemption(tx, {
+                        tenantId: input.tenantId,
+                        promoCodeId: promo.promoId,
+                        code: promo.code,
+                        orderId: createdOrder.id,
+                        customerId: resolvedCustomer?.id ?? null,
+                        customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? customerPhoneNormalized,
+                        discountAmount: promo.discountAmount,
+                        shippingDiscount: promo.shippingDiscount
+                    })
+                } catch (error) {
+                    if (error instanceof PromoCodeError) {
+                        throw new OrderValidationError(error.statusCode, error.statusMessage, { code: error.code })
+                    }
+                    throw error
+                }
+            }
+
             if (redemption.pointsReserved > 0 && resolvedCustomer?.id) {
                 await this.loyaltyCheckout.createPendingOrderRedemption(tx, {
                     tenantId: input.tenantId,
@@ -3077,6 +3269,14 @@ export class OrdersService {
 
             return {
                 createdOrder,
+                promoSummary: promo
+                    ? {
+                        code: promo.code,
+                        discountType: promo.discountType,
+                        discountAmount: promo.discountAmount,
+                        shippingDiscount: promo.shippingDiscount
+                    }
+                    : null,
                 loyaltySummary: this.buildLoyaltyResponse({
                     availablePoints: redemption.availablePoints - redemption.pointsReserved,
                     pendingRedeemPoints: redemption.pendingRedeemPoints + redemption.pointsReserved,
@@ -3107,7 +3307,8 @@ export class OrdersService {
 
         return {
             order: finalOrder,
-            loyaltySummary: orderResult.loyaltySummary
+            loyaltySummary: orderResult.loyaltySummary,
+            promoSummary: orderResult.promoSummary
         }
     }
 

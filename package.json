@@ -30,6 +30,7 @@
     "db:migrate:status": "prisma migrate status",
     "themes:shots": "node scripts/capture-theme-shots.mjs",
     "seed:demo-stores": "node scripts/seed-theme-demo-stores.mjs",
+    "seed:promo-codes": "node scripts/seed-default-promo-codes.mjs",
     "logos:carriers": "node scripts/normalize-carrier-logos.mjs"
   },
   "dependencies": {

@@ -207,6 +207,61 @@ export class WhatsAppCloudClient {
         return { wamid }
     }
 
+    /**
+     * Sends an AUTHENTICATION-category template — the only category Meta lets
+     * carry a one-time code.
+     *
+     * Its component shape is fixed and unlike every other template: the code is
+     * the single body parameter *and* it is repeated as the parameter of the
+     * one button, which is what makes WhatsApp render "copy code" / one-tap
+     * autofill. Deployments whose approved template has no button set
+     * `withButton: false` rather than have Meta reject the send.
+     */
+    async sendAuthenticationTemplate(
+        phoneNumberId: string,
+        input: { to: string; templateName: string; languageCode: string; code: string; withButton?: boolean }
+    ): Promise<{ wamid: string }> {
+        const components: any[] = [
+            { type: 'body', parameters: [{ type: 'text', text: input.code }] }
+        ]
+
+        if (input.withButton !== false) {
+            components.push({
+                type: 'button',
+                sub_type: 'url',
+                index: '0',
+                parameters: [{ type: 'text', text: input.code }]
+            })
+        }
+
+        const res = await this.request<{ messages?: Array<{ id?: string }> }>(
+            'POST',
+            `${encodeURIComponent(phoneNumberId)}/messages`,
+            {
+                messaging_product: 'whatsapp',
+                recipient_type: 'individual',
+                to: input.to,
+                type: 'template',
+                template: {
+                    name: input.templateName,
+                    language: { code: input.languageCode },
+                    components
+                }
+            }
+        )
+
+        const wamid = res.messages?.[0]?.id
+        if (!wamid) {
+            throw new WhatsAppApiError({
+                message: 'WhatsApp accepted the request but returned no message id',
+                httpStatus: 502,
+                retryable: true
+            })
+        }
+
+        return { wamid }
+    }
+
     async createTemplate(wabaId: string, definition: TemplateDefinition) {
         return this.request<{ id: string; status: string; category?: string }>(
             'POST',

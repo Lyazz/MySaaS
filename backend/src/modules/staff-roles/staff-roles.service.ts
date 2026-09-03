@@ -34,6 +34,7 @@ export const STAFF_RESOURCES = [
     'contactInfos',
     'integrations',
     'metaPixels',
+    'promoCodes',
     'pos'
 ] as const
 

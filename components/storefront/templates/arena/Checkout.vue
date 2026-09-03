@@ -102,11 +102,14 @@ watchEffect(() => {
 
 const submitting = ref(false)
 const errorMessage = ref('')
-const couponCode = ref('')
+const promo = useCheckoutPromoCode()
+const couponCode = promo.codeInput
+promo.watchCart()
 const loyalty = useCheckoutLoyalty()
 
 watch(() => form.value.phone, (phone) => {
   loyalty.phone.value = phone.trim()
+  promo.phone.value = phone.trim()
 }, { immediate: true })
 
 const selectedDelivery = computed(() =>
@@ -129,13 +132,49 @@ const pickupPointsLoading = pickup.loading
 const pickupPointsError = pickup.error
 const syncPickupPointCommune = pickup.syncCommune
 
+// The promo code comes off the subtotal, and a free-shipping code off the
+// delivery line. Both are re-priced by the server when the order is placed.
+const promoShippingDiscount = computed(() => {
+  if (!promo.freeShipping.value) return 0
+  const delivery = selectedDelivery.value
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return 0
+  const price = Number(delivery.price)
+  return isNaN(price) ? 0 : price
+})
+
+const promoTotalDiscount = computed(() => promo.discountAmount.value + promoShippingDiscount.value)
+
+const promoDiscountLabel = computed(() => (
+  promo.appliedCode.value
+    ? `${storefrontContent.value.checkout.coupon.title} (${promo.appliedCode.value})`
+    : storefrontContent.value.checkout.coupon.title
+))
+
+const couponButtonLabel = computed(() => {
+  if (promo.checking.value) return storefrontContent.value.checkout.coupon.checking
+  return promo.applied.value
+    ? storefrontContent.value.checkout.coupon.remove
+    : storefrontContent.value.actions.apply
+})
+
+async function applyPromoCode() {
+  if (promo.applied.value) {
+    promo.reset()
+    return
+  }
+  await promo.apply(storefrontContent.value.checkout.coupon.invalid)
+}
+
 const discountedSubtotal = computed(() => Math.max(0, cartStore.total - cartStore.clearanceDiscount))
+
+const promoAdjustedSubtotal = computed(() => Math.max(0, discountedSubtotal.value - promo.discountAmount.value))
 
 const grandTotal = computed(() => {
   const delivery = selectedDelivery.value
-  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return discountedSubtotal.value
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return promoAdjustedSubtotal.value
   const deliveryPrice = Number(delivery.price)
-  return isNaN(deliveryPrice) ? discountedSubtotal.value : discountedSubtotal.value + deliveryPrice
+  if (isNaN(deliveryPrice)) return promoAdjustedSubtotal.value
+  return promoAdjustedSubtotal.value + Math.max(0, deliveryPrice - promoShippingDiscount.value)
 })
 
 const hasRequiredFields = computed(() => Boolean(
@@ -217,6 +256,7 @@ async function handleSubmit() {
           shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
           shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
           redeemPointsRequested: loyalty.redeemPointsRequested.value || undefined,
+          promoCode: promo.appliedCode.value || undefined,
           items: cartStore.items.map(item => ({
             productId: item.productId,
             variantId: item.variantId,
@@ -231,6 +271,7 @@ async function handleSubmit() {
         })
 
         cartStore.clearCart()
+        promo.reset()
         loyalty.reset()
         router.push({ path: '/order-success', query: { orderId: response.orderId } })
     } catch (error: any) {
@@ -567,14 +608,34 @@ async function handleSubmit() {
               <div class="flex gap-2">
                 <input
                   v-model="couponCode"
+                  :disabled="promo.applied.value"
                   type="text"
                   :placeholder="storefrontContent.checkout.coupon.placeholder"
                   class="flex-1 h-10 bg-[#0b0f14] border border-white/10 px-3 text-xs text-white placeholder:text-slate-600 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/30 outline-none uppercase tracking-wider"
                 >
-                <button class="px-4 h-10 bg-brand-500 text-[#02060a] text-[10px] font-black uppercase tracking-[0.22em] hover:bg-white transition-colors whitespace-nowrap">
-                  {{ storefrontContent.actions.apply }}
+                <button
+                  type="button"
+                  class="px-4 h-10 bg-brand-500 text-[#02060a] text-[10px] font-black uppercase tracking-[0.22em] hover:bg-white transition-colors whitespace-nowrap"
+                  :disabled="promo.checking.value"
+                  @click="applyPromoCode"
+                >
+                  {{ couponButtonLabel }}
                 </button>
               </div>
+              <p
+                v-if="promo.errorMessage.value"
+                class="mt-2 text-xs text-red-500"
+              >
+                {{ promo.errorMessage.value }}
+              </p>
+              <p
+                v-else-if="promo.applied.value"
+                class="mt-2 text-xs text-emerald-600"
+              >
+                {{ promo.freeShipping.value
+                  ? storefrontContent.checkout.coupon.freeShipping
+                  : storefrontContent.checkout.coupon.applied(promo.appliedCode.value) }}
+              </p>
             </div>
 
             <!-- Totals -->
@@ -611,6 +672,17 @@ async function handleSubmit() {
                 </dt>
                 <dd class="font-black text-amber-400">
                   -{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}
+                </dd>
+              </div>
+              <div
+                v-if="promoTotalDiscount > 0"
+                class="flex justify-between text-xs"
+              >
+                <dt class="font-bold uppercase tracking-[0.18em] text-amber-400">
+                  {{ promoDiscountLabel }}
+                </dt>
+                <dd class="font-black text-amber-400">
+                  -{{ formatAmount(promoTotalDiscount) }} {{ currencyCode }}
                 </dd>
               </div>
               <div

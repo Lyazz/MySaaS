@@ -1058,6 +1058,7 @@ const staffResources = [
   'contactInfos',
   'integrations',
   'metaPixels',
+  'promoCodes',
   'pos'
 ] as const
 
@@ -1084,6 +1085,7 @@ const resourceLabel = (resource: string): string => {
     contactInfos: 'admin.nav.contactInfo',
     integrations: 'admin.nav.integrations',
     metaPixels: 'admin.pages.users.roles.resources.metaPixels',
+    promoCodes: 'admin.nav.promoCodes',
     pos: 'admin.nav.pos'
   }
   const key = keyMap[resource] || resource

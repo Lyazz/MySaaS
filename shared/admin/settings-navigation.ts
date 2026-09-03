@@ -23,6 +23,7 @@ export type AdminResource =
   | 'delivery'
   | 'cash'
   | 'metaPixels'
+  | 'promoCodes'
   | AdminSettingsResource
   | 'settingsHub'
 
@@ -128,6 +129,7 @@ export function adminPathToResource(path: string): AdminResource | null {
   if (path.startsWith('/admin/settings/domains')) return 'storeSettings'
   if (path.startsWith('/admin/integrations')) return 'integrations'
   if (path.startsWith('/admin/meta-pixels')) return 'metaPixels'
+  if (path.startsWith('/admin/marketing/promo-codes')) return 'promoCodes'
   if (path.startsWith('/admin/users')) return 'users'
   return null
 }

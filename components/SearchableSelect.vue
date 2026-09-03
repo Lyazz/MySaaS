@@ -37,15 +37,22 @@ const selectedOption = computed(() => {
 })
 
 const btnRef = ref<any>(null)
+
+const buttonEl = (): HTMLElement | null => {
+  const el = btnRef.value?.$el || btnRef.value
+  return el && typeof el.click === 'function' ? (el as HTMLElement) : null
+}
+
+// One pointer press on the input fires `focus` and then `click`. Toggling the
+// panel from both handlers opened the list and shut it again within the same
+// press, so the field only answered on the second click. Open only — the
+// chevron button, Escape and an outside click still close it.
 const openDropdown = () => {
+  if (props.disabled) return
+  const el = buttonEl()
+  if (!el || el.getAttribute('aria-expanded') === 'true') return
   query.value = ''
-  if (btnRef.value) {
-    const el = btnRef.value.$el || btnRef.value
-    if (el && typeof el.click === 'function') {
-      // Small delay to ensure focus doesn't steal the click effect, though click() on button is usually synchronous
-      setTimeout(() => el.click(), 10)
-    }
-  }
+  el.click()
 }
 
 const handleUpdate = (val: any) => {
@@ -66,7 +73,6 @@ const handleUpdate = (val: any) => {
           autocapitalize="off"
           spellcheck="false"
           @input="query = ($event.target as HTMLInputElement).value"
-          @focus="openDropdown"
           @click="openDropdown"
         />
         <ComboboxButton

@@ -832,8 +832,12 @@
           "placeholder": "Enter OTP code",
           "send": "Send Code",
           "verify": "Verify Code",
-          "placeholderNotice": "OTP code sent.",
-          "verified": "Phone confirmed."
+          "verified": "Contact confirmed.",
+          "channelPrompt": "Where should we send your code?",
+          "sentTo": "Code sent to {destination}. It expires in {minutes} minutes.",
+          "sending": "Sending…",
+          "verifying": "Verifying…",
+          "resendIn": "Resend in {seconds}s"
         },
         "password": {
           "label": "Password"
@@ -877,17 +881,59 @@
     },
     "forgotPassword": {
       "title": "Forgot Password",
-      "subtitle": "Enter your email and we will send reset instructions when this feature is enabled.",
-      "placeholderNotice": "This screen is a placeholder for now. Reset emails are not active yet.",
+      "subtitle": "We will send you a one-time code to confirm it is you, then you can choose a new password.",
+      "backToLogin": "Back to login",
       "email": {
         "label": "Email Address",
         "placeholder": "name{'@'}company.com"
       },
-      "submit": {
-        "send": "Send Reset Link",
-        "sent": "Request Saved (Placeholder)"
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "05 55 55 55 55"
       },
-      "backToLogin": "Back to login"
+      "password": {
+        "label": "New Password",
+        "placeholder": "At least 8 characters"
+      },
+      "confirmPassword": {
+        "label": "Confirm New Password",
+        "placeholder": "Repeat your new password"
+      },
+      "otp": {
+        "channelLabel": "Send my code by",
+        "label": "Verification Code",
+        "placeholder": "000000",
+        "sentTo": "If an account matches, a code is on its way to {destination}. It expires in {minutes} minutes.",
+        "resend": "Send the code again",
+        "resendIn": "Send again in {seconds}s",
+        "changeDestination": "Use a different address"
+      },
+      "submit": {
+        "send": "Send Code",
+        "sending": "Sending…",
+        "verify": "Verify Code",
+        "verifying": "Verifying…",
+        "save": "Save New Password",
+        "saving": "Saving…"
+      },
+      "done": {
+        "title": "Password updated",
+        "subtitle": "You have been signed out everywhere. Log in with your new password.",
+        "logIn": "Go to login"
+      },
+      "errors": {
+        "emailInvalid": "Enter a valid email address.",
+        "phoneRequired": "Enter your phone number.",
+        "codeRequired": "Enter the code you received.",
+        "passwordTooShort": "Password must be at least {min} characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "generic": "Your password could not be updated. Try again."
+      }
+    },
+    "channels": {
+      "email": "Email",
+      "sms": "SMS",
+      "whatsapp": "WhatsApp"
     }
   },
   "pricing": {
@@ -1159,7 +1205,20 @@
       "coupon": {
         "title": "Coupon code",
         "badge": "Discount",
-        "placeholder": "Enter code (e.g., WELCOME10)"
+        "placeholder": "Enter code (e.g., WELCOME10)",
+        "checking": "Checking…",
+        "remove": "Remove",
+        "invalid": "This promo code is not valid",
+        "freeShipping": "Free shipping applied",
+        "applied": "Code {code} applied",
+        "errors": {
+          "notStarted": "This promo code is not active yet",
+          "expired": "This promo code has expired",
+          "usageLimit": "This promo code has reached its usage limit",
+          "customerLimit": "You have already used this promo code",
+          "notApplicable": "This promo code does not apply to the items in your cart",
+          "minOrder": "This promo code needs a minimum order of {amount} {currency}"
+        }
       },
       "summary": {
         "deliveryOption": "Delivery option",
@@ -2340,7 +2399,8 @@
       "users": "Users",
       "storefront": "Storefront",
       "account": "Account",
-      "connections": "Connections"
+      "connections": "Connections",
+      "promoCodes": "Promo codes"
     },
     "settingsNav": {
       "ariaLabel": "Settings",
@@ -3068,7 +3128,8 @@
           },
           "resources": {
             "variants": "Variants",
-            "metaPixels": "Meta pixels"
+            "metaPixels": "Meta pixels",
+            "promoCodes": "Promo codes"
           },
           "validation": {
             "invalidName": "Invalid name (min 2 characters).",
@@ -3945,7 +4006,8 @@
             "subtotal": "Subtotal",
             "total": "Total",
             "fallbackProduct": "Product",
-            "clearance": "Clearance: {count} free unit(s)"
+            "clearance": "Clearance: {count} free unit(s)",
+            "promoCode": "Promo code {code}"
           },
           "statusUpdate": {
             "title": "Update order status",
@@ -4702,6 +4764,91 @@
             "loadFailed": "Failed to load supplier details.",
             "updateFailed": "Failed to update supplier. Please try again."
           }
+        }
+      },
+      "promoCodes": {
+        "title": "Promo codes",
+        "subtitle": "Discount codes shoppers type at checkout.",
+        "actions": {
+          "create": "New promo code"
+        },
+        "filters": {
+          "search": "Search",
+          "searchPlaceholder": "Code or description",
+          "status": "Status",
+          "all": "All"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "scheduled": "Scheduled",
+          "expired": "Expired",
+          "exhausted": "Limit reached"
+        },
+        "types": {
+          "PERCENTAGE": "Percentage",
+          "FIXED": "Fixed amount",
+          "FREE_SHIPPING": "Free shipping"
+        },
+        "stats": {
+          "total": "codes",
+          "active": "live",
+          "redemptions": "redemptions"
+        },
+        "empty": {
+          "title": "No promo codes yet",
+          "description": "Create a code and shoppers can enter it at checkout."
+        },
+        "table": {
+          "code": "Code",
+          "discount": "Discount",
+          "conditions": "Conditions",
+          "usage": "Used",
+          "window": "Window",
+          "status": "Status",
+          "cappedAt": "Capped at {amount}",
+          "minOrder": "Min. order {amount}",
+          "perCustomer": "{count} per customer",
+          "noStart": "No start date",
+          "noEnd": "No end date",
+          "wholeCatalog": "Whole catalogue",
+          "categoriesCount": "{count} categories",
+          "productsCount": "{count} products"
+        },
+        "form": {
+          "createTitle": "New promo code",
+          "editTitle": "Edit promo code",
+          "description": "Set what the code takes off and when it can be used.",
+          "code": "Code",
+          "codeHint": "Letters, digits, dots, dashes. Shoppers type it, and it is matched case-insensitively.",
+          "descriptionPlaceholder": "Internal note, e.g. Ramadan campaign",
+          "discountType": "Discount type",
+          "percentValue": "Percentage off (%)",
+          "fixedValue": "Amount off ({currency})",
+          "maxDiscount": "Maximum discount ({currency})",
+          "maxDiscountHint": "Caps a percentage discount. Leave empty for no cap.",
+          "minOrder": "Minimum order ({currency})",
+          "minOrderHint": "Cart subtotal needed before the code applies.",
+          "startsAt": "Starts at",
+          "startsAtHint": "Leave empty to start immediately.",
+          "endsAt": "Ends at",
+          "endsAtHint": "Leave empty for no expiry.",
+          "usageLimit": "Total uses",
+          "usageLimitHint": "Leave empty for unlimited.",
+          "usageLimitPerCustomer": "Uses per customer",
+          "usageLimitPerCustomerHint": "Counted by phone number. Leave empty for unlimited.",
+          "scope": "Where it applies",
+          "scopeHint": "Pick nothing to discount the whole cart. Otherwise only the selected products and categories are discounted.",
+          "categories": "Categories",
+          "products": "Products",
+          "noCategories": "No categories yet",
+          "noProducts": "No products yet",
+          "active": "Active",
+          "activeHint": "Inactive codes are refused at checkout."
+        },
+        "delete": {
+          "title": "Delete this promo code?",
+          "message": "{code} will stop working at checkout. Past orders keep the code they were placed with."
         }
       }
     },

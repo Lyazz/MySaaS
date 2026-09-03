@@ -4,6 +4,7 @@ import { requireSuperAdmin } from '../../middleware/superadmin.middleware'
 import { logAction } from '../../lib/audit'
 import bcrypt from 'bcryptjs'
 import { seedStaffRolePresets } from '../staff-roles/presets'
+import { seedDefaultPromoCodes } from '../promo-codes/presets'
 import { ensureSubscription } from '../billing/subscription.service'
 
 const router = Router()
@@ -90,6 +91,8 @@ router.post('/', async (req, res) => {
             })
 
             await seedStaffRolePresets(tx, newTenant.id)
+            // Inactive by default — see backend/src/modules/promo-codes/presets.ts.
+            await seedDefaultPromoCodes(tx, newTenant.id)
 
             await tx.storeSettings.create({
                 data: {

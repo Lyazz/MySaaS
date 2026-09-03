@@ -87,7 +87,23 @@ export function useStorefrontContent() {
       coupon: {
         title: i18n.t('storefront.checkout.coupon.title'),
         badge: i18n.t('storefront.checkout.coupon.badge'),
-        placeholder: i18n.t('storefront.checkout.coupon.placeholder')
+        placeholder: i18n.t('storefront.checkout.coupon.placeholder'),
+        checking: i18n.t('storefront.checkout.coupon.checking'),
+        remove: i18n.t('storefront.checkout.coupon.remove'),
+        invalid: i18n.t('storefront.checkout.coupon.invalid'),
+        errors: {
+          PROMO_CODE_INVALID: i18n.t('storefront.checkout.coupon.invalid'),
+          PROMO_INACTIVE: i18n.t('storefront.checkout.coupon.invalid'),
+          PROMO_NOT_STARTED: i18n.t('storefront.checkout.coupon.errors.notStarted'),
+          PROMO_EXPIRED: i18n.t('storefront.checkout.coupon.errors.expired'),
+          PROMO_USAGE_LIMIT_REACHED: i18n.t('storefront.checkout.coupon.errors.usageLimit'),
+          PROMO_CUSTOMER_LIMIT_REACHED: i18n.t('storefront.checkout.coupon.errors.customerLimit'),
+          PROMO_NOT_APPLICABLE: i18n.t('storefront.checkout.coupon.errors.notApplicable'),
+          PROMO_MIN_ORDER_NOT_MET: (amount: string | number, currency: string) =>
+            i18n.t('storefront.checkout.coupon.errors.minOrder', { amount, currency })
+        },
+        freeShipping: i18n.t('storefront.checkout.coupon.freeShipping'),
+        applied: (code: string) => i18n.t('storefront.checkout.coupon.applied', { code })
       },
       summary: {
         deliveryOption: i18n.t('storefront.checkout.summary.deliveryOption'),

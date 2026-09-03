@@ -12,7 +12,8 @@ import {
     apiRateLimiter,
     loginRateLimiter,
     publicOrderRateLimiter,
-    registerRateLimiter
+    registerRateLimiter,
+    verificationRateLimiter
 } from './middleware/rate-limit.middleware'
 import { assertRequiredEnv } from './lib/env-check'
 import routes from './routes'
@@ -67,7 +68,8 @@ app.use((req, res, next) => {
         req.path.startsWith('/api/admin') ||
         req.path.startsWith('/api/super-admin') ||
         req.path === '/api/login' ||
-        req.path === '/api/register'
+        req.path === '/api/register' ||
+        req.path.startsWith('/api/auth/')
     ) {
         res.setHeader('Cache-Control', 'no-store')
     }
@@ -79,6 +81,7 @@ app.use(expressTenantMiddleware)
 app.use('/api', apiRateLimiter)
 app.use('/api/login', loginRateLimiter)
 app.use('/api/register', registerRateLimiter)
+app.use('/api/auth', verificationRateLimiter)
 app.use('/api/orders', publicOrderRateLimiter)
 app.use('/api/activation', activationRateLimiter)
 app.use(expressAuthMiddleware)

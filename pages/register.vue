@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
+import { useOtpFlow, type OtpChannel } from '~/composables/useOtpFlow'
 import SaaSLogo from '~/components/branding/SaaSLogo.vue'
 import { useAuthStore } from '~/stores/auth'
 
@@ -31,11 +32,57 @@ const form = ref({
 const loading = ref(false)
 const error = ref('')
 const successData = ref<any>(null)
-const otpSent = ref(false)
-const otpVerified = ref(false)
-const otpFeedback = ref('')
-const otpFeedbackTone = ref<'info' | 'success'>('info')
 const platformBaseDomain = usePlatformBaseDomain()
+
+const otp = useOtpFlow('REGISTRATION')
+
+const CHANNEL_ICONS: Record<OtpChannel, string> = {
+  EMAIL: 'lucide:mail',
+  SMS: 'lucide:message-square',
+  WHATSAPP: 'lucide:message-circle'
+}
+
+onMounted(() => {
+  void otp.loadChannels()
+})
+
+/**
+ * Verification is only demanded when the deployment can actually deliver a
+ * code. With no provider configured the block hides itself rather than parking
+ * the visitor in front of a button that cannot work; the server makes the real
+ * decision and says so if it disagrees.
+ */
+const otpRequired = computed(() => otp.availableChannels.value.length > 0)
+
+const otpDestination = computed(() =>
+  otp.channel.value === 'EMAIL'
+    ? { email: form.value.email.trim().toLowerCase() }
+    : { phone: form.value.phone.trim() }
+)
+
+const otpFeedback = computed(() => {
+  if (otp.error.value) return otp.error.value
+  if (otp.verified.value) return t('auth.register.form.otp.verified')
+  if (otp.sent.value) {
+    return t('auth.register.form.otp.sentTo', {
+      destination: otp.maskedDestination.value,
+      minutes: otp.expiresInMinutes.value
+    })
+  }
+  return ''
+})
+
+const otpFeedbackTone = computed<'info' | 'success' | 'error'>(() => {
+  if (otp.error.value) return 'error'
+  if (otp.verified.value) return 'success'
+  return 'info'
+})
+
+const resendLabel = computed(() =>
+  otp.cooldown.value > 0
+    ? t('auth.register.form.otp.resendIn', { seconds: otp.cooldown.value })
+    : t('auth.register.form.otp.send')
+)
 
 type RegisterResponse = {
   success: boolean
@@ -101,36 +148,39 @@ watch(() => form.value.name, (newName) => {
   }
 })
 
-watch(() => form.value.phone, () => {
-  otpSent.value = false
-  otpVerified.value = false
+// Any change to what the code was sent to invalidates the code that was sent.
+watch([() => form.value.phone, () => form.value.email, otp.channel], () => {
   form.value.otp = ''
-  otpFeedback.value = ''
+  otp.reset()
 })
 
-function sendOtpPlaceholder() {
+async function sendOtp() {
   error.value = ''
 
-  if (!form.value.phone.trim()) {
-    error.value = t('auth.register.errors.phoneRequired')
-    return
+  if (otp.channel.value === 'EMAIL') {
+    if (!EMAIL_REGEX.test(form.value.email.trim())) {
+      error.value = t('auth.register.errors.emailInvalid')
+      return
+    }
+  } else {
+    if (!form.value.phone.trim()) {
+      error.value = t('auth.register.errors.phoneRequired')
+      return
+    }
+
+    if (!normalizedPhone.value) {
+      error.value = t('auth.register.errors.phoneInvalid')
+      return
+    }
   }
 
-  if (!normalizedPhone.value) {
-    error.value = t('auth.register.errors.phoneInvalid')
-    return
-  }
-
-  otpSent.value = true
-  otpVerified.value = false
-  otpFeedbackTone.value = 'info'
-  otpFeedback.value = t('auth.register.form.otp.placeholderNotice')
+  await otp.send(otpDestination.value)
 }
 
-function verifyOtpPlaceholder() {
+async function verifyOtp() {
   error.value = ''
 
-  if (!otpSent.value) {
+  if (!otp.sent.value) {
     error.value = t('auth.register.errors.otpSendFirst')
     return
   }
@@ -140,9 +190,7 @@ function verifyOtpPlaceholder() {
     return
   }
 
-  otpVerified.value = true
-  otpFeedbackTone.value = 'success'
-  otpFeedback.value = t('auth.register.form.otp.verified')
+  await otp.verify({ code: form.value.otp, ...otpDestination.value })
 }
 
 async function register() {
@@ -174,7 +222,7 @@ async function register() {
     return
   }
 
-  if (!otpVerified.value) {
+  if (otpRequired.value && !otp.verified.value) {
     error.value = t('auth.register.errors.otpVerifyFirst')
     return
   }
@@ -189,7 +237,8 @@ async function register() {
         slug: form.value.slug,
         email: form.value.email,
         password: form.value.password,
-        phone: form.value.phone
+        phone: form.value.phone,
+        verificationToken: otp.verificationToken.value || undefined
       }
     })
 
@@ -459,8 +508,28 @@ async function register() {
                 >
               </div>
 
-              <div>
+              <div v-if="otpRequired">
                 <label for="otp-code" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.otp.label') }}</label>
+
+                <p class="mb-2 text-xs text-[color:var(--m-text-dim)]">
+                  {{ t('auth.register.form.otp.channelPrompt') }}
+                </p>
+                <div class="mb-3 flex flex-wrap gap-2">
+                  <button
+                    v-for="option in otp.availableChannels.value"
+                    :key="option"
+                    type="button"
+                    :data-testid="`register-channel-${option.toLowerCase()}`"
+                    class="otp-channel-btn"
+                    :class="{ 'otp-channel-btn--active': otp.channel.value === option }"
+                    :aria-pressed="otp.channel.value === option"
+                    @click="otp.channel.value = option"
+                  >
+                    <Icon :name="CHANNEL_ICONS[option]" class="h-3.5 w-3.5" />
+                    {{ t(`auth.channels.${option.toLowerCase()}`) }}
+                  </button>
+                </div>
+
                 <div class="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
                   <input
                     id="otp-code"
@@ -468,6 +537,9 @@ async function register() {
                     data-testid="register-otp"
                     name="otp"
                     type="text"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="6"
                     class="cinematic-input"
                     :placeholder="t('auth.register.form.otp.placeholder')"
                   >
@@ -475,24 +547,29 @@ async function register() {
                     type="button"
                     data-testid="register-send-otp"
                     class="register-submit-btn !py-2.5 !text-xs"
-                    @click="sendOtpPlaceholder"
+                    :disabled="!otp.canResend.value"
+                    @click="sendOtp"
                   >
-                    {{ t('auth.register.form.otp.send') }}
+                    {{ otp.sending.value ? t('auth.register.form.otp.sending') : resendLabel }}
                   </button>
                   <button
                     type="button"
                     data-testid="register-verify-otp"
                     class="register-submit-btn !py-2.5 !text-xs"
-                    :disabled="!otpSent"
-                    @click="verifyOtpPlaceholder"
+                    :disabled="!otp.sent.value || otp.verifying.value || otp.verified.value"
+                    @click="verifyOtp"
                   >
-                    {{ t('auth.register.form.otp.verify') }}
+                    {{ otp.verifying.value ? t('auth.register.form.otp.verifying') : t('auth.register.form.otp.verify') }}
                   </button>
                 </div>
                 <p
                   v-if="otpFeedback"
                   class="mt-2 text-xs"
-                  :class="otpFeedbackTone === 'success' ? 'text-emerald-300' : 'text-amber-200'"
+                  :class="{
+                    'text-emerald-300': otpFeedbackTone === 'success',
+                    'text-red-300': otpFeedbackTone === 'error',
+                    'text-amber-200': otpFeedbackTone === 'info'
+                  }"
                 >
                   {{ otpFeedback }}
                 </p>
@@ -532,11 +609,11 @@ async function register() {
                 {{ error }}
               </div>
 
-              <button type="submit" :disabled="loading || !otpVerified" class="register-submit-btn w-full">
+              <button type="submit" :disabled="loading || (otpRequired && !otp.verified.value)" class="register-submit-btn w-full">
                 <span class="relative z-10 flex items-center justify-center gap-2">
                   <Icon v-if="loading" name="lucide:loader-2" class="h-4 w-4 animate-spin" />
-                  <span>{{ loading ? t('auth.register.form.submit.creating') : (otpVerified ? t('auth.register.form.submit.register') : t('auth.register.form.submit.verifyOtp')) }}</span>
-                  <Icon v-if="!loading && otpVerified" name="lucide:arrow-right" class="h-4 w-4" />
+                  <span>{{ loading ? t('auth.register.form.submit.creating') : (!otpRequired || otp.verified.value ? t('auth.register.form.submit.register') : t('auth.register.form.submit.verifyOtp')) }}</span>
+                  <Icon v-if="!loading && (!otpRequired || otp.verified.value)" name="lucide:arrow-right" class="h-4 w-4" />
                 </span>
               </button>
 
@@ -559,6 +636,35 @@ async function register() {
 </template>
 
 <style scoped>
+/* Channel picker: a segmented control, not a <select>, so all three options are
+   visible at once — the visitor is choosing where a code will arrive, and a
+   collapsed dropdown hides the fact that WhatsApp is even on offer. */
+.otp-channel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--m-text-dim);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.otp-channel-btn:hover {
+  border-color: rgba(198, 244, 50, 0.3);
+  color: var(--m-text);
+}
+
+.otp-channel-btn--active {
+  border-color: rgba(198, 244, 50, 0.5);
+  background: rgba(198, 244, 50, 0.12);
+  color: #c6f432;
+}
+
 .register-slug-wrap {
   display: flex;
   border: 1px solid rgba(255, 255, 255, 0.08);

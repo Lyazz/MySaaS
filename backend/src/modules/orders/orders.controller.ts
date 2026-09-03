@@ -489,6 +489,7 @@ export class OrdersController {
                 shippingProvider: req.body?.shippingProvider,
                 shippingPickupPoint: req.body?.shippingPickupPoint,
                 redeemPointsRequested: req.body?.redeemPointsRequested,
+                promoCode: req.body?.promoCode,
                 clientIp: req.ip || req.socket.remoteAddress || null,
                 items: req.body?.items ?? []
             }, req.subscription ? {
@@ -503,7 +504,8 @@ export class OrdersController {
                 orderId: result.order?.id,
                 publicOrderId: result.order?.publicId,
                 order: result.order,
-                loyaltySummary: result.loyaltySummary
+                loyaltySummary: result.loyaltySummary,
+                promoSummary: result.promoSummary
             })
         } catch (error: any) {
             if (error instanceof OrderValidationError) {
@@ -546,6 +548,37 @@ export class OrdersController {
             }
 
             console.error('Public loyalty summary error:', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async promoCodePreviewPublic(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) {
+            return res.status(404).json({ statusCode: 404, statusMessage: 'Tenant not found' })
+        }
+
+        try {
+            const preview = await service.previewPromoCode({
+                tenantId: tenant.id,
+                code: req.body?.code ?? req.body?.promoCode,
+                customerPhone: req.body?.customerPhone,
+                shippingAmount: req.body?.shippingAmount,
+                items: req.body?.items ?? []
+            })
+
+            res.json(preview)
+        } catch (error) {
+            if (error instanceof OrderValidationError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
+            }
+
+            console.error('Public promo code preview error:', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
     }

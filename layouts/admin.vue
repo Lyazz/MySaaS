@@ -475,6 +475,7 @@ const navGroups = ref<NavGroup[]>([
       { path: '/admin/customers', labelKey: 'admin.nav.customers', icon: 'lucide:users', access: 'admin' },
       { path: '/admin/devices', labelKey: 'admin.nav.devices', icon: 'lucide:smartphone', access: 'admin' },
       { path: '/admin/marketing/landing-page/new', labelKey: 'admin.nav.landingPage', icon: 'lucide:megaphone', access: 'admin' },
+      { path: '/admin/marketing/promo-codes', labelKey: 'admin.nav.promoCodes', icon: 'lucide:ticket-percent', access: 'admin' },
       { path: '/admin/users', labelKey: 'admin.nav.users', icon: 'lucide:user-cog', access: 'admin' },
       { path: '/admin/billing', labelKey: 'admin.nav.billing', icon: 'lucide:credit-card', access: 'admin' },
       { path: '/admin/integrations', labelKey: 'admin.nav.integrations', icon: 'lucide:puzzle', access: 'admin' },
