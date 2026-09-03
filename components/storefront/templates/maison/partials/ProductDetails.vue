@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:selectedOptions']);
 const { format: formatPrice } = useCurrency();
+const storefrontContent = useStorefrontContent();
 
 const setOption = (optionId: string, valueId: string) => {
   emit('update:selectedOptions', {
@@ -70,7 +71,7 @@ watch(inviteTick, () => {
     <!-- Title block -->
     <div class="details__head">
       <span class="at-label">{{
-        product?.category?.title || 'Pistachio'
+        product?.category?.title || storefrontContent.common.collection
       }}</span>
       <h1 class="details__title">{{ product?.title }}</h1>
 

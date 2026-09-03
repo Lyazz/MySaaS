@@ -1050,7 +1050,24 @@
           "emailUs": "Email Us",
           "visitUs": "Visit Us"
         },
-        "addressPlaceholder": "123 Store St, City, Country"
+        "addressPlaceholder": "123 Store St, City, Country",
+        "intro": "A question about a product, an order, or just want to say hello? We are here for you.",
+        "form": {
+          "name": {
+            "label": "Full name",
+            "placeholder": "Your name"
+          },
+          "email": {
+            "label": "Email",
+            "placeholder": "you@email.com"
+          },
+          "message": {
+            "label": "Message",
+            "placeholder": "Your message…"
+          },
+          "send": "Send the message"
+        },
+        "mailSubject": "Message from {name}"
       },
       "categories": {
         "title": "Categories",
@@ -1392,6 +1409,65 @@
       "dismissAria": "Dismiss announcement"
     },
     "templates": {
+      "food": {
+        "badges": {
+          "organic": "Organic",
+          "fastDelivery": "Fast delivery",
+          "premium": "Premium quality"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "Since {year}",
+          "titlePrefix": "Built for",
+          "titleAccent": "the street",
+          "descriptionFallback": "We make pieces that hold up to real wear. No filler, no seasonal noise — just clothes that earn their place in your rotation.",
+          "missionPrefix": "Our mission is simple:",
+          "missionAccent": "quality you can feel, priced without the markup.",
+          "values": {
+            "quality": {
+              "title": "Quality",
+              "description": "Materials picked to last, checked piece by piece."
+            },
+            "design": {
+              "title": "Design",
+              "description": "Cuts drawn in-house, made to wear every day."
+            },
+            "culture": {
+              "title": "Culture",
+              "description": "Rooted in the scene we come from, made with it."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "Get in",
+          "titleAccent": "touch",
+          "sections": {
+            "hqLocation": "Where to find us",
+            "directLine": "Call us",
+            "emailProtocol": "Write to us"
+          },
+          "form": {
+            "name": {
+              "label": "Name",
+              "placeholder": "Your name"
+            },
+            "email": {
+              "label": "Email",
+              "placeholder": "you@email.com"
+            },
+            "message": {
+              "label": "Message",
+              "placeholder": "How can we help?"
+            },
+            "send": "Send"
+          },
+          "alert": {
+            "sent": "Thanks — your message is on its way. We will get back to you shortly."
+          }
+        }
+      },
       "wellness": {
         "home": {
           "curatedSelection": "Curated selection",

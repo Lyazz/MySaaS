@@ -1036,7 +1036,24 @@
           "emailUs": "Écrivez-nous",
           "visitUs": "Rendez-nous visite"
         },
-        "addressPlaceholder": "123 rue du Magasin, Ville, Pays"
+        "addressPlaceholder": "123 rue du Magasin, Ville, Pays",
+        "intro": "Une question sur un produit, une commande, ou envie de nous dire bonjour ? Nous sommes là pour vous.",
+        "form": {
+          "name": {
+            "label": "Nom complet",
+            "placeholder": "Votre nom"
+          },
+          "email": {
+            "label": "E-mail",
+            "placeholder": "vous@email.com"
+          },
+          "message": {
+            "label": "Message",
+            "placeholder": "Votre message…"
+          },
+          "send": "Envoyer le message"
+        },
+        "mailSubject": "Message de {name}"
       },
       "categories": {
         "title": "Catégories",
@@ -1378,6 +1395,65 @@
       "dismissAria": "Fermer l’annonce"
     },
     "templates": {
+      "food": {
+        "badges": {
+          "organic": "Bio",
+          "fastDelivery": "Livraison rapide",
+          "premium": "Qualité premium"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "Depuis {year}",
+          "titlePrefix": "Fait pour",
+          "titleAccent": "la rue",
+          "descriptionFallback": "Nous créons des pièces qui tiennent à l’usage réel. Pas de remplissage, pas de bruit saisonnier — juste des vêtements qui méritent leur place dans votre dressing.",
+          "missionPrefix": "Notre mission est simple :",
+          "missionAccent": "une qualité qui se sent, à un prix sans surcoût.",
+          "values": {
+            "quality": {
+              "title": "Qualité",
+              "description": "Des matières choisies pour durer, contrôlées pièce par pièce."
+            },
+            "design": {
+              "title": "Design",
+              "description": "Des coupes dessinées en interne, pensées pour tous les jours."
+            },
+            "culture": {
+              "title": "Culture",
+              "description": "Ancrés dans la scène d’où nous venons, et faits avec elle."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "Écrivez-",
+          "titleAccent": "nous",
+          "sections": {
+            "hqLocation": "Où nous trouver",
+            "directLine": "Nous appeler",
+            "emailProtocol": "Nous écrire"
+          },
+          "form": {
+            "name": {
+              "label": "Nom",
+              "placeholder": "Votre nom"
+            },
+            "email": {
+              "label": "E-mail",
+              "placeholder": "vous@email.com"
+            },
+            "message": {
+              "label": "Message",
+              "placeholder": "Comment pouvons-nous vous aider ?"
+            },
+            "send": "Envoyer"
+          },
+          "alert": {
+            "sent": "Merci — votre message part vers nous. Nous vous répondrons rapidement."
+          }
+        }
+      },
       "wellness": {
         "home": {
           "curatedSelection": "Notre sélection",

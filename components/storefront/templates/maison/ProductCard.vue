@@ -121,7 +121,7 @@ async function handleAddToCart() {
 
     <!-- Info -->
     <div class="pc__info">
-      <span class="pc__cat">{{ product.category?.title || 'Pistachio' }}</span>
+      <span class="pc__cat">{{ product.category?.title || storefrontContent.common.collection }}</span>
       <h3 class="pc__title">
         <NuxtLink :to="`/product/${product.slug}`" class="pc__title-link">{{ product.title }}</NuxtLink>
       </h3>

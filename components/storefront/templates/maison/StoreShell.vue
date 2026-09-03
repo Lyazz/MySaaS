@@ -7,7 +7,9 @@ import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 const cartStore = useCartStore()
 const favorites = useFavorites()
 const tenant = useState<any>('tenant')
-const tenantName = computed(() => tenant.value?.name || 'Pistachio')
+// "Pistachio" was the design reference, not a tenant: never show it to a shopper.
+const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const legalLinks = useStoreLegalLinks()
@@ -322,7 +324,7 @@ watch(searchQuery, async (q) => {
             <!-- Brand -->
             <div class="shell-footer__brand">
               <span class="shell-logo__text" style="font-size:1.6rem;margin-bottom:16px;display:block">{{ tenantName }}</span>
-              <p class="shell-footer__tagline">Pistachio, sélection premium pour une boutique chaleureuse et raffinée.</p>
+              <p v-if="storeSettings?.description" class="shell-footer__tagline">{{ storeSettings.description }}</p>
               <ul v-if="primaryContactInfos.length" class="shell-footer__contacts">
                 <li v-for="info in primaryContactInfos" :key="info.id" class="shell-footer__contact-item">
                   <Icon :name="kindDef(info.kind).iconName" class="shell-footer__contact-icon" />

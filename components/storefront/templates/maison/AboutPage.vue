@@ -1,7 +1,9 @@
 <script setup lang="ts">
 const tenant = useState<any>('tenant')
 const storeSettings = useState<any>('storeSettings')
-const tenantName = computed(() => tenant.value?.name || 'Pistachio')
+// "Pistachio" was the design reference, not a tenant: never show it to a shopper.
+const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
 </script>
 
 <template>

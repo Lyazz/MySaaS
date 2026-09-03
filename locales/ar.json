@@ -1054,7 +1054,24 @@
           "emailUs": "راسلنا",
           "visitUs": "زرنا"
         },
-        "addressPlaceholder": "123 شارع المتجر، المدينة، البلد"
+        "addressPlaceholder": "123 شارع المتجر، المدينة، البلد",
+        "intro": "سؤال عن منتج أو طلب، أو تودّ فقط إلقاء التحية؟ نحن هنا من أجلك.",
+        "form": {
+          "name": {
+            "label": "الاسم الكامل",
+            "placeholder": "اسمك"
+          },
+          "email": {
+            "label": "البريد الإلكتروني",
+            "placeholder": "you@email.com"
+          },
+          "message": {
+            "label": "الرسالة",
+            "placeholder": "رسالتك…"
+          },
+          "send": "إرسال الرسالة"
+        },
+        "mailSubject": "رسالة من {name}"
       },
       "categories": {
         "title": "الفئات",
@@ -1396,6 +1413,65 @@
       "dismissAria": "إغلاق الإعلان"
     },
     "templates": {
+      "food": {
+        "badges": {
+          "organic": "عضوي",
+          "fastDelivery": "توصيل سريع",
+          "premium": "جودة ممتازة"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "منذ {year}",
+          "titlePrefix": "صُنع من أجل",
+          "titleAccent": "الشارع",
+          "descriptionFallback": "نصنع قطعًا تصمد أمام الاستعمال اليومي. بلا حشو ولا ضجيج موسمي — ملابس تستحق مكانها في خزانتك.",
+          "missionPrefix": "مهمتنا بسيطة:",
+          "missionAccent": "جودة تُلمس، بسعر بلا مبالغة.",
+          "values": {
+            "quality": {
+              "title": "الجودة",
+              "description": "خامات مختارة لتدوم، ومراجَعة قطعة بقطعة."
+            },
+            "design": {
+              "title": "التصميم",
+              "description": "قصّات مصممة داخليًا، للارتداء كل يوم."
+            },
+            "culture": {
+              "title": "الثقافة",
+              "description": "متجذرون في المشهد الذي أتينا منه، ونصنع معه."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "تواصل",
+          "titleAccent": "معنا",
+          "sections": {
+            "hqLocation": "أين تجدنا",
+            "directLine": "اتصل بنا",
+            "emailProtocol": "راسلنا"
+          },
+          "form": {
+            "name": {
+              "label": "الاسم",
+              "placeholder": "اسمك"
+            },
+            "email": {
+              "label": "البريد الإلكتروني",
+              "placeholder": "you@email.com"
+            },
+            "message": {
+              "label": "الرسالة",
+              "placeholder": "كيف يمكننا مساعدتك؟"
+            },
+            "send": "إرسال"
+          },
+          "alert": {
+            "sent": "شكرًا — رسالتك في طريقها إلينا وسنعود إليك قريبًا."
+          }
+        }
+      },
       "wellness": {
         "home": {
           "curatedSelection": "مختاراتنا",
