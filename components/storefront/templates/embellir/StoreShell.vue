@@ -231,12 +231,10 @@ watch(isSearchOpen, (open) => {
                   @click="navigateTo('/wishlist')"
                 >
                   <Icon name="lucide:heart" class="w-[18px] h-[18px]" />
-                  <ClientOnly>
-                    <span
-                      v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center bg-[#DFA254] text-[10px] font-bold text-[#062622] absolute top-1 end-1"
-                    >{{ favorites.count.value }}</span>
-                  </ClientOnly>
+                  <span
+                    v-if="favorites.count.value > 0"
+                    class="flex h-4 min-w-4 px-1 items-center justify-center bg-[#DFA254] text-[10px] font-bold text-[#062622] absolute top-1 end-1"
+                  >{{ favorites.count.value }}</span>
                 </button>
                 <!-- Cart -->
                 <NuxtLink

@@ -290,12 +290,10 @@ const closeSearchDropdownSoon = () => {
                   name="lucide:heart"
                   class="w-5 h-5"
                 />
-                <ClientOnly>
-                  <span
-                    v-if="favorites.count.value > 0"
-                    class="kw-pop absolute -top-1 -end-1 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full bg-[var(--kw-pink-deep)] text-white text-[10px] font-extrabold flex items-center justify-center"
-                  >{{ favorites.count.value }}</span>
-                </ClientOnly>
+                <span
+                  v-if="favorites.count.value > 0"
+                  class="kw-pop absolute -top-1 -end-1 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full bg-[var(--kw-pink-deep)] text-white text-[10px] font-extrabold flex items-center justify-center"
+                >{{ favorites.count.value }}</span>
               </button>
 
               <NuxtLink
@@ -308,12 +306,10 @@ const closeSearchDropdownSoon = () => {
                   class="w-4 h-4"
                 />
                 <span class="hidden lg:inline">{{ storefrontContent.cart.title }}</span>
-                <ClientOnly>
-                  <span
-                    v-if="cartStore.itemCount > 0"
-                    class="kw-pop min-w-[1.3rem] h-[1.3rem] px-1 rounded-full bg-white/95 text-[var(--kw-ink)] text-[11px] font-extrabold flex items-center justify-center"
-                  >{{ cartStore.itemCount }}</span>
-                </ClientOnly>
+                <span
+                  v-if="cartStore.itemCount > 0"
+                  class="kw-pop min-w-[1.3rem] h-[1.3rem] px-1 rounded-full bg-white/95 text-[var(--kw-ink)] text-[11px] font-extrabold flex items-center justify-center"
+                >{{ cartStore.itemCount }}</span>
               </NuxtLink>
 
               <button

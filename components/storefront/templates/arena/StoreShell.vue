@@ -201,12 +201,10 @@ const props = defineProps<{
                 @click="navigateTo('/wishlist')"
               >
                 <Icon name="lucide:heart" class="w-[18px] h-[18px]" />
-                <ClientOnly>
-                  <span
-                    v-if="favorites.count.value > 0"
-                    class="absolute top-1.5 right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-brand-500 text-[9px] font-black text-[#02060a]"
-                  >{{ favorites.count.value }}</span>
-                </ClientOnly>
+                <span
+                  v-if="favorites.count.value > 0"
+                  class="absolute top-1.5 right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-brand-500 text-[9px] font-black text-[#02060a]"
+                >{{ favorites.count.value }}</span>
               </button>
 
               <NuxtLink

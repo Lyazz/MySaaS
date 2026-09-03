@@ -247,12 +247,10 @@ defineProps<{
                     @click="navigateTo('/wishlist')"
                   >
                     <Icon name="lucide:heart" class="w-5 h-5" />
-                    <ClientOnly>
-                      <span
-                        v-if="favorites.count.value > 0"
-                        class="wl-num flex h-4 min-w-4 px-1 items-center justify-center bg-wl-ink text-[10px] font-semibold text-wl-paper absolute top-0.5 end-0.5"
-                      >{{ favorites.count.value }}</span>
-                    </ClientOnly>
+                    <span
+                      v-if="favorites.count.value > 0"
+                      class="wl-num flex h-4 min-w-4 px-1 items-center justify-center bg-wl-ink text-[10px] font-semibold text-wl-paper absolute top-0.5 end-0.5"
+                    >{{ favorites.count.value }}</span>
                   </button>
                   <!-- Cart: ink that greens on hover, like every other primary action -->
                   <NuxtLink

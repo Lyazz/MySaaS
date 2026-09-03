@@ -253,12 +253,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   @click="navigateTo('/wishlist')"
                 >
                   <Icon name="lucide:flame" class="w-5 h-5 skew-x-[10deg]" />
-                  <ClientOnly>
-                    <span
-                      v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-brand-500 text-[10px] font-black text-black absolute -top-1 -end-1 skew-x-[10deg]"
-                    >{{ favorites.count.value }}</span>
-                  </ClientOnly>
+                  <span
+                    v-if="favorites.count.value > 0"
+                    class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-brand-500 text-[10px] font-black text-black absolute -top-1 -end-1 skew-x-[10deg]"
+                  >{{ favorites.count.value }}</span>
                 </button>
                 <!-- Cart -->
                 <NuxtLink

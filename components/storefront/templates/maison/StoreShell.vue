@@ -181,9 +181,7 @@ watch(searchQuery, async (q) => {
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 015.5-1.7A3 3 0 0114.5 5.5C14.5 9.5 8 13.5 8 13.5z" stroke="currentColor" stroke-width="0.85"/>
               </svg>
-              <ClientOnly>
-                <span v-if="favorites.count.value > 0" class="shell-icon-btn__badge">{{ favorites.count.value }}</span>
-              </ClientOnly>
+              <span v-if="favorites.count.value > 0" class="shell-icon-btn__badge">{{ favorites.count.value }}</span>
             </button>
 
             <!-- Cart -->
@@ -193,9 +191,7 @@ watch(searchQuery, async (q) => {
                 <circle cx="7" cy="13" r="1" fill="currentColor"/>
                 <circle cx="12" cy="13" r="1" fill="currentColor"/>
               </svg>
-              <ClientOnly>
-                <span v-if="cartStore.itemCount > 0" class="shell-icon-btn__badge">{{ cartStore.itemCount }}</span>
-              </ClientOnly>
+              <span v-if="cartStore.itemCount > 0" class="shell-icon-btn__badge">{{ cartStore.itemCount }}</span>
             </NuxtLink>
 
             <!-- Hamburger -->

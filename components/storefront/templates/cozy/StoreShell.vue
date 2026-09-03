@@ -201,12 +201,10 @@ const currentYear = new Date().getFullYear()
                 @click="navigateTo('/wishlist')"
               >
                 <Icon name="lucide:heart" class="w-[18px] h-[18px]" />
-                <ClientOnly>
-                  <span
-                    v-if="favorites.count.value > 0"
-                    class="flex h-4 min-w-4 px-1 items-center justify-center bg-[#B8532E] text-[10px] font-bold text-[#F4EFE6] absolute top-1 end-0.5 ed-ui"
-                  >{{ favorites.count.value }}</span>
-                </ClientOnly>
+                <span
+                  v-if="favorites.count.value > 0"
+                  class="flex h-4 min-w-4 px-1 items-center justify-center bg-[#B8532E] text-[10px] font-bold text-[#F4EFE6] absolute top-1 end-0.5 ed-ui"
+                >{{ favorites.count.value }}</span>
               </button>
               <NuxtLink
                 v-if="storeSettings?.cartEnabled !== false"

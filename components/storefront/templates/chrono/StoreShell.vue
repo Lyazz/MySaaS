@@ -200,12 +200,10 @@ const props = defineProps<{
                   @mouseleave="($event.target as HTMLElement).closest('button')!.style.color = '#6B7280'"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
-                  <ClientOnly>
-                    <span
-                      v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#0E1117] text-[10px] font-bold text-[#D4C5A9] absolute -top-1 -right-1"
-                    >{{ favorites.count.value }}</span>
-                  </ClientOnly>
+                  <span
+                    v-if="favorites.count.value > 0"
+                    class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-[#0E1117] text-[10px] font-bold text-[#D4C5A9] absolute -top-1 -right-1"
+                  >{{ favorites.count.value }}</span>
                 </button>
                 <!-- Cart -->
                 <NuxtLink
