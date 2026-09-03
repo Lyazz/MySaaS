@@ -30,6 +30,7 @@ const clearance = useClearanceDiscount()
 const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const { format: formatPrice } = useCurrency()
 
@@ -63,7 +64,10 @@ async function handleAddToCart() {
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Ajouté au panier', 'Consulter votre panier pour finaliser')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -96,14 +100,14 @@ async function handleAddToCart() {
             <circle cx="7" cy="13" r="1" fill="currentColor"/>
             <circle cx="12" cy="13" r="1" fill="currentColor"/>
           </svg>
-          <span>Ajouter</span>
+          <span>{{ storefrontContent.actions.addToCart }}</span>
         </button>
         <NuxtLink :to="`/product/${product.slug}`" class="pc__hover-btn pc__hover-btn--outline">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="0.85"/>
             <path d="M1 8c1.5-4 10-4 14 0-4 4-12.5 4-14 0z" stroke="currentColor" stroke-width="0.85"/>
           </svg>
-          <span>Voir</span>
+          <span>{{ storefrontContent.actions.quickView }}</span>
         </NuxtLink>
       </div>
 
@@ -117,7 +121,7 @@ async function handleAddToCart() {
 
     <!-- Info -->
     <div class="pc__info">
-      <span class="pc__cat">{{ product.category?.title || 'Pistachio' }}</span>
+      <span class="pc__cat">{{ product.category?.title || storefrontContent.common.collection }}</span>
       <h3 class="pc__title">
         <NuxtLink :to="`/product/${product.slug}`" class="pc__title-link">{{ product.title }}</NuxtLink>
       </h3>

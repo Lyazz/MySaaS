@@ -13,6 +13,7 @@ const { data: categoryData } = await useFetch<any[]>(categoriesUrl, {
 })
 
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -107,7 +108,7 @@ const resetFilters = () => {
     <!-- Page header -->
     <div class="shop__header">
       <div class="shop__header-inner">
-        <span class="at-label" style="--delay:0ms;animation:at-fade-up 0.6s ease forwards">Notre boutique</span>
+        <span class="at-label" style="--delay:0ms;animation:at-fade-up 0.6s ease forwards">{{ storefrontContent.shop.title }}</span>
         <h1 class="shop__title">{{ storefrontContent.shop.catalogTitle }}</h1>
       </div>
     </div>

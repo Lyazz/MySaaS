@@ -154,7 +154,7 @@ onUnmounted(() => {
               </h2>
               <span class="h-px flex-1 bg-[#C9A24B]/30" />
             </div>
-            <SafeRichText
+            <CommonSafeRichText
             v-if="product?.description"
             class="prose prose-lg text-[#5C4A44] max-w-none leading-relaxed bg-[#FFFDF9] rounded-tl-[56px] rounded-tr-2xl rounded-br-2xl rounded-bl-2xl p-8 border border-[#C9A24B]/30"
             :html="product.description"

@@ -137,7 +137,7 @@ onUnmounted(() => {
                 <h2 class="text-sm font-bold uppercase tracking-widest text-slate-900 mb-6">
                 {{ storefrontContent.product.detailsTitle }}
                 </h2>
-                <SafeRichText 
+                <CommonSafeRichText 
                 v-if="product?.description" 
                 class="prose prose-slate prose-sm text-slate-600 max-w-none leading-relaxed font-light"
                 :html="product.description"

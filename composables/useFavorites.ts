@@ -54,7 +54,14 @@ export const useFavorites = () => {
     localStorage.setItem(FAVORITES_STORAGE_KEY_V1, JSON.stringify(storage.value))
   }
 
-  hydrateOnce()
+  /*
+   * Reading localStorage during setup made the first client render disagree with
+   * the server (which always has an empty store), so every storefront page hit
+   * logged a hydration mismatch on the header's favourites badge. Wait for mount:
+   * the first client render then matches the server and the badge fills in after.
+   */
+  if (getCurrentInstance()) onMounted(hydrateOnce)
+  else hydrateOnce()
 
   const favoriteIds = computed<string[]>(() => storage.value[tenantKey.value] ?? [])
   const count = computed(() => favoriteIds.value.length)

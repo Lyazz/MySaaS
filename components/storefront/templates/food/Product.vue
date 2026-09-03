@@ -171,7 +171,7 @@ onUnmounted(() => {
                     <Icon name="lucide:file-text" class="w-5 h-5 text-brand-600" />
                     {{ storefrontContent.product.descriptionTitle }}
                 </h2>
-                <SafeRichText 
+                <CommonSafeRichText 
                 v-if="product?.description" 
                 class="prose prose-stone prose-sm text-stone-600 max-w-none leading-relaxed"
                 :html="product.description"

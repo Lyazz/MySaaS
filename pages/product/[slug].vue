@@ -194,7 +194,7 @@ onUnmounted(() => {
 <template>
   <NuxtLayout :name="layoutName">
     <div v-if="displayedLoyaltyPreview?.enabled" class="mx-auto max-w-6xl px-4 pt-4">
-      <ProductLoyaltyPreview :preview="displayedLoyaltyPreview" />
+      <LoyaltyProductLoyaltyPreview :preview="displayedLoyaltyPreview" />
     </div>
     <component
         :is="ActiveTemplate"

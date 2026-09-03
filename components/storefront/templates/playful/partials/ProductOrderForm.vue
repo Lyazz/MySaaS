@@ -254,7 +254,7 @@ const handleOrderSubmit = async () => {
         if (isMaystro) {
           if (!quickForm.wilaya || !quickForm.commune) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
           if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() ) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
-          if (maystroShippingAmount == null) { orderError.value = 'Maystro shipping price unavailable for selected commune'; orderSubmitting.value = false; return }
+          if (maystroShippingAmount == null) { orderError.value = storefrontContent.value.checkout.errors.shippingUnavailable; orderSubmitting.value = false; return }
         }
 
         const payload = {
@@ -350,7 +350,7 @@ const scrollToForm = () => {
         window.scrollTo({ top: y, behavior: 'smooth' })
         setTimeout(() => {
             if (codEnabled.value && quickForm.fullName === '') {
-                const firstInput = document.querySelector('input[type="text"]') as HTMLElement
+                const firstInput = mainOrderFormRef.value?.querySelector('input[type="text"]') as HTMLElement | null
                 if (firstInput) firstInput.focus()
             }
         }, 500)

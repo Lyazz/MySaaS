@@ -1100,7 +1100,24 @@
           "emailUs": "راسلنا",
           "visitUs": "زرنا"
         },
-        "addressPlaceholder": "123 شارع المتجر، المدينة، البلد"
+        "addressPlaceholder": "123 شارع المتجر، المدينة، البلد",
+        "intro": "سؤال عن منتج أو طلب، أو تودّ فقط إلقاء التحية؟ نحن هنا من أجلك.",
+        "form": {
+          "name": {
+            "label": "الاسم الكامل",
+            "placeholder": "اسمك"
+          },
+          "email": {
+            "label": "البريد الإلكتروني",
+            "placeholder": "you{'@'}email.com"
+          },
+          "message": {
+            "label": "الرسالة",
+            "placeholder": "رسالتك…"
+          },
+          "send": "إرسال الرسالة"
+        },
+        "mailSubject": "رسالة من {name}"
       },
       "categories": {
         "title": "الفئات",
@@ -1237,7 +1254,8 @@
         "phoneRequired": "رقم الهاتف مطلوب لإتمام الطلب.",
         "deliveryRequired": "يرجى اختيار خيار التوصيل.",
         "requiredFields": "يرجى ملء جميع الحقول المطلوبة.",
-        "submitFailed": "تعذر إتمام الطلب. يرجى المحاولة مرة أخرى."
+        "submitFailed": "تعذر إتمام الطلب. يرجى المحاولة مرة أخرى.",
+        "shippingUnavailable": "الشحن غير متاح للبلدية المختارة. يرجى اختيار خيار توصيل آخر."
       },
       "actions": {
         "returnToCart": "العودة إلى السلة",
@@ -1312,6 +1330,7 @@
       "detailsTitle": "تفاصيل المنتج",
       "addedToCart": "تمت إضافة {title} إلى السلة",
       "inStock": "متوفر",
+      "lowStock": "الكمية محدودة",
       "perUnit": "للوحدة",
       "descriptionFallback": "استمتع بالمزيج المثالي بين الأناقة والعملية.",
       "viewFullDetails": "عرض التفاصيل",
@@ -1423,7 +1442,10 @@
     },
     "search": {
       "placeholder": "ابحث عن منتجات...",
-      "keywords": "كلمات ذات صلة"
+      "keywords": "كلمات ذات صلة",
+      "searching": "جارٍ البحث...",
+      "noResults": "لم يتم العثور على منتجات.",
+      "seeMore": "عرض المزيد"
     },
     "header": {
       "wishlistTitle": "المفضلة",
@@ -1451,6 +1473,102 @@
       "dismissAria": "إغلاق الإعلان"
     },
     "templates": {
+      "maison": {
+        "about": {
+          "kicker": "قصتنا",
+          "body": "نؤمن بأن كل مساحة معيشة تستحق أن تكون جميلة وعملية وملهمة. لذلك نختار كل منتج بعناية لنقدّم لك الأفضل في الديكور وإكسسوارات المنزل.",
+          "lead": "متجر مخصص لفن العيش، وللديكور الداخلي، ولإكسسوارات المنزل المنتقاة بعناية.",
+          "valuesTitle": "قيمنا",
+          "values": {
+            "quality": {
+              "title": "الجودة",
+              "text": "منتجات مختارة لجودة تصنيعها ومتانتها."
+            },
+            "living": {
+              "title": "فن العيش",
+              "text": "كل قطعة مصممة لتُجمّل يومك وتُحسّنه."
+            },
+            "passion": {
+              "title": "الشغف",
+              "text": "فريق شغوف بالديكور الداخلي والتصميم."
+            }
+          },
+          "ctaTitle": "اكتشف",
+          "ctaAccent": "متجرنا",
+          "ctaAction": "تصفّح المنتجات"
+        },
+        "home": {
+          "trust": {
+            "delivery": "التوصيل إلى كامل التراب الجزائري",
+            "curation": "انتقاء دقيق",
+            "returns": "إرجاع ميسّر"
+          },
+          "manifestoKicker": "عالمنا",
+          "manifestoTitle": "فن تزيين",
+          "manifestoAccent": "مساحتك",
+          "manifestoBody": "قطع مصممة لتُجمّل كل ركن في منزلك. من الصالون إلى غرفة النوم، ومن المطبخ إلى المكتب.",
+          "manifestoCta": "اكتشف المتجر"
+        }
+      },
+      "food": {
+        "badges": {
+          "organic": "عضوي",
+          "fastDelivery": "توصيل سريع",
+          "premium": "جودة ممتازة"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "منذ {year}",
+          "titlePrefix": "صُنع من أجل",
+          "titleAccent": "الشارع",
+          "descriptionFallback": "نصنع قطعًا تصمد أمام الاستعمال اليومي. بلا حشو ولا ضجيج موسمي — ملابس تستحق مكانها في خزانتك.",
+          "missionPrefix": "مهمتنا بسيطة:",
+          "missionAccent": "جودة تُلمس، بسعر بلا مبالغة.",
+          "values": {
+            "quality": {
+              "title": "الجودة",
+              "description": "خامات مختارة لتدوم، ومراجَعة قطعة بقطعة."
+            },
+            "design": {
+              "title": "التصميم",
+              "description": "قصّات مصممة داخليًا، للارتداء كل يوم."
+            },
+            "culture": {
+              "title": "الثقافة",
+              "description": "متجذرون في المشهد الذي أتينا منه، ونصنع معه."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "تواصل",
+          "titleAccent": "معنا",
+          "sections": {
+            "hqLocation": "أين تجدنا",
+            "directLine": "اتصل بنا",
+            "emailProtocol": "راسلنا"
+          },
+          "form": {
+            "name": {
+              "label": "الاسم",
+              "placeholder": "اسمك"
+            },
+            "email": {
+              "label": "البريد الإلكتروني",
+              "placeholder": "you{'@'}email.com"
+            },
+            "message": {
+              "label": "الرسالة",
+              "placeholder": "كيف يمكننا مساعدتك؟"
+            },
+            "send": "إرسال"
+          },
+          "alert": {
+            "sent": "شكرًا — رسالتك في طريقها إلينا وسنعود إليك قريبًا."
+          }
+        }
+      },
       "wellness": {
         "home": {
           "curatedSelection": "مختاراتنا",

@@ -102,7 +102,7 @@ onUnmounted(() => {
       >
         {{ product?.title }}
       </h1>
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-slate mx-auto prose-img:rounded-none prose-img:w-full prose-headings:font-serif prose-headings:font-bold prose-p:font-light prose-a:text-slate-900"
         :html="product.description"

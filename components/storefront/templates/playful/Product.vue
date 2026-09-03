@@ -134,7 +134,7 @@ onUnmounted(() => {
           />
         </div>
         <div class="kw-card p-8 md:p-12">
-          <SafeRichText
+          <CommonSafeRichText
             v-if="product?.description"
             class="prose prose-base max-w-none leading-relaxed text-[var(--kw-ink-soft)]"
             :html="product.description"

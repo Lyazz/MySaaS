@@ -8,6 +8,7 @@ const props = defineProps<{
 }>()
 
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -50,7 +51,7 @@ const categoryProducts = computed(() => {
       <!-- Sidebar: all categories -->
       <aside class="cat-sidebar">
         <div class="cat-sidebar__inner">
-          <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
+          <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.nav.categories }}</span>
           <nav class="cat-sidebar__nav">
             <NuxtLink
               v-for="cat in allCategories"

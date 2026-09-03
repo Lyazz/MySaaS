@@ -300,7 +300,7 @@ const handleOrderSubmit = async () => {
             return
           }
           if (maystroShippingAmount == null) {
-            orderError.value = 'Maystro shipping price unavailable for selected commune'
+            orderError.value = storefrontContent.value.checkout.errors.shippingUnavailable
             orderSubmitting.value = false
             return
           }
@@ -411,6 +411,45 @@ const handleAddToCart = async () => {
     )
     addToCartSubmitting.value = false
 }
+
+/*
+ * Mobile sticky buy bar — the same conversion aid modern has: once the COD card
+ * has scrolled out of view the total and the order button follow the customer,
+ * and tapping it brings them back to the form (and into its first field, not
+ * the header search).
+ */
+const mainOrderFormRef = ref<HTMLElement | null>(null)
+const showStickyBar = ref(false)
+
+onMounted(() => {
+    const observer = new IntersectionObserver((entries) => {
+        showStickyBar.value = !entries[0].isIntersecting
+    }, { root: null, threshold: 0.1, rootMargin: '0px 0px -20% 0px' })
+
+    if (mainOrderFormRef.value) observer.observe(mainOrderFormRef.value)
+
+    onUnmounted(() => {
+        if (mainOrderFormRef.value) observer.unobserve(mainOrderFormRef.value)
+        observer.disconnect()
+    })
+})
+
+const stickyBarTotal = computed(() => {
+    const price = selectedDelivery.value?.price
+    const shipping = price && price !== 'FREE' && price !== '—' ? Number(price) : 0
+    return totalPrice.value + (Number.isNaN(shipping) ? 0 : shipping)
+})
+
+const scrollToForm = () => {
+    if (!mainOrderFormRef.value) return
+    const y = mainOrderFormRef.value.getBoundingClientRect().top + window.scrollY - 20
+    window.scrollTo({ top: y, behavior: 'smooth' })
+    setTimeout(() => {
+        if (!codEnabled.value || quickForm.fullName !== '') return
+        const firstInput = mainOrderFormRef.value?.querySelector('input[type="text"]') as HTMLElement | null
+        firstInput?.focus()
+    }, 500)
+}
 </script>
 
 <template>
@@ -494,6 +533,7 @@ const handleAddToCart = async () => {
     <!-- Quick COD Order Form -->
     <div
       v-if="codEnabled"
+      ref="mainOrderFormRef"
       data-test="cod-order-card"
       class="bg-[#1a0a2e]/90 rounded-3xl p-6 md:p-8 border border-purple-500/30 relative overflow-hidden"
     >
@@ -768,6 +808,33 @@ const handleAddToCart = async () => {
             {{ successMessage }}
           </div>
         </div>
+      </div>
+    </Transition>
+    <!-- Mobile sticky buy bar -->
+    <Transition
+      enter-active-class="transform transition ease-out duration-300"
+      enter-from-class="translate-y-full"
+      enter-to-class="translate-y-0"
+      leave-active-class="transform transition ease-in duration-200"
+      leave-from-class="translate-y-0"
+      leave-to-class="translate-y-full"
+    >
+      <div
+        v-if="showStickyBar && codEnabled"
+        class="fixed bottom-0 inset-x-0 z-40 bg-[#0B0716]/95 backdrop-blur border-t border-purple-500/40 p-4 md:hidden flex items-center justify-between gap-4"
+      >
+        <div class="flex flex-col min-w-0">
+          <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-purple-300/70">{{ storefrontContent.cart.summary.total }}</span>
+          <span class="font-mono text-xl font-bold text-purple-200 leading-none">{{ formatAmount(stickyBarTotal) }} {{ currencyCode }}</span>
+        </div>
+        <button
+          type="button"
+          :disabled="!canPurchase"
+          class="flex-1 h-12 bg-gradient-to-r from-fuchsia-600 to-purple-600 hover:from-fuchsia-500 hover:to-purple-500 disabled:from-slate-700 disabled:to-slate-700 disabled:cursor-not-allowed text-white font-mono text-sm uppercase tracking-[0.16em] transition-all"
+          @click="scrollToForm"
+        >
+          {{ storefrontContent.productForm.cod.submit }}
+        </button>
       </div>
     </Transition>
   </div>

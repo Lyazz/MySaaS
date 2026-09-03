@@ -176,7 +176,7 @@ async function handleSubmit() {
     if (isMaystro) {
       if (!form.value.wilaya || !form.value.commune) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
       if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() ) { errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
-      if (maystroShippingAmount == null) { errorMessage.value = 'Maystro shipping price unavailable for selected commune'; return }
+      if (maystroShippingAmount == null) { errorMessage.value = storefrontContent.value.checkout.errors.shippingUnavailable; return }
     }
 
     const payload = {
@@ -216,7 +216,7 @@ async function handleSubmit() {
   <div class="co">
     <div class="co__header">
       <div class="co__header-inner">
-        <span class="at-label">Finaliser</span>
+        <span class="at-label">{{ storefrontContent.checkout.title }}</span>
         <h1 class="co__title">
           {{ storefrontContent.checkout.title }}
         </h1>

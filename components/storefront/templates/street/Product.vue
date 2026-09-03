@@ -129,7 +129,7 @@ onUnmounted(() => {
     <!-- Full Description -->
     <div class="mt-16 border-t-4 border-black pt-8">
         <h2 class="font-street text-3xl uppercase mb-6">{{ storefrontContent.product.detailsTitle }}</h2>
-        <SafeRichText 
+        <CommonSafeRichText 
           v-if="product?.description" 
           class="prose prose-lg prose-headings:font-street prose-headings:uppercase max-w-none font-mono bg-white border-4 border-black p-8"
           :html="product.description"

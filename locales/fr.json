@@ -1082,7 +1082,24 @@
           "emailUs": "Écrivez-nous",
           "visitUs": "Rendez-nous visite"
         },
-        "addressPlaceholder": "123 rue du Magasin, Ville, Pays"
+        "addressPlaceholder": "123 rue du Magasin, Ville, Pays",
+        "intro": "Une question sur un produit, une commande, ou envie de nous dire bonjour ? Nous sommes là pour vous.",
+        "form": {
+          "name": {
+            "label": "Nom complet",
+            "placeholder": "Votre nom"
+          },
+          "email": {
+            "label": "E-mail",
+            "placeholder": "vous{'@'}email.com"
+          },
+          "message": {
+            "label": "Message",
+            "placeholder": "Votre message…"
+          },
+          "send": "Envoyer le message"
+        },
+        "mailSubject": "Message de {name}"
       },
       "categories": {
         "title": "Catégories",
@@ -1219,7 +1236,8 @@
         "phoneRequired": "Le numéro de téléphone est requis pour passer la commande.",
         "deliveryRequired": "Veuillez sélectionner une option de livraison.",
         "requiredFields": "Veuillez remplir tous les champs requis.",
-        "submitFailed": "Impossible de passer la commande. Veuillez réessayer."
+        "submitFailed": "Impossible de passer la commande. Veuillez réessayer.",
+        "shippingUnavailable": "La livraison n'est pas disponible pour la commune choisie. Veuillez sélectionner une autre option."
       },
       "actions": {
         "returnToCart": "Retour au panier",
@@ -1294,6 +1312,7 @@
       "detailsTitle": "Détails du produit",
       "addedToCart": "{title} ajouté au panier !",
       "inStock": "En stock",
+      "lowStock": "Stock faible",
       "perUnit": "par unité",
       "descriptionFallback": "Découvrez le parfait équilibre entre style et fonctionnalité.",
       "viewFullDetails": "Voir les détails",
@@ -1405,7 +1424,10 @@
     },
     "search": {
       "placeholder": "Rechercher des produits...",
-      "keywords": "Mots-clés associés"
+      "keywords": "Mots-clés associés",
+      "searching": "Recherche…",
+      "noResults": "Aucun produit trouvé.",
+      "seeMore": "Voir plus"
     },
     "header": {
       "wishlistTitle": "Favoris",
@@ -1433,6 +1455,102 @@
       "dismissAria": "Fermer l’annonce"
     },
     "templates": {
+      "maison": {
+        "about": {
+          "kicker": "Notre histoire",
+          "body": "Nous croyons que chaque espace de vie mérite d'être beau, fonctionnel et inspirant. C'est pourquoi nous sélectionnons avec soin chaque produit pour vous offrir le meilleur de la décoration et des accessoires maison.",
+          "lead": "Une boutique dédiée à l'art de vivre, à la décoration intérieure et aux accessoires maison soigneusement sélectionnés.",
+          "valuesTitle": "Nos valeurs",
+          "values": {
+            "quality": {
+              "title": "Qualité",
+              "text": "Des produits sélectionnés pour leur qualité de fabrication et leur durabilité."
+            },
+            "living": {
+              "title": "Art de vivre",
+              "text": "Chaque pièce est pensée pour embellir et améliorer votre quotidien."
+            },
+            "passion": {
+              "title": "Passion",
+              "text": "Une équipe passionnée par la décoration intérieure et le design."
+            }
+          },
+          "ctaTitle": "Découvrir",
+          "ctaAccent": "notre boutique",
+          "ctaAction": "Explorer les produits"
+        },
+        "home": {
+          "trust": {
+            "delivery": "Livraison partout en Algérie",
+            "curation": "Sélection rigoureuse",
+            "returns": "Retours facilités"
+          },
+          "manifestoKicker": "Notre Univers",
+          "manifestoTitle": "L'art de décorer",
+          "manifestoAccent": "votre espace",
+          "manifestoBody": "Des pièces pensées pour embellir chaque coin de votre maison. Du salon à la chambre, de la cuisine au bureau.",
+          "manifestoCta": "Découvrir la boutique"
+        }
+      },
+      "food": {
+        "badges": {
+          "organic": "Bio",
+          "fastDelivery": "Livraison rapide",
+          "premium": "Qualité premium"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "Depuis {year}",
+          "titlePrefix": "Fait pour",
+          "titleAccent": "la rue",
+          "descriptionFallback": "Nous créons des pièces qui tiennent à l’usage réel. Pas de remplissage, pas de bruit saisonnier — juste des vêtements qui méritent leur place dans votre dressing.",
+          "missionPrefix": "Notre mission est simple :",
+          "missionAccent": "une qualité qui se sent, à un prix sans surcoût.",
+          "values": {
+            "quality": {
+              "title": "Qualité",
+              "description": "Des matières choisies pour durer, contrôlées pièce par pièce."
+            },
+            "design": {
+              "title": "Design",
+              "description": "Des coupes dessinées en interne, pensées pour tous les jours."
+            },
+            "culture": {
+              "title": "Culture",
+              "description": "Ancrés dans la scène d’où nous venons, et faits avec elle."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "Écrivez-",
+          "titleAccent": "nous",
+          "sections": {
+            "hqLocation": "Où nous trouver",
+            "directLine": "Nous appeler",
+            "emailProtocol": "Nous écrire"
+          },
+          "form": {
+            "name": {
+              "label": "Nom",
+              "placeholder": "Votre nom"
+            },
+            "email": {
+              "label": "E-mail",
+              "placeholder": "vous{'@'}email.com"
+            },
+            "message": {
+              "label": "Message",
+              "placeholder": "Comment pouvons-nous vous aider ?"
+            },
+            "send": "Envoyer"
+          },
+          "alert": {
+            "sent": "Merci — votre message part vers nous. Nous vous répondrons rapidement."
+          }
+        }
+      },
       "wellness": {
         "home": {
           "curatedSelection": "Notre sélection",

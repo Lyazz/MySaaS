@@ -7,7 +7,9 @@ import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 const cartStore = useCartStore()
 const favorites = useFavorites()
 const tenant = useState<any>('tenant')
-const tenantName = computed(() => tenant.value?.name || 'Pistachio')
+// "Pistachio" was the design reference, not a tenant: never show it to a shopper.
+const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const legalLinks = useStoreLegalLinks()
@@ -49,6 +51,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -132,7 +144,7 @@ watch(searchQuery, async (q) => {
 
             <div class="shell-nav__dropdown-wrap">
               <button class="shell-nav__link shell-nav__dropdown-trigger">
-                {{ storefrontContent.nav.categories || 'Collections' }}
+                {{ storefrontContent.nav.categories }}
                 <svg width="8" height="5" viewBox="0 0 8 5" fill="none">
                   <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
                 </svg>
@@ -169,9 +181,7 @@ watch(searchQuery, async (q) => {
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 015.5-1.7A3 3 0 0114.5 5.5C14.5 9.5 8 13.5 8 13.5z" stroke="currentColor" stroke-width="0.85"/>
               </svg>
-              <ClientOnly>
-                <span v-if="favorites.count.value > 0" class="shell-icon-btn__badge">{{ favorites.count.value }}</span>
-              </ClientOnly>
+              <span v-if="favorites.count.value > 0" class="shell-icon-btn__badge">{{ favorites.count.value }}</span>
             </button>
 
             <!-- Cart -->
@@ -181,9 +191,7 @@ watch(searchQuery, async (q) => {
                 <circle cx="7" cy="13" r="1" fill="currentColor"/>
                 <circle cx="12" cy="13" r="1" fill="currentColor"/>
               </svg>
-              <ClientOnly>
-                <span v-if="cartStore.itemCount > 0" class="shell-icon-btn__badge">{{ cartStore.itemCount }}</span>
-              </ClientOnly>
+              <span v-if="cartStore.itemCount > 0" class="shell-icon-btn__badge">{{ cartStore.itemCount }}</span>
             </NuxtLink>
 
             <!-- Hamburger -->
@@ -204,11 +212,11 @@ watch(searchQuery, async (q) => {
               <input
                 v-model="searchQuery"
                 type="text"
-                :placeholder="storefrontContent.search?.placeholder || 'Rechercher un produit...'"
+                :placeholder="storefrontContent.search.placeholder"
                 class="shell-search-bar__input"
                 autofocus
-                @blur="setTimeout(() => { isSearchDropdownOpen = false }, 200)"
-                @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
+                @blur="closeSearchDropdownSoon"
+                @focus="openSearchDropdown"
               >
               <button class="shell-search-bar__close" @click="searchOpen = false; searchQuery = ''">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -218,8 +226,8 @@ watch(searchQuery, async (q) => {
             </div>
             <!-- Results -->
             <div v-show="isSearchDropdownOpen" class="shell-search-results pointer-events-auto">
-              <div v-if="searchLoading" class="shell-search-results__state">Recherche…</div>
-              <div v-else-if="searchResults.length === 0" class="shell-search-results__state">Aucun résultat.</div>
+              <div v-if="searchLoading" class="shell-search-results__state">{{ storefrontContent.search.searching }}</div>
+              <div v-else-if="searchResults.length === 0" class="shell-search-results__state">{{ storefrontContent.search.noResults }}</div>
               <NuxtLink
                 v-for="product in visibleSearchResults"
                 :key="product.id"
@@ -242,7 +250,7 @@ watch(searchQuery, async (q) => {
                 @mousedown.prevent
                 @click="showMoreSearchResults"
               >
-                See more
+                {{ storefrontContent.search.seeMore }}
               </button>
             </div>
           </div>
@@ -278,7 +286,7 @@ watch(searchQuery, async (q) => {
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
     <h4 class="shell-drawer__cats-title">
-      {{ storefrontContent.nav.categories || 'Collections' }}
+      {{ storefrontContent.nav.categories }}
     </h4>
     <Icon
       name="lucide:chevron-down"
@@ -312,7 +320,7 @@ watch(searchQuery, async (q) => {
             <!-- Brand -->
             <div class="shell-footer__brand">
               <span class="shell-logo__text" style="font-size:1.6rem;margin-bottom:16px;display:block">{{ tenantName }}</span>
-              <p class="shell-footer__tagline">Pistachio, sélection premium pour une boutique chaleureuse et raffinée.</p>
+              <p v-if="storeSettings?.description" class="shell-footer__tagline">{{ storeSettings.description }}</p>
               <ul v-if="primaryContactInfos.length" class="shell-footer__contacts">
                 <li v-for="info in primaryContactInfos" :key="info.id" class="shell-footer__contact-item">
                   <Icon :name="kindDef(info.kind).iconName" class="shell-footer__contact-icon" />
@@ -342,7 +350,7 @@ watch(searchQuery, async (q) => {
 
             <!-- Collections -->
             <div>
-              <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
+              <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.nav.categories }}</span>
               <ul class="shell-footer__links">
                 <li v-for="cat in (tenantCategories || []).slice(0, 5)" :key="cat.id">
                   <NuxtLink :to="`/category/${cat.slug}`" class="shell-footer__link">{{ categoryDisplayTitle(cat) }}</NuxtLink>
@@ -371,7 +379,7 @@ watch(searchQuery, async (q) => {
 
           <div class="shell-footer__bottom">
             <span>{{ storefrontContent.footer.copyright(tenantName) }}</span>
-            <span>Atelier · Algérie</span>
+            <span>{{ tenantName }}</span>
             <StorefrontSharedPoweredBy />
           </div>
         </div>

@@ -138,7 +138,7 @@ onUnmounted(() => {
           <span class="h-px flex-1 bg-current" />
         </div>
 
-        <SafeRichText
+        <CommonSafeRichText
           v-if="product?.description"
           class="prose prose-lg max-w-none leading-relaxed text-[#5A6763] border border-[#CBBDAB] bg-[#FDFAF4] p-6 md:p-10"
           :html="product.description"

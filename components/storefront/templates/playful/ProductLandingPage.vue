@@ -97,7 +97,7 @@ const scrollToTop = () => {
   <div class="bg-[var(--kw-cream)] min-h-screen py-6 pb-28 md:pb-14 overflow-x-hidden">
     <!-- ══ Merchant's own long-form pitch ═════════════════════════════ -->
     <div class="w-full mb-10">
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-img:rounded-[var(--kw-r-xl)] prose-img:w-full max-w-none text-[var(--kw-ink)]"
         :html="product.description"

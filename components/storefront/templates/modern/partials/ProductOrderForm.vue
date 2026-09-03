@@ -302,7 +302,7 @@ const handleOrderSubmit = async () => {
 
         if (isMaystro) {
           if (maystroShippingAmount == null) {
-            orderError.value = 'Maystro shipping price unavailable for selected commune'
+            orderError.value = storefrontContent.value.checkout.errors.shippingUnavailable
             orderSubmitting.value = false
             return
           }
@@ -455,7 +455,7 @@ const scrollToForm = () => {
         // If the form is focused, the user can immediately interact
         setTimeout(() => {
            if (codEnabled.value && quickForm.fullName === '') {
-               const firstInput = document.querySelector('input[type="text"]') as HTMLElement
+               const firstInput = mainOrderFormRef.value?.querySelector('input[type="text"]') as HTMLElement | null
                if (firstInput) firstInput.focus()
            }
         }, 500)
@@ -911,7 +911,7 @@ const scrollToForm = () => {
         class="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-[0_-4px_20px_-10px_rgba(0,0,0,0.1)] p-4 md:hidden flex items-center justify-between gap-4"
       >
         <div class="flex flex-col">
-          <span class="text-xs text-slate-500 font-medium">Total</span>
+          <span class="text-xs text-slate-500 font-medium">{{ storefrontContent.cart.summary.total }}</span>
           <span class="text-xl font-bold text-brand-600 leading-none">{{ formatAmount(totalPrice + (selectedDelivery?.price && selectedDelivery?.price !== 'FREE' && selectedDelivery?.price !== '—' ? Number(selectedDelivery.price) : 0)) }} {{ currencyCode }}</span>
         </div>
         <button

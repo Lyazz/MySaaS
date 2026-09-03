@@ -252,7 +252,7 @@ async function handleSubmit() {
             return
           }
           if (maystroShippingAmount == null) {
-            errorMessage.value = 'Maystro shipping price unavailable for selected commune'
+            errorMessage.value = storefrontContent.value.checkout.errors.shippingUnavailable
             return
           }
         }

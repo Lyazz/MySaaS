@@ -92,7 +92,10 @@ async function handleAddToCart() {
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -153,11 +156,11 @@ async function handleAddToCart() {
         <span
           v-if="isLowStock"
           class="px-2.5 py-1 bg-amber-50/95 backdrop-blur text-amber-800 text-[10px] font-bold rounded-full shadow-sm ring-1 ring-amber-200"
-        >Low Stock</span>
+        >{{ storefrontContent.product.lowStock }}</span>
         <span
           v-else
           class="px-2.5 py-1 bg-[#FFFDF9]/90 backdrop-blur text-[#2E1E20] text-[10px] font-bold rounded-full shadow-sm"
-        >In Stock</span>
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
 
       <div
@@ -194,7 +197,7 @@ async function handleAddToCart() {
         <!-- Quick View -->
         <button
            class="w-9 h-9 bg-[#FAF3EA] rounded-full flex items-center justify-center text-[#2E1E20] hover:bg-brand-50 hover:text-brand-700 shadow-sm transition-colors"
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4" />
@@ -224,7 +227,7 @@ async function handleAddToCart() {
         />
         <button
            class="w-9 h-9 bg-[#FFFDF9] rounded-full flex items-center justify-center text-[#2E1E20] hover:bg-brand-50 hover:text-brand-700 shadow-md transition-colors"
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4" />

@@ -1096,7 +1096,24 @@
           "emailUs": "Email Us",
           "visitUs": "Visit Us"
         },
-        "addressPlaceholder": "123 Store St, City, Country"
+        "addressPlaceholder": "123 Store St, City, Country",
+        "intro": "A question about a product, an order, or just want to say hello? We are here for you.",
+        "form": {
+          "name": {
+            "label": "Full name",
+            "placeholder": "Your name"
+          },
+          "email": {
+            "label": "Email",
+            "placeholder": "you{'@'}email.com"
+          },
+          "message": {
+            "label": "Message",
+            "placeholder": "Your message…"
+          },
+          "send": "Send the message"
+        },
+        "mailSubject": "Message from {name}"
       },
       "categories": {
         "title": "Categories",
@@ -1233,7 +1250,8 @@
         "phoneRequired": "Phone number is required to place your order.",
         "deliveryRequired": "Please select a delivery option.",
         "requiredFields": "Please fill in all required fields.",
-        "submitFailed": "Failed to place order. Please try again."
+        "submitFailed": "Failed to place order. Please try again.",
+        "shippingUnavailable": "Shipping is unavailable for the selected commune. Please pick another delivery option."
       },
       "actions": {
         "returnToCart": "Return to cart",
@@ -1308,6 +1326,7 @@
       "detailsTitle": "Product Details",
       "addedToCart": "{title} added to cart!",
       "inStock": "In stock",
+      "lowStock": "Low stock",
       "perUnit": "per unit",
       "descriptionFallback": "Experience the perfect blend of style and functionality.",
       "viewFullDetails": "View full details",
@@ -1419,7 +1438,10 @@
     },
     "search": {
       "placeholder": "Search products...",
-      "keywords": "Related Keywords"
+      "keywords": "Related Keywords",
+      "searching": "Searching...",
+      "noResults": "No products found.",
+      "seeMore": "See more"
     },
     "header": {
       "wishlistTitle": "Wishlist",
@@ -1447,6 +1469,102 @@
       "dismissAria": "Dismiss announcement"
     },
     "templates": {
+      "maison": {
+        "about": {
+          "kicker": "Our story",
+          "body": "We believe every living space deserves to be beautiful, useful and inspiring. That is why each product is chosen with care, to bring you the best in decoration and home accessories.",
+          "lead": "A store devoted to the art of living, to interior decoration and to carefully chosen home accessories.",
+          "valuesTitle": "Our values",
+          "values": {
+            "quality": {
+              "title": "Quality",
+              "text": "Products chosen for how they are made and how long they last."
+            },
+            "living": {
+              "title": "Art of living",
+              "text": "Every piece is meant to make your day-to-day both better and lovelier."
+            },
+            "passion": {
+              "title": "Passion",
+              "text": "A team that genuinely cares about interiors and design."
+            }
+          },
+          "ctaTitle": "Discover",
+          "ctaAccent": "our store",
+          "ctaAction": "Browse the products"
+        },
+        "home": {
+          "trust": {
+            "delivery": "Delivery across Algeria",
+            "curation": "Carefully curated",
+            "returns": "Easy returns"
+          },
+          "manifestoKicker": "Our world",
+          "manifestoTitle": "The art of decorating",
+          "manifestoAccent": "your space",
+          "manifestoBody": "Pieces meant to make every corner of your home better. From the living room to the bedroom, from the kitchen to the study.",
+          "manifestoCta": "Browse the store"
+        }
+      },
+      "food": {
+        "badges": {
+          "organic": "Organic",
+          "fastDelivery": "Fast delivery",
+          "premium": "Premium quality"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "Since {year}",
+          "titlePrefix": "Built for",
+          "titleAccent": "the street",
+          "descriptionFallback": "We make pieces that hold up to real wear. No filler, no seasonal noise — just clothes that earn their place in your rotation.",
+          "missionPrefix": "Our mission is simple:",
+          "missionAccent": "quality you can feel, priced without the markup.",
+          "values": {
+            "quality": {
+              "title": "Quality",
+              "description": "Materials picked to last, checked piece by piece."
+            },
+            "design": {
+              "title": "Design",
+              "description": "Cuts drawn in-house, made to wear every day."
+            },
+            "culture": {
+              "title": "Culture",
+              "description": "Rooted in the scene we come from, made with it."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "Get in",
+          "titleAccent": "touch",
+          "sections": {
+            "hqLocation": "Where to find us",
+            "directLine": "Call us",
+            "emailProtocol": "Write to us"
+          },
+          "form": {
+            "name": {
+              "label": "Name",
+              "placeholder": "Your name"
+            },
+            "email": {
+              "label": "Email",
+              "placeholder": "you{'@'}email.com"
+            },
+            "message": {
+              "label": "Message",
+              "placeholder": "How can we help?"
+            },
+            "send": "Send"
+          },
+          "alert": {
+            "sent": "Thanks — your message is on its way. We will get back to you shortly."
+          }
+        }
+      },
       "wellness": {
         "home": {
           "curatedSelection": "Curated selection",

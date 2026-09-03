@@ -47,6 +47,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -186,10 +196,10 @@ defineProps<{
                   <input
                     type="text"
                     v-model="searchQuery"
-                    :placeholder="storefrontContent.search?.placeholder || 'Search...'"
+                    :placeholder="storefrontContent.search.placeholder"
                     class="w-[150px] focus:w-[210px] py-1.5 pe-6 text-sm text-wl-ink bg-transparent border-b border-wl-rule focus:border-wl-olive outline-none transition-all duration-300 placeholder:text-wl-muted/60"
-                    @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                    @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                    @focus="openSearchDropdown"
+                    @blur="closeSearchDropdownSoon"
                   >
                   <Icon name="lucide:search" class="w-3.5 h-3.5 text-wl-muted absolute end-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -198,8 +208,8 @@ defineProps<{
                     v-show="isSearchDropdownOpen"
                     class="absolute top-full end-0 mt-3 w-72 wl-plate wl-plate-lg z-50 overflow-hidden text-start pointer-events-auto"
                   >
-                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">Searching...</div>
-                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">No products found.</div>
+                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.searching }}</div>
+                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.noResults }}</div>
                     <div v-else class="flex flex-col">
                       <NuxtLink
                         v-for="product in visibleSearchResults"
@@ -221,7 +231,7 @@ defineProps<{
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >
-                      See more
+                      {{ storefrontContent.search.seeMore }}
                     </button>
                     </div>
                   </div>
@@ -237,12 +247,10 @@ defineProps<{
                     @click="navigateTo('/wishlist')"
                   >
                     <Icon name="lucide:heart" class="w-5 h-5" />
-                    <ClientOnly>
-                      <span
-                        v-if="favorites.count.value > 0"
-                        class="wl-num flex h-4 min-w-4 px-1 items-center justify-center bg-wl-ink text-[10px] font-semibold text-wl-paper absolute top-0.5 end-0.5"
-                      >{{ favorites.count.value }}</span>
-                    </ClientOnly>
+                    <span
+                      v-if="favorites.count.value > 0"
+                      class="wl-num flex h-4 min-w-4 px-1 items-center justify-center bg-wl-ink text-[10px] font-semibold text-wl-paper absolute top-0.5 end-0.5"
+                    >{{ favorites.count.value }}</span>
                   </button>
                   <!-- Cart: ink that greens on hover, like every other primary action -->
                   <NuxtLink
@@ -293,10 +301,10 @@ defineProps<{
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full border-b border-wl-ruleStrong bg-transparent py-2.5 pe-8 text-sm placeholder:text-wl-muted/60 text-wl-ink outline-none focus:border-wl-olive transition-colors"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-wl-muted absolute end-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -304,8 +312,8 @@ defineProps<{
                   v-show="isSearchDropdownOpen"
                   class="absolute top-full start-0 end-0 mt-1 wl-plate wl-plate-lg z-50 overflow-hidden pointer-events-auto"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">No products found.</div>
+                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.searching }}</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.noResults }}</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
                       v-for="product in visibleSearchResults"
@@ -327,7 +335,7 @@ defineProps<{
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
-                    See more
+                    {{ storefrontContent.search.seeMore }}
                   </button>
                   </div>
                 </div>
@@ -340,6 +348,10 @@ defineProps<{
               <NuxtLink to="/products" class="py-4 wl-label text-wl-ink border-t border-wl-rule" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
               <NuxtLink to="/contact" class="py-4 wl-label text-wl-ink border-t border-wl-rule" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
             <div v-if="tenantCategories && tenantCategories.length" class="px-5">
@@ -462,4 +474,5 @@ defineProps<{
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 </style>

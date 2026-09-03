@@ -94,7 +94,10 @@ async function handleAddToCart() {
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -141,11 +144,11 @@ async function handleAddToCart() {
         <span
           v-if="isOutOfStock"
           class="bg-rose-500 text-white text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1"
-        >Out of Stock</span>
+        >{{ storefrontContent.actions.outOfStock }}</span>
         <span
           v-else-if="isLowStock"
           class="bg-amber-400 text-black text-[9px] font-black uppercase tracking-[0.22em] px-2 py-1"
-        >Low Stock</span>
+        >{{ storefrontContent.product.lowStock }}</span>
       </div>
 
       <!-- Hover action stack (desktop reveal) -->
@@ -157,7 +160,7 @@ async function handleAddToCart() {
         />
         <button
           class="h-9 w-9 flex items-center justify-center bg-black/70 border border-white/15 text-white hover:border-brand-500 hover:text-brand-500 backdrop-blur transition-colors"
-          title="Quick View"
+          :title="storefrontContent.actions.quickView"
           @click.prevent="$emit('quick-view', product)"
         >
           <Icon name="lucide:eye" class="w-4 h-4" />

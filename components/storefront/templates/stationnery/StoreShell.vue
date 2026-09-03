@@ -54,6 +54,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -160,7 +170,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
               <div class="relative group">
                 <input 
                   type="text" 
-                  v-model="searchQuery" :placeholder="storefrontContent.search?.placeholder || 'Search products...'" @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null" @blur="setTimeout(() => isSearchDropdownOpen = false, 200)" 
+                  v-model="searchQuery" :placeholder="storefrontContent.search.placeholder" @focus="openSearchDropdown" @blur="closeSearchDropdownSoon" 
                   class="w-full h-10 bg-white border border-stone-300 text-slate-900 text-sm rounded-sm focus:ring-1 focus:ring-brand-500 focus:border-brand-500 block ps-5 pe-10 transition-all shadow-sm" 
                 >
                 <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
@@ -170,8 +180,8 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     v-show="isSearchDropdownOpen"
                     class="absolute top-[100%] end-0 mt-2 w-64 bg-white border border-slate-100 shadow-xl z-50 rounded-md overflow-hidden text-start pointer-events-auto"
                   >
-                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
-                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
+                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">{{ storefrontContent.search.searching }}</div>
+                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">{{ storefrontContent.search.noResults }}</div>
                     <div v-else class="flex flex-col">
                       <NuxtLink
                         v-for="product in visibleSearchResults"
@@ -193,7 +203,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >
-                      See more
+                      {{ storefrontContent.search.seeMore }}
                     </button>
                     </div>
                   </div>
@@ -241,12 +251,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   @click="navigateTo('/wishlist')"
                 >
                   <Icon name="lucide:heart" class="w-5 h-5" />
-                  <ClientOnly>
-                    <span
-                      v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-stone-900 text-[10px] font-bold text-white absolute -top-1 -end-1"
-                    >{{ favorites.count.value }}</span>
-                  </ClientOnly>
+                  <span
+                    v-if="favorites.count.value > 0"
+                    class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-stone-900 text-[10px] font-bold text-white absolute -top-1 -end-1"
+                  >{{ favorites.count.value }}</span>
                 </button>
                 <!-- Cart -->
                 <NuxtLink
@@ -292,10 +300,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 ps-4 pe-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -303,8 +311,8 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   v-show="isSearchDropdownOpen"
                   class="absolute top-[100%] start-0 end-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
+                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">{{ storefrontContent.search.searching }}</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">{{ storefrontContent.search.noResults }}</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
                       v-for="product in visibleSearchResults"
@@ -326,7 +334,7 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
-                    See more
+                    {{ storefrontContent.search.seeMore }}
                   </button>
                   </div>
                 </div>
@@ -339,6 +347,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
               <NuxtLink to="/products" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
               <NuxtLink to="/contact" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
@@ -461,4 +473,5 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 </style>

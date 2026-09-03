@@ -26,6 +26,34 @@ import ModernStoreShell from './modern/StoreShell.vue'
 import ModernThemeProvider from './modern/ThemeProvider.vue'
 import ModernCart from './modern/Cart.vue'
 
+// Interior Imports
+import InteriorCategory from './interior/Category.vue'
+import InteriorContact from './interior/ContactPage.vue'
+import InteriorAbout from './interior/AboutPage.vue'
+import InteriorCheckout from './interior/Checkout.vue'
+import InteriorHome from './interior/Home.vue'
+import InteriorProduct from './interior/Product.vue'
+import InteriorProductCard from './interior/ProductCard.vue'
+import InteriorShop from './interior/Shop.vue'
+import InteriorStoreShell from './interior/StoreShell.vue'
+import InteriorThemeProvider from './interior/ThemeProvider.vue'
+import InteriorCart from './interior/Cart.vue'
+import InteriorProductLandingPage from './interior/ProductLandingPage.vue'
+
+// Minimal Imports
+import MinimalCategory from './minimal/Category.vue'
+import MinimalContact from './minimal/ContactPage.vue'
+import MinimalAbout from './minimal/AboutPage.vue'
+import MinimalCheckout from './minimal/Checkout.vue'
+import MinimalHome from './minimal/Home.vue'
+import MinimalProduct from './minimal/Product.vue'
+import MinimalProductCard from './minimal/ProductCard.vue'
+import MinimalShop from './minimal/Shop.vue'
+import MinimalStoreShell from './minimal/StoreShell.vue'
+import MinimalThemeProvider from './minimal/ThemeProvider.vue'
+import MinimalCart from './minimal/Cart.vue'
+import MinimalProductLandingPage from './minimal/ProductLandingPage.vue'
+
 // Food Imports
 import FoodCategory from './food/Category.vue'
 import FoodContact from './food/ContactPage.vue'
@@ -215,15 +243,17 @@ import PlayfulWishlist from './playful/Wishlist.vue'
 import PlayfulProductLandingPage from './playful/ProductLandingPage.vue'
 import ActivewearProductLandingPage from './activewear/ProductLandingPage.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena' | 'nour' | 'embellir'
+export type TemplateKey = 'classic' | 'modern' | 'interior' | 'minimal' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena' | 'nour' | 'embellir'
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena', 'nour', 'embellir'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  ['classic', 'modern', 'interior', 'minimal', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena', 'nour', 'embellir'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,
   modern: ModernHome,
+  interior: InteriorHome,
+  minimal: MinimalHome,
   street: StreetHome,
   cozy: CozyHome,
   cyber: CyberHome,
@@ -242,6 +272,8 @@ export const homeTemplates = {
 export const productTemplates = {
   classic: ClassicProduct,
   modern: ModernProduct,
+  interior: InteriorProduct,
+  minimal: MinimalProduct,
   street: StreetProduct,
   cozy: CozyProduct,
   cyber: CyberProduct,
@@ -260,6 +292,8 @@ export const productTemplates = {
 export const productCardTemplates = {
   classic: ClassicProductCard,
   modern: ModernProductCard,
+  interior: InteriorProductCard,
+  minimal: MinimalProductCard,
   street: StreetProductCard,
   cozy: CozyProductCard,
   cyber: CyberProductCard,
@@ -278,6 +312,8 @@ export const productCardTemplates = {
 export const categoryTemplates = {
   classic: ClassicCategory,
   modern: ModernCategory,
+  interior: InteriorCategory,
+  minimal: MinimalCategory,
   street: StreetCategory,
   cozy: CozyCategory,
   cyber: CyberCategory,
@@ -296,6 +332,8 @@ export const categoryTemplates = {
 export const storeShellTemplates = {
   classic: ClassicStoreShell,
   modern: ModernStoreShell,
+  interior: InteriorStoreShell,
+  minimal: MinimalStoreShell,
   street: StreetStoreShell,
   cozy: CozyStoreShell,
   cyber: CyberStoreShell,
@@ -314,6 +352,8 @@ export const storeShellTemplates = {
 export const shopTemplates = {
   classic: ClassicShop,
   modern: ModernShop,
+  interior: InteriorShop,
+  minimal: MinimalShop,
   street: StreetShop,
   cozy: CozyShop,
   cyber: CyberShop,
@@ -332,6 +372,8 @@ export const shopTemplates = {
 export const checkoutTemplates = {
   classic: ClassicCheckout,
   modern: ModernCheckout,
+  interior: InteriorCheckout,
+  minimal: MinimalCheckout,
   street: StreetCheckout,
   cozy: CozyCheckout,
   cyber: CyberCheckout,
@@ -350,6 +392,8 @@ export const checkoutTemplates = {
 export const cartTemplates = {
   classic: ClassicCart,
   modern: ModernCart,
+  interior: InteriorCart,
+  minimal: MinimalCart,
   street: StreetCart,
   cozy: CozyCart,
   cyber: CyberCart,
@@ -368,6 +412,8 @@ export const cartTemplates = {
 export const aboutPageTemplates = {
   classic: ClassicAbout,
   modern: ModernAbout,
+  interior: InteriorAbout,
+  minimal: MinimalAbout,
   street: StreetAbout,
   cozy: CozyAbout,
   cyber: CyberAbout,
@@ -386,6 +432,8 @@ export const aboutPageTemplates = {
 export const contactPageTemplates = {
   classic: ClassicContact,
   modern: ModernContact,
+  interior: InteriorContact,
+  minimal: MinimalContact,
   street: StreetContact,
   cozy: CozyContact,
   cyber: CyberContact,
@@ -404,6 +452,8 @@ export const contactPageTemplates = {
 export const themeProviderTemplates = {
   classic: ClassicThemeProvider,
   modern: ModernThemeProvider,
+  interior: InteriorThemeProvider,
+  minimal: MinimalThemeProvider,
   street: StreetThemeProvider,
   cozy: CozyThemeProvider,
   cyber: CyberThemeProvider,
@@ -422,6 +472,8 @@ export const themeProviderTemplates = {
 export const productLandingPageTemplates = {
   classic: ClassicProductLandingPage,
   modern: ModernProductLandingPage,
+  interior: InteriorProductLandingPage,
+  minimal: MinimalProductLandingPage,
   street: StreetProductLandingPage,
   cozy: CozyProductLandingPage,
   cyber: CyberProductLandingPage,
@@ -448,6 +500,8 @@ export const selectTemplate = (
 export const wishlistTemplates = {
   classic: WishlistDefault,
   modern: WishlistDefault,
+  interior: WishlistDefault,
+  minimal: WishlistDefault,
   street: StreetWishlist,
   cozy: WishlistDefault,
   cyber: WishlistDefault,

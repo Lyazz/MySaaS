@@ -199,7 +199,7 @@ const closeSearchDropdownSoon = () => {
                 <input
                   v-model="searchQuery"
                   type="text"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="kw-field h-12 pe-12 bg-[var(--kw-cream-2)] border-transparent"
                   @focus="openSearchDropdown"
                   @blur="closeSearchDropdownSoon"
@@ -225,13 +225,13 @@ const closeSearchDropdownSoon = () => {
                     v-if="searchLoading"
                     class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
                   >
-                    {{ storefrontContent.search?.searching || 'Searching…' }}
+                    {{ storefrontContent.search.searching }}
                   </div>
                   <div
                     v-else-if="searchResults.length === 0"
                     class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
                   >
-                    {{ storefrontContent.search?.noResults || 'No products found.' }}
+                    {{ storefrontContent.search.noResults }}
                   </div>
                   <div
                     v-else
@@ -269,7 +269,7 @@ const closeSearchDropdownSoon = () => {
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >
-                      {{ storefrontContent.search?.seeMore || 'See more' }}
+                      {{ storefrontContent.search.seeMore }}
                     </button>
                   </div>
                 </div>
@@ -290,12 +290,10 @@ const closeSearchDropdownSoon = () => {
                   name="lucide:heart"
                   class="w-5 h-5"
                 />
-                <ClientOnly>
-                  <span
-                    v-if="favorites.count.value > 0"
-                    class="kw-pop absolute -top-1 -end-1 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full bg-[var(--kw-pink-deep)] text-white text-[10px] font-extrabold flex items-center justify-center"
-                  >{{ favorites.count.value }}</span>
-                </ClientOnly>
+                <span
+                  v-if="favorites.count.value > 0"
+                  class="kw-pop absolute -top-1 -end-1 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full bg-[var(--kw-pink-deep)] text-white text-[10px] font-extrabold flex items-center justify-center"
+                >{{ favorites.count.value }}</span>
               </button>
 
               <NuxtLink
@@ -308,12 +306,10 @@ const closeSearchDropdownSoon = () => {
                   class="w-4 h-4"
                 />
                 <span class="hidden lg:inline">{{ storefrontContent.cart.title }}</span>
-                <ClientOnly>
-                  <span
-                    v-if="cartStore.itemCount > 0"
-                    class="kw-pop min-w-[1.3rem] h-[1.3rem] px-1 rounded-full bg-white/95 text-[var(--kw-ink)] text-[11px] font-extrabold flex items-center justify-center"
-                  >{{ cartStore.itemCount }}</span>
-                </ClientOnly>
+                <span
+                  v-if="cartStore.itemCount > 0"
+                  class="kw-pop min-w-[1.3rem] h-[1.3rem] px-1 rounded-full bg-white/95 text-[var(--kw-ink)] text-[11px] font-extrabold flex items-center justify-center"
+                >{{ cartStore.itemCount }}</span>
               </NuxtLink>
 
               <button
@@ -457,7 +453,7 @@ const closeSearchDropdownSoon = () => {
                 <input
                   v-model="searchQuery"
                   type="text"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="kw-field pe-11"
                   @focus="openSearchDropdown"
                   @blur="closeSearchDropdownSoon"
@@ -474,13 +470,13 @@ const closeSearchDropdownSoon = () => {
                     v-if="searchLoading"
                     class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
                   >
-                    {{ storefrontContent.search?.searching || 'Searching…' }}
+                    {{ storefrontContent.search.searching }}
                   </div>
                   <div
                     v-else-if="searchResults.length === 0"
                     class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
                   >
-                    {{ storefrontContent.search?.noResults || 'No products found.' }}
+                    {{ storefrontContent.search.noResults }}
                   </div>
                   <NuxtLink
                     v-for="product in visibleSearchResults"
@@ -567,7 +563,7 @@ const closeSearchDropdownSoon = () => {
 
             <div class="mt-auto px-4 py-4 border-t border-[var(--kw-line)]">
               <div class="flex items-center justify-between gap-3 mb-3">
-                <LocaleSwitcher />
+                <LocaleSwitcher show-labels />
               </div>
               <NuxtLink
                 v-if="storeSettings?.cartEnabled !== false"
@@ -744,4 +740,5 @@ const closeSearchDropdownSoon = () => {
 .kw-fade-enter-from, .kw-fade-leave-to { opacity: 0; }
 .kw-slide-enter-active, .kw-slide-leave-active { transition: transform .32s cubic-bezier(.34, 1.4, .64, 1); }
 .kw-slide-enter-from, .kw-slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .kw-slide-enter-from, [dir='rtl'] .kw-slide-leave-to { transform: translateX(100%); }
 </style>

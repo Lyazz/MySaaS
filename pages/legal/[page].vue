@@ -165,7 +165,7 @@ definePageMeta({
             </h1>
           </header>
           <div class="px-6 sm:px-8 py-6 sm:py-8">
-            <SafeRichText
+            <CommonSafeRichText
               v-if="richContent"
               class="prose prose-slate max-w-none leading-7 text-slate-700"
               :html="richContent"

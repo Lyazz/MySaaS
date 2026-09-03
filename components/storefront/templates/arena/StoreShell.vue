@@ -188,7 +188,7 @@ const props = defineProps<{
               <button
                 class="hidden lg:inline-flex h-10 w-10 items-center justify-center text-slate-400 hover:text-brand-500 transition-colors"
                 @click="searchOverlayOpen = true"
-                :title="storefrontContent.search?.placeholder || 'Search'"
+                :title="storefrontContent.search.placeholder"
               >
                 <Icon name="lucide:search" class="w-[18px] h-[18px]" />
               </button>
@@ -201,12 +201,10 @@ const props = defineProps<{
                 @click="navigateTo('/wishlist')"
               >
                 <Icon name="lucide:heart" class="w-[18px] h-[18px]" />
-                <ClientOnly>
-                  <span
-                    v-if="favorites.count.value > 0"
-                    class="absolute top-1.5 right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-brand-500 text-[9px] font-black text-[#02060a]"
-                  >{{ favorites.count.value }}</span>
-                </ClientOnly>
+                <span
+                  v-if="favorites.count.value > 0"
+                  class="absolute top-1.5 right-1.5 flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-brand-500 text-[9px] font-black text-[#02060a]"
+                >{{ favorites.count.value }}</span>
               </button>
 
               <NuxtLink
@@ -238,7 +236,7 @@ const props = defineProps<{
                   v-model="searchQuery"
                   type="text"
                   autofocus
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="flex-1 bg-transparent text-2xl font-black uppercase tracking-[0.04em] text-white outline-none placeholder:text-slate-600"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                 >
@@ -249,8 +247,8 @@ const props = defineProps<{
             </div>
             <div class="flex-1 overflow-y-auto">
               <div class="max-w-3xl mx-auto px-5 py-6">
-                <div v-if="searchLoading" class="text-sm text-slate-500 py-4">Searching...</div>
-                <div v-else-if="searchResults.length === 0" class="text-sm text-slate-500 py-4">No products found.</div>
+                <div v-if="searchLoading" class="text-sm text-slate-500 py-4">{{ storefrontContent.search.searching }}</div>
+                <div v-else-if="searchResults.length === 0" class="text-sm text-slate-500 py-4">{{ storefrontContent.search.noResults }}</div>
                 <div v-else>
                   <NuxtLink
                     v-for="product in visibleSearchResults"
@@ -272,7 +270,7 @@ const props = defineProps<{
                     class="mt-4 text-[10px] font-black uppercase tracking-[0.28em] text-brand-500 hover:text-white"
                     @click="showMoreSearchResults"
                   >
-                    See more
+                    {{ storefrontContent.search.seeMore }}
                   </button>
                 </div>
               </div>
@@ -301,7 +299,7 @@ const props = defineProps<{
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full border-0 border-b border-white/15 bg-transparent py-2 pe-8 text-sm text-white outline-none focus:border-brand-500 placeholder:text-slate-600 uppercase tracking-wider"
                   @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
                 >
@@ -323,6 +321,10 @@ const props = defineProps<{
                 <Icon name="lucide:chevron-right" class="w-4 h-4 text-slate-500" />
               </NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-6 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <div v-if="tenantCategories && tenantCategories.length" class="px-6 pb-6">
               <button

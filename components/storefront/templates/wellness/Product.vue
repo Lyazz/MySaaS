@@ -136,7 +136,7 @@ onUnmounted(() => {
 
         <!-- Full Description (Rich Text) -->
         <div class="mt-20 col-span-12 max-w-4xl mx-auto w-full">
-            <SafeRichText
+            <CommonSafeRichText
               v-if="product?.description"
               class="prose prose-stone text-wl-muted max-w-none leading-relaxed wl-plate p-8 md:p-12"
               :html="product.description"
