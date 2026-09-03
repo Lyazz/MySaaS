@@ -232,6 +232,45 @@ const handleAddToCart = async () => {
   triggerSuccessToast(storefrontContent.value.toasts.addedToCart.title, storefrontContent.value.toasts.addedToCart.message)
   addToCartSubmitting.value = false
 }
+
+/*
+ * Mobile sticky buy bar — the same conversion aid modern has: once the COD card
+ * has scrolled out of view the total and the order button follow the customer,
+ * and tapping it brings them back to the form (and into its first field, not
+ * the header search).
+ */
+const mainOrderFormRef = ref<HTMLElement | null>(null)
+const showStickyBar = ref(false)
+
+onMounted(() => {
+    const observer = new IntersectionObserver((entries) => {
+        showStickyBar.value = !entries[0].isIntersecting
+    }, { root: null, threshold: 0.1, rootMargin: '0px 0px -20% 0px' })
+
+    if (mainOrderFormRef.value) observer.observe(mainOrderFormRef.value)
+
+    onUnmounted(() => {
+        if (mainOrderFormRef.value) observer.unobserve(mainOrderFormRef.value)
+        observer.disconnect()
+    })
+})
+
+const stickyBarTotal = computed(() => {
+    const price = selectedDelivery.value?.price
+    const shipping = price && price !== 'FREE' && price !== '—' ? Number(price) : 0
+    return totalPrice.value + (Number.isNaN(shipping) ? 0 : shipping)
+})
+
+const scrollToForm = () => {
+    if (!mainOrderFormRef.value) return
+    const y = mainOrderFormRef.value.getBoundingClientRect().top + window.scrollY - 20
+    window.scrollTo({ top: y, behavior: 'smooth' })
+    setTimeout(() => {
+        if (!codEnabled.value || quickForm.fullName !== '') return
+        const firstInput = mainOrderFormRef.value?.querySelector('input[type="text"]') as HTMLElement | null
+        firstInput?.focus()
+    }, 500)
+}
 </script>
 
 <template>
@@ -325,6 +364,7 @@ const handleAddToCart = async () => {
     <!-- COD form -->
     <div
       v-if="codEnabled"
+      ref="mainOrderFormRef"
       class="order-form__cod"
       data-test="cod-order-card"
     >
@@ -623,6 +663,33 @@ const handleAddToCart = async () => {
         </div>
       </div>
     </Transition>
+    <!-- Mobile sticky buy bar -->
+    <Transition
+      enter-active-class="transform transition ease-out duration-300"
+      enter-from-class="translate-y-full"
+      enter-to-class="translate-y-0"
+      leave-active-class="transform transition ease-in duration-200"
+      leave-from-class="translate-y-0"
+      leave-to-class="translate-y-full"
+    >
+      <div
+        v-if="showStickyBar && codEnabled"
+        class="order-form__sticky"
+      >
+        <div class="flex flex-col min-w-0">
+          <span class="order-form__sticky-label">{{ storefrontContent.cart.summary.total }}</span>
+          <span class="order-form__sticky-total">{{ formatCurrency(stickyBarTotal) }}</span>
+        </div>
+        <button
+          type="button"
+          :disabled="!canPurchase"
+          class="order-form__sticky-btn"
+          @click="scrollToForm"
+        >
+          {{ storefrontContent.productForm.cod.submit }}
+        </button>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -705,4 +772,49 @@ const handleAddToCart = async () => {
 .form-toast-leave-active { transition: opacity 0.15s; }
 .form-toast-enter-from { opacity: 0; transform: translateY(8px); }
 .form-toast-leave-to { opacity: 0; }
+
+.order-form__sticky {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 18px;
+  background: var(--at-grad-paper);
+  border-top: 1px solid var(--at-border);
+  box-shadow: var(--at-shadow-lg);
+}
+@media (min-width: 768px) { .order-form__sticky { display: none; } }
+.order-form__sticky-label {
+  font-family: var(--at-f-mono);
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--at-muted);
+}
+.order-form__sticky-total {
+  font-family: var(--at-f-display);
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--at-cream);
+  line-height: 1;
+}
+.order-form__sticky-btn {
+  flex: 1;
+  height: 46px;
+  border: 1px solid var(--at-border-2);
+  border-radius: var(--at-r-pill);
+  background: var(--at-grad-gold-ink);
+  color: #FFFBF0;
+  font-family: var(--at-f-mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  cursor: pointer;
+  transition: opacity 0.25s ease;
+}
+.order-form__sticky-btn:disabled { opacity: 0.45; cursor: not-allowed; }
 </style>

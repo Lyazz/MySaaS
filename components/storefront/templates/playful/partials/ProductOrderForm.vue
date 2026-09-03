@@ -350,7 +350,7 @@ const scrollToForm = () => {
         window.scrollTo({ top: y, behavior: 'smooth' })
         setTimeout(() => {
             if (codEnabled.value && quickForm.fullName === '') {
-                const firstInput = document.querySelector('input[type="text"]') as HTMLElement
+                const firstInput = mainOrderFormRef.value?.querySelector('input[type="text"]') as HTMLElement | null
                 if (firstInput) firstInput.focus()
             }
         }, 500)
