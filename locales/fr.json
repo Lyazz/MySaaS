@@ -1045,7 +1045,7 @@
           },
           "email": {
             "label": "E-mail",
-            "placeholder": "vous@email.com"
+            "placeholder": "vous{'@'}email.com"
           },
           "message": {
             "label": "Message",
@@ -1442,7 +1442,7 @@
             },
             "email": {
               "label": "E-mail",
-              "placeholder": "vous@email.com"
+              "placeholder": "vous{'@'}email.com"
             },
             "message": {
               "label": "Message",

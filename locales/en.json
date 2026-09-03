@@ -1059,7 +1059,7 @@
           },
           "email": {
             "label": "Email",
-            "placeholder": "you@email.com"
+            "placeholder": "you{'@'}email.com"
           },
           "message": {
             "label": "Message",
@@ -1456,7 +1456,7 @@
             },
             "email": {
               "label": "Email",
-              "placeholder": "you@email.com"
+              "placeholder": "you{'@'}email.com"
             },
             "message": {
               "label": "Message",

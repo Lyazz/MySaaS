@@ -1063,7 +1063,7 @@
           },
           "email": {
             "label": "البريد الإلكتروني",
-            "placeholder": "you@email.com"
+            "placeholder": "you{'@'}email.com"
           },
           "message": {
             "label": "الرسالة",
@@ -1460,7 +1460,7 @@
             },
             "email": {
               "label": "البريد الإلكتروني",
-              "placeholder": "you@email.com"
+              "placeholder": "you{'@'}email.com"
             },
             "message": {
               "label": "الرسالة",

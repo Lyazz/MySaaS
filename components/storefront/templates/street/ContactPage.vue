@@ -68,6 +68,13 @@ const mailtoHref = computed(() => {
           >{{ info.value }}</p>
         </div>
       </div>
+
+      <p
+        v-else
+        class="font-mono text-lg uppercase ps-4 border-s-4 border-brand leading-relaxed text-gray-800"
+      >
+        {{ t('storefront.pages.contact.placeholder') }}
+      </p>
     </div>
 
     <!-- Contact Form -->
