@@ -447,11 +447,11 @@ const selectedDelivery = computed(() => deliveryOptions.value.find((opt: any) =>
 const pickup = usePickupPoints({
   provider: () => selectedDelivery.value?.provider,
   mode: () => selectedDelivery.value?.mode,
-  wilaya: () => form.value.wilaya,
-  commune: () => form.value.commune,
-  selected: () => form.value.pickupPoint,
-  onSelect: (name) => { form.value.pickupPoint = name },
-  onCommuneChange: (communeName) => { form.value.commune = communeName }
+  wilaya: () => form.wilaya,
+  commune: () => form.commune,
+  selected: () => form.pickupPoint,
+  onSelect: (name) => { form.pickupPoint = name },
+  onCommuneChange: (communeName) => { form.commune = communeName }
 })
 
 const isPickupSelected = pickup.isPickupSelected

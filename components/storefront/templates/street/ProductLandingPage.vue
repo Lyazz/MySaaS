@@ -108,7 +108,7 @@ onUnmounted(() => {
   <div class="min-h-screen bg-gray-50 pb-32 md:pb-12">
     <!-- Full Width Description Section -->
     <div class="w-full mb-8 bg-white border-b-4 border-black">
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-headings:font-street prose-headings:uppercase max-w-none text-black p-8 md:p-12"
         :html="product.description"

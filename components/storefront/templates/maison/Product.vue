@@ -111,7 +111,7 @@ onUnmounted(() => {
     <div class="pdp__desc">
       <div class="pdp__desc-inner">
         <h2 class="pdp__desc-title">{{ storefrontContent.product.detailsTitle }}</h2>
-        <SafeRichText
+        <CommonSafeRichText
           v-if="product?.description"
           class="pdp__desc-content"
           :html="product.description"

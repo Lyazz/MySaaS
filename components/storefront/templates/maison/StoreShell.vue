@@ -49,6 +49,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -204,11 +214,11 @@ watch(searchQuery, async (q) => {
               <input
                 v-model="searchQuery"
                 type="text"
-                :placeholder="storefrontContent.search?.placeholder || 'Rechercher un produit...'"
+                :placeholder="storefrontContent.search.placeholder"
                 class="shell-search-bar__input"
                 autofocus
-                @blur="setTimeout(() => { isSearchDropdownOpen = false }, 200)"
-                @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
+                @blur="closeSearchDropdownSoon"
+                @focus="openSearchDropdown"
               >
               <button class="shell-search-bar__close" @click="searchOpen = false; searchQuery = ''">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -242,7 +252,7 @@ watch(searchQuery, async (q) => {
                 @mousedown.prevent
                 @click="showMoreSearchResults"
               >
-                See more
+                {{ storefrontContent.search.seeMore }}
               </button>
             </div>
           </div>

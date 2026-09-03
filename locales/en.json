@@ -1360,7 +1360,10 @@
     },
     "search": {
       "placeholder": "Search products...",
-      "keywords": "Related Keywords"
+      "keywords": "Related Keywords",
+      "searching": "Searching...",
+      "noResults": "No products found.",
+      "seeMore": "See more"
     },
     "header": {
       "wishlistTitle": "Wishlist",

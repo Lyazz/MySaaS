@@ -267,7 +267,10 @@ export function useStorefrontContent() {
       }
     },
     search: {
-      placeholder: i18n.t('storefront.search.placeholder')
+      placeholder: i18n.t('storefront.search.placeholder'),
+      searching: i18n.t('storefront.search.searching'),
+      noResults: i18n.t('storefront.search.noResults'),
+      seeMore: i18n.t('storefront.search.seeMore')
     },
     wishlist: {
       title: i18n.t('storefront.wishlist.title'),

@@ -129,7 +129,7 @@ onUnmounted(() => {
                 {{ storefrontContent.product.detailsTitle }}
               </h2>
             </div>
-            <SafeRichText 
+            <CommonSafeRichText 
               v-if="product?.description" 
               class="prose prose-invert prose-lg max-w-none leading-relaxed p-8 border"
               style="background-color:#0B0E16; border-color:rgba(212,197,169,0.08); border-radius:2px; color:#8A8070;"

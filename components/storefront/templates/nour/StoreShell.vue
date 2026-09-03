@@ -56,6 +56,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -199,7 +209,7 @@ watch(isSearchOpen, (open) => {
                 <button
                   class="relative h-10 w-10 hidden lg:flex items-center justify-center text-[#2E1E20]/70 hover:text-brand-700 hover:bg-[#FAF3EA] rounded-full transition-colors"
                   :class="{ 'text-brand-700 bg-[#FAF3EA]': isSearchOpen }"
-                  :title="storefrontContent.search?.placeholder || 'Search products...'"
+                  :title="storefrontContent.search.placeholder"
                   @click="isSearchOpen = !isSearchOpen"
                 >
                   <Icon :name="isSearchOpen ? 'lucide:x' : 'lucide:search'" class="w-5 h-5" />
@@ -246,7 +256,7 @@ watch(isSearchOpen, (open) => {
               <div class="relative group">
                 <input
                   type="text"
-                  v-model="searchQuery" :placeholder="storefrontContent.search?.placeholder || 'Search products...'" @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null" @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  v-model="searchQuery" :placeholder="storefrontContent.search.placeholder" @focus="openSearchDropdown" @blur="closeSearchDropdownSoon"
                   class="w-full h-12 bg-[#FFFDF9] border border-[#C9A24B]/35 text-[#2E1E20] text-sm rounded-tl-2xl rounded-tr-md rounded-br-2xl rounded-bl-md focus:ring-2 focus:ring-brand-500/20 focus:border-brand-400 block ps-5 pe-10 transition-all group-hover:bg-white shadow-sm"
                 >
                 <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
@@ -256,8 +266,8 @@ watch(isSearchOpen, (open) => {
                     v-show="isSearchDropdownOpen"
                     class="absolute top-[100%] end-0 mt-2 w-64 bg-[#FFFDF9] border border-[#C9A24B]/35 shadow-xl z-50 rounded-2xl overflow-hidden text-start pointer-events-auto"
                   >
-                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-[#6B5850]">Searching...</div>
-                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-[#6B5850]">No products found.</div>
+                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-[#6B5850]">{{ storefrontContent.search.searching }}</div>
+                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-[#6B5850]">{{ storefrontContent.search.noResults }}</div>
                     <div v-else class="flex flex-col">
                       <NuxtLink
                         v-for="product in visibleSearchResults"
@@ -279,7 +289,7 @@ watch(isSearchOpen, (open) => {
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >
-                      See more
+                      {{ storefrontContent.search.seeMore }}
                     </button>
                     </div>
                   </div>
@@ -312,10 +322,10 @@ watch(isSearchOpen, (open) => {
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full border border-[#C9A24B]/35 bg-[#FAF3EA] rounded-xl py-2.5 ps-4 pe-10 text-sm placeholder:text-[#9C8B82] text-[#2E1E20] outline-none focus:border-brand-500"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-[#9C8B82] absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -323,8 +333,8 @@ watch(isSearchOpen, (open) => {
                   v-show="isSearchDropdownOpen"
                   class="absolute top-[100%] start-0 end-0 mt-1 bg-[#FFFDF9] border border-[#C9A24B]/35 shadow-xl z-50 rounded-xl overflow-hidden pointer-events-auto"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-[#6B5850]">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-[#6B5850]">No products found.</div>
+                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-[#6B5850]">{{ storefrontContent.search.searching }}</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-[#6B5850]">{{ storefrontContent.search.noResults }}</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
                       v-for="product in visibleSearchResults"
@@ -346,7 +356,7 @@ watch(isSearchOpen, (open) => {
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
-                    See more
+                    {{ storefrontContent.search.seeMore }}
                   </button>
                   </div>
                 </div>
@@ -359,6 +369,10 @@ watch(isSearchOpen, (open) => {
               <NuxtLink to="/products" class="py-3 text-sm font-medium text-[#2E1E20]/85 hover:text-brand-700 border-b border-[#C9A24B]/20" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
               <NuxtLink to="/contact" class="py-3 text-sm font-medium text-[#2E1E20]/85 hover:text-brand-700 border-b border-[#C9A24B]/20" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
@@ -482,6 +496,7 @@ watch(isSearchOpen, (open) => {
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 .search-reveal-enter-active, .search-reveal-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .search-reveal-enter-from, .search-reveal-leave-to { opacity: 0; transform: translateY(-6px); }
 </style>

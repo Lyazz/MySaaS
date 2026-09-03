@@ -147,7 +147,7 @@ onUnmounted(() => {
           <span class="pointer-events-none absolute bottom-0 start-0 w-3 h-3 border-b-2 border-s-2 border-brand-500" />
           <span class="pointer-events-none absolute bottom-0 end-0 w-3 h-3 border-b-2 border-e-2 border-brand-500" />
 
-          <SafeRichText
+          <CommonSafeRichText
             v-if="product?.description"
             class="prose prose-invert prose-sm md:prose-base text-slate-300 max-w-none leading-relaxed prose-headings:text-white prose-headings:uppercase prose-headings:tracking-tight prose-strong:text-white prose-a:text-brand-500 prose-a:no-underline hover:prose-a:underline"
             :html="product.description"

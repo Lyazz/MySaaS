@@ -109,7 +109,7 @@ onUnmounted(() => {
     <!-- Full-width editorial description -->
     <div class="border-b border-[#DAD2C4]">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-10 py-10 md:py-14">
-        <SafeRichText
+        <CommonSafeRichText
           v-if="product?.description"
           class="ed-prose text-[17px]"
           :html="product.description"

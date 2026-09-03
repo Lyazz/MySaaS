@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
+import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
 const cartStore = useCartStore()
 const favorites = useFavorites()
@@ -31,7 +32,7 @@ const socialContactInfosWithHref = computed(() =>
 const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
 const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
 const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
-const { currencyCode } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -51,6 +52,25 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+// Suggestions must price like the rest of the storefront: promo first, raw price only as a fallback.
+const applySearchResultPricing = (products: any) => (Array.isArray(products) ? products : []).map((product: any) => {
+    const pricing = buildActiveProductPricing(product)
+    return {
+        ...product,
+        effectivePrice: pricing.effectivePrice,
+        promotionDiscountPercent: pricing.promotionDiscountPercent
+    }
+})
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 let searchTimeout: any
 
 watch(searchQuery, (newVal) => {
@@ -64,7 +84,7 @@ watch(searchQuery, (newVal) => {
                     headers: useTenantApiHeaders(),
                     query: { q: newVal },
                 })
-                searchResults.value = Array.isArray(data) ? data : []
+                searchResults.value = applySearchResultPricing(data)
             } catch (e) {
                 console.error('Search error:', e)
                 searchResults.value = []
@@ -215,10 +235,10 @@ const currentYear = new Date().getFullYear()
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full border-2 border-black bg-gray-100 py-2.5 ps-4 pe-10 font-mono text-sm uppercase placeholder:text-gray-400 text-black outline-none focus:shadow-[4px_4px_0_0_var(--brand)] transition-all"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-black absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -226,8 +246,8 @@ const currentYear = new Date().getFullYear()
                   v-show="isSearchDropdownOpen"
                   class="absolute top-[100%] start-0 end-0 mt-1 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] z-50 overflow-hidden pointer-events-auto"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 font-mono text-xs uppercase text-gray-500">{{ storefrontContent.search?.searching || 'Searching...' }}</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 font-mono text-xs uppercase text-gray-500">{{ storefrontContent.search?.noResults || 'No products found.' }}</div>
+                  <div v-if="searchLoading" class="px-4 py-3 font-mono text-xs uppercase text-gray-500">{{ storefrontContent.search.searching }}</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 font-mono text-xs uppercase text-gray-500">{{ storefrontContent.search.noResults }}</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
                       v-for="product in searchResults"
@@ -239,7 +259,10 @@ const currentYear = new Date().getFullYear()
                       <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover border-2 border-black" />
                       <div class="flex-1 min-w-0">
                         <div class="font-street text-base uppercase leading-none truncate">{{ product.title }}</div>
-                        <div class="font-mono text-xs font-bold mt-1">{{ product.price }} {{ currencyCode }}</div>
+                        <div class="font-mono text-xs font-bold mt-1">
+                          {{ formatCurrency(product.effectivePrice ?? product.price) }}
+                          <span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-red-600">-{{ product.promotionDiscountPercent }}%</span>
+                        </div>
                       </div>
                     </NuxtLink>
                   </div>
@@ -253,6 +276,10 @@ const currentYear = new Date().getFullYear()
               <NuxtLink to="/products" class="py-3 font-street text-2xl uppercase border-b-2 border-black hover:bg-brand hover:text-black px-2 -mx-2 transition-colors" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
               <NuxtLink to="/contact" class="py-3 font-street text-2xl uppercase border-b-2 border-black hover:bg-brand hover:text-black px-2 -mx-2 transition-colors" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-4">
@@ -373,4 +400,5 @@ const currentYear = new Date().getFullYear()
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 </style>

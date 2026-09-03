@@ -61,6 +61,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const isSearchOpen = ref(false)
 watch(isSearchOpen, (open) => {
   if (!open) isSearchDropdownOpen.value = false
@@ -180,7 +190,7 @@ const currentYear = new Date().getFullYear()
               <button
                 class="h-10 w-10 hidden lg:flex items-center justify-center text-[#8A7E6E] hover:text-[#262019] transition-colors"
                 :class="{ '!text-[#97401F]': isSearchOpen }"
-                :title="storefrontContent.search?.placeholder || 'Search'"
+                :title="storefrontContent.search.placeholder"
                 @click="isSearchOpen = !isSearchOpen"
               >
                 <Icon :name="isSearchOpen ? 'lucide:x' : 'lucide:search'" class="w-[18px] h-[18px]" />
@@ -222,10 +232,10 @@ const currentYear = new Date().getFullYear()
                 <input
                   v-model="searchQuery"
                   type="text"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search the shop…'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full h-11 bg-transparent border-0 border-b border-[#C4B8A4] text-[#262019] ed-ui text-base placeholder:text-[#8A7E6E] focus:ring-0 focus:border-[#B8532E] block ps-0 pe-9 transition-colors"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-[#B8532E] absolute end-1 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -284,10 +294,10 @@ const currentYear = new Date().getFullYear()
                 <input
                   v-model="searchQuery"
                   type="text"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products…'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full bg-transparent border-0 border-b border-[#C4B8A4] py-2.5 ps-0 pe-9 ed-ui text-sm placeholder:text-[#8A7E6E] text-[#262019] outline-none focus:ring-0 focus:border-[#B8532E]"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-[#8A7E6E] absolute end-0 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -321,6 +331,10 @@ const currentYear = new Date().getFullYear()
               <NuxtLink to="/products" class="py-3.5 ed-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-[#4A4038] hover:text-[#97401F] border-b border-[#DAD2C4]" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
               <NuxtLink to="/contact" class="py-3.5 ed-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-[#4A4038] hover:text-[#97401F] border-b border-[#DAD2C4]" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-4">
               <button

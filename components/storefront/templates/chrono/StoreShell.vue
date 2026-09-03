@@ -46,6 +46,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -240,11 +250,11 @@ const props = defineProps<{
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
+                  :placeholder="storefrontContent.search.placeholder"
                   class="w-full rounded-lg py-2.5 ps-4 pe-10 text-sm outline-none"
                   style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.15); color: #E8E0D5;"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" style="color: #6B7280;" />
 
@@ -253,8 +263,8 @@ const props = defineProps<{
                   class="absolute top-[100%] start-0 end-0 mt-1 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
                   style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.12);"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm" style="color: #7A7060;">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm" style="color: #7A7060;">No products found.</div>
+                  <div v-if="searchLoading" class="px-4 py-3 text-sm" style="color: #7A7060;">{{ storefrontContent.search.searching }}</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm" style="color: #7A7060;">{{ storefrontContent.search.noResults }}</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
                       v-for="product in visibleSearchResults"
@@ -277,7 +287,7 @@ const props = defineProps<{
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
-                    See more
+                    {{ storefrontContent.search.seeMore }}
                   </button>
                   </div>
                 </div>
@@ -290,6 +300,10 @@ const props = defineProps<{
               <NuxtLink to="/products" class="py-3 text-sm font-medium" style="color: #D4C5A9; border-bottom: 1px solid rgba(212,197,169,0.06);" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
               <NuxtLink to="/contact" class="py-3 text-sm font-medium" style="color: #D4C5A9; border-bottom: 1px solid rgba(212,197,169,0.06);" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
@@ -408,4 +422,5 @@ const props = defineProps<{
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 </style>

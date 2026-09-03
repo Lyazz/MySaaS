@@ -152,7 +152,7 @@ onUnmounted(() => {
           <span class="ed-label !mb-0 shrink-0">{{ storefrontContent.product.detailsTitle }}</span>
           <span class="ed-rule flex-1" />
         </div>
-        <SafeRichText
+        <CommonSafeRichText
           v-if="product?.description"
           class="ed-prose text-[17px]"
           :html="product.description"

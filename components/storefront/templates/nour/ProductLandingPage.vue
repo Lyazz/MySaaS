@@ -100,7 +100,7 @@ onUnmounted(() => {
   >
     <!-- Description Section (Raw & Full Width & No Margins) -->
     <div class="w-full mb-8 animate-fade-in-up">
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-img:rounded-2xl prose-img:w-full max-w-none text-[#2E1E20]"
         :html="product.description"

@@ -108,7 +108,7 @@ onUnmounted(() => {
 
     <!-- Full-width rich description hero -->
     <div v-if="product?.description" class="w-full animate-fade-in-up">
-      <SafeRichText
+      <CommonSafeRichText
         class="prose prose-invert prose-lg md:prose-xl prose-img:w-full prose-img:my-0 prose-headings:text-white prose-headings:uppercase prose-headings:tracking-tight prose-p:text-slate-300 prose-strong:text-white prose-a:text-brand-500 max-w-none"
         :html="product.description"
       />

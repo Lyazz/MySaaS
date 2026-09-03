@@ -1364,7 +1364,10 @@
     },
     "search": {
       "placeholder": "ابحث عن منتجات...",
-      "keywords": "كلمات ذات صلة"
+      "keywords": "كلمات ذات صلة",
+      "searching": "جارٍ البحث...",
+      "noResults": "لم يتم العثور على منتجات.",
+      "seeMore": "عرض المزيد"
     },
     "header": {
       "wishlistTitle": "المفضلة",

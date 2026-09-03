@@ -65,6 +65,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -260,8 +270,8 @@ watch(isSearchOpen, (open) => {
                   type="text"
                   :placeholder="storefrontContent.search.placeholder"
                   class="w-full h-12 bg-transparent border-0 border-b border-[#DFA254]/45 text-[#FDFAF4] text-base placeholder:text-[#F2ECE1]/40 focus:ring-0 focus:border-[#DFA254] block ps-0 pe-10 transition-colors"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-[#DFA254] absolute end-1 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -326,8 +336,8 @@ watch(isSearchOpen, (open) => {
                   type="text"
                   :placeholder="storefrontContent.search.placeholder"
                   class="w-full bg-transparent border-0 border-b border-[#CBBDAB] py-2.5 ps-0 pe-9 text-sm placeholder:text-[#8E9793] text-[#16211E] outline-none focus:ring-0 focus:border-brand-600"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
                 <Icon name="lucide:search" class="w-4 h-4 text-[#8E9793] absolute end-0 top-1/2 -translate-y-1/2 pointer-events-none" />
 
@@ -371,6 +381,10 @@ watch(isSearchOpen, (open) => {
               <NuxtLink to="/products" class="py-3.5 emb-label text-[#16211E] hover:text-brand-700 border-b border-[#CBBDAB]/60" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
               <NuxtLink to="/contact" class="py-3.5 emb-label text-[#16211E] hover:text-brand-700 border-b border-[#CBBDAB]/60" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
             <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-4">
@@ -493,6 +507,7 @@ watch(isSearchOpen, (open) => {
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 .search-reveal-enter-active, .search-reveal-leave-active { transition: opacity 0.2s ease, transform 0.2s ease; }
 .search-reveal-enter-from, .search-reveal-leave-to { opacity: 0; transform: translateY(-6px); }
 

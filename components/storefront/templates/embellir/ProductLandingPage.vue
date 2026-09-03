@@ -98,7 +98,7 @@ const scrollToTop = () => {
   <div class="bg-[#F2ECE1] min-h-screen pb-24 md:pb-12 overflow-x-hidden w-full">
     <!-- Description first: the landing page leads with the merchant's own pitch -->
     <div class="w-full mb-10">
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-img:w-full max-w-none text-[#16211E]"
         :html="product.description"
