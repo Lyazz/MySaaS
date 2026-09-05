@@ -56,6 +56,21 @@ export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [
 
 
 
+/**
+ * Publishing was refused because the store is not sellable yet. 409 rather than
+ * 400: the request was well-formed, the store's state is what disqualified it.
+ */
+export class StorePublishBlockedError extends Error {
+    statusCode = 409
+    statusMessage = 'Store is not ready to publish'
+    missing: string[]
+
+    constructor(missing: string[]) {
+        super('Store is not ready to publish')
+        this.missing = missing
+    }
+}
+
 export class StoreSettingsValidationError extends Error {
     statusCode = 400
     statusMessage: string
@@ -79,6 +94,7 @@ export type StoreSettingsPatchInput = Partial<{
     slug: string
     logoUrl: string | null
     faviconUrl: string | null
+    description: string | null
     primaryColor: string
     useBrandColor: boolean
     templateKey: string
@@ -95,6 +111,8 @@ export type StoreSettingsPatchInput = Partial<{
     currencyCode: string
     currencyCountry: string
     isCompleted: boolean
+    onboardingStep: number
+    onboardingExited: boolean
     checklistDismissed: boolean
     allowedDeliveryProviders: string[]
     storePickupEnabled: boolean
@@ -186,6 +204,17 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('faviconUrl must be a string URL or null')
             }
             updateSettings.faviconUrl = input.faviconUrl
+        }
+
+        if (input.description !== undefined) {
+            if (input.description !== null && typeof input.description !== 'string') {
+                throw new StoreSettingsValidationError('description must be a string or null')
+            }
+            const description = typeof input.description === 'string' ? input.description.trim() : ''
+            if (description.length > 300) {
+                throw new StoreSettingsValidationError('description is too long (max 300 chars)')
+            }
+            updateSettings.description = description || null
         }
 
         if (input.primaryColor !== undefined) {
@@ -291,6 +320,24 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('isCompleted must be a boolean')
             }
             updateSettings.isCompleted = input.isCompleted
+        }
+
+        if (input.onboardingStep !== undefined) {
+            const onboardingStep = Math.trunc(Number(input.onboardingStep))
+            if (!Number.isFinite(onboardingStep) || onboardingStep < 0 || onboardingStep > 50) {
+                throw new StoreSettingsValidationError('onboardingStep must be an integer between 0 and 50')
+            }
+            updateSettings.onboardingStep = onboardingStep
+        }
+
+        // The client says "I stepped out" or "I came back"; the server owns the
+        // timestamp. Exposing the raw date would let a client backdate itself out
+        // of the redirect.
+        if (input.onboardingExited !== undefined) {
+            if (typeof input.onboardingExited !== 'boolean') {
+                throw new StoreSettingsValidationError('onboardingExited must be a boolean')
+            }
+            updateSettings.onboardingExitedAt = input.onboardingExited ? new Date() : null
         }
 
         if (input.checklistDismissed !== undefined) {
@@ -518,12 +565,41 @@ export class StoreSettingsService {
         return taggedCount === 0
     }
 
+    /**
+     * What a store must have before its public storefront may open. A store that
+     * is live but cannot take an order is worse for the merchant than one that is
+     * still dark, so both of these are hard requirements rather than warnings.
+     *
+     * Delivery counts SELF: a merchant who delivers personally is ready to sell,
+     * and demanding a Maystro or Yalidine account on day one would strand them.
+     */
+    async getPublishReadiness(tenantId: string) {
+        const [productCount, settings] = await Promise.all([
+            prisma.product.count({ where: { tenantId } }),
+            prisma.storeSettings.findUnique({
+                where: { tenantId },
+                select: { allowedDeliveryProviders: true, storePickupEnabled: true }
+            })
+        ])
+
+        const hasProduct = productCount > 0
+        const hasDelivery =
+            (settings?.allowedDeliveryProviders ?? []).length > 0 || settings?.storePickupEnabled === true
+
+        const missing: string[] = []
+        if (!hasProduct) missing.push('product')
+        if (!hasDelivery) missing.push('delivery')
+
+        return { hasProduct, hasDelivery, canPublish: missing.length === 0, missing }
+    }
+
     async getOnboardingChecklist(tenantId: string) {
-        const [settings, tenant, productCount, categoryCount] = await Promise.all([
+        const [settings, tenant, productCount, categoryCount, readiness] = await Promise.all([
             prisma.storeSettings.findUnique({ where: { tenantId } }),
             prisma.tenant.findUnique({ where: { id: tenantId } }),
             prisma.product.count({ where: { tenantId } }),
-            prisma.category.count({ where: { tenantId } })
+            prisma.category.count({ where: { tenantId } }),
+            this.getPublishReadiness(tenantId)
         ])
 
         if (!tenant) {
@@ -533,20 +609,52 @@ export class StoreSettingsService {
         const hasLogo = settings?.logoUrl != null
         const hasProducts = productCount > 0
         const hasCategories = categoryCount > 0
-        const hasDelivery = (settings?.allowedDeliveryProviders ?? []).some(
-            (p: string) => ['MAYSTRO', 'YALIDINE'].includes(p)
-        )
-        const isPublished = tenant?.isOffline === false
+        // Any delivery method the store can actually fulfil with, SELF included.
+        // Reading only MAYSTRO/YALIDINE marked self-delivering merchants as
+        // permanently incomplete.
+        const hasDelivery = readiness.hasDelivery
+        // Published is publishedAt, not isOffline. isOffline is the offline-only
+        // tier and defaults to false, which is why this item used to show as done
+        // on a store that had never been published.
+        const isPublished = tenant.publishedAt != null
         const checklistDismissed = settings?.checklistDismissed ?? false
 
-        return { hasLogo, hasProducts, hasCategories, hasDelivery, isPublished, checklistDismissed }
+        return {
+            hasLogo,
+            hasProducts,
+            hasCategories,
+            hasDelivery,
+            isPublished,
+            checklistDismissed,
+            canPublish: readiness.canPublish,
+            missingToPublish: readiness.missing
+        }
     }
 
+    /**
+     * Opens the public storefront. Idempotent: publishing an already-published
+     * store keeps its original publishedAt rather than resetting the date.
+     */
     async publishStore(tenantId: string) {
-        await prisma.tenant.update({
+        const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { publishedAt: true } })
+        if (!tenant) {
+            throw new Error(`Tenant not found: ${tenantId}`)
+        }
+        if (tenant.publishedAt) {
+            return { publishedAt: tenant.publishedAt }
+        }
+
+        const readiness = await this.getPublishReadiness(tenantId)
+        if (!readiness.canPublish) {
+            throw new StorePublishBlockedError(readiness.missing)
+        }
+
+        const updated = await prisma.tenant.update({
             where: { id: tenantId },
-            data: { isOffline: false }
+            data: { publishedAt: new Date() },
+            select: { publishedAt: true }
         })
+        return { publishedAt: updated.publishedAt }
     }
 
     buildFrontendAgentSummary(args: {

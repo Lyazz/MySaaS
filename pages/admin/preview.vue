@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { homeTemplates, storeShellTemplates } from '~/components/storefront/templates/registry'
+import { resolveTemplateKey } from '~/components/storefront/templates/registry'
+import { TEMPLATE_SPECIMENS } from '~/components/admin/onboarding/template-specimens'
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
@@ -12,31 +13,16 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
-const templateKey = computed(() => (route.query.template as string) || 'classic')
 const previewMode = ref<'desktop' | 'mobile'>('desktop')
 
-// Define the templates metadata (we can duplicate this briefly or import if it was a separate file, but for simplicity we keep it here to run the preview)
-const templatesMeta = [
-  { key: 'classic', label: 'Classic Elegance' },
-  { key: 'modern', label: 'Modern Edge' },
-  { key: 'street', label: 'Streetwear' },
-  { key: 'cozy', label: 'Cozy Basics' },
-  { key: 'food', label: 'Fresh Food' },
-  { key: 'cyber', label: 'Cyber Tech' },
-  { key: 'stationnery', label: 'Stationery' },
-  { key: 'wellness', label: 'Wellness Space' },
-  { key: 'chrono', label: 'Chrono Luxe' },
-  { key: 'maison', label: 'Pistachio' },
-  { key: 'arena', label: 'Arena Performance' },
-  { key: 'playful', label: 'Playful' },
-  { key: 'activewear', label: 'Activewear' },
-  { key: 'nour', label: 'Nour Élégance' },
-  { key: 'embellir', label: 'Embellir' },
-]
-
-const activeTemplateDef = computed(() => {
-  return templatesMeta.find((tpl) => tpl.key === templateKey.value) || templatesMeta[0]
-})
+// Resolved through the registry rather than a local copy of the theme list. The
+// copy that lived here had fallen two themes behind, so asking to preview
+// Interior or Minimal silently showed Classic instead.
+const activeTemplateKey = computed(() => resolveTemplateKey(route.query.template as string))
+const activeTemplateDef = computed(() => ({
+  key: activeTemplateKey.value,
+  label: TEMPLATE_SPECIMENS[activeTemplateKey.value].label
+}))
 
 // Create a computed iframe URL that points to the isolated preview route
 const iframeUrl = computed(() => {

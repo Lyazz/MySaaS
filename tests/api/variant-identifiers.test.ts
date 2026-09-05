@@ -18,7 +18,7 @@ describe('Variant identifiers (SKU + barcode)', () => {
     let variantBId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Identifiers Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Identifiers Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({

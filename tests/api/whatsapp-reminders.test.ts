@@ -68,9 +68,9 @@ describe('WhatsApp confirmation reminders', () => {
     })
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'WA Reminders', slug: `wa-rem-${Date.now()}` } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'WA Reminders', slug: `wa-rem-${Date.now()}` } })
         tenantId = tenant.id
-        const other = await prisma.tenant.create({ data: { name: 'WA Other', slug: `wa-rem-other-${Date.now()}` } })
+        const other = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'WA Other', slug: `wa-rem-other-${Date.now()}` } })
         otherTenantId = other.id
     })
 

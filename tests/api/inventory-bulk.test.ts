@@ -13,7 +13,7 @@ describe('Admin inventory bulk ops', () => {
     let variantId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Inv Bulk', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Inv Bulk', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({

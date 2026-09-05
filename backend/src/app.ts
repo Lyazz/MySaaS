@@ -18,6 +18,7 @@ import {
 import { assertRequiredEnv } from './lib/env-check'
 import routes from './routes'
 import { startWhatsAppReminderScheduler } from './modules/whatsapp/whatsapp-reminders.job'
+import { startAiDocumentReaperScheduler } from './modules/ai-documents/ai-documents-reaper.job'
 
 // Fail at boot, not on the first request that happens to need a secret.
 assertRequiredEnv()
@@ -104,5 +105,8 @@ app.get('/api/hello', (req, res) => {
 // test and can be switched off with WHATSAPP_REMINDERS_ENABLED=false; a lease
 // lock in the database keeps several instances from sending the same reminder.
 startWhatsAppReminderScheduler()
+
+// Closes out AI document scans stranded by a crash or a deploy mid-extraction.
+startAiDocumentReaperScheduler()
 
 export default app

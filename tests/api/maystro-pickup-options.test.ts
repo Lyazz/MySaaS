@@ -11,6 +11,7 @@ describe('Maystro pickup point selection', () => {
     beforeAll(async () => {
         const created = await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Pickup Selection Tenant',
                 slug: `pickup-selection-${Date.now()}`
             }

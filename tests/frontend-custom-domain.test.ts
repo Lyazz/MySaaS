@@ -11,7 +11,7 @@ describe('Frontend custom domain tenant resolution', async () => {
 
   it('renders tenant storefront on custom domain', async () => {
     const tenant = await prisma.tenant.create({
-      data: { name: 'Frontend Custom Domain', slug }
+      data: { publishedAt: new Date(), name: 'Frontend Custom Domain', slug }
     })
 
     await prisma.tenantDomain.create({

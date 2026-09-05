@@ -38,10 +38,10 @@ describe('Promo codes', () => {
             .send(data)
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Promo Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Promo Tenant', slug } })
         tenantId = tenant.id
 
-        const other = await prisma.tenant.create({ data: { name: 'Promo Other Tenant', slug: otherSlug } })
+        const other = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Promo Other Tenant', slug: otherSlug } })
         otherTenantId = other.id
 
         const admin = await prisma.user.create({

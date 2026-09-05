@@ -24,7 +24,7 @@ describe('Clearance (destockage) module', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Clearance Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Clearance Tenant', slug }
         })
         tenantId = tenant.id
 
@@ -276,7 +276,7 @@ describe('Clearance module — applies to all products when none is tagged', () 
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Clearance All Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Clearance All Tenant', slug }
         })
         tenantId = tenant.id
 

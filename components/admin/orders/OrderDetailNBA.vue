@@ -36,13 +36,13 @@
         type="button"
         class="ui-btn ui-btn--secondary ui-btn--md"
         :class="model.primary ? '' : (fullWidth ? 'w-full' : '')"
-        :aria-label="t('common.moreActions', 'More actions')"
+        :aria-label="t('admin.common.moreActions', 'More actions')"
       >
         <Icon
           name="lucide:more-horizontal"
           class="w-4 h-4"
         />
-        <span v-if="!model.primary">{{ t('common.actions', 'Actions') }}</span>
+        <span v-if="!model.primary">{{ t('admin.common.actions', 'Actions') }}</span>
       </MenuButton>
       <transition
         enter-active-class="transition duration-100 ease-out"

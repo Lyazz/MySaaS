@@ -13,7 +13,7 @@ describe('Subscription expiration enforcement', () => {
     let token: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Expired Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Expired Tenant', slug } })
         tenantId = tenant.id
 
         const user = await prisma.user.create({

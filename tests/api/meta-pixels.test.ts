@@ -14,8 +14,8 @@ describe('Meta Pixels Admin + Product Assignment', () => {
     let productA: any
 
     beforeAll(async () => {
-        tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: `tenant-a-mp-${Date.now()}` } })
-        tenantB = await prisma.tenant.create({ data: { name: 'Tenant B', slug: `tenant-b-mp-${Date.now()}` } })
+        tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant A', slug: `tenant-a-mp-${Date.now()}` } })
+        tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant B', slug: `tenant-b-mp-${Date.now()}` } })
 
         const userA = await prisma.user.create({
             data: { email: `mp-a-${Date.now()}@test.com`, role: 'owner', tenantId: tenantA.id }

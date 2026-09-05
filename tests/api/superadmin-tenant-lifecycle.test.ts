@@ -15,7 +15,7 @@ describe('Super Admin: tenant detail, archive/restore, delete-guard', () => {
     beforeAll(async () => {
         tenantSlug = `lifecycle-${Date.now()}`
         const tenant = await prisma.tenant.create({
-            data: { name: 'Lifecycle Tenant', slug: tenantSlug }
+            data: { publishedAt: new Date(), name: 'Lifecycle Tenant', slug: tenantSlug }
         })
         tenantId = tenant.id
 

@@ -21,15 +21,19 @@ describe('AdminGettingStartedChecklist', () => {
     hasCategories: true,
     hasDelivery: true,
     isPublished: true,
-    checklistDismissed: false
+    checklistDismissed: false,
+    canPublish: true,
+    missingToPublish: []
   }
 
+  let checklist: Record<string, unknown> = completedChecklist
   let fetchMock: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
+    checklist = { ...completedChecklist }
     fetchMock = vi.fn((url: string, options?: { method?: string }) => {
       if (url === '/api/admin/store-settings/onboarding-checklist') {
-        return Promise.resolve(completedChecklist)
+        return Promise.resolve(checklist)
       }
 
       if (url === '/api/admin/store-settings' && options?.method === 'PATCH') {
@@ -73,5 +77,44 @@ describe('AdminGettingStartedChecklist', () => {
       })
     )
     expect(wrapper.find('[data-testid="getting-started-dismiss"]').exists()).toBe(false)
+  })
+
+  it('disables the publish button while the store is not ready to publish', async () => {
+    checklist = {
+      ...completedChecklist,
+      isPublished: false,
+      canPublish: false,
+      missingToPublish: ['product', 'delivery']
+    }
+
+    const wrapper = mount(AdminGettingStartedChecklist, {
+      global: { stubs: { Icon: true, NuxtLink: true } }
+    })
+
+    await flushPromises()
+
+    const publishButton = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('admin.pages.gettingStarted.publishBtn'))
+
+    expect(publishButton).toBeDefined()
+    expect(publishButton!.attributes('disabled')).toBeDefined()
+  })
+
+  it('enables the publish button once the store is ready', async () => {
+    checklist = { ...completedChecklist, isPublished: false, canPublish: true, missingToPublish: [] }
+
+    const wrapper = mount(AdminGettingStartedChecklist, {
+      global: { stubs: { Icon: true, NuxtLink: true } }
+    })
+
+    await flushPromises()
+
+    const publishButton = wrapper
+      .findAll('button')
+      .find((b) => b.text().includes('admin.pages.gettingStarted.publishBtn'))
+
+    expect(publishButton).toBeDefined()
+    expect(publishButton!.attributes('disabled')).toBeUndefined()
   })
 })

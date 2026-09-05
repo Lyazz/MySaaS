@@ -26,6 +26,8 @@ const Harness = defineComponent({
     template: `<CommuneField v-model="model" :wilaya-code="wilayaCode" placeholder="Select commune" />`
 })
 
+const trigger = (wrapper: any) => wrapper.get('button[aria-haspopup="listbox"]')
+
 describe('CommuneField', () => {
     beforeEach(() => {
         communesRef.value = []
@@ -33,26 +35,54 @@ describe('CommuneField', () => {
         errorRef.value = null
     })
 
-    it('renders a disabled <select> when no wilaya is selected', () => {
+    it('renders a disabled trigger when no wilaya is selected', () => {
         const wrapper = mount(Harness, { props: { wilayaCode: '' } })
-        expect(wrapper.find('input').exists()).toBe(false)
-        const select = wrapper.get('select')
-        expect(select.attributes('disabled')).toBeDefined()
+        expect(trigger(wrapper).attributes('disabled')).toBeDefined()
     })
 
-    it('renders a disabled <select> while loading communes', () => {
+    it('renders a disabled trigger while loading communes', () => {
         loadingRef.value = true
         const wrapper = mount(Harness, { props: { wilayaCode: '16' } })
-        const select = wrapper.get('select')
-        expect(select.attributes('disabled')).toBeDefined()
+        expect(trigger(wrapper).attributes('disabled')).toBeDefined()
     })
 
-    it('enables <select> when communes are available', () => {
+    it('enables the trigger when communes are available', () => {
         communesRef.value = [{ name: 'Alger' }]
         const wrapper = mount(Harness, { props: { wilayaCode: '16' } })
-        const select = wrapper.get('select')
-        expect(select.attributes('disabled')).toBeUndefined()
-        expect(wrapper.text()).toContain('Alger')
+        expect(trigger(wrapper).attributes('disabled')).toBeUndefined()
+    })
+
+    it('shows the whole list on the first click, with search offered second', async () => {
+        communesRef.value = [{ name: 'Alger' }, { name: 'Bab Ezzouar' }]
+        const wrapper = mount(Harness, { props: { wilayaCode: '16' }, attachTo: document.body })
+
+        expect(wrapper.find('[role="listbox"]').exists()).toBe(false)
+
+        await trigger(wrapper).trigger('click')
+
+        // One click: the options are on screen...
+        const listbox = wrapper.get('[role="listbox"]')
+        expect(listbox.findAll('[role="option"]')).toHaveLength(2)
+        expect(listbox.text()).toContain('Alger')
+        expect(listbox.text()).toContain('Bab Ezzouar')
+
+        // ...and the search box is inside the panel, secondary to the list.
+        const search = listbox.get('input[role="searchbox"]')
+        expect((search.element as HTMLInputElement).value).toBe('')
+
+        // Searching still filters once used.
+        await search.setValue('bab')
+        expect(wrapper.get('[role="listbox"]').findAll('[role="option"]')).toHaveLength(1)
+    })
+
+    it('keeps the panel open on a second click of the search box', async () => {
+        communesRef.value = [{ name: 'Alger' }]
+        const wrapper = mount(Harness, { props: { wilayaCode: '16' }, attachTo: document.body })
+
+        await trigger(wrapper).trigger('click')
+        await wrapper.get('input[role="searchbox"]').trigger('click')
+
+        expect(wrapper.find('[role="listbox"]').exists()).toBe(true)
+        expect(trigger(wrapper).attributes('aria-expanded')).toBe('true')
     })
 })
-

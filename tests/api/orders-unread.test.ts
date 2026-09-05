@@ -21,9 +21,9 @@ describe('Orders unread notifications', () => {
     let variantBId: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Unread Tenant A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Unread Tenant A', slug: slugA } })
         tenantAId = tenantA.id
-        const tenantB = await prisma.tenant.create({ data: { name: 'Unread Tenant B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Unread Tenant B', slug: slugB } })
         tenantBId = tenantB.id
 
         const adminA1 = await prisma.user.create({

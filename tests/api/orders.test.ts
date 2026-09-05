@@ -26,7 +26,7 @@ describe('Public checkout order flow', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Checkout Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Checkout Tenant', slug }
         })
         tenantId = tenant.id
 
@@ -377,7 +377,7 @@ describe('Public checkout order flow', () => {
 
         const otherSlug = `other-${Date.now()}`
         const otherHost = `${otherSlug}.localhost:3000`
-        const otherTenant = await prisma.tenant.create({ data: { name: 'Other', slug: otherSlug } })
+        const otherTenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Other', slug: otherSlug } })
         await prisma.storeSettings.create({
             data: { tenantId: otherTenant.id, cartEnabled: true, codEnabled: true, minimumOrderAmountDzd: 0, hideOptionalAddress: true }
         })
@@ -851,7 +851,7 @@ describe('Admin Order Creation', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Admin Checkout Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Admin Checkout Tenant', slug }
         })
         tenantId = tenant.id
 

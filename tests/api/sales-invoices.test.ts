@@ -26,9 +26,9 @@ describe('Sales invoice API', () => {
     let posSaleBId: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Invoice Tenant A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Invoice Tenant A', slug: slugA } })
         tenantAId = tenantA.id
-        const tenantB = await prisma.tenant.create({ data: { name: 'Invoice Tenant B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Invoice Tenant B', slug: slugB } })
         tenantBId = tenantB.id
 
         const adminA = await prisma.user.create({

@@ -21,7 +21,7 @@ describe('Product price sync from variants', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Variant Price Sync Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Variant Price Sync Tenant', slug }
         })
         tenantId = tenant.id
 

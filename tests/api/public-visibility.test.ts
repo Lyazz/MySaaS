@@ -21,8 +21,8 @@ describe('Storefront visibility (LISTED / UNLISTED)', () => {
 
   beforeAll(async () => {
     const [tenant, otherTenant] = await Promise.all([
-      prisma.tenant.create({ data: { name: 'Visibility Tenant', slug } }),
-      prisma.tenant.create({ data: { name: 'Visibility Other Tenant', slug: `${slug}-other` } })
+      prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Visibility Tenant', slug } }),
+      prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Visibility Other Tenant', slug: `${slug}-other` } })
     ])
     tenantId = tenant.id
     otherTenantId = otherTenant.id

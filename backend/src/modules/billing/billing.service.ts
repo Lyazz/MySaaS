@@ -17,6 +17,7 @@ import {
     normalizeInterval
 } from '../../../../shared/pricing/billing-period'
 import { getPaymentMethod } from '../../../../shared/pricing/payment-methods'
+import { resolvePlan } from '../../lib/plan-limits'
 import { STATUS_ACTIVE, STATUS_PAST_DUE, STATUS_TRIALING } from './subscription.service'
 
 export class BillingValidationError extends Error {
@@ -71,6 +72,8 @@ export interface TenantBillingSnapshot {
         orders: UsageMetric
         products: UsageMetric
         pixels: UsageMetric
+        /** Document pages pushed through AI import this window. */
+        aiScans: UsageMetric
     }
 }
 
@@ -281,8 +284,9 @@ export class BillingService {
         const subscription = await prisma.tenantSubscription.findUnique({ where: { tenantId } })
 
         const planCode = (subscription?.planCode as PlanCode | undefined) ?? 'basic'
-        const plan = getPlanByCode(planCode) ?? getPlanByCode('basic')
-        if (!plan) throw new Error('Missing default plan definition')
+        // Super-admin quota overrides applied here, so the meter the merchant
+        // sees is the same number enforceScanQuota holds them to.
+        const plan = await resolvePlan(planCode)
 
         const interval = normalizeInterval(subscription?.interval)
         const now = new Date()
@@ -302,12 +306,24 @@ export class BillingService {
         // term against a per-month allowance is what used to 429 annual tenants.
         const quota = currentUsageWindow(currentPeriodStart, now)
 
-        const [ordersInPeriod, productCount, pixelCount] = await Promise.all([
+        const [ordersInPeriod, productCount, pixelCount, aiScanPages] = await Promise.all([
             prisma.order.count({
                 where: { tenantId, createdAt: { gte: quota.start, lt: quota.end } }
             }),
             prisma.product.count({ where: { tenantId } }),
-            prisma.tenantMetaPixel.count({ where: { tenantId } })
+            prisma.tenantMetaPixel.count({ where: { tenantId } }),
+            // Pages, not jobs — a five-page PDF costs five times a phone photo,
+            // which is what AiDocumentsService.enforceScanQuota meters.
+            prisma.aiDocumentJob
+                .aggregate({
+                    _sum: { pageCount: true },
+                    where: {
+                        tenantId,
+                        status: { not: 'FAILED' },
+                        createdAt: { gte: quota.start, lt: quota.end }
+                    }
+                })
+                .then((r: { _sum: { pageCount: number | null } }) => r._sum.pageCount ?? 0)
         ])
 
         return {
@@ -335,7 +351,8 @@ export class BillingService {
                 ordersLimit: plan.ordersPerMonth,
                 orders: buildMetric(ordersInPeriod, plan.ordersPerMonth),
                 products: buildMetric(productCount, plan.maxProducts),
-                pixels: buildMetric(pixelCount, plan.maxPixels)
+                pixels: buildMetric(pixelCount, plan.maxPixels),
+                aiScans: buildMetric(aiScanPages, plan.aiScansPerMonth)
             }
         }
     }

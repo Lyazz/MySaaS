@@ -54,8 +54,13 @@ watch(
 </script>
 
 <template>
-  <component :is="StoreShell">
-    <slot />
-    <StorefrontSharedProductCardVariantModalHost />
-  </component>
+  <!-- `display: contents` so the draft bar can sit above the shell without a
+       wrapper box changing any theme's layout or sticky containing block. -->
+  <div class="contents">
+    <StorefrontStoreDraftBar />
+    <component :is="StoreShell">
+      <slot />
+      <StorefrontSharedProductCardVariantModalHost />
+    </component>
+  </div>
 </template>

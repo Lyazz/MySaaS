@@ -66,8 +66,8 @@ describe('WhatsApp Cloud API webhook', () => {
         process.env.META_APP_SECRET = APP_SECRET
         process.env.META_WA_VERIFY_TOKEN = VERIFY_TOKEN
 
-        tenantA = await prisma.tenant.create({ data: { name: 'WA Tenant A', slug: `wa-a-${Date.now()}` } })
-        tenantB = await prisma.tenant.create({ data: { name: 'WA Tenant B', slug: `wa-b-${Date.now()}` } })
+        tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'WA Tenant A', slug: `wa-a-${Date.now()}` } })
+        tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'WA Tenant B', slug: `wa-b-${Date.now()}` } })
 
         for (const [tenant, phoneNumberId] of [
             [tenantA, PHONE_NUMBER_ID_A],

@@ -35,6 +35,12 @@ export interface PlanDefinition {
     ordersPerMonth: number
     maxProducts: number
     maxPixels: number
+    /**
+     * Document pages the tenant may push through AI import each month.
+     * 0 turns the feature off entirely, the same way a 0 order limit is read as
+     * "not metered" — see `AiDocumentsService.enforceScanQuota`.
+     */
+    aiScansPerMonth: number
     flags?: {
         popular?: boolean
         highlight?: boolean
@@ -64,7 +70,8 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         pricing: { currency: 'DA', monthlyAmountDzd: 0, annualMonthlyAmountDzd: 0 },
         ordersPerMonth: 150,
         maxProducts: 30,
-        maxPixels: 1
+        maxPixels: 1,
+        aiScansPerMonth: 0
     },
     {
         code: 'beginner',
@@ -73,7 +80,8 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         pricing: { currency: 'DA', monthlyAmountDzd: 1490, annualMonthlyAmountDzd: 1190 },
         ordersPerMonth: 500,
         maxProducts: 150,
-        maxPixels: 2
+        maxPixels: 2,
+        aiScansPerMonth: 20
     },
     {
         code: 'merchant',
@@ -83,6 +91,7 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         ordersPerMonth: 1500,
         maxProducts: 500,
         maxPixels: 5,
+        aiScansPerMonth: 100,
         flags: { popular: true }
     },
     {
@@ -93,6 +102,7 @@ export const PRICING_PLANS: readonly PlanDefinition[] = [
         ordersPerMonth: 5000,
         maxProducts: 2000,
         maxPixels: 10,
+        aiScansPerMonth: 400,
         flags: { highlight: true }
     }
 ] as const
@@ -231,6 +241,9 @@ export const buildDisplayPlan = (
             t('pricing.features.ordersPerMonth', { count: plan.ordersPerMonth }),
             t('pricing.features.maxProducts', { count: plan.maxProducts }),
             t('pricing.features.maxPixels', { count: plan.maxPixels }),
+            ...(plan.aiScansPerMonth > 0
+                ? [t('pricing.features.aiScansPerMonth', { count: plan.aiScansPerMonth })]
+                : []),
             ...PLAN_FEATURE_KEYS[plan.code].map((k) => t(k))
         ],
         cta: t(`pricing.plans.${plan.code}.cta`),

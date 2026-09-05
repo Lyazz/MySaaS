@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import { StoreSettingsService, StoreSettingsValidationError } from './store-settings.service'
+import { StorePublishBlockedError, StoreSettingsService, StoreSettingsValidationError } from './store-settings.service'
 
 const service = new StoreSettingsService()
 
@@ -13,7 +13,9 @@ export class StoreSettingsController {
                 ...settings,
                 name: tenant.name,
                 slug: tenant.slug,
-                maintenanceMode: tenant.maintenanceMode
+                maintenanceMode: tenant.maintenanceMode,
+                publishedAt: tenant.publishedAt,
+                isPublished: tenant.publishedAt != null
             }))
         } catch (error) {
             console.error('Get store settings error:', error)
@@ -88,9 +90,16 @@ export class StoreSettingsController {
     async publish(req: Request, res: Response) {
         try {
             const tenant = req.tenant!
-            await service.publishStore(tenant.id)
-            res.json({ success: true })
+            const { publishedAt } = await service.publishStore(tenant.id)
+            res.json({ success: true, publishedAt, isPublished: true })
         } catch (error) {
+            if (error instanceof StorePublishBlockedError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    missing: error.missing
+                })
+            }
             console.error('Publish store error:', error)
             res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
@@ -110,6 +119,7 @@ export class StoreSettingsController {
                 storeSettings: {
                     logoUrl: settings.logoUrl,
                     faviconUrl: settings.faviconUrl,
+                    description: settings.description,
                     primaryColor: settings.primaryColor,
                     useBrandColor: (settings as any).useBrandColor ?? false,
                     templateKey: settings.templateKey,

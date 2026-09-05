@@ -12,7 +12,7 @@ describe('Public products hasVariants flag', () => {
   let simpleProductSlug: string
 
   beforeAll(async () => {
-    const tenant = await prisma.tenant.create({ data: { name: 'Has Variants Tenant', slug } })
+    const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Has Variants Tenant', slug } })
     tenantId = tenant.id
 
     optionedProductSlug = `prod-opt-${Date.now()}`

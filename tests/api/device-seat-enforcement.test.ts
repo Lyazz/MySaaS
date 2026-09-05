@@ -32,7 +32,7 @@ describe('device seat enforcement at login', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Seat Tenant', slug: `seat-${stamp}`, isOffline: false }
+            data: { publishedAt: new Date(), name: 'Seat Tenant', slug: `seat-${stamp}`, isOffline: false }
         })
         tenantId = tenant.id
 

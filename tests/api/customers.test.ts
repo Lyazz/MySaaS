@@ -14,7 +14,7 @@ describe('Admin customers API', () => {
     let otherTenantCustomerId: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Customers Tenant A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Customers Tenant A', slug: slugA } })
         tenantAId = tenantA.id
         const adminA = await prisma.user.create({
             data: { tenantId: tenantAId, email: `admin-${slugA}@example.com`, role: 'admin', passwordHash: 'x' }
@@ -26,7 +26,7 @@ describe('Admin customers API', () => {
             tenantId: adminA.tenantId
         })
 
-        const tenantB = await prisma.tenant.create({ data: { name: 'Customers Tenant B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Customers Tenant B', slug: slugB } })
         tenantBId = tenantB.id
 
         const c1 = await prisma.customer.create({

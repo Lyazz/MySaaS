@@ -17,8 +17,8 @@ describe('Products delete policy (archive vs hard-delete)', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await prisma.$transaction([
-            prisma.tenant.create({ data: { name: 'Products Delete A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Products Delete B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Products Delete A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Products Delete B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

@@ -17,7 +17,7 @@ describe('Loyalty points edge cases', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Loyalty Extra Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Loyalty Extra Tenant', slug }
         })
         tenantId = tenant.id
 

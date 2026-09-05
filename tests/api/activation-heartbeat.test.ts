@@ -31,7 +31,7 @@ describe('activation heartbeat', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Heartbeat Tenant', slug, isOffline: false }
+            data: { publishedAt: new Date(), name: 'Heartbeat Tenant', slug, isOffline: false }
         })
         tenantId = tenant.id
 

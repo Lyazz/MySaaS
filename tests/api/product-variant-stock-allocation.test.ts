@@ -18,7 +18,7 @@ describe('Product variant stock allocation workflow', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Variant Allocation Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Variant Allocation Tenant', slug }
         })
         tenantId = tenant.id
 

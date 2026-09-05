@@ -18,8 +18,8 @@ describe('Admin sync pull API', () => {
     let productBId = ''
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Sync Tenant A', slug: slugA } })
-        const tenantB = await prisma.tenant.create({ data: { name: 'Sync Tenant B', slug: slugB } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Sync Tenant A', slug: slugA } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Sync Tenant B', slug: slugB } })
         tenantAId = tenantA.id
         tenantBId = tenantB.id
 

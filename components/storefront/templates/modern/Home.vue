@@ -40,11 +40,18 @@ const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSli
 
 // Auto-advance slider
 let slideInterval: any
+/*
+ * A carousel that moves on its own is exactly what `prefers-reduced-motion`
+ * asks us not to do. The arrows and dots still reach every slide.
+ */
+const prefersReducedMotion = () =>
+    import.meta.client && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 const pauseSlideAutoplay = () => {
     clearInterval(slideInterval)
 }
 const resumeSlideAutoplay = () => {
     clearInterval(slideInterval)
+    if (prefersReducedMotion()) return
     slideInterval = setInterval(nextSlide, 6000)
 }
 
@@ -64,7 +71,7 @@ const {
 } = useAutoScroll(bestSellersDisplayed)
 
 onMounted(() => {
-    slideInterval = setInterval(nextSlide, 6000)
+    resumeSlideAutoplay()
 })
 
 onUnmounted(() => {
@@ -109,6 +116,8 @@ const displayedProducts = computed(() => {
     <div class="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden group"
       @touchstart.passive="pauseSlideAutoplay"
       @touchend.passive="resumeSlideAutoplay"
+      @mouseenter="pauseSlideAutoplay"
+      @mouseleave="resumeSlideAutoplay"
     >
       <!-- Slides -->
       <div 
@@ -123,7 +132,7 @@ const displayedProducts = computed(() => {
           :alt="slide.title"
         >
         <!-- Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent flex items-center">
+        <div class="absolute inset-0 bg-gradient-to-r rtl:bg-gradient-to-l from-black/70 via-black/40 to-transparent flex items-center">
           <div class="max-w-7xl mx-auto px-6 w-full">
             <div
               class="max-w-2xl text-white transform transition-all duration-1000 delay-300" 

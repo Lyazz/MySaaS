@@ -13,7 +13,7 @@ describe('Order blacklist (fraud prevention)', () => {
     let variantId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Blacklist Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Blacklist Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({

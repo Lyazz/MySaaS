@@ -24,7 +24,7 @@ describe('Admin product image routes', () => {
     let productId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'ImgRoutes', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'ImgRoutes', slug } })
         tenantId = tenant.id
         const admin = await prisma.user.create({
             data: { tenantId, email: `admin-${slug}@example.com`, role: 'admin', passwordHash: 'x' }

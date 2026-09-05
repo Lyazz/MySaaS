@@ -13,6 +13,7 @@ describe('Super Admin API Tests', () => {
         const slug = `test-${Date.now()}`
         const tenant = await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Test Tenant',
                 slug
             }

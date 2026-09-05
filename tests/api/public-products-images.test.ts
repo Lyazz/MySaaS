@@ -12,7 +12,7 @@ describe('Public products images payload', () => {
     let noImageProductSlug: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Images Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Images Tenant', slug } })
         tenantId = tenant.id
 
         productSlug = `prod-${Date.now()}`

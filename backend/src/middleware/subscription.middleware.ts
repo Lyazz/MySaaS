@@ -4,6 +4,7 @@ import {
   ensureSubscription,
   STATUS_TRIALING
 } from '../modules/billing/subscription.service';
+import { isTenantMemberByCookie } from '../lib/draft-storefront';
 
 const addUtcMonths = (date: Date, months: number) =>
   new Date(
@@ -68,6 +69,30 @@ export const expressSubscriptionMiddleware = async (
     return res
       .status(403)
       .json({ statusCode: 403, statusMessage: 'Tenant is suspended' });
+  }
+
+  /**
+   * A store that has never been published is invisible, not merely unstyled.
+   * Without this the browser 404s on the storefront while the API happily serves
+   * /api/store/settings, /api/products and POST /api/orders for the same tenant --
+   * the draft store would be readable and orderable by anyone who skipped the HTML.
+   *
+   * Admin paths stay open so the merchant can build the store. Membership is
+   * checked twice because the two clients authenticate differently: the Bearer
+   * token expressAuthMiddleware resolved (admin fetches, the mobile app), or the
+   * auth_token cookie a browser sends while the owner walks their own draft
+   * storefront -- that middleware never looks at cookies.
+   */
+  if (tenant.publishedAt === null && !isAdminApi) {
+    const isTenantMember =
+      req.user?.tenantId === tenant.id ||
+      isTenantMemberByCookie(req.headers.cookie, tenant.id);
+
+    if (!isTenantMember) {
+      return res
+        .status(404)
+        .json({ statusCode: 404, statusMessage: 'Store not found' });
+    }
   }
 
   if (tenant.maintenanceMode && !isAdminApi) {

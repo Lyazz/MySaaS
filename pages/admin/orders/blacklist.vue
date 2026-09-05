@@ -101,7 +101,7 @@
               <td class="ui-td whitespace-nowrap text-end">
                 <button
                   class="ui-table-action ui-table-action--danger"
-                  :title="t('common.delete', 'Delete')"
+                  :title="t('admin.common.delete', 'Delete')"
                   @click="removeEntry(entry)"
                 >
                   <Icon name="lucide:trash" class="w-4 h-4" />
@@ -117,7 +117,7 @@
       v-model="deleteOpen"
       :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
       :message="t('admin.pages.orders.blacklist.deleteConfirm', 'Remove this entry from the blacklist?')"
-      :confirm-text="t('common.delete', 'Delete')"
+      :confirm-text="t('admin.common.delete', 'Delete')"
       :error="deleteError"
       @confirm="confirmRemove"
       @cancel="deleteError = null"
@@ -191,7 +191,7 @@ async function submitCreate() {
     await fetchEntries()
   } catch (error: any) {
     console.error('Failed to create blacklist entry:', error)
-    formError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    formError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   } finally {
     submitting.value = false
   }
@@ -214,7 +214,7 @@ async function confirmRemove() {
     deleteOpen.value = false
   } catch (error: any) {
     console.error('Failed to delete blacklist entry:', error)
-    deleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    deleteError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   }
 }
 

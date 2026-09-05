@@ -19,7 +19,7 @@ describe('POS sale payment requires an open cash session', () => {
     let cashboxId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'POS Pay Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'POS Pay Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({

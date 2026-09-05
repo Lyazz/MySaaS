@@ -39,7 +39,7 @@ describe('device transfer and super-admin device management', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Transfer Tenant', slug, isOffline: false }
+            data: { publishedAt: new Date(), name: 'Transfer Tenant', slug, isOffline: false }
         })
         tenantId = tenant.id
 
@@ -66,7 +66,7 @@ describe('device transfer and super-admin device management', () => {
 
         // Super admins live on their own tenant in this schema.
         const adminTenant = await prisma.tenant.create({
-            data: { name: 'Platform', slug: `platform-${stamp}` }
+            data: { publishedAt: new Date(), name: 'Platform', slug: `platform-${stamp}` }
         })
         const admin = await prisma.user.create({
             data: {

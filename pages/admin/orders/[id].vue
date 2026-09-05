@@ -4,7 +4,7 @@
       v-model="deleteOpen"
       :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
       :message="t('admin.pages.orders.detail.deleteConfirm', 'Delete this order? This cannot be undone. If the order is confirmed with a carrier, it will also be cancelled there.')"
-      :confirm-text="t('common.delete', 'Delete')"
+      :confirm-text="t('admin.common.delete', 'Delete')"
       :error="deleteError"
       @confirm="confirmDelete"
       @cancel="deleteError = null"
@@ -184,7 +184,7 @@
               <button
                 type="button"
                 class="od-copy"
-                :aria-label="t('common.copy', 'Copy')"
+                :aria-label="t('admin.common.copy', 'Copy')"
                 @click="copyToClipboard(order.publicId || order.id)"
               >
                 <Icon name="lucide:copy" class="w-3 h-3" />
@@ -302,7 +302,7 @@
                 <button
                   type="button"
                   class="ui-btn ui-btn--sm ui-btn--secondary px-3"
-                  :aria-label="t('common.copy', 'Copy')"
+                  :aria-label="t('admin.common.copy', 'Copy')"
                   @click="copyToClipboard(order.customerPhone)"
                 >
                   <Icon name="lucide:copy" class="w-4 h-4" />
@@ -451,7 +451,7 @@
                     :disabled="editSaving"
                     @click="cancelEdit"
                   >
-                    {{ t('common.cancel', 'Cancel') }}
+                    {{ t('admin.common.cancel', 'Cancel') }}
                   </button>
                   <button
                     type="button"
@@ -463,7 +463,7 @@
                       v-if="editSaving"
                       class="inline-block animate-spin rounded-full h-3.5 w-3.5 border-b-2 border-white"
                     />
-                    {{ t('common.save', 'Save') }}
+                    {{ t('admin.common.save', 'Save') }}
                   </button>
                 </template>
                 <button
@@ -474,7 +474,7 @@
                   @click="startEdit"
                 >
                   <Icon name="lucide:pencil" class="w-3.5 h-3.5" />
-                  {{ t('common.edit', 'Edit') }}
+                  {{ t('admin.common.edit', 'Edit') }}
                 </button>
               </div>
             </header>
@@ -576,7 +576,7 @@
                   <button
                     type="button"
                     class="od-cart__remove"
-                    :title="t('common.delete', 'Delete')"
+                    :title="t('admin.common.delete', 'Delete')"
                     @click="removeCartItem(index)"
                   >
                     <Icon name="lucide:x" class="w-4 h-4" />
@@ -645,7 +645,7 @@
                   @click="startEditCustomer"
                 >
                   <Icon name="lucide:pencil" class="w-3.5 h-3.5" />
-                  {{ t('common.edit', 'Edit') }}
+                  {{ t('admin.common.edit', 'Edit') }}
                 </button>
               </div>
             </header>
@@ -776,7 +776,7 @@
                       :disabled="savingCustomer"
                       @click="cancelEditCustomer"
                     >
-                      {{ t('common.cancel', 'Cancel') }}
+                      {{ t('admin.common.cancel', 'Cancel') }}
                     </button>
                     <button
                       type="button"
@@ -785,7 +785,7 @@
                       @click="saveCustomerInfo"
                     >
                       <span v-if="savingCustomer" class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                      {{ t('common.save', 'Save') }}
+                      {{ t('admin.common.save', 'Save') }}
                     </button>
                   </div>
                 </template>
@@ -805,7 +805,7 @@
                     <button
                       type="button"
                       class="od-copy"
-                      :aria-label="t('common.copy', 'Copy')"
+                      :aria-label="t('admin.common.copy', 'Copy')"
                       @click="copyToClipboard(order.customerPhone)"
                     >
                       <Icon name="lucide:copy" class="w-3.5 h-3.5" />
@@ -1530,7 +1530,7 @@ ${confirmLink}`
         : []
     } catch (error: any) {
       editAvailableCompanies.value = []
-      editCompaniesError.value = error?.data?.statusMessage || error?.data?.message || t('common.error', 'An error occurred. Please try again.')
+      editCompaniesError.value = error?.data?.statusMessage || error?.data?.message || t('admin.common.error', 'An error occurred. Please try again.')
     } finally {
       editCompaniesLoading.value = false
     }
@@ -1597,7 +1597,7 @@ ${confirmLink}`
     } catch (error: any) {
       if (requestId !== editMaystroCommunesResolveId) return
       editMaystroCommunes.value = []
-      editMaystroCommunesError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+      editMaystroCommunesError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
     } finally {
       if (requestId === editMaystroCommunesResolveId) {
         editMaystroCommunesLoading.value = false
@@ -1668,7 +1668,7 @@ ${confirmLink}`
         'DZD'
     } catch (error: any) {
       if (requestId !== editPriceResolveId) return
-      editPriceError.value = error?.data?.statusMessage || error?.data?.message || t('common.error', 'An error occurred. Please try again.')
+      editPriceError.value = error?.data?.statusMessage || error?.data?.message || t('admin.common.error', 'An error occurred. Please try again.')
     } finally {
       if (requestId === editPriceResolveId) {
         editPriceLoading.value = false
@@ -1711,7 +1711,7 @@ ${confirmLink}`
     } catch (error: any) {
       if (requestId !== editMaystroPickupPointsResolveId) return
       editMaystroPickupPoints.value = []
-      editMaystroPickupPointsError.value = error?.data?.statusMessage || error?.data?.message || t('common.error', 'An error occurred. Please try again.')
+      editMaystroPickupPointsError.value = error?.data?.statusMessage || error?.data?.message || t('admin.common.error', 'An error occurred. Please try again.')
     } finally {
       if (requestId === editMaystroPickupPointsResolveId) {
         editMaystroPickupPointsLoading.value = false
@@ -1982,7 +1982,7 @@ ${confirmLink}`
       setTimeout(() => URL.revokeObjectURL(url), 60_000)
     } catch (e: any) {
       console.error('Failed to print bordereau', e)
-      errorMessage.value = e?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+      errorMessage.value = e?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
     }
   }
 
@@ -2077,7 +2077,7 @@ async function confirmDelete() {
     await router.push('/admin/orders')
   } catch (error: any) {
     console.error('Failed to delete order:', error)
-    deleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    deleteError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   }
 }
 
@@ -2228,7 +2228,7 @@ async function saveEdit() {
 
   const shippingValidationError = validateEditShippingSelection()
   if (shippingValidationError) {
-    editErrorMessage.value = `${shippingValidationError} ${t('common.invalid', 'is invalid')}`
+    editErrorMessage.value = `${shippingValidationError} ${t('admin.common.invalid', 'is invalid')}`
     return
   }
 
@@ -2260,7 +2260,7 @@ async function saveEdit() {
     editing.value = false
   } catch (error: any) {
     console.error('Failed to update order:', error)
-    editErrorMessage.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    editErrorMessage.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   } finally {
     editSaving.value = false
   }
@@ -2291,7 +2291,7 @@ async function saveCustomerInfo() {
   if (!order.value || order.value.status !== 'PENDING') return
   const shippingValidationError = validateEditShippingSelection()
   if (shippingValidationError) {
-    customerSaveError.value = `${shippingValidationError} ${t('common.invalid', 'is invalid')}`
+    customerSaveError.value = `${shippingValidationError} ${t('admin.common.invalid', 'is invalid')}`
     return
   }
   customerSaveError.value = ''
@@ -2313,7 +2313,7 @@ async function saveCustomerInfo() {
     editingCustomer.value = false
     showToast(t('admin.common.saved', 'Saved'), 'success')
   } catch (error: any) {
-    customerSaveError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    customerSaveError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   } finally {
     savingCustomer.value = false
   }
@@ -2535,17 +2535,17 @@ async function confirmBlacklist() {
     showToast(t('admin.pages.orders.detail.blacklist.success', 'Added to blacklist'), 'success')
   } catch (error: any) {
     console.error('Blacklist order error:', error)
-    blacklistError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    blacklistError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   }
 }
 
 async function copyToClipboard(text: string) {
   try {
     await navigator.clipboard.writeText(text)
-    showToast(t('common.copied', 'Copied'), 'success')
+    showToast(t('admin.common.copied', 'Copied'), 'success')
   } catch (err) {
     console.error('Failed to copy text: ', err)
-    showToast(t('common.error', 'An error occurred. Please try again.'), 'error')
+    showToast(t('admin.common.error', 'An error occurred. Please try again.'), 'error')
   }
 }
 

@@ -20,8 +20,19 @@
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
-          <MenuItems class="absolute end-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-lg shadow-lg focus:outline-none surface-2 border border-line">
+          <MenuItems class="absolute end-0 z-10 mx-auto mt-2 w-56 origin-top-right rounded-lg shadow-lg focus:outline-none surface-2 border border-line">
             <div class="py-1">
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
+                  :disabled="loading"
+                  @click="scanOpen = true"
+                >
+                  <Icon name="lucide:scan-line" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
+                  {{ t('admin.pages.aiImport.entry.importFromDocument') }}
+                </button>
+              </MenuItem>
               <MenuItem v-slot="{ active }">
                 <button
                   :class="['group flex w-full items-center px-4 py-2 text-sm']"
@@ -858,6 +869,13 @@
 	      </div>
 	    </div>
 	    </Teleport>
+
+	    <AdminAiImportScanUploadModal
+	      :open="scanOpen"
+	      default-kind="PRODUCT_CATALOG"
+	      @close="scanOpen = false"
+	      @created="onScanCreated"
+	    />
 	  </div>
 	</template>
  
@@ -874,6 +892,7 @@ import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useToast } from '~/composables/useToast'
 import { buildProductPricing } from '~/shared/pricing/product-pricing'
 import { extractApiErrorMessage } from '~/shared/http/error-message'
+import AdminAiImportScanUploadModal from '~/components/admin/ai-import/ScanUploadModal.vue'
  
 definePageMeta({
   middleware: 'auth',
@@ -887,6 +906,13 @@ const { showToast } = useToast()
 const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 const router = useRouter()
+
+/** Scanning a supplier catalogue or price list into products. */
+const scanOpen = ref(false)
+const onScanCreated = async (jobId: string) => {
+  scanOpen.value = false
+  await router.push(`/admin/ai-import/${jobId}`)
+}
  
 interface Product {
   id: string

@@ -65,10 +65,10 @@ describe('WhatsApp admin API', () => {
         })
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'WA Admin', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'WA Admin', slug } })
         tenantId = tenant.id
 
-        const other = await prisma.tenant.create({ data: { name: 'WA Other', slug: `${slug}-other` } })
+        const other = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'WA Other', slug: `${slug}-other` } })
         otherTenantId = other.id
 
         const admin = await prisma.user.create({

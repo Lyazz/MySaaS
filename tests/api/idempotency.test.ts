@@ -33,8 +33,8 @@ describe('Idempotent admin writes', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
-            prisma.tenant.create({ data: { name: 'Idempotency Tenant A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Idempotency Tenant B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Idempotency Tenant A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Idempotency Tenant B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

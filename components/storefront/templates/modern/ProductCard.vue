@@ -183,10 +183,14 @@ async function handleAddToCart() {
         </button>
       </div>
 
-      <!-- Static In Stock Badge (Grid Only) -->
+      <!--
+        Stock state used to be hover-only, which meant it did not exist on touch.
+        In/low stock stays a desktop hover flourish; out of stock is always shown,
+        because it blocks the purchase.
+      -->
       <div
         v-if="product.stock > 0 && viewMode !== 'list'"
-        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute bottom-3 end-3 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity duration-300"
       >
         <span
           v-if="isLowStock"
@@ -200,10 +204,10 @@ async function handleAddToCart() {
 
       <div
         v-if="isOutOfStock && viewMode !== 'list'"
-        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute bottom-3 end-3"
       >
         <span class="px-2.5 py-1 bg-red-50/95 backdrop-blur text-red-800 text-[10px] font-bold rounded-full shadow-sm ring-1 ring-red-200">
-          Out of Stock
+          {{ storefrontContent.actions.outOfStock }}
         </span>
       </div>
     

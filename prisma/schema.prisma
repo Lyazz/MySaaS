@@ -17,6 +17,11 @@ model Tenant {
   isOffline       Boolean   @default(false)
   isSuspended     Boolean   @default(false)
   maintenanceMode Boolean   @default(false)
+  /// Null means DRAFT: the public storefront and the public API answer 404 to
+  /// everyone but an authenticated member of this tenant. Set once, by the
+  /// merchant, from the onboarding wizard's publish step. Distinct from
+  /// isOffline, which is the offline-only tier and is super-admin controlled.
+  publishedAt     DateTime?
   archivedAt      DateTime?
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -78,6 +83,9 @@ model Tenant {
   whatsappMessages          WhatsAppMessage[]
   promoCodes                PromoCode[]
   promoCodeRedemptions      PromoCodeRedemption[]
+  aiDocumentJobs            AiDocumentJob[]
+  aiDocumentCorrections     AiDocumentCorrection[]
+  supplierProductAliases    SupplierProductAlias[]
 }
 
 model Cashbox {
@@ -315,6 +323,10 @@ model StoreSettings {
   fontFamily    String  @default("Outfit")
   language      String  @default("fr") // ar | fr | en
 
+  /// Short store tagline shown in onboarding and used as the storefront's
+  /// meta-description fallback.
+  description String?
+
   announcementText      String?
   announcementScrolling Boolean @default(false)
 
@@ -338,12 +350,23 @@ model StoreSettings {
   currencyCode          String  @default("DZD") // ISO currency code
   currencyCountry       String  @default("DZ") // ISO country for flag/locale
 
+  /// Default markup applied to a purchase unit cost when proposing a sale price
+  /// (AI document import, and anywhere else a sale price is derived from cost).
+  /// 30 means "cost + 30%".
+  defaultMarginPercent Decimal @default(30)
+
   whatsappConfirmationTemplate String? // Customizable WhatsApp confirmation message template
 
-  isCompleted              Boolean  @default(false)
-  checklistDismissed       Boolean  @default(false)
-  allowedDeliveryProviders String[] @default(["SELF"])
-  storePickupEnabled       Boolean  @default(false)
+  isCompleted              Boolean   @default(false)
+  /// Resume point for the onboarding wizard, and the timestamp set when the
+  /// merchant chooses "Finish later". While isCompleted is false and
+  /// onboardingExitedAt is null the admin redirects into the wizard; once the
+  /// merchant has stepped out deliberately it stops pulling them back.
+  onboardingStep           Int       @default(0)
+  onboardingExitedAt       DateTime?
+  checklistDismissed       Boolean   @default(false)
+  allowedDeliveryProviders String[]  @default(["SELF"])
+  storePickupEnabled       Boolean   @default(false)
 
   loyaltyEnabled               Boolean @default(false)
   loyaltyMinRedeemPoints       Int     @default(0)
@@ -742,6 +765,7 @@ model ProductVariant {
   purchaseOrderItems PurchaseOrderItem[]
   orderItems         OrderItem[]
   saleItems          SaleItem[]
+  supplierAliases    SupplierProductAlias[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -926,7 +950,9 @@ model Supplier {
 
   purchaseOrders   PurchaseOrder[]
   payments         SupplierPayment[]
-  cashTransactions CashTransaction[] @relation("CashTxSupplier")
+  cashTransactions CashTransaction[]      @relation("CashTxSupplier")
+  aiDocumentJobs   AiDocumentJob[]
+  productAliases   SupplierProductAlias[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -962,6 +988,7 @@ model PurchaseOrder {
   items            PurchaseOrderItem[]
   cashTransactions CashTransaction[]   @relation("CashTxPurchaseOrder")
   supplierPayments SupplierPayment[]
+  aiDocumentJobs   AiDocumentJob[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -994,6 +1021,109 @@ model PurchaseOrderItem {
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, purchaseOrderId])
+  @@index([tenantId, variantId])
+}
+
+/// One scanned document (supplier invoice, delivery note or product catalog)
+/// pushed through Claude vision extraction. The original file lives in the
+/// private bucket; `extraction` keeps the model's verbatim output and `draft`
+/// the merchant's working copy while they review it.
+model AiDocumentJob {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind   String // PURCHASE_INVOICE | DELIVERY_NOTE | PRODUCT_CATALOG
+  status String @default("PENDING") // PENDING | EXTRACTING | READY | CONFIRMED | FAILED | CANCELLED
+
+  documentRef String // s3://<private>/tenants/<id>/ai-documents/... or local://
+  mimeType    String
+  /// Pages billed against the plan's monthly AI scan quota.
+  pageCount   Int    @default(1)
+
+  model        String?
+  inputTokens  Int?
+  outputTokens Int?
+  errorMessage String?
+
+  /// Verbatim structured output from the model. Never mutated after extraction.
+  extraction Json?
+  /// The merchant's working copy: lines, supplier choice, margin, per-cell review state.
+  draft      Json?
+
+  supplierId      String?
+  supplier        Supplier?      @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: SetNull)
+  purchaseOrderId String?
+  purchaseOrder   PurchaseOrder? @relation(fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: SetNull)
+
+  createdByUserId String?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  confirmedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  corrections AiDocumentCorrection[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+/// Every field the merchant changed between what the model extracted and what
+/// they confirmed. Feeds accuracy reporting; the matching half of the feedback
+/// loop lives in SupplierProductAlias.
+model AiDocumentCorrection {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  jobId String
+  job   AiDocumentJob @relation(fields: [tenantId, jobId], references: [tenantId, id], onDelete: Cascade)
+
+  /// null for document-level fields (supplier, reference, totals).
+  lineIndex  Int?
+  field      String // label | quantity | unitCost | salePrice | supplierName | variantMatch | reference | total
+  aiValue    String?
+  userValue  String?
+  /// What the model claimed for that field, so accuracy can be scored per confidence band.
+  confidence Decimal?
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, jobId])
+  @@index([tenantId, field])
+}
+
+/// Remembers that a supplier's line label maps to one of our variants, so the
+/// same supplier's next invoice matches without the merchant repeating the work.
+model SupplierProductAlias {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  /// null means a store-wide alias, used when no supplier-specific row matches.
+  supplierId String?
+  supplier   Supplier? @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: Cascade)
+
+  /// Normalized supplier label (upper-cased, accents and punctuation stripped).
+  rawLabel  String
+  variantId String
+  variant   ProductVariant @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
+
+  hitCount   Int      @default(1)
+  lastSeenAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, supplierId, rawLabel])
+  @@unique([tenantId, id])
+  @@index([tenantId])
   @@index([tenantId, variantId])
 }
 
@@ -2016,7 +2146,7 @@ model VerificationCode {
 
   requestIp String?
   /// Locale the message was rendered in, kept for support requests.
-  locale String?
+  locale    String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -2024,4 +2154,35 @@ model VerificationCode {
   @@index([purpose, destination, createdAt])
   @@index([tokenHash])
   @@index([expiresAt])
+}
+
+/// Platform-wide configuration a super-admin can change without a redeploy.
+///
+/// Deliberately NOT tenant-scoped: this is operator config, not tenant data, so
+/// the usual `tenantId` rule does not apply. Only `requireSuperAdmin` routes
+/// read or write it, and the typed accessors live in `lib/platform-settings.ts`.
+///
+/// One row per namespace (`ai.documents`, …), value shape validated on write.
+model PlatformSetting {
+  key   String @id
+  value Json
+
+  updatedByUserId String?
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+}
+
+/// Super-admin overrides for the quotas hardcoded in `shared/pricing/plans.ts`.
+///
+/// Also platform-level by design. A null column means "no override" — the code
+/// default wins — so an override can always be reverted without guessing what
+/// the original number was.
+model PlanOverride {
+  planCode String @id
+
+  aiScansPerMonth Int?
+
+  updatedByUserId String?
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
 }

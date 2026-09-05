@@ -243,11 +243,22 @@ import PlayfulWishlist from './playful/Wishlist.vue'
 import PlayfulProductLandingPage from './playful/ProductLandingPage.vue'
 import ActivewearProductLandingPage from './activewear/ProductLandingPage.vue'
 
-export type TemplateKey = 'classic' | 'modern' | 'interior' | 'minimal' | 'street' | 'cozy' | 'cyber' | 'stationnery' | 'food' | 'wellness' | 'playful' | 'activewear' | 'chrono' | 'maison' | 'arena' | 'nour' | 'embellir'
+/**
+ * The one list of shipped themes. Anything that needs to enumerate templates --
+ * the onboarding gallery, the preview iframe, appearance settings -- reads this
+ * rather than keeping its own copy; the copies had already drifted to 11 and 15
+ * entries against the 17 that actually exist.
+ */
+export const TEMPLATE_KEYS = [
+  'classic', 'modern', 'interior', 'minimal', 'street', 'cozy', 'cyber', 'stationnery',
+  'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena', 'nour', 'embellir'
+] as const
+
+export type TemplateKey = (typeof TEMPLATE_KEYS)[number]
 export const DEFAULT_TEMPLATE: TemplateKey = 'modern'
 
 export const resolveTemplateKey = (value?: string | null): TemplateKey =>
-  ['classic', 'modern', 'interior', 'minimal', 'street', 'cozy', 'cyber', 'stationnery', 'food', 'wellness', 'playful', 'activewear', 'chrono', 'maison', 'arena', 'nour', 'embellir'].includes(value as any) ? (value as TemplateKey) : DEFAULT_TEMPLATE
+  TEMPLATE_KEYS.includes(value as TemplateKey) ? (value as TemplateKey) : DEFAULT_TEMPLATE
 
 export const homeTemplates = {
   classic: ClassicHome,

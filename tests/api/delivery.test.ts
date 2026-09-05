@@ -34,8 +34,8 @@ describe('Delivery API', () => {
     let deliveryCashboxAId: string
 
     beforeAll(async () => {
-        tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: `tenant-a-${Date.now()}` } })
-        tenantB = await prisma.tenant.create({ data: { name: 'Tenant B', slug: `tenant-b-${Date.now()}` } })
+        tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant A', slug: `tenant-a-${Date.now()}` } })
+        tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant B', slug: `tenant-b-${Date.now()}` } })
 
         const userA = await prisma.user.create({
             data: { email: `a-${Date.now()}@test.com`, role: 'owner', tenantId: tenantA.id }

@@ -25,6 +25,7 @@ describe('device activation API', () => {
   beforeAll(async () => {
     const tenant = await prisma.tenant.create({
       data: {
+        publishedAt: new Date(),
         name: 'Activation Tenant',
         slug,
         isOffline: true,
@@ -34,6 +35,7 @@ describe('device activation API', () => {
 
     const foreignTenant = await prisma.tenant.create({
       data: {
+        publishedAt: new Date(),
         name: 'Foreign Activation Tenant',
         slug: foreignSlug,
         isOffline: false,

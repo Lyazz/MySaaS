@@ -12,7 +12,7 @@ describe('Super-admin payment import API', () => {
     let regularToken: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Payments Tenant', slug: `pay-${Date.now()}` } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Payments Tenant', slug: `pay-${Date.now()}` } })
         tenantId = tenant.id
 
         const [regularUser, superAdmin] = await prisma.$transaction([

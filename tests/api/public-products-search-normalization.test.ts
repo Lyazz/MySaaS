@@ -16,8 +16,8 @@ describe('Public products search normalization', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
-            prisma.tenant.create({ data: { name: 'Search Tenant A', slug: tenantASlug } }),
-            prisma.tenant.create({ data: { name: 'Search Tenant B', slug: tenantBSlug } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Search Tenant A', slug: tenantASlug } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Search Tenant B', slug: tenantBSlug } })
         ])
 
         tenantAId = tenantA.id

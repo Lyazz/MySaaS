@@ -130,7 +130,7 @@ export function useOrderNBA(
           : []),
         {
           id: 'editItems',
-          label: t('common.edit', 'Edit'),
+          label: t('admin.common.edit', 'Edit'),
           icon: 'lucide:pencil',
           tone: 'secondary'
         },
@@ -142,7 +142,7 @@ export function useOrderNBA(
         },
         {
           id: 'delete',
-          label: t('common.delete', 'Delete'),
+          label: t('admin.common.delete', 'Delete'),
           icon: 'lucide:trash-2',
           tone: 'danger'
         },
@@ -184,7 +184,7 @@ export function useOrderNBA(
           },
           {
             id: 'delete',
-            label: t('common.delete', 'Delete'),
+            label: t('admin.common.delete', 'Delete'),
             icon: 'lucide:trash-2',
             tone: 'danger'
           },
@@ -217,7 +217,7 @@ export function useOrderNBA(
         },
         {
           id: 'delete',
-          label: t('common.delete', 'Delete'),
+          label: t('admin.common.delete', 'Delete'),
           icon: 'lucide:trash-2',
           tone: 'danger'
         },

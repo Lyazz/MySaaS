@@ -1,5 +1,15 @@
 import { useAuthStore } from '~/stores/auth'
 
+/**
+ * Pulls a merchant into the setup wizard on their way into the admin -- but only
+ * until they deliberately step out of it.
+ *
+ * This used to redirect on `isCompleted === false` alone, which made the entire
+ * admin unreachable for anyone who got stuck on a step (no product photos to
+ * hand, no delivery account yet). `onboardingExitedAt` records "Finish later",
+ * and once it is set the wizard stops grabbing the wheel; the draft banner and
+ * the getting-started checklist bring them back instead.
+ */
 export default defineNuxtRouteMiddleware(async (to) => {
   if (process.server) return
   if (!to.path.startsWith('/admin')) return
@@ -18,7 +28,8 @@ export default defineNuxtRouteMiddleware(async (to) => {
       })
     }
 
-    if (cached.value && cached.value.isCompleted === false) {
+    const settings = cached.value
+    if (settings && settings.isCompleted === false && !settings.onboardingExitedAt) {
       return navigateTo('/admin/onboarding')
     }
   } catch {

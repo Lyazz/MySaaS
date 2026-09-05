@@ -63,6 +63,12 @@ const facebookPixelId = useState<string | null>(
   'facebookPixelId',
   () => (event?.context as any)?.facebookPixelId ?? null
 );
+// True only when a member of this tenant is previewing their own unpublished
+// storefront; the public gets a 404 before ever reaching this component.
+useState<boolean>(
+  'storefrontDraft',
+  () => (event?.context as any)?.storefrontDraft === true
+);
 
 const faviconUrl = computed(() =>
   resolveFaviconUrl({

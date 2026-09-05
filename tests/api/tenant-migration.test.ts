@@ -32,7 +32,7 @@ describe('tenant migration to an online tier', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Offline Shop', slug, isOffline: true }
+            data: { publishedAt: new Date(), name: 'Offline Shop', slug, isOffline: true }
         })
         tenantId = tenant.id
 
@@ -53,7 +53,7 @@ describe('tenant migration to an online tier', () => {
         })
 
         const adminTenant = await prisma.tenant.create({
-            data: { name: 'Platform', slug: `platform-mig-${stamp}` }
+            data: { publishedAt: new Date(), name: 'Platform', slug: `platform-mig-${stamp}` }
         })
         adminTenantId = adminTenant.id
         const admin = await prisma.user.create({

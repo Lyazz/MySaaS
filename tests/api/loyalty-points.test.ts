@@ -17,7 +17,7 @@ describe('Loyalty points flows', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Loyalty Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Loyalty Tenant', slug }
         })
         tenantId = tenant.id
 

@@ -22,7 +22,7 @@ describe('Admin POS (direct sale) flow', () => {
     let otherSku: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'POS Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'POS Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({
@@ -80,7 +80,7 @@ describe('Admin POS (direct sale) flow', () => {
         })
         customerId = customer.id
 
-        const other = await prisma.tenant.create({ data: { name: 'Other Tenant', slug: `other-${slug}` } })
+        const other = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Other Tenant', slug: `other-${slug}` } })
         otherTenantId = other.id
 
         const otherCustomer = await prisma.customer.create({

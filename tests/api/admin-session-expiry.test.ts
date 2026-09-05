@@ -34,8 +34,8 @@ describe('Tenant admin session expiry and protected-route isolation', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
-            prisma.tenant.create({ data: { name: 'Session Tenant A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Session Tenant B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Session Tenant A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Session Tenant B', slug: slugB } })
         ])
 
         tenantAId = tenantA.id

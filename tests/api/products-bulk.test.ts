@@ -35,7 +35,7 @@ describe('Admin products bulk ops', () => {
     let adminBToken: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Bulk A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Bulk A', slug: slugA } })
         tenantAId = tenantA.id
         const adminA = await prisma.user.create({
             data: { tenantId: tenantAId, email: `admin-${slugA}@example.com`, role: 'admin', passwordHash: 'x' }
@@ -108,7 +108,7 @@ describe('Admin products bulk ops', () => {
         })
         deleteAProduct2Id = toDelete2.id
 
-        const tenantB = await prisma.tenant.create({ data: { name: 'Bulk B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Bulk B', slug: slugB } })
         tenantBId = tenantB.id
         const adminB = await prisma.user.create({
             data: { tenantId: tenantBId, email: `admin-${slugB}@example.com`, role: 'admin', passwordHash: 'x' }

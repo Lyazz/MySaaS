@@ -12,8 +12,8 @@ describe('Meta Pixel Script (tenant-scoped)', () => {
     let tokenA: string
 
     beforeAll(async () => {
-        tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: `tenant-a-fb-${Date.now()}` } })
-        tenantB = await prisma.tenant.create({ data: { name: 'Tenant B', slug: `tenant-b-fb-${Date.now()}` } })
+        tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant A', slug: `tenant-a-fb-${Date.now()}` } })
+        tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant B', slug: `tenant-b-fb-${Date.now()}` } })
 
         const userA = await prisma.user.create({
             data: { email: `fb-a-${Date.now()}@test.com`, role: 'owner', tenantId: tenantA.id }

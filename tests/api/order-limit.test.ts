@@ -13,7 +13,7 @@ describe('Order limit enforcement', () => {
     const basicPlanLimit = getPlanByCode('basic')?.ordersPerMonth ?? 0
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Limit Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Limit Tenant', slug } })
         tenantId = tenant.id
 
         const now = new Date()

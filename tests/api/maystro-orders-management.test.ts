@@ -16,7 +16,7 @@ describe('Maystro Orders Management integration', () => {
     let product: any
 
     beforeAll(async () => {
-        tenant = await prisma.tenant.create({ data: { name: 'Tenant M', slug: `tenant-m-${Date.now()}` } })
+        tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant M', slug: `tenant-m-${Date.now()}` } })
         const user = await prisma.user.create({
             data: { email: `m-${Date.now()}@test.com`, role: 'owner', tenantId: tenant.id }
         })

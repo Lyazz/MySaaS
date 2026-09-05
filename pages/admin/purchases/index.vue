@@ -10,14 +10,32 @@
           {{ t('admin.pages.purchases.index.subtitle') }}
         </p>
       </div>
-      <NuxtLink
-        to="/admin/purchases/create"
-        class="ui-btn ui-btn--primary ui-btn--md"
-      >
-        <Icon name="lucide:plus" class="w-5 h-5" />
-        <span>{{ t('admin.pages.purchases.index.newPurchase') }}</span>
-      </NuxtLink>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="ui-btn ui-btn--secondary ui-btn--md"
+          @click="scanOpen = true"
+        >
+          <Icon name="lucide:scan-line" class="w-5 h-5" />
+          <span>{{ t('admin.pages.aiImport.entry.scan') }}</span>
+        </button>
+
+        <NuxtLink
+          to="/admin/purchases/create"
+          class="ui-btn ui-btn--primary ui-btn--md"
+        >
+          <Icon name="lucide:plus" class="w-5 h-5" />
+          <span>{{ t('admin.pages.purchases.index.newPurchase') }}</span>
+        </NuxtLink>
+      </div>
     </div>
+
+    <AdminAiImportScanUploadModal
+      :open="scanOpen"
+      default-kind="PURCHASE_INVOICE"
+      @close="scanOpen = false"
+      @created="onScanCreated"
+    />
 
     <!-- Filters -->
     <AdminFilterBar
@@ -301,6 +319,7 @@ import BaseSelect from '~/components/ui/BaseSelect.vue'
 import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
 import AdminDateRangeFilter from '~/components/admin/AdminDateRangeFilter.vue'
 import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
+import AdminAiImportScanUploadModal from '~/components/admin/ai-import/ScanUploadModal.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -326,6 +345,14 @@ const { t } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
 const route = useRoute()
 const router = useRouter()
+
+/** Scanning a supplier invoice into a DRAFT purchase order. */
+const scanOpen = ref(false)
+const onScanCreated = async (jobId: string) => {
+  scanOpen.value = false
+  await router.push(`/admin/ai-import/${jobId}`)
+}
+
 const suppliers = ref<Supplier[]>([])
 const users = ref<{ id: string; email: string }[]>([])
 const orders = ref<PurchaseOrder[]>([])

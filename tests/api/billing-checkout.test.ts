@@ -28,7 +28,7 @@ describe('Billing checkout API', () => {
             .send(body)
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Billing Checkout', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Billing Checkout', slug } })
         tenantId = tenant.id
 
         const user = await prisma.user.create({

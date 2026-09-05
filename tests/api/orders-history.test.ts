@@ -22,9 +22,9 @@ describe('Admin order previous orders history', () => {
     let invalidPhoneOrderId: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Orders History A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Orders History A', slug: slugA } })
         tenantAId = tenantA.id
-        const tenantB = await prisma.tenant.create({ data: { name: 'Orders History B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Orders History B', slug: slugB } })
         tenantBId = tenantB.id
 
         const adminA = await prisma.user.create({

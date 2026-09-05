@@ -29,8 +29,8 @@ describe('Admin slug availability endpoints', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
-            prisma.tenant.create({ data: { name: 'Slug Check A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Slug Check B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Slug Check A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Slug Check B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

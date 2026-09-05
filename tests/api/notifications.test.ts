@@ -35,8 +35,8 @@ describe('Admin notifications', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
-            prisma.tenant.create({ data: { name: 'Notifications A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Notifications B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Notifications A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Notifications B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

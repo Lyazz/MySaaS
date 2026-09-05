@@ -181,7 +181,8 @@
           "question": "Qu’est-ce qui change entre les offres pour le moment ?",
           "answer": "Pour l’instant, le principal changement est le nombre de commandes incluses par mois."
         }
-      }
+      },
+      "eyebrow": "FAQ"
     },
     "testimonials": {
       "eyebrow": "Témoignages",
@@ -721,6 +722,28 @@
           "orders": "Commandes, produits et livraison au même endroit",
           "workspace": "Un espace clair pour votre équipe",
           "performance": "Une vue rapide sur les résultats du jour"
+        },
+        "carousel": {
+          "analytics": {
+            "title": "Analyses avancées",
+            "description": "Suivez vos tunnels de vente, vos taux de conversion et le comportement de vos clients."
+          },
+          "orders": {
+            "title": "Gestion des commandes",
+            "description": "Traitez, suivez et expédiez les commandes de vos clients en toute simplicité."
+          },
+          "revenue": {
+            "title": "Suivi du chiffre d'affaires",
+            "description": "Une vision en temps réel des performances de votre boutique, d'un coup d'œil."
+          },
+          "shipping": {
+            "title": "Expédition intelligente",
+            "description": "Envoi automatique vers plus de 50 transporteurs, avec webhooks en temps réel et suivi automatique."
+          },
+          "catalog": {
+            "title": "Catalogue produits",
+            "description": "Gérez les variantes, le stock et les prix depuis un seul endroit."
+          }
         }
       },
       "form": {
@@ -947,7 +970,8 @@
     "features": {
       "ordersPerMonth": "{count} commandes/mois",
       "maxProducts": "Jusqu’à {count} produits",
-      "maxPixels": "{count} pixels marketing"
+      "maxPixels": "{count} pixels marketing",
+      "aiScansPerMonth": "{count} scans de documents par IA par mois"
     },
     "page": {
       "title": "Tarifs simples et transparents",
@@ -1566,6 +1590,11 @@
           "showMore": "Afficher plus"
         }
       }
+    },
+    "draftBar": {
+      "title": "Boutique en brouillon",
+      "hint": "Vous seul pouvez la voir. Les visiteurs reçoivent une erreur 404.",
+      "cta": "Publier"
     }
   },
   "admin": {
@@ -1645,7 +1674,19 @@
       "leaveTitle": "Quitter sans enregistrer ?",
       "leaveMessage": "Vous avez des modifications non enregistrées. Elles seront perdues si vous quittez cette page.",
       "leaveConfirm": "Quitter la page",
-      "clickToUpload": "Cliquez pour téléverser votre reçu"
+      "clickToUpload": "Cliquez pour téléverser votre reçu",
+      "confirmDelete": "Voulez-vous vraiment supprimer cet élément ?",
+      "done": "Terminé",
+      "remove": "Retirer",
+      "retry": "Réessayer",
+      "receive": "Réceptionner",
+      "receiveAll": "Tout réceptionner",
+      "recordPayment": "Enregistrer un paiement",
+      "invalid": "est invalide",
+      "moreActions": "Plus d'actions",
+      "errors": {
+        "amountTooHigh": "Le montant ne peut pas dépasser le solde restant."
+      }
     },
     "confirmModal": {
       "defaults": {
@@ -2006,7 +2047,9 @@
             "productsRecap": "Liste des produits commandés",
             "total": "Montant total avec livraison",
             "address": "Adresse de livraison complète (y compris wilaya/commune)",
-            "confirmLink": "Le lien de confirmation sécurisé"
+            "confirmLink": "Le lien de confirmation sécurisé",
+            "payment": "Paiement",
+            "remaining": "Restant"
           },
           "preview": "Aperçu"
         }
@@ -2196,7 +2239,8 @@
         "sku": "SKU",
         "barcode": "Code-barres",
         "active": "Actif",
-        "images": "Images"
+        "images": "Images",
+        "promotion": "Promotion"
       },
       "actions": {
         "manageImages": "Gérer ({count})",
@@ -2239,7 +2283,8 @@
         "suggestSkuFailed": "Impossible de suggérer un SKU",
         "suggestSkuUnavailable": "Le SKU suggéré n’est pas disponible",
         "saveImagesFailed": "Impossible d’enregistrer les images"
-      }
+      },
+      "promotionSimpleProduct": "Utilisez l'onglet Promotions du produit pour la variante par défaut d'un produit simple."
     },
     "productOptionsEditor": {
       "title": "Options",
@@ -2445,6 +2490,16 @@
             "label": "Embellir",
             "description": "Zellige émaillé profond, plâtre chaud et titrage à fort contraste.",
             "storeTypes": "Soins de la peau, cosmétiques, bain et corps, bien-être"
+          },
+          "interior": {
+            "label": "Interior",
+            "description": "Des mises en page calmes et aérées, qui laissent respirer.",
+            "storeTypes": "Mobilier, décoration, luminaires"
+          },
+          "minimal": {
+            "label": "Minimal",
+            "description": "Épuré, centré sur le produit lui-même.",
+            "storeTypes": "Accessoires, papeterie, tech"
           }
         }
       },
@@ -2611,7 +2666,8 @@
         },
         "category": {
           "label": "Catégorie",
-          "placeholder": "Sélectionner une catégorie (optionnel)"
+          "placeholder": "Sélectionner une catégorie (optionnel)",
+          "hintMulti": "Sélectionnez une ou plusieurs catégories ou sous-catégories."
         },
         "isActive": {
           "label": "Le produit est actif et visible pour les clients"
@@ -2621,6 +2677,27 @@
           "hint": "Les produits non répertoriés sont masqués de la grille boutique, de la recherche et des produits associés, mais restent accessibles via leur lien direct.",
           "listed": "Répertorié — affiché dans la grille boutique, la recherche et les produits associés",
           "unlisted": "Non répertorié — accessible uniquement via le lien direct"
+        },
+        "isClearance": {
+          "label": "Produit en déstockage",
+          "hint": "Ce produit bénéficie de la remise déstockage configurée dans Réglages > Fonctionnel. Un produit ne peut pas être à la fois en déstockage et en promotion.",
+          "blockedByPromotion": "Désactivez la promotion pour pouvoir activer le déstockage."
+        },
+        "isPromotionActive": {
+          "label": "Activer la promotion"
+        },
+        "promotionalPrice": {
+          "label": "Prix promotionnel",
+          "placeholder": "Nouveau prix"
+        },
+        "promotionStartDate": {
+          "label": "Date de début (facultatif)"
+        },
+        "promotionEndDate": {
+          "label": "Date de fin (requise pour le compte à rebours)"
+        },
+        "showCountdown": {
+          "label": "Afficher le compte à rebours"
         }
       },
       "category": {
@@ -2644,6 +2721,11 @@
           "listed": "Répertoriée — affichée dans la navigation et les listes",
           "unlisted": "Non répertoriée — accessible uniquement via le lien direct",
           "unlistedNotice": "Cette catégorie est masquée de la navigation et des listes de la boutique. Ses produits sont également masqués de la grille boutique sauf s'ils appartiennent à une autre catégorie répertoriée. La page de la catégorie reste accessible via son lien direct."
+        },
+        "parent": {
+          "label": "Catégorie parente",
+          "hint": "Facultatif — choisissez une catégorie parente pour créer une sous-catégorie.",
+          "none": "Aucune (catégorie principale)"
         }
       },
       "customer": {
@@ -2689,6 +2771,10 @@
         "address": {
           "label": "Adresse",
           "placeholder": "Adresse du fournisseur"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Notes complémentaires…"
         }
       }
     },
@@ -3005,7 +3091,11 @@
             "openingFloat": "Fond de caisse",
             "expectedClosing": "Attendu",
             "closingCount": "Réel",
-            "difference": "Écart"
+            "difference": "Écart",
+            "opened": "Ouverte le",
+            "closed": "Fermée le",
+            "opening": "Fonds d'ouverture",
+            "closing": "Comptage de clôture"
           },
           "expected": {
             "loading": "Calcul du montant attendu…",
@@ -3671,7 +3761,8 @@
             "allCategories": "Toutes les catégories",
             "status": "Statut",
             "allStatus": "Tous les statuts",
-            "lowStock": "Stock bas"
+            "lowStock": "Stock bas",
+            "clearance": "Déstockage"
           },
           "loading": "Chargement des produits…",
           "empty": {
@@ -3697,7 +3788,9 @@
             "actions": "Actions",
             "uncategorized": "Sans catégorie",
             "lowStock": "Stock bas",
-            "outOfStock": "Rupture de stock"
+            "outOfStock": "Rupture de stock",
+            "clearance": "Déstockage",
+            "selectAllHint": "Sélectionne tous les produits correspondant aux filtres actuels (toutes les pages)"
           },
           "links": {
             "product": "Produit",
@@ -3755,9 +3848,16 @@
               "category": "Catégorie",
               "noChange": "Aucun changement",
               "clearCategory": "Supprimer la catégorie",
-              "propagatePrice": "Mettre à jour aussi les prix des variants"
+              "propagatePrice": "Mettre à jour aussi les prix des variants",
+              "clearance": "Déstockage",
+              "clearanceHint": "Les produits avec une promotion active sont ignorés.",
+              "clearanceOn": "Marquer en déstockage",
+              "clearanceOff": "Retirer du déstockage",
+              "clearanceSkippedSuffix": "produit(s) ignoré(s) car en promotion active."
             }
-          }
+          },
+          "loadingError": "Échec du chargement des produits",
+          "categoriesLoadError": "Échec du chargement des catégories"
         },
         "create": {
           "metaTitle": "Créer un produit",
@@ -3766,7 +3866,8 @@
           "subtitle": "Ajoutez un nouveau produit à votre catalogue",
           "submit": "Créer le produit",
           "errors": {
-            "createFailed": "Impossible de créer le produit. Veuillez réessayer."
+            "createFailed": "Impossible de créer le produit. Veuillez réessayer.",
+            "title": "Impossible de créer le produit brouillon"
           }
         },
         "edit": {
@@ -3786,7 +3887,8 @@
             "general": "Général",
             "description": "Description de la landing page",
             "variants": "Variants / Stock",
-            "bundles": "Bundles"
+            "bundles": "Bundles",
+            "promotions": "Promotions"
           },
           "links": {
             "label": "Liens",
@@ -3803,7 +3905,20 @@
           "variantsTab": {
             "title": "Options / Variants / Stock",
             "showArchived": "Afficher les variants archivées",
-            "archivedCount": "Archivées : {count}"
+            "archivedCount": "Archivées : {count}",
+            "pricingHint": "Gérez ici les prix de vente, les coûts, le stock et les promotions par variante.",
+            "allocationTitle": "Répartissez le stock avant d'utiliser ces variantes",
+            "allocationMessage": "Le stock existant est encore rattaché à la variante source masquée. Répartissez le stock total, le stock réservé et le stock de sécurité entre les variantes actives pour le rendre à nouveau vendable.",
+            "allocateAction": "Répartir le stock",
+            "allocationSaved": "Répartition du stock enregistrée",
+            "allocationBalanced": "La répartition est équilibrée",
+            "allocationUnbalanced": "La répartition doit correspondre exactement aux soldes de la source masquée",
+            "onHandShort": "en stock",
+            "reservedShort": "réservé",
+            "safetyShort": "sécurité",
+            "totalOnHand": "Stock réparti",
+            "totalReserved": "Réservé réparti",
+            "totalSafety": "Sécurité répartie"
           },
           "bundlesTab": {
             "title": "Offres en bundle",
@@ -3829,6 +3944,19 @@
             "bundlesLoadFailed": "Impossible de charger les offres bundle",
             "bundlesSaveFailed": "Impossible d’enregistrer l’offre bundle",
             "bundlesDeleteFailed": "Impossible de supprimer l’offre bundle"
+          },
+          "noCategories": "Aucune catégorie disponible",
+          "generalTab": {
+            "variantPricingTitle": "Le prix de vente se gère dans l'onglet Variantes",
+            "variantPricingMessage": "Définissez le prix de vente de ce produit dans l'onglet Variantes. Les produits simples utilisent leur variante par défaut, et les produits à options utilisent chaque variante sélectionnable."
+          },
+          "promotions": {
+            "variantPromotionTitle": "Utilisez les promotions par variante pour ce produit",
+            "variantPromotionMessage": "Ce produit possède des variantes sélectionnables. Les promotions au niveau du produit sont désactivées : chaque variante gère désormais son propre prix promotionnel, sa période et son compte à rebours."
+          },
+          "metaPixels": {
+            "title": "Pixels Meta",
+            "subtitle": "Choisissez les pixels déclenchés sur la page de ce produit."
           }
         }
       },
@@ -3945,7 +4073,9 @@
           "emptyCart": "Le panier est vide",
           "itemsTotal": "Total des articles",
           "inStock": "en stock",
-          "submit": "Créer la commande"
+          "submit": "Créer la commande",
+          "pickupPoint": "Stop desk",
+          "selfDelivery": "Livraison par mes soins"
         },
         "badges": {
           "destockage": "Déstockage"
@@ -3978,8 +4108,14 @@
             "total": "Total",
             "status": "Statut",
             "date": "Date",
-            "actions": "Actions"
-          }
+            "actions": "Actions",
+            "delivery": "Livraison",
+            "paymentStatus": "Paiement"
+          },
+          "bulkDeleteBtn": "Supprimer la sélection",
+          "selectedCount": "{count} sélectionnée(s)",
+          "deleteOneConfirm": "Supprimer cette commande ? Seules les commandes non confirmées (en attente) peuvent être supprimées.",
+          "deleteManyConfirm": "Supprimer {count} commandes ? Seules les commandes non confirmées (en attente) peuvent être supprimées."
         },
         "blacklist": {
           "title": "Liste noire des commandes",
@@ -4144,7 +4280,9 @@
         },
         "modals": {
           "payment": {
-            "title": "Enregistrer le paiement"
+            "title": "Enregistrer le paiement",
+            "subtitle": "Enregistrer un nouveau paiement pour cette commande.",
+            "confirm": "Enregistrer le paiement"
           }
         }
       },
@@ -4459,69 +4597,145 @@
         "metaTitle": "Configuration de la boutique",
         "title": "Configuration de la boutique",
         "subtitle": "Configurez votre boutique en quelques étapes.",
-        "loadingSettings": "Chargement des paramètres…",
+        "loadingSettings": "Chargement de vos paramètres…",
+        "finishLater": "Terminer plus tard",
         "progress": {
           "stepOf": "Étape {current} sur {total}"
         },
         "steps": {
-          "storeInfo": "Infos boutique",
-          "template": "Choisir un template",
-          "brandColor": "Couleur de marque",
-          "language": "Langue",
+          "storeInfo": "Votre boutique",
+          "template": "Thème",
+          "brandColor": "Couleur",
           "firstProduct": "Premier produit",
-          "done": "C’est fait !"
+          "delivery": "Livraison",
+          "publish": "Mise en ligne"
+        },
+        "preview": {
+          "eyebrow": "Aperçu en direct",
+          "desktop": "Ordinateur",
+          "mobile": "Mobile"
         },
         "storeInfo": {
           "title": "Parlez-nous de votre boutique",
+          "subtitle": "Le nom et le logo que vos clients verront sur chaque page.",
           "nameLabel": "Nom de la boutique",
-          "namePlaceholder": "Ma Boutique",
-          "logoLabel": "Logo de la boutique",
-          "logoHint": "Recommandé : PNG ou SVG 200×200px",
-          "logoUpload": "Télécharger le logo",
+          "namePlaceholder": "Ma boutique",
+          "logoLabel": "Logo",
+          "logoHint": "Recommandé : PNG ou SVG de 200×200 px",
+          "logoUpload": "Téléverser un logo",
           "logoChange": "Changer le logo",
-          "descriptionLabel": "Courte description (optionnel)",
+          "logoRemove": "Retirer",
+          "descriptionLabel": "Courte description",
+          "descriptionHint": "Utilisée comme description de votre boutique dans les résultats de recherche.",
           "descriptionPlaceholder": "Quelques mots sur votre boutique…"
         },
+        "template": {
+          "title": "Choisissez un thème",
+          "subtitle": "Chaque thème est une boutique complète. Vous pourrez en changer plus tard.",
+          "searchPlaceholder": "Rechercher un thème…",
+          "buy": "ACHETER",
+          "audiences": {
+            "fashion": "Mode",
+            "beauty": "Beauté",
+            "food": "Alimentation",
+            "tech": "Tech",
+            "home": "Maison",
+            "kids": "Enfants"
+          },
+          "specimens": {
+            "classic": "Élégant & intemporel",
+            "modern": "Minimaliste & moderne",
+            "interior": "Maison & décoration",
+            "minimal": "Essentiel & épuré",
+            "street": "Drop limité",
+            "cozy": "Doux & chaleureux",
+            "cyber": "Tech nouvelle génération",
+            "stationnery": "Élégance papeterie",
+            "food": "Saveurs artisanales",
+            "wellness": "Bio & naturel",
+            "playful": "Candy kawaii",
+            "activewear": "Haute performance",
+            "chrono": "Accessoires de luxe",
+            "maison": "Pistache luxe",
+            "arena": "Performance esport",
+            "nour": "Élégance drapée",
+            "embellir": "Beauté & bien-être"
+          }
+        },
         "brand": {
-          "title": "Couleur principale",
+          "title": "Votre couleur de marque",
+          "subtitle": "Boutons, liens et accents de toute votre boutique.",
+          "suggested": "Suggestions",
           "pickColor": "Choisir une couleur",
           "hexValue": "Valeur hexadécimale",
-          "example": "Exemple : {value}",
-          "preview": "Aperçu",
-          "primaryButton": "Bouton principal"
-        },
-        "template": {
-          "title": "Template de boutique"
-        },
-        "language": {
-          "title": "Langue",
-          "label": "Langue",
-          "rtlHint": "L’arabe activera la mise en page de droite à gauche."
+          "hexInvalid": "Saisissez une couleur hexadécimale à six chiffres, comme #0D9488.",
+          "contrastWarning": "Cette couleur est très claire. Le texte de vos boutons risque d’être illisible."
         },
         "firstProduct": {
           "title": "Ajoutez votre premier produit",
-          "subtitle": "Vous pourrez en ajouter d’autres depuis la section Produits.",
+          "subtitle": "Une boutique a besoin d’un produit avant d’ouvrir. Vous en ajouterez d’autres ensuite.",
+          "created": "Produit créé. Vous pouvez le modifier à tout moment depuis Produits.",
           "nameLabel": "Nom du produit",
-          "namePlaceholder": "ex. T-Shirt, Coque de téléphone…",
+          "namePlaceholder": "ex. T-shirt, coque de téléphone…",
           "priceLabel": "Prix (DZD)",
-          "imageLabel": "Image du produit (optionnel)",
-          "imageUpload": "Télécharger une image",
-          "imageChange": "Changer l’image",
-          "skipLink": "Passer pour l’instant",
-          "errorCreate": "Échec de la création du produit. Vous pouvez passer et l’ajouter plus tard."
+          "imageLabel": "Image du produit",
+          "imageUpload": "Téléverser une image",
+          "imageChange": "Changer l’image"
+        },
+        "delivery": {
+          "title": "Comment allez-vous livrer ?",
+          "subtitle": "Choisissez au moins une option. Modifiable à tout moment.",
+          "required": "Choisissez au moins un mode de livraison pour ouvrir votre boutique.",
+          "carrierNote": "Connectez l’API du transporteur plus tard dans",
+          "options": {
+            "SELF": {
+              "label": "Je livre moi-même",
+              "hint": "Vos propres livreurs, ou vous."
+            },
+            "PICKUP": {
+              "label": "Retrait en boutique",
+              "hint": "Le client vient chercher sa commande."
+            },
+            "MAYSTRO": {
+              "label": "Maystro Delivery",
+              "hint": "Transporteur national."
+            },
+            "YALIDINE": {
+              "label": "Yalidine",
+              "hint": "Transporteur national."
+            }
+          }
+        },
+        "publish": {
+          "title": "Prêt à ouvrir ?",
+          "subtitle": "Votre boutique reste privée tant que vous ne l’avez pas publiée.",
+          "liveTitle": "Votre boutique est en ligne",
+          "liveSubtitle": "Toute personne disposant du lien peut désormais commander.",
+          "cta": "Publier ma boutique",
+          "statusDraft": "Brouillon — vous seul pouvez la voir.",
+          "statusLive": "En ligne — ouverte aux clients.",
+          "blockedTitle": "Avant l’ouverture :",
+          "noProduct": "Aucun pour l’instant",
+          "noDelivery": "Aucun pour l’instant",
+          "missing": {
+            "product": "Ajoutez au moins un produit",
+            "delivery": "Choisissez au moins un mode de livraison"
+          }
         },
         "done": {
-          "title": "Votre boutique est prête !",
-          "subtitle": "Voici ce que vous avez configuré :",
-          "storeUrlLabel": "URL de votre boutique",
-          "offlineNote": "Votre boutique est actuellement hors ligne. Publiez-la depuis le tableau de bord quand vous serez prêt.",
-          "ctaDashboard": "Aller au tableau de bord",
-          "ctaProducts": "Ajouter des produits"
+          "storeUrlLabel": "L’adresse de votre boutique",
+          "ctaDashboard": "Aller au tableau de bord"
         },
-        "saveFinish": "Terminer la configuration",
         "errors": {
-          "loadFailed": "Impossible de charger les paramètres.",
-          "saveFailed": "Impossible de sauvegarder les paramètres."
+          "loadFailed": "Échec du chargement des paramètres.",
+          "saveFailed": "Échec de l’enregistrement des paramètres.",
+          "publishFailed": "Échec de la publication de votre boutique.",
+          "uploadFailed": "Échec du téléversement. Réessayez.",
+          "nameRequired": "Votre boutique a besoin d’un nom."
+        },
+        "language": {
+          "label": "Langue de la boutique",
+          "rtlHint": "L'arabe affiche votre boutique de droite à gauche."
         }
       },
       "gettingStarted": {
@@ -4537,7 +4751,9 @@
           "publish": "Publier votre boutique"
         },
         "publishBtn": "Publier maintenant",
-        "publishing": "Publication…"
+        "publishing": "Publication…",
+        "publishBlocked": "Ajoutez d’abord un produit et un mode de livraison.",
+        "publishMissing": "Encore nécessaire : {items}"
       },
       "purchases": {
         "index": {
@@ -4618,7 +4834,9 @@
             "itemsOrdered": "Articles commandés",
             "itemsReceived": "Articles reçus",
             "estimatedTotal": "Coût total estimé",
-            "notesPlaceholder": "Notes et pièces jointes bientôt disponibles"
+            "notesPlaceholder": "Notes et pièces jointes bientôt disponibles",
+            "paidAmount": "Montant payé",
+            "balance": "Solde"
           },
           "items": {
             "title": "Articles de la commande",
@@ -4950,6 +5168,126 @@
           "title": "Supprimer ce code promo ?",
           "message": "{code} ne fonctionnera plus au paiement. Les commandes passees gardent le code utilise."
         }
+      },
+      "aiImport": {
+        "title": "Import de documents par IA",
+        "kicker": "Import IA",
+        "entry": {
+          "scan": "Scanner un document",
+          "importFromDocument": "Importer depuis un document"
+        },
+        "kinds": {
+          "invoice": "Facture fournisseur",
+          "invoiceHint": "Devient un bon d'achat brouillon",
+          "deliveryNote": "Bon de livraison",
+          "deliveryNoteHint": "BL du fournisseur",
+          "catalog": "Catalogue ou liste de prix",
+          "catalogHint": "Crée uniquement des produits",
+          "invoiceTrait": "Comporte des quantités, des prix unitaires et un total à payer.",
+          "deliveryNoteTrait": "Comporte des quantités, généralement sans les prix.",
+          "catalogTrait": "Comporte des prix, sans quantités commandées."
+        },
+        "upload": {
+          "title": "Scanner un document",
+          "intro": "Photographiez ou importez un document fournisseur. L'IA le lit, et vous vérifiez chaque ligne avant tout enregistrement.",
+          "kindLabel": "De quel document s'agit-il ?",
+          "dropHint": "Déposez le fichier ici",
+          "formats": "JPEG, PNG, WebP ou PDF · 10 Mo maximum · 10 pages",
+          "choose": "Choisir un fichier",
+          "uploading": "Envoi en cours…",
+          "submit": "Lire le document",
+          "tips": {
+            "title": "Pour une lecture la plus fiable possible",
+            "frame": "Cadrez la page entière, y compris la ligne des totaux.",
+            "flat": "Posez le document à plat et photographiez-le bien de face, sans angle.",
+            "light": "Lumière uniforme — évitez l'ombre de votre main ou du téléphone.",
+            "focus": "Vérifiez que les quantités manuscrites sont nettes avant d'envoyer.",
+            "pages": "Plusieurs pages ? Envoyez un PDF plutôt que plusieurs photos."
+          }
+        },
+        "review": {
+          "subtitle": "Vérifiez chaque ligne, puis importez. Rien n'est enregistré avant votre confirmation.",
+          "reading": "Lecture de votre document…",
+          "readingHint": "Cela prend jusqu'à une minute pour un document de plusieurs pages. Vous pouvez quitter cette page et revenir.",
+          "originalTitle": "Document original",
+          "openOriginal": "Ouvrir l'original dans un nouvel onglet",
+          "zoomIn": "Agrandir",
+          "zoomOut": "Réduire",
+          "noPreview": "Aperçu indisponible",
+          "noPreviewHint": "Les valeurs extraites restent affichées à droite.",
+          "detailsTitle": "Détails du document",
+          "reference": "N° du document",
+          "issuedAt": "Date d'émission",
+          "modelNotes": "Remarque de l'IA : {notes}",
+          "needsReview": "{count} valeur(s) à vérifier",
+          "needsReviewHint": "Les cases surlignées sont celles dont l'IA n'était pas sûre. Vérifiez-les, puis importez.",
+          "totalsMismatch": "Le total des lignes est de {computed} alors que le document indique {printed}. Vérifiez les quantités.",
+          "failedTitle": "Ce document n'a pas pu être lu",
+          "failedHint": "Essayez une photo plus nette et mieux éclairée de la facture elle-même.",
+          "tryAgain": "Essayer un autre document",
+          "alreadyImported": "Déjà importé",
+          "alreadyImportedHint": "Ce document a déjà été transformé en bon d'achat.",
+          "openPurchase": "Ouvrir le bon d'achat"
+        },
+        "supplier": {
+          "title": "Fournisseur",
+          "selectLabel": "Fournisseur",
+          "createOption": "Créer « {name} »",
+          "noneOption": "Aucun fournisseur",
+          "nameLabel": "Nom du fournisseur",
+          "nameHint": "C'est ce que l'IA a lu sur le document.",
+          "phoneLabel": "Téléphone",
+          "addressLabel": "Adresse",
+          "matchedNote": "Correspond à {percent} % à un fournisseur existant."
+        },
+        "margin": {
+          "label": "Marge %",
+          "hint": "Appliquée au prix d'achat",
+          "apply": "Recalculer les prix de vente",
+          "pinnedNote": "{count} prix saisi(s) à la main sont conservés."
+        },
+        "table": {
+          "title": "Lignes ({count})",
+          "total": "Total {total}",
+          "label": "Sur le document",
+          "product": "Votre produit",
+          "quantity": "Qté",
+          "unitCost": "Prix d'achat",
+          "salePrice": "Prix de vente",
+          "margin": "Marge",
+          "actions": "Actions",
+          "skip": "Ignorer cette ligne",
+          "include": "Remettre cette ligne",
+          "unpin": "Suivre à nouveau la marge",
+          "emptyTitle": "Aucune ligne trouvée",
+          "emptyHint": "L'IA n'a trouvé aucune ligne de produit dans ce document."
+        },
+        "match": {
+          "createNew": "Créer un nouveau produit",
+          "willCreate": "sera créé",
+          "source": {
+            "barcode": "Code-barres",
+            "sku": "Référence",
+            "alias": "Mémorisé",
+            "fuzzy": "Nom similaire",
+            "none": "Non associé"
+          }
+        },
+        "confirm": {
+          "lines": "lignes",
+          "units": "unités",
+          "discard": "Abandonner ce scan",
+          "submit": "Importer",
+          "done": "Document importé."
+        },
+        "errors": {
+          "tooLarge": "Le document doit faire moins de 10 Mo.",
+          "uploadFailed": "Le document n'a pas pu être envoyé."
+        }
+      },
+      "devices": {
+        "title": "Gestion des appareils",
+        "subtitle": "Consultez les appareils et la capacité d'activation, et générez des codes d'activation hors ligne."
       }
     },
     "validation": {
@@ -5090,9 +5428,11 @@
     "nav": {
       "dashboard": "Tableau de bord",
       "tenants": "Tenants",
+      "ai": "IA",
       "analytics": "Analytique",
       "auditLogs": "Journal d’audit",
-      "payments": "Paiements"
+      "payments": "Paiements",
+      "devices": "Appareils"
     },
     "login": {
       "title": "Super Admin",

@@ -20,9 +20,9 @@ describe('Orders delete (unconfirmed only)', () => {
     let staffNoDeleteToken: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant A', slug: slugA } })
         tenantAId = tenantA.id
-        const tenantB = await prisma.tenant.create({ data: { name: 'Tenant B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant B', slug: slugB } })
         tenantBId = tenantB.id
 
         const adminA = await prisma.user.create({

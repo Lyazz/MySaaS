@@ -41,7 +41,7 @@ describe('Default promo code presets', () => {
 
     it('seeds all 6 presets, inactive, for a brand-new tenant', async () => {
         const slug = `preset-seed-${Date.now()}`
-        const tenant = await prisma.tenant.create({ data: { name: 'Preset Seed', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Preset Seed', slug } })
         createdTenantIds.push(tenant.id)
 
         await prisma.$transaction((tx) => seedDefaultPromoCodes(tx, tenant.id))
@@ -75,7 +75,7 @@ describe('Default promo code presets', () => {
 
     it('is idempotent: running it again on the same tenant creates nothing new', async () => {
         const slug = `preset-idem-${Date.now()}`
-        const tenant = await prisma.tenant.create({ data: { name: 'Preset Idempotent', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Preset Idempotent', slug } })
         createdTenantIds.push(tenant.id)
 
         await prisma.$transaction((tx) => seedDefaultPromoCodes(tx, tenant.id))
@@ -87,7 +87,7 @@ describe('Default promo code presets', () => {
 
     it('does not touch a code the merchant already renamed onto one of the preset strings', async () => {
         const slug = `preset-preserve-${Date.now()}`
-        const tenant = await prisma.tenant.create({ data: { name: 'Preset Preserve', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Preset Preserve', slug } })
         createdTenantIds.push(tenant.id)
 
         // A merchant-owned code that happens to collide with a preset's code string.
@@ -116,8 +116,8 @@ describe('Default promo code presets', () => {
     it('scopes presets to the tenant that owns them', async () => {
         const slugA = `preset-scope-a-${Date.now()}`
         const slugB = `preset-scope-b-${Date.now()}`
-        const tenantA = await prisma.tenant.create({ data: { name: 'Preset Scope A', slug: slugA } })
-        const tenantB = await prisma.tenant.create({ data: { name: 'Preset Scope B', slug: slugB } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Preset Scope A', slug: slugA } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Preset Scope B', slug: slugB } })
         createdTenantIds.push(tenantA.id, tenantB.id)
 
         await prisma.$transaction((tx) => seedDefaultPromoCodes(tx, tenantA.id))

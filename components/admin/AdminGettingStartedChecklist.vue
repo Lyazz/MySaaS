@@ -52,7 +52,8 @@
         <button
           v-if="item.key === 'publish' && !item.done"
           type="button"
-          :disabled="publishing"
+          :disabled="publishing || data?.canPublish === false"
+          :title="data?.canPublish === false ? t('admin.pages.gettingStarted.publishBlocked') : undefined"
           class="text-xs px-2.5 py-1 rounded-lg font-medium [background:var(--brand)] text-brand-contrast disabled:opacity-50"
           @click="publishStore"
         >
@@ -67,6 +68,8 @@
         </NuxtLink>
       </li>
     </ul>
+
+    <p v-if="publishError" class="ui-error mt-3">{{ publishError }}</p>
   </div>
 </template>
 
@@ -83,11 +86,14 @@ interface ChecklistData {
   hasDelivery: boolean
   isPublished: boolean
   checklistDismissed: boolean
+  canPublish: boolean
+  missingToPublish: string[]
 }
 
 const data = ref<ChecklistData | null>(null)
 const dismissed = ref(false)
 const publishing = ref(false)
+const publishError = ref('')
 
 const items = computed(() => [
   { key: 'logo',     done: data.value?.hasLogo ?? false,       label: t('admin.pages.gettingStarted.items.logo'),     href: '/admin/settings/appearance' },
@@ -106,7 +112,10 @@ async function fetchChecklist() {
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
     if (data.value.checklistDismissed) dismissed.value = true
-  } catch {}
+  } catch {
+    // The checklist is a nudge, not a blocker: a failed fetch just leaves the
+    // card empty rather than breaking the dashboard around it.
+  }
 }
 
 async function dismiss() {
@@ -120,13 +129,23 @@ async function dismiss() {
 
 async function publishStore() {
   publishing.value = true
+  publishError.value = ''
   try {
     await $fetch('/api/admin/store-settings/publish', {
       method: 'PATCH',
       headers: { Authorization: `Bearer ${authStore.token}` }
     })
     await fetchChecklist()
-  } catch {} finally {
+  } catch (e: any) {
+    // A refusal names what the store is still missing; swallowing it left the
+    // merchant clicking a button that silently did nothing.
+    const missing: string[] = e?.data?.missing ?? []
+    publishError.value = missing.length
+      ? t('admin.pages.gettingStarted.publishMissing', {
+          items: missing.map((m) => t(`admin.pages.onboarding.publish.missing.${m}`)).join(', ')
+        })
+      : (e?.data?.statusMessage || t('admin.pages.onboarding.errors.publishFailed'))
+  } finally {
     publishing.value = false
   }
 }

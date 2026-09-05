@@ -4,7 +4,7 @@
       v-model="singleDeleteOpen"
       :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
       :message="t('admin.pages.orders.index.deleteOneConfirm', 'Delete this order? Only unconfirmed (PENDING) orders can be deleted.')"
-      :confirm-text="t('common.delete', 'Delete')"
+      :confirm-text="t('admin.common.delete', 'Delete')"
       :error="singleDeleteError"
       @confirm="confirmSingleDelete"
       @cancel="singleDeleteError = null"
@@ -14,7 +14,7 @@
       v-model="bulkDeleteOpen"
       :title="t('admin.confirmModal.defaults.title', 'Are you sure?')"
       :message="t('admin.pages.orders.index.deleteManyConfirm', { count: selectedIds.length }, 'Delete {count} orders? Only unconfirmed (PENDING) orders can be deleted.')"
-      :confirm-text="t('common.delete', 'Delete')"
+      :confirm-text="t('admin.common.delete', 'Delete')"
       :error="bulkDeleteError"
       @confirm="confirmBulkDelete"
       @cancel="bulkDeleteError = null"
@@ -299,7 +299,7 @@
                   <button
                     v-if="order.status === 'PENDING'"
                     class="ui-table-action ui-table-action--danger"
-                    :title="t('common.delete', 'Delete')"
+                    :title="t('admin.common.delete', 'Delete')"
                     @click.stop="openSingleDelete(order.id)"
                   >
                     <Icon name="lucide:trash-2" class="w-4 h-4" />
@@ -591,7 +591,7 @@ async function confirmSingleDelete() {
     await fetchOrders()
   } catch (error: any) {
     console.error('Failed to delete order:', error)
-    singleDeleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    singleDeleteError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   }
 }
 
@@ -628,7 +628,7 @@ async function confirmBulkDelete() {
     await fetchOrders()
   } catch (error: any) {
     console.error('Failed to bulk delete orders:', error)
-    bulkDeleteError.value = error?.data?.statusMessage || t('common.error', 'An error occurred. Please try again.')
+    bulkDeleteError.value = error?.data?.statusMessage || t('admin.common.error', 'An error occurred. Please try again.')
   }
 }
 

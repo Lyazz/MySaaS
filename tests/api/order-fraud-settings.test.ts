@@ -13,7 +13,7 @@ describe('Fraud prevention settings (blacklist toggle + duplicate order limit)',
     let variantId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Fraud Settings Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Fraud Settings Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({

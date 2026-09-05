@@ -13,8 +13,8 @@ describe('Tenancy (DB-level constraints)', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await prisma.$transaction([
-            prisma.tenant.create({ data: { name: 'Constraint Tenant A', slug: `c-a-${Date.now()}` } }),
-            prisma.tenant.create({ data: { name: 'Constraint Tenant B', slug: `c-b-${Date.now()}` } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Constraint Tenant A', slug: `c-a-${Date.now()}` } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Constraint Tenant B', slug: `c-b-${Date.now()}` } })
         ])
 
         tenantAId = tenantA.id

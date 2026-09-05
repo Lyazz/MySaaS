@@ -63,7 +63,7 @@ describe('WhatsApp onboarding API', () => {
         })
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'WA Onboarding', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'WA Onboarding', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({

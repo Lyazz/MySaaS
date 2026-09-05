@@ -16,7 +16,7 @@ describe('Sales refund lifecycle policy', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Sales Refund Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Sales Refund Tenant', slug }
         })
         tenantId = tenant.id
 

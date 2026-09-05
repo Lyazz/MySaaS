@@ -554,6 +554,21 @@
     box-shadow: 0 0 0 3px var(--status-cancelled-bg);
   }
 
+  /*
+   * A value the AI read but was not sure about. Distinct from
+   * [aria-invalid]: nothing is wrong yet, the merchant simply has to look at
+   * it before the import can go through. Uses the pending status tokens so it
+   * reads as "needs attention" in both themes.
+   */
+  .ui-input--flagged {
+    border-color: var(--status-pending-text);
+    background-color: var(--status-pending-bg);
+  }
+
+  .ui-input--flagged:focus {
+    box-shadow: 0 0 0 3px var(--status-pending-bg);
+  }
+
   .ui-input--textarea,
   .settings-page .field-textarea {
     @apply leading-relaxed;

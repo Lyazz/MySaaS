@@ -21,7 +21,7 @@ describe('Variants: archived visibility + safe deletion', () => {
     let incompleteVariantId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Variants Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Variants Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({

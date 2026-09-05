@@ -273,6 +273,12 @@ const navItems = computed(() => [
     badge: pendingDeviceRequestsCount.value
   },
   {
+    path: '/super-admin/ai',
+    label: t('superAdmin.nav.ai', 'AI'),
+    icon: 'lucide:sparkles',
+    badge: 0
+  },
+  {
     path: '/super-admin/analytics',
     label: t('superAdmin.nav.analytics'),
     icon: 'lucide:bar-chart-2',

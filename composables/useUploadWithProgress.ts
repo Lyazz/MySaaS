@@ -3,6 +3,8 @@ type UploadWithProgressOptions = {
     file: File
     token?: string | null
     fieldName?: string
+    /** Extra multipart fields sent alongside the file (e.g. a document kind). */
+    fields?: Record<string, string>
     onProgress?: (percent: number) => void
     fallbackErrorMessage?: string
 }
@@ -22,6 +24,7 @@ export const useUploadWithProgress = () => {
         file,
         token,
         fieldName = 'file',
+        fields,
         onProgress,
         fallbackErrorMessage = 'Upload failed'
     }: UploadWithProgressOptions): Promise<T> => {
@@ -30,6 +33,9 @@ export const useUploadWithProgress = () => {
         }
 
         const formData = new FormData()
+        // Fields first: multer parses the stream in order, so a field appended
+        // after the file is not on req.body when the route handler runs.
+        for (const [key, value] of Object.entries(fields ?? {})) formData.append(key, value)
         formData.append(fieldName, file)
 
         return await new Promise<T>((resolve, reject) => {

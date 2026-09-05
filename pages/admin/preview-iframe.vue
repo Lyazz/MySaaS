@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { useRoute } from 'vue-router'
-import { homeTemplates, storeShellTemplates } from '~/components/storefront/templates/registry'
+import { homeTemplates, resolveTemplateKey, storeShellTemplates } from '~/components/storefront/templates/registry'
 import { useAuthStore } from '~/stores/auth'
 import { getPromotionalPrice } from '~/shared/pricing/product-pricing'
 
@@ -12,25 +12,22 @@ definePageMeta({
 const route = useRoute()
 const authStore = useAuthStore()
 
-const templateKey = computed(() => (route.query.template as string) || 'classic')
+/**
+ * Draft state pushed in live by the onboarding wizard over postMessage. It wins
+ * over the saved settings so the merchant sees unsaved edits as they type; with
+ * no wizard driving it the page falls back to the ?template= query and the
+ * tenant's real settings, which is how the appearance previewer uses it.
+ */
+const draft = ref<Record<string, any> | null>(null)
 
-const templatesMeta = [
-  { key: 'classic', label: 'Classic Elegance' },
-  { key: 'modern', label: 'Modern Edge' },
-  { key: 'street', label: 'Streetwear' },
-  { key: 'cozy', label: 'Cozy Basics' },
-  { key: 'food', label: 'Fresh Food' },
-  { key: 'cyber', label: 'Cyber Tech' },
-  { key: 'stationnery', label: 'Stationery' },
-  { key: 'wellness', label: 'Wellness Space' },
-  { key: 'chrono', label: 'Chrono Luxe' },
-  { key: 'maison', label: 'Pistachio' },
-  { key: 'arena', label: 'Arena Performance' },
-]
+const templateKey = computed(() =>
+  resolveTemplateKey(draft.value?.templateKey ?? (route.query.template as string))
+)
 
-const activeTemplateDef = computed(() => {
-  return templatesMeta.find((tpl) => tpl.key === templateKey.value) || templatesMeta[0]
-})
+// The template list lives in the registry. This page used to carry its own copy,
+// which had fallen six themes behind -- picking playful, activewear, interior,
+// minimal, nour or embellir silently previewed Classic instead.
+const activeTemplateKey = templateKey
 
 // -- Sample product from tenant stock --
 const sampleProduct = ref<any>(null)
@@ -92,8 +89,71 @@ const fetchSampleProduct = async () => {
   }
 }
 
+/*
+ * Every storefront template reads useState('tenant') and useState('storeSettings'),
+ * so seeding those two is enough to drive the real shell -- no per-template
+ * plumbing, and nothing to keep in sync when a theme changes what it reads.
+ */
+const previewTenant = useState<any>('tenant')
+const previewStoreSettings = useState<any>('storeSettings')
+
+const applyDraft = (payload: Record<string, any>) => {
+  draft.value = { ...(draft.value ?? {}), ...payload }
+
+  previewTenant.value = {
+    ...(previewTenant.value ?? {}),
+    name: payload.name ?? previewTenant.value?.name ?? 'My Store',
+    slug: payload.slug ?? previewTenant.value?.slug ?? 'preview'
+  }
+
+  previewStoreSettings.value = {
+    ...(previewStoreSettings.value ?? {}),
+    templateKey: resolveTemplateKey(payload.templateKey ?? previewStoreSettings.value?.templateKey),
+    primaryColor: payload.primaryColor ?? previewStoreSettings.value?.primaryColor ?? '#0D9488',
+    useBrandColor: true,
+    logoUrl: payload.logoUrl !== undefined ? payload.logoUrl : previewStoreSettings.value?.logoUrl,
+    description: payload.description ?? previewStoreSettings.value?.description,
+    cartEnabled: previewStoreSettings.value?.cartEnabled ?? true
+  }
+
+  if (payload.product && (payload.product.name || payload.product.imageUrl)) {
+    sampleProduct.value = {
+      id: 'onboarding-draft',
+      title: payload.product.name || 'Your first product',
+      slug: 'preview',
+      price: Number(payload.product.price) || 0,
+      promotionalPrice: null,
+      isPromotionActive: false,
+      promotionStartDate: null,
+      promotionEndDate: null,
+      stock: 10,
+      isActive: true,
+      images: [payload.product.imageUrl || '/blank.svg?v=2'],
+      description: ''
+    }
+  }
+}
+
+const onDraftMessage = (event: MessageEvent) => {
+  // Same-origin only: this page renders whatever it is handed, so a cross-origin
+  // frame must never be able to hand it anything.
+  if (event.origin !== window.location.origin) return
+  const data = event.data
+  if (!data || data.type !== 'swekly:onboarding-draft' || typeof data.payload !== 'object') return
+  applyDraft(data.payload)
+}
+
 onMounted(() => {
   fetchSampleProduct()
+  if (window.parent !== window) {
+    window.addEventListener('message', onDraftMessage)
+    // The wizard cannot know when this frame finished booting, so the frame says so.
+    window.parent.postMessage({ type: 'swekly:preview-ready' }, window.location.origin)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (import.meta.client) window.removeEventListener('message', onDraftMessage)
 })
 
 const isPreviewReady = ref(false)
@@ -159,16 +219,17 @@ const capturePreviewClicks = (e: MouseEvent) => {
 
 <template>
   <div class="w-full min-h-screen surface-1" @click="capturePreviewClicks">
-    <template v-if="activeTemplateDef && isPreviewReady">
-       <component 
-         :is="storeShellTemplates[activeTemplateDef.key as keyof typeof storeShellTemplates]" 
-         :hideAnnouncementBar="false" 
+    <template v-if="isPreviewReady">
+       <component
+         :is="storeShellTemplates[activeTemplateKey]"
+         :key="activeTemplateKey"
+         :hideAnnouncementBar="false"
          :hideNavigation="false"
          :mobileHeaderHidden="false"
        >
-         <component 
-           :is="homeTemplates[activeTemplateDef.key as keyof typeof homeTemplates]" 
-           :tenantName="activeTemplateDef.label"
+         <component
+           :is="homeTemplates[activeTemplateKey]"
+           :tenantName="previewTenant?.name || 'My Store'"
            :featuredProducts="sampleProductsList"
            :bestSellerProducts="sampleProductsList"
            :pending="false"

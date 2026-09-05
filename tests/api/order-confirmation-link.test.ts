@@ -15,7 +15,7 @@ describe('Public order confirmation link', () => {
     let tenant: any
 
     beforeAll(async () => {
-        tenant = await prisma.tenant.create({ data: { name: 'Confirm Link', slug: `confirm-link-${Date.now()}` } })
+        tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Confirm Link', slug: `confirm-link-${Date.now()}` } })
     })
 
     afterAll(async () => {

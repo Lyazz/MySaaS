@@ -13,7 +13,7 @@ describe('Store maintenance mode enforcement', () => {
     let token: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Maintenance Tenant', slug, isOffline: false } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Maintenance Tenant', slug, isOffline: false } })
         tenantId = tenant.id
 
         const user = await prisma.user.create({

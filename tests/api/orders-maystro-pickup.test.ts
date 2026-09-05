@@ -13,7 +13,7 @@ describe('Public checkout Maystro pickup handling', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Maystro Pickup Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Maystro Pickup Tenant', slug }
         })
         tenantId = tenant.id
 
