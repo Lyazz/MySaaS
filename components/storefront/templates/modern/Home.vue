@@ -54,6 +54,15 @@ const resumeSlideAutoplay = () => {
     if (prefersReducedMotion()) return
     slideInterval = setInterval(nextSlide, 6000)
 }
+/*
+ * Touch already pauses on `touchstart` and resumes on `touchend`. A tap also
+ * synthesises `mouseenter` with no matching `mouseleave`, which would leave the
+ * carousel paused for good, so the pointer handlers only run where hover exists.
+ */
+const canHover = () =>
+    import.meta.client && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+const pauseSlideOnHover = () => { if (canHover()) pauseSlideAutoplay() }
+const resumeSlideOnHover = () => { if (canHover()) resumeSlideAutoplay() }
 
 
 // Auto-scroll for Featured Products
@@ -116,8 +125,8 @@ const displayedProducts = computed(() => {
     <div class="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden group"
       @touchstart.passive="pauseSlideAutoplay"
       @touchend.passive="resumeSlideAutoplay"
-      @mouseenter="pauseSlideAutoplay"
-      @mouseleave="resumeSlideAutoplay"
+      @mouseenter="pauseSlideOnHover"
+      @mouseleave="resumeSlideOnHover"
     >
       <!-- Slides -->
       <div 
