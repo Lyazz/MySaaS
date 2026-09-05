@@ -1,3 +1,5 @@
+import 'package:easy_localization/easy_localization.dart';
+import 'package:flutter/foundation.dart' hide Category;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,7 +12,11 @@ import '../repositories/product_repository.dart'; // NEW
 import '../repositories/category_repository.dart'; // NEW
 import '../repositories/pos_sale_repository.dart'; // NEW
 import '../providers/printer_profiles_provider.dart'; // NEW - Assuming this path
+import '../providers/cash_provider.dart';
+import '../providers/store_settings_provider.dart';
+import '../utils/pos_cashbox.dart';
 import '../utils/pos_payment.dart';
+import '../utils/tenant_currency.dart';
 import '../services/sync_service.dart';
 
 enum ProductSortType { name, priceAsc, priceDesc, recent }
@@ -23,6 +29,7 @@ class PosLookupItem {
   final String? sku;
   final double price;
   final String? imageUrl;
+  final bool needsVariantSelection;
 
   const PosLookupItem({
     required this.productId,
@@ -32,6 +39,7 @@ class PosLookupItem {
     required this.sku,
     required this.price,
     required this.imageUrl,
+    this.needsVariantSelection = false,
   });
 
   factory PosLookupItem.fromJson(Map<String, dynamic> json) {
@@ -43,6 +51,7 @@ class PosLookupItem {
       variantLabel: json['variantLabel']?.toString(),
       price: (json['price'] is num) ? (json['price'] as num).toDouble() : 0.0,
       imageUrl: json['imageUrl']?.toString(),
+      needsVariantSelection: json['needsVariantSelection'] == true,
     );
   }
 }
@@ -51,21 +60,36 @@ class PosSession {
   final List<CartItem> cart;
   final String? selectedCustomerId;
   final Customer? selectedCustomer;
+  final PosDiscount? discount;
+  final int? lastInteractedItemIndex;
 
   const PosSession({
     this.cart = const [],
     this.selectedCustomerId,
     this.selectedCustomer,
+    this.discount,
+    this.lastInteractedItemIndex,
   });
 
-  double get total =>
+  double get subtotal =>
       cart.fold(0, (sum, item) => sum + (item.price * item.quantity));
+
+  double get discountAmount => discount?.amountFor(subtotal) ?? 0;
+
+  double get total {
+    final value = subtotal - discountAmount;
+    return value > 0 ? value : 0;
+  }
 
   PosSession copyWith({
     List<CartItem>? cart,
     String? selectedCustomerId,
     Customer? selectedCustomer,
+    PosDiscount? discount,
     bool clearCustomer = false,
+    bool clearDiscount = false,
+    bool clearLastInteracted = false,
+    int? lastInteractedItemIndex,
   }) {
     return PosSession(
       cart: cart ?? this.cart,
@@ -75,6 +99,10 @@ class PosSession {
       selectedCustomer: clearCustomer
           ? null
           : (selectedCustomer ?? this.selectedCustomer),
+      discount: clearDiscount ? null : (discount ?? this.discount),
+      lastInteractedItemIndex: clearLastInteracted
+          ? null
+          : (lastInteractedItemIndex ?? this.lastInteractedItemIndex),
     );
   }
 }
@@ -104,11 +132,15 @@ class PosState {
   // Last Order Details for Reprinting
   final List<CartItem> lastOrderItems;
   final Customer? lastOrderCustomer;
+  final double lastOrderDiscountAmount;
   final double lastOrderTotal;
 
   // Helper getters for active session
   PosSession get currentSession => sessions[currentSessionIndex];
   List<CartItem> get cart => currentSession.cart;
+  double get subtotal => currentSession.subtotal;
+  double get discountAmount => currentSession.discountAmount;
+  PosDiscount? get discount => currentSession.discount;
   double get total => currentSession.total;
   Customer? get selectedCustomer => currentSession.selectedCustomer;
   String? get selectedCustomerId => currentSession.selectedCustomerId;
@@ -130,6 +162,7 @@ class PosState {
     this.showNumpadOnDesktop = true,
     this.lastOrderItems = const [],
     this.lastOrderCustomer,
+    this.lastOrderDiscountAmount = 0.0,
     this.lastOrderTotal = 0.0,
   }) {
     // print('Debug: PosState created. Products: ${products.length}');
@@ -152,6 +185,7 @@ class PosState {
     bool? showNumpadOnDesktop,
     List<CartItem>? lastOrderItems,
     Customer? lastOrderCustomer,
+    double? lastOrderDiscountAmount,
     double? lastOrderTotal,
   }) {
     return PosState(
@@ -175,6 +209,8 @@ class PosState {
       showNumpadOnDesktop: showNumpadOnDesktop ?? this.showNumpadOnDesktop,
       lastOrderItems: lastOrderItems ?? this.lastOrderItems,
       lastOrderCustomer: lastOrderCustomer ?? this.lastOrderCustomer,
+      lastOrderDiscountAmount:
+          lastOrderDiscountAmount ?? this.lastOrderDiscountAmount,
       lastOrderTotal: lastOrderTotal ?? this.lastOrderTotal,
     );
   }
@@ -276,6 +312,9 @@ class PosNotifier extends Notifier<PosState> {
           final matchesBarcode =
               (v.barcode != null && v.barcode!.trim() == normalized);
           if (matchesSku || matchesBarcode) {
+            final bool isMainProductVariant = v.optionValues.isEmpty;
+            final bool needsVariantSelection =
+                isMainProductVariant && p.options.isNotEmpty;
             return PosLookupItem(
               productId: p.id,
               variantId: v.id,
@@ -284,6 +323,7 @@ class PosNotifier extends Notifier<PosState> {
               sku: v.sku,
               price: v.price,
               imageUrl: p.mainImageUrl,
+              needsVariantSelection: needsVariantSelection,
             );
           }
         }
@@ -301,6 +341,33 @@ class PosNotifier extends Notifier<PosState> {
   Future<PosLookupItem?> addByCode(String code, {int quantity = 1}) async {
     final item = await lookupByCode(code);
     if (item == null) return null;
+
+    bool needsSelection = item.needsVariantSelection;
+    if (!needsSelection) {
+      final product = state.products
+          .where((p) => p.id == item.productId)
+          .firstOrNull;
+      if (product != null &&
+          product.options.isNotEmpty &&
+          (item.variantLabel == null ||
+              item.variantLabel == 'Default' ||
+              item.variantLabel!.isEmpty)) {
+        needsSelection = true;
+      }
+    }
+
+    if (needsSelection) {
+      return PosLookupItem(
+        productId: item.productId,
+        variantId: item.variantId,
+        title: item.title,
+        variantLabel: item.variantLabel,
+        sku: item.sku,
+        price: item.price,
+        imageUrl: item.imageUrl,
+        needsVariantSelection: true,
+      );
+    }
 
     final current = state.currentSession;
     final existingIndex = current.cart.indexWhere(
@@ -332,7 +399,14 @@ class PosNotifier extends Notifier<PosState> {
       ];
     }
 
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    _updateCurrentSession(
+      current.copyWith(
+        cart: newCart,
+        lastInteractedItemIndex: existingIndex >= 0
+            ? existingIndex
+            : newCart.length - 1,
+      ),
+    );
     return item;
   }
 
@@ -344,6 +418,7 @@ class PosNotifier extends Notifier<PosState> {
 
   void toggleProductView() {
     state = state.copyWith(isProductListView: !state.isProductListView);
+    saveSettings();
   }
 
   void toggleCartView() {
@@ -418,11 +493,18 @@ class PosNotifier extends Notifier<PosState> {
             : variant.title,
         price: price,
         quantity: quantity,
-        imageUrl: product.images.isNotEmpty ? product.images.first : null,
+        imageUrl: product.mainImageUrl,
       );
       newCart = [...current.cart, newItem];
     }
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    _updateCurrentSession(
+      current.copyWith(
+        cart: newCart,
+        lastInteractedItemIndex: existingIndex >= 0
+            ? existingIndex
+            : newCart.length - 1,
+      ),
+    );
   }
 
   void addCustomItem({
@@ -443,6 +525,20 @@ class PosNotifier extends Notifier<PosState> {
     _updateCurrentSession(current.copyWith(cart: [...current.cart, newItem]));
   }
 
+  void applyDiscount(PosDiscount discount) {
+    final current = state.currentSession;
+    if (current.cart.isEmpty || discount.amountFor(current.subtotal) <= 0) {
+      clearDiscount();
+      return;
+    }
+    _updateCurrentSession(current.copyWith(discount: discount));
+  }
+
+  void clearDiscount() {
+    final current = state.currentSession;
+    _updateCurrentSession(current.copyWith(clearDiscount: true));
+  }
+
   void updateQuantity(String productId, String? variantId, int quantity) {
     if (quantity <= 0) {
       removeFromCart(productId, variantId);
@@ -455,7 +551,16 @@ class PosNotifier extends Notifier<PosState> {
       }
       return item;
     }).toList();
-    _updateCurrentSession(current.copyWith(cart: newCart));
+
+    final interactedIndex = newCart.indexWhere(
+      (item) => item.productId == productId && item.variantId == variantId,
+    );
+    _updateCurrentSession(
+      current.copyWith(
+        cart: newCart,
+        lastInteractedItemIndex: interactedIndex >= 0 ? interactedIndex : null,
+      ),
+    );
   }
 
   void updateQuantityAtIndex(int index, int quantity) {
@@ -464,7 +569,9 @@ class PosNotifier extends Notifier<PosState> {
       // Remove item at index
       final current = state.currentSession;
       final newCart = [...current.cart]..removeAt(index);
-      _updateCurrentSession(current.copyWith(cart: newCart));
+      _updateCurrentSession(
+        current.copyWith(cart: newCart, clearDiscount: newCart.isEmpty),
+      );
       return;
     }
 
@@ -472,7 +579,23 @@ class PosNotifier extends Notifier<PosState> {
     final item = current.cart[index];
     final newCart = [...current.cart];
     newCart[index] = item.copyWith(quantity: quantity);
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    _updateCurrentSession(
+      current.copyWith(cart: newCart, lastInteractedItemIndex: index),
+    );
+  }
+
+  void incrementLastInteractedItemQuantity() {
+    final current = state.currentSession;
+    final index = current.lastInteractedItemIndex;
+    if (index == null || index < 0 || index >= current.cart.length) return;
+    updateQuantityAtIndex(index, current.cart[index].quantity + 1);
+  }
+
+  void decrementLastInteractedItemQuantity() {
+    final current = state.currentSession;
+    final index = current.lastInteractedItemIndex;
+    if (index == null || index < 0 || index >= current.cart.length) return;
+    updateQuantityAtIndex(index, current.cart[index].quantity - 1);
   }
 
   void removeFromCart(String productId, String? variantId) {
@@ -483,12 +606,14 @@ class PosNotifier extends Notifier<PosState> {
               !(item.productId == productId && item.variantId == variantId),
         )
         .toList();
-    _updateCurrentSession(current.copyWith(cart: newCart));
+    _updateCurrentSession(
+      current.copyWith(cart: newCart, clearDiscount: newCart.isEmpty),
+    );
   }
 
   void clearCart() {
     final current = state.currentSession;
-    _updateCurrentSession(current.copyWith(cart: []));
+    _updateCurrentSession(current.copyWith(cart: [], clearDiscount: true));
   }
 
   Future<bool> checkout({PosPaymentRequest? payment}) async {
@@ -499,6 +624,8 @@ class PosNotifier extends Notifier<PosState> {
       final apiService = ref.read(apiProvider);
       final saleRepository = PosSaleRepository(apiService);
       final current = state.currentSession;
+      final subtotal = current.subtotal;
+      final discountAmount = current.discountAmount;
       final total = current.total;
 
       final paymentBreakdown = payment?.breakdown(total);
@@ -516,6 +643,30 @@ class PosNotifier extends Notifier<PosState> {
         }
       }
 
+      // The sale's cash-ledger entry is attached to this cashbox server-side.
+      // Without it every POS sale posts unattributed and never shows against
+      // the cashier's open session.
+      final cashboxes = ref.read(cashProvider).cashboxes;
+      final cashboxId = resolvePosCashboxId(cashboxes);
+      if (cashboxId == null) {
+        // The server routes the sale's SALE_PAYMENT movement through the cash
+        // ledger, which refuses it with 409 unless the till has an open
+        // session — and the sale is created in the same transaction, so it
+        // rolls back with it. Ringing it up anyway would bank it locally, hand
+        // the customer a receipt, and then strand the sale in the sync recovery
+        // list where retrying can only reproduce the same 409.
+        final hasOpenSession = cashboxes.any(
+          (cashbox) => cashbox.openSession != null && cashbox.id.isNotEmpty,
+        );
+        state = state.copyWith(
+          isLoading: false,
+          error: hasOpenSession
+              ? 'admin.pages.pos.alerts.ambiguousCashbox'.tr()
+              : 'admin.pages.pos.alerts.noOpenSession'.tr(),
+        );
+        return false;
+      }
+
       final payload = {
         'items': current.cart
             .map(
@@ -528,8 +679,20 @@ class PosNotifier extends Notifier<PosState> {
             )
             .toList(),
         'customerId': current.selectedCustomerId,
+        'subtotal': subtotal,
+        'discountAmount': discountAmount,
+        'total': total,
+        'cashboxId': cashboxId,
+        if (current.discount != null)
+          'discount': current.discount!.toJson(subtotal),
         if (paymentBreakdown != null)
           'payment': {
+            // `method`/`note` are the fields the backend actually reads; it
+            // defaults to CASH when `method` is absent, which recorded every
+            // card sale as cash. The richer fields below are kept for the
+            // local record and for a backend that can accept them later.
+            'method': paymentBreakdown.ledgerMethod,
+            'note': paymentBreakdown.ledgerNote,
             'total': total,
             'cardAmount': paymentBreakdown.cardAmount,
             'cashReceived': paymentBreakdown.cashReceived,
@@ -544,6 +707,7 @@ class PosNotifier extends Notifier<PosState> {
       // Store cart details before clearing for potential printing
       final List<CartItem> itemsToPrint = List.from(current.cart);
       final Customer? customerToPrint = current.selectedCustomer;
+      final double discountToPrint = discountAmount;
       final double orderTotal = total;
 
       // Clear the current session after successful checkout
@@ -555,6 +719,7 @@ class PosNotifier extends Notifier<PosState> {
         // Update last order details
         lastOrderItems: itemsToPrint,
         lastOrderCustomer: customerToPrint,
+        lastOrderDiscountAmount: discountToPrint,
         lastOrderTotal: orderTotal,
       );
 
@@ -567,16 +732,23 @@ class PosNotifier extends Notifier<PosState> {
             .printReceipt(
               profile: profilesState.defaultProfile!,
               items: itemsToPrint,
-              total: itemsToPrint.fold(
-                0,
-                (sum, item) => sum + (item.price * item.quantity),
-              ),
+              total: orderTotal,
+              discountAmount: discountToPrint,
               customer: customerToPrint,
               orderId: saleId,
               layout: profilesState.receiptLayout,
+              currencyCode: tenantCurrencyCode(
+                ref.read(storeSettingsProvider).settings,
+              ),
             )
             .catchError((e) {
-              print('Error auto-printing receipt: $e');
+              FlutterError.reportError(
+                FlutterErrorDetails(
+                  exception: e,
+                  library: 'pos_provider',
+                  context: ErrorDescription('auto-printing POS receipt'),
+                ),
+              );
             });
       }
       return true;
@@ -589,13 +761,12 @@ class PosNotifier extends Notifier<PosState> {
     }
   }
 
-  Future<void> printLastOrder() async {
-    if (state.lastOrderItems.isEmpty) return;
+  Future<String?> printLastOrder() async {
+    if (state.lastOrderItems.isEmpty) return 'No last order to print';
 
     final profilesState = ref.read(printerProfilesProvider);
     if (profilesState.defaultProfile == null) {
-      state = state.copyWith(error: 'No default printer profile selected');
-      return;
+      return 'No default printer profile selected';
     }
 
     try {
@@ -604,12 +775,17 @@ class PosNotifier extends Notifier<PosState> {
         profile: profilesState.defaultProfile!,
         items: state.lastOrderItems,
         total: state.lastOrderTotal,
+        discountAmount: state.lastOrderDiscountAmount,
         customer: state.lastOrderCustomer,
         orderId: state.lastSaleId,
         layout: profilesState.receiptLayout,
+        currencyCode: tenantCurrencyCode(
+          ref.read(storeSettingsProvider).settings,
+        ),
       );
+      return null;
     } catch (e) {
-      state = state.copyWith(error: 'Failed to print last order: $e');
+      return 'Failed to print last order: $e';
     }
   }
 
@@ -635,6 +811,10 @@ class PosNotifier extends Notifier<PosState> {
       final isCartSimpleView =
           prefs.getBool('pos_is_cart_simple_view') ?? false;
 
+      // Load product card/list preference
+      final isProductListView =
+          prefs.getBool('pos_is_product_list_view') ?? false;
+
       // Load numpad preference
       final showNumpadOnDesktop =
           prefs.getBool('pos_show_numpad_desktop') ?? true;
@@ -643,10 +823,17 @@ class PosNotifier extends Notifier<PosState> {
         sortType: sortType,
         crossAxisCount: crossAxisCount,
         isCartSimpleView: isCartSimpleView,
+        isProductListView: isProductListView,
         showNumpadOnDesktop: showNumpadOnDesktop,
       );
     } catch (e) {
-      print('Error loading POS settings: $e');
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: e,
+          library: 'pos_provider',
+          context: ErrorDescription('loading POS settings'),
+        ),
+      );
     }
   }
 
@@ -655,11 +842,17 @@ class PosNotifier extends Notifier<PosState> {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt('pos_sort_type', state.sortType.index);
       await prefs.setInt('pos_cross_axis_count', state.crossAxisCount);
-      await prefs.setInt('pos_cross_axis_count', state.crossAxisCount);
       await prefs.setBool('pos_is_cart_simple_view', state.isCartSimpleView);
+      await prefs.setBool('pos_is_product_list_view', state.isProductListView);
       await prefs.setBool('pos_show_numpad_desktop', state.showNumpadOnDesktop);
     } catch (e) {
-      print('Error saving POS settings: $e');
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: e,
+          library: 'pos_provider',
+          context: ErrorDescription('saving POS settings'),
+        ),
+      );
     }
   }
 

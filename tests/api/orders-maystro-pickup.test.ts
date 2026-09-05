@@ -13,7 +13,7 @@ describe('Public checkout Maystro pickup handling', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Maystro Pickup Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Maystro Pickup Tenant', slug }
         })
         tenantId = tenant.id
 
@@ -152,6 +152,7 @@ describe('Public checkout Maystro pickup handling', () => {
             })
 
         expect(res.status).toBe(400)
-        expect(res.body.statusMessage).toContain('Invalid Maystro pickup point')
+        // The resolver is carrier-agnostic now, so the rejection no longer names Maystro.
+        expect(res.body.statusMessage).toContain('Unknown pickup point')
     })
 })

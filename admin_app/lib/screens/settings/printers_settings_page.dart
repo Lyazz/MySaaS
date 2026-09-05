@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:uuid/uuid.dart';
 import '../../providers/printer_profiles_provider.dart';
 import '../../models/printer_profile.dart';
@@ -13,6 +13,8 @@ import '../../widgets/buttons/app_button.dart';
 import 'receipt_layout_editor.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import '../../models/pos_models.dart'; // For CartItem
+import 'package:easy_localization/easy_localization.dart';
+import '../../utils/app_toasts.dart';
 
 class PrintersSettingsPage extends ConsumerStatefulWidget {
   const PrintersSettingsPage({super.key});
@@ -41,6 +43,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
   int _paperWidth = 80;
   bool _cut = true;
   bool _drawer = false;
+  bool _forceImagePrint = false;
 
   @override
   void initState() {
@@ -51,7 +54,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
   void _initializeControllers() {
     _nameController = TextEditingController();
     _ipController = TextEditingController();
-    _portController = TextEditingController(text: '9100');
+    _portController = TextEditingController(text: 'app.9100'.tr());
     _macController = TextEditingController();
     _deviceIdController = TextEditingController();
     _printerNameController = TextEditingController();
@@ -81,6 +84,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         _paperWidth = profile.paperWidth;
         _cut = profile.cut;
         _drawer = profile.drawer;
+        _forceImagePrint = profile.forceImagePrint;
 
         _ipController.text = profile.ip ?? '';
         _portController.text = profile.port?.toString() ?? '9100';
@@ -95,6 +99,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         _paperWidth = 80;
         _cut = true;
         _drawer = false;
+        _forceImagePrint = false;
         _ipController.clear();
         _portController.text = '9100';
         _macController.clear();
@@ -142,6 +147,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
       'paperWidth': _paperWidth,
       'cut': _cut,
       'drawer': _drawer,
+      'forceImagePrint': _forceImagePrint,
     };
 
     final newProfile = PrinterProfile(
@@ -159,14 +165,12 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
     }
 
     _cancelEditing();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Printer saved successfully')));
+    AppToasts.show(context, 'app.printer_saved_successfully'.tr());
   }
 
   @override
   Widget build(BuildContext context) {
-    const accentColor = Color(0xFF0D9488); // Teal 600
+    const accentColor = Color(0xFF65A30D); // Lime 600
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
@@ -185,8 +189,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Printer Settings',
+        Text(
+          'app.printer_settings'.tr(),
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,
@@ -196,7 +200,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Manage your receipt printers and layout settings.',
+          'app.manage_your_receipt_printers_a'.tr(),
           style: TextStyle(fontSize: 14, color: Colors.grey[500]),
         ),
       ],
@@ -253,7 +257,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
             ),
             const SizedBox(height: 24),
             Text(
-              'No printers configured',
+              'app.no_printers_configured'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
@@ -262,12 +266,12 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Add a printer to start printing receipts',
+              'app.add_a_printer_to_start_printin'.tr(),
               style: TextStyle(color: Colors.grey[500]),
             ),
             const SizedBox(height: 32),
             AppButton.primary(
-              label: 'Add Printer',
+              label: 'app.add_printer'.tr(),
               icon: LucideIcons.plus,
               onPressed: () => _startEditing(),
             ),
@@ -281,8 +285,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Saved Printers',
+            Text(
+              'app.saved_printers'.tr(),
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -290,7 +294,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
               ),
             ),
             AppButton.primary(
-              label: 'Add New',
+              label: 'app.add_new'.tr(),
               icon: LucideIcons.plus,
               onPressed: () => _startEditing(),
             ),
@@ -318,13 +322,11 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                 color: Colors.amber.shade700,
               ),
             ),
-            title: const Text(
-              'Receipt Layout Configuration',
+            title: Text(
+              'app.receipt_layout_configuration'.tr(),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
-            subtitle: const Text(
-              'Customize your receipt header, footer, and content',
-            ),
+            subtitle: Text('app.customize_your_receipt_header'.tr()),
             trailing: const Icon(LucideIcons.chevronRight),
             onTap: () {
               // Open Layout Editor
@@ -337,9 +339,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                       ref
                           .read(printerProfilesProvider.notifier)
                           .saveLayout(layout);
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Layout Saved')),
-                      );
+                      AppToasts.show(context, 'app.layout_saved'.tr());
                       Navigator.pop(context);
                     },
                   ),
@@ -411,8 +411,8 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                   color: accentColor,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Text(
-                  'DEFAULT',
+                child: Text(
+                  'admin.pages.sales.detail.itemsTable.defaultVariant'.tr(),
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 10,
@@ -440,16 +440,19 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         trailing: PopupMenuButton(
           icon: const Icon(LucideIcons.moreVertical, color: Color(0xFF94A3B8)),
           itemBuilder: (context) => [
-            const PopupMenuItem(value: 'edit', child: Text('Edit Config')),
+            PopupMenuItem(value: 'edit', child: Text('app.edit_config'.tr())),
             if (!isDefault)
-              const PopupMenuItem(
+              PopupMenuItem(
                 value: 'default',
-                child: Text('Set as Default'),
+                child: Text('app.set_as_default'.tr()),
               ),
-            const PopupMenuItem(value: 'test', child: Text('Test Print')),
-            const PopupMenuItem(
+            PopupMenuItem(value: 'test', child: Text('app.test_print'.tr())),
+            PopupMenuItem(
               value: 'delete',
-              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              child: Text(
+                'admin.pages.products.index.bulk.delete'.tr(),
+                style: TextStyle(color: Colors.red),
+              ),
             ),
           ],
           onSelected: (value) => _handleMenuAction(value, profile),
@@ -489,11 +492,9 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
         final confirm = await showDialog<bool>(
           context: context,
           builder: (context) => AppDialog(
-            title: 'Delete Printer?',
-            description: 'This action cannot be undone.',
-            content: const Text(
-              'Are you sure you want to delete this profile?',
-            ),
+            title: 'app.delete_printer'.tr(),
+            description: 'admin.confirmModal.defaults.message'.tr(),
+            content: Text('app.are_you_sure_you_want_to_delet3'.tr()),
             secondaryLabel: 'Cancel',
             onSecondary: () => Navigator.pop(context, false),
             primaryLabel: 'Delete',
@@ -522,12 +523,12 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   _buildFormSection(
-                    title: 'Basic Information',
+                    title: 'app.basic_information'.tr(),
                     icon: LucideIcons.info,
                     accentColor: accentColor,
                     children: [
                       FormInput(
-                        label: 'Profile Name',
+                        label: 'app.profile_name'.tr(),
                         controller: _nameController,
                         hint: 'e.g. Kitchen Printer',
                         validator: (v) =>
@@ -535,7 +536,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                       ),
                       const SizedBox(height: 16),
                       FormSelect<PrinterTransport>(
-                        label: 'Transport Type',
+                        label: 'app.transport_type'.tr(),
                         value: _transport,
                         items: PrinterTransport.values.map((t) {
                           return DropdownMenuItem(
@@ -554,14 +555,14 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                   ),
                   const SizedBox(height: 24),
                   _buildFormSection(
-                    title: 'Connection Details',
+                    title: 'app.connection_details'.tr(),
                     icon: LucideIcons.radio,
                     accentColor: accentColor,
                     children: [
                       if (_transport == PrinterTransport.network) ...[
                         if (isMobile) ...[
                           FormInput(
-                            label: 'IP Address',
+                            label: 'app.ip_address'.tr(),
                             controller: _ipController,
                             hint: '192.168.1.100',
                             validator: (v) => (v == null || v.isEmpty)
@@ -570,7 +571,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                           ),
                           const SizedBox(height: 16),
                           FormInput(
-                            label: 'Port',
+                            label: 'app.port'.tr(),
                             controller: _portController,
                             hint: '9100',
                             keyboardType: TextInputType.number,
@@ -582,7 +583,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                               Expanded(
                                 flex: 2,
                                 child: FormInput(
-                                  label: 'IP Address',
+                                  label: 'app.ip_address'.tr(),
                                   controller: _ipController,
                                   hint: '192.168.1.100',
                                   validator: (v) => (v == null || v.isEmpty)
@@ -593,7 +594,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                               const SizedBox(width: 16),
                               Expanded(
                                 child: FormInput(
-                                  label: 'Port',
+                                  label: 'app.port'.tr(),
                                   controller: _portController,
                                   hint: '9100',
                                   keyboardType: TextInputType.number,
@@ -604,7 +605,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                         ],
                       ] else if (_transport == PrinterTransport.bluetooth) ...[
                         FormInput(
-                          label: 'MAC Address',
+                          label: 'app.mac_address'.tr(),
                           controller: _macController,
                           hint: '00:11:22:33:44:55',
                           validator: (v) => (v == null || v.isEmpty)
@@ -613,13 +614,13 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                         ),
                       ] else if (_transport == PrinterTransport.ble) ...[
                         FormInput(
-                          label: 'Device ID (UUID)',
+                          label: 'app.device_id_uuid'.tr(),
                           controller: _deviceIdController,
                           hint: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
                           suffixIcon: IconButton(
                             icon: const Icon(LucideIcons.search),
                             onPressed: _showBleScanDialog,
-                            tooltip: 'Scan for BLE Devices',
+                            tooltip: 'app.scan_for_ble_devices'.tr(),
                           ),
                           validator: (v) => (v == null || v.isEmpty)
                               ? 'ID is required'
@@ -627,7 +628,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                         ),
                       ] else if (_transport == PrinterTransport.windows) ...[
                         FormInput(
-                          label: 'Printer Name',
+                          label: 'app.printer_name'.tr(),
                           controller: _printerNameController,
                           hint: 'POS-58',
                           validator: (v) => (v == null || v.isEmpty)
@@ -636,29 +637,29 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                         ),
                       ] else if (_transport == PrinterTransport.serial) ...[
                         FormInput(
-                          label: 'Serial Port',
+                          label: 'app.serial_port'.tr(),
                           controller: _portNameController,
                           hint: 'COM1 or /dev/ttyS0',
                           suffixIcon: IconButton(
                             icon: const Icon(LucideIcons.refreshCcw),
                             onPressed: _showSerialPortPicker,
-                            tooltip: 'Scan for Ports',
+                            tooltip: 'app.scan_for_ports'.tr(),
                           ),
                           validator: (v) => (v == null || v.isEmpty)
                               ? 'Port is required'
                               : null,
                         ),
                       ] else ...[
-                        const Text(
-                          'Uses system default print dialog.',
+                        Text(
+                          'app.uses_system_default_print_dial'.tr(),
                           style: TextStyle(color: Colors.grey),
                         ),
                       ],
                     ],
                   ),
-                  const SizedBox(height: 24),
+                  SizedBox(height: 24),
                   _buildFormSection(
-                    title: 'Capabilities',
+                    title: 'app.capabilities'.tr(),
                     icon: LucideIcons.settings,
                     accentColor: accentColor,
                     children: [
@@ -666,16 +667,16 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                         children: [
                           Expanded(
                             child: FormSelect<int>(
-                              label: 'Paper Width',
+                              label: 'app.paper_width'.tr(),
                               value: _paperWidth,
-                              items: const [
+                              items: [
                                 DropdownMenuItem(
                                   value: 80,
-                                  child: Text('80mm (Standard)'),
+                                  child: Text('app.80mm_standard'.tr()),
                                 ),
                                 DropdownMenuItem(
                                   value: 58,
-                                  child: Text('58mm (Narrow)'),
+                                  child: Text('app.58mm_narrow'.tr()),
                                 ),
                               ],
                               onChanged: (v) {
@@ -690,15 +691,15 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                       if (isMobile) ...[
                         CheckboxListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Auto Cut Paper'),
+                          title: Text('app.auto_cut_paper'.tr()),
                           value: _cut,
                           onChanged: (v) => setState(() => _cut = v!),
                           activeColor: accentColor,
                         ),
                         CheckboxListTile(
                           contentPadding: EdgeInsets.zero,
-                          title: const Text('Open Cash Drawer'),
-                          subtitle: const Text('After printing'),
+                          title: Text('app.open_cash_drawer'.tr()),
+                          subtitle: Text('app.after_printing'.tr()),
                           value: _drawer,
                           onChanged: (v) => setState(() => _drawer = v!),
                           activeColor: accentColor,
@@ -709,7 +710,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                             Expanded(
                               child: CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text('Auto Cut Paper'),
+                                title: Text('app.auto_cut_paper'.tr()),
                                 value: _cut,
                                 onChanged: (v) => setState(() => _cut = v!),
                                 activeColor: accentColor,
@@ -718,14 +719,26 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                             Expanded(
                               child: CheckboxListTile(
                                 contentPadding: EdgeInsets.zero,
-                                title: const Text('Open Cash Drawer'),
-                                subtitle: const Text('After printing'),
+                                title: Text('app.open_cash_drawer'.tr()),
+                                subtitle: Text('app.after_printing'.tr()),
                                 value: _drawer,
                                 onChanged: (v) => setState(() => _drawer = v!),
                                 activeColor: accentColor,
                               ),
                             ),
                           ],
+                        ),
+                        const SizedBox(height: 8),
+                        CheckboxListTile(
+                          contentPadding: EdgeInsets.zero,
+                          title: Text('app.print_as_image_arabic_support'.tr()),
+                          subtitle: Text(
+                            'app.rasterize_pdf_to_image_for_per'.tr(),
+                          ),
+                          value: _forceImagePrint,
+                          onChanged: (v) =>
+                              setState(() => _forceImagePrint = v!),
+                          activeColor: accentColor,
                         ),
                       ],
                     ],
@@ -736,12 +749,12 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       AppButton.secondary(
-                        label: 'Cancel',
+                        label: 'admin.common.cancel'.tr(),
                         onPressed: _cancelEditing,
                       ),
                       const SizedBox(width: 16),
                       AppButton.primary(
-                        label: 'Save Profile',
+                        label: 'app.save_profile'.tr(),
                         icon: LucideIcons.save,
                         onPressed: _save,
                       ),
@@ -810,9 +823,7 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
     final ports = DiscoveryService.getAvailableSerialPorts();
     if (ports.isEmpty) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('No serial ports found')));
+        AppToasts.show(context, 'app.no_serial_ports_found'.tr());
       }
       return;
     }
@@ -822,9 +833,9 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
       builder: (context) => Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const ListTile(
+          ListTile(
             title: Text(
-              'Select Serial Port',
+              'app.select_serial_port'.tr(),
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
           ),
@@ -922,17 +933,14 @@ class _PrintersSettingsPageState extends ConsumerState<PrintersSettingsPage> {
           );
 
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(const SnackBar(content: Text('Test print sent')));
+        AppToasts.show(context, 'app.test_print_sent'.tr());
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Test print failed: $e'),
-            backgroundColor: Colors.red,
-          ),
+        AppToasts.show(
+          context,
+          'Test print failed: $e',
+          type: AppToastType.error,
         );
       }
     }
@@ -990,7 +998,7 @@ class _BleScanDialogState extends State<_BleScanDialog> {
   @override
   Widget build(BuildContext context) {
     return AppDialog(
-      title: 'Scanning BLE Devices',
+      title: 'app.scanning_ble_devices'.tr(),
       description: _isScanning ? 'Scanning…' : 'Select a device from the list.',
       maxWidth: 720,
       content: SizedBox(
@@ -1003,7 +1011,7 @@ class _BleScanDialogState extends State<_BleScanDialog> {
                         height: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('No devices found'),
+                    : Text('app.no_devices_found'.tr()),
               )
             : ListView.builder(
                 itemCount: _results.length,

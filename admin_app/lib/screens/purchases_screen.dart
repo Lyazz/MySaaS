@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../providers/purchases_provider.dart';
 import '../providers/suppliers_provider.dart';
 import '../models/purchase.dart';
@@ -13,7 +13,10 @@ import '../widgets/form/date_range_filter_field.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
+import '../theme/app_theme.dart';
 import '../widgets/badges/status_badges.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PurchasesScreen extends ConsumerStatefulWidget {
   const PurchasesScreen({super.key});
@@ -29,18 +32,17 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
   DateTime? _endDate;
   String? _selectedSupplierId;
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
   static DateTime _endOfDay(DateTime dt) =>
       DateTime(dt.year, dt.month, dt.day, 23, 59, 59, 999);
 
-  static DateTimeRange _normalizeRange(DateTimeRange range) => DateTimeRange(
-        start: _startOfDay(range.start),
-        end: _endOfDay(range.end),
-      );
+  static DateTimeRange _normalizeRange(DateTimeRange range) =>
+      DateTimeRange(start: _startOfDay(range.start), end: _endOfDay(range.end));
 
   void _setDefaultDateRange() {
     final now = DateTime.now();
-    final start = _startOfDay(now.subtract(const Duration(days: 7)));
+    final start = _startOfDay(now.subtract(const Duration(days: 6)));
     final end = _endOfDay(now);
     _startDate = start;
     _endDate = end;
@@ -76,6 +78,11 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     final purchases = purchasesState.purchases;
     final suppliers = suppliersState.suppliers;
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     final query = _searchController.text.trim().toLowerCase();
     final filteredPurchases = purchases.where((purchase) {
@@ -92,12 +99,14 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     }).toList();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/purchases/create'),
-              backgroundColor: const Color(0xFF0F172A),
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
+                LucideIcons.plus,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             )
           : null,
       body: SingleChildScrollView(
@@ -110,30 +119,27 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Column(
+                    Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Purchases',
+                          'admin.pages.purchases.index.title'.tr(),
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF111827), // Gray-900
+                            color: textPrimary,
                             letterSpacing: -0.5,
                           ),
                         ),
                         SizedBox(height: 4),
                         Text(
-                          'Manage your purchase orders',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Color(0xFF6B7280),
-                          ), // Gray-500
+                          'app.manage_your_purchase_orders'.tr(),
+                          style: TextStyle(fontSize: 14, color: textMuted),
                         ),
                       ],
                     ),
                     AppButton.primary(
-                      label: 'New Purchase',
+                      label: 'admin.pages.purchases.create.breadcrumb'.tr(),
                       icon: LucideIcons.plus,
                       onPressed: () => context.go('/purchases/create'),
                     ),
@@ -144,7 +150,7 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
 
               ResponsiveFilterBar(
                 searchField: FormInput(
-                  label: 'Search',
+                  label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
                   controller: _searchController,
                   hint: 'Search purchases...',
                   contentPadding: const EdgeInsets.symmetric(
@@ -156,35 +162,40 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                 filters: [
                   SizedBox(
                     width: 320,
-                  child: DateRangeFilterField(
-                    range: (_startDate != null && _endDate != null)
-                        ? DateTimeRange(start: _startDate!, end: _endDate!)
-                        : null,
-                    firstDate: DateTime(2020),
-                    lastDate: DateTime.now(),
-                    normalize: _normalizeRange,
-                    onChanged: (range) {
-                      setState(() {
-                        _startDate = range?.start;
-                        _endDate = range?.end;
-                      });
-                      _fetchPurchases();
-                    },
+                    child: DateRangeFilterField(
+                      showLabel: false,
+                      range: (_startDate != null && _endDate != null)
+                          ? DateTimeRange(start: _startDate!, end: _endDate!)
+                          : null,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime.now(),
+                      normalize: _normalizeRange,
+                      onChanged: (range) {
+                        setState(() {
+                          _startDate = range?.start;
+                          _endDate = range?.end;
+                        });
+                        _fetchPurchases();
+                      },
+                    ),
                   ),
-                ),
                   SizedBox(
                     width: 240,
                     child: FormSelect<String?>(
-                      label: 'Supplier',
+                      showLabel: false,
+                      label: 'admin.pages.purchases.detail.cards.supplier'.tr(),
                       value: _selectedSupplierId,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
                       ),
                       items: [
-                        const DropdownMenuItem<String?>(
+                        DropdownMenuItem<String?>(
                           value: null,
-                          child: Text('All Suppliers'),
+                          child: Text(
+                            'admin.pages.purchases.index.filters.allSuppliers'
+                                .tr(),
+                          ),
                         ),
                         ...suppliers.map(
                           (s) => DropdownMenuItem<String?>(
@@ -223,7 +234,11 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
               else if (purchasesState.isLoading)
                 const Center(child: CircularProgressIndicator())
               else
-                _buildPurchasesTable(filteredPurchases, isMobile),
+                _buildPurchasesTable(
+                  filteredPurchases,
+                  isMobile,
+                  isDark: isDark,
+                ),
             ],
           ),
         ),
@@ -231,21 +246,39 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     );
   }
 
-  Widget _buildPurchasesTable(List<Purchase> purchases, bool isMobile) {
+  Widget _buildPurchasesTable(
+    List<Purchase> purchases,
+    bool isMobile, {
+    required bool isDark,
+  }) {
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+
     if (purchases.isEmpty) {
       return Center(
         child: Padding(
           padding: const EdgeInsets.all(48),
           child: Column(
             children: [
-              Icon(LucideIcons.shoppingBag, size: 48, color: Colors.grey[300]),
+              Icon(
+                LucideIcons.shoppingBag,
+                size: 48,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.textTertiary
+                    : AppColors.lightTextTertiary,
+              ),
               const SizedBox(height: 16),
               Text(
-                'No purchases found',
+                'admin.pages.purchases.index.empty.title'.tr(),
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
-                  color: Colors.grey[800],
+                  color: textPrimary,
                 ),
               ),
             ],
@@ -257,18 +290,48 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     return ResponsivePaginatedTable<Purchase>(
       items: purchases,
       minWidth: 900,
-      header: const Row(
+      header: Row(
         children: [
-          Expanded(flex: 2, child: Text('ID', style: _headerStyle)),
-          Expanded(flex: 3, child: Text('SUPPLIER', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('STATUS', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('ITEMS', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('DATE', style: _headerStyle)),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.purchases.index.table.id'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              'admin.pages.purchases.detail.cards.supplier'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'superAdmin.paymentsPage.history.table.status'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.sales.detail.sections.items'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'superAdmin.paymentsPage.history.table.date'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
+            ),
+          ),
           Expanded(
             flex: 1,
             child: Text(
-              'ACTION',
-              style: _headerStyle,
+              'admin.pages.purchases.index.table.action'.tr().toUpperCase(),
+              style: _headerStyle(isDark),
               textAlign: TextAlign.right,
             ),
           ),
@@ -278,19 +341,17 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
         return InkWell(
           onTap: () => context.go('/purchases/${purchase.id}'),
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: isMobile ? 12 : 24,
-              vertical: 12,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
             child: Row(
               children: [
                 Expanded(
                   flex: 2,
                   child: Text(
                     '#${purchase.id.length > 8 ? purchase.id.substring(0, 8) : purchase.id}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF111827), // Gray-900
+                      color: textPrimary,
+                      fontSize: 13,
                       fontFamily: 'RobotoMono',
                     ),
                   ),
@@ -299,9 +360,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   flex: 3,
                   child: Text(
                     purchase.supplierName,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w500,
-                      color: Color(0xFF1F2937),
+                      color: textSecondary,
+                      fontSize: 13,
                     ),
                   ),
                 ),
@@ -316,29 +378,23 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
                   flex: 2,
                   child: Text(
                     '${purchase.items.length} items',
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: textMuted, fontSize: 13),
                   ),
                 ),
                 Expanded(
                   flex: 2,
                   child: Text(
                     DateFormat('MMM d, yyyy').format(purchase.createdAt),
-                    style: const TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: textMuted, fontSize: 13),
                   ),
                 ),
                 Expanded(
                   flex: 1,
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: AppButton.secondary(
-                      label: 'Manage',
-                      size: AppButtonSize.sm,
+                    child: TableActionButton(
+                      tooltip: 'admin.pages.purchases.index.table.manage'.tr(),
+                      icon: LucideIcons.eye,
                       onPressed: () => context.go('/purchases/${purchase.id}'),
                     ),
                   ),
@@ -351,10 +407,10 @@ class _PurchasesScreenState extends ConsumerState<PurchasesScreen> {
     );
   }
 
-  static const _headerStyle = TextStyle(
+  static TextStyle _headerStyle(bool isDark) => TextStyle(
     fontWeight: FontWeight.w600,
     fontSize: 11,
-    color: Color(0xFF6B7280), // Gray-500
+    color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
     letterSpacing: 0.5,
   );
 }

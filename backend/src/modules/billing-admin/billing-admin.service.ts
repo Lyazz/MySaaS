@@ -1,42 +1,62 @@
 import prisma from '../../lib/prisma'
-import { getPlanByCode, planPriceForInterval, type BillingInterval, type PlanCode } from '../../../../shared/pricing/plans'
+import { getPlanByCode, quotePlan, type BillingInterval, type PlanCode } from '../../../../shared/pricing/plans'
+import { addBillingInterval, normalizeInterval } from '../../../../shared/pricing/billing-period'
+import { STATUS_ACTIVE, STATUS_TRIALING } from '../billing/subscription.service'
 import { PRIVATE_BUCKET_NAME } from '../../lib/s3'
 import { parseStorageRef } from '../../lib/storage-ref'
 import { presignGetObject } from '../../lib/s3-presign'
 import { signLocalFileToken } from '../../lib/local-file-token'
 import path from 'path'
 
-const addUtcMonths = (date: Date, months: number) =>
-    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
-
-const addUtcYears = (date: Date, years: number) =>
-    new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
-
 export class BillingAdminService {
-    async setTenantSubscription(params: { tenantId: string; planCode: PlanCode; interval: BillingInterval }) {
+    /**
+     * Where a new term should begin: at the end of the one already paid for, if
+     * any of it is left.
+     *
+     * Approving a payment used to restart the period from `now`, so a customer
+     * who renewed a fortnight early lost that fortnight. Stacking the term is
+     * both what they paid for and what the payment row already recorded.
+     */
+    private async nextTermStart(tenantId: string, now: Date): Promise<Date> {
+        const existing = await prisma.tenantSubscription.findUnique({ where: { tenantId } })
+        if (!existing) return now
+
+        const isLive = existing.status === STATUS_ACTIVE || existing.status === STATUS_TRIALING
+        const end = existing.currentPeriodEnd
+        return isLive && end && end > now ? end : now
+    }
+
+    async setTenantSubscription(params: {
+        tenantId: string
+        planCode: PlanCode
+        interval: BillingInterval
+        /** Defaults to now. Approvals pass the end of the term already paid for. */
+        startAt?: Date
+    }) {
         const plan = getPlanByCode(params.planCode)
         if (!plan) {
             throw new Error('Invalid planCode')
         }
 
-        const now = new Date()
-        const currentPeriodEnd = params.interval === 'year' ? addUtcYears(now, 1) : addUtcMonths(now, 1)
+        const interval = normalizeInterval(params.interval)
+        const currentPeriodStart = params.startAt ?? new Date()
+        const currentPeriodEnd = addBillingInterval(currentPeriodStart, interval)
 
         const subscription = await prisma.tenantSubscription.upsert({
             where: { tenantId: params.tenantId },
             create: {
                 tenantId: params.tenantId,
                 planCode: params.planCode,
-                interval: params.interval,
-                status: 'ACTIVE',
-                currentPeriodStart: now,
+                interval,
+                status: STATUS_ACTIVE,
+                currentPeriodStart,
                 currentPeriodEnd
             },
             update: {
                 planCode: params.planCode,
-                interval: params.interval,
-                status: 'ACTIVE',
-                currentPeriodStart: now,
+                interval,
+                status: STATUS_ACTIVE,
+                currentPeriodStart,
                 currentPeriodEnd,
                 cancelAtPeriodEnd: false,
                 trialEnd: null
@@ -62,7 +82,7 @@ export class BillingAdminService {
         const plan = getPlanByCode(params.planCode)
         if (!plan) throw new Error('Invalid planCode')
 
-        const amount = planPriceForInterval(plan, params.interval)
+        const quote = quotePlan(plan, params.interval)
         let subscriptionPeriodStart: Date | null = null
         let subscriptionPeriodEnd: Date | null = null
 
@@ -80,9 +100,9 @@ export class BillingAdminService {
             data: {
                 tenantId: params.tenantId,
                 planCode: params.planCode,
-                interval: params.interval,
-                amountDzd: amount,
-                currency: plan.pricing.currency,
+                interval: quote.interval,
+                amountDzd: quote.totalDzd,
+                currency: quote.currency,
                 method: 'MANUAL_PROOF',
                 status: params.status ?? 'IMPORTED',
                 proofUrl: params.proofUrl,
@@ -176,10 +196,21 @@ export class BillingAdminService {
 
         // Apply subscription if payment is approved
         if (params.status === 'PAID') {
+            const now = new Date()
+
+            // Honour the term the tenant was quoted at submission time when it is
+            // still in the future, so a review that lands days later does not
+            // shorten what they bought.
+            const startAt =
+                payment.periodStart && payment.periodStart > now
+                    ? payment.periodStart
+                    : await this.nextTermStart(params.tenantId, now)
+
             const sub = await this.setTenantSubscription({
                 tenantId: params.tenantId,
                 planCode: payment.planCode as PlanCode,
-                interval: payment.interval as BillingInterval
+                interval: payment.interval as BillingInterval,
+                startAt
             })
 
             return prisma.billingPayment.update({

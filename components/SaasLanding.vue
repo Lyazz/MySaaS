@@ -1,6 +1,13 @@
 <script setup lang="ts">
-import { computed } from 'vue'
-import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
+import { computed, ref, resolveComponent } from 'vue'
+import { PRICING_PLANS, buildDisplayPlan, maxAnnualDiscountPercent } from '~/shared/pricing/plans'
+
+const MechanismTenancy = resolveComponent('MarketingCinematicMechanismsMechanismTenancy')
+const MechanismLocalization = resolveComponent('MarketingCinematicMechanismsMechanismLocalization')
+const MechanismLogistics = resolveComponent('MarketingCinematicMechanismsMechanismLogistics')
+const MechanismAnalytics = resolveComponent('MarketingCinematicMechanismsMechanismAnalytics')
+const MechanismPayment = resolveComponent('MarketingCinematicMechanismsMechanismPayment')
+const MechanismBuilder = resolveComponent('MarketingCinematicMechanismsMechanismBuilder')
 
 const { t, locale, tm, rt } = useI18n({ useScope: 'global' })
 const isRtl = computed(() => locale.value === 'ar')
@@ -18,12 +25,22 @@ useSeoMeta({
   twitterImage: '/swekly-logo-mark.svg'
 })
 
-const heroProofPoints = computed(() => [
-  { icon: 'lucide:star', value: t('saasLanding.extras.heroProof.rating'), label: t('saasLanding.extras.heroProof.ratingLabel') },
-  { icon: 'lucide:store', value: t('saasLanding.extras.heroProof.merchants'), label: t('saasLanding.extras.heroProof.merchantsLabel') },
-  { icon: 'lucide:banknote', value: t('saasLanding.extras.heroProof.cod'), label: t('saasLanding.extras.heroProof.codLabel') },
-  { icon: 'lucide:credit-card', value: t('saasLanding.extras.heroProof.noCard'), label: t('saasLanding.extras.heroProof.noCardLabel') }
-])
+const carouselSlides = computed(() => {
+  const ids = ['delivery', 'warehouse', 'themes', 'conversion', 'pos'] as const
+  return ids.map(id => ({
+    eyebrow: t(`saasLanding.cinematic.heroCarousel.slides.${id}.eyebrow`),
+    headlinePre: t(`saasLanding.cinematic.heroCarousel.slides.${id}.headlinePre`),
+    headlineAccent: t(`saasLanding.cinematic.heroCarousel.slides.${id}.headlineAccent`),
+    headlinePost: t(`saasLanding.cinematic.heroCarousel.slides.${id}.headlinePost`),
+    subhead: t(`saasLanding.cinematic.heroCarousel.slides.${id}.subhead`),
+    meta: [
+      t(`saasLanding.cinematic.heroCarousel.slides.${id}.meta.0`),
+      t(`saasLanding.cinematic.heroCarousel.slides.${id}.meta.1`),
+      t(`saasLanding.cinematic.heroCarousel.slides.${id}.meta.2`)
+    ],
+    address: t(`saasLanding.cinematic.heroCarousel.slides.${id}.address`)
+  }))
+})
 
 const trustStripItems = computed(() => [
   { icon: 'lucide:banknote', title: t('saasLanding.extras.trustStrip.items.cod.title'), description: t('saasLanding.extras.trustStrip.items.cod.description') },
@@ -66,8 +83,7 @@ useHead({
 })
 
 const integrationLogos = [
-  { name: 'Yalidine', icon: 'lucide:package' },
-  { name: 'Maystro', icon: 'lucide:truck' },
+  { name: 'Multi-carrier', icon: 'lucide:truck' },
   { name: 'ZR Express', icon: 'lucide:truck' },
   { name: 'Noest Express', icon: 'lucide:truck' },
   { name: 'E-COM Delivery', icon: 'lucide:truck' },
@@ -87,52 +103,10 @@ const integrationLogos = [
 const integrationLogosRow1 = integrationLogos.slice(0, Math.ceil(integrationLogos.length / 2))
 const integrationLogosRow2 = integrationLogos.slice(Math.ceil(integrationLogos.length / 2))
 
-const stepCards = computed(() => [
-  {
-    step: '01',
-    icon: 'lucide:pen-tool',
-    title: t('saasLanding.storyteller.steps.design.title'),
-    description: t('saasLanding.storyteller.steps.design.description'),
-    bullets: [
-      { icon: 'lucide:layout-template', label: t('saasLanding.features.items.templates.title') },
-      { icon: 'lucide:globe', label: t('marketing.featuresPage.items.domains.title') }
-    ]
-  },
-  {
-    step: '02',
-    icon: 'lucide:shopping-cart',
-    title: t('saasLanding.storyteller.steps.sell.title'),
-    description: t('saasLanding.storyteller.steps.sell.description'),
-    bullets: [
-      { icon: 'lucide:credit-card', label: t('marketing.featuresPage.items.payments.title') },
-      { icon: 'lucide:package', label: t('auth.login.hero.carousel.orders.title') }
-    ]
-  },
-  {
-    step: '03',
-    icon: 'lucide:truck',
-    title: t('saasLanding.storyteller.steps.ship.title'),
-    description: t('saasLanding.storyteller.steps.ship.description'),
-    bullets: [
-      { icon: 'lucide:truck', label: t('marketing.featuresPage.items.logistics.title') },
-      { icon: 'lucide:badge-dollar-sign', label: t('saasLanding.trust.secure') }
-    ]
-  },
-  {
-    step: '04',
-    icon: 'lucide:bar-chart-3',
-    title: t('saasLanding.storyteller.steps.grow.title'),
-    description: t('saasLanding.storyteller.steps.grow.description'),
-    bullets: [
-      { icon: 'lucide:line-chart', label: t('marketing.featuresPage.items.analytics.title') },
-      { icon: 'lucide:sparkles', label: t('saasLanding.features.items.aiTools.title') }
-    ]
-  }
-])
 
 const metrics = computed(() => [
-  { value: '1,200+', label: t('saasLanding.stats.activeMerchants'), detail: t('saasLanding.hero.chips.storefront') },
-  { value: '50M+', label: t('saasLanding.stats.revenueGenerated'), detail: t('saasLanding.stats.gmvDetail') },
+  { value: '500+', label: t('saasLanding.stats.activeMerchants'), detail: t('saasLanding.hero.chips.storefront') },
+  { value: '5M+', label: t('saasLanding.stats.revenueGenerated'), detail: t('saasLanding.stats.gmvDetail') },
   { value: '99.9%', label: t('saasLanding.stats.uptime'), detail: t('saasLanding.trust.cloud') }
 ])
 
@@ -220,52 +194,46 @@ const trialAssurances = computed(() => [
 
 const featureGrid = computed(() => [
   {
-    icon: 'lucide:layers',
+    icon: 'lucide:zap',
+    mechanism: MechanismTenancy,
     title: t('marketing.featuresPage.items.tenancy.title'),
     description: t('marketing.featuresPage.items.tenancy.description')
   },
   {
     icon: 'lucide:languages',
+    mechanism: MechanismLocalization,
     title: t('marketing.featuresPage.items.localization.title'),
     description: t('marketing.featuresPage.items.localization.description')
   },
   {
     icon: 'lucide:truck',
+    mechanism: MechanismLogistics,
     title: t('marketing.featuresPage.items.logistics.title'),
     description: t('marketing.featuresPage.items.logistics.description')
   },
   {
     icon: 'lucide:line-chart',
+    mechanism: MechanismAnalytics,
     title: t('marketing.featuresPage.items.analytics.title'),
     description: t('marketing.featuresPage.items.analytics.description')
   },
   {
     icon: 'lucide:credit-card',
+    mechanism: MechanismPayment,
     title: t('marketing.featuresPage.items.payments.title'),
     description: t('marketing.featuresPage.items.payments.description')
   },
   {
     icon: 'lucide:smartphone',
+    mechanism: MechanismBuilder,
     title: t('marketing.featuresPage.items.mobile.title'),
     description: t('marketing.featuresPage.items.mobile.description')
   }
 ])
 
+const isAnnualPreview = ref(false)
 const pricingPreview = computed(() =>
-  PRICING_PLANS.slice(0, 3).map(plan => {
-    const card = pricingPlanCardForUi(plan, 'month')
-    return {
-      code: plan.code,
-      name: t(`pricing.plans.${plan.code}.name`),
-      description: t(`pricing.plans.${plan.code}.description`),
-      price: card.priceText,
-      currency: card.currency,
-      period: t('pricing.period.perMonth'),
-      cta: t(`pricing.plans.${plan.code}.cta`),
-      popular: card.popular,
-      features: (card.features || []).slice(0, 4).map(f => f.text)
-    }
-  })
+  PRICING_PLANS.map(plan => buildDisplayPlan(plan, isAnnualPreview.value ? 'year' : 'month', t))
 )
 
 const testimonials = computed<Array<{ quote: string; author: string; role: string }>>(() => {
@@ -283,16 +251,11 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
 
 <template>
   <div :dir="isRtl ? 'rtl' : 'ltr'">
-    <!-- ─── Hero ─── -->
-    <MarketingCinematicHeroCinematic
-      :eyebrow="t('saasLanding.cinematic.hero.eyebrow')"
-      :headline-pre="t('saasLanding.cinematic.hero.headlinePre')"
-      :headline-accent="t('saasLanding.cinematic.hero.headlineAccent')"
-      :headline-post="t('saasLanding.cinematic.hero.headlinePost')"
-      :subhead="t('saasLanding.cinematic.hero.subhead')"
-      :primary-cta="{ label: t('saasLanding.cinematic.hero.ctaPrimary'), to: '/register' }"
-      :secondary-cta="{ label: t('saasLanding.extras.demoStore'), to: '/themes' }"
-      :proof-points="heroProofPoints"
+    <!-- ─── Hero (carousel) ─── -->
+    <MarketingCinematicHeroCarousel
+      :slides="carouselSlides"
+      :primary-cta="{ label: t('saasLanding.cinematic.heroCarousel.ctaRegister'), to: '/register' }"
+      :secondary-cta="{ label: t('saasLanding.cinematic.heroCarousel.ctaFeatures'), to: '/features' }"
     />
 
     <!-- ─── Logo cloud ─── -->
@@ -302,113 +265,6 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
         <div class="space-y-3">
           <MarketingCinematicLogoCloud :logos="integrationLogosRow1" />
           <MarketingCinematicLogoCloud :logos="integrationLogosRow2" :reverse="true" />
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── Algeria trust strip ─── -->
-    <section class="cinematic-section !py-16 md:!py-20">
-      <div class="cinematic-container">
-        <div class="mb-10 text-center">
-          <span class="cinematic-pill">
-            <span class="cinematic-pill__dot" />
-            {{ t('saasLanding.extras.trustStrip.eyebrow') }}
-          </span>
-        </div>
-        <div class="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div
-            v-for="item in trustStripItems"
-            :key="item.title"
-            class="cinematic-card flex items-start gap-4 p-5"
-          >
-            <div class="flex-none rounded-xl border border-lime-neon/30 bg-lime-neon/[0.06] p-2.5">
-              <Icon :name="item.icon" class="h-5 w-5 text-lime-neon" />
-            </div>
-            <div class="min-w-0">
-              <h3 class="text-[15px] font-medium text-white">{{ item.title }}</h3>
-              <p class="mt-1 text-sm text-[color:var(--m-text-dim)]">{{ item.description }}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- ─── How it works ─── -->
-    <MarketingCinematicSectionShell
-      :eyebrow="t('saasLanding.storyteller.eyebrow')"
-      :title-pre="t('saasLanding.cinematic.howItWorks.titlePre')"
-      :title-accent="t('saasLanding.cinematic.howItWorks.titleAccent')"
-      :title-post="t('saasLanding.cinematic.howItWorks.titlePost')"
-      :description="t('saasLanding.cinematic.howItWorks.description')"
-    >
-      <div class="grid gap-5 md:grid-cols-2">
-        <MarketingCinematicFeatureCard3D
-          v-for="card in stepCards"
-          :key="card.step"
-          v-motion-slide-visible-once-bottom
-          :step="card.step"
-          :icon="card.icon"
-          :title="card.title"
-          :description="card.description"
-          :bullets="card.bullets"
-        />
-      </div>
-    </MarketingCinematicSectionShell>
-
-    <!-- ─── Live preview ─── -->
-    <section class="cinematic-section">
-      <div class="cinematic-container">
-        <div class="grid items-center gap-10 lg:grid-cols-2">
-          <div>
-            <span class="cinematic-pill">
-              <span class="cinematic-pill__dot" />
-              {{ t('saasLanding.cinematic.preview.eyebrow') }}
-            </span>
-            <h2 class="cinematic-headline mt-6">
-              {{ t('saasLanding.cinematic.preview.titlePre') }}
-              <em>{{ t('saasLanding.cinematic.preview.titleAccent') }}</em>
-              {{ t('saasLanding.cinematic.preview.titlePost') }}
-            </h2>
-            <p class="cinematic-subhead mt-5">{{ t('saasLanding.cinematic.preview.description') }}</p>
-            <div class="mt-7 space-y-3">
-              <div v-for="point in [t('saasLanding.cinematic.preview.point1'), t('saasLanding.cinematic.preview.point2'), t('saasLanding.cinematic.preview.point3')]" :key="point" class="flex items-start gap-3 text-[15px] text-[color:var(--m-text)]/85">
-                <Icon name="lucide:check-circle-2" class="mt-0.5 h-4 w-4 flex-none text-lime-neon" />
-                <span>{{ point }}</span>
-              </div>
-            </div>
-          </div>
-
-          <div v-motion-slide-visible-once-bottom class="cinematic-card relative aspect-[4/3] overflow-hidden p-0">
-            <div class="absolute inset-0 bg-gradient-to-br from-[#0A1014] via-[#06181a] to-[#05070A]" />
-            <div class="absolute inset-0 cinematic-grid-bg opacity-50" />
-            <div class="relative h-full p-5 md:p-7 flex flex-col">
-              <div class="flex items-center gap-2 mb-4">
-                <span class="h-2.5 w-2.5 rounded-full bg-white/10" />
-                <span class="h-2.5 w-2.5 rounded-full bg-white/10" />
-                <span class="h-2.5 w-2.5 rounded-full bg-white/10" />
-                <div class="ml-3 flex-1 rounded-md bg-white/[0.03] border border-white/[0.05] px-3 py-1 font-mono text-[10px] text-[color:var(--m-text-faint)]">
-                  store.swekly.com/admin/orders
-                </div>
-              </div>
-              <div class="flex-1 grid grid-rows-3 gap-3">
-                <div v-for="i in 3" :key="i" class="flex items-center gap-3 rounded-lg border border-white/[0.05] bg-white/[0.015] px-3 py-2.5">
-                  <span class="cinematic-mono-num text-xs text-[color:var(--m-text-dim)]">#{{ 1024 + i }}</span>
-                  <div class="flex-1 min-w-0">
-                    <div class="h-2 w-2/3 rounded bg-white/10" />
-                    <div class="mt-1.5 h-1.5 w-1/3 rounded bg-white/[0.06]" />
-                  </div>
-                  <span class="rounded-full border px-2 py-0.5 text-[10px] font-mono uppercase tracking-wider"
-                    :class="i === 0 ? 'border-lime-neon/40 bg-lime-neon/10 text-lime-neon' : 'border-white/[0.08] bg-white/[0.03] text-[color:var(--m-text-dim)]'">
-                    {{ i === 0 ? 'NEW' : i === 1 ? 'SHIPPED' : 'PAID' }}
-                  </span>
-                </div>
-              </div>
-              <div class="mt-4 flex items-center justify-between rounded-lg border border-lime-neon/30 bg-lime-neon/[0.04] px-3 py-2">
-                <span class="font-mono text-[10px] uppercase tracking-[0.2em] text-lime-neon">live</span>
-                <span class="cinematic-mono-num text-xs text-white">+ 3 orders / 12s</span>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>
@@ -455,6 +311,7 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
           :icon="f.icon"
           :title="f.title"
           :description="f.description"
+          :mechanism="f.mechanism"
         />
       </div>
     </MarketingCinematicSectionShell>
@@ -485,7 +342,31 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
       :description="t('saasLanding.cinematic.pricing.description')"
       centered
     >
-      <div class="grid gap-5 md:grid-cols-3">
+      <div class="-mt-2 mb-10 flex flex-col items-center gap-3">
+        <div class="inline-flex items-center rounded-full border border-white/[0.08] bg-white/[0.02] p-1">
+          <button
+            class="rounded-full px-5 py-2 text-sm font-medium transition-all"
+            :class="!isAnnualPreview ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
+            @click="isAnnualPreview = false"
+          >
+            {{ t('pricing.toggle.monthly') }}
+          </button>
+          <button
+            class="rounded-full px-5 py-2 text-sm font-medium transition-all inline-flex items-center gap-2"
+            :class="isAnnualPreview ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
+            @click="isAnnualPreview = true"
+          >
+            {{ t('pricing.toggle.annual') }}
+            <span
+              class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]"
+              :class="isAnnualPreview ? 'bg-[color:var(--m-bg)]/15 text-[color:var(--m-bg)]' : 'bg-lime-neon/15 text-lime-neon'"
+            >
+              {{ t('pricing.toggle.save', { percent: maxAnnualDiscountPercent() }) }}
+            </span>
+          </button>
+        </div>
+      </div>
+      <div class="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
         <MarketingCinematicPricingTile
           v-for="plan in pricingPreview"
           :key="plan.code"
@@ -494,12 +375,13 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
           :price="plan.price"
           :currency="plan.currency"
           :period="plan.period"
+          :billing-note="plan.billingNote"
           :description="plan.description"
           :features="plan.features"
           :cta="plan.cta"
           :cta-to="`/pricing#${plan.code}`"
           :featured="plan.popular"
-          :popular-label="t('pricing.popular')"
+          :popular-label="t('pricing.badges.mostPopular')"
         />
       </div>
       <div class="mt-10 text-center">
@@ -587,7 +469,6 @@ const testimonialsRow2 = computed(() => testimonials.value.slice(Math.ceil(testi
       :headline-post="t('saasLanding.cinematic.cta.headlinePost')"
       :subhead="t('saasLanding.cinematic.cta.subhead')"
       :primary-cta="{ label: t('saasLanding.cinematic.cta.button'), to: '/register' }"
-      :secondary-cta="{ label: t('saasLanding.cinematic.cta.secondary'), to: '/contact' }"
     />
 
     <!-- ─── Sticky mobile CTA ─── -->

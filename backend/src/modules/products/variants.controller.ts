@@ -1,10 +1,22 @@
 import type { Request, Response } from 'express'
 import { VariantsService } from './variants.service'
 import { InventoryValidationError } from '../inventory/inventory.service'
+import { ProductWorkflowError } from './product-workflow.error'
 
 const service = new VariantsService()
 
 export class VariantsController {
+    private respondProductWorkflowError(res: Response, error: unknown): boolean {
+        if (!(error instanceof ProductWorkflowError)) return false
+        res.status(error.statusCode).json({
+            statusCode: error.statusCode,
+            statusMessage: error.statusMessage,
+            code: error.code,
+            details: error.details
+        })
+        return true
+    }
+
     async updateVariant(req: Request, res: Response) {
         const tenant = req.tenant!
         const user = req.user
@@ -18,6 +30,7 @@ export class VariantsController {
             const updated = await service.updateVariant(tenant.id, id, req.body, { userId: user?.id ?? null })
             res.json(updated)
         } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
             if (error instanceof InventoryValidationError) {
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
@@ -62,6 +75,7 @@ export class VariantsController {
             const result = await service.deleteVariant(tenant.id, id)
             res.json(result)
         } catch (error: any) {
+            if (this.respondProductWorkflowError(res, error)) return
             if (typeof error?.statusCode === 'number') {
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }

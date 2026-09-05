@@ -42,7 +42,7 @@ describe('Security hardening', () => {
 
     beforeAll(async () => {
         const authTenant = await prisma.tenant.create({
-            data: { name: 'Security Auth Tenant', slug: authSlug }
+            data: { publishedAt: new Date(), name: 'Security Auth Tenant', slug: authSlug }
         })
         authTenantId = authTenant.id
 
@@ -63,7 +63,7 @@ describe('Security hardening', () => {
         })
 
         const orderTenant = await prisma.tenant.create({
-            data: { name: 'Security Order Tenant', slug: orderSlug }
+            data: { publishedAt: new Date(), name: 'Security Order Tenant', slug: orderSlug }
         })
         orderTenantId = orderTenant.id
 
@@ -90,7 +90,7 @@ describe('Security hardening', () => {
         orderProductId = product.id
 
         const webhookTenant = await prisma.tenant.create({
-            data: { name: 'Security Hook Tenant', slug: webhookSlug }
+            data: { publishedAt: new Date(), name: 'Security Hook Tenant', slug: webhookSlug }
         })
         webhookTenantId = webhookTenant.id
 

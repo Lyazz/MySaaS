@@ -1,427 +1,271 @@
 <template>
-  <div class="space-y-6">
-    <div class="flex items-start justify-between gap-4">
-      <div>
-        <h1 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.billing.title') }}</h1>
-        <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.billing.subtitle') }}</p>
-      </div>
-      <NuxtLink
-        to="/pricing"
-        class="ui-btn ui-btn--secondary inline-flex items-center gap-2"
-      >
-        <Icon name="lucide:arrow-up-right" class="w-4 h-4" />
-        <span class="text-sm font-semibold">{{ t('admin.pages.billing.seePricing') }}</span>
+  <div>
+    <AdminPageHeader
+      :title="t('admin.pages.billing.title')"
+      :subtitle="t('admin.pages.billing.subtitle')"
+    >
+      <button type="button" class="ui-btn ui-btn--secondary ui-btn--md" :disabled="pending" @click="() => refresh()">
+        <Icon name="lucide:rotate-cw" class="h-4 w-4" :class="{ 'animate-spin': pending }" />
+        {{ t('admin.common.refresh', 'Refresh') }}
+      </button>
+      <NuxtLink to="/pricing" class="ui-btn ui-btn--secondary ui-btn--md">
+        <Icon name="lucide:arrow-up-right" class="h-4 w-4" />
+        {{ t('admin.pages.billing.seePricing') }}
       </NuxtLink>
-    </div>
+    </AdminPageHeader>
 
-    <div v-if="error" class="p-4 bg-red-50 border border-red-100 rounded-lg text-red-700 text-sm">
+    <div
+      v-if="error"
+      class="flex items-center gap-2 rounded-xl p-4 text-sm"
+      style="background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.2); color: #ef4444"
+    >
+      <Icon name="lucide:alert-circle" class="h-4 w-4 shrink-0" />
       {{ t('admin.pages.billing.errors.loadFailed') }}
     </div>
 
-    <template v-else>
-    <!-- Payment status banners -->
-    <div v-if="pendingPayments.length > 0" class="flex items-start gap-4 rounded-xl p-5" style="background: rgba(var(--brand-rgb)/0.08); border: 1px solid rgba(var(--brand-rgb)/0.25)">
-      <div class="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full" style="background: rgba(var(--brand-rgb)/0.15)">
-        <Icon name="lucide:clock" class="w-5 h-5 [color:var(--brand)]" />
-      </div>
-      <div class="flex-1">
-        <p class="font-semibold [color:var(--brand)]">{{ t('admin.pages.billing.status.pending.title', 'Payment under review') }}</p>
-        <p class="mt-0.5 text-sm" style="color: rgba(var(--brand-rgb)/0.82)">
-          {{ t('admin.pages.billing.status.pending.desc', 'We received your payment proof and our team is reviewing it. Your subscription will be updated once approved.') }}
-        </p>
-      </div>
-      <span class="shrink-0 rounded-full px-2.5 py-1 text-xs font-bold [color:var(--brand)]" style="background: rgba(var(--brand-rgb)/0.15); border: 1px solid rgba(var(--brand-rgb)/0.25)">
-        {{ pendingPayments.length }} {{ t('admin.pages.billing.status.pending.badge', 'pending') }}
-      </span>
+    <div v-else-if="pending && !snapshot" class="flex justify-center py-20">
+      <Icon name="lucide:loader-2" class="h-7 w-7 animate-spin [color:var(--brand)]" />
     </div>
 
-    <div v-else-if="latestApprovedProof" class="flex items-start gap-4 p-5 rounded-xl" style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.25)">
-      <div class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 mt-0.5" style="background: rgba(34,197,94,0.15)">
-        <Icon name="lucide:check-circle-2" class="w-5 h-5 text-emerald-400" />
-      </div>
-      <div>
-        <p class="font-semibold text-emerald-400">{{ t('admin.pages.billing.status.approved.title', 'Payment approved') }}</p>
-        <p class="text-sm text-emerald-500/80 mt-0.5">
-          {{ t('admin.pages.billing.status.approved.desc', 'Your latest payment was approved and your subscription is active.') }}
-        </p>
-      </div>
-    </div>
+    <div v-else class="space-y-6">
+      <BillingStateBanner
+        :subscription="snapshot?.subscription ?? null"
+        :pending-payment="pendingPayment"
+        :rejected-payment="rejectedPayment"
+        :busy="cancelBusy"
+        @action="onBannerAction"
+      />
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Premium Current Plan Card -->
-      <div class="lg:col-span-3 bg-gradient-to-br from-slate-900 via-slate-800 [--tw-gradient-to:color-mix(in_srgb,var(--brand)_60%,#000)] border border-slate-800 rounded-2xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-        <!-- Decorative Background Glow -->
-        <div class="absolute top-0 right-0 -mt-16 -mr-16 w-64 h-64 [background:var(--brand)]/20 blur-3xl rounded-full pointer-events-none"></div>
-        <div class="absolute bottom-0 left-0 -mb-16 -ml-16 w-48 h-48 bg-slate-500/20 blur-3xl rounded-full pointer-events-none"></div>
+      <!-- ── Current subscription + usage ── -->
+      <div class="grid grid-cols-1 gap-5 lg:grid-cols-5">
+        <!-- Subscription -->
+        <div class="ui-card lg:col-span-3">
+          <div class="ui-card-body">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+              <div class="min-w-0">
+                <p class="text-micro font-bold uppercase tracking-[0.12em] text-muted">
+                  {{ t('admin.pages.billing.current.eyebrow') }}
+                </p>
+                <div class="mt-1.5 flex flex-wrap items-center gap-2.5">
+                  <h2 class="text-2xl font-black text-primary">{{ currentPlanName }}</h2>
+                  <span class="ui-badge" :class="statusBadgeClass">{{ statusLabel }}</span>
+                </div>
+                <p class="mt-1 text-sm text-tertiary">{{ currentPlanDescription }}</p>
+              </div>
 
-        <div class="relative flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          
-          <!-- Plan Info -->
-          <div class="flex-1">
-            <div class="flex items-center gap-3 mb-2">
-              <h2 class="text-sm font-bold [color:rgba(var(--brand-rgb)/0.85)] uppercase tracking-wider relative inline-flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full [background:var(--brand)] animate-pulse"></span>
-                {{ t('admin.pages.billing.currentPlan.title', 'Current Plan') }}
-              </h2>
-              <span
-                class="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide border backdrop-blur-md"
-                :class="snapshot?.subscription?.status === 'ACTIVE' ? '[background:var(--brand)]/10 [border-color:var(--brand)]/30 [color:rgba(var(--brand-rgb)/0.7)]' : 'bg-slate-500/10 border-slate-500/30 text-slate-300'"
+              <div class="text-end">
+                <div class="text-2xl font-black tabular-nums text-primary">
+                  {{ money(snapshot?.renewalQuote?.monthlyEquivalentDzd) }}
+                  <span class="text-xs font-bold uppercase text-tertiary">
+                    {{ snapshot?.renewalQuote?.currency }}
+                  </span>
+                </div>
+                <p class="text-xs text-muted">{{ t('admin.pages.billing.perMonth') }}</p>
+              </div>
+            </div>
+
+            <!-- Term facts: the three questions a merchant actually opens this page with -->
+            <dl class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <div class="rounded-xl p-3 surface-2">
+                <dt class="text-mini uppercase tracking-wide text-muted">
+                  {{ t('admin.pages.billing.current.billedAs') }}
+                </dt>
+                <dd class="mt-1 text-sm font-semibold text-primary">{{ intervalLabel }}</dd>
+              </div>
+              <div class="rounded-xl p-3 surface-2">
+                <dt class="text-mini uppercase tracking-wide text-muted">
+                  {{ renewalTermLabel }}
+                </dt>
+                <dd class="mt-1 text-sm font-semibold text-primary">{{ date(renewalDate) }}</dd>
+                <dd class="text-mini" :style="{ color: daysColor }">{{ daysLabel }}</dd>
+              </div>
+              <div class="rounded-xl p-3 surface-2">
+                <dt class="text-mini uppercase tracking-wide text-muted">
+                  {{ t('admin.pages.billing.current.nextCharge') }}
+                </dt>
+                <dd class="mt-1 text-sm font-semibold tabular-nums text-primary">
+                  {{ snapshot?.subscription?.cancelAtPeriodEnd ? '—' : `${money(snapshot?.renewalQuote?.totalDzd)} ${snapshot?.renewalQuote?.currency}` }}
+                </dd>
+                <dd v-if="snapshot?.renewalQuote?.savingsDzd" class="text-mini text-success">
+                  {{ t('admin.pages.billing.current.savingPerYear', { amount: money(snapshot?.renewalQuote?.savingsDzd) }) }}
+                </dd>
+              </div>
+            </dl>
+
+            <div v-if="!isFreeCurrentPlan" class="mt-4 flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                class="ui-btn ui-btn--ghost ui-btn--sm"
+                :disabled="cancelBusy"
+                @click="toggleRenewal"
               >
-                {{ snapshot?.subscription?.status || 'UNKNOWN' }}
-              </span>
+                <Icon v-if="cancelBusy" name="lucide:loader-2" class="h-3.5 w-3.5 animate-spin" />
+                <Icon v-else :name="snapshot?.subscription?.cancelAtPeriodEnd ? 'lucide:rotate-ccw' : 'lucide:calendar-x'" class="h-3.5 w-3.5" />
+                {{
+                  snapshot?.subscription?.cancelAtPeriodEnd
+                    ? t('admin.pages.billing.current.resumeRenewal')
+                    : t('admin.pages.billing.current.stopRenewal')
+                }}
+              </button>
+              <span v-if="cancelError" class="text-xs text-danger">{{ cancelError }}</span>
             </div>
-            
-            <div class="flex items-baseline gap-3">
-              <div class="text-4xl sm:text-5xl font-black text-white tracking-tight">
-                {{ snapshot?.plan?.name || '—' }}
-              </div>
-              <div class="text-slate-400 font-medium text-lg">
-                {{ snapshot?.subscription?.interval === 'year' ? t('admin.pages.billing.currentPlan.interval.yearly', '/ year') : t('admin.pages.billing.currentPlan.interval.monthly', '/ month') }}
-              </div>
-            </div>
-            <p class="text-slate-400 mt-2 max-w-xl text-sm leading-relaxed">
-              {{ snapshot?.plan?.description || '' }}
+          </div>
+        </div>
+
+        <!-- Usage -->
+        <div class="ui-card lg:col-span-2">
+          <div class="ui-card-header">
+            <h2 class="text-sm font-semibold text-primary">
+              {{ t('admin.pages.billing.usage.title') }}
+            </h2>
+            <p class="mt-0.5 text-mini text-muted">
+              {{ t('admin.pages.billing.usage.window', { range: usageWindowLabel }) }}
             </p>
           </div>
-
-          <!-- Usage & Limits -->
-          <div class="w-full md:w-auto min-w-[300px] bg-slate-950/40 backdrop-blur-md border border-slate-700/50 rounded-xl p-5 flex flex-col justify-center">
-            <div class="flex items-baseline justify-between mb-2">
-              <span class="text-sm font-semibold text-slate-300">{{ t('admin.pages.billing.currentPlan.cards.ordersThisPeriod', 'Orders mapped this period') }}</span>
-              <div class="text-2xl font-black text-white">
-                {{ snapshot?.usage?.ordersInPeriod ?? 0 }}
-                <span class="text-sm text-slate-500 font-semibold">/ {{ formatLimit(snapshot?.usage?.ordersLimit) }}</span>
-              </div>
-            </div>
-            
-            <!-- Progress Bar -->
-            <div class="w-full bg-slate-800 rounded-full h-1.5 mb-3 overflow-hidden">
-              <div class="bg-gradient-to-r [--tw-gradient-from:var(--brand)] to-emerald-400 h-1.5 rounded-full transition-all duration-1000 ease-in-out" 
-                   :style="{ width: `${Math.min(100, ((snapshot?.usage?.ordersInPeriod ?? 0) / (snapshot?.usage?.ordersLimit || 1)) * 100)}%` }">
-              </div>
-            </div>
-
-            <div class="flex items-center justify-between text-xs text-slate-400">
-              <span class="flex items-center gap-1.5">
-                <Icon name="lucide:calendar" class="w-3.5 h-3.5" />
-                {{ periodLabel }}
-              </span>
-              <button
-                class="hover:text-white transition-colors flex items-center gap-1 font-semibold disabled:opacity-50"
-                :disabled="pending"
-                @click="() => refresh()"
-              >
-                <Icon name="lucide:rotate-cw" class="w-3.5 h-3.5" :class="{ 'animate-spin': pending }" />
-                {{ t('admin.common.refresh', 'Refresh') }}
-              </button>
-            </div>
+          <div class="ui-card-body space-y-4">
+            <BillingUsageMeter
+              v-if="snapshot"
+              :label="t('admin.pages.billing.usage.orders')"
+              :metric="snapshot.usage.orders"
+              :hint="snapshot.usage.orders.exceeded ? t('admin.pages.billing.usage.ordersBlocked') : ''"
+            />
+            <BillingUsageMeter
+              v-if="snapshot"
+              :label="t('admin.pages.billing.usage.products')"
+              :metric="snapshot.usage.products"
+            />
+            <BillingUsageMeter
+              v-if="snapshot"
+              :label="t('admin.pages.billing.usage.pixels')"
+              :metric="snapshot.usage.pixels"
+            />
           </div>
         </div>
       </div>
 
-      <!-- Plan Selection & Checkout Region -->
-      <div class="lg:col-span-3 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        
-        <!-- Left Side: Plans -->
-        <div class="lg:col-span-7 space-y-6">
-          <!-- Interval Toggle -->
-          <div class="flex justify-center mb-8">
-            <div class="p-1 rounded-xl inline-grid grid-cols-2 relative" style="background: var(--surface-3)">
-              <button
-                @click="billingInterval = 'month'"
-                class="relative z-10 px-6 py-2.5 text-sm font-bold rounded-lg transition-colors flex items-center justify-center w-full"
-                :class="billingInterval === 'month' ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
-                :style="billingInterval !== 'month' ? 'color: var(--text-tertiary)' : ''"
-              >
-                {{ t('admin.pages.billing.interval.monthly', 'Monthly Billing') }}
-              </button>
-              <button
-                @click="billingInterval = 'year'"
-                class="relative z-10 px-6 py-2.5 text-sm font-bold rounded-lg transition-colors flex items-center justify-center gap-2 w-full"
-                :class="billingInterval === 'year' ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
-                :style="billingInterval !== 'year' ? 'color: var(--text-tertiary)' : ''"
-              >
-                {{ t('admin.pages.billing.interval.yearly', 'Yearly Billing') }}
-                <span class="px-2 py-0.5 rounded-full [background:var(--brand)]/15 [color:rgba(var(--brand-rgb)/0.85)] text-[10px] font-black uppercase tracking-wider whitespace-nowrap">{{ t('admin.pages.billing.interval.save', { pct: 20 }, 'Save 20%') }}</span>
-              </button>
+      <!-- ── Plans + checkout ── -->
+      <div id="plans-section" class="grid grid-cols-1 gap-6 xl:grid-cols-12">
+        <div class="xl:col-span-8">
+          <div class="mb-5 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <h2 class="text-base font-semibold text-primary">
+                {{ t('admin.pages.billing.plans.title') }}
+              </h2>
+              <p class="text-xs text-tertiary">{{ t('admin.pages.billing.plans.subtitle') }}</p>
+            </div>
 
-              <!-- Sliding Background Indicator -->
+            <!-- Interval toggle -->
+            <div class="relative inline-grid grid-cols-2 rounded-xl p-1 surface-3">
               <div
-                class="absolute top-1 bottom-1 left-1 w-[calc(50%-4px)] rounded-lg transition-transform duration-300 ease-in-out"
+                class="absolute bottom-1 top-1 w-[calc(50%-4px)] rounded-lg transition-transform duration-300 ease-out"
                 :class="billingInterval === 'month' ? 'translate-x-0' : 'translate-x-full'"
-                style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-              ></div>
-            </div>
-        </div>
-
-        <div v-if="pending" class="flex justify-center py-12">
-          <Icon name="lucide:loader-2" class="w-8 h-8 animate-spin [color:var(--brand)]" />
-        </div>
-        
-        <div v-else class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div
-            v-for="plan in plans"
-            :key="plan.code"
-            @click="selectPlan(plan.code)"
-            class="relative flex flex-col p-6 rounded-2xl border-2 transition-all cursor-pointer group hover:shadow-xl"
-            :class="plan.code === selectedPlanCode ? '[border-color:var(--brand)] shadow-lg [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.1)] ring-1 [--tw-ring-color:var(--brand)]' : ''"
-            :style="plan.code !== selectedPlanCode ? 'background: var(--surface-1); border-color: var(--surface-border)' : 'background: var(--surface-1)'"
-          >
-            <!-- Current Plan Badge -->
-            <div 
-              v-if="plan.code === snapshot?.subscription?.planCode" 
-              class="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-slate-800 text-white text-[10px] font-bold uppercase tracking-widest rounded-full shadow-sm"
-            >
-              {{ t('admin.pages.billing.currentPlanBadge', 'Your Plan') }}
-            </div>
-
-            <div class="mb-4">
-              <h3 class="text-xl font-black mb-1" :class="plan.code === selectedPlanCode ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="plan.code !== selectedPlanCode ? 'color: var(--text-primary)' : ''">{{ plan.name }}</h3>
-              <p class="text-xs min-h-[32px]" style="color: var(--text-tertiary)">{{ plan.description }}</p>
-            </div>
-
-            <div class="mb-6 flex items-baseline gap-1">
-              <span class="text-3xl font-black" style="color: var(--text-primary)">
-                {{ formatDzd(billingInterval === 'year' ? (plan.pricing?.annualAmountDzd || 0) * 12 : plan.pricing?.monthlyAmountDzd) }}
-              </span>
-              <span class="text-sm font-bold uppercase" style="color: var(--text-tertiary)">{{ plan.pricing?.currency }}</span>
-              <span class="text-xs ml-1" style="color: var(--text-muted)">/ {{ billingInterval === 'year' ? t('admin.pages.billing.yr', 'yr') : t('admin.pages.billing.mo', 'mo') }}</span>
-            </div>
-
-            <!-- Features -->
-            <ul class="space-y-3 mb-8 flex-1">
-              <li class="flex items-start gap-2">
-                <Icon name="lucide:check" class="w-4 h-4 [color:var(--brand)] mt-0.5 shrink-0" />
-                <span class="text-sm font-medium" style="color: var(--text-secondary)">
-                  {{ plan.ordersPerMonth === -1 ? t('admin.pages.billing.unlimitedOrders', 'Unlimited Orders') : t('admin.pages.billing.upToOrders', { count: formatLimit(plan.ordersPerMonth) }, `Up to {count} orders/mo`) }}
+                style="inset-inline-start: 4px; background: var(--surface-1); border: 1px solid var(--surface-border)"
+              />
+              <button
+                type="button"
+                class="relative z-10 rounded-lg px-4 py-2 text-xs font-bold transition-colors"
+                :style="{ color: billingInterval === 'month' ? 'var(--text-primary)' : 'var(--text-tertiary)' }"
+                @click="billingInterval = 'month'"
+              >
+                {{ t('admin.pages.billing.interval.monthly') }}
+              </button>
+              <button
+                type="button"
+                class="relative z-10 inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2 text-xs font-bold transition-colors"
+                :style="{ color: billingInterval === 'year' ? 'var(--text-primary)' : 'var(--text-tertiary)' }"
+                @click="billingInterval = 'year'"
+              >
+                {{ t('admin.pages.billing.interval.yearly') }}
+                <span
+ class="rounded-full px-1.5 py-0.5 text-micro font-black uppercase tracking-wider ui-wash"
+ 
+>
+                  {{ t('admin.pages.billing.interval.save', { pct: bestAnnualDiscount }) }}
                 </span>
-              </li>
-              <!-- Example of static robust features based on plans (could be dynamic in real apps) -->
-              <li class="flex items-start gap-2" v-if="plan.code !== 'basic'">
-                <Icon name="lucide:check" class="w-4 h-4 [color:var(--brand)] mt-0.5 shrink-0" />
-                <span class="text-sm font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.billing.prioritySupport', 'Priority support') }}</span>
-              </li>
-              <li class="flex items-start gap-2" v-if="plan.code === 'premium'">
-                <Icon name="lucide:check" class="w-4 h-4 [color:var(--brand)] mt-0.5 shrink-0" />
-                <span class="text-sm font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.billing.customBranding', 'Custom branding & SMS config') }}</span>
-              </li>
-            </ul>
+              </button>
+            </div>
+          </div>
 
-            <div 
-              class="w-full py-2.5 rounded-xl border flex items-center justify-center font-bold text-sm transition-colors"
-              :class="plan.code === selectedPlanCode ? '[color:rgba(var(--brand-rgb)/0.85)]' : ''"
-              :style="plan.code === selectedPlanCode ? 'background: rgba(var(--brand-rgb)/0.1); border-color: var(--brand)' : 'background: var(--surface-2); border-color: var(--surface-border); color: var(--text-tertiary)'"
+          <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <BillingPlanCard
+              v-for="plan in plans"
+              :key="plan.code"
+              :plan="plan"
+              :interval="billingInterval"
+              :selected="plan.code === selectedPlanCode"
+              :current="plan.code === currentPlanCode"
+              :current-rank="currentPlanRank"
+              :current-interval="currentInterval"
+              @select="selectPlan"
+            />
+          </div>
+        </div>
+
+        <!-- Checkout column -->
+        <div class="xl:col-span-4">
+          <div id="checkout-section" class="xl:sticky xl:top-6">
+            <BillingCheckout
+              v-if="checkoutPlan"
+              :plan="checkoutPlan"
+              :interval="billingInterval"
+              :term-start="termStart"
+              :term-end="termEnd"
+              :current-period-end="snapshot?.subscription?.currentPeriodEnd ?? ''"
+              :cancel-at-period-end="snapshot?.subscription?.cancelAtPeriodEnd ?? false"
+              :cancel-busy="cancelBusy"
+              :has-pending-payment="Boolean(pendingPayment)"
+              @submitted="onSubmitted"
+              @dismiss="selectedPlanCode = ''"
+              @cancel-renewal="setRenewal(true)"
+            />
+
+            <div
+              v-else
+              class="ui-card flex flex-col items-center justify-center px-6 py-12 text-center"
             >
-              {{ plan.code === selectedPlanCode ? t('admin.pages.billing.selectedBtn', 'Selected') : t('admin.pages.billing.selectBtn', 'Select Plan') }}
+              <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-full surface-3">
+                <Icon name="lucide:credit-card" class="h-7 w-7 text-muted" />
+              </div>
+              <h3 class="text-base font-bold text-primary">
+                {{ t('admin.pages.billing.checkout.emptyTitle') }}
+              </h3>
+              <p class="mt-1.5 max-w-[24ch] text-sm text-tertiary">
+                {{ t('admin.pages.billing.checkout.emptyDesc') }}
+              </p>
             </div>
           </div>
-        </div>
-        </div> <!-- Close Left Side -->
-
-        <!-- Right Side: Checkout (Sticky) -->
-        <div id="checkout-section" class="lg:col-span-5 w-full sticky top-6">
-          <!-- Checkout / Payment Flow Section -->
-          <div v-if="selectedPlanCode && selectedPlanCode !== snapshot?.subscription?.planCode" class="animate-in fade-in slide-in-from-bottom-4 duration-300">
-            <div class="w-full rounded-2xl overflow-hidden text-left" style="background: var(--surface-1); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.3)">
-            <div class="p-6 flex flex-col md:flex-row md:items-center justify-between gap-4" style="background: var(--surface-2); border-bottom: 1px solid var(--surface-border)">
-              <div>
-                <h3 class="text-xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.billing.payment.title', 'Complete your upgrade') }}</h3>
-                <p class="text-sm mt-1" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.subtitle', 'Select a payment method to proceed.') }}</p>
-              </div>
-              <div class="text-right">
-                <div class="text-sm font-semibold mb-1" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.totalLabel', 'Total to pay') }}</div>
-                <div class="text-2xl font-black" style="color: var(--text-primary)">
-                  {{ formatDzd(billingInterval === 'year' ? (plans.find(p => p.code === selectedPlanCode)?.pricing?.annualAmountDzd || 0) * 12 : plans.find(p => p.code === selectedPlanCode)?.pricing?.monthlyAmountDzd) }}
-                  <span class="text-xs uppercase" style="color: var(--text-tertiary)">{{ plans.find(p => p.code === selectedPlanCode)?.pricing?.currency || 'DZD' }}</span>
-                </div>
-              </div>
-            </div>
-            
-            <div class="p-6 md:p-8 space-y-6">
-              <!-- Methods Grid -->
-              <div class="grid grid-cols-2 gap-4">
-                <label v-for="method in availableMethods" :key="method.id" class="cursor-pointer relative group">
-                  <input type="radio" v-model="selectedMethod" :value="method.id" class="peer sr-only" />
-                  <div class="h-full flex flex-col items-center justify-center p-4 rounded-xl border-2 hover:[border-color:rgba(var(--brand-rgb)/0.4)] peer-checked:[border-color:var(--brand)] peer-checked:[background:var(--brand)]/10 transition-all" style="background: var(--surface-3); border-color: var(--surface-border)">
-                    <Icon v-if="method.id === 'MYFIN'" name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else-if="method.id === 'PAYSERA'" name="lucide:euro" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else-if="method.id === 'BARIDIMOB'" name="lucide:smartphone" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else-if="method.id === 'CCP'" name="lucide:building" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
-                    <Icon v-else name="lucide:credit-card" class="w-8 h-8 mb-2 peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-tertiary)" />
-
-                    <div class="text-xs font-bold text-center peer-checked:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">{{ method.label }}</div>
-                  </div>
-                  <!-- Check badge -->
-                  <div class="absolute -top-2 -right-2 w-6 h-6 [background:var(--brand)] text-white rounded-full flex items-center justify-center border-2 opacity-0 scale-50 peer-checked:opacity-100 peer-checked:scale-100 transition-all shadow-md" style="border-color: var(--surface-1)">
-                    <Icon name="lucide:check" class="w-3.5 h-3.5" />
-                  </div>
-                </label>
-              </div>
-
-              <!-- Selected Method Details -->
-              <div v-if="selectedMethod" class="p-6 rounded-xl space-y-5" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
-                <div class="flex gap-4">
-                  <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0" style="background: rgba(59,130,246,0.15); color: #60a5fa">
-                    <Icon name="lucide:info" class="w-5 h-5" />
-                  </div>
-                  <div class="text-sm whitespace-pre-line leading-relaxed flex-1 pt-1" style="color: var(--text-secondary)">{{ methodInstructions }}</div>
-                </div>
-
-                <div v-if="requiresProof(selectedMethod)" class="pt-4" style="border-top: 1px solid var(--surface-border)">
-                  <label class="ui-label block mb-3">{{ t('admin.pages.billing.payment.uploadProof', 'Upload Receipt/Proof') }}</label>
-                  
-                  <div class="flex items-center justify-center w-full">
-                    <label 
-                      class="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-xl cursor-pointer transition-colors"
-                      :class="uploadError ? 'border-red-500/50 hover:bg-red-500/5' : proofUrl ? 'border-green-500/50 hover:bg-green-500/5' : 'hover:[border-color:var(--brand)]/40'"
-                      :style="!uploadError && !proofUrl ? 'border-color: var(--surface-border); background: var(--surface-3)' : uploadError ? 'background: rgba(239,68,68,0.05)' : 'background: rgba(34,197,94,0.05)'"
-                    >
-                      <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                        <Icon v-if="uploading" name="lucide:loader-2" class="w-8 h-8 [color:var(--brand)] mb-2 animate-spin" />
-                        <Icon v-else-if="proofUrl" name="lucide:file-check" class="w-8 h-8 text-green-500 mb-2" />
-                        <Icon v-else name="lucide:upload-cloud" class="w-8 h-8 text-slate-400 mb-2" />
-                        
-                        <p class="mb-1 text-sm font-semibold" :class="proofUrl ? 'text-emerald-400' : ''" :style="!proofUrl ? 'color: var(--text-secondary)' : ''">
-                          {{ uploading ? `${t('admin.common.uploading', 'Uploading...')} ${uploadProgress}%` : proofUrl ? t('admin.pages.billing.payment.uploadSuccess', 'Receipt attached successfully') : t('admin.common.clickToUpload', 'Click to upload receipt') }}
-                        </p>
-                        <p v-if="!proofUrl && !uploading" class="text-xs" style="color: var(--text-muted)">PNG, JPG, WEBP, PDF (Max 10MB)</p>
-                      </div>
-                      <input 
-                        type="file" 
-                        class="hidden" 
-                        accept="image/png, image/jpeg, image/webp, application/pdf" 
-                        @change="handleFileUpload" 
-                        :disabled="uploading"
-                      />
-                    </label>
-                  </div>
-                  <div v-if="uploadError" class="mt-2 text-sm text-red-600 font-medium flex items-center gap-1">
-                    <Icon name="lucide:alert-circle" class="w-4 h-4" />
-                    {{ uploadError }}
-                  </div>
-                </div>
-
-                <div
-                  v-if="selectedMethod === 'CHARGILY'"
-                  class="flex items-start gap-3 rounded-xl border p-4 text-sm"
-                  style="color: var(--brand); background: rgba(var(--brand-rgb)/0.08); border-color: rgba(var(--brand-rgb)/0.2)"
-                >
-                  <Icon name="lucide:alert-triangle" class="mt-0.5 w-5 flex-shrink-0 [color:var(--brand)]" />
-                  <div>
-                    <span class="font-bold block mb-1">{{ t('admin.pages.billing.payment.chargilySoon', 'Coming soon') }}</span>
-                    <span style="color: rgba(var(--brand-rgb)/0.82)">
-                      {{ t('admin.pages.billing.payment.chargilyNote', 'Automatic payment gateway integration is currently unavailable. Please choose another manual method like CCP or BaridiMob in the meantime.') }}
-                    </span>
-                  </div>
-                </div>
-
-                <div class="pt-4">
-                  <button
-                    class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-xl [background:var(--brand)] text-white hover:[background:var(--brand)] hover:shadow-lg disabled:opacity-50 disabled:hover:shadow-none disabled:cursor-not-allowed text-base font-bold transition-all"
-                    :disabled="pending || uploading || submitting || (requiresProof(selectedMethod) && !proofUrl) || selectedMethod === 'CHARGILY'"
-                    @click="submitPayment"
-                  >
-                    <Icon v-if="submitting || uploading" name="lucide:loader-2" class="w-5 h-5 animate-spin" />
-                    <Icon v-else name="lucide:shield-check" class="w-5 h-5" />
-                    {{ t('admin.pages.billing.payment.submitBtn', 'Confirm & Submit Payment') }}
-                  </button>
-                </div>
-              </div>
-              
-              <div v-if="submitError" class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm font-medium flex items-start gap-3">
-                <Icon name="lucide:alert-octagon" class="w-5 h-5 shrink-0" />
-                {{ submitError }}
-              </div>
-              <div v-if="submitSuccess" class="p-4 bg-green-50 border border-green-200 rounded-xl text-green-800 text-sm font-medium flex items-start gap-3">
-                <Icon name="lucide:check-circle" class="w-5 h-5 shrink-0" />
-                {{ t('admin.pages.billing.payment.submitSuccess', 'Your payment proof has been securely submitted and is under review by our agents. Your subscription will be updated shortly.') }}
-              </div>
-            </div>
-          </div>
-        </div>
-        <!-- Empty State -->
-        <div v-else class="rounded-2xl p-10 flex flex-col items-center justify-center text-center h-[350px]" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-          <div class="w-16 h-16 rounded-full flex items-center justify-center mb-4" style="background: var(--surface-3)">
-            <Icon name="lucide:credit-card" class="w-8 h-8" style="color: var(--text-muted)" />
-          </div>
-          <h3 class="text-xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.billing.payment.emptyTitle', 'Checkout') }}</h3>
-          <p class="mt-2 text-sm" style="color: var(--text-tertiary)">{{ t('admin.pages.billing.payment.emptyDesc', 'Select a plan from the list to start your upgrade.') }}</p>
-        </div>
-
-        </div> <!-- Close Right Side -->
-      </div> <!-- Close 12-col Grid Wrapper -->
-    </div>
-
-    <!-- Payment History -->
-    <div v-if="paymentHistory.length > 0" class="mt-2">
-      <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-        <div class="px-6 py-4 flex items-center justify-between" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
-          <h2 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.billing.history.title', 'Payment history') }}</h2>
-          <span class="text-xs" style="color: var(--text-muted)">{{ paymentHistory.length }} {{ t('admin.pages.billing.history.entries', 'entries') }}</span>
-        </div>
-        <div class="overflow-x-auto">
-          <table class="ui-table">
-            <thead class="ui-thead" style="border-bottom: 1px solid var(--surface-border)">
-              <tr>
-                <th class="ui-th">{{ t('admin.pages.billing.history.col.date', 'Date') }}</th>
-                <th class="ui-th">{{ t('admin.pages.billing.history.col.plan', 'Plan') }}</th>
-                <th class="ui-th">{{ t('admin.pages.billing.history.col.amount', 'Amount') }}</th>
-                <th class="ui-th">{{ t('admin.pages.billing.history.col.method', 'Method') }}</th>
-                <th class="ui-th">{{ t('admin.pages.billing.history.col.status', 'Status') }}</th>
-                <th class="ui-th">{{ t('admin.pages.billing.history.col.proof', 'Proof') }}</th>
-              </tr>
-            </thead>
-            <tbody class="ui-tbody">
-              <tr v-for="pay in paymentHistory" :key="pay.id" class="ui-tr">
-                <td class="ui-td text-sm whitespace-nowrap" style="color: var(--text-secondary)">{{ formatPayDate(pay.createdAt) }}</td>
-                <td class="ui-td">
-                  <div class="text-sm font-semibold capitalize" style="color: var(--text-primary)">{{ pay.planCode }}</div>
-                  <div class="text-xs" style="color: var(--text-muted)">{{ pay.interval }}</div>
-                </td>
-                <td class="ui-td text-sm font-semibold whitespace-nowrap" style="color: var(--text-secondary)">{{ formatDzd(pay.amountDzd) }} {{ pay.currency }}</td>
-                <td class="ui-td text-xs font-semibold uppercase" style="color: var(--text-tertiary)">{{ pay.method }}</td>
-                <td class="ui-td">
-                  <span
-                    class="ui-badge"
-                    :class="{
-                      'ui-badge--amber': pay.status === 'PENDING',
-                      'ui-badge--emerald': pay.status === 'PAID',
-                      'ui-badge--red': pay.status === 'REJECTED',
-                      'ui-badge--slate': pay.status === 'IMPORTED',
-                    }"
-                  >
-                    {{ pay.status }}
-                  </span>
-                </td>
-                <td class="ui-td text-sm">
-                  <button
-                    v-if="pay.proofUrl"
-                    type="button"
-                    class="[color:rgba(var(--brand-rgb)/0.85)] hover:underline font-semibold inline-flex items-center gap-1"
-                    @click="openPaymentProof(pay)"
-                  >
-                    <Icon name="lucide:external-link" class="w-3.5 h-3.5" />
-                    {{ t('admin.pages.billing.history.viewProof', 'View') }}
-                  </button>
-                  <span v-else style="color: var(--text-muted)">—</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
         </div>
       </div>
+
+      <!-- ── Success toast-strip after a submission ── -->
+      <div
+        v-if="submitSuccess"
+        class="flex items-start gap-3 rounded-xl p-4 text-sm"
+        style="background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.22); color: var(--status-delivered-text)"
+      >
+        <Icon name="lucide:check-circle-2" class="mt-0.5 h-5 w-5 shrink-0" />
+        {{ t('admin.pages.billing.checkout.submitSuccess') }}
+      </div>
+
+      <BillingHistoryTable :payments="paymentHistory" @open-proof="openPaymentProof" />
     </div>
-    </template>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, nextTick } from 'vue'
+import { computed, nextTick, ref, watch } from 'vue'
 import { useAuthStore } from '~/stores/auth'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
+import { useBillingFormat } from '~/composables/useBillingFormat'
+import { addBillingInterval, type BillingInterval } from '~/shared/pricing/billing-period'
+import { planRank, type PlanQuote } from '~/shared/pricing/plans'
+import BillingStateBanner from '~/components/admin/billing/BillingStateBanner.vue'
+import BillingUsageMeter from '~/components/admin/billing/BillingUsageMeter.vue'
+import BillingPlanCard from '~/components/admin/billing/BillingPlanCard.vue'
+import BillingCheckout from '~/components/admin/billing/BillingCheckout.vue'
+import BillingHistoryTable, { type PaymentRecord } from '~/components/admin/billing/BillingHistoryTable.vue'
 
-const { t, locale } = useI18n({ useScope: 'global' })
-const { uploadWithProgress } = useUploadWithProgress()
+const { t } = useI18n({ useScope: 'global' })
+const { money, date, dateRange } = useBillingFormat()
 
 definePageMeta({
   middleware: 'auth',
@@ -429,64 +273,66 @@ definePageMeta({
   titleKey: 'admin.pages.billing.metaTitle'
 })
 
+type UsageMetric = { used: number; limit: number; percent: number; exceeded: boolean; unlimited: boolean }
+
 type BillingSnapshot = {
   subscription: {
     source: 'db' | 'default'
     planCode: string
-    interval: 'month' | 'year'
+    interval: BillingInterval
     status: string
     currentPeriodStart: string
     currentPeriodEnd: string
+    cancelAtPeriodEnd: boolean
+    trialEnd: string | null
+    isTrialing: boolean
+    isPastDue: boolean
+    daysUntilRenewal: number
   }
-  plan: {
-    code: string
-    name: string
-    description: string
-    pricing: { currency: string; monthlyAmountDzd: number; annualAmountDzd: number }
-    ordersPerMonth: number
-  }
+  plan: { code: string; name: string; description: string; ordersPerMonth: number }
+  renewalQuote: PlanQuote
   usage: {
-    ordersInPeriod: number
-    ordersLimit: number
     periodStart: string
     periodEnd: string
+    ordersInPeriod: number
+    ordersLimit: number
+    orders: UsageMetric
+    products: UsageMetric
+    pixels: UsageMetric
   }
 }
 
 type PlanCatalogItem = {
   code: string
-  name: string
-  description: string
-  pricing: { currency: string; monthlyAmountDzd: number; annualAmountDzd: number }
+  rank: number
+  free: boolean
   ordersPerMonth: number
+  maxProducts: number
+  maxPixels: number
+  flags?: { popular?: boolean; highlight?: boolean } | null
+  quotes: Record<BillingInterval, PlanQuote>
 }
 
 const authStore = useAuthStore()
 
-type PaymentRecord = {
-  id: string
-  planCode: string
-  interval: string
-  amountDzd: number
-  currency: string
-  method: string
-  status: string
-  proofUrl: string | null
-  createdAt: string
+const authToken = () => {
+  const token = (authStore as any).token?.value ?? (authStore as any).token
+  return typeof token === 'string' && token ? token : null
 }
 
 const { data, pending, error, refresh } = await useAsyncData(
   'adminBilling',
   async () => {
-    const token = (authStore as any).token?.value ?? (authStore as any).token
-    if (!token || typeof token !== 'string') {
+    const token = authToken()
+    if (!token) {
       return { snapshot: null as BillingSnapshot | null, plans: [] as PlanCatalogItem[], payments: [] as PaymentRecord[] }
     }
 
+    const headers = { Authorization: `Bearer ${token}` }
     const [snapshot, plansRes, paymentsRes] = await Promise.all([
-      $fetch('/api/admin/billing/subscription', { headers: { Authorization: `Bearer ${token}` } }) as Promise<BillingSnapshot>,
-      $fetch('/api/admin/billing/plans', { headers: { Authorization: `Bearer ${token}` } }) as Promise<{ plans: PlanCatalogItem[] }>,
-      $fetch('/api/admin/billing/payments', { headers: { Authorization: `Bearer ${token}` } }) as Promise<{ payments: PaymentRecord[] }>
+      $fetch('/api/admin/billing/subscription', { headers }) as Promise<BillingSnapshot>,
+      $fetch('/api/admin/billing/plans', { headers }) as Promise<{ plans: PlanCatalogItem[] }>,
+      $fetch('/api/admin/billing/payments', { headers }) as Promise<{ payments: PaymentRecord[] }>
     ])
 
     return { snapshot, plans: plansRes.plans || [], payments: paymentsRes.payments || [] }
@@ -497,219 +343,201 @@ const { data, pending, error, refresh } = await useAsyncData(
 const snapshot = computed(() => (data.value as any)?.snapshot as BillingSnapshot | null)
 const plans = computed(() => ((data.value as any)?.plans as PlanCatalogItem[]) || [])
 const paymentHistory = computed(() => ((data.value as any)?.payments as PaymentRecord[]) || [])
-const pendingPayments = computed(() => paymentHistory.value.filter((p) => p.status === 'PENDING'))
-const latestApprovedProof = computed(() =>
-  paymentHistory.value.find((p) => p.status === 'PAID' && p.method !== 'SIMULATED') ?? null
-)
 
-const formatLimit = (limit: number | null | undefined) => {
-  if (typeof limit === 'number') return String(limit)
-  return '—'
-}
+/** Payments come back newest-first, so the first match is the latest one. */
+const pendingPayment = computed(() => paymentHistory.value.find((p) => p.status === 'PENDING') ?? null)
 
-const formatDzd = (amount: number | null | undefined) => {
-  if (typeof amount !== 'number') return '—'
-  const intlLocale = locale.value === 'fr' ? 'fr-DZ' : locale.value === 'ar' ? 'ar-DZ' : 'en-DZ'
-  return new Intl.NumberFormat(intlLocale, { maximumFractionDigits: 0 }).format(amount)
-}
-
-const formatPayDate = (date: string) =>
-  new Date(date).toLocaleString(locale.value, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
-
-const periodLabel = computed(() => {
-  const start = snapshot.value?.usage?.periodStart
-  const end = snapshot.value?.usage?.periodEnd
-  if (!start || !end) return ''
-  const s = new Date(start)
-  const e = new Date(end)
-  return `${s.toLocaleDateString()} → ${e.toLocaleDateString()}`
+/**
+ * Only surfaced while it is still the most recent thing that happened — a
+ * rejection stops being news once the tenant has submitted again.
+ */
+const rejectedPayment = computed(() => {
+  const latest = paymentHistory.value[0]
+  return latest?.status === 'REJECTED' ? latest : null
 })
 
-const limitRows = computed(() => {
-  return [
-    { label: t('admin.pages.billing.limits.ordersPerMonth'), value: formatLimit(snapshot.value?.plan?.ordersPerMonth) }
-  ]
-})
-
-const planOptions = computed(() =>
-  plans.value.map((p) => ({ value: p.code, label: t('admin.pages.billing.planOption', { name: p.name, orders: p.ordersPerMonth }) }))
+const currentPlanCode = computed(() => snapshot.value?.subscription?.planCode ?? 'basic')
+const currentInterval = computed<BillingInterval>(() => snapshot.value?.subscription?.interval ?? 'month')
+const currentPlanRank = computed(() => planRank(currentPlanCode.value))
+const currentPlanName = computed(() => t(`pricing.plans.${currentPlanCode.value}.name`, snapshot.value?.plan?.name ?? '—'))
+const currentPlanDescription = computed(() =>
+  t(`pricing.plans.${currentPlanCode.value}.description`, snapshot.value?.plan?.description ?? '')
+)
+const isFreeCurrentPlan = computed(
+  () => plans.value.find((p) => p.code === currentPlanCode.value)?.free ?? false
 )
 
-const billingInterval = ref<'month' | 'year'>('month')
+const intervalLabel = computed(() =>
+  currentInterval.value === 'year'
+    ? t('admin.pages.billing.interval.yearly')
+    : t('admin.pages.billing.interval.monthly')
+)
+
+const statusLabel = computed(() => {
+  const sub = snapshot.value?.subscription
+  if (!sub) return '—'
+  if (sub.isTrialing) return t('admin.pages.billing.status.trialing')
+  if (sub.isPastDue) return t('admin.pages.billing.status.pastDue')
+  if (sub.cancelAtPeriodEnd) return t('admin.pages.billing.status.canceling')
+  return t('admin.pages.billing.status.active')
+})
+
+const statusBadgeClass = computed(() => {
+  const sub = snapshot.value?.subscription
+  if (!sub) return 'ui-badge--slate'
+  if (sub.isPastDue) return 'ui-badge--red'
+  if (sub.isTrialing) return 'ui-badge--indigo'
+  if (sub.cancelAtPeriodEnd) return 'ui-badge--amber'
+  return 'ui-badge--emerald'
+})
+
+// A trial ends on its own date; a paid term ends at the period end.
+const renewalDate = computed(() => {
+  const sub = snapshot.value?.subscription
+  if (!sub) return null
+  return sub.isTrialing && sub.trialEnd ? sub.trialEnd : sub.currentPeriodEnd
+})
+
+const renewalTermLabel = computed(() => {
+  const sub = snapshot.value?.subscription
+  if (sub?.isTrialing) return t('admin.pages.billing.current.trialEnds')
+  if (sub?.cancelAtPeriodEnd) return t('admin.pages.billing.current.accessEnds')
+  return t('admin.pages.billing.current.renewsOn')
+})
+
+const daysLabel = computed(() => {
+  const days = snapshot.value?.subscription?.daysUntilRenewal
+  if (typeof days !== 'number') return ''
+  if (days < 0) return t('admin.pages.billing.current.expiredAgo', { days: Math.abs(days) })
+  if (days === 0) return t('admin.pages.billing.current.today')
+  return t('admin.pages.billing.current.daysLeft', { days })
+})
+
+const daysColor = computed(() => {
+  const days = snapshot.value?.subscription?.daysUntilRenewal ?? 0
+  if (days < 0) return '#ef4444'
+  if (days <= 7) return 'var(--status-pending-text)'
+  return 'var(--text-muted)'
+})
+
+const usageWindowLabel = computed(() =>
+  dateRange(snapshot.value?.usage?.periodStart, snapshot.value?.usage?.periodEnd)
+)
+
+/** Headline discount on the toggle — read off the catalogue, never hardcoded. */
+const bestAnnualDiscount = computed(() =>
+  plans.value.reduce((best, plan) => Math.max(best, plan.quotes.year.savingsPercent), 0)
+)
+
+const billingInterval = ref<BillingInterval>('month')
 const selectedPlanCode = ref<string>('')
+const submitSuccess = ref(false)
 
-const selectPlan = (code: string) => {
-  selectedPlanCode.value = code
-  if (window.innerWidth < 1024) {
-    nextTick(() => {
-      const el = document.getElementById('checkout-section')
-      if (el) {
-        const yInfo = el.getBoundingClientRect().top + window.scrollY - 24
-        window.scrollTo({ top: yInfo, behavior: 'smooth' })
-      }
-    })
-  }
-}
-
+// Open on the interval the tenant is already billed at, not always monthly.
 watch(
-  snapshot,
-  (s) => {
-    if (!selectedPlanCode.value && s?.subscription?.planCode) {
-      selectedPlanCode.value = s.subscription.planCode
-    }
+  () => snapshot.value?.subscription?.interval,
+  (interval) => {
+    if (interval) billingInterval.value = interval
   },
   { immediate: true }
 )
 
-// Payment Flow State
-const selectedMethod = ref('')
-const proofUrl = ref('')
-const uploading = ref(false)
-const uploadProgress = ref(0)
-const uploadError = ref('')
-const submitting = ref(false)
-const submitError = ref('')
-const submitSuccess = ref(false)
-
-const availableMethods = computed(() => [
-  { id: 'MYFIN', label: t('admin.pages.billing.payment.methods.myfin', 'MyFin') },
-  { id: 'PAYSERA', label: t('admin.pages.billing.payment.methods.paysera', 'Paysera') },
-  { id: 'BARIDIMOB', label: t('admin.pages.billing.payment.methods.baridimob', 'BaridiMob') },
-  { id: 'CCP', label: t('admin.pages.billing.payment.methods.ccp', 'CCP / Poste') },
-  { id: 'CHARGILY', label: t('admin.pages.billing.payment.methods.chargily', 'Chargily (CIB/Edahabia)') },
-])
-
-const requiresProof = (method: string) => {
-  return ['MYFIN', 'PAYSERA', 'BARIDIMOB', 'CCP'].includes(method)
-}
-
-const methodInstructions = computed(() => {
-  const amountObj = plans.value.find(p => p.code === selectedPlanCode.value)?.pricing
-  const amount = billingInterval.value === 'year' ? (amountObj?.annualAmountDzd || 0) * 12 : amountObj?.monthlyAmountDzd
-  const finalAmount = amount || 0
-  
-  const exchangeRate = 280
-  const eurAmount = (finalAmount / exchangeRate).toFixed(2).replace(/\.00$/, '')
-  
-  switch(selectedMethod.value) {
-    case 'MYFIN':
-      if (locale.value === 'fr') {
-        return `Veuillez envoyer ${eurAmount} EUR (Taux : 1€ = ${exchangeRate} DA) sur notre compte MyFin :\nIBAN : BG98MYFI123123123\nNom : MySaaS LLC`
-      } else if (locale.value === 'ar') {
-        return `يرجى إرسال ${eurAmount} يورو (السعر: 1€ = ${exchangeRate} دج) إلى حساب MyFin الخاص بنا:\nIBAN: BG98MYFI123123123\nالاسم: MySaaS LLC`
-      }
-      return `Please send ${eurAmount} EUR (Rate: 1€ = ${exchangeRate} DA) to our MyFin account:\nIBAN: BG98MYFI123123123\nName: MySaaS LLC`
-    case 'PAYSERA':
-      if (locale.value === 'fr') {
-         return `Veuillez envoyer ${eurAmount} EUR (Taux : 1€ = ${exchangeRate} DA) sur notre compte Paysera :\nEmail : payments@mysaas.com\nNom : MySaaS LLC`
-      } else if (locale.value === 'ar') {
-         return `يرجى إرسال ${eurAmount} يورو (السعر: 1€ = ${exchangeRate} دج) إلى حساب Paysera الخاص بنا:\nالبريد الإلكتروني: payments@mysaas.com\nالاسم: MySaaS LLC`
-      }
-      return `Please send ${eurAmount} EUR (Rate: 1€ = ${exchangeRate} DA) to our Paysera account:\nEmail: payments@mysaas.com\nName: MySaaS LLC`
-    case 'BARIDIMOB':
-      return t('admin.pages.billing.payment.instructions.baridimob', { amount: formatDzd(finalAmount) }) || `Please send ${formatDzd(finalAmount)} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +213 555 55 55 55`
-    case 'CCP':
-      return t('admin.pages.billing.payment.instructions.ccp', { amount: formatDzd(finalAmount) }) || `Please deposit ${formatDzd(finalAmount)} DZD to our CCP account:\nAccount: 12345678 99\nName: MySaaS LLC`
-    default:
-      return ''
-  }
+const checkoutPlan = computed(() => {
+  if (!selectedPlanCode.value) return null
+  const plan = plans.value.find((p) => p.code === selectedPlanCode.value)
+  if (!plan) return null
+  // Nothing to buy when the selection is already what the tenant has.
+  if (plan.code === currentPlanCode.value && billingInterval.value === currentInterval.value) return null
+  return plan
 })
 
-// Reset state when changing method
-watch(selectedMethod, () => {
-  proofUrl.value = ''
-  uploadError.value = ''
-  submitError.value = ''
-  submitSuccess.value = false
+/**
+ * A new term starts when the current one runs out, so a tenant who renews early
+ * keeps the days they already paid for. Mirrors what the API records.
+ */
+const termStart = computed(() => {
+  const sub = snapshot.value?.subscription
+  if (!sub) return new Date().toISOString()
+  const end = new Date(sub.currentPeriodEnd)
+  const now = new Date()
+  return !sub.isPastDue && end > now ? end.toISOString() : now.toISOString()
 })
 
-async function handleFileUpload(event: Event) {
-  const target = event.target as HTMLInputElement
-  const file = target.files?.[0]
-  if (!file) return
+const termEnd = computed(() =>
+  addBillingInterval(new Date(termStart.value), billingInterval.value).toISOString()
+)
 
-  uploading.value = true
-  uploadProgress.value = 0
-  uploadError.value = ''
-  
-  const token = (authStore as any).token?.value ?? (authStore as any).token
-  
-  try {
-    const res = await uploadWithProgress<{ url: string; error?: string }>({
-      url: '/api/admin/billing/proofs/upload',
-      file,
-      token,
-      fallbackErrorMessage: t('admin.pages.billing.payment.errors.uploadFailed'),
-      onProgress: (percent) => {
-        uploadProgress.value = percent
-      }
-    }) as { url: string }
-    
-    proofUrl.value = res.url
-  } catch (e: any) {
-    uploadError.value = e?.message || e?.data?.error || t('admin.pages.billing.payment.errors.uploadFailed')
-  } finally {
-    uploading.value = false
-    uploadProgress.value = 0
-  }
+const scrollToCheckout = () => {
+  nextTick(() => {
+    const el = document.getElementById('checkout-section')
+    if (!el) return
+    // Only worth jumping on narrow layouts; on xl the panel is already alongside.
+    if (window.innerWidth >= 1280) return
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 24, behavior: 'smooth' })
+  })
 }
 
-async function openPaymentProof(payment: any) {
-  const token = (authStore as any).token?.value ?? (authStore as any).token
-  if (!token || typeof token !== 'string') return
-  if (!payment?.id || !payment?.proofUrl) return
-
-  try {
-    if (typeof payment.proofUrl === 'string' && payment.proofUrl.startsWith('http')) {
-      window.open(payment.proofUrl, '_blank', 'noopener,noreferrer')
-      return
-    }
-
-    const res = await $fetch(`/api/admin/billing/payments/${payment.id}/proof-url`, {
-      headers: { Authorization: `Bearer ${token}` }
-    }) as { url: string }
-
-    if (res?.url) window.open(res.url, '_blank', 'noopener,noreferrer')
-  } catch (e: any) {
-    submitError.value = e?.message || e?.data?.statusMessage || 'Failed to open proof'
-  }
-}
-
-async function submitPayment() {
-  const token = (authStore as any).token?.value ?? (authStore as any).token
-  if (!token || typeof token !== 'string') return
-  
-  submitting.value = true
-  submitError.value = ''
+const selectPlan = (code: string) => {
   submitSuccess.value = false
-  
-  const selectedPlan = plans.value.find(p => p.code === selectedPlanCode.value)
-  const amountDzd = billingInterval.value === 'year' ? (selectedPlan?.pricing?.annualAmountDzd || 0) * 12 : selectedPlan?.pricing?.monthlyAmountDzd
-  
+  selectedPlanCode.value = selectedPlanCode.value === code ? '' : code
+  if (selectedPlanCode.value) scrollToCheckout()
+}
+
+const onBannerAction = (id: 'resume' | 'choosePlan') => {
+  if (id === 'resume') return setRenewal(false)
+  nextTick(() => {
+    document.getElementById('plans-section')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  })
+}
+
+// ── Automatic renewal ──
+const cancelBusy = ref(false)
+const cancelError = ref('')
+
+async function setRenewal(cancel: boolean) {
+  const token = authToken()
+  if (!token || cancelBusy.value) return
+
+  cancelBusy.value = true
+  cancelError.value = ''
   try {
-    await $fetch('/api/admin/billing/payments/submit', {
+    await $fetch('/api/admin/billing/subscription/cancel-at-period-end', {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}` },
-      body: { 
-        planCode: selectedPlanCode.value, 
-        interval: billingInterval.value,
-        method: selectedMethod.value,
-        amountDzd: amountDzd || 0,
-        proofUrl: proofUrl.value
-      }
+      body: { cancelAtPeriodEnd: cancel }
     })
-    
-    submitSuccess.value = true
-    // Reset selections after short delay to show success
-    setTimeout(() => {
-      selectedPlanCode.value = snapshot.value?.subscription?.planCode || ''
-    }, 5000)
-    
     await refresh()
   } catch (e: any) {
-    submitError.value = e?.message || e?.data?.statusMessage || t('admin.pages.billing.payment.errors.submitFailed')
+    cancelError.value = e?.data?.statusMessage || e?.message || t('admin.pages.billing.errors.updateFailed')
   } finally {
-    submitting.value = false
+    cancelBusy.value = false
+  }
+}
+
+const toggleRenewal = () => setRenewal(!snapshot.value?.subscription?.cancelAtPeriodEnd)
+
+async function onSubmitted() {
+  submitSuccess.value = true
+  selectedPlanCode.value = ''
+  await refresh()
+}
+
+async function openPaymentProof(payment: PaymentRecord) {
+  const token = authToken()
+  if (!token || !payment?.id || !payment?.proofUrl) return
+
+  if (payment.proofUrl.startsWith('http')) {
+    window.open(payment.proofUrl, '_blank', 'noopener,noreferrer')
+    return
+  }
+
+  try {
+    const res = (await $fetch(`/api/admin/billing/payments/${payment.id}/proof-url`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })) as { url: string }
+    if (res?.url) window.open(res.url, '_blank', 'noopener,noreferrer')
+  } catch {
+    // A missing or expired proof link is not worth derailing the page over.
   }
 }
 </script>

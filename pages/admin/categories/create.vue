@@ -5,19 +5,19 @@
       class="flex mb-6"
       aria-label="Breadcrumb"
     >
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink
-            to="/admin/categories"
-            class="hover:[color:var(--brand)]" style="color: var(--text-secondary)"
-          >
+ to="/admin/categories"
+ class="hover:[color:var(--brand)] text-secondary" 
+>
             {{ t('admin.nav.categories') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.create.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-tertiary" />
+            <span class="ms-1 text-tertiary">{{ t('admin.pages.categories.create.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -26,25 +26,25 @@
     <!-- Header -->
     <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
       <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-bold text-primary">
           {{ t('admin.pages.categories.create.title') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ t('admin.pages.categories.create.subtitle') }}
         </p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <NuxtLink
-          to="/admin/categories"
-          class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
-        >
+ to="/admin/categories"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary surface-1" 
+>
           {{ t('admin.common.cancel') }}
         </NuxtLink>
         <button
           form="category-create-form"
           type="submit"
           :disabled="submitting"
-          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.creating') : t('admin.pages.categories.create.submit') }}
@@ -75,7 +75,6 @@
         @change="handleSlugChange"
         @blur="handleSlugChange"
         required
-        pattern="[a-z0-9-]+"
       />
 
       <BaseSelect
@@ -102,26 +101,39 @@
         :hint="t('admin.forms.category.image.hint')"
       />
 
+      <BaseSelect
+        v-model="form.visibility"
+        :label="t('admin.forms.category.visibility.label')"
+        :hint="t('admin.forms.category.visibility.hint')"
+      >
+        <option value="LISTED">
+          {{ t('admin.forms.category.visibility.listed') }}
+        </option>
+        <option value="UNLISTED">
+          {{ t('admin.forms.category.visibility.unlisted') }}
+        </option>
+      </BaseSelect>
+
       <div
         v-if="errorMessage"
-        class="p-4 bg-red-50 border border-red-200 rounded-md"
+        class="p-4 bg-red-50 border border-red-200 rounded-lg"
       >
         <p class="text-sm text-red-800">
           {{ errorMessage }}
         </p>
       </div>
 
-      <div class="flex justify-end space-x-3 pt-4" style="border-top: 1px solid var(--surface-border)">
+      <div class="flex justify-end space-x-3 pt-4 rtl:space-x-reverse border-t border-line">
         <NuxtLink
-          to="/admin/categories"
-          class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
-        >
+ to="/admin/categories"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary surface-1" 
+>
           {{ t('admin.common.cancel') }}
         </NuxtLink>
         <button
           type="submit"
           :disabled="submitting"
-          class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+          class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
         >
           <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
           {{ submitting ? t('admin.common.creating') : t('admin.pages.categories.create.submit') }}
@@ -136,6 +148,7 @@ import { useAuthStore } from '~/stores/auth'
 import SingleImageUploader from '~/components/admin/SingleImageUploader.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import { CONTENT_SLUG_PATTERN, CONTENT_SLUG_RULE_HINT, normalizeContentSlug } from '~/shared/content-slug'
 
 definePageMeta({
   middleware: 'auth',
@@ -151,7 +164,8 @@ const form = ref({
   title: '',
   slug: '',
   parentId: '',
-  imageUrl: null as string | null
+  imageUrl: null as string | null,
+  visibility: 'LISTED' as 'LISTED' | 'UNLISTED'
 })
 
 type Category = {
@@ -202,7 +216,7 @@ const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
 const submitting = ref(false)
 const lastAutoSlug = ref('')
-const slugPattern = /^[a-z0-9-]+$/
+const slugPattern = CONTENT_SLUG_PATTERN
 const slugSuggestionSeq = ref(0)
 
 watch(() => form.value.title, (newTitle) => {
@@ -210,10 +224,7 @@ watch(() => form.value.title, (newTitle) => {
 })
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeContentSlug(text)
 }
 
 function normalizeSlugInput(): string {
@@ -287,7 +298,7 @@ async function checkSlugAvailability(): Promise<boolean> {
     return false
   }
   if (!slugPattern.test(slug)) {
-    errors.value.slug = 'Slug must contain only lowercase letters, numbers, and hyphens'
+    errors.value.slug = CONTENT_SLUG_RULE_HINT
     return false
   }
 
@@ -333,7 +344,8 @@ async function handleSubmit() {
         title: form.value.title,
         slug: form.value.slug,
         parentId: form.value.parentId || null,
-        imageUrl: form.value.imageUrl
+        imageUrl: form.value.imageUrl,
+        visibility: form.value.visibility
       }
     })
 

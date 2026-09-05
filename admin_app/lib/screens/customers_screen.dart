@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/customers_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/customer.dart';
+import '../theme/app_theme.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/responsive_server_paginated_table.dart';
 
 class CustomersScreen extends ConsumerStatefulWidget {
@@ -65,12 +69,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/customers/create'),
-              backgroundColor: const Color(0xFF0F172A), // Slate-900
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
+                LucideIcons.plus,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             )
           : null,
       body: SingleChildScrollView(
@@ -88,10 +94,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   ],
                   ResponsiveFilterBar(
                     searchField: FormInput(
-                      label: 'admin.pages.customers.index.filters.searchLabel'.tr(),
+                      label: 'app.admin_pages_customers_index_fi'.tr().tr(),
                       controller: _searchController,
-                      hint: 'admin.pages.customers.index.filters.searchPlaceholder'
-                          .tr(),
+                      hint:
+                          'admin.pages.customers.index.filters.searchPlaceholder'
+                              .tr(),
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 16,
                         vertical: 14,
@@ -112,7 +119,8 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   else if (customersState.customers.isEmpty)
                     _buildEmptyCard(
                       hint: _searchController.text.trim().isNotEmpty
-                          ? 'admin.pages.customers.index.empty.hintFiltered'.tr()
+                          ? 'admin.pages.customers.index.empty.hintFiltered'
+                                .tr()
                           : 'admin.pages.customers.index.empty.hint'.tr(),
                     )
                   else
@@ -139,14 +147,19 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF111827), // Gray-900
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
               SizedBox(height: 4),
               Text(
                 'admin.pages.customers.index.subtitle'.tr(),
-                style: TextStyle(color: Color(0xFF6B7280), fontSize: 14),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -166,7 +179,7 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   onPressed: loading ? null : _fetchCustomers,
                 ),
                 AppButton.primary(
-                  label: 'admin.pages.customers.index.addCustomer'.tr(),
+                  label: 'app.admin_pages_customers_index_ad'.tr().tr(),
                   icon: LucideIcons.plus,
                   onPressed: () => context.go('/customers/create'),
                 ),
@@ -179,7 +192,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   Widget _buildCustomersTable(CustomersState state) {
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
 
     return ResponsiveServerPaginatedTable<Customer>(
       items: state.customers,
@@ -196,16 +211,22 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         children: [
           _buildHeaderCell(
             'admin.pages.customers.index.table.customer'.tr(),
-            flex: 4,
+            flex: 3,
           ),
-          _buildHeaderCell('admin.forms.customer.phone.label'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.index.table.orders'.tr(), flex: 1),
+          _buildHeaderCell(
+            'admin.pages.customers.index.table.info'.tr(),
+            flex: 3,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.index.table.address'.tr(),
+            flex: 3,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.index.table.orders'.tr(),
+            flex: 1,
+          ),
           _buildHeaderCell(
             'admin.pages.customers.index.table.totalSpent'.tr(),
-            flex: 2,
-          ),
-          _buildHeaderCell(
-            'admin.pages.customers.detail.stats.currentBalance'.tr(),
             flex: 2,
           ),
           _buildHeaderCell(
@@ -216,7 +237,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText('admin.pages.customers.index.table.actions'.tr()),
+              child: _headerText(
+                'admin.pages.customers.index.table.actions'.tr(),
+              ),
             ),
           ),
         ],
@@ -229,19 +252,19 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         return InkWell(
           onTap: () => context.go('/customers/${customer.id}'),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
             child: Row(
               children: [
                 Expanded(
-                  flex: 4,
+                  flex: 3,
                   child: Row(
                     children: [
                       Container(
-                        width: 40,
-                        height: 40,
+                        width: 28,
+                        height: 28,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEFF6FF), // Blue-50
-                          borderRadius: BorderRadius.circular(20),
+                          color: AppColors.blue.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                         alignment: Alignment.center,
                         child: Text(
@@ -250,58 +273,109 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                               : '?',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF3B82F6), // Blue-500
+                            color: AppColors.blue,
                           ),
                         ),
                       ),
                       const SizedBox(width: 12),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              customer.name,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xFF0F172A), // Slate-900
-                                fontSize: 14,
-                              ),
-                            ),
-                            if ((customer.email ?? '').trim().isNotEmpty)
-                              Text(
-                                customer.email!,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF64748B), // Slate-500
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              )
-                            else if ((customer.address ?? '').trim().isNotEmpty)
-                              Text(
-                                customer.address!,
-                                style: const TextStyle(
-                                  fontSize: 13,
-                                  color: Color(0xFF64748B), // Slate-500
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                          ],
+                        child: Text(
+                          customer.name,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontWeight: FontWeight.w600,
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontSize: 13,
+                          ),
                         ),
                       ),
                     ],
                   ),
                 ),
                 Expanded(
-                  flex: 2,
+                  flex: 3,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      if ((customer.email ?? '').trim().isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              LucideIcons.mail,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                customer.email!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      if ((customer.phone).trim().isNotEmpty)
+                        Row(
+                          children: [
+                            Icon(
+                              LucideIcons.phone,
+                              size: 14,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.5),
+                            ),
+                            const SizedBox(width: 6),
+                            Expanded(
+                              child: Text(
+                                customer.phone,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: Theme.of(context).colorScheme.onSurface
+                                      .withValues(alpha: 0.7),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                      if ((customer.email ?? '').trim().isEmpty &&
+                          customer.phone.trim().isEmpty)
+                        Text(
+                          '—',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+                Expanded(
+                  flex: 3,
                   child: Text(
-                    customer.phone.isEmpty ? '—' : customer.phone,
-                    style: const TextStyle(
+                    (customer.address ?? '').trim().isEmpty
+                        ? '—'
+                        : customer.address!,
+                    style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF475569), // Slate-600
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.7),
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
                 Expanded(
@@ -312,15 +386,17 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                       vertical: 2,
                     ),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF3F4F6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       '${customer.ordersCount}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w500,
-                        color: Color(0xFF374151),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -329,21 +405,10 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   flex: 2,
                   child: Text(
                     money.format(customer.totalSpent),
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFF0F172A), // Slate-900
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 2,
-                  child: Text(
-                    money.format(customer.currentBalance),
                     style: TextStyle(
                       fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: balanceColor,
+                      fontWeight: FontWeight.w500,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -353,9 +418,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                     customer.lastOrderAt != null
                         ? DateFormat.yMMMd().format(customer.lastOrderAt!)
                         : '—',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 13,
-                      color: Color(0xFF64748B), // Slate-500
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                   ),
                 ),
@@ -363,10 +430,9 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
                   flex: 2,
                   child: Align(
                     alignment: Alignment.centerRight,
-                    child: AppButton.secondary(
-                      label: 'admin.common.view'.tr(),
+                    child: TableActionButton(
+                      tooltip: 'admin.common.view'.tr(),
                       icon: LucideIcons.eye,
-                      size: AppButtonSize.sm,
                       onPressed: () => context.go('/customers/${customer.id}'),
                     ),
                   ),
@@ -393,7 +459,11 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.index.loading'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B)), // Slate-500
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -428,28 +498,36 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.users, size: 48, color: Colors.grey[400]),
+            Icon(
+              LucideIcons.users,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.index.empty.title'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827), // Gray-900
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               hint,
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 13,
-                color: Color(0xFF6B7280), // Gray-500
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: 16),
             AppButton.primary(
-              label: 'admin.pages.customers.index.addCustomer'.tr(),
+              label: 'app.admin_pages_customers_index_ad'.tr().tr(),
               icon: LucideIcons.plus,
               onPressed: () => context.go('/customers/create'),
             ),
@@ -460,12 +538,14 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   Widget _headerText(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF6B7280), // Gray-500
-        fontSize: 12,
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -475,12 +555,17 @@ class _CustomersScreenState extends ConsumerState<CustomersScreen> {
   }
 
   Widget _card({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

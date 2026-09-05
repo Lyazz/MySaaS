@@ -19,6 +19,10 @@
     <div v-if="period" class="mt-2 text-[11px] uppercase tracking-[0.18em] text-[color:var(--m-text-faint)] font-mono">
       {{ period }}
     </div>
+    <!-- What is actually charged, so a per-month headline can never mislead. -->
+    <div v-if="billingNote" class="mt-1.5 text-[12px] text-[color:var(--m-text-dim)]">
+      {{ billingNote }}
+    </div>
 
     <p class="mt-5 text-[15px] leading-relaxed text-[color:var(--m-text-dim)] min-h-[3rem]">
       {{ description }}
@@ -52,6 +56,7 @@ defineProps<{
   price: string
   currency?: string
   period?: string
+  billingNote?: string
   description: string
   features?: string[]
   cta: string

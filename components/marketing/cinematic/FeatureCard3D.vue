@@ -2,7 +2,10 @@
   <div ref="el" class="cinematic-card group relative h-full p-7 will-change-transform">
     <div class="cinematic-card-glow" />
     <div class="relative flex h-full flex-col">
-      <div class="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
+      <div v-if="mechanism" class="mb-5 flex h-28 items-center justify-center overflow-hidden rounded-xl border border-white/[0.06] bg-white/[0.015]">
+        <component :is="mechanism" size="compact" />
+      </div>
+      <div v-else class="mb-6 inline-flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-white/[0.03]">
         <Icon :name="icon" class="h-5 w-5 text-lime-neon" />
       </div>
 
@@ -24,6 +27,7 @@
 </template>
 
 <script setup lang="ts">
+import type { Component } from 'vue'
 import { useTilt } from '~/composables/useTilt'
 
 defineProps<{
@@ -32,6 +36,7 @@ defineProps<{
   description: string
   step?: string
   bullets?: Array<{ icon: string; label: string }>
+  mechanism?: Component | string
 }>()
 
 const { el } = useTilt({ max: 5, scale: 1.012 })

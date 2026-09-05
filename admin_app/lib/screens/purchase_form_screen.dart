@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../providers/purchases_provider.dart';
 import '../providers/suppliers_provider.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/buttons/app_button.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class PurchaseFormScreen extends ConsumerStatefulWidget {
   const PurchaseFormScreen({super.key});
@@ -37,9 +39,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Error: $e')));
+        AppToasts.show(context, 'Error: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -53,7 +53,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Create Purchase Order'),
+        title: Text('app.create_purchase_order'.tr()),
         leading: IconButton(
           icon: const Icon(LucideIcons.arrowLeft),
           onPressed: () => context.pop(),
@@ -70,16 +70,16 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                        'New Purchase Order',
+                      Text(
+                        'admin.pages.purchases.create.title'.tr(),
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 8),
-                      const Text(
-                        'Select a supplier to start a new purchase order. You can add items later.',
+                      Text(
+                        'app.select_a_supplier_to_start_a_n'.tr(),
                         style: TextStyle(color: Colors.grey),
                       ),
                       const SizedBox(height: 32),
@@ -100,7 +100,7 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                             const SizedBox(width: 12),
                             Expanded(
                               child: Text(
-                                'A draft purchase order will be created. You can add products and finalize details in the next step.',
+                                'app.a_draft_purchase_order_will_be'.tr(),
                                 style: TextStyle(
                                   color: Colors.blue[900],
                                   fontSize: 13,
@@ -112,7 +112,8 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                       ),
                       const SizedBox(height: 24),
                       FormSelect<String>(
-                        label: 'Select Supplier',
+                        label: 'admin.pages.purchases.create.supplier.label'
+                            .tr(),
                         value: _selectedSupplierId,
                         items: suppliers
                             .map(
@@ -138,12 +139,12 @@ class _PurchaseFormScreenState extends ConsumerState<PurchaseFormScreen> {
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           AppButton.secondary(
-                            label: 'Cancel',
+                            label: 'admin.common.cancel'.tr(),
                             onPressed: () => context.pop(),
                           ),
                           const SizedBox(width: 12),
                           AppButton.primary(
-                            label: 'Create Draft',
+                            label: 'admin.pages.purchases.create.submit'.tr(),
                             onPressed: _selectedSupplierId == null
                                 ? null
                                 : _createDraft,

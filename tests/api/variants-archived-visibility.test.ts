@@ -21,7 +21,7 @@ describe('Variants: archived visibility + safe deletion', () => {
     let incompleteVariantId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Variants Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Variants Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({
@@ -200,6 +200,50 @@ describe('Variants: archived visibility + safe deletion', () => {
         expect(stillThere?.isActive).toBe(false)
     })
 
+    it('rejects deleting a variant that still has stock balances', async () => {
+        const stocked = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId,
+                sku: `VAR-STOCK-${Date.now()}`,
+                price: 100,
+                stock: 3,
+                reserved: 1,
+                safetyStock: 0,
+                trackInventory: true,
+                isActive: true
+            }
+        })
+
+        await prisma.productVariantOptionValue.createMany({
+            data: [
+                { tenantId, variantId: stocked.id, optionValueId: valueA1Id },
+                { tenantId, variantId: stocked.id, optionValueId: valueB1Id }
+            ],
+            skipDuplicates: true
+        })
+
+        const res = await request(app)
+            .delete(`/api/admin/variants/${stocked.id}`)
+            .set('X-Forwarded-Host', host)
+            .set('Authorization', `Bearer ${adminToken}`)
+
+        expect(res.status).toBe(409)
+        expect(res.body.code).toBe('VARIANT_STOCK_NOT_EMPTY')
+
+        const stillThere = await prisma.productVariant.findFirst({
+            where: { tenantId, id: stocked.id },
+            select: { id: true, stock: true, reserved: true, safetyStock: true, isActive: true }
+        })
+        expect(stillThere).toMatchObject({
+            id: stocked.id,
+            stock: 3,
+            reserved: 1,
+            safetyStock: 0,
+            isActive: true
+        })
+    })
+
     it('hard-deletes a variant with no references', async () => {
         const created = await prisma.productVariant.create({
             data: {
@@ -228,4 +272,3 @@ describe('Variants: archived visibility + safe deletion', () => {
         expect(missing).toBeNull()
     })
 })
-

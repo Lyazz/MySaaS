@@ -1,15 +1,34 @@
-import { timingSafeEqual } from 'node:crypto'
+import { createHmac, timingSafeEqual } from 'node:crypto'
 import type { Request, Response } from 'express'
 import { DeliveryConfigurationError, DeliveryService } from './delivery.service'
 import { ShipmentProvider } from '@prisma/client'
 import { getProviderCatalogItem } from './catalog'
 import { MaystroIntegrationError } from './maystro/maystro.errors'
+import { YalidineIntegrationError } from './yalidine/yalidine.errors'
+import { YalidineWebhookService } from './yalidine/yalidine-webhook.service'
 import prisma from '../../lib/prisma'
 
 const service = new DeliveryService()
+const yalidineWebhookService = new YalidineWebhookService()
 
 const isShipmentProvider = (value: string): value is ShipmentProvider =>
     (Object.values(ShipmentProvider) as string[]).includes(value)
+
+/**
+ * The HTTP status to answer with when a carrier — or our own config check — refused.
+ * Covers DeliveryConfigurationError and every carrier's integration error alike.
+ */
+const carrierErrorStatus = (error: any): number | null => {
+    if (
+        error instanceof DeliveryConfigurationError ||
+        error instanceof MaystroIntegrationError ||
+        error instanceof YalidineIntegrationError
+    ) {
+        const status = Number(error.statusCode)
+        return Number.isFinite(status) && status >= 400 && status <= 599 ? status : 502
+    }
+    return null
+}
 
 export class DeliveryController {
     async getOptions(req: Request, res: Response) {
@@ -21,12 +40,13 @@ export class DeliveryController {
             return res.status(400).json({ statusCode: 400, statusMessage: 'destination.wilayaCode is required' })
         }
 
-        const normalizedProvider =
+        const normalizedProviderRaw =
             typeof provider === 'string' && provider.trim().length > 0 ? provider.trim().toUpperCase() : undefined
 
-        if (normalizedProvider && !isShipmentProvider(normalizedProvider)) {
+        if (normalizedProviderRaw && !isShipmentProvider(normalizedProviderRaw)) {
             return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
         }
+        const normalizedProvider = normalizedProviderRaw as ShipmentProvider | undefined
 
         if (normalizedProvider === 'MAYSTRO' && !destination?.communeCode) {
             return res.status(400).json({
@@ -89,6 +109,22 @@ export class DeliveryController {
         }
     }
 
+    async listCommuneNames(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+
+        try {
+            const communes = await service.listCommuneNames(tenant.id, wilaya)
+            res.json(communes)
+        } catch (error) {
+            console.error('List delivery communes error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
     async createShipment(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
@@ -124,25 +160,35 @@ export class DeliveryController {
             if (error.message === 'Order not found for tenant') {
                 return res.status(404).json({ statusCode: 404, statusMessage: error.message })
             }
-            if (error instanceof DeliveryConfigurationError) {
+            if (error instanceof DeliveryConfigurationError || error.name === 'DeliveryConfigurationError') {
                 return res
                     .status(error.statusCode)
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
-            if (error instanceof MaystroIntegrationError) {
+            if (error instanceof MaystroIntegrationError || error.name === 'MaystroIntegrationError') {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
+            }
+            if (error instanceof YalidineIntegrationError || error.name === 'YalidineIntegrationError') {
                 return res
                     .status(error.statusCode)
                     .json({ statusCode: error.statusCode, statusMessage: error.statusMessage, code: error.code })
             }
             console.error('Create shipment error', error)
-            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+            res.status(500).json({ 
+                statusCode: 500, 
+                message: 'Internal Server Error (Debug)', 
+                debugMessage: String(error?.message || error), 
+                debugStack: error?.stack 
+            })
         }
     }
 
     async getShipment(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
-        const { id } = req.params
+        const id = String(req.params.id || '')
         try {
             const shipment = await service.getShipment(tenant.id, id)
             if (!shipment) return res.status(404).json({ statusCode: 404, statusMessage: 'Shipment not found' })
@@ -156,7 +202,7 @@ export class DeliveryController {
     async track(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
-        const { id } = req.params
+        const id = String(req.params.id || '')
         try {
             const result = await service.trackShipment(tenant.id, id)
             if (!result) return res.status(404).json({ statusCode: 404, statusMessage: 'Shipment not found' })
@@ -168,16 +214,63 @@ export class DeliveryController {
     }
 
     async maystroWebhook(req: Request, res: Response) {
-        const tenant = req.tenant
-        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+        console.log(`[Webhook] Raw request received on /api/webhooks/maystro. Host: ${req.hostname}, Secret in query: ${!!req.query.secret}`)
+        
+        let tenant = req.tenant
+
+        const rawBodyStr = typeof req.body === 'string' ? req.body : JSON.stringify(req.body)
+        console.log(`[Webhook][Debug] Maystro Webhook Payload:`, rawBodyStr.length > 1000 ? rawBodyStr.substring(0, 1000) + '...' : rawBodyStr)
+
+        if (!tenant) {
+            console.warn(`[Webhook] Tenant not found from host ${req.hostname}. Attempting to infer tenant from payload...`)
+            try {
+                // Try to infer tenant from the payload using the order mapping
+                // First, attempt to extract the order ID directly from the raw string
+                const idMatch = rawBodyStr.match(/"(id|order_id|orderId|instance_uuid)"\s*:\s*"?([a-zA-Z0-9-]+)"?/)
+                if (idMatch && idMatch[2]) {
+                    const inferredId = idMatch[2]
+                    console.log(`[Webhook][Debug] Inferred Maystro Order ID from payload: ${inferredId}`)
+                    const mapping = await prisma.maystroOrderMapping.findFirst({
+                        where: {
+                            OR: [
+                                { maystroOrderId: inferredId },
+                                { tracking: inferredId },
+                                { externalId: inferredId }
+                            ]
+                        },
+                        include: { tenant: true }
+                    })
+                    if (mapping?.tenant) {
+                        tenant = mapping.tenant
+                        console.log(`[Webhook][Debug] Successfully inferred tenant ${tenant.id} from mapping!`)
+                    }
+                }
+            } catch (err) {
+                console.error(`[Webhook][Debug] Error inferring tenant from payload`, err)
+            }
+        }
+
+        if (!tenant) {
+            console.warn(`[Webhook] Dropped Maystro webhook - Tenant not found and could not be inferred.`)
+            return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+        }
 
         try {
+            console.log(`[Webhook] Maystro payload processing for tenant ${tenant.id}.`)
             // Preferred authentication is X-Webhook-Secret.
             // Legacy fallback (?secret=...) remains for backward compatibility.
-            const incomingHeaderSecret = req.get('x-webhook-secret')
+            const incomingHeaderSecret = req.get('x-webhook-secret') || req.get('authorization')
             const incomingHeader = typeof incomingHeaderSecret === 'string' ? incomingHeaderSecret.trim() : ''
             const incomingQuery = typeof req.query.secret === 'string' ? req.query.secret.trim() : ''
-            const incoming = incomingHeader || incomingQuery
+            
+            // Maystro might send it as Bearer token
+            let incoming = incomingHeader || incomingQuery
+            if (incoming.toLowerCase().startsWith('bearer ')) {
+                incoming = incoming.substring(7).trim()
+            }
+
+            console.log(`[Webhook][Debug] Extracted secret from request. Length: ${incoming.length}`)
+
             const account = await prisma.tenantDeliveryAccount.findUnique({
                 where: { tenantId_provider: { tenantId: tenant.id, provider: 'MAYSTRO' } },
                 select: { config: true }
@@ -185,7 +278,10 @@ export class DeliveryController {
             const config = (account?.config && typeof account.config === 'object' ? account.config : {}) as Record<string, unknown>
             const storedSecret = typeof config.webhookSecret === 'string' ? config.webhookSecret : ''
 
+            console.log(`[Webhook][Debug] Stored secret length: ${storedSecret.length}`)
+
             if (!storedSecret || !incoming) {
+                console.warn(`[Webhook][Debug] Missing secret. incoming: ${!!incoming}, stored: ${!!storedSecret}`)
                 return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
             }
 
@@ -193,6 +289,7 @@ export class DeliveryController {
             const incomingBuf = Buffer.from(incoming)
             const storedBuf = Buffer.from(storedSecret)
             if (incomingBuf.length !== storedBuf.length || !timingSafeEqual(incomingBuf, storedBuf)) {
+                console.warn(`[Webhook][Debug] Secret mismatch.`)
                 return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
             }
 
@@ -200,6 +297,14 @@ export class DeliveryController {
             if (!result) return res.status(202).json({ received: true })
             res.json({ success: true, ...result })
         } catch (error) {
+            if (typeof (error as any)?.statusCode === 'number' && typeof (error as any)?.statusMessage === 'string') {
+                return res.status((error as any).statusCode).json({
+                    statusCode: (error as any).statusCode,
+                    statusMessage: (error as any).statusMessage,
+                    code: (error as any).code,
+                    meta: (error as any).meta
+                })
+            }
             if (error instanceof MaystroIntegrationError) {
                 return res
                     .status(error.statusCode)
@@ -210,18 +315,93 @@ export class DeliveryController {
         }
     }
 
+    async yalidineWebhookChallenge(req: Request, res: Response) {
+        const subscribePresent = Object.prototype.hasOwnProperty.call(req.query, 'subscribe')
+        const crcToken = typeof req.query.crc_token === 'string' ? req.query.crc_token : ''
+        if (!subscribePresent || !crcToken) {
+            return res.status(405).json({ statusCode: 405, statusMessage: 'Method Not Allowed' })
+        }
+
+        return res.status(200).json({ crc_token: crcToken })
+    }
+
+    private normalizeYalidineSignature(value: string) {
+        const trimmed = value.trim()
+        return trimmed.toLowerCase().startsWith('sha256=') ? trimmed.slice('sha256='.length).trim() : trimmed
+    }
+
+    private verifyYalidineSignature(input: { rawBody: Buffer; signature: string; secret: string }) {
+        const incoming = this.normalizeYalidineSignature(input.signature)
+        const expected = createHmac('sha256', input.secret).update(input.rawBody).digest('hex')
+        const incomingBuffer = Buffer.from(incoming)
+        const expectedBuffer = Buffer.from(expected)
+        return incomingBuffer.length === expectedBuffer.length && timingSafeEqual(incomingBuffer, expectedBuffer)
+    }
+
+    async yalidineWebhook(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        try {
+            const account = await prisma.tenantDeliveryAccount.findUnique({
+                where: { tenantId_provider: { tenantId: tenant.id, provider: 'YALIDINE' } },
+                select: { config: true }
+            })
+            const config = (account?.config && typeof account.config === 'object' ? account.config : {}) as Record<string, unknown>
+            const secret =
+                typeof config.webhookSecret === 'string' && config.webhookSecret.trim()
+                    ? config.webhookSecret.trim()
+                    : ''
+            const signature = req.get('x-yalidine-signature') || ''
+
+            if (!secret || !signature || !req.rawBody) {
+                return res.status(401).json({ statusCode: 401, statusMessage: 'Unauthorized' })
+            }
+
+            if (!this.verifyYalidineSignature({ rawBody: req.rawBody, signature, secret })) {
+                return res.status(401).json({ statusCode: 401, statusMessage: 'Invalid signature' })
+            }
+
+            if (!req.body || typeof req.body?.type !== 'string' || !Array.isArray(req.body?.events)) {
+                return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid payload' })
+            }
+
+            const result = await yalidineWebhookService.handleWebhook({ tenantId: tenant.id, payload: req.body })
+            return res.status(200).json({ success: true, ...result })
+        } catch (error) {
+            if (typeof (error as any)?.statusCode === 'number' && typeof (error as any)?.statusMessage === 'string') {
+                return res.status((error as any).statusCode).json({
+                    statusCode: (error as any).statusCode,
+                    statusMessage: (error as any).statusMessage,
+                    code: (error as any).code,
+                    meta: (error as any).meta
+                })
+            }
+            console.error('Yalidine webhook error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
     async updateSelfStatus(req: Request, res: Response) {
         const tenant = req.tenant
         if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
         const user = req.user
-        const { id } = req.params
+        const id = String(req.params.id || '')
         const { status } = req.body as { status: string }
         if (!status) return res.status(400).json({ statusCode: 400, statusMessage: 'status required' })
 
         try {
             const updated = await service.updateSelfStatus(tenant.id, id, status as any, { userId: user?.id ?? null })
             res.json(updated)
-        } catch (error) {
+        } catch (error: any) {
+            if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
+            }
             console.error('Self status update error', error)
             res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
         }
@@ -264,14 +444,17 @@ export class DeliveryController {
             return res.status(400).json({ statusCode: 400, statusMessage: 'Unsupported provider' })
         }
 
-        const { deliveryMode, serviceLevel, weight, codAmount, originWilayaCode, communeCode } = req.query as {
+        const { deliveryMode, serviceLevel, weight, codAmount, originWilayaCode, communeCode, refresh } = req.query as {
             deliveryMode?: string
             serviceLevel?: string
             weight?: string
             codAmount?: string
             originWilayaCode?: string
             communeCode?: string
+            refresh?: string
         }
+
+        const forceRefresh = String(refresh || '').toLowerCase() === 'true'
 
         const rawDeliveryMode =
             typeof deliveryMode === 'string' && deliveryMode.trim().length > 0 ? deliveryMode.trim().toLowerCase() : undefined
@@ -298,7 +481,8 @@ export class DeliveryController {
                 weight: parsedWeight,
                 codAmount: parsedCod,
                 originWilayaCode: typeof originWilayaCode === 'string' ? originWilayaCode : undefined,
-                communeCode: typeof communeCode === 'string' ? communeCode : undefined
+                communeCode: typeof communeCode === 'string' ? communeCode : undefined,
+                forceRefresh
             })
             res.json(rates)
         } catch (error: any) {
@@ -312,7 +496,141 @@ export class DeliveryController {
         }
     }
 
+    async getProviderCommunes(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+
+        try {
+            const communes = await service.listProviderCommunes({ tenantId: tenant.id, provider, wilayaCode: wilaya })
+            res.json(communes)
+        } catch (error: any) {
+            if (error instanceof DeliveryConfigurationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get provider communes error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    /** When each mode's rate table was last rebuilt from the carrier. */
+    async getProviderRateCacheInfo(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        try {
+            res.json(await service.getCarrierRateCacheInfo(tenant.id, provider))
+        } catch (error) {
+            console.error('Get carrier rate cache info error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    /** Admin-side listing: the operator is authenticated, so any configured carrier answers. */
+    async getProviderPickupPoints(req: Request, res: Response) {
+        return this.respondWithPickupPoints(req, res, { requireOffered: false })
+    }
+
+    /** Storefront listing: unauthenticated, so restricted to carriers the store actually offers. */
+    async getPublicProviderPickupPoints(req: Request, res: Response) {
+        return this.respondWithPickupPoints(req, res, { requireOffered: true })
+    }
+
+    private async respondWithPickupPoints(req: Request, res: Response, opts: { requireOffered: boolean }) {
+        const tenantId = req.tenant?.id || req.user?.tenantId
+        if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        const commune = typeof req.query.commune === 'string' ? req.query.commune.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+
+        try {
+            const points = await service.listProviderPickupPoints({
+                tenantId,
+                provider,
+                wilayaCode: wilaya,
+                communeCode: commune || undefined,
+                requireOffered: opts.requireOffered
+            })
+            res.json(points)
+        } catch (error: any) {
+            // A carrier that is throttled, down or misconfigured is not a server fault.
+            // Passing its own status and reason through lets the storefront degrade
+            // quietly and the operator see why, instead of a bare 500.
+            const carrierStatus = carrierErrorStatus(error)
+            if (carrierStatus) {
+                return res
+                    .status(carrierStatus)
+                    .json({ statusCode: carrierStatus, statusMessage: error.statusMessage })
+            }
+            console.error('Get provider pickup points error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    async getProviderCommunePrice(req: Request, res: Response) {
+        const tenant = req.tenant
+        if (!tenant) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        const provider = this.parseProviderParam(req)
+        if (!provider) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid provider' })
+
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya.trim() : ''
+        const commune = typeof req.query.commune === 'string' ? req.query.commune.trim() : ''
+        if (!wilaya) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
+        if (!commune) return res.status(400).json({ statusCode: 400, statusMessage: 'commune is required' })
+
+        const { weight, codAmount, originWilayaCode } = req.query as {
+            weight?: string
+            codAmount?: string
+            originWilayaCode?: string
+        }
+
+        try {
+            const prices = await service.getProviderCommunePrice({
+                tenantId: tenant.id,
+                provider,
+                wilayaCode: wilaya,
+                communeCode: commune,
+                weight: weight ? Number(weight) : undefined,
+                codAmount: codAmount ? Number(codAmount) : undefined,
+                originWilayaCode: typeof originWilayaCode === 'string' ? originWilayaCode : undefined
+            })
+            res.json(prices)
+        } catch (error: any) {
+            if (error instanceof DeliveryConfigurationError) {
+                return res
+                    .status(error.statusCode)
+                    .json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Get provider commune price error', error)
+            res.status(500).json({ statusCode: 500, message: 'Internal Server Error' })
+        }
+    }
+
+    private parseProviderParam(req: Request): ShipmentProvider | null {
+        const provider = String(req.params.provider || '').toUpperCase()
+        if (!provider || !isShipmentProvider(provider)) return null
+        try {
+            getProviderCatalogItem(provider)
+        } catch {
+            return null
+        }
+        return provider
+    }
 
     async getDeliveryRates(req: Request, res: Response) {
         const tenant = req.tenant

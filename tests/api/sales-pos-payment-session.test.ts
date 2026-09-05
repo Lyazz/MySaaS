@@ -19,7 +19,7 @@ describe('POS sale payment requires an open cash session', () => {
     let cashboxId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'POS Pay Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'POS Pay Tenant', slug } })
         tenantId = tenant.id
 
         const admin = await prisma.user.create({
@@ -77,6 +77,8 @@ describe('POS sale payment requires an open cash session', () => {
         await prisma.saleItem.deleteMany({ where: { sale: { tenantId } } })
         await prisma.sale.deleteMany({ where: { tenantId } })
         await prisma.inventoryMovement.deleteMany({ where: { tenantId } })
+        await prisma.orderItem.deleteMany({ where: { tenantId } })
+        await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
 
@@ -114,5 +116,39 @@ describe('POS sale payment requires an open cash session', () => {
         })
         expect(move).toBeNull()
     })
-})
 
+    it('blocks delivered-order payment when the selected cashbox has no open session', async () => {
+        const order = await prisma.order.create({
+            data: {
+                tenantId,
+                status: 'SHIPPED',
+                totalAmount: 120,
+                customerName: 'Delivery Buyer',
+                customerPhone: '0550123000',
+                items: {
+                    create: [{ productId, variantId, quantity: 1, price: 120 }]
+                }
+            }
+        })
+
+        const res = await request(app)
+            .patch(`/api/admin/orders/${order.id}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                status: 'DELIVERED',
+                cashboxId,
+                method: 'CASH'
+            })
+
+        expect(res.status).toBe(409)
+        expect(res.body.code).toBe('CASH_SESSION_REQUIRED')
+        expect(res.body.meta?.cashboxId).toBe(cashboxId)
+
+        const sale = await prisma.sale.findFirst({ where: { tenantId, orderId: order.id } })
+        expect(sale).toBeNull()
+
+        const updatedOrder = await prisma.order.findUnique({ where: { tenantId_id: { tenantId, id: order.id } } })
+        expect(updatedOrder?.status).toBe('SHIPPED')
+    })
+})

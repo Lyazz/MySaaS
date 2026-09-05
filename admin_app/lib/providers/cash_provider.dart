@@ -170,21 +170,9 @@ class CashNotifier extends Notifier<CashState> {
     bool isActive = true,
   }) async {
     try {
-      // NOTE: Not all apps allow POS to create cashboxes offline, typically a manager function.
-      // Here we assume CashRepository doesn't actively support offline Cashbox CREATION yet,
-      // but if it did, we would call it.
-      // For now, we will leave API pass-through for config creation, or we can mock it.
-      final api = ref.read(apiProvider);
-      final res = await api.client.post(
-        '/admin/cashboxes',
-        data: {'name': name.trim(), 'isActive': isActive},
-      );
+      final cashbox = await _repo.createCashbox(name: name, isActive: isActive);
       await fetchCashboxes();
-      final data = res.data;
-      if (data is Map) {
-        return CashboxSummary.fromJson(data.cast<String, dynamic>());
-      }
-      return null;
+      return cashbox;
     } catch (e) {
       state = state.copyWith(error: e.toString());
       rethrow;
@@ -197,17 +185,13 @@ class CashNotifier extends Notifier<CashState> {
     bool? isActive,
   }) async {
     try {
-      final api = ref.read(apiProvider);
-      final payload = <String, dynamic>{};
-      if (name != null) payload['name'] = name.trim();
-      if (isActive != null) payload['isActive'] = isActive;
-      final res = await api.client.patch('/admin/cashboxes/$id', data: payload);
+      final cashbox = await _repo.updateCashbox(
+        id,
+        name: name,
+        isActive: isActive,
+      );
       await fetchCashboxes();
-      final data = res.data;
-      if (data is Map) {
-        return CashboxSummary.fromJson(data.cast<String, dynamic>());
-      }
-      return null;
+      return cashbox;
     } catch (e) {
       state = state.copyWith(error: e.toString());
       rethrow;
@@ -320,7 +304,7 @@ class CashNotifier extends Notifier<CashState> {
     try {
       final api = ref.read(apiProvider);
       await api.client.post(
-        '/admin/cash-transfers',
+        '/admin/cash/cash-transfers',
         data: {
           'fromCashboxId': fromCashboxId,
           'toCashboxId': toCashboxId,

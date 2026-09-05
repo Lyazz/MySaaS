@@ -12,11 +12,12 @@ const route = useRoute()
 const pixelScriptEnabled = computed(() => Boolean(tenant.value))
 const pixelNoscriptEnabled = computed(() => Boolean(tenant.value && facebookPixelId.value))
 const metaPixel = useMetaPixel()
+const productDetailRoute = computed(() => /^\/(?:product|p)\//.test(route.path))
 
 useHead(() => {
-  if (!pixelScriptEnabled.value) return {}
-  return {
-    script: [
+  const head: Record<string, any> = {}
+  if (pixelScriptEnabled.value) {
+    head.script = [
       {
         key: 'facebook-pixel-loader',
         src: '/api/pixel/facebook.js',
@@ -24,12 +25,22 @@ useHead(() => {
       }
     ]
   }
+  if (pixelNoscriptEnabled.value) {
+    head.noscript = [
+      {
+        key: 'facebook-pixel-noscript',
+        innerHTML: `<img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${facebookPixelId.value}&ev=PageView&noscript=1" alt="">`
+      }
+    ]
+  }
+  return head
 })
 
 watch(
   () => route.fullPath,
   () => {
     if (!process.client) return
+    if (productDetailRoute.value) return
     metaPixel.pageView()
   },
   { immediate: true }
@@ -39,14 +50,6 @@ watch(
 <template>
   <component :is="StoreShell" :hide-navigation="false" :mobile-header-hidden="true" :hide-announcement-bar="true">
     <slot />
-    <noscript v-if="pixelNoscriptEnabled">
-      <img
-        height="1"
-        width="1"
-        style="display:none"
-        :src="`https://www.facebook.com/tr?id=${facebookPixelId}&ev=PageView&noscript=1`"
-        alt=""
-      >
-    </noscript>
+    <StorefrontSharedProductCardVariantModalHost />
   </component>
 </template>

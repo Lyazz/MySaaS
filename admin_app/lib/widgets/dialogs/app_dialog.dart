@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../../theme/app_theme.dart';
 import '../buttons/app_button.dart';
 
 enum AppDialogPrimaryVariant { primary, destructive }
@@ -45,12 +46,27 @@ class AppDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+
     final resolvedActions = actions ?? _buildDefaultActions(context);
 
     return Dialog(
       insetPadding: insetPadding,
-      backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      backgroundColor: surface2,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(color: borderColor),
+      ),
       child: ConstrainedBox(
         constraints: BoxConstraints(
           maxWidth: maxWidth,
@@ -68,18 +84,18 @@ class AppDialog extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: const TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.w800,
-                        color: Color(0xFF0F172A), // Slate-900
-                        height: 1.1,
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.w700,
+                        color: textPrimary,
+                        height: 1.2,
                       ),
                     ),
                   ),
                   if (showCloseButton)
                     IconButton(
                       onPressed: () => Navigator.of(context).maybePop(),
-                      icon: const Icon(Icons.close_rounded),
+                      icon: Icon(Icons.close_rounded, color: textSecondary),
                       tooltip: 'admin.common.close'.tr(),
                     ),
                 ],
@@ -88,10 +104,10 @@ class AppDialog extends StatelessWidget {
                 const SizedBox(height: 10),
                 Text(
                   description!,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    color: Color(0xFF64748B), // Slate-500
-                    height: 1.3,
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: textSecondary,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -100,7 +116,7 @@ class AppDialog extends StatelessWidget {
                 fit: FlexFit.loose,
                 child: SingleChildScrollView(
                   child: DefaultTextStyle.merge(
-                    style: const TextStyle(color: Color(0xFF0F172A)),
+                    style: TextStyle(color: textPrimary),
                     child: content,
                   ),
                 ),
@@ -156,25 +172,19 @@ class _AppDialogActionsBar extends StatelessWidget {
   Widget build(BuildContext context) {
     if (actions.isEmpty) return const SizedBox.shrink();
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isNarrow = constraints.maxWidth < 520;
-
-        return Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Expanded(
-              child: Wrap(
-                alignment: WrapAlignment.end,
-                runAlignment: WrapAlignment.center,
-                spacing: 16,
-                runSpacing: 12,
-                children: actions,
-              ),
-            ),
-          ],
-        );
-      },
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Expanded(
+          child: Wrap(
+            alignment: WrapAlignment.end,
+            runAlignment: WrapAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
+            children: actions,
+          ),
+        ),
+      ],
     );
   }
 }

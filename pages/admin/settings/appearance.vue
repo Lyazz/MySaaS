@@ -1,13 +1,12 @@
 <template>
-  <div>
-    <!-- Title handled by form component -->
-
+  <SettingsShell>
     <AppearanceSettingsForm />
-  </div>
+  </SettingsShell>
 </template>
 
 <script setup lang="ts">
 import AppearanceSettingsForm from '~/components/admin/AppearanceSettingsForm.vue'
+import SettingsShell from '~/components/admin/settings/SettingsShell.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -15,5 +14,6 @@ definePageMeta({
   titleKey: 'admin.pages.settings.appearance.metaTitle'
 })
 
-const { t } = useI18n({ useScope: 'global' })
+const { autoStartIfNeeded } = useTour()
+onMounted(() => autoStartIfNeeded('settings'))
 </script>

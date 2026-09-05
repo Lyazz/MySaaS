@@ -67,9 +67,7 @@ void main() {
 
     await tester.pumpWidget(
       ProviderScope(
-        overrides: [
-          cashProvider.overrideWith(() => CashNotifier(initial)),
-        ],
+        overrides: [cashProvider.overrideWith(() => CashNotifier(initial))],
         child: buildLocalizedTestApp(home: const CashScreen(autoFetch: false)),
       ),
     );

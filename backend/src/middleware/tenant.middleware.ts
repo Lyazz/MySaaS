@@ -19,10 +19,15 @@ export const expressTenantMiddleware = async (req: Request, res: Response, next:
                 req.tenant = tenant
                 next()
             } else {
-                res.status(404).json({
-                    statusCode: 404,
-                    statusMessage: 'Tenant not found'
-                })
+                // Allow webhooks to pass through so their controllers can handle/log the missing tenant
+                if (req.path.startsWith('/api/webhooks/')) {
+                    next()
+                } else {
+                    res.status(404).json({
+                        statusCode: 404,
+                        statusMessage: 'Tenant not found'
+                    })
+                }
             }
         } catch (error) {
             console.error('Tenant middleware error', error)

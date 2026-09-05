@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models/product.dart';
 import '../providers/products_provider.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/buttons/app_button.dart';
+import '../theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class VariantEditScreen extends ConsumerStatefulWidget {
   final ProductVariant variant;
@@ -101,9 +104,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to update variant: $e')));
+        AppToasts.show(context, 'Failed to update variant: $e');
       }
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -113,13 +114,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: AppBar(
-        title: Text(widget.variant.title),
-        elevation: 0,
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-      ),
+      appBar: AppBar(title: Text(widget.variant.title), elevation: 0),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Form(
@@ -129,10 +124,11 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
             children: [
               // Basic Info Card
               _buildCard(
-                title: 'General Information',
+                context,
+                title: 'app.general_information'.tr(),
                 children: [
                   FormInput(
-                    label: 'Price',
+                    label: 'admin.pages.sales.detail.itemsTable.price'.tr(),
                     controller: _priceController,
                     prefixText: '\$ ',
                     keyboardType: const TextInputType.numberWithOptions(
@@ -141,7 +137,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   FormInput(
-                    label: 'Cost (Purchase price)',
+                    label: 'app.cost_purchase_price'.tr(),
                     controller: _costController,
                     prefixText: '\$ ',
                     keyboardType: const TextInputType.numberWithOptions(
@@ -150,29 +146,25 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                   ),
                   const SizedBox(height: 16),
                   FormInput(
-                    label: 'SKU',
+                    label: 'admin.pages.purchases.detail.items.sku'.tr(),
                     controller: _skuController,
                     enabled: widget.variant.skuLocked != true,
                     suffixIcon: widget.variant.skuLocked == true
                         ? null
                         : IconButton(
-                            tooltip: 'Suggest SKU',
+                            tooltip: 'app.suggest_sku'.tr(),
                             onPressed: _isLoading
                                 ? null
                                 : () async {
-                                    final messenger = ScaffoldMessenger.of(
-                                      context,
-                                    );
                                     try {
                                       final suggested = await ref
                                           .read(productsProvider.notifier)
                                           .suggestVariantSku(widget.variant.id);
-                                      if (!mounted) return;
+                                      if (!context.mounted) return;
                                       if (suggested.trim().isEmpty) {
-                                        messenger.showSnackBar(
-                                          const SnackBar(
-                                            content: Text('No SKU suggestion'),
-                                          ),
+                                        AppToasts.show(
+                                          context,
+                                          'app.no_sku_suggestion'.tr(),
                                         );
                                         return;
                                       }
@@ -180,13 +172,10 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                                         _skuController.text = suggested;
                                       });
                                     } catch (e) {
-                                      if (!mounted) return;
-                                      messenger.showSnackBar(
-                                        SnackBar(
-                                          content: Text(
-                                            'Failed to suggest SKU: $e',
-                                          ),
-                                        ),
+                                      if (!context.mounted) return;
+                                      AppToasts.show(
+                                        context,
+                                        'Failed to suggest SKU: $e',
                                       );
                                     }
                                   },
@@ -194,49 +183,51 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                           ),
                   ),
                   const SizedBox(height: 16),
-                  FormInput(label: 'Barcode', controller: _barcodeController),
+                  FormInput(
+                    label: 'admin.variantsTable.columns.barcode'.tr(),
+                    controller: _barcodeController,
+                  ),
                   const SizedBox(height: 16),
                   if (widget.variant.skuLocked != true)
                     Align(
                       alignment: Alignment.centerLeft,
                       child: AppButton.secondary(
-                        label: 'Lock SKU',
+                        label: 'app.lock_sku'.tr(),
                         icon: LucideIcons.lock,
                         size: AppButtonSize.sm,
                         onPressed: _isLoading
                             ? null
                             : () async {
-                                final messenger = ScaffoldMessenger.of(context);
                                 try {
                                   await ref
                                       .read(productsProvider.notifier)
                                       .lockVariantSku(widget.variant.id);
-                                  if (!mounted) return;
-                                  messenger.showSnackBar(
-                                    const SnackBar(content: Text('SKU locked')),
+                                  if (!context.mounted) return;
+                                  AppToasts.show(
+                                    context,
+                                    'app.sku_locked'.tr(),
                                   );
                                 } catch (e) {
-                                  if (!mounted) return;
-                                  messenger.showSnackBar(
-                                    SnackBar(
-                                      content: Text('Failed to lock SKU: $e'),
-                                    ),
+                                  if (!context.mounted) return;
+                                  AppToasts.show(
+                                    context,
+                                    'Failed to lock SKU: $e',
                                   );
                                 }
                               },
                       ),
                     )
                   else
-                    const Text(
-                      'SKU is locked',
+                    Text(
+                      'app.sku_is_locked'.tr(),
                       style: TextStyle(color: Color(0xFF64748B)),
                     ),
                   const SizedBox(height: 16),
                   SwitchListTile(
-                    title: const Text('Active'),
-                    subtitle: const Text('Visible to customers'),
+                    title: Text('superAdmin.tenants.status.active'.tr()),
+                    subtitle: Text('app.visible_to_customers'.tr()),
                     value: _isActive,
-                    activeThumbColor: const Color(0xFF0D9488),
+                    activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _isActive = v),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -246,12 +237,13 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
 
               // Inventory Card
               _buildCard(
-                title: 'Inventory',
+                context,
+                title: 'admin.pages.inventory.title'.tr(),
                 children: [
                   SwitchListTile(
-                    title: const Text('Track Inventory'),
+                    title: Text('app.track_inventory'.tr()),
                     value: _trackInventory,
-                    activeThumbColor: const Color(0xFF0D9488),
+                    activeThumbColor: const Color(0xFF65A30D),
                     onChanged: (v) => setState(() => _trackInventory = v),
                     contentPadding: EdgeInsets.zero,
                   ),
@@ -261,7 +253,8 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                       children: [
                         Expanded(
                           child: FormInput(
-                            label: 'Stock',
+                            label: 'admin.pages.products.index.table.stock'
+                                .tr(),
                             controller: _stockController,
                             keyboardType: TextInputType.number,
                             readOnly: true,
@@ -271,7 +264,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                         const SizedBox(width: 16),
                         Expanded(
                           child: FormInput(
-                            label: 'Safety Stock',
+                            label: 'app.safety_stock'.tr(),
                             controller: _safetyStockController,
                             keyboardType: TextInputType.number,
                           ),
@@ -280,7 +273,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
                     ),
                     const SizedBox(height: 16),
                     FormInput(
-                      label: 'Reserved',
+                      label: 'admin.pages.inventory.table.reserved'.tr(),
                       controller: _reservedController,
                       readOnly: true,
                       keyboardType: TextInputType.number,
@@ -291,7 +284,7 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
 
               const SizedBox(height: 32),
               AppButton.primary(
-                label: 'Save Changes',
+                label: 'admin.common.saveChanges'.tr(),
                 onPressed: _save,
                 fullWidth: true,
                 loading: _isLoading,
@@ -303,20 +296,31 @@ class _VariantEditScreenState extends ConsumerState<VariantEditScreen> {
     );
   }
 
-  Widget _buildCard({required String title, required List<Widget> children}) {
+  Widget _buildCard(
+    BuildContext context, {
+    required String title,
+    required List<Widget> children,
+  }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

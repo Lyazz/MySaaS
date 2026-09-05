@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProductCard from '~/components/storefront/templates/cyber/ProductCard.vue'
-
+import { normalizeSearchText } from '~/shared/text/normalize-search'
 const props = defineProps<{
     products: any[]
 }>()
@@ -28,7 +28,14 @@ const filters = computed(() => ({
 
 // Filtering Logic
 const selectedCategories = ref<string[]>([])
-const searchQuery = ref('')
+const route = useRoute()
+const searchQuery = ref((route.query.q as string) || '')
+
+watch(() => route.query.q, (newQ) => {
+    if (newQ !== undefined) {
+        searchQuery.value = newQ as string
+    }
+})
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
@@ -65,8 +72,8 @@ const filteredProducts = computed(() => {
 
     // Filter by Search
     if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase()
-        result = result.filter(p => p.title.toLowerCase().includes(q))
+        const q = normalizeSearchText(searchQuery.value)
+        result = result.filter(p => normalizeSearchText(p.title).includes(q) || (p.searchKeywords && normalizeSearchText(p.searchKeywords).includes(q)))
     }
 
     // Filter by Price
@@ -187,7 +194,7 @@ const closeQuickView = () => {
         <div class="flex items-center justify-between mb-6">
           <h3 class="font-bold text-white text-lg">{{ storefrontContent.actions.filters }}</h3>
           <button
-            class="p-2 -mr-2 text-purple-400 hover:text-pink-400"
+            class="p-2 -me-2 text-purple-400 hover:text-pink-400"
             @click="isFilterDrawerOpen = false"
           >
             <Icon name="lucide:x" class="w-6 h-6" />
@@ -349,7 +356,7 @@ const closeQuickView = () => {
                 :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
                 class="w-full bg-[#1a0a2e]/90 border border-purple-500/30 text-white text-sm rounded-full focus:ring-2 focus:ring-pink-500/30 focus:border-pink-500 block pl-5 pr-10 py-3 shadow-sm transition-all hover:border-pink-500/50 placeholder:text-purple-400/50" 
               >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+              <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
                 <Icon name="lucide:search" class="w-5 h-5 text-purple-400/60" />
               </div>
             </div>
@@ -366,7 +373,7 @@ const closeQuickView = () => {
                   <option class="bg-[#1a0a2e]" value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option class="bg-[#1a0a2e]" value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-purple-400" />
                 </div>
               </div>
@@ -457,7 +464,7 @@ const closeQuickView = () => {
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closeQuickView"></div>
           <div class="bg-gradient-to-br from-[#1a0a2e] to-[#0d0515] rounded-2xl shadow-2xl shadow-pink-500/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden border border-pink-500/30">
-              <button @click="closeQuickView" class="absolute top-4 right-4 z-20 p-2 bg-purple-900/50 rounded-full hover:bg-pink-500/30 transition-colors">
+              <button @click="closeQuickView" class="absolute top-4 end-4 z-20 p-2 bg-purple-900/50 rounded-full hover:bg-pink-500/30 transition-colors">
                   <Icon name="lucide:x" class="w-6 h-6 text-purple-300" />
               </button>
               

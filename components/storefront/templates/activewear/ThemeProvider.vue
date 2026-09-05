@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('activewear')
 
 const storeStyle = computed(() => {
-  const primaryColor = '#EAB308' // Electric Yellow
+  const primaryColor = brandColor.value.color
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {
@@ -28,7 +29,15 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Teko', sans-serif"
+    fontFamily: "'Teko', sans-serif",
+    // Shared LocaleSwitcher — dark chrome to sit on the black storefront
+    '--ls-surface': '#111111',
+    '--ls-border': 'rgba(255,255,255,0.14)',
+    '--ls-shadow': '0 18px 44px -14px rgba(0,0,0,0.75)',
+    '--ls-radius': '2px',
+    '--ls-text': '#a3a3a3',
+    '--ls-text-strong': '#fafafa',
+    '--ls-hover-bg': 'rgba(255,255,255,0.06)'
   } as Record<string, string>
 
   return result

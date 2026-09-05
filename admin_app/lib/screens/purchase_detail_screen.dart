@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import '../providers/purchases_provider.dart';
 import '../providers/products_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/purchase.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/badges/status_badges.dart';
+import '../theme/app_theme.dart';
+import '../widgets/tenant_image_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class PurchaseDetailScreen extends ConsumerStatefulWidget {
   final String purchaseId;
@@ -28,6 +33,11 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
   final _quantityDebouncer = Debouncer(milliseconds: 500);
   final _costDebouncer = Debouncer(milliseconds: 500);
   String _salePriceMode = 'replace';
+
+  NumberFormat get _money =>
+      tenantCurrencyFormatter(ref.watch(storeSettingsProvider).settings);
+  String get _currencyCode =>
+      tenantCurrencyCode(ref.watch(storeSettingsProvider).settings);
 
   @override
   void initState() {
@@ -71,11 +81,9 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AppDialog(
-        title: 'Delete Purchase Order',
-        description: 'This action cannot be undone.',
-        content: const Text(
-          'Are you sure you want to delete this purchase order?',
-        ),
+        title: 'admin.pages.purchases.detail.deleteModal.title'.tr(),
+        description: 'admin.confirmModal.defaults.message'.tr(),
+        content: Text('app.are_you_sure_you_want_to_delet2'.tr()),
         secondaryLabel: 'Cancel',
         onSecondary: () => Navigator.pop(context, false),
         primaryLabel: 'Delete',
@@ -116,16 +124,17 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
 
     if (purchaseAsync.status == 'NOT_FOUND') {
       return Scaffold(
-        appBar: AppBar(title: const Text('Not Found')),
-        body: const Center(child: Text('Purchase order not found')),
+        appBar: AppBar(title: Text('app.not_found'.tr())),
+        body: Center(child: Text('app.purchase_order_not_found'.tr())),
       );
     }
 
     final purchase = purchaseAsync;
     final isMobile = MediaQuery.of(context).size.width < 1024;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
         child: Column(
@@ -147,7 +156,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                         InkWell(
                           onTap: () => context.go('/purchases'),
                           child: Text(
-                            'Purchases',
+                            'admin.pages.purchases.index.title'.tr(),
                             style: TextStyle(
                               color: Colors.grey[500],
                               fontWeight: FontWeight.w500,
@@ -182,7 +191,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                 Row(
                   children: [
                     AppButton.secondary(
-                      label: 'Refresh',
+                      label: 'superAdmin.paymentsPage.actions.refresh'.tr(),
                       icon: LucideIcons.refreshCw,
                       onPressed: () => ref
                           .read(purchasesProvider.notifier)
@@ -190,7 +199,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                     ),
                     const SizedBox(width: 12),
                     AppButton.primary(
-                      label: 'Add Products',
+                      label: 'admin.pages.purchases.detail.addProducts'.tr(),
                       icon: LucideIcons.plus,
                       onPressed: _showAddProductModal,
                     ),
@@ -231,16 +240,22 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             // Items Table
             Container(
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.grey[200]!),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 2,
-                    offset: const Offset(0, 1),
-                  ),
-                ],
+                border: Border.all(
+                  color: isDark
+                      ? AppColors.surfaceBorder
+                      : AppColors.lightSurfaceBorder,
+                ),
+                boxShadow: isDark
+                    ? null
+                    : [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.05),
+                          blurRadius: 2,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
               ),
               child: Column(
                 children: [
@@ -252,8 +267,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Order items',
+                        Text(
+                          'admin.pages.purchases.detail.items.title'.tr(),
                           style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -265,14 +280,18 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                             vertical: 2,
                           ),
                           decoration: BoxDecoration(
-                            color: Colors.grey[100],
+                            color: isDark
+                                ? AppColors.surface3
+                                : const Color(0xFFF1F5F9),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             '${purchase.items.length} items',
                             style: TextStyle(
                               fontSize: 12,
-                              color: Colors.grey[600],
+                              color: isDark
+                                  ? AppColors.textMuted
+                                  : const Color(0xFF64748B),
                             ),
                           ),
                         ),
@@ -295,6 +314,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
                         return _TableRow(
                           key: ValueKey(item.id),
                           item: item,
+                          money: _money,
+                          currencyCode: _currencyCode,
                           salePriceMode: _salePriceMode,
                           onUpdateMode: (val) =>
                               setState(() => _salePriceMode = val),
@@ -347,7 +368,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
             Align(
               alignment: Alignment.centerRight,
               child: AppButton.danger(
-                label: 'Delete Order',
+                label: 'admin.pages.purchases.detail.deleteModal.confirm'.tr(),
                 icon: LucideIcons.trash2,
                 onPressed: _deletePurchase,
               ),
@@ -360,7 +381,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
 
   Widget _buildSupplierCard(Purchase purchase) {
     return _InfoCard(
-      title: 'SUPPLIER',
+      title: 'admin.pages.purchases.detail.cards.supplier'.tr(),
       icon: LucideIcons.truck,
       children: [
         Text(
@@ -386,12 +407,15 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
     );
 
     return _InfoCard(
-      title: 'SUMMARY',
+      title: 'admin.pages.purchases.detail.cards.summary'.tr(),
       icon: LucideIcons.fileText,
       children: [
-        _SummaryRow(label: 'Items Ordered', value: ordered.toInt().toString()),
         _SummaryRow(
-          label: 'Items Received',
+          label: 'admin.pages.purchases.detail.cards.itemsOrdered'.tr(),
+          value: ordered.toInt().toString(),
+        ),
+        _SummaryRow(
+          label: 'admin.pages.purchases.detail.cards.itemsReceived'.tr(),
           value: received.toInt().toString(),
           valueColor: received == ordered
               ? Colors.green[700]
@@ -402,8 +426,8 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
           child: Divider(),
         ),
         _SummaryRow(
-          label: 'Estimated Total',
-          value: NumberFormat.simpleCurrency().format(purchase.totalAmount),
+          label: 'app.estimated_total'.tr(),
+          value: _money.format(purchase.totalAmount),
           isBold: true,
         ),
       ],
@@ -412,7 +436,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
 
   Widget _buildActionsCard() {
     return _InfoCard(
-      title: 'NOTES',
+      title: 'superAdmin.paymentsPage.import.fields.notes'.tr(),
       icon: LucideIcons.fileText,
       children: [
         Center(
@@ -421,7 +445,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
               Icon(LucideIcons.fileText, size: 32, color: Colors.grey[300]),
               const SizedBox(height: 8),
               Text(
-                'No notes added',
+                'app.no_notes_added'.tr(),
                 style: TextStyle(color: Colors.grey[500], fontSize: 13),
               ),
             ],
@@ -439,7 +463,7 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
           Icon(LucideIcons.shoppingCart, size: 48, color: Colors.grey[300]),
           const SizedBox(height: 16),
           Text(
-            'No items added yet',
+            'app.no_items_added_yet'.tr(),
             style: TextStyle(
               fontSize: 16,
               fontWeight: FontWeight.bold,
@@ -448,12 +472,12 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            'Add products to this purchase order',
+            'app.add_products_to_this_purchase'.tr(),
             style: TextStyle(color: Colors.grey[500]),
           ),
           const SizedBox(height: 24),
           AppButton.primary(
-            label: 'Add Products',
+            label: 'admin.pages.purchases.detail.addProducts'.tr(),
             icon: LucideIcons.plus,
             onPressed: _showAddProductModal,
           ),
@@ -463,22 +487,29 @@ class _PurchaseDetailScreenState extends ConsumerState<PurchaseDetailScreen> {
   }
 
   Widget _buildTableFooter(Purchase purchase) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        color: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
+        border: Border(
+          top: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
-          const Text(
-            'TOTAL ORDER VALUE',
+          Text(
+            'admin.pages.purchases.detail.items.table.totalOrderValue'.tr(),
             style: TextStyle(fontWeight: FontWeight.w600),
           ),
           const SizedBox(width: 24),
           Text(
-            NumberFormat.simpleCurrency().format(purchase.totalAmount),
+            _money.format(purchase.totalAmount),
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ],
@@ -500,19 +531,26 @@ class _InfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey[200]!),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.02),
-            blurRadius: 2,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 2,
+                  offset: const Offset(0, 1),
+                ),
+              ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -522,7 +560,7 @@ class _InfoCard extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
-              color: Colors.grey[500],
+              color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
               letterSpacing: 0.5,
             ),
           ),
@@ -593,33 +631,69 @@ class _SummaryRow extends StatelessWidget {
 class _TableHeader extends StatelessWidget {
   const _TableHeader();
 
-  static const _headerStyle = TextStyle(
-    fontSize: 12,
-    fontWeight: FontWeight.bold,
-    color: Colors.grey,
-    letterSpacing: 0.5,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerStyle = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.bold,
+      color: isDark ? AppColors.textMuted : const Color(0xFF64748B),
+      letterSpacing: 0.5,
+    );
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
       decoration: BoxDecoration(
-        color: Colors.grey[50],
-        border: Border(bottom: BorderSide(color: Colors.grey[200]!)),
+        color: isDark ? AppColors.surface2 : const Color(0xFFF8FAFC),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Expanded(flex: 3, child: Text('PRODUCT', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('ORDERED', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('UNIT COST', style: _headerStyle)),
-          Expanded(flex: 2, child: Text('RECEIVED', style: _headerStyle)),
-          Expanded(flex: 3, child: Text('RECEIVE NOW', style: _headerStyle)),
+          Expanded(
+            flex: 3,
+            child: Text(
+              'admin.pages.sales.detail.itemsTable.product'.tr(),
+              style: headerStyle,
+            ),
+          ),
           Expanded(
             flex: 2,
             child: Text(
-              'TOTAL',
-              style: _headerStyle,
+              'admin.pages.purchases.detail.items.table.ordered'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.purchases.detail.items.table.unitCost'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.purchases.detail.items.table.received'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 3,
+            child: Text(
+              'admin.pages.purchases.detail.items.table.receiveNow'.tr(),
+              style: headerStyle,
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(
+              'admin.pages.sales.detail.itemsTable.total'.tr(),
+              style: headerStyle,
               textAlign: TextAlign.right,
             ),
           ),
@@ -631,6 +705,8 @@ class _TableHeader extends StatelessWidget {
 
 class _TableRow extends StatefulWidget {
   final PurchaseItem item;
+  final NumberFormat money;
+  final String currencyCode;
   final String salePriceMode;
   final Function(String val) onUpdateMode;
   final Function(String type, double val) onUpdate;
@@ -640,6 +716,8 @@ class _TableRow extends StatefulWidget {
   const _TableRow({
     super.key,
     required this.item,
+    required this.money,
+    required this.currencyCode,
     required this.salePriceMode,
     required this.onUpdateMode,
     required this.onUpdate,
@@ -697,9 +775,16 @@ class _TableRowState extends State<_TableRow> {
         widget.item.quantityReceived >= widget.item.quantityOrdered &&
         widget.item.quantityOrdered > 0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: Colors.grey[100]!)),
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       child: Row(
@@ -740,7 +825,7 @@ class _TableRowState extends State<_TableRow> {
                       style: const TextStyle(fontWeight: FontWeight.w500),
                     )
                   : FormInput(
-                      label: 'Qty ordered',
+                      label: 'app.qty_ordered'.tr(),
                       showLabel: false,
                       controller: _qtyController,
                       keyboardType: TextInputType.number,
@@ -763,17 +848,14 @@ class _TableRowState extends State<_TableRow> {
             child: Padding(
               padding: const EdgeInsets.only(right: 16),
               child: widget.item.quantityReceived > 0
-                  ? Text(
-                      NumberFormat.simpleCurrency().format(
-                        widget.item.unitCost,
-                      ),
-                    )
+                  ? Text(widget.money.format(widget.item.unitCost))
                   : FormInput(
-                      label: 'Unit cost',
+                      label: 'admin.pages.purchases.detail.items.table.unitCost'
+                          .tr(),
                       showLabel: false,
                       controller: _costController,
                       keyboardType: TextInputType.number,
-                      prefixText: '\$ ',
+                      prefixText: '${widget.currencyCode} ',
                       borderRadius: 6,
                       contentPadding: const EdgeInsets.symmetric(
                         horizontal: 8,
@@ -811,8 +893,10 @@ class _TableRowState extends State<_TableRow> {
                         ? widget.item.quantityReceived /
                               widget.item.quantityOrdered
                         : 0,
-                    backgroundColor: Colors.grey[200],
-                    color: Colors.teal[600],
+                    backgroundColor: isDark
+                        ? AppColors.surface3
+                        : const Color(0xFFE2E8F0),
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(2),
                     minHeight: 4,
                   ),
@@ -831,7 +915,7 @@ class _TableRowState extends State<_TableRow> {
                   SizedBox(
                     width: 70,
                     child: FormInput(
-                      label: 'Receive',
+                      label: 'app.receive'.tr(),
                       showLabel: false,
                       controller: _receiveController,
                       enabled: !isFullyReceived,
@@ -856,8 +940,12 @@ class _TableRowState extends State<_TableRow> {
                     icon: const Icon(LucideIcons.check, size: 16),
                     style:
                         IconButton.styleFrom(
-                          backgroundColor: Colors.green[50],
-                          foregroundColor: Colors.green[700],
+                          backgroundColor: isDark
+                              ? AppColors.greenSurface
+                              : const Color(0xFFF0FDF4),
+                          foregroundColor: isDark
+                              ? AppColors.greenText
+                              : const Color(0xFF15803D),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(6),
                           ),
@@ -868,17 +956,25 @@ class _TableRowState extends State<_TableRow> {
                             states,
                           ) {
                             if (states.contains(WidgetState.disabled)) {
-                              return Colors.grey[100];
+                              return isDark
+                                  ? AppColors.surface3
+                                  : const Color(0xFFF1F5F9);
                             }
-                            return Colors.green[50];
+                            return isDark
+                                ? AppColors.greenSurface
+                                : const Color(0xFFF0FDF4);
                           }),
                           foregroundColor: WidgetStateProperty.resolveWith((
                             states,
                           ) {
                             if (states.contains(WidgetState.disabled)) {
-                              return Colors.grey[400];
+                              return isDark
+                                  ? AppColors.textTertiary
+                                  : const Color(0xFF94A3B8);
                             }
-                            return Colors.green[700];
+                            return isDark
+                                ? AppColors.greenText
+                                : const Color(0xFF15803D);
                           }),
                         ),
                   ),
@@ -886,25 +982,25 @@ class _TableRowState extends State<_TableRow> {
                   // Simple Dropdown for mode (Replace/Weighted)
                   Expanded(
                     child: FormSelect<String>(
-                      label: 'Mode',
+                      label: 'app.mode'.tr(),
                       showLabel: false,
                       value: widget.salePriceMode,
                       borderless: true,
                       filled: false,
                       isDense: true,
-                      textStyle: const TextStyle(
-                        fontSize: 12,
-                        color: Colors.grey,
-                      ),
+                      textStyle: TextStyle(fontSize: 12, color: Colors.grey),
                       contentPadding: EdgeInsets.zero,
-                      items: const [
+                      items: [
                         DropdownMenuItem(
                           value: 'replace',
-                          child: Text('Replace Price'),
+                          child: Text('app.replace_price'.tr()),
                         ),
                         DropdownMenuItem(
                           value: 'weighted',
-                          child: Text('Weighted Avg'),
+                          child: Text(
+                            'admin.pages.purchases.detail.items.table.salePriceMode.weighted'
+                                .tr(),
+                          ),
                         ),
                       ],
                       onChanged: (val) {
@@ -925,7 +1021,7 @@ class _TableRowState extends State<_TableRow> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 Text(
-                  NumberFormat.simpleCurrency().format(widget.item.total),
+                  widget.money.format(widget.item.total),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 if (widget.item.quantityReceived == 0) ...[
@@ -978,8 +1074,9 @@ class _VariantSelectorDialogState
       return p.title.toLowerCase().contains(_query.toLowerCase());
     }).toList();
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Dialog(
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? AppColors.surface2 : AppColors.lightSurface2,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Container(
         width: 600,
@@ -990,8 +1087,8 @@ class _VariantSelectorDialogState
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
-                  'Add Products',
+                Text(
+                  'admin.pages.purchases.detail.addProducts'.tr(),
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 IconButton(
@@ -1002,7 +1099,7 @@ class _VariantSelectorDialogState
             ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'Search',
+              label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
               showLabel: false,
               controller: _searchController,
               hint: 'Search products...',
@@ -1044,13 +1141,20 @@ class _VariantSelectorDialogState
                             width: 40,
                             height: 40,
                             decoration: BoxDecoration(
-                              color: Colors.grey[100],
+                              color: isDark
+                                  ? AppColors.surface3
+                                  : const Color(0xFFF1F5F9),
                               borderRadius: BorderRadius.circular(4),
                             ),
-                            child: product.mainImageUrl != null
-                                ? Image.network(
-                                    product.mainImageUrl!,
-                                    fit: BoxFit.cover,
+                            child:
+                                product.mainImageUrl != null &&
+                                    product.mainImageUrl!.trim().isNotEmpty
+                                ? ClipRRect(
+                                    borderRadius: BorderRadius.circular(4),
+                                    child: TenantImageWidget(
+                                      imagePath: product.mainImageUrl!,
+                                      fit: BoxFit.cover,
+                                    ),
                                   )
                                 : const Icon(
                                     LucideIcons.image,
@@ -1078,7 +1182,7 @@ class _VariantSelectorDialogState
                                 'SKU: ${variant.sku.isNotEmpty ? variant.sku : "-"}  |  Stock: ${variant.stock}',
                               ),
                               trailing: AppButton.secondary(
-                                label: 'Add',
+                                label: 'app.add'.tr(),
                                 size: AppButtonSize.sm,
                                 onPressed: () =>
                                     widget.onSelect(product, variant),

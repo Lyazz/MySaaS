@@ -16,6 +16,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -45,10 +46,14 @@ const displayPrice = computed(() => {
     return originalPrice.value
 })
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
@@ -91,11 +96,15 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: Number(props.product.price),
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -114,7 +123,7 @@ async function handleAddToCart() {
       :class="[
         viewMode === 'list' 
           ? 'w-48 h-48 aspect-square flex-shrink-0' 
-          : 'w-[102%] aspect-[3/4] -ml-[2%] -mt-[2%]'
+          : 'w-[102%] aspect-[3/4] -ms-[2%] -mt-[2%]'
       ]"
     >
       <!-- Background Image -->
@@ -133,7 +142,7 @@ async function handleAddToCart() {
       <div v-if="viewMode !== 'list'" class="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
       <!-- Badges (Top Left) -->
-      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10 skew-x-[5deg]">
+      <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10 skew-x-[5deg]">
         <span
           v-if="isNew"
           class="px-3 py-1 bg-brand-500 text-black text-[11px] font-black rounded-none shadow-sm uppercase tracking-widest skew-x-[-10deg]"
@@ -142,13 +151,17 @@ async function handleAddToCart() {
           v-if="discount > 0"
           class="px-3 py-1 bg-white text-black text-[11px] font-black rounded-none shadow-sm uppercase tracking-widest skew-x-[-10deg]"
         >-{{ discount }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-3 py-1 bg-amber-600 text-white text-[11px] font-black rounded-none shadow-sm uppercase tracking-widest skew-x-[-10deg]"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
       <!-- Floating Actions (Right) -->
       <!-- In List View, we might want these visible or positioned differently. For now, keep generic behavior or hide in list if preferred. 
            Let's keep them absolute for consistency but adjust visibility. -->
       <div 
-        class="absolute top-3 right-3 flex flex-col gap-3 transition-all duration-300 z-10 skew-x-[5deg]"
+        class="absolute top-3 end-3 flex flex-col gap-3 transition-all duration-300 z-10 skew-x-[5deg]"
         :class="[
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-12 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
         ]"
@@ -164,7 +177,7 @@ async function handleAddToCart() {
         <!-- Quick View -->
         <button
            class="w-10 h-10 bg-black border-2 border-[#333] flex items-center justify-center text-white hover:border-brand-500 hover:text-brand-500 uppercase font-bold skew-x-[-10deg] transition-colors shadow-[2px_2px_0_#222] hover:shadow-[2px_2px_0_theme(colors.brand.500)]" 
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4 skew-x-[10deg]" />
@@ -184,21 +197,21 @@ async function handleAddToCart() {
       <!-- Static In Stock Badge (Grid Only) -->
       <div
         v-if="product.stock > 0 && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
       >
         <span
           v-if="isLowStock"
           class="px-3 py-1 bg-red-500 text-white text-[11px] font-black uppercase tracking-widest skew-x-[-10deg] block"
-        >Low Stock</span>
+        >{{ storefrontContent.product.lowStock }}</span>
         <span
           v-else
           class="px-3 py-1 bg-[#111] border border-[#333] text-white text-[11px] font-black uppercase tracking-widest skew-x-[-10deg] block"
-        >In Stock</span>
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
 
       <div
         v-if="isOutOfStock && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 skew-x-[5deg]"
       >
         <span class="px-3 py-1 bg-[#333] text-[#888] text-[11px] font-black uppercase tracking-widest skew-x-[-10deg] block">
           Out of Stock
@@ -221,7 +234,7 @@ async function handleAddToCart() {
     <div 
       :class="[
         viewMode === 'list' 
-          ? 'flex-1 text-left skew-x-[5deg]' 
+          ? 'flex-1 text-start skew-x-[5deg]' 
           : 'mt-4 text-center w-full px-2 skew-x-[5deg]'
       ]"
     >
@@ -246,11 +259,11 @@ async function handleAddToCart() {
         class="flex items-center gap-2" 
         :class="[ viewMode === 'list' ? '' : 'justify-center mt-2' ]"
       >
-        <span class="text-2xl font-black text-brand-500">{{ Number(product.price).toLocaleString() }} <span class="text-sm font-bold text-slate-500 ml-1">{{ currencyCode }}</span></span>
+        <span class="text-2xl font-black text-brand-500">{{ formatAmount(product.price) }} <span class="text-sm font-bold text-slate-500 ms-1">{{ currencyCode }}</span></span>
         <span
           v-if="originalPrice"
           class="text-sm text-slate-600 line-through font-bold"
-        >{{ originalPrice }} {{ currencyCode }}</span>
+        >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
       </div>
       
       <!-- List View Extra Actions -->

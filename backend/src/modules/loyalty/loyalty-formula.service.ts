@@ -28,8 +28,10 @@ export type LoyaltyLineResult = {
     margin: number
     basePoints: number
     factor: number
-    computedPointsPerUnit: number
-    computedPoints: number
+    productPointsPerUnit: number
+    productPoints: number
+    totalPointsPerUnit: number
+    totalPoints: number
 }
 
 export class LoyaltyFormulaService {
@@ -46,11 +48,13 @@ export class LoyaltyFormulaService {
         const quantity = Math.max(1, Math.trunc(Number(input.quantity || 0) || 0))
         const referencePrice = toNumber(input.referencePrice)
         const variantCost = toNumber(input.cost)
-        const basePoints = toNumber(settings?.loyaltyBasePoints)
+        const basePoints = this.roundPoints(toNumber(settings?.loyaltyBasePoints))
         const factor = toNumber(settings?.loyaltyMarginFactor)
         const margin = referencePrice - variantCost
-        const computedPointsPerUnit = this.roundPoints(basePoints + (margin * factor))
-        const computedPoints = computedPointsPerUnit * quantity
+        const productPointsPerUnit = this.roundPoints(margin * factor)
+        const totalPointsPerUnit = basePoints + productPointsPerUnit
+        const productPoints = productPointsPerUnit * quantity
+        const totalPoints = totalPointsPerUnit * quantity
 
         return {
             quantity,
@@ -59,15 +63,19 @@ export class LoyaltyFormulaService {
             margin,
             basePoints,
             factor,
-            computedPointsPerUnit,
-            computedPoints
+            productPointsPerUnit,
+            productPoints,
+            totalPointsPerUnit,
+            totalPoints
         }
     }
 
     computeTotal(settings: LoyaltySettingsLike | null | undefined, lines: LoyaltyLineInput[]) {
         const computedLines = lines.map((line) => this.computeLine(settings, line))
         return {
-            totalPoints: computedLines.reduce((sum, line) => sum + line.computedPoints, 0),
+            basePointsTotal: computedLines.reduce((sum, line) => sum + (line.basePoints * line.quantity), 0),
+            productPointsTotal: computedLines.reduce((sum, line) => sum + line.productPoints, 0),
+            totalPoints: computedLines.reduce((sum, line) => sum + line.totalPoints, 0),
             lines: computedLines
         }
     }
@@ -76,26 +84,17 @@ export class LoyaltyFormulaService {
         if (!this.isEnabled(settings)) return null
 
         const computed = this.computeLine(settings, input)
-        const parts: string[] = []
-        if (computed.basePoints !== 0) {
-            parts.push(computed.basePoints > 0 ? `inclut une base de ${computed.basePoints} pts` : `inclut une base de ${computed.basePoints} pts`)
-        }
-        if (computed.factor !== 0) {
-            parts.push('ajusté selon ce produit')
-        }
 
         return {
             enabled: true,
-            estimatedPoints: computed.computedPoints,
+            basePoints: computed.basePoints * computed.quantity,
+            productPoints: computed.productPoints,
+            totalPoints: computed.totalPoints,
             displayText:
-                computed.computedPoints === 0
+                computed.totalPoints === 0
                     ? '0 point fidelite estime'
-                    : `${computed.computedPoints} points fidelite estimes`,
-            formulaBreakdown: {
-                mode: settings?.loyaltyPublicFormulaMode || 'SUMMARY',
-                detail: parts.length > 0 ? parts.join(' + ') : 'calcul standard de fidelite'
-            }
+                    : `${computed.totalPoints} points fidelite estimes`,
+            mode: settings?.loyaltyPublicFormulaMode || 'SUMMARY'
         }
     }
 }
-

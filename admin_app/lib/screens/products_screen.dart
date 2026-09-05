@@ -2,19 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
-import '../services/api_service.dart';
+import '../models/app_mode.dart';
 import '../providers/auth_provider.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/badges/ui_badge.dart';
+import '../theme/app_theme.dart';
+import '../providers/store_settings_provider.dart';
+import '../widgets/tenant_image_widget.dart';
+import '../utils/app_toasts.dart';
 
 // Filter Notifiers
 class CategoryFilterNotifier extends Notifier<String> {
@@ -88,16 +94,18 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     final productsState = ref.watch(productsProvider);
     final filteredProducts = _filterProducts(productsState.products);
     final categories = ref.watch(productsProvider).categories;
-    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
+    final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       floatingActionButton: (isMobile && !isOfflineTenant)
           ? FloatingActionButton(
               onPressed: () => context.go('/products/create'),
-              backgroundColor: const Color(0xFF0F172A), // Slate-900
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
+                LucideIcons.plus,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             )
           : null,
       body: Column(
@@ -105,14 +113,9 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         children: [
           if (!isMobile) ...[
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
+              padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
               child: _buildHeader(),
             ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: _buildActionsRow(),
-            ),
-            const SizedBox(height: 16),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 24),
               child: _buildFilters(categories, isMobile: isMobile),
@@ -199,7 +202,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildHeader() {
-    final isOfflineTenant = ref.watch(authProvider).user?.isOfflineTenant ?? false;
+    final isOfflineTenant = ref.watch(authProvider).mode == AppMode.offlineOnly;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -208,26 +219,23 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           children: [
             Text(
               'admin.pages.products.index.title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF111827), // Gray-900
+                color: textPrimary,
                 letterSpacing: -0.5,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'admin.pages.products.index.subtitle'.tr(),
-              style: const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF6B7280),
-              ), // Gray-500
+              style: TextStyle(fontSize: 14, color: textSecondary),
             ),
           ],
         ),
         if (!isOfflineTenant)
           AppButton.primary(
-            label: 'admin.pages.products.index.addProduct'.tr(),
+            label: 'app.admin_pages_products_index_add'.tr().tr(),
             icon: LucideIcons.plus,
             onPressed: () => context.go('/products/create'),
           ),
@@ -235,175 +243,56 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
-  Widget _buildActionsRow() {
-    return Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE5E7EB)),
-      ),
-      child: Row(
-        children: [
-          // Action Buttons in Toolbar? Maybe keep them separately or integrate?
-          // The design shows Search + Sort + View Toggle usually.
-          // Products screen has bulk actions. Let's keep them but style better if needed.
-          // Actually, let's keep the user's bulk actions but in a nice row.
-          // The previous "Actions Row" was a mix. Let's use the new Toolbar style for Search/Sort/Filter and keep Actions separate or above?
-          // The products screen has a LOT of filters.
-          // Let's stick to the previous layout but update the style of the "Actions Row" to be cleaner.
-          _ActionToolbarButton(
-            icon: LucideIcons.upload,
-            label: 'admin.pages.products.index.bulk.export'.tr(),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'admin.common.featureComingSoon'.tr(
-                      namedArgs: {
-                        'feature': 'admin.pages.products.index.bulk.export'
-                            .tr(),
-                      },
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          const SizedBox(width: 8),
-          _ActionToolbarButton(
-            icon: LucideIcons.download,
-            label: 'admin.pages.products.index.bulk.import'.tr(),
-            onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    'admin.common.featureComingSoon'.tr(
-                      namedArgs: {
-                        'feature': 'admin.pages.products.index.bulk.import'
-                            .tr(),
-                      },
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-          if (_selectedProductIds.isNotEmpty) ...[
-            const SizedBox(width: 8),
-            _ActionToolbarButton(
-              icon: LucideIcons.edit,
-              label: 'admin.pages.products.index.bulk.update'.tr(),
-              onPressed: () {
-                // ...
-              },
-              color: const Color(0xFF0F172A),
-              textColor: Colors.white,
-            ),
-          ],
-          const Spacer(),
-          // Sort Dropdown
-          Row(
-            children: [
-              Text(
-                'admin.pages.products.index.sort.sortBy'.tr(),
-                style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
-              ),
-              const SizedBox(width: 8),
-              SizedBox(
-                width: 150,
-                child: Consumer(
-                  builder: (context, ref, _) {
-                    final sortBy = ref.watch(productSortProvider);
-                    return FormSelect<String>(
-                      label: 'admin.pages.products.index.sort.sortBy'.tr(),
-                      showLabel: false,
-                      value: sortBy,
-                      fillColor: const Color(0xFFF3F4F6),
-                      borderless: true,
-                      borderRadius: 6,
-                      contentPadding: const EdgeInsets.symmetric(
-                        horizontal: 12,
-                        vertical: 10,
-                      ),
-                      items: [
-                        DropdownMenuItem(
-                          value: 'recent',
-                          child: Text(
-                            'admin.pages.products.index.sort.newest'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'title',
-                          child: Text(
-                            'admin.pages.products.index.sort.title'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'price',
-                          child: Text(
-                            'admin.pages.products.index.sort.price'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'stock',
-                          child: Text(
-                            'admin.pages.products.index.sort.stock'.tr(),
-                          ),
-                        ),
-                        DropdownMenuItem(
-                          value: 'status',
-                          child: Text(
-                            'admin.pages.products.index.sort.status'.tr(),
-                          ),
-                        ),
-                      ],
-                      onChanged: (value) => ref
-                          .read(productSortProvider.notifier)
-                          .set(value ?? 'recent'),
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _buildFilters(List<Category> categories, {bool isMobile = false}) {
+    final selectedCategoryId = ref.watch(productCategoryFilterProvider);
+    final selectedStatus = ref.watch(productStatusFilterProvider);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+
+    final activeFilterChips = isMobile
+        ? const <Widget>[]
+        : _buildActiveFilterChips(
+            categories,
+            selectedCategoryId: selectedCategoryId,
+            selectedStatus: selectedStatus,
+          );
+
     return ResponsiveFilterBar(
       searchField: FormInput(
-        label: 'admin.pages.products.index.filters.searchLabel'.tr(),
+        label: 'app.admin_pages_products_index_fil4'.tr().tr(),
         controller: _searchController,
         hint: 'admin.pages.products.index.filters.searchPlaceholder'.tr(),
+        showLabel: isMobile,
         contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
+          horizontal: 14,
+          vertical: 12,
         ),
         onChanged: (value) => _searchDebouncer.run(() => setState(() {})),
       ),
       filters: [
         // Category
         SizedBox(
-          width: 180,
+          width: isMobile ? double.infinity : 220,
           child: Consumer(
             builder: (context, ref, _) {
               final selectedCategory = ref.watch(productCategoryFilterProvider);
               return FormSelect<String>(
+                showLabel: false,
                 label: 'admin.pages.products.index.filters.category'.tr(),
                 value: selectedCategory,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+                  horizontal: 14,
+                  vertical: 12,
                 ),
                 items: [
                   DropdownMenuItem(
                     value: '',
-                    child: Text(
-                      'admin.pages.products.index.filters.allCategories'.tr(),
-                    ),
+                    child: Text('app.admin_pages_products_index_fil'.tr().tr()),
                   ),
                   ...categories.map(
                     (c) => DropdownMenuItem(value: c.id, child: Text(c.title)),
@@ -418,22 +307,23 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         ),
         // Status
         SizedBox(
-          width: 140,
+          width: isMobile ? double.infinity : 180,
           child: Consumer(
             builder: (context, ref, _) {
               final selectedStatus = ref.watch(productStatusFilterProvider);
               return FormSelect<String>(
+                showLabel: false,
                 label: 'admin.pages.products.index.filters.status'.tr(),
                 value: selectedStatus,
                 contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
+                  horizontal: 14,
+                  vertical: 12,
                 ),
                 items: [
                   DropdownMenuItem(
                     value: '',
                     child: Text(
-                      'admin.pages.products.index.filters.allStatus'.tr(),
+                      'app.admin_pages_products_index_fil2'.tr().tr(),
                     ),
                   ),
                   DropdownMenuItem(
@@ -447,7 +337,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   DropdownMenuItem(
                     value: 'lowStock',
                     child: Text(
-                      'admin.pages.products.index.filters.lowStock'.tr(),
+                      'app.admin_pages_products_index_fil3'.tr().tr(),
                     ),
                   ),
                 ],
@@ -463,15 +353,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           ? [
               Container(
                 decoration: BoxDecoration(
-                  border: Border.all(color: const Color(0xFFE5E7EB)),
+                  border: Border.all(color: surfaceBorder),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: IconButton(
                   onPressed: () => _showMobileOperations(),
-                  icon: const Icon(
+                  icon: Icon(
                     LucideIcons.moreHorizontal,
                     size: 20,
-                    color: Color(0xFF64748B),
+                    color: textTertiary,
                   ),
                   tooltip: 'admin.common.actions'.tr(),
                   style: IconButton.styleFrom(
@@ -483,7 +373,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 ),
               ),
             ]
-          : null,
+          : _buildDesktopToolbarActions(),
+      collapseDesktopFilters: true,
+      activeFilterCount:
+          (selectedCategoryId.isNotEmpty ? 1 : 0) +
+          (selectedStatus.isNotEmpty ? 1 : 0),
+      activeFilterChips: activeFilterChips,
       onClearFilters: () {
         setState(() {
           _searchController.clear();
@@ -495,11 +390,262 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
+  List<Widget> _buildDesktopToolbarActions() {
+    return [
+      if (_selectedProductIds.isNotEmpty) ...[
+        AppButton.neutral(
+          label: 'admin.pages.products.index.bulk.update'.tr(),
+          icon: LucideIcons.edit,
+          onPressed: () =>
+              _showComingSoon('admin.pages.products.index.bulk.update'.tr()),
+        ),
+        const SizedBox(width: 8),
+      ],
+      _buildImportExportMenu(),
+      const SizedBox(width: 12),
+      _buildSortSelect(),
+    ];
+  }
+
+  Widget _buildImportExportMenu() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+
+    return PopupMenuButton<String>(
+      tooltip: 'admin.common.actions'.tr(),
+      position: PopupMenuPosition.under,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      onSelected: (value) {
+        if (value == 'export') {
+          _showComingSoon('admin.pages.products.index.bulk.export'.tr());
+        } else if (value == 'import') {
+          _showComingSoon('admin.pages.products.index.bulk.import'.tr());
+        }
+      },
+      itemBuilder: (context) => [
+        PopupMenuItem(
+          value: 'export',
+          child: Row(
+            children: [
+              Icon(LucideIcons.upload, size: 16, color: textTertiary),
+              const SizedBox(width: 8),
+              Text('admin.pages.products.index.bulk.export'.tr()),
+            ],
+          ),
+        ),
+        PopupMenuItem(
+          value: 'import',
+          child: Row(
+            children: [
+              Icon(LucideIcons.download, size: 16, color: textTertiary),
+              const SizedBox(width: 8),
+              Text('admin.pages.products.index.bulk.import'.tr()),
+            ],
+          ),
+        ),
+      ],
+      child: IgnorePointer(
+        child: AppButton.secondary(
+          label: 'CSV',
+          icon: LucideIcons.arrowDownUp,
+          trailing: const Icon(LucideIcons.chevronDown, size: 14),
+          onPressed: () {},
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSortSelect() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          'app.admin_pages_products_index_sor'.tr().tr(),
+          style: TextStyle(fontSize: 13, color: textSecondary),
+        ),
+        const SizedBox(width: 8),
+        SizedBox(
+          width: 150,
+          child: Consumer(
+            builder: (context, ref, _) {
+              final sortBy = ref.watch(productSortProvider);
+              return FormSelect<String>(
+                label: 'app.admin_pages_products_index_sor'.tr().tr(),
+                showLabel: false,
+                value: sortBy,
+                borderRadius: 6,
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 10,
+                ),
+                items: [
+                  DropdownMenuItem(
+                    value: 'recent',
+                    child: Text('admin.pages.products.index.sort.newest'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'title',
+                    child: Text('admin.pages.products.index.sort.title'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'price',
+                    child: Text('admin.pages.products.index.sort.price'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'stock',
+                    child: Text('admin.pages.products.index.sort.stock'.tr()),
+                  ),
+                  DropdownMenuItem(
+                    value: 'status',
+                    child: Text('admin.pages.products.index.sort.status'.tr()),
+                  ),
+                ],
+                onChanged: (value) => ref
+                    .read(productSortProvider.notifier)
+                    .set(value ?? 'recent'),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
+  List<Widget> _buildActiveFilterChips(
+    List<Category> categories, {
+    required String selectedCategoryId,
+    required String selectedStatus,
+  }) {
+    final chips = <Widget>[];
+    final selectedCategory = categories
+        .where((category) => category.id == selectedCategoryId)
+        .firstOrNull;
+
+    if (selectedCategory != null) {
+      chips.add(
+        _ActiveFilterChip(
+          label: selectedCategory.title,
+          onDeleted: () =>
+              ref.read(productCategoryFilterProvider.notifier).set(''),
+        ),
+      );
+    }
+
+    if (selectedStatus.isNotEmpty) {
+      chips.add(
+        _ActiveFilterChip(
+          label: _statusFilterLabel(selectedStatus),
+          onDeleted: () =>
+              ref.read(productStatusFilterProvider.notifier).set(''),
+        ),
+      );
+    }
+
+    return chips;
+  }
+
+  String _statusFilterLabel(String status) {
+    return switch (status) {
+      'active' => 'admin.common.active'.tr(),
+      'inactive' => 'admin.common.inactive'.tr(),
+      'lowStock' => 'app.admin_pages_products_index_fil3'.tr().tr(),
+      _ => status,
+    };
+  }
+
+  /// Flips a product between active and draft.
+  ///
+  /// The switch previously had an empty handler, so it animated, sent nothing,
+  /// and snapped back on the next rebuild.
+  Future<void> _setProductActive(Product product, bool isActive) async {
+    try {
+      await ref.read(productsProvider.notifier).updateProduct(product.id, {
+        'isActive': isActive,
+      });
+    } catch (_) {
+      if (!mounted) return;
+      // The list refetches on failure, so the switch already shows the true
+      // value again; this only explains why it moved back.
+      AppToasts.show(
+        context,
+        'admin.common.error'.tr(),
+        type: AppToastType.error,
+      );
+    }
+  }
+
+  /// Confirms before deleting, and surfaces the server's reason when it
+  /// refuses. Previously this fired immediately on tap and swallowed the error.
+  Future<void> _confirmDeleteProduct(Product product) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text('admin.pages.products.index.deleteModal.title'.tr()),
+        content: Text(
+          'admin.pages.products.index.deleteModal.message'.tr(
+            namedArgs: {'title': product.title},
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text('admin.common.cancel'.tr()),
+          ),
+          FilledButton(
+            style: FilledButton.styleFrom(backgroundColor: AppColors.red),
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text('admin.common.delete'.tr()),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    try {
+      await ref.read(productsProvider.notifier).deleteProduct(product.id);
+    } catch (error) {
+      if (!mounted) return;
+      // The backend answers 409 when the product is referenced by sales or
+      // purchase orders, which is the one case worth naming explicitly.
+      final message = error.toString().contains('409')
+          ? 'admin.pages.products.index.deleteModal.errorHasTransactions'.tr()
+          : 'admin.pages.products.index.deleteModal.error'.tr();
+      AppToasts.show(context, message, type: AppToastType.error);
+    }
+  }
+
+  void _showComingSoon(String feature) {
+    AppToasts.show(
+      context,
+      'app.admin_common_featurecomingsoon'.tr().tr(
+        namedArgs: {'feature': feature},
+      ),
+    );
+  }
+
   void _showMobileOperations() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: isDark ? AppColors.surface2 : AppColors.lightSurface2,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -518,7 +664,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: surfaceBorder,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -532,10 +678,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     children: [
                       Text(
                         'admin.common.actions'.tr(),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0F172A),
+                          color: textPrimary,
                         ),
                       ),
                       IconButton(
@@ -553,14 +699,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     controller: scrollController,
                     padding: const EdgeInsets.symmetric(horizontal: 8),
                     children: [
-                      if (!(ref.read(authProvider).user?.isOfflineTenant ?? false))
+                      if (!(ref.read(authProvider).mode == AppMode.offlineOnly))
                         ListTile(
-                          leading: const Icon(
-                            LucideIcons.plus,
-                            color: Color(0xFF0F172A),
-                          ),
+                          leading: Icon(LucideIcons.plus, color: textPrimary),
                           title: Text(
-                            'admin.pages.products.index.addProduct'.tr(),
+                            'app.admin_pages_products_index_add'.tr().tr(),
                           ),
                           onTap: () {
                             context.pop();
@@ -568,12 +711,12 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                           },
                         ),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           LucideIcons.arrowUpDown,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         title: Text(
-                          'admin.pages.products.index.sort.sortBy'.tr(),
+                          'app.admin_pages_products_index_sor'.tr().tr(),
                         ),
                         trailing: SizedBox(
                           width: 160,
@@ -581,7 +724,8 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                             builder: (context, ref, _) {
                               final sortBy = ref.watch(productSortProvider);
                               return FormSelect<String>(
-                                label: 'admin.pages.products.index.sort.sortBy'
+                                label: 'app.admin_pages_products_index_sor'
+                                    .tr()
                                     .tr(),
                                 showLabel: false,
                                 value: sortBy,
@@ -643,51 +787,42 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                         ),
                       ),
                       ListTile(
-                        leading: const Icon(
-                          LucideIcons.upload,
-                          color: Color(0xFF64748B),
-                        ),
+                        leading: Icon(LucideIcons.upload, color: textTertiary),
                         title: Text(
                           'admin.pages.products.index.bulk.export'.tr(),
                         ),
                         onTap: () {
                           context.pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'admin.common.featureComingSoon'.tr(
-                                  namedArgs: {
-                                    'feature':
-                                        'admin.pages.products.index.bulk.export'
-                                            .tr(),
-                                  },
-                                ),
-                              ),
+                          AppToasts.show(
+                            context,
+                            'app.admin_common_featurecomingsoon'.tr().tr(
+                              namedArgs: {
+                                'feature':
+                                    'admin.pages.products.index.bulk.export'
+                                        .tr(),
+                              },
                             ),
                           );
                         },
                       ),
                       ListTile(
-                        leading: const Icon(
+                        leading: Icon(
                           LucideIcons.download,
-                          color: Color(0xFF64748B),
+                          color: textTertiary,
                         ),
                         title: Text(
                           'admin.pages.products.index.bulk.import'.tr(),
                         ),
                         onTap: () {
                           context.pop();
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'admin.common.featureComingSoon'.tr(
-                                  namedArgs: {
-                                    'feature':
-                                        'admin.pages.products.index.bulk.import'
-                                            .tr(),
-                                  },
-                                ),
-                              ),
+                          AppToasts.show(
+                            context,
+                            'app.admin_common_featurecomingsoon'.tr().tr(
+                              namedArgs: {
+                                'feature':
+                                    'admin.pages.products.index.bulk.import'
+                                        .tr(),
+                              },
                             ),
                           );
                         },
@@ -695,26 +830,20 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       if (_selectedProductIds.isNotEmpty) ...[
                         const Divider(),
                         ListTile(
-                          leading: const Icon(
-                            LucideIcons.edit,
-                            color: Color(0xFF64748B),
-                          ),
+                          leading: Icon(LucideIcons.edit, color: textTertiary),
                           title: Text(
                             '${'admin.pages.products.index.bulk.update'.tr()} — ${'admin.pages.products.index.bulk.selected'.tr(namedArgs: {'count': _selectedProductIds.length.toString()})}',
                           ),
                           onTap: () {
                             context.pop();
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text(
-                                  'admin.common.featureComingSoon'.tr(
-                                    namedArgs: {
-                                      'feature':
-                                          'admin.pages.products.index.bulk.update'
-                                              .tr(),
-                                    },
-                                  ),
-                                ),
+                            AppToasts.show(
+                              context,
+                              'app.admin_common_featurecomingsoon'.tr().tr(
+                                namedArgs: {
+                                  'feature':
+                                      'admin.pages.products.index.bulk.update'
+                                          .tr(),
+                                },
                               ),
                             );
                           },
@@ -745,6 +874,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+
     return Center(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 48),
@@ -754,33 +892,29 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: const Color(0xFFF1F5F9), // Slate-100
+                color: isDark ? AppColors.surface3 : AppColors.lightSurface3,
                 shape: BoxShape.circle,
               ),
-              child: const Icon(
-                LucideIcons.package,
-                size: 32,
-                color: Color(0xFF94A3B8),
-              ), // Slate-400
+              child: Icon(LucideIcons.package, size: 32, color: textMuted),
             ),
             const SizedBox(height: 16),
             Text(
               'admin.pages.products.index.empty.title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1E293B), // Slate-800
+                color: textPrimary,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               'admin.pages.products.index.empty.hint'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B)), // Slate-500
+              style: TextStyle(color: textTertiary),
             ),
             const SizedBox(height: 24),
-            if (!(ref.watch(authProvider).user?.isOfflineTenant ?? false))
+            if (!(ref.watch(authProvider).mode == AppMode.offlineOnly))
               AppButton.primary(
-                label: 'admin.pages.products.index.empty.newProduct'.tr(),
+                label: 'app.admin_pages_products_index_emp'.tr().tr(),
                 icon: LucideIcons.plus,
                 onPressed: () => context.push('/products/create'),
               ),
@@ -809,6 +943,14 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         products.isNotEmpty && selectedVisibleCount == products.length;
     final noneSelected = selectedVisibleCount == 0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+
     return Row(
       children: [
         SizedBox(
@@ -830,56 +972,69 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
         Expanded(
           flex: 4,
           child: Text(
-            'admin.pages.products.index.table.product'.tr(),
-            style: const TextStyle(
+            'admin.pages.products.index.table.product'.tr().toUpperCase(),
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: textTertiary,
               letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Text(
+            'admin.pages.products.index.table.category'.tr().toUpperCase(),
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w600,
+              color: textTertiary,
+              letterSpacing: 0.5,
+            ),
+          ),
+        ),
+        Expanded(
+          flex: 3,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'admin.pages.products.index.table.price'.tr().toUpperCase(),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: textTertiary,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),
         Expanded(
           flex: 2,
-          child: Text(
-            'admin.pages.products.index.table.category'.tr(),
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF6B7280),
-              letterSpacing: 0.5,
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'admin.pages.products.index.table.stock'.tr().toUpperCase(),
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w600,
+                color: textTertiary,
+                letterSpacing: 0.5,
+              ),
             ),
           ),
         ),
         Expanded(
-          flex: 1,
+          flex: 2,
           child: Align(
-            alignment: Alignment.centerRight,
+            alignment: Alignment.centerLeft,
             child: Text(
-              'admin.pages.products.index.table.price'.tr(),
-              style: const TextStyle(
+              'admin.pages.products.index.table.status'.tr().toUpperCase(),
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
-              textAlign: TextAlign.right,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 1,
-          child: Align(
-            alignment: Alignment.centerRight,
-            child: Text(
-              'admin.pages.products.index.table.stock'.tr(),
-              style: const TextStyle(
-                fontSize: 11,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
-                letterSpacing: 0.5,
-              ),
-              textAlign: TextAlign.right,
             ),
           ),
         ),
@@ -888,11 +1043,11 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           child: Align(
             alignment: Alignment.center,
             child: Text(
-              'admin.pages.products.index.table.status'.tr(),
-              style: const TextStyle(
+              'admin.pages.products.index.table.links'.tr().toUpperCase(),
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
               textAlign: TextAlign.center,
@@ -900,27 +1055,15 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
           ),
         ),
         Expanded(
-          flex: 3,
-          child: Text(
-            'admin.pages.products.index.table.links'.tr(),
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF6B7280),
-              letterSpacing: 0.5,
-            ),
-          ),
-        ),
-        Expanded(
-          flex: 3,
+          flex: 2,
           child: Align(
             alignment: Alignment.centerRight,
             child: Text(
-              'admin.pages.products.index.table.actions'.tr(),
-              style: const TextStyle(
+              'admin.pages.products.index.table.actions'.tr().toUpperCase(),
+              style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF6B7280),
+                color: textTertiary,
                 letterSpacing: 0.5,
               ),
               textAlign: TextAlign.right,
@@ -931,13 +1074,17 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     );
   }
 
-  Widget _buildStockCell(Product product) {
+  Widget _buildStockCell(BuildContext context, Product product) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+
     if (product.stock == 0) {
       // Out of stock — red badge
       return UiBadge(
-        label: 'admin.pages.products.index.table.outOfStock'.tr(),
+        label: 'app.admin_pages_products_index_tab'.tr().tr(),
         tone: UiBadgeTone.red,
-        textAlign: TextAlign.center,
       );
     }
     if (product.stock <= product.lowStockThreshold) {
@@ -970,25 +1117,40 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
     // Normal stock — plain number
     return Text(
       '${product.stock}',
-      style: const TextStyle(
-        fontSize: 14,
-        color: Color(0xFF374151),
+      style: TextStyle(
+        fontSize: 13,
+        color: textPrimary,
         fontWeight: FontWeight.w500,
       ),
-      textAlign: TextAlign.right,
     );
   }
 
   Widget _buildProductRow(BuildContext context, Product product) {
-    final rawImageUrl = product.mainImageUrl;
-    final imageUrl = rawImageUrl == null
-        ? null
-        : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
+    final imagePath = product.mainImageUrl?.trim();
     final isSelected = _selectedProductIds.contains(product.id);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final surfaceBorder = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
 
     return Container(
-      color: isSelected ? const Color(0xFFF0FDFA) : null, // Teal-50-ish
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      color: isSelected
+          ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.06)
+          : null,
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
       child: Row(
         children: [
           SizedBox(
@@ -1011,29 +1173,21 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             child: Row(
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 28,
+                  height: 28,
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF9FAFB),
+                    color: isDark
+                        ? AppColors.surface3
+                        : AppColors.lightSurface3,
                     borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: const Color(0xFFE5E7EB),
-                      width: 1,
-                    ),
-                    image: imageUrl != null
-                        ? DecorationImage(
-                            image: NetworkImage(imageUrl),
-                            fit: BoxFit.cover,
-                          )
-                        : null,
+                    border: Border.all(color: surfaceBorder, width: 1),
                   ),
-                  child: imageUrl == null
-                      ? const Icon(
-                          LucideIcons.image,
-                          color: Color(0xFF94A3B8),
-                          size: 20,
-                        )
-                      : null,
+                  child: imagePath == null || imagePath.isEmpty
+                      ? Icon(LucideIcons.image, color: textMuted, size: 20)
+                      : ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: TenantImageWidget(imagePath: imagePath),
+                        ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -1043,10 +1197,10 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     children: [
                       Text(
                         product.title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
-                          color: Color(0xFF111827),
+                          fontSize: 13,
+                          color: textPrimary,
                           letterSpacing: -0.1,
                         ),
                         overflow: TextOverflow.ellipsis,
@@ -1055,10 +1209,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                       const SizedBox(height: 3),
                       Text(
                         product.slug,
-                        style: const TextStyle(
-                          color: Color(0xFF6B7280),
-                          fontSize: 12,
-                        ),
+                        style: TextStyle(color: textSecondary, fontSize: 12),
                         overflow: TextOverflow.ellipsis,
                         maxLines: 1,
                       ),
@@ -1069,7 +1220,7 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
             ),
           ),
           Expanded(
-            flex: 2,
+            flex: 3,
             child: Align(
               alignment: Alignment.centerLeft,
               child: product.category != null
@@ -1080,170 +1231,157 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                     )
                   : Text(
                       'admin.pages.products.index.table.uncategorized'.tr(),
-                      style: const TextStyle(
-                        color: Color(0xFF9CA3AF),
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: textMuted, fontSize: 13),
                     ),
             ),
           ),
           Expanded(
-            flex: 1,
+            flex: 3,
             child: Align(
-              alignment: Alignment.centerRight,
-              child: Text(
-                '\$${product.price.toStringAsFixed(2)}',
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xFF111827),
-                  fontWeight: FontWeight.w600,
-                  letterSpacing: -0.2,
-                ),
-                textAlign: TextAlign.right,
-              ),
+              alignment: Alignment.centerLeft,
+              child: _buildPriceCell(product, money, isDark),
             ),
           ),
           Expanded(
-            flex: 1,
+            flex: 2,
             child: Align(
-              alignment: Alignment.centerRight,
-              child: _buildStockCell(product),
+              alignment: Alignment.centerLeft,
+              child: _buildStockCell(context, product),
+            ),
+          ),
+          Expanded(
+            flex: 2,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Transform.scale(
+                    scale: 0.75,
+                    child: Switch(
+                      value: product.isActive,
+                      activeThumbColor: Colors.white,
+                      activeTrackColor: const Color(0xFF84CC16), // Lime-500
+                      onChanged: (val) => _setProductActive(product, val),
+                    ),
+                  ),
+                  const SizedBox(width: 2),
+                  Flexible(
+                    child: Text(
+                      product.isActive
+                          ? 'admin.common.active'.tr()
+                          : 'admin.common.inactive'.tr(),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: product.isActive
+                            ? const Color(0xFF15803D)
+                            : textTertiary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           Expanded(
             flex: 1,
             child: Align(
               alignment: Alignment.center,
-              child: UiBadge(
-                label: product.isActive
-                    ? 'admin.common.active'.tr()
-                    : 'admin.common.inactive'.tr(),
-                tone: product.isActive
-                    ? UiBadgeTone.emerald
-                    : UiBadgeTone.slate,
-                maxWidth: 110,
-                textAlign: TextAlign.center,
+              child: PopupMenuButton<String>(
+                icon: Icon(LucideIcons.globe, color: textTertiary, size: 18),
+                position: PopupMenuPosition.under,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'open_product',
+                    child: Row(
+                      children: [
+                        Icon(
+                          LucideIcons.externalLink,
+                          size: 16,
+                          color: textTertiary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('app.admin_pages_products_index_lin'.tr().tr()),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'copy_product',
+                    child: Row(
+                      children: [
+                        Icon(LucideIcons.copy, size: 16, color: textTertiary),
+                        const SizedBox(width: 8),
+                        Text('app.admin_pages_products_index_lin2'.tr().tr()),
+                      ],
+                    ),
+                  ),
+                  const PopupMenuDivider(),
+                  PopupMenuItem(
+                    value: 'open_landing',
+                    child: Row(
+                      children: [
+                        Icon(
+                          LucideIcons.externalLink,
+                          size: 16,
+                          color: textTertiary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text('app.admin_pages_products_index_lin3'.tr().tr()),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'copy_landing',
+                    child: Row(
+                      children: [
+                        Icon(LucideIcons.copy, size: 16, color: textTertiary),
+                        const SizedBox(width: 8),
+                        Text('app.admin_pages_products_index_lin4'.tr().tr()),
+                      ],
+                    ),
+                  ),
+                ],
+                onSelected: (value) async {
+                  if (value == 'copy_product') {
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text: 'https://example.com/product/${product.slug}',
+                      ),
+                    );
+                    if (context.mounted) {
+                      AppToasts.show(context, 'admin.common.copied'.tr());
+                    }
+                  } else if (value == 'copy_landing') {
+                    await Clipboard.setData(
+                      ClipboardData(
+                        text:
+                            'https://example.com/product/${product.slug}?mode=landing',
+                      ),
+                    );
+                    if (context.mounted) {
+                      AppToasts.show(context, 'admin.common.copied'.tr());
+                    }
+                  } else {
+                    if (context.mounted) {
+                      AppToasts.show(
+                        context,
+                        'app.admin_common_featurecomingsoon'.tr().tr(
+                          namedArgs: {'feature': value},
+                        ),
+                      );
+                    }
+                  }
+                },
               ),
             ),
           ),
           Expanded(
-            flex: 3,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        '${'admin.pages.products.index.links.product'.tr()}:',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF9CA3AF), // Gray-400
-                        ),
-                      ),
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.externalLink,
-                      color: const Color(0xFF0D9488), // Teal-600
-                      tooltip: 'admin.pages.products.index.links.openProduct'
-                          .tr(),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'admin.common.featureComingSoon'.tr(
-                                namedArgs: {
-                                  'feature':
-                                      'admin.pages.products.index.links.openProduct'
-                                          .tr(),
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.copy,
-                      color: const Color(0xFF9CA3AF), // Gray-400
-                      tooltip: 'admin.pages.products.index.links.copyProduct'
-                          .tr(),
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(
-                            text: 'https://example.com/product/${product.slug}',
-                          ),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('admin.common.copied'.tr())),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    SizedBox(
-                      width: 60,
-                      child: Text(
-                        '${'admin.pages.products.index.links.landing'.tr()}:',
-                        style: const TextStyle(
-                          fontSize: 11,
-                          color: Color(0xFF9CA3AF), // Gray-400
-                        ),
-                      ),
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.externalLink,
-                      color: const Color(0xFF0D9488), // Teal-600
-                      tooltip: 'admin.pages.products.index.links.openLanding'
-                          .tr(),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text(
-                              'admin.common.featureComingSoon'.tr(
-                                namedArgs: {
-                                  'feature':
-                                      'admin.pages.products.index.links.openLanding'
-                                          .tr(),
-                                },
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                    _LinkButton(
-                      icon: LucideIcons.copy,
-                      color: const Color(0xFF9CA3AF), // Gray-400
-                      tooltip: 'admin.pages.products.index.links.copyLanding'
-                          .tr(),
-                      onPressed: () async {
-                        await Clipboard.setData(
-                          ClipboardData(
-                            text:
-                                'https://example.com/product/${product.slug}?mode=landing',
-                          ),
-                        );
-                        if (context.mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('admin.common.copied'.tr())),
-                          );
-                        }
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            flex: 3,
+            flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
               child: Wrap(
@@ -1252,25 +1390,80 @@ class _ProductsScreenState extends ConsumerState<ProductsScreen> {
                 alignment: WrapAlignment.end,
                 crossAxisAlignment: WrapCrossAlignment.center,
                 children: [
-                  AppButton.secondary(
-                    label: 'admin.common.edit'.tr(),
+                  TableActionButton(
+                    tooltip: 'admin.common.edit'.tr(),
                     icon: LucideIcons.pencil,
-                    size: AppButtonSize.sm,
                     onPressed: () => context.push('/products/${product.id}'),
                   ),
-                  AppButton.danger(
-                    label: 'admin.common.delete'.tr(),
+                  TableActionButton(
+                    tooltip: 'admin.common.delete'.tr(),
                     icon: LucideIcons.trash2,
-                    size: AppButtonSize.sm,
-                    onPressed: () => ref
-                        .read(productsProvider.notifier)
-                        .deleteProduct(product.id),
+                    isDanger: true,
+                    onPressed: () => _confirmDeleteProduct(product),
                   ),
                 ],
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildPriceCell(Product product, NumberFormat money, bool isDark) {
+    final bool hasPromotion =
+        product.promotionalPrice != null && product.promotionalPrice! > 0;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+
+    if (hasPromotion) {
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Text(
+                money.format(product.promotionalPrice!),
+                style: const TextStyle(
+                  fontSize: 13,
+                  color: Color(0xFF84CC16), // Lime-500
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: -0.2,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                money.format(product.price),
+                style: TextStyle(
+                  fontSize: 12,
+                  color: textMuted,
+                  decoration: TextDecoration.lineThrough,
+                ),
+              ),
+            ],
+          ),
+          if (product.promotionEndDate != null)
+            Padding(
+              padding: const EdgeInsets.only(top: 2.0),
+              child: Text(
+                'exp. ${DateFormat('dd/MM/yyyy').format(product.promotionEndDate!)}',
+                style: TextStyle(fontSize: 11, color: textMuted),
+              ),
+            ),
+        ],
+      );
+    }
+
+    return Text(
+      money.format(product.price),
+      style: TextStyle(
+        fontSize: 13,
+        color: textPrimary,
+        fontWeight: FontWeight.w600,
+        letterSpacing: -0.2,
       ),
     );
   }
@@ -1303,7 +1496,7 @@ class _LinkButtonState extends State<_LinkButton> {
       onExit: (_) => setState(() => _isHovered = false),
       child: IconButton(
         icon: Icon(widget.icon, size: 14),
-        color: _isHovered ? widget.color.withOpacity(0.8) : widget.color,
+        color: _isHovered ? widget.color.withValues(alpha: 0.8) : widget.color,
         onPressed: widget.onPressed,
         padding: const EdgeInsets.all(4),
         constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
@@ -1313,23 +1506,56 @@ class _LinkButtonState extends State<_LinkButton> {
   }
 }
 
-class _ActionToolbarButton extends StatelessWidget {
-  final IconData icon;
+class _ActiveFilterChip extends StatelessWidget {
   final String label;
-  final VoidCallback? onPressed;
-  final Color? color;
-  final Color? textColor;
+  final VoidCallback onDeleted;
 
-  const _ActionToolbarButton({
-    required this.icon,
-    required this.label,
-    required this.onPressed,
-    this.color,
-    this.textColor,
-  });
+  const _ActiveFilterChip({required this.label, required this.onDeleted});
 
   @override
   Widget build(BuildContext context) {
-    return AppButton.secondary(label: label, icon: icon, onPressed: onPressed);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    return Container(
+      constraints: const BoxConstraints(maxWidth: 180),
+      padding: const EdgeInsets.only(left: 10, right: 4, top: 6, bottom: 6),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.surface2 : AppColors.lightSurface2,
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Flexible(
+            child: Text(
+              label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: textTertiary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+          InkWell(
+            onTap: onDeleted,
+            borderRadius: BorderRadius.circular(999),
+            child: Padding(
+              padding: const EdgeInsets.all(2),
+              child: Icon(LucideIcons.x, size: 12, color: textTertiary),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

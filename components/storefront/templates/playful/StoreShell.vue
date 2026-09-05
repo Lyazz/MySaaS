@@ -4,17 +4,22 @@ import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
+defineProps<{
+    hideNavigation?: boolean
+    mobileHeaderHidden?: boolean
+    hideAnnouncementBar?: boolean
+}>()
+
 const cartStore = useCartStore()
 const favorites = useFavorites()
 const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
+const { format: formatCurrency } = useCurrency()
 
-const categoryDisplayTitle = (category: any): string => {
-    if (!category) return ""
-    return category.parentId ? ("-> " + category.title) : category.title
-}
+/* ── Contact rails ─────────────────────────────────────────────────── */
 
 type ContactInfoRow = { id: string; kind: ContactInfoKind; label?: string | null; value: string; position?: number; isActive?: boolean }
 const contactInfos = useState<ContactInfoRow[]>('contactInfos', () => [])
@@ -33,18 +38,62 @@ const socialContactInfosWithHref = computed(() =>
 const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
 const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
 const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
-const { format: formatCurrency } = useCurrency()
+
+/* ── Category tree (the nav rail needs parents + their children) ───── */
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
     headers: useTenantApiHeaders(),
 })
 
+const rootCategories = computed(() => {
+    const all = tenantCategories.value || []
+    const roots = all.filter((c) => !c.parentId)
+    /* A flat catalogue (no parents declared) still deserves a full nav bar. */
+    if (roots.length === 0) return all
+    return roots
+})
+
+const childrenOf = (parentId: string) => (tenantCategories.value || []).filter((c) => c.parentId === parentId)
+
+/* ── Nav bar horizontal scroll (babyshop-style chevrons) ───────────── */
+
+const navScroller = ref<HTMLElement | null>(null)
+const navCanScrollStart = ref(false)
+const navCanScrollEnd = ref(false)
+
+const syncNavArrows = () => {
+    const el = navScroller.value
+    if (!el) return
+    const max = el.scrollWidth - el.clientWidth
+    /* `scrollLeft` goes negative in RTL, so compare on magnitude. */
+    const pos = Math.abs(el.scrollLeft)
+    navCanScrollStart.value = pos > 4
+    navCanScrollEnd.value = max - pos > 4
+}
+
+const scrollNav = (direction: 1 | -1) => {
+    const el = navScroller.value
+    if (!el) return
+    el.scrollBy({ left: direction * Math.round(el.clientWidth * 0.7), behavior: 'smooth' })
+}
+
+onMounted(() => {
+    syncNavArrows()
+    window.addEventListener('resize', syncNavArrows)
+})
+onUnmounted(() => window.removeEventListener('resize', syncNavArrows))
+watch(tenantCategories, () => nextTick(syncNavArrows))
+
+/* ── Mobile drawer ─────────────────────────────────────────────────── */
+
 const mobileMenuOpen = ref(false)
 const mobileCategoriesDropdownOpen = ref(false)
 watch(mobileMenuOpen, (open) => {
     if (!open) mobileCategoriesDropdownOpen.value = false
 })
+
+/* ── Search ────────────────────────────────────────────────────────── */
 
 const searchQuery = ref('')
 const searchResults = ref<any[]>([])
@@ -55,6 +104,7 @@ const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
 const hasMoreSearchResults = computed(() => searchResults.value.length > visibleSearchResultCount.value)
 const showMoreSearchResults = () => { visibleSearchResultCount.value += searchSuggestionLimit }
+
 const applySearchResultPricing = (products: any[]) => (Array.isArray(products) ? products : []).map((product: any) => {
     const pricing = buildActiveProductPricing(product)
     return {
@@ -87,353 +137,597 @@ watch(searchQuery, (newVal) => {
     }
 })
 
-const props = defineProps<{
-    hideNavigation?: boolean
-    mobileHeaderHidden?: boolean
-    hideAnnouncementBar?: boolean
-}>()
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion's click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 </script>
 
 <template>
   <StoreThemeProvider>
-    <div class="min-h-screen flex flex-col font-sans text-stone-700 bg-[#fffbf0]">
-
-      <!-- Announcement Bar -->
+    <div class="min-h-screen flex flex-col">
       <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
-        background-color="bg-violet-700"
+        background-color="bg-[#ED5A96]"
         text-color="text-white"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
-      <!-- Header -->
+      <!-- ══ Main bar — logo · search · actions ═════════════════════════ -->
       <header
         v-if="!hideNavigation"
-        :class="['bg-[#fffbf0] border-b-4 border-violet-200 sticky top-0 z-50 shadow-sm', { 'hidden md:block': mobileHeaderHidden }]"
+        :class="['bg-[var(--kw-surface)] sticky top-0 z-50 border-b border-[var(--kw-line-soft)]', { 'hidden md:block': mobileHeaderHidden }]"
       >
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="h-16 md:h-20 flex items-center justify-between gap-4">
-
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="h-[4.5rem] flex items-center gap-4 lg:gap-8">
             <!-- Logo -->
-            <NuxtLink to="/" class="flex-shrink-0 flex items-center gap-2 group">
+            <NuxtLink
+              to="/"
+              class="flex-shrink-0 flex items-center gap-2.5 group"
+            >
               <template v-if="storeSettings?.logoUrl">
-                <img :src="storeSettings.logoUrl" :alt="tenantName" class="h-10 max-w-[140px] object-contain">
+                <img
+                  :src="storeSettings.logoUrl"
+                  :alt="tenantName"
+                  class="h-10 max-w-[150px] object-contain"
+                >
               </template>
               <template v-else>
-                <div class="h-11 w-11 rounded-2xl bg-violet-600 text-white flex items-center justify-center shadow-[0_4px_0_0_#4c1d95] group-hover:-translate-y-0.5 group-active:translate-y-1 group-active:shadow-none transition-all">
-                  <Icon name="lucide:store" class="w-6 h-6" />
-                </div>
+                <span
+                  class="h-11 w-11 kw-blob kw-blob-hover flex items-center justify-center text-white shrink-0"
+                  style="background: linear-gradient(140deg, var(--kw-pink), var(--kw-lilac))"
+                >
+                  <Icon
+                    name="lucide:candy"
+                    class="w-5 h-5"
+                  />
+                </span>
               </template>
-              <span class="text-xl font-black text-stone-900 group-hover:text-violet-700 transition-colors tracking-tight" style="font-family: 'Fredoka', sans-serif">{{ tenantName }}</span>
+              <span class="kw-display text-[1.35rem] group-hover:text-[var(--kw-pink-deep)] transition-colors truncate max-w-[7.5rem] sm:max-w-none">{{ tenantName }}</span>
             </NuxtLink>
 
-            <!-- Search Bar -->
-            <div class="flex-1 max-w-md hidden lg:block">
+            <!-- Search — the widest thing on the bar, babyshop-style -->
+            <div class="flex-1 min-w-0 hidden md:block">
               <div class="relative">
                 <input
                   v-model="searchQuery"
                   type="text"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full h-11 bg-white border-3 border-violet-200 text-stone-900 text-sm rounded-full focus:ring-0 focus:border-violet-400 block pl-5 pr-10 transition-all shadow-[0_3px_0_0_#ddd6fe] focus:shadow-[0_3px_0_0_#7c3aed] outline-none"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  :placeholder="storefrontContent.search.placeholder"
+                  class="kw-field h-12 pe-12 bg-[var(--kw-cream-2)] border-transparent"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
-                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                  <Icon name="lucide:search" class="w-4 h-4 text-violet-400" />
-                </div>
-                <!-- Search Dropdown -->
+                <span class="absolute inset-y-0 end-1.5 flex items-center">
+                  <span
+                    class="w-9 h-9 rounded-full flex items-center justify-center text-white"
+                    style="background: var(--kw-brand)"
+                  >
+                    <Icon
+                      name="lucide:search"
+                      class="w-4 h-4"
+                    />
+                  </span>
+                </span>
+
+                <!-- Suggestions -->
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[calc(100%+8px)] left-0 right-0 bg-white border-3 border-violet-100 shadow-xl z-50 rounded-2xl overflow-hidden pointer-events-auto"
+                  class="kw-card absolute top-[calc(100%+10px)] inset-x-0 z-50 overflow-hidden p-1.5"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-stone-500">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-stone-500">No products found.</div>
-                  <div v-else class="flex flex-col">
+                  <div
+                    v-if="searchLoading"
+                    class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
+                  >
+                    {{ storefrontContent.search.searching }}
+                  </div>
+                  <div
+                    v-else-if="searchResults.length === 0"
+                    class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
+                  >
+                    {{ storefrontContent.search.noResults }}
+                  </div>
+                  <div
+                    v-else
+                    class="flex flex-col"
+                  >
                     <NuxtLink
                       v-for="product in visibleSearchResults"
                       :key="product.id"
                       :to="'/product/' + product.slug"
-                      class="flex items-center gap-3 px-4 py-3 hover:bg-violet-50 transition-colors border-b border-violet-50 last:border-0"
+                      class="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-[var(--kw-pink-soft)] transition-colors"
                       @click="isSearchDropdownOpen = false"
                     >
-                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-xl border-2 border-violet-100 shadow-sm" />
+                      <img
+                        :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'"
+                        class="w-11 h-11 object-cover kw-blob border border-[var(--kw-line)]"
+                        :alt="product.title"
+                      >
                       <div class="flex-1 min-w-0">
-                        <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-violet-600 font-black mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-sm font-bold truncate">
+                          {{ product.title }}
+                        </div>
+                        <div class="text-xs kw-num text-[var(--kw-pink-deep)] mt-0.5">
+                          {{ formatCurrency(product.effectivePrice ?? product.price) }}
+                          <span
+                            v-if="product.promotionDiscountPercent"
+                            class="ms-1 kw-badge kw-badge-sale"
+                          >-{{ product.promotionDiscountPercent }}%</span>
+                        </div>
                       </div>
                     </NuxtLink>
                     <button
                       v-if="hasMoreSearchResults"
                       type="button"
-                      class="w-full px-4 py-3 text-left text-sm font-bold text-violet-600 hover:bg-violet-50 transition-colors"
+                      class="w-full px-4 py-3 text-start text-sm font-extrabold text-[var(--kw-pink-deep)] hover:bg-[var(--kw-pink-soft)] rounded-2xl transition-colors"
                       @mousedown.prevent
                       @click="showMoreSearchResults"
-                    >See more</button>
+                    >
+                      {{ storefrontContent.search.seeMore }}
+                    </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Nav + Actions -->
-            <div class="flex items-center gap-4">
-              <!-- Desktop Nav -->
-              <nav class="hidden lg:flex items-center gap-1">
+            <!-- Actions -->
+            <div class="flex items-center gap-2 ms-auto md:ms-0 flex-shrink-0">
+              <LocaleSwitcher class="hidden sm:inline-flex" />
+
+              <button
+                class="kw-icon-btn relative"
+                :title="storefrontContent.header.wishlistTitle"
+                :aria-label="storefrontContent.header.wishlistTitle"
+                @click="navigateTo('/wishlist')"
+              >
+                <Icon
+                  name="lucide:heart"
+                  class="w-5 h-5"
+                />
+                <span
+                  v-if="favorites.count.value > 0"
+                  class="kw-pop absolute -top-1 -end-1 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full bg-[var(--kw-pink-deep)] text-white text-[10px] font-extrabold flex items-center justify-center"
+                >{{ favorites.count.value }}</span>
+              </button>
+
+              <NuxtLink
+                v-if="storeSettings?.cartEnabled !== false"
+                to="/cart"
+                class="kw-btn kw-btn-sm relative h-[2.6rem]"
+              >
+                <Icon
+                  name="lucide:shopping-bag"
+                  class="w-4 h-4"
+                />
+                <span class="hidden lg:inline">{{ storefrontContent.cart.title }}</span>
+                <span
+                  v-if="cartStore.itemCount > 0"
+                  class="kw-pop min-w-[1.3rem] h-[1.3rem] px-1 rounded-full bg-white/95 text-[var(--kw-ink)] text-[11px] font-extrabold flex items-center justify-center"
+                >{{ cartStore.itemCount }}</span>
+              </NuxtLink>
+
+              <button
+                class="kw-icon-btn md:!hidden"
+                :aria-label="$t('storefront.nav.menu')"
+                @click="mobileMenuOpen = true"
+              >
+                <Icon
+                  name="lucide:menu"
+                  class="w-5 h-5"
+                />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ══ Category rail ════════════════════════════════════════════ -->
+        <div class="hidden md:block border-t border-[var(--kw-line-soft)] relative">
+          <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <button
+              v-show="navCanScrollStart"
+              type="button"
+              class="absolute start-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-[var(--kw-surface)] border border-[var(--kw-line)] flex items-center justify-center text-[var(--kw-ink-soft)] hover:text-[var(--kw-pink-deep)] shadow-sm"
+              :aria-label="$t('storefront.nav.previous')"
+              @click="scrollNav(-1)"
+            >
+              <Icon
+                name="lucide:chevron-left"
+                class="w-4 h-4 rtl:rotate-180"
+              />
+            </button>
+
+            <nav
+              ref="navScroller"
+              class="flex items-stretch gap-1 overflow-x-auto kw-hide-scroll h-12"
+              @scroll="syncNavArrows"
+            >
+              <NuxtLink
+                to="/products"
+                class="flex items-center px-3.5 text-sm font-extrabold whitespace-nowrap transition-colors border-b-[3px]"
+                :class="$route.path === '/products'
+                  ? 'text-[var(--kw-pink-deep)] border-[var(--kw-pink)]'
+                  : 'text-[var(--kw-ink)] border-transparent hover:text-[var(--kw-pink-deep)]'"
+              >
+                {{ storefrontContent.nav.shop }}
+              </NuxtLink>
+
+              <div
+                v-for="cat in rootCategories"
+                :key="cat.id"
+                class="group relative flex items-stretch"
+              >
                 <NuxtLink
-                  to="/"
-                  class="text-sm font-black px-4 py-2 rounded-full border-2 transition-all"
-                  :class="$route.path === '/' ? 'bg-amber-400 text-amber-900 border-amber-300 shadow-[0_3px_0_0_#d97706] -translate-y-0.5' : 'text-stone-600 border-transparent hover:bg-violet-50 hover:border-violet-200 hover:-translate-y-0.5'"
-                >{{ storefrontContent.nav.home }}</NuxtLink>
-
-                <NuxtLink
-                  to="/products"
-                  class="text-sm font-black px-4 py-2 rounded-full border-2 transition-all"
-                  :class="$route.path === '/products' ? 'bg-amber-400 text-amber-900 border-amber-300 shadow-[0_3px_0_0_#d97706] -translate-y-0.5' : 'text-stone-600 border-transparent hover:bg-violet-50 hover:border-violet-200 hover:-translate-y-0.5'"
-                >{{ storefrontContent.nav.shop }}</NuxtLink>
-
-                <!-- Categories Dropdown -->
-                <div class="relative group flex items-center">
-                  <button class="text-sm font-black px-4 py-2 rounded-full border-2 border-transparent text-stone-600 hover:bg-violet-50 hover:border-violet-200 hover:-translate-y-0.5 transition-all flex items-center gap-1">
-                    {{ storefrontContent.nav.categories || 'Categories' }}
-                    <Icon name="lucide:chevron-down" class="w-3.5 h-3.5" />
-                  </button>
-                  <div class="absolute top-full left-0 mt-2 w-52 bg-white border-3 border-violet-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-2xl overflow-hidden">
-                    <NuxtLink
-                      v-for="cat in tenantCategories"
-                      :key="cat.id"
-                      :to="`/category/${cat.slug}`"
-                      class="block px-4 py-3 text-sm font-bold text-stone-700 hover:bg-violet-50 hover:text-violet-700 transition-colors border-b border-violet-50 last:border-0"
-                    >{{ categoryDisplayTitle(cat) }}</NuxtLink>
-                  </div>
-                </div>
-
-                <NuxtLink
-                  to="/contact"
-                  class="text-sm font-black px-4 py-2 rounded-full border-2 transition-all"
-                  :class="$route.path === '/contact' ? 'bg-amber-400 text-amber-900 border-amber-300 shadow-[0_3px_0_0_#d97706] -translate-y-0.5' : 'text-stone-600 border-transparent hover:bg-violet-50 hover:border-violet-200 hover:-translate-y-0.5'"
-                >{{ storefrontContent.nav.contact }}</NuxtLink>
-              </nav>
-
-              <div class="h-7 w-px bg-violet-100 hidden lg:block" />
-
-              <!-- Icon Actions -->
-              <div class="flex items-center gap-2">
-                <LocaleSwitcher class="hidden lg:inline-flex" />
-
-                <!-- Wishlist -->
-                <button
-                  class="relative h-10 w-10 flex items-center justify-center text-stone-500 hover:text-violet-600 hover:bg-violet-50 rounded-full border-2 border-transparent hover:border-violet-200 hover:-translate-y-0.5 transition-all"
-                  :title="storefrontContent.header.wishlistTitle"
-                  @click="navigateTo('/wishlist')"
+                  :to="`/category/${cat.slug}`"
+                  class="flex items-center gap-1 px-3.5 text-sm font-extrabold whitespace-nowrap text-[var(--kw-ink)] hover:text-[var(--kw-pink-deep)] transition-colors border-b-[3px] border-transparent group-hover:border-[var(--kw-pink)]"
                 >
-                  <Icon name="lucide:heart" class="w-5 h-5" />
-                  <ClientOnly>
-                    <span
-                      v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-pink-500 text-[10px] font-black text-white absolute -top-0.5 -right-0.5"
-                    >{{ favorites.count.value }}</span>
-                  </ClientOnly>
-                </button>
-
-                <!-- Cart -->
-                <NuxtLink
-                  v-if="storeSettings?.cartEnabled !== false"
-                  to="/cart"
-                  class="relative h-11 flex items-center justify-center px-5 rounded-full bg-violet-600 text-white font-black text-sm shadow-[0_4px_0_0_#4c1d95] hover:-translate-y-0.5 active:translate-y-1 active:shadow-none transition-all gap-2"
-                >
-                  <Icon name="lucide:shopping-bag" class="w-4 h-4" />
-                  <ClientOnly>
-                    <span v-if="cartStore.itemCount > 0" class="bg-amber-400 text-amber-900 rounded-full w-5 h-5 flex items-center justify-center text-xs font-black">{{ cartStore.itemCount }}</span>
-                  </ClientOnly>
+                  {{ cat.title }}
+                  <Icon
+                    v-if="childrenOf(cat.id).length"
+                    name="lucide:chevron-down"
+                    class="w-3.5 h-3.5 opacity-60"
+                  />
                 </NuxtLink>
 
-                <!-- Hamburger -->
-                <button class="lg:hidden p-2 rounded-full hover:bg-violet-50 transition-colors" @click="mobileMenuOpen = true">
-                  <Icon name="lucide:menu" class="w-5 h-5 text-stone-700" />
-                </button>
+                <div
+                  v-if="childrenOf(cat.id).length"
+                  class="kw-card absolute top-full start-0 mt-1 w-60 p-2 opacity-0 invisible translate-y-1 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-200 z-50"
+                >
+                  <NuxtLink
+                    v-for="child in childrenOf(cat.id)"
+                    :key="child.id"
+                    :to="`/category/${child.slug}`"
+                    class="flex items-center justify-between gap-2 px-3 py-2.5 rounded-2xl text-sm font-bold text-[var(--kw-ink)] hover:bg-[var(--kw-pink-soft)] hover:text-[var(--kw-pink-deep)] transition-colors"
+                  >
+                    {{ child.title }}
+                    <span
+                      v-if="child._count?.products"
+                      class="text-[11px] font-extrabold text-[var(--kw-ink-faint)]"
+                    >{{ child._count.products }}</span>
+                  </NuxtLink>
+                </div>
               </div>
-            </div>
+
+              <NuxtLink
+                to="/contact"
+                class="flex items-center px-3.5 text-sm font-extrabold whitespace-nowrap transition-colors border-b-[3px]"
+                :class="$route.path === '/contact'
+                  ? 'text-[var(--kw-pink-deep)] border-[var(--kw-pink)]'
+                  : 'text-[var(--kw-ink)] border-transparent hover:text-[var(--kw-pink-deep)]'"
+              >
+                {{ storefrontContent.nav.contact }}
+              </NuxtLink>
+            </nav>
+
+            <button
+              v-show="navCanScrollEnd"
+              type="button"
+              class="absolute end-0 top-1/2 -translate-y-1/2 z-20 w-8 h-8 rounded-full bg-[var(--kw-surface)] border border-[var(--kw-line)] flex items-center justify-center text-[var(--kw-ink-soft)] hover:text-[var(--kw-pink-deep)] shadow-sm"
+              :aria-label="$t('storefront.nav.next')"
+              @click="scrollNav(1)"
+            >
+              <Icon
+                name="lucide:chevron-right"
+                class="w-4 h-4 rtl:rotate-180"
+              />
+            </button>
           </div>
         </div>
       </header>
 
-      <!-- Mobile Drawer -->
+      <!-- ══ Mobile drawer ══════════════════════════════════════════════ -->
       <Teleport to="body">
-        <Transition name="fade">
-          <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
+        <Transition name="kw-fade">
+          <div
+            v-if="mobileMenuOpen"
+            class="fixed inset-0 bg-[#4A2E4D]/45 z-[60]"
+            @click="mobileMenuOpen = false"
+          />
         </Transition>
-        <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-[#fffbf0] z-[61] shadow-2xl flex flex-col overflow-y-auto border-r-4 border-violet-200">
-            <div class="flex items-center justify-between px-5 py-4 border-b-3 border-violet-100">
-              <span class="text-lg font-black text-stone-900" style="font-family: 'Fredoka', sans-serif">{{ tenantName }}</span>
-              <button class="p-1.5 rounded-full bg-violet-50 text-stone-600" @click="mobileMenuOpen = false">
-                <Icon name="lucide:x" class="w-5 h-5" />
+        <Transition name="kw-slide">
+          <div
+            v-if="mobileMenuOpen"
+            class="kw-theme fixed top-0 start-0 bottom-0 w-[86%] max-w-xs bg-[var(--kw-cream)] z-[61] shadow-2xl flex flex-col overflow-y-auto"
+          >
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[var(--kw-line)]">
+              <span class="kw-display text-lg">{{ tenantName }}</span>
+              <button
+                class="kw-icon-btn w-9 h-9"
+                :aria-label="$t('storefront.nav.closeMenu')"
+                @click="mobileMenuOpen = false"
+              >
+                <Icon
+                  name="lucide:x"
+                  class="w-5 h-5"
+                />
               </button>
             </div>
 
-            <div class="px-4 py-3">
+            <div class="px-4 py-4">
               <div class="relative">
                 <input
                   v-model="searchQuery"
                   type="text"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search...'"
-                  class="w-full border-3 border-violet-200 bg-white rounded-full py-2.5 pl-4 pr-10 text-sm text-stone-900 outline-none focus:border-violet-400"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  :placeholder="storefrontContent.search.placeholder"
+                  class="kw-field pe-11"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-violet-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                <div v-show="isSearchDropdownOpen" class="absolute top-full left-0 right-0 mt-1 bg-white border-2 border-violet-100 shadow-xl z-50 rounded-2xl overflow-hidden pointer-events-auto">
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-stone-500">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-stone-500">No products found.</div>
-                  <div v-else class="flex flex-col">
-                    <NuxtLink
-                      v-for="product in visibleSearchResults"
-                      :key="product.id"
-                      :to="'/product/' + product.slug"
-                      class="flex items-center gap-3 px-4 py-3 hover:bg-violet-50 transition-colors border-b border-violet-50 last:border-0"
-                      @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
-                    >
-                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-xl" />
-                      <div class="flex-1 min-w-0">
-                        <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-violet-600 font-black">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
-                      </div>
-                    </NuxtLink>
+                <Icon
+                  name="lucide:search"
+                  class="w-4 h-4 text-[var(--kw-ink-faint)] absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none"
+                />
+                <div
+                  v-show="isSearchDropdownOpen"
+                  class="kw-card absolute top-[calc(100%+8px)] inset-x-0 z-50 p-1.5"
+                >
+                  <div
+                    v-if="searchLoading"
+                    class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
+                  >
+                    {{ storefrontContent.search.searching }}
                   </div>
+                  <div
+                    v-else-if="searchResults.length === 0"
+                    class="px-4 py-3 text-sm font-semibold text-[var(--kw-ink-soft)]"
+                  >
+                    {{ storefrontContent.search.noResults }}
+                  </div>
+                  <NuxtLink
+                    v-for="product in visibleSearchResults"
+                    v-else
+                    :key="product.id"
+                    :to="'/product/' + product.slug"
+                    class="flex items-center gap-3 px-3 py-2.5 rounded-2xl hover:bg-[var(--kw-pink-soft)] transition-colors"
+                    @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
+                  >
+                    <img
+                      :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'"
+                      class="w-10 h-10 object-cover kw-blob"
+                      :alt="product.title"
+                    >
+                    <div class="flex-1 min-w-0">
+                      <div class="text-sm font-bold truncate">
+                        {{ product.title }}
+                      </div>
+                      <div class="text-xs kw-num text-[var(--kw-pink-deep)]">
+                        {{ formatCurrency(product.effectivePrice ?? product.price) }}
+                      </div>
+                    </div>
+                  </NuxtLink>
                 </div>
               </div>
             </div>
 
-            <nav class="flex flex-col px-4 py-2 gap-1">
-              <NuxtLink to="/" class="py-3 px-3 text-sm font-black text-stone-700 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-colors border-b-2 border-violet-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="py-3 px-3 text-sm font-black text-stone-700 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-colors border-b-2 border-violet-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
-              <NuxtLink to="/contact" class="py-3 px-3 text-sm font-black text-stone-700 hover:text-violet-700 hover:bg-violet-50 rounded-xl transition-colors border-b-2 border-violet-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
+            <nav class="flex flex-col px-4 gap-1">
+              <NuxtLink
+                to="/"
+                class="py-3 px-3 rounded-2xl text-sm font-extrabold hover:bg-[var(--kw-pink-soft)] transition-colors"
+                @click="mobileMenuOpen = false"
+              >
+                {{ storefrontContent.nav.home }}
+              </NuxtLink>
+              <NuxtLink
+                to="/products"
+                class="py-3 px-3 rounded-2xl text-sm font-extrabold hover:bg-[var(--kw-pink-soft)] transition-colors"
+                @click="mobileMenuOpen = false"
+              >
+                {{ storefrontContent.nav.shop }}
+              </NuxtLink>
+              <NuxtLink
+                to="/contact"
+                class="py-3 px-3 rounded-2xl text-sm font-extrabold hover:bg-[var(--kw-pink-soft)] transition-colors"
+                @click="mobileMenuOpen = false"
+              >
+                {{ storefrontContent.nav.contact }}
+              </NuxtLink>
             </nav>
 
-            <div v-if="tenantCategories && tenantCategories.length" class="px-4 py-3">
-  <button
-    type="button"
-    class="w-full flex items-center justify-between text-left"
-    @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
-  >
-    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-      {{ storefrontContent.nav.categories || 'Categories' }}
-    </h4>
-    <Icon
-      name="lucide:chevron-down"
-      class="w-4 h-4 text-slate-400 transition-transform"
-      :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
-    />
-  </button>
-  <div v-show="mobileCategoriesDropdownOpen" class="flex flex-col gap-1">
-    <NuxtLink
-      v-for="cat in tenantCategories"
-      :key="cat.id"
-      :to="'/category/' + cat.slug"
-      class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
-      @click="mobileMenuOpen = false"
-    >
-      {{ categoryDisplayTitle(cat) }}
-    </NuxtLink>
-  </div>
-</div>
+            <div
+              v-if="tenantCategories && tenantCategories.length"
+              class="px-4 py-3"
+            >
+              <button
+                type="button"
+                class="w-full flex items-center justify-between text-start py-2"
+                @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
+              >
+                <span class="kw-kicker">{{ storefrontContent.nav.categories || 'Categories' }}</span>
+                <Icon
+                  name="lucide:chevron-down"
+                  class="w-4 h-4 text-[var(--kw-ink-faint)] transition-transform"
+                  :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
+                />
+              </button>
+              <div
+                v-show="mobileCategoriesDropdownOpen"
+                class="flex flex-col gap-1 pt-1"
+              >
+                <NuxtLink
+                  v-for="cat in tenantCategories"
+                  :key="cat.id"
+                  :to="'/category/' + cat.slug"
+                  class="py-2 px-3 rounded-2xl text-sm font-bold text-[var(--kw-ink-soft)] hover:bg-[var(--kw-pink-soft)] hover:text-[var(--kw-pink-deep)] transition-colors"
+                  :class="cat.parentId ? 'ms-3' : ''"
+                  @click="mobileMenuOpen = false"
+                >
+                  {{ cat.title }}
+                </NuxtLink>
+              </div>
+            </div>
 
-            <div class="mt-auto px-4 py-4 border-t-2 border-violet-100">
+            <div class="mt-auto px-4 py-4 border-t border-[var(--kw-line)]">
+              <div class="flex items-center justify-between gap-3 mb-3">
+                <LocaleSwitcher show-labels />
+              </div>
               <NuxtLink
                 v-if="storeSettings?.cartEnabled !== false"
                 to="/cart"
-                class="flex items-center justify-center gap-2 w-full py-3 bg-violet-600 text-white font-black rounded-full shadow-[0_4px_0_0_#4c1d95] active:translate-y-1 active:shadow-none transition-all"
+                class="kw-btn w-full"
                 @click="mobileMenuOpen = false"
               >
-                <Icon name="lucide:shopping-bag" class="w-5 h-5" />
-                Cart
-                <span v-if="cartStore.itemCount > 0" class="bg-amber-400 text-amber-900 rounded-full w-5 h-5 flex items-center justify-center text-xs font-black">{{ cartStore.itemCount }}</span>
+                <Icon
+                  name="lucide:shopping-bag"
+                  class="w-5 h-5"
+                />
+                {{ storefrontContent.cart.title }}
+                <span
+                  v-if="cartStore.itemCount > 0"
+                  class="min-w-[1.3rem] h-[1.3rem] px-1 rounded-full bg-white/95 text-[var(--kw-ink)] text-[11px] font-extrabold flex items-center justify-center"
+                >{{ cartStore.itemCount }}</span>
               </NuxtLink>
             </div>
           </div>
         </Transition>
       </Teleport>
 
-      <!-- Main Content -->
       <main class="flex-grow">
         <slot />
       </main>
 
-      <!-- Footer Wave -->
-      <div class="w-full overflow-hidden leading-none bg-[#fffbf0]">
-        <svg viewBox="0 0 1200 60" preserveAspectRatio="none" class="w-full h-8 md:h-12 fill-[#1e1b4b]">
-          <path d="M0,0 C300,60 900,0 1200,40 L1200,60 L0,60 Z" />
-        </svg>
-      </div>
+      <!-- ══ Pre-footer candy band (babyshop's newsletter slot) ═════════ -->
+      <section
+        v-if="!hideNavigation"
+        class="kw-sprinkles kw-scallop relative overflow-hidden"
+        style="background: linear-gradient(135deg, var(--kw-lilac-soft), var(--kw-pink-soft) 55%, var(--kw-lemon-soft));
+               --kw-scallop-fill: #3B2440"
+      >
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-14 md:py-20 relative">
+          <div class="max-w-2xl">
+            <p class="kw-kicker mb-3">
+              {{ storefrontContent.footer.contact }}
+            </p>
+            <h2 class="kw-display text-3xl md:text-[2.6rem] mb-4">
+              {{ storefrontContent.home.welcomeTo(tenantName) }}
+            </h2>
+            <p class="kw-lede mb-8">
+              {{ storefrontContent.cart.empty.subtitle }}
+            </p>
+            <div class="flex flex-wrap items-center gap-3">
+              <NuxtLink
+                to="/products"
+                class="kw-btn kw-btn-lg"
+              >
+                {{ storefrontContent.cart.empty.cta }}
+                <Icon
+                  name="lucide:arrow-right"
+                  class="w-4 h-4 rtl:rotate-180"
+                />
+              </NuxtLink>
+              <a
+                v-for="info in socialContactInfosWithHref"
+                :key="info.id"
+                :href="info.href"
+                class="kw-icon-btn"
+                :title="info.label || kindDef(info.kind).iconName"
+                :target="isExternalHref(info.href) ? '_blank' : undefined"
+                :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
+              >
+                <Icon
+                  :name="kindDef(info.kind).iconName"
+                  class="w-4 h-4"
+                />
+              </a>
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <!-- Footer -->
-      <footer class="bg-[#1e1b4b] text-violet-200 pt-12 pb-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-            <!-- Brand -->
-            <div class="col-span-1 md:col-span-1">
-              <h3 class="text-amber-400 text-2xl font-black mb-5 tracking-tight" style="font-family: 'Fredoka', sans-serif">{{ tenantName }}</h3>
-              <ul v-if="primaryContactInfos.length" class="space-y-3 text-sm">
-                <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
-                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4 text-amber-400 mt-0.5 flex-shrink-0" />
+      <!-- ══ Footer ═════════════════════════════════════════════════════ -->
+      <footer class="bg-[#3B2440] text-[#E9D9EE] pt-16 pb-9">
+        <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-10 mb-12">
+            <div class="md:col-span-2">
+              <h3 class="kw-display text-2xl !text-white mb-5">
+                {{ tenantName }}
+              </h3>
+              <ul
+                v-if="primaryContactInfos.length"
+                class="space-y-3 text-sm"
+              >
+                <li
+                  v-for="info in primaryContactInfos"
+                  :key="info.id"
+                  class="flex items-start gap-3"
+                >
+                  <span class="w-7 h-7 rounded-full bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                    <Icon
+                      :name="kindDef(info.kind).iconName"
+                      class="w-3.5 h-3.5 text-[var(--kw-lemon)]"
+                    />
+                  </span>
                   <a
                     v-if="hrefFor(info)"
                     :href="hrefFor(info)!"
-                    class="hover:text-white transition-colors font-medium"
+                    class="font-semibold hover:text-white transition-colors pt-1"
                     :target="isExternalHref(hrefFor(info)!) ? '_blank' : undefined"
                     :rel="isExternalHref(hrefFor(info)!) ? 'noopener noreferrer' : undefined"
                   >{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</a>
-                  <span v-else class="font-medium">{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
+                  <span
+                    v-else
+                    class="font-semibold pt-1"
+                  >{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
                 </li>
               </ul>
-              <div v-if="socialContactInfosWithHref.length" class="flex flex-wrap gap-3 mt-6">
-                <a
-                  v-for="info in socialContactInfosWithHref"
-                  :key="info.id"
-                  :href="info.href"
-                  class="h-10 w-10 rounded-full bg-violet-800 border-2 border-violet-600 flex items-center justify-center hover:bg-amber-400 hover:border-amber-300 hover:text-amber-900 hover:-translate-y-0.5 shadow-[0_3px_0_0_#312e81] hover:shadow-[0_3px_0_0_#d97706] active:translate-y-0.5 active:shadow-none transition-all text-violet-300"
-                  :target="isExternalHref(info.href) ? '_blank' : undefined"
-                  :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
-                >
-                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5" />
-                </a>
-              </div>
             </div>
 
-            <!-- Links -->
-            <div>
-              <h4 class="text-white font-black text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-amber-400 inline-block"></span>
+            <div v-if="legalLinks.contact.enabled">
+              <h4 class="kw-kicker !text-[var(--kw-sky)] mb-5">
                 {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.contactUs }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.aboutUs }}</a></li>
+                <li>
+                  <NuxtLink
+                    :to="legalLinks.contact.path"
+                    class="font-semibold hover:text-white transition-colors"
+                  >
+                    {{ storefrontContent.footer.contactUs }}
+                  </NuxtLink>
+                </li>
               </ul>
             </div>
-            <div>
-              <h4 class="text-white font-black text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-pink-400 inline-block"></span>
+
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
+              <h4 class="kw-kicker !text-[var(--kw-mint)] mb-5">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.termsOfService }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.returnPolicy }}</a></li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="text-white font-black text-sm uppercase tracking-wider mb-5 flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span>
-                {{ storefrontContent.footer.help }}
-              </h4>
-              <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.faq }}</a></li>
-                <li><a href="#" class="hover:text-white hover:translate-x-1 inline-flex transition-all font-medium">{{ storefrontContent.footer.shippingInfo }}</a></li>
+                <li v-if="legalLinks.terms.enabled">
+                  <NuxtLink
+                    :to="legalLinks.terms.path"
+                    class="font-semibold hover:text-white transition-colors"
+                  >
+                    {{ storefrontContent.footer.termsOfService }}
+                  </NuxtLink>
+                </li>
+                <li v-if="legalLinks.privacy.enabled">
+                  <NuxtLink
+                    :to="legalLinks.privacy.path"
+                    class="font-semibold hover:text-white transition-colors"
+                  >
+                    {{ storefrontContent.footer.privacyPolicy }}
+                  </NuxtLink>
+                </li>
+                <li v-if="legalLinks.returns.enabled">
+                  <NuxtLink
+                    :to="legalLinks.returns.path"
+                    class="font-semibold hover:text-white transition-colors"
+                  >
+                    {{ storefrontContent.footer.returnPolicy }}
+                  </NuxtLink>
+                </li>
               </ul>
             </div>
           </div>
 
-          <div class="pt-8 border-t border-violet-800 text-center text-sm font-bold text-violet-500">
-            {{ storefrontContent.footer.copyright(tenantName) }}
+          <div class="pt-7 border-t border-white/10 flex flex-col sm:flex-row items-center justify-between gap-3 text-sm font-semibold text-[#B79EC0]">
+            <span>{{ storefrontContent.footer.copyright(tenantName) }}</span>
+            <StorefrontSharedPoweredBy />
           </div>
         </div>
       </footer>
@@ -442,8 +736,9 @@ const props = defineProps<{
 </template>
 
 <style scoped>
-.fade-enter-active, .fade-leave-active { transition: opacity 0.25s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
-.slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
-.slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+.kw-fade-enter-active, .kw-fade-leave-active { transition: opacity .25s ease; }
+.kw-fade-enter-from, .kw-fade-leave-to { opacity: 0; }
+.kw-slide-enter-active, .kw-slide-leave-active { transition: transform .32s cubic-bezier(.34, 1.4, .64, 1); }
+.kw-slide-enter-from, .kw-slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .kw-slide-enter-from, [dir='rtl'] .kw-slide-leave-to { transform: translateX(100%); }
 </style>

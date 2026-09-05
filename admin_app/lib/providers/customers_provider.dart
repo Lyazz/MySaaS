@@ -158,7 +158,7 @@ class CustomersNotifier extends Notifier<CustomersState> {
     }
   }
 
-  Future<void> createCustomer({
+  Future<Customer> createCustomer({
     required String name,
     required String phone,
     String? email,
@@ -181,7 +181,7 @@ class CustomersNotifier extends Notifier<CustomersState> {
       final api = ref.read(apiProvider);
       final repo = CustomerRepository(api);
 
-      await repo.createCustomer({
+      final created = await repo.createCustomer({
         'name': trimmedName,
         'phone': trimmedPhone,
         'email': (email ?? '').trim().isEmpty ? null : email!.trim(),
@@ -190,6 +190,7 @@ class CustomersNotifier extends Notifier<CustomersState> {
       });
 
       await fetchCustomers(search: state.search, page: 1, limit: state.limit);
+      return created;
     } catch (e) {
       state = state.copyWith(isLoading: false, error: _formatApiError(e));
       rethrow;

@@ -15,7 +15,9 @@ BoxDecoration _decorationOf(WidgetTester tester, Finder root) {
 }
 
 Text _textOf(WidgetTester tester, Finder root, String text) {
-  return tester.widget<Text>(find.descendant(of: root, matching: find.text(text)));
+  return tester.widget<Text>(
+    find.descendant(of: root, matching: find.text(text)),
+  );
 }
 
 void main() {
@@ -43,17 +45,11 @@ void main() {
       const Color(0xFF4338CA),
     );
 
-    expect(UiBadge.backgroundColor(UiBadgeTone.teal), const Color(0xFFF0FDFA));
-    expect(UiBadge.foregroundColor(UiBadgeTone.teal), const Color(0xFF0F766E));
+    expect(UiBadge.backgroundColor(UiBadgeTone.lime), const Color(0xFFF7FEE7));
+    expect(UiBadge.foregroundColor(UiBadgeTone.lime), const Color(0xFF4D7C0F));
 
-    expect(
-      UiBadge.backgroundColor(UiBadgeTone.amber),
-      const Color(0xFFFFFBEB),
-    );
-    expect(
-      UiBadge.foregroundColor(UiBadgeTone.amber),
-      const Color(0xFFB45309),
-    );
+    expect(UiBadge.backgroundColor(UiBadgeTone.amber), const Color(0xFFFFFBEB));
+    expect(UiBadge.foregroundColor(UiBadgeTone.amber), const Color(0xFFB45309));
 
     expect(UiBadge.backgroundColor(UiBadgeTone.red), const Color(0xFFFEF2F2));
     expect(UiBadge.foregroundColor(UiBadgeTone.red), const Color(0xFFB91C1C));
@@ -103,7 +99,7 @@ void main() {
     await pump(const OrderStatusBadge(status: 'shipped'));
     expect(
       _decorationOf(tester, find.byType(OrderStatusBadge)).color,
-      UiBadge.backgroundColor(UiBadgeTone.teal),
+      UiBadge.backgroundColor(UiBadgeTone.lime),
     );
 
     await pump(const PurchaseStatusBadge(status: 'received'));
@@ -115,7 +111,7 @@ void main() {
     await pump(const SaleTypeBadge(type: 'pos'));
     expect(
       _decorationOf(tester, find.byType(SaleTypeBadge)).color,
-      UiBadge.backgroundColor(UiBadgeTone.teal),
+      UiBadge.backgroundColor(UiBadgeTone.lime),
     );
 
     await pump(const ActiveBadge(isActive: true));

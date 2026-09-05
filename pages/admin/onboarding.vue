@@ -1,728 +1,428 @@
 <template>
-  <div class="max-w-4xl mx-auto">
-    <div class="mb-8">
-      <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
-        {{ t('admin.pages.onboarding.title') }}
-      </h2>
-      <p class="mt-1" style="color: var(--text-secondary)">
-        {{ t('admin.pages.onboarding.subtitle') }}
-      </p>
-    </div>
-
-    <div
-      v-if="loading"
-      class="rounded-xl p-8" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-    >
-      <div class="flex items-center gap-3" style="color: var(--text-secondary)">
-        <div class="inline-block animate-spin rounded-full h-5 w-5 border-b-2 [border-color:var(--brand)]" />
-        <span>{{ t('admin.pages.onboarding.loadingSettings') }}</span>
-      </div>
-    </div>
-
-    <div
-      v-else
-      class="space-y-6"
-    >
-      <!-- Progress -->
-      <div class="rounded-xl p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-        <div class="flex items-center justify-between mb-4">
-          <p class="text-sm font-medium" style="color: var(--text-secondary)">
-            {{ t('admin.pages.onboarding.progress.stepOf', { current: step + 1, total: steps.length }) }}
-          </p>
-          <p class="text-sm" style="color: var(--text-tertiary)">
-            {{ steps[step] }}
-          </p>
-        </div>
-        <div class="h-2 rounded-full overflow-hidden" style="background: var(--surface-3)">
-          <div
-            class="h-2 [background:var(--brand)] transition-all"
-            :style="{ width: `${progressPercent}%` }"
-          />
-        </div>
+  <div class="flex h-screen flex-col bg-admin">
+    <!-- Header -->
+    <header class="flex shrink-0 items-center justify-between gap-4 border-b border-line px-4 py-3 surface-1 sm:px-6">
+      <div class="flex min-w-0 items-center gap-3">
+        <SaaSLogo class="h-6 w-auto shrink-0" />
+        <span class="hidden truncate text-sm text-tertiary sm:block">{{ t('admin.pages.onboarding.title') }}</span>
       </div>
 
-      <!-- Step content -->
-      <div class="rounded-xl p-6" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-        <!-- Brand -->
-        <div
-          v-if="step === 0"
-          class="space-y-4"
-        >
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-            {{ t('admin.pages.onboarding.brand.title') }}
-          </h3>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.brand.pickColor') }}</label>
-              <input
-                v-model="form.primaryColor"
-                type="color"
-                class="h-12 w-full rounded-lg"
-                style="border: 1px solid var(--surface-border); background: var(--surface-2)"
-              >
-            </div>
-            <div>
-              <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.brand.hexValue') }}</label>
-              <input
-                v-model="form.primaryColor"
-                type="text"
-                placeholder="#4F46E5"
-                class="ui-input w-full px-3 py-2"
-              >
-              <p class="mt-1 text-xs" style="color: var(--text-muted)">
-                {{ t('admin.pages.onboarding.brand.example', { value: '#4F46E5' }) }}
-              </p>
-            </div>
-          </div>
-          <div class="rounded-lg p-4" style="border: 1px solid var(--surface-border)">
-            <p class="text-sm mb-2" style="color: var(--text-secondary)">
-              {{ t('admin.pages.onboarding.brand.preview') }}
-            </p>
-            <button
-              type="button"
-              class="px-4 py-2 rounded-lg text-white font-medium"
-              :style="{ backgroundColor: form.primaryColor }"
-            >
-              {{ t('admin.pages.onboarding.brand.primaryButton') }}
-            </button>
-          </div>
-        </div>
-
-        <!-- Template -->
-        <div
-          v-else-if="step === 1"
-          class="space-y-4"
-        >
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-            {{ t('admin.pages.onboarding.template.title') }}
-          </h3>
-          <p class="text-sm" style="color: var(--text-tertiary)">
-            Sélectionnez le template à appliquer à votre boutique.
-          </p>
-
-           <!-- Thumbnails Grid -->
-           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              <div
-                v-for="tpl in templates"
-                :key="tpl.key"
-                class="group relative rounded-xl border-2 cursor-pointer transition-all duration-200 flex flex-col overflow-hidden"
-                :class="form.templateKey === tpl.key ? '[border-color:var(--brand)] ring-4 [--tw-ring-color:var(--brand)]/20 shadow-md' : ''"
-                :style="form.templateKey !== tpl.key ? 'background: var(--surface-2); border-color: var(--surface-border)' : 'background: var(--surface-2)'"
-                @click="form.templateKey = tpl.key"
-              >
-                 <!-- Style Swatch Preview -->
-                 <div
-                   class="relative w-full border-b overflow-hidden flex flex-col"
-                   style="height: 200px;"
-                   :style="{ background: tpl.bg, borderColor: tpl.border }"
-                 >
-                   <!-- Top accent strip -->
-                   <div class="h-1 w-full shrink-0" :style="{ background: tpl.color }"></div>
-
-                   <!-- Mock product card (centered) -->
-                   <div class="flex-1 flex items-center justify-center p-4">
-                     <div
-                       class="w-full max-w-[140px] overflow-hidden shadow-sm"
-                       :style="{ background: tpl.cardBg, borderRadius: tpl.radius, border: `1px solid ${tpl.border}` }"
-                     >
-                       <!-- Image zone -->
-                       <div
-                         class="w-full flex items-center justify-center text-3xl"
-                         style="height: 80px;"
-                         :style="{ background: tpl.imgBg }"
-                       >
-                         {{ tpl.emoji }}
-                       </div>
-                       <!-- Text body -->
-                       <div class="px-2.5 py-2" :style="{ fontFamily: tpl.fontStyle }">
-                         <p class="text-[11px] font-semibold leading-tight truncate" :style="{ color: tpl.textColor }">
-                           {{ tpl.sampleDesc }}
-                         </p>
-                         <p class="text-[11px] mt-0.5 font-bold" :style="{ color: tpl.color }">
-                           {{ tpl.samplePrice }}
-                         </p>
-                         <!-- Mini button -->
-                         <div
-                           class="mt-2 w-full text-center text-[9px] font-bold py-1 leading-none"
-                           :style="{ background: tpl.color, color: tpl.btnText, borderRadius: tpl.radius }"
-                         >
-                           BUY
-                         </div>
-                       </div>
-                     </div>
-                   </div>
-
-                   <!-- Hover overlay with Prévisualiser button -->
-                   <div class="absolute inset-0 z-10 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none flex flex-col justify-end p-3">
-                     <NuxtLink
-                       :to="`/admin/preview?template=${tpl.key}`"
-                       target="_blank"
-                       class="pointer-events-auto py-2 px-4 backdrop-blur-sm font-medium text-sm rounded-lg shadow flex items-center justify-center gap-2 transform translate-y-3 group-hover:translate-y-0 transition-all duration-300" style="background: var(--surface-2); color: var(--text-primary); border: 1px solid var(--surface-border)"
-                       @click.stop
-                     >
-                       <Icon name="lucide:external-link" class="w-4 h-4" />
-                       Prévisualiser
-                     </NuxtLink>
-                   </div>
-                 </div>
-
-                 <!-- Template Identity Footer -->
-                 <div class="p-3 flex flex-col gap-2" style="background: var(--surface-3); border-top: 1px solid var(--surface-border)">
-                   <div class="flex items-center justify-between">
-                     <span class="font-bold text-sm" :class="tpl.fontClass" style="color: var(--text-primary)">{{ tpl.label }}</span>
-                     <div v-if="form.templateKey === tpl.key" class="[color:rgba(var(--brand-rgb)/0.85)]">
-                       <Icon name="lucide:check-circle-2" class="w-5 h-5" />
-                     </div>
-                   </div>
-                   <div class="flex flex-col gap-0.5">
-                     <p class="text-[11px] font-medium leading-snug" style="color: var(--text-secondary)">{{ tpl.storeTypes }}</p>
-                     <p class="text-[11px] leading-snug" style="color: var(--text-tertiary)">{{ tpl.description }}</p>
-                   </div>
-                   <!-- Color + font pills -->
-                   <div class="flex items-center gap-1.5 flex-wrap">
-                     <span
-                       class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium border"
-                       :style="{ borderColor: tpl.color + '40', background: tpl.color + '12', color: tpl.color }"
-                     >
-                       <span class="w-2 h-2 rounded-full inline-block" :style="{ background: tpl.color }"></span>
-                       {{ tpl.color.toUpperCase() }}
-                     </span>
-                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium" style="background: var(--surface-1); border: 1px solid var(--surface-border); color: var(--text-tertiary)">
-                       <Icon name="lucide:type" class="w-2.5 h-2.5" />
-                       {{ tpl.fontName }}
-                     </span>
-                   </div>
-                 </div>
-              </div>
-           </div>
-        </div>
-
-        <!-- Language + Font -->
-        <div
-          v-else-if="step === 2"
-          class="space-y-4"
-        >
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-            {{ t('admin.pages.onboarding.language.title') }}
-          </h3>
-          <div>
-            <label class="ui-label block mb-1">{{ t('admin.pages.onboarding.language.label') }}</label>
-            <BaseSelect
-              v-model="form.language"
-            >
-              <option
-                v-for="l in languages"
-                :key="l.key"
-                :value="l.key"
-              >
-                {{ l.label }}
-              </option>
-            </BaseSelect>
-            <p class="mt-1 text-xs" style="color: var(--text-muted)">
-              {{ t('admin.pages.onboarding.language.rtlHint') }}
-            </p>
-          </div>
-        </div>
-
-        <!-- Summary -->
-        <div
-          v-else
-          class="space-y-4"
-        >
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
-            {{ t('admin.pages.onboarding.summary.title') }}
-          </h3>
-
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
-              <p class="text-sm" style="color: var(--text-tertiary)">
-                {{ t('admin.pages.onboarding.summary.cards.template') }}
-              </p>
-              <p class="font-semibold" style="color: var(--text-primary)">
-                {{ form.templateKey }}
-              </p>
-            </div>
-            <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
-              <p class="text-sm" style="color: var(--text-tertiary)">
-                {{ t('admin.pages.onboarding.summary.cards.primaryColor') }}
-              </p>
-              <div class="flex items-center gap-3">
-                <div
-                  class="h-6 w-6 rounded"
-                  :style="{ backgroundColor: form.primaryColor }"
-                />
-                <p class="font-semibold" style="color: var(--text-primary)">
-                  {{ form.primaryColor }}
-                </p>
-              </div>
-            </div>
-            <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
-              <p class="text-sm" style="color: var(--text-tertiary)">
-                {{ t('admin.pages.onboarding.summary.cards.language') }}
-              </p>
-              <p class="font-semibold" style="color: var(--text-primary)">
-                {{ form.language }}
-              </p>
-            </div>
-          </div>
-
-          <div class="rounded-xl p-4" style="border: 1px solid var(--surface-border)">
-            <div class="flex items-center justify-between gap-3 mb-3">
-              <p class="font-medium" style="color: var(--text-primary)">
-                {{ t('admin.pages.onboarding.summary.aiTitle') }}
-              </p>
-              <button
-                type="button"
-                class="ui-btn ui-btn--secondary px-3 py-1.5 text-sm"
-                :disabled="summaryLoading"
-                @click="loadSummary"
-              >
-                {{ summaryLoading ? t('admin.pages.onboarding.summary.generating') : t('admin.pages.onboarding.summary.generate') }}
-              </button>
-            </div>
-            <textarea
-              v-model="summaryMarkdown"
-              rows="10"
-              class="ui-input w-full font-mono text-xs p-3"
-              :placeholder="t('admin.pages.onboarding.summary.placeholder')"
-            />
-            <div class="mt-3 flex items-center justify-end gap-2">
-              <button
-                type="button"
-                class="px-3 py-2 rounded-lg text-sm font-medium [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-white disabled:opacity-50"
-                :disabled="!summaryMarkdown"
-                @click="copySummary"
-              >
-                {{ t('admin.common.copy') }}
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div
-          v-if="error"
-          class="mt-4 rounded-lg bg-red-50 border border-red-200 p-3 text-sm text-red-800"
-        >
-          {{ error }}
-        </div>
-      </div>
-
-      <!-- Actions -->
-      <div class="flex items-center justify-between">
+      <div class="flex items-center gap-2">
         <button
           type="button"
-          class="ui-btn ui-btn--secondary px-4 py-2 disabled:opacity-50"
-          :disabled="step === 0 || saving"
-          @click="step--"
+          class="rounded-lg px-3 py-1.5 text-mini font-medium text-tertiary hover:text-primary bg-hover"
+          :disabled="saving"
+          @click="finishLater"
         >
-          {{ t('admin.common.back') }}
+          {{ t('admin.pages.onboarding.finishLater') }}
         </button>
-
-        <div class="flex items-center gap-3">
-          <button
-            v-if="step < steps.length - 1"
-            type="button"
-            class="px-4 py-2 rounded-lg [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] text-white font-medium disabled:opacity-50"
-            :disabled="saving"
-            @click="nextStep"
-          >
-            {{ t('admin.common.next') }}
-          </button>
-
-          <button
-            v-else
-            type="button"
-            class="px-4 py-2 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium disabled:opacity-50"
-            :disabled="saving"
-            @click="finish"
-          >
-            {{ saving ? t('admin.common.saving') : t('admin.pages.onboarding.saveFinish') }}
-          </button>
-        </div>
+        <button
+          type="button"
+          class="rounded-lg px-2.5 py-1.5 text-mini font-medium text-tertiary hover:text-primary bg-hover xl:hidden"
+          :aria-pressed="showPreviewOnMobile"
+          @click="showPreviewOnMobile = !showPreviewOnMobile"
+        >
+          <Icon name="lucide:eye" class="h-4 w-4" />
+        </button>
       </div>
+    </header>
+
+    <div v-if="loading" class="flex flex-1 items-center justify-center">
+      <div class="flex items-center gap-3 text-secondary">
+        <div class="h-5 w-5 animate-spin rounded-full border-2 border-transparent [border-bottom-color:var(--brand)]" />
+        <span class="text-sm">{{ t('admin.pages.onboarding.loadingSettings') }}</span>
+      </div>
+    </div>
+
+    <div v-else class="flex min-h-0 flex-1">
+      <!-- Step rail -->
+      <aside class="hidden w-60 shrink-0 overflow-y-auto border-e border-line p-4 surface-1 lg:block">
+        <AdminOnboardingRail
+          :steps="railSteps"
+          :current="step"
+          :furthest="furthest"
+          @go="goTo"
+        />
+      </aside>
+
+      <!-- Question panel -->
+      <main
+        class="flex min-w-0 flex-1 flex-col"
+        :class="showPreviewOnMobile ? 'hidden xl:flex' : 'flex'"
+      >
+        <div class="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-8">
+          <div class="mx-auto w-full max-w-xl">
+            <!-- Compact progress for viewports without the rail -->
+            <div class="mb-6 lg:hidden">
+              <div class="mb-2 flex items-center justify-between">
+                <p class="text-mini font-medium text-secondary">
+                  {{ t('admin.pages.onboarding.progress.stepOf', { current: step + 1, total: STEP_KEYS.length }) }}
+                </p>
+                <p class="text-mini text-tertiary">{{ railSteps[step].label }}</p>
+              </div>
+              <div class="h-1.5 overflow-hidden rounded-full surface-3">
+                <div
+                  class="h-full rounded-full transition-all duration-300"
+                  :style="{ width: `${((step + 1) / STEP_KEYS.length) * 100}%`, background: 'var(--brand)' }"
+                />
+              </div>
+            </div>
+
+            <Transition name="onboarding-step" mode="out-in">
+              <div :key="step">
+                <AdminOnboardingStepIdentity v-if="step === 0" v-model="draft" />
+                <AdminOnboardingStepTemplate v-else-if="step === 1" v-model="draft" />
+                <AdminOnboardingStepBrandColor v-else-if="step === 2" v-model="draft" />
+                <AdminOnboardingStepFirstProduct v-else-if="step === 3" v-model="draft" />
+                <AdminOnboardingStepDelivery v-else-if="step === 4" v-model="draft" />
+                <AdminOnboardingStepPublish
+                  v-else
+                  :draft="draft"
+                  :slug="slug"
+                  :published="published"
+                  :missing="missingToPublish"
+                  @fix="goToStepKey"
+                />
+              </div>
+            </Transition>
+
+            <p v-if="error" class="ui-error mt-4">{{ error }}</p>
+          </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="shrink-0 border-t border-line px-4 py-3 surface-1 sm:px-8">
+          <div class="mx-auto flex w-full max-w-xl items-center justify-between gap-3">
+            <UiButton variant="secondary" size="sm" :disabled="step === 0 || saving" @click="back">
+              {{ t('admin.common.back') }}
+            </UiButton>
+
+            <UiButton
+              v-if="step < STEP_KEYS.length - 1"
+              size="sm"
+              :loading="saving"
+              :disabled="!canAdvance"
+              @click="next"
+            >
+              {{ t('admin.common.next') }}
+            </UiButton>
+
+            <UiButton
+              v-else-if="!published"
+              size="sm"
+              :loading="saving"
+              :disabled="missingToPublish.length > 0"
+              @click="publish"
+            >
+              {{ t('admin.pages.onboarding.publish.cta') }}
+            </UiButton>
+
+            <UiButton v-else size="sm" @click="goToDashboard">
+              {{ t('admin.pages.onboarding.done.ctaDashboard') }}
+            </UiButton>
+          </div>
+        </div>
+      </main>
+
+      <!-- Live preview -->
+      <aside
+        class="min-w-0 shrink-0 border-s border-line p-4 surface-1 xl:flex xl:w-[46%] xl:max-w-3xl"
+        :class="showPreviewOnMobile ? 'flex flex-1 border-s-0' : 'hidden'"
+      >
+        <AdminOnboardingPreview class="w-full" :draft="previewDraft" :slug="slug" />
+      </aside>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import BaseSelect from '~/components/ui/BaseSelect.vue'
+import SaaSLogo from '~/components/branding/SaaSLogo.vue'
+import type { OnboardingDraft } from '~/components/admin/onboarding/types'
 
 definePageMeta({
   middleware: 'auth',
-  layout: 'admin',
+  // No admin chrome: the wizard is the whole screen, and the sidebar it would
+  // otherwise sit inside links to pages the store cannot use yet.
+  layout: false,
   titleKey: 'admin.pages.onboarding.metaTitle'
 })
 
+const STEP_KEYS = ['storeInfo', 'template', 'brandColor', 'firstProduct', 'delivery', 'publish'] as const
+type StepKey = (typeof STEP_KEYS)[number]
+
+const { t } = useI18n({ useScope: 'global' })
 const authStore = useAuthStore()
-const { t, setLocale } = useI18n({ useScope: 'global' })
+const route = useRoute()
 
 const loading = ref(true)
 const saving = ref(false)
 const error = ref('')
-
 const step = ref(0)
-const steps = computed(() => ([
-  t('admin.pages.onboarding.steps.brand'),
-  t('admin.pages.onboarding.steps.template'),
-  t('admin.pages.onboarding.steps.language'),
-  t('admin.pages.onboarding.steps.summary')
-]))
-const progressPercent = computed(() => Math.round(((step.value + 1) / steps.value.length) * 100))
+const furthest = ref(0)
+const published = ref(false)
+const slug = ref('')
+const showPreviewOnMobile = ref(false)
+const serverMissing = ref<string[]>([])
 
-const templates = computed(() => [
-  { 
-    key: 'classic',
-    label: 'Classic',
-    description: t('admin.appearanceSettingsForm.templates.options.classic.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.classic.storeTypes'),
-    icon: 'lucide:layout-grid',
-    fontClass: 'font-serif',
-    fontName: 'Alice',
-    fontStyle: "'Alice', serif",
-    color: '#0f172a',
-    bg: '#f8fafc',
-    cardBg: '#ffffff',
-    imgBg: 'linear-gradient(135deg,#e2e8f0,#cbd5e1)',
-    border: '#e2e8f0',
-    textColor: '#0f172a',
-    subColor: '#64748b',
-    btnText: '#ffffff',
-    radius: '4px',
-    emoji: '🖼️',
-    sampleDesc: 'Élégant & intemporel',
-    samplePrice: '189 €',
-  },
-  { 
-    key: 'modern',
-    label: 'Modern',
-    description: t('admin.appearanceSettingsForm.templates.options.modern.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.modern.storeTypes'),
-    icon: 'lucide:layout-template',
-    fontClass: 'font-sans',
-    fontName: 'Outfit',
-    fontStyle: "'Outfit', ui-sans-serif, system-ui, sans-serif",
-    color: '#0d9488',
-    bg: '#f8fafc',
-    cardBg: '#ffffff',
-    imgBg: 'linear-gradient(135deg,#ccfbf1,#99f6e4)',
-    border: '#e2e8f0',
-    textColor: '#475569',
-    subColor: '#64748b',
-    btnText: '#ffffff',
-    radius: '8px',
-    emoji: '🛍️',
-    sampleDesc: 'Minimaliste & moderne',
-    samplePrice: '129 €',
-  },
-  { 
-    key: 'street',
-    label: 'Street',
-    description: t('admin.appearanceSettingsForm.templates.options.street.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.street.storeTypes'),
-    icon: 'lucide:zap',
-    fontClass: 'font-street',
-    fontName: 'Anton',
-    fontStyle: "'Anton', sans-serif",
-    color: '#FACC15',
-    bg: '#ffffff',
-    cardBg: '#ffffff',
-    imgBg: 'linear-gradient(135deg,#fef9c3,#fde68a)',
-    border: '#FACC15',
-    textColor: '#000000',
-    subColor: '#374151',
-    btnText: '#000000',
-    radius: '0px',
-    emoji: '👟',
-    sampleDesc: 'Limited drop',
-    samplePrice: '99 €',
-  },
-  { 
-    key: 'cozy',
-    label: 'Cozy',
-    description: t('admin.appearanceSettingsForm.templates.options.cozy.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.cozy.storeTypes'),
-    icon: 'lucide:coffee',
-    fontClass: 'font-cozy',
-    fontName: 'Nunito',
-    fontStyle: "'Nunito', sans-serif",
-    color: '#A4C3B2',
-    bg: '#F5F2EA',
-    cardBg: '#F5F2EA',
-    imgBg: 'linear-gradient(135deg,#d1fae5,#bbf7d0)',
-    border: '#e8f0eb',
-    textColor: '#475569',
-    subColor: '#6b7280',
-    btnText: '#ffffff',
-    radius: '16px',
-    emoji: '🕯️',
-    sampleDesc: 'Doux & chaleureux',
-    samplePrice: '24 €',
-  },
-  { 
-    key: 'cyber',
-    label: 'Cyber',
-    description: t('admin.appearanceSettingsForm.templates.options.cyber.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.cyber.storeTypes'),
-    icon: 'lucide:cpu',
-    fontClass: 'font-cyber',
-    fontName: 'Orbitron',
-    fontStyle: "'Orbitron', sans-serif",
-    color: '#F43F5E',
-    bg: '#0d0515',
-    cardBg: '#1a0a2e',
-    imgBg: 'linear-gradient(135deg,#2d1b5e,#1a0a2e)',
-    border: '#F43F5E',
-    textColor: '#e9d5ff',
-    subColor: '#c084fc',
-    btnText: '#ffffff',
-    radius: '4px',
-    emoji: '🤖',
-    sampleDesc: 'Next-gen tech',
-    samplePrice: '499 €',
-  },
-  { 
-    key: 'stationnery',
-    label: 'Stationery',
-    description: t('admin.appearanceSettingsForm.templates.options.stationnery.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.stationnery.storeTypes'),
-    icon: 'lucide:pen-tool',
-    fontClass: 'font-stationery',
-    fontName: 'Merriweather',
-    fontStyle: "'Merriweather', 'Playfair Display', serif",
-    color: '#334155',
-    bg: '#fdfbf7',
-    cardBg: '#fdfbf7',
-    imgBg: 'linear-gradient(135deg,#f8fafc,#e2e8f0)',
-    border: '#cbd5e1',
-    textColor: '#1e293b',
-    subColor: '#64748b',
-    btnText: '#fdfbf7',
-    radius: '2px',
-    emoji: '📓',
-    sampleDesc: 'Élégance papeterie',
-    samplePrice: '18 €',
-  },
-  { 
-    key: 'food',
-    label: 'Food',
-    description: t('admin.appearanceSettingsForm.templates.options.food.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.food.storeTypes'),
-    icon: 'lucide:utensils',
-    fontClass: 'font-food',
-    fontName: 'Nunito',
-    fontStyle: "'Nunito', sans-serif",
-    color: '#ea580c',
-    bg: '#f5f5f4',
-    cardBg: '#ffffff',
-    imgBg: 'linear-gradient(135deg,#ffedd5,#fed7aa)',
-    border: '#e7e5e4',
-    textColor: '#292524',
-    subColor: '#78716c',
-    btnText: '#ffffff',
-    radius: '12px',
-    emoji: '🍕',
-    sampleDesc: 'Saveurs artisanales',
-    samplePrice: '14 €',
-  },
-  { 
-    key: 'wellness',
-    label: 'Wellness',
-    description: t('admin.appearanceSettingsForm.templates.options.wellness.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.wellness.storeTypes'),
-    icon: 'lucide:flower-2',
-    fontClass: 'font-wellness',
-    fontName: 'Solway',
-    fontStyle: "'Solway', ui-serif, Georgia, serif",
-    color: '#2A9D8F',
-    bg: '#f8fafc',
-    cardBg: '#ffffff',
-    imgBg: 'linear-gradient(135deg,#ccfbf1,#a7f3d0)',
-    border: '#ccfbf1',
-    textColor: '#475569',
-    subColor: '#64748b',
-    btnText: '#ffffff',
-    radius: '12px',
-    emoji: '🌿',
-    sampleDesc: 'Bio & naturel',
-    samplePrice: '22 €',
-  },
-  { 
-    key: 'playful',
-    label: 'Playful',
-    description: t('admin.appearanceSettingsForm.templates.options.playful.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.playful.storeTypes'),
-    icon: 'lucide:smile',
-    fontClass: 'font-sans',
-    fontName: 'Nunito',
-    fontStyle: "'Nunito', 'Quicksand', sans-serif",
-    color: '#9333EA',
-    bg: '#faf5ff',
-    cardBg: '#ffffff',
-    imgBg: 'linear-gradient(135deg,#f3e8ff,#e9d5ff)',
-    border: '#e9d5ff',
-    textColor: '#334155',
-    subColor: '#7c3aed',
-    btnText: '#ffffff',
-    radius: '20px',
-    emoji: '🧸',
-    sampleDesc: 'Toys & Fun',
-    samplePrice: '15 €',
-  },
-  { 
-    key: 'activewear',
-    label: 'Activewear',
-    description: t('admin.appearanceSettingsForm.templates.options.activewear.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.activewear.storeTypes'),
-    icon: 'lucide:activity',
-    fontClass: 'font-activewear',
-    fontName: 'Teko',
-    fontStyle: "'Teko', sans-serif",
-    color: '#EAB308',
-    bg: '#000000',
-    cardBg: '#111111',
-    imgBg: 'linear-gradient(135deg,#1f2937,#000000)',
-    border: '#333333',
-    textColor: '#d1d5db',
-    subColor: '#9ca3af',
-    btnText: '#000000',
-    radius: '0px',
-    emoji: '⚡',
-    sampleDesc: 'High Performance',
-    samplePrice: '89 €',
-  },
-  { 
-    key: 'chrono',
-    label: 'Chrono Luxe',
-    description: t('admin.appearanceSettingsForm.templates.options.chrono.description'),
-    storeTypes: t('admin.appearanceSettingsForm.templates.options.chrono.storeTypes'),
-    icon: 'lucide:watch',
-    fontClass: 'font-serif',
-    fontName: 'Cormorant Garamond',
-    fontStyle: "'Cormorant Garamond', serif",
-    color: '#A67C52',
-    bg: '#0E1117',
-    cardBg: '#131720',
-    imgBg: 'linear-gradient(135deg,#1A1F2E,#0B0E16)',
-    border: 'rgba(212,197,169,0.18)',
-    textColor: '#E8E0D5',
-    subColor: '#8A8070',
-    btnText: '#ffffff',
-    radius: '2px',
-    emoji: '⌚',
-    sampleDesc: 'Luxury Accessories',
-    samplePrice: '3,500 €',
-  },
-])
-const languages = computed(() => ([
-  { key: 'ar', label: `${t('i18n.locales.ar')} (AR)` },
-  { key: 'fr', label: `${t('i18n.locales.fr')} (FR)` },
-  { key: 'en', label: `${t('i18n.locales.en')} (EN)` }
-]))
-
-
-const form = reactive({
-  primaryColor: '#0d9488',
-  templateKey: 'classic',
-  language: 'fr'
+const draft = reactive<OnboardingDraft>({
+  name: authStore.user?.tenant?.name ?? '',
+  logoUrl: null,
+  description: '',
+  language: 'fr',
+  templateKey: 'modern',
+  primaryColor: '#0D9488',
+  deliveryProviders: [],
+  storePickupEnabled: false,
+  product: { name: '', price: null, imageUrl: null, createdId: null }
 })
 
-const summaryLoading = ref(false)
-const summaryMarkdown = ref('')
+const railSteps = computed(() =>
+  STEP_KEYS.map((key) => ({ key, label: t(`admin.pages.onboarding.steps.${key}`) }))
+)
+
+// A plain object so the preview's deep watcher sees every keystroke; passing the
+// reactive draft straight through would also work, but this keeps the frame's
+// contract explicit and drops fields it has no use for.
+const previewDraft = computed(() => ({
+  name: draft.name,
+  logoUrl: draft.logoUrl,
+  description: draft.description,
+  templateKey: draft.templateKey,
+  primaryColor: draft.primaryColor,
+  product: { name: draft.product.name, price: draft.product.price, imageUrl: draft.product.imageUrl }
+}))
+
+// A product typed into step 3 counts: commitStep() creates it before publish runs.
+const hasProduct = computed(() => Boolean(draft.product.createdId) || draft.product.name.trim().length > 0)
+const hasDelivery = computed(() => draft.deliveryProviders.length > 0 || draft.storePickupEnabled)
+
+/**
+ * Mirrors the server's publish requirements so the button reacts as the merchant
+ * types. The server still has the last word -- if it refuses, its answer is
+ * merged in here until the merchant changes something.
+ */
+const missingToPublish = computed(() => {
+  const missing: string[] = []
+  if (!hasProduct.value) missing.push('product')
+  if (!hasDelivery.value) missing.push('delivery')
+  for (const item of serverMissing.value) {
+    if (!missing.includes(item)) missing.push(item)
+  }
+  return missing
+})
+
+// Any edit invalidates a stale refusal -- except during the save that produced
+// it, which would otherwise wipe the server's answer before it is shown.
+watch(draft, () => { if (!saving.value) serverMissing.value = [] }, { deep: true })
+
+const canAdvance = computed(() => {
+  if (step.value === 0) return draft.name.trim().length > 0
+  if (step.value === 2) return /^#[0-9a-fA-F]{6}$/.test(draft.primaryColor)
+  return true
+})
 
 async function loadSettings() {
   loading.value = true
   error.value = ''
   try {
-    const data = await $fetch<any>('/api/admin/store-settings', {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    const [settings, checklist] = await Promise.all([
+      $fetch<any>('/api/admin/store-settings', {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      }),
+      $fetch<any>('/api/admin/store-settings/onboarding-checklist', {
+        headers: { Authorization: `Bearer ${authStore.token}` }
+      }).catch(() => null)
+    ])
 
-    form.primaryColor = data.primaryColor || form.primaryColor
-    form.templateKey = data.templateKey || form.templateKey
-    form.language = data.language || form.language
-    await setLocale(form.language as any)
+    draft.name = settings.name || draft.name
+    draft.logoUrl = settings.logoUrl ?? null
+    draft.description = settings.description ?? ''
+    draft.language = settings.language || draft.language
+    draft.templateKey = settings.templateKey || draft.templateKey
+    draft.primaryColor = settings.primaryColor || draft.primaryColor
+    draft.deliveryProviders = Array.isArray(settings.allowedDeliveryProviders)
+      ? [...settings.allowedDeliveryProviders]
+      : []
+    draft.storePickupEnabled = settings.storePickupEnabled === true
+
+    slug.value = settings.slug || ''
+    published.value = settings.isPublished === true
+    // A tenant that already has products satisfies the requirement without
+    // retyping one into the wizard.
+    if (checklist?.hasProducts) draft.product.createdId = 'existing'
+
+    const resumeAt = Number(settings.onboardingStep) || 0
+    step.value = Math.min(Math.max(resumeAt, 0), STEP_KEYS.length - 1)
+    furthest.value = step.value
+
+    // The draft banner on the storefront links straight at the publish step.
+    if (route.query.step === 'publish') goTo(STEP_KEYS.length - 1)
+
+    useState<any>('storeSettings').value = settings
   } catch (e: any) {
-    error.value = e.data?.statusMessage || t('admin.pages.onboarding.errors.loadFailed')
+    error.value = e?.data?.statusMessage || t('admin.pages.onboarding.errors.loadFailed')
   } finally {
     loading.value = false
   }
 }
 
-async function save(partial?: { isCompleted?: boolean }) {
+async function saveSettings(extra: Record<string, unknown> = {}) {
+  const updated = await $fetch<any>('/api/admin/store-settings', {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${authStore.token}` },
+    body: {
+      name: draft.name.trim(),
+      logoUrl: draft.logoUrl,
+      description: draft.description,
+      language: draft.language,
+      templateKey: draft.templateKey,
+      primaryColor: draft.primaryColor,
+      allowedDeliveryProviders: draft.deliveryProviders,
+      storePickupEnabled: draft.storePickupEnabled,
+      onboardingStep: step.value,
+      ...extra
+    }
+  })
+  useState<any>('storeSettings').value = updated
+  return updated
+}
+
+/**
+ * Creates the product the merchant typed in step 3, once. Re-entering the step
+ * and moving forward again must not leave two products behind, so the created id
+ * is remembered on the draft.
+ */
+async function createFirstProductIfNeeded() {
+  const { name, price, imageUrl, createdId } = draft.product
+  if (createdId || !name.trim()) return
+
+  const slugified = name
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .slice(0, 60)
+
+  const created = await $fetch<any>('/api/admin/products', {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${authStore.token}` },
+    body: {
+      title: name.trim(),
+      slug: `${slugified || 'produit'}-${Math.random().toString(36).slice(2, 8)}`,
+      price: Number(price) || 0,
+      stock: 0,
+      isActive: true,
+      images: imageUrl ? [imageUrl] : []
+    }
+  })
+
+  draft.product.createdId = created?.id ?? 'created'
+  serverMissing.value = serverMissing.value.filter((m) => m !== 'product')
+}
+
+async function commitStep() {
+  if (step.value === 3) await createFirstProductIfNeeded()
+  await saveSettings()
+}
+
+async function next() {
+  if (!canAdvance.value) return
   saving.value = true
   error.value = ''
   try {
-    const payload: any = {
-      primaryColor: form.primaryColor,
-      templateKey: form.templateKey,
-      language: form.language,
-      ...partial
-    }
-
-    const updated = await $fetch<any>('/api/admin/store-settings', {
-      method: 'PATCH',
-      headers: { Authorization: `Bearer ${authStore.token}` },
-      body: payload
-    })
-
-    useState<any>('storeSettings').value = updated
-    return true
+    await commitStep()
+    step.value = Math.min(step.value + 1, STEP_KEYS.length - 1)
+    furthest.value = Math.max(furthest.value, step.value)
+    await saveSettings()
   } catch (e: any) {
-    error.value = e.data?.statusMessage || t('admin.pages.onboarding.errors.saveFailed')
-    return false
+    error.value = e?.data?.statusMessage || t('admin.pages.onboarding.errors.saveFailed')
   } finally {
     saving.value = false
   }
 }
 
-async function nextStep() {
-  const ok = await save()
-  if (!ok) return
-  step.value++
+function back() {
+  step.value = Math.max(step.value - 1, 0)
 }
 
-async function finish() {
-  const ok = await save({ isCompleted: true })
-  if (!ok) return
+function goTo(index: number) {
+  if (index > furthest.value) return
+  step.value = index
+}
+
+function goToStepKey(key: string) {
+  const index = STEP_KEYS.indexOf(key === 'product' ? 'firstProduct' : (key as StepKey))
+  if (index >= 0) {
+    furthest.value = Math.max(furthest.value, index)
+    step.value = index
+  }
+}
+
+async function publish() {
+  saving.value = true
+  error.value = ''
+  try {
+    await commitStep()
+    await $fetch('/api/admin/store-settings/publish', {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+    published.value = true
+    await saveSettings({ isCompleted: true })
+    if (import.meta.client) localStorage.removeItem('tour_seen_sidebar')
+  } catch (e: any) {
+    // The server owns the requirements; if it refuses, show what it is missing
+    // rather than the local guess.
+    if (e?.data?.missing) serverMissing.value = e.data.missing
+    error.value = e?.data?.statusMessage || t('admin.pages.onboarding.errors.publishFailed')
+  } finally {
+    saving.value = false
+  }
+}
+
+async function finishLater() {
+  saving.value = true
+  try {
+    await saveSettings({ onboardingExited: true })
+  } catch {
+    // Leaving must not be blocked by a failed save; the merchant keeps whatever
+    // was already persisted and the redirect will simply bring them back.
+  } finally {
+    saving.value = false
+    await navigateTo('/admin')
+  }
+}
+
+async function goToDashboard() {
   await navigateTo('/admin')
 }
 
-async function loadSummary() {
-  summaryLoading.value = true
-  try {
-    const data = await $fetch<any>('/api/admin/store-settings/agent-summary', {
-      headers: { Authorization: `Bearer ${authStore.token}` }
-    })
-    summaryMarkdown.value = data.markdown || ''
-  } catch (e: any) {
-    error.value = e.data?.statusMessage || t('admin.pages.onboarding.errors.summaryFailed')
-  } finally {
-    summaryLoading.value = false
-  }
-}
-
-watch(
-  () => form.language,
-  async (next) => {
-    try {
-      await setLocale(next as any)
-    } catch (e) {
-      console.error('Failed to switch locale from onboarding', e)
-    }
-  }
-)
-
-async function copySummary() {
-  if (!summaryMarkdown.value) return
-  try {
-    await navigator.clipboard.writeText(summaryMarkdown.value)
-  } catch {
-    // ignore
-  }
-}
-
-onMounted(() => {
-  loadSettings()
-})
+onMounted(loadSettings)
 </script>
+
+<style scoped>
+.onboarding-step-enter-active,
+.onboarding-step-leave-active {
+  transition: opacity 180ms ease, transform 180ms ease;
+}
+
+.onboarding-step-enter-from {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.onboarding-step-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .onboarding-step-enter-active,
+  .onboarding-step-leave-active {
+    transition: none;
+  }
+}
+</style>

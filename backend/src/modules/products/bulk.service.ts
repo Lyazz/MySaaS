@@ -1,10 +1,50 @@
+import path from 'path'
+import AdmZip from 'adm-zip'
 import prisma from '../../lib/prisma'
 import { parseCsv, stringifyCsv } from '../../lib/csv'
 import { InventoryService } from '../inventory/inventory.service'
 import { ProductsService } from './products.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
 import { buildPublicUrl } from '../../lib/s3'
+import { readPublicAssetBuffer } from '../../lib/public-assets'
+import { UploadService } from '../upload/upload.service'
 import { sanitizeOptionalRichText } from '../../lib/rich-text'
+import { syncDerivedProductPrice } from './product-price-sync'
+import { mapWithConcurrency } from '../../lib/concurrency'
+
+const ARCHIVE_IMAGE_FETCH_CONCURRENCY = 6
+const ARCHIVE_IMAGE_UPLOAD_CONCURRENCY = 4
+
+export type BulkProgress = { phase: 'images' | 'rows' | 'archive'; processed: number; total: number }
+export type BulkProgressCallback = (progress: BulkProgress) => void
+
+const ARCHIVE_CSV_ENTRY = 'products.csv'
+const ARCHIVE_IMAGES_DIR = 'images'
+
+const EXT_BY_MIME: Record<string, string> = {
+    'image/png': '.png',
+    'image/jpeg': '.jpg',
+    'image/webp': '.webp'
+}
+
+const MIME_BY_EXT: Record<string, string> = {
+    '.png': 'image/png',
+    '.jpg': 'image/jpeg',
+    '.jpeg': 'image/jpeg',
+    '.webp': 'image/webp'
+}
+
+const guessImageExtension = (url: string, contentType?: string): string => {
+    if (contentType && EXT_BY_MIME[contentType.toLowerCase()]) return EXT_BY_MIME[contentType.toLowerCase()]!
+    try {
+        const pathname = /^https?:\/\//i.test(url) ? new URL(url).pathname : url
+        const ext = path.extname(pathname).toLowerCase()
+        if (ext && MIME_BY_EXT[ext]) return ext
+    } catch {
+        // ignore
+    }
+    return '.jpg'
+}
 
 type ImportSummary = {
     created: number
@@ -159,54 +199,122 @@ const buildUniqueSlug = async (tenantId: string, base: string) => {
     return `${root}-${Date.now()}`
 }
 
-const parseDelimitedValues = (raw: string): string[] => {
-    return Array.from(
-        new Set(
-            raw
-                .split('|')
-                .map((v) => v.trim())
-                .filter(Boolean)
-        )
-    )
+// Preserves position and duplicates (no dedup) — needed to keep categoryTitles[i] aligned with
+// categorySlugs[i] for the same category reference.
+const splitPipeListPositional = (raw: string): string[] =>
+    raw.trim() ? raw.split('|').map((v) => v.trim()) : []
+
+type CategoryRef = { id?: string; slug?: string; title?: string }
+
+const buildCategoryRefs = (idsCell: string, slugsCell: string, titlesCell: string): CategoryRef[] => {
+    const ids = splitPipeListPositional(idsCell)
+    const slugs = splitPipeListPositional(slugsCell)
+    const titles = splitPipeListPositional(titlesCell)
+    const length = Math.max(ids.length, slugs.length, titles.length)
+
+    const refs: CategoryRef[] = []
+    for (let i = 0; i < length; i++) {
+        const id = ids[i] || undefined
+        const slug = slugs[i] || undefined
+        const title = titles[i] || undefined
+        if (id || slug) refs.push({ id, slug, title })
+    }
+    return refs
 }
 
+const humanizeSlug = (slug: string): string => {
+    const words = slug
+        .replace(/[-_]+/g, ' ')
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+    if (words.length === 0) return slug
+    return words.map((w) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')
+}
+
+type CategoryResolution = {
+    categoryIds: string[]
+    unmatchedIds: string[]
+    unmatchedSlugs: string[]
+    createdSlugs: string[]
+}
+
+// Resolves each category reference against the *destination* tenant's categories, matching by id
+// first, then by slug. A reference with a slug that matches nothing gets a brand-new category
+// created for it (when allowCreate is true) — using the reference's title if the CSV carried one,
+// otherwise a title derived from the slug — so importing/migrating a catalog into a new store
+// doesn't require pre-creating categories by hand. A reference with only an id (no slug) can't be
+// created meaningfully and is reported as unmatched instead, same as when allowCreate is false.
 const resolveCategoryIdsForImport = async (
     tenantId: string,
-    rawIds: string[],
-    rawSlugs: string[]
-): Promise<string[]> => {
-    let resolvedByIds: string[] = []
-    if (rawIds.length > 0) {
-        const found = await prisma.category.findMany({
-            where: { tenantId, id: { in: rawIds } },
-            select: { id: true }
-        })
-        const foundSet = new Set(found.map((item) => item.id))
-        if (rawIds.some((id) => !foundSet.has(id))) {
-            throw new Error('Invalid categoryIds')
-        }
-        resolvedByIds = rawIds
-    }
+    refs: CategoryRef[],
+    allowCreate: boolean
+): Promise<CategoryResolution> => {
+    const candidateIds = Array.from(new Set(refs.map((r) => r.id).filter((v): v is string => Boolean(v))))
+    const candidateSlugs = Array.from(new Set(refs.map((r) => r.slug).filter((v): v is string => Boolean(v))))
 
-    let resolvedBySlugs: string[] = []
-    if (rawSlugs.length > 0) {
-        const found = await prisma.category.findMany({
-            where: { tenantId, slug: { in: rawSlugs } },
+    const foundById = candidateIds.length
+        ? await prisma.category.findMany({ where: { tenantId, id: { in: candidateIds } }, select: { id: true } })
+        : []
+    const idSet = new Set(foundById.map((c) => c.id))
+
+    const foundBySlug = candidateSlugs.length
+        ? await prisma.category.findMany({
+            where: { tenantId, slug: { in: candidateSlugs } },
             select: { id: true, slug: true }
         })
-        const bySlug = new Map(found.map((item) => [item.slug, item.id]))
-        if (rawSlugs.some((slug) => !bySlug.has(slug))) {
-            throw new Error('Invalid categorySlugs')
+        : []
+    const slugMap = new Map(foundBySlug.map((c) => [c.slug, c.id]))
+
+    const resolvedIds: string[] = []
+    const unmatchedIds: string[] = []
+    const unmatchedSlugs: string[] = []
+    const createdSlugs: string[] = []
+
+    for (const ref of refs) {
+        if (ref.id && idSet.has(ref.id)) {
+            resolvedIds.push(ref.id)
+            continue
         }
-        resolvedBySlugs = rawSlugs.map((slug) => bySlug.get(slug)!).filter(Boolean)
+
+        if (ref.slug) {
+            const existingId = slugMap.get(ref.slug)
+            if (existingId) {
+                resolvedIds.push(existingId)
+                continue
+            }
+
+            if (!allowCreate) {
+                unmatchedSlugs.push(ref.slug)
+                continue
+            }
+
+            const created = await prisma.category.upsert({
+                where: { tenantId_slug: { tenantId, slug: ref.slug } },
+                update: {},
+                create: { tenantId, slug: ref.slug, title: ref.title?.trim() || humanizeSlug(ref.slug) }
+            })
+            slugMap.set(ref.slug, created.id)
+            resolvedIds.push(created.id)
+            createdSlugs.push(ref.slug)
+            continue
+        }
+
+        if (ref.id) unmatchedIds.push(ref.id)
     }
 
-    return Array.from(new Set([...resolvedByIds, ...resolvedBySlugs]))
+    return {
+        categoryIds: Array.from(new Set(resolvedIds)),
+        unmatchedIds: Array.from(new Set(unmatchedIds)),
+        unmatchedSlugs: Array.from(new Set(unmatchedSlugs)),
+        createdSlugs: Array.from(new Set(createdSlugs))
+    }
 }
 
 export class BulkProductsService {
     private inventory = new InventoryService()
     private products = new ProductsService()
+    private uploads = new UploadService()
 
     async exportProductsCsv(tenantId: string, opts?: { ids?: string[] | null }) {
         const ids = opts?.ids?.filter(Boolean) ?? null
@@ -231,8 +339,10 @@ export class BulkProductsService {
             'stock',
             'categoryId',
             'categorySlug',
+            'categoryTitle',
             'categoryIds',
             'categorySlugs',
+            'categoryTitles',
             'description',
             'miniDescription',
             'images'
@@ -244,6 +354,7 @@ export class BulkProductsService {
                 .filter((category: any) => category?.id)
             const categoryIds = categories.map((category: any) => category.id)
             const categorySlugs = categories.map((category: any) => category.slug)
+            const categoryTitles = categories.map((category: any) => category.title)
 
             return {
             id: p.id,
@@ -254,8 +365,10 @@ export class BulkProductsService {
             stock: String(p.stock),
             categoryId: p.categoryId ?? '',
             categorySlug: p.category?.slug ?? '',
+            categoryTitle: p.category?.title ?? '',
             categoryIds: categoryIds.join('|'),
             categorySlugs: categorySlugs.join('|'),
+            categoryTitles: categoryTitles.join('|'),
             description: p.description ?? '',
             miniDescription: p.miniDescription ?? '',
             images: (p.images ?? []).join('|')
@@ -265,13 +378,210 @@ export class BulkProductsService {
         return stringifyCsv(header, rows)
     }
 
+    /**
+     * Export products as a downloadable ZIP archive: a products.csv plus the actual image
+     * files (fetched from S3/local storage) so the catalog can be backed up/restored with images
+     * intact, rather than relying on image URLs that may not resolve in another environment.
+     */
+    async exportProductsArchive(
+        tenantId: string,
+        opts?: { ids?: string[] | null },
+        onProgress?: BulkProgressCallback
+    ): Promise<Buffer> {
+        const ids = opts?.ids?.filter(Boolean) ?? null
+        const products = await prisma.product.findMany({
+            where: { tenantId, ...(ids && ids.length > 0 ? { id: { in: ids } } : {}) },
+            include: {
+                category: { select: { id: true, slug: true, title: true } },
+                categoryLinks: {
+                    where: { tenantId },
+                    include: { category: { select: { id: true, slug: true, title: true } } }
+                }
+            },
+            orderBy: [{ createdAt: 'desc' }, { id: 'asc' }]
+        })
+
+        const header = [
+            'id',
+            'title',
+            'slug',
+            'isActive',
+            'price',
+            'stock',
+            'categoryId',
+            'categorySlug',
+            'categoryTitle',
+            'categoryIds',
+            'categorySlugs',
+            'categoryTitles',
+            'description',
+            'miniDescription',
+            'images'
+        ]
+
+        const zip = new AdmZip()
+        const total = products.length
+        let completed = 0
+        onProgress?.({ phase: 'archive', processed: 0, total })
+
+        const rows = await mapWithConcurrency(products, ARCHIVE_IMAGE_FETCH_CONCURRENCY, async (p) => {
+            const categories = (p.categoryLinks || [])
+                .map((link: any) => link?.category)
+                .filter((category: any) => category?.id)
+            const categoryIds = categories.map((category: any) => category.id)
+            const categorySlugs = categories.map((category: any) => category.slug)
+            const categoryTitles = categories.map((category: any) => category.title)
+
+            const imageUrls = (p.images ?? []) as string[]
+            const archivedRefs: string[] = []
+
+            for (let i = 0; i < imageUrls.length; i++) {
+                const url = imageUrls[i]!
+                const asset = await readPublicAssetBuffer(url)
+                if (!asset) {
+                    // Couldn't fetch the bytes (e.g. external host down) — keep the URL so
+                    // import can still fall back to linking it directly.
+                    archivedRefs.push(url)
+                    continue
+                }
+
+                const ext = guessImageExtension(url, asset.contentType)
+                const entryName = `${ARCHIVE_IMAGES_DIR}/${p.id}/${i}${ext}`
+                zip.addFile(entryName, asset.buffer)
+                archivedRefs.push(entryName)
+            }
+
+            completed++
+            onProgress?.({ phase: 'archive', processed: completed, total })
+
+            return {
+                id: p.id,
+                title: p.title,
+                slug: p.slug,
+                isActive: p.isActive ? 'true' : 'false',
+                price: String(p.price),
+                stock: String(p.stock),
+                categoryId: p.categoryId ?? '',
+                categorySlug: p.category?.slug ?? '',
+                categoryTitle: p.category?.title ?? '',
+                categoryIds: categoryIds.join('|'),
+                categorySlugs: categorySlugs.join('|'),
+                categoryTitles: categoryTitles.join('|'),
+                description: p.description ?? '',
+                miniDescription: p.miniDescription ?? '',
+                images: archivedRefs.join('|')
+            }
+        })
+
+        zip.addFile(ARCHIVE_CSV_ENTRY, Buffer.from(stringifyCsv(header, rows), 'utf8'))
+        return zip.toBuffer()
+    }
+
+    /**
+     * Import products from a ZIP archive produced by exportProductsArchive: uploads the bundled
+     * image files to this tenant's storage, rewrites the CSV image references to the resulting
+     * URLs, then delegates to importProductsCsv for the actual create/update logic.
+     */
+    async importProductsArchive(
+        tenantId: string,
+        zipBuffer: Buffer,
+        opts?: { actorUserId?: string | null; canCreateCategories?: boolean },
+        onProgress?: BulkProgressCallback
+    ): Promise<ImportSummary> {
+        let zip: AdmZip
+        try {
+            zip = new AdmZip(zipBuffer)
+        } catch {
+            throw new Error('Invalid ZIP archive')
+        }
+
+        const entries = zip.getEntries().filter((e) => !e.isDirectory)
+        const csvEntry = entries.find((e) => e.entryName.replace(/^\/+/, '').toLowerCase() === ARCHIVE_CSV_ENTRY)
+        if (!csvEntry) throw new Error(`Archive must contain a ${ARCHIVE_CSV_ENTRY} file`)
+
+        const entryByName = new Map<string, (typeof entries)[number]>(
+            entries.map((e) => [e.entryName.replace(/^\/+/, ''), e])
+        )
+        // Cache in-flight/completed uploads by entry name so concurrent rows referencing the
+        // same bundled image only upload it once.
+        const uploadedUrlByEntry = new Map<string, Promise<string | null>>()
+        const archiveWarnings: Array<{ row: number; message: string }> = []
+
+        const csvText = csvEntry.getData().toString('utf8')
+        const parsed = parseCsv(csvText)
+
+        const totalRecords = parsed.records.length
+        let imagesProcessed = 0
+        onProgress?.({ phase: 'images', processed: 0, total: totalRecords })
+
+        await mapWithConcurrency(parsed.records, ARCHIVE_IMAGE_UPLOAD_CONCURRENCY, async (record, i) => {
+            const rowNumber = i + 2
+            const raw = (record.images ?? '').trim()
+
+            if (raw) {
+                const parts = raw.split('|').map((p) => p.trim()).filter(Boolean)
+                const resolvedParts: string[] = []
+
+                for (const part of parts) {
+                    const normalizedName = part.replace(/^\.?\/+/, '')
+                    const entry = entryByName.get(normalizedName)
+                    if (!entry) {
+                        // Not a bundled file (already a URL/path) — keep as-is for normal import handling.
+                        resolvedParts.push(part)
+                        continue
+                    }
+
+                    let uploadPromise = uploadedUrlByEntry.get(normalizedName)
+                    if (!uploadPromise) {
+                        uploadPromise = (async () => {
+                            const buffer = entry.getData()
+                            const ext = path.extname(normalizedName).toLowerCase()
+                            const mimeType = MIME_BY_EXT[ext] || 'image/jpeg'
+                            const result = await this.uploads.uploadPublicImage({
+                                tenantId,
+                                originalName: path.basename(normalizedName),
+                                mimeType,
+                                buffer
+                            })
+                            return result.url
+                        })().catch((error: any) => {
+                            archiveWarnings.push({
+                                row: rowNumber,
+                                message: `Failed to import image ${normalizedName}: ${error?.message || 'upload failed'}`
+                            })
+                            return null
+                        })
+                        uploadedUrlByEntry.set(normalizedName, uploadPromise)
+                    }
+
+                    const uploadedUrl = await uploadPromise
+                    if (uploadedUrl) resolvedParts.push(uploadedUrl)
+                }
+
+                record.images = resolvedParts.join('|')
+            }
+
+            imagesProcessed++
+            onProgress?.({ phase: 'images', processed: imagesProcessed, total: totalRecords })
+        })
+
+        const rebuiltCsv = stringifyCsv(parsed.header, parsed.records)
+        const summary = await this.importProductsCsv(tenantId, rebuiltCsv, opts, (processed, total) => {
+            onProgress?.({ phase: 'rows', processed, total })
+        })
+        summary.warnings.push(...archiveWarnings)
+        return summary
+    }
+
     async importProductsCsv(
         tenantId: string,
         csvText: string,
-        opts?: { actorUserId?: string | null }
+        opts?: { actorUserId?: string | null; canCreateCategories?: boolean },
+        onRowProgress?: (processed: number, total: number) => void
     ): Promise<ImportSummary> {
         const parsed = parseCsv(csvText)
         const summary: ImportSummary = { created: 0, updated: 0, skipped: 0, errors: [], warnings: [] }
+        const canCreateCategories = opts?.canCreateCategories ?? true
 
         const supportedColumns = new Set([
             'id',
@@ -282,8 +592,10 @@ export class BulkProductsService {
             'stock',
             'categoryId',
             'categorySlug',
+            'categoryTitle',
             'categoryIds',
             'categorySlugs',
+            'categoryTitles',
             'description',
             'miniDescription',
             'images'
@@ -335,6 +647,7 @@ export class BulkProductsService {
                 if (!id && !slug) {
                     summary.skipped++
                     summary.errors.push({ row: rowNumber, message: 'Missing id or slug' })
+                    onRowProgress?.(i + 1, parsed.records.length)
                     continue
                 }
 
@@ -349,28 +662,54 @@ export class BulkProductsService {
                     })
 
                 const categoryIds = await (async () => {
-                    const hasMultiCategoryColumns = hasColumn('categoryIds') || hasColumn('categorySlugs')
-                    const hasSingleCategoryColumns = hasColumn('categoryId') || hasColumn('categorySlug')
+                    const hasMultiCategoryColumns =
+                        hasColumn('categoryIds') || hasColumn('categorySlugs') || hasColumn('categoryTitles')
+                    const hasSingleCategoryColumns =
+                        hasColumn('categoryId') || hasColumn('categorySlug') || hasColumn('categoryTitle')
+
+                    const reportResolution = (resolution: CategoryResolution) => {
+                        if (resolution.unmatchedIds.length > 0 || resolution.unmatchedSlugs.length > 0) {
+                            const unmatched = [...resolution.unmatchedIds, ...resolution.unmatchedSlugs]
+                            summary.warnings.push({
+                                row: rowNumber,
+                                message: `Category not found in this store, skipped: ${unmatched.join(', ')}`
+                            })
+                        }
+                        if (resolution.createdSlugs.length > 0) {
+                            const label = resolution.createdSlugs.length === 1 ? 'category' : 'categories'
+                            summary.warnings.push({
+                                row: rowNumber,
+                                message: `Created new ${label} in this store: ${resolution.createdSlugs.join(', ')}`
+                            })
+                        }
+                        return resolution.categoryIds
+                    }
 
                     if (hasMultiCategoryColumns) {
                         const idsCell = (record.categoryIds ?? '').trim()
                         const slugsCell = (record.categorySlugs ?? '').trim()
-                        if (!idsCell && !slugsCell) return []
-                        return resolveCategoryIdsForImport(
-                            tenantId,
-                            idsCell ? parseDelimitedValues(idsCell) : [],
-                            slugsCell ? parseDelimitedValues(slugsCell) : []
+                        const titlesCell = (record.categoryTitles ?? '').trim()
+                        if (!idsCell && !slugsCell && !titlesCell) return []
+                        return reportResolution(
+                            await resolveCategoryIdsForImport(
+                                tenantId,
+                                buildCategoryRefs(idsCell, slugsCell, titlesCell),
+                                canCreateCategories
+                            )
                         )
                     }
 
                     if (hasSingleCategoryColumns) {
                         const categoryIdCell = (record.categoryId ?? '').trim()
                         const categorySlugCell = (record.categorySlug ?? '').trim()
-                        if (!categoryIdCell && !categorySlugCell) return []
-                        return resolveCategoryIdsForImport(
-                            tenantId,
-                            categoryIdCell ? [categoryIdCell] : [],
-                            categorySlugCell ? [categorySlugCell] : []
+                        const categoryTitleCell = (record.categoryTitle ?? '').trim()
+                        if (!categoryIdCell && !categorySlugCell && !categoryTitleCell) return []
+                        return reportResolution(
+                            await resolveCategoryIdsForImport(
+                                tenantId,
+                                buildCategoryRefs(categoryIdCell, categorySlugCell, categoryTitleCell),
+                                canCreateCategories
+                            )
                         )
                     }
 
@@ -416,6 +755,7 @@ export class BulkProductsService {
                     await this.products.createProduct(tenantId, createData)
 
                     summary.created++
+                    onRowProgress?.(i + 1, parsed.records.length)
                     continue
                 }
 
@@ -426,7 +766,6 @@ export class BulkProductsService {
                 if (miniDescription !== undefined) updateData.miniDescription = miniDescription
                 if (isActive !== null) updateData.isActive = isActive
                 if (categoryIds !== undefined) updateData.categoryIds = categoryIds
-                if (price !== null) updateData.price = price
                 if (images !== undefined) updateData.images = images ?? []
 
                 // Only allow slug change when targeting by id.
@@ -445,6 +784,20 @@ export class BulkProductsService {
                     })
                 }
 
+                if (price !== null) {
+                    // Price lives on the default (no-option) variant; Product.price is a derived cache.
+                    const defaultVariant = await prisma.productVariant.findFirst({
+                        where: { tenantId, productId: existing.id, optionValues: { none: {} } }
+                    })
+                    if (defaultVariant) {
+                        await prisma.productVariant.updateMany({
+                            where: { tenantId, id: defaultVariant.id },
+                            data: { price }
+                        })
+                        await syncDerivedProductPrice(prisma, tenantId, existing.id)
+                    }
+                }
+
                 if (stock !== null) {
                     summary.warnings.push({
                         row: rowNumber,
@@ -456,6 +809,8 @@ export class BulkProductsService {
             } catch (error: any) {
                 summary.errors.push({ row: rowNumber, message: error?.message || 'Import failed' })
             }
+
+            onRowProgress?.(i + 1, parsed.records.length)
         }
 
         return summary
@@ -465,7 +820,7 @@ export class BulkProductsService {
         tenantId: string,
         input: {
             ids: string[]
-            data: { price?: unknown; stock?: unknown; isActive?: unknown; categoryId?: unknown; categoryIds?: unknown }
+            data: { price?: unknown; stock?: unknown; isActive?: unknown; categoryId?: unknown; categoryIds?: unknown; isClearance?: unknown }
             options?: { propagatePriceToVariants?: boolean }
             actorUserId?: string | null
         }
@@ -544,6 +899,28 @@ export class BulkProductsService {
 
         await prisma.product.updateMany({ where: { tenantId, id: { in: ids } }, data: patch })
 
+        let clearanceSkippedIds: string[] = []
+        if (data.isClearance !== undefined) {
+            if (typeof data.isClearance !== 'boolean') throw new Error('isClearance must be boolean')
+
+            let targetIds = ids
+            if (data.isClearance === true) {
+                const promoActive = await prisma.product.findMany({
+                    where: { tenantId, id: { in: ids }, isPromotionActive: true },
+                    select: { id: true }
+                })
+                clearanceSkippedIds = promoActive.map((p) => p.id)
+                targetIds = ids.filter((id) => !clearanceSkippedIds.includes(id))
+            }
+
+            if (targetIds.length > 0) {
+                await prisma.product.updateMany({
+                    where: { tenantId, id: { in: targetIds } },
+                    data: { isClearance: data.isClearance }
+                })
+            }
+        }
+
         if (resolvedCategoryIds !== undefined) {
             await prisma.productCategory.deleteMany({
                 where: { tenantId, productId: { in: ids } }
@@ -570,7 +947,7 @@ export class BulkProductsService {
             })
         }
 
-        return { success: true }
+        return { success: true, clearanceSkippedIds }
     }
 
     async bulkDeleteProducts(tenantId: string, input: { ids: string[] }) {

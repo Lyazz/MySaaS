@@ -1,19 +1,23 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import '../models/admin_user.dart';
 import '../models/staff_role.dart';
 import '../providers/admin_users_provider.dart';
 import '../providers/staff_roles_provider.dart';
+import '../providers/cash_provider.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/badges/status_badges.dart';
+import '../theme/app_theme.dart';
+import '../utils/app_toasts.dart';
 
 class UsersScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -33,6 +37,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     super.initState();
     if (widget.autoFetch) {
       Future.microtask(() async {
+        await ref.read(cashProvider.notifier).fetchCashboxes();
         await ref.read(staffRolesProvider.notifier).fetchRoles();
         await ref.read(adminUsersProvider.notifier).fetchUsers();
       });
@@ -49,6 +54,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
   Widget build(BuildContext context) {
     final usersState = ref.watch(adminUsersProvider);
     final rolesState = ref.watch(staffRolesProvider);
+    final cashState = ref.watch(cashProvider);
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     final query = _searchController.text.trim().toLowerCase();
@@ -109,6 +115,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                         : () async {
                             if (_activeTab == 'users') {
                               await ref
+                                  .read(cashProvider.notifier)
+                                  .fetchCashboxes();
+                              await ref
                                   .read(adminUsersProvider.notifier)
                                   .fetchUsers();
                             } else {
@@ -127,7 +136,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                     )
                   else
                     AppButton.primary(
-                      label: 'admin.pages.users.roles.actions.addRole'.tr(),
+                      label: 'app.admin_pages_users_roles_action'.tr().tr(),
                       icon: LucideIcons.plus,
                       onPressed: () => _openCreateRole(context),
                     ),
@@ -146,6 +155,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                           ? null
                           : () async {
                               if (_activeTab == 'users') {
+                                await ref
+                                    .read(cashProvider.notifier)
+                                    .fetchCashboxes();
                                 await ref
                                     .read(adminUsersProvider.notifier)
                                     .fetchUsers();
@@ -168,7 +180,9 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                             fullWidth: true,
                           )
                         : AppButton.primary(
-                            label: 'admin.pages.users.roles.actions.addRole'.tr(),
+                            label: 'app.admin_pages_users_roles_action'
+                                .tr()
+                                .tr(),
                             icon: LucideIcons.plus,
                             onPressed: () => _openCreateRole(context),
                             fullWidth: true,
@@ -211,7 +225,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                                 .fetchUsers(includeInactive: v == true);
                           },
                   ),
-                  Text('admin.pages.users.includeInactive'.tr()),
+                  Text('app.admin_pages_users_includeinact'.tr().tr()),
                 ],
               ),
             const SizedBox(height: 12),
@@ -245,6 +259,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
                       loading: usersState.isLoading,
                       users: filteredUsers,
                       staffRoles: rolesState.roles,
+                      cashboxes: cashState.cashboxes,
                       onEdit: (u) => _openEditUser(context, u),
                       onDeactivate: (u) => _confirmDeactivate(context, u),
                     )
@@ -315,7 +330,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
       context: context,
       builder: (ctx) => AppDialog(
         title: 'admin.pages.users.actions.deactivate'.tr(),
-        description: 'admin.pages.users.hints.deactivateHint'.tr(),
+        description: 'app.admin_pages_users_hints_deacti'.tr().tr(),
         content: Text(user.email),
         secondaryLabel: 'admin.common.cancel'.tr(),
         onSecondary: () => Navigator.of(ctx).pop(false),
@@ -331,7 +346,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
   Future<void> _openCreateRole(BuildContext context) async {
     final result = await showDialog<_RoleFormResult>(
       context: context,
-      builder: (ctx) => _RoleDialog(title: 'admin.pages.users.roles.createTitle'.tr()),
+      builder: (ctx) =>
+          _RoleDialog(title: 'app.admin_pages_users_roles_create'.tr().tr()),
     );
     if (result == null) return;
     await ref
@@ -343,7 +359,7 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     final result = await showDialog<_RoleFormResult>(
       context: context,
       builder: (ctx) => _RoleDialog(
-        title: 'admin.pages.users.roles.editTitle'.tr(),
+        title: 'app.admin_pages_users_roles_editti'.tr().tr(),
         initialName: role.name,
         initialPermissions: role.permissions,
       ),
@@ -362,8 +378,8 @@ class _UsersScreenState extends ConsumerState<UsersScreen> {
     final ok = await showDialog<bool>(
       context: context,
       builder: (ctx) => AppDialog(
-        title: 'admin.confirmModal.defaults.title'.tr(),
-        description: 'admin.confirmModal.defaults.message'.tr(),
+        title: 'app.admin_confirmmodal_defaults_ti'.tr().tr(),
+        description: 'app.admin_confirmmodal_defaults_me'.tr().tr(),
         content: Text(role.name),
         secondaryLabel: 'admin.common.cancel'.tr(),
         onSecondary: () => Navigator.of(ctx).pop(false),
@@ -423,17 +439,22 @@ class _TabButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return TextButton(
       onPressed: onTap,
       style: TextButton.styleFrom(
-        backgroundColor: active ? Colors.white : Colors.transparent,
+        backgroundColor: active
+            ? (isDark ? AppColors.surface3 : Colors.white)
+            : Colors.transparent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontWeight: FontWeight.w600,
-          color: active ? const Color(0xFF0F172A) : const Color(0xFF64748B),
+          color: active
+              ? (isDark ? AppColors.textPrimary : const Color(0xFF0F172A))
+              : const Color(0xFF64748B),
         ),
       ),
     );
@@ -444,6 +465,7 @@ class _UsersTable extends StatelessWidget {
   final bool loading;
   final List<AdminUser> users;
   final List<StaffRole> staffRoles;
+  final List<dynamic> cashboxes;
   final ValueChanged<AdminUser> onEdit;
   final ValueChanged<AdminUser> onDeactivate;
 
@@ -451,6 +473,7 @@ class _UsersTable extends StatelessWidget {
     required this.loading,
     required this.users,
     required this.staffRoles,
+    required this.cashboxes,
     required this.onEdit,
     required this.onDeactivate,
   });
@@ -463,27 +486,58 @@ class _UsersTable extends StatelessWidget {
     return '—';
   }
 
+  String _cashboxName(String? cashboxId) {
+    if (cashboxId == null || cashboxId.isEmpty) return '—';
+    for (final cashbox in cashboxes) {
+      if (cashbox.id == cashboxId) return cashbox.name;
+    }
+    return '—';
+  }
+
   @override
   Widget build(BuildContext context) {
     return ResponsivePaginatedTable<AdminUser>(
       items: users,
       isLoading: loading,
       emptyState: Center(child: Text('admin.pages.users.empty'.tr())),
-      minWidth: 980,
+      minWidth: 1200,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.users.columns.email'.tr(), flex: 4),
-          _buildHeaderCell('admin.pages.users.columns.role'.tr(), flex: 2),
           _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.email'.tr(),
+            flex: 4,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.role'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            context,
             'admin.pages.users.columns.staffRole'.tr(),
             flex: 3,
           ),
-          _buildHeaderCell('admin.pages.users.columns.status'.tr(), flex: 2),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.cashbox'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.status'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            context,
+            'admin.pages.users.columns.createdAt'.tr(),
+            flex: 2,
+          ),
           Expanded(
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText('admin.common.actions'.tr()),
+              child: _headerText(context, 'admin.common.actions'.tr()),
             ),
           ),
         ],
@@ -491,7 +545,7 @@ class _UsersTable extends StatelessWidget {
       rowBuilder: (context, u, index) {
         final staffRole = u.role == 'staff' ? _roleName(u.staffRoleId) : '—';
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -519,7 +573,7 @@ class _UsersTable extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: const TextStyle(
                           fontWeight: FontWeight.w600,
-                          fontSize: 14,
+                          fontSize: 13,
                           color: Color(0xFF0F172A),
                         ),
                       ),
@@ -553,9 +607,34 @@ class _UsersTable extends StatelessWidget {
               ),
               Expanded(
                 flex: 2,
+                child: Text(
+                  _cashboxName(u.cashboxId),
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: u.cashboxId == null
+                        ? const Color(0xFF94A3B8)
+                        : const Color(0xFF475569),
+                  ),
+                ),
+              ),
+              Expanded(
+                flex: 2,
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: ActiveBadge(isActive: u.isActive),
+                ),
+              ),
+              Expanded(
+                flex: 2,
+                child: Text(
+                  u.createdAt != null
+                      ? DateFormat.yMMMd().format(u.createdAt!)
+                      : '—',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    color: Color(0xFF64748B),
+                  ),
                 ),
               ),
               Expanded(
@@ -565,17 +644,17 @@ class _UsersTable extends StatelessWidget {
                   child: Wrap(
                     spacing: 8,
                     children: [
-                      AppButton.secondary(
-                        label: 'admin.common.edit'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.edit'.tr(),
                         icon: LucideIcons.pencil,
-                        size: AppButtonSize.sm,
                         onPressed: () => onEdit(u),
                       ),
                       if (u.isActive && u.role != 'owner')
-                        IconButton(
+                        TableActionButton(
                           tooltip: 'admin.pages.users.actions.deactivate'.tr(),
                           onPressed: () => onDeactivate(u),
-                          icon: const Icon(LucideIcons.userX, size: 18),
+                          icon: LucideIcons.userX,
+                          isDanger: true,
                         ),
                     ],
                   ),
@@ -588,19 +667,25 @@ class _UsersTable extends StatelessWidget {
     );
   }
 
-  Widget _headerText(String text) {
+  Widget _headerText(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF64748B), // Slate-500
-        fontSize: 12,
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
 
-  Widget _buildHeaderCell(String text, {required int flex}) {
-    return Expanded(flex: flex, child: _headerText(text));
+  Widget _buildHeaderCell(
+    BuildContext context,
+    String text, {
+    required int flex,
+  }) {
+    return Expanded(flex: flex, child: _headerText(context, text));
   }
 }
 
@@ -626,8 +711,13 @@ class _RolesTable extends StatelessWidget {
       minWidth: 900,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.users.roles.columns.name'.tr(), flex: 5),
           _buildHeaderCell(
+            context,
+            'admin.pages.users.roles.columns.name'.tr(),
+            flex: 5,
+          ),
+          _buildHeaderCell(
+            context,
             'admin.pages.users.roles.columns.permissions'.tr(),
             flex: 2,
           ),
@@ -635,7 +725,7 @@ class _RolesTable extends StatelessWidget {
             flex: 2,
             child: Align(
               alignment: Alignment.centerRight,
-              child: _headerText('admin.common.actions'.tr()),
+              child: _headerText(context, 'admin.common.actions'.tr()),
             ),
           ),
         ],
@@ -646,7 +736,7 @@ class _RolesTable extends StatelessWidget {
           (sum, p) => sum + p.actions.length,
         );
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -655,7 +745,7 @@ class _RolesTable extends StatelessWidget {
                   r.name,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
+                    fontSize: 13,
                     color: Color(0xFF0F172A),
                   ),
                 ),
@@ -677,16 +767,15 @@ class _RolesTable extends StatelessWidget {
                   child: Wrap(
                     spacing: 8,
                     children: [
-                      AppButton.secondary(
-                        label: 'admin.common.edit'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.edit'.tr(),
                         icon: LucideIcons.pencil,
-                        size: AppButtonSize.sm,
                         onPressed: () => onEdit(r),
                       ),
-                      AppButton.danger(
-                        label: 'admin.common.delete'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.delete'.tr(),
                         icon: LucideIcons.trash2,
-                        size: AppButtonSize.sm,
+                        isDanger: true,
                         onPressed: () => onDelete(r),
                       ),
                     ],
@@ -700,19 +789,25 @@ class _RolesTable extends StatelessWidget {
     );
   }
 
-  Widget _headerText(String text) {
+  Widget _headerText(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF64748B), // Slate-500
-        fontSize: 12,
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
 
-  Widget _buildHeaderCell(String text, {required int flex}) {
-    return Expanded(flex: flex, child: _headerText(text));
+  Widget _buildHeaderCell(
+    BuildContext context,
+    String text, {
+    required int flex,
+  }) {
+    return Expanded(flex: flex, child: _headerText(context, text));
   }
 }
 
@@ -786,7 +881,7 @@ class _UserDialogState extends State<_UserDialog> {
   Widget build(BuildContext context) {
     return AppDialog(
       title: widget.title,
-      description: 'Create or update an admin/staff user for this tenant.',
+      description: 'app.create_or_update_an_admin_staf'.tr(),
       maxWidth: 720,
       content: Form(
         key: _formKey,
@@ -794,7 +889,7 @@ class _UserDialogState extends State<_UserDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             FormInput(
-              label: 'Email',
+              label: 'admin.pages.users.fields.email'.tr(),
               controller: _email,
               keyboardType: TextInputType.emailAddress,
               validator: (v) =>
@@ -802,7 +897,7 @@ class _UserDialogState extends State<_UserDialog> {
             ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'Password',
+              label: 'superAdmin.login.form.password.label'.tr(),
               controller: _password,
               obscureText: true,
               validator: (v) {
@@ -812,13 +907,19 @@ class _UserDialogState extends State<_UserDialog> {
                 return null;
               },
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             FormSelect<String>(
-              label: 'Role',
+              label: 'admin.pages.users.fields.role'.tr(),
               value: _role,
-              items: const [
-                DropdownMenuItem(value: 'staff', child: Text('Staff')),
-                DropdownMenuItem(value: 'admin', child: Text('Admin')),
+              items: [
+                DropdownMenuItem(
+                  value: 'staff',
+                  child: Text('admin.roles.staff'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'admin',
+                  child: Text('admin.roles.admin'.tr()),
+                ),
               ],
               onChanged: (v) {
                 if (v == null) return;
@@ -831,12 +932,12 @@ class _UserDialogState extends State<_UserDialog> {
             if (_role == 'staff') ...[
               const SizedBox(height: 16),
               FormSelect<String?>(
-                label: 'Staff Role',
+                label: 'admin.pages.users.fields.staffRole'.tr(),
                 value: _staffRoleId,
                 items: [
-                  const DropdownMenuItem<String?>(
+                  DropdownMenuItem<String?>(
                     value: null,
-                    child: Text('No staff role'),
+                    child: Text('app.no_staff_role'.tr()),
                   ),
                   ...widget.roles.map(
                     (r) => DropdownMenuItem<String?>(
@@ -851,7 +952,7 @@ class _UserDialogState extends State<_UserDialog> {
             if (widget.showActiveToggle) ...[
               const SizedBox(height: 8),
               SwitchListTile(
-                title: const Text('Active'),
+                title: Text('superAdmin.tenants.status.active'.tr()),
                 value: _isActive,
                 onChanged: (v) => setState(() => _isActive = v),
                 contentPadding: EdgeInsets.zero,
@@ -929,24 +1030,24 @@ class _RoleDialogState extends State<_RoleDialog> {
   Widget build(BuildContext context) {
     return AppDialog(
       title: widget.title,
-      description: 'Define a role and its permissions.',
+      description: 'app.define_a_role_and_its_permissi'.tr(),
       maxWidth: 840,
       content: Form(
         key: _formKey,
         child: Column(
           children: [
             FormInput(
-              label: 'Role name',
+              label: 'app.role_name'.tr(),
               controller: _name,
               validator: (v) => (v == null || v.trim().length < 2)
                   ? 'Name is too short'
                   : null,
             ),
             const SizedBox(height: 20),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Permissions',
+                'admin.pages.users.roles.fields.permissions'.tr(),
                 style: TextStyle(fontWeight: FontWeight.w800, fontSize: 16),
               ),
             ),
@@ -985,9 +1086,7 @@ class _RoleDialogState extends State<_RoleDialog> {
           );
         }
         if (perms.isEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Select at least one permission')),
-          );
+          AppToasts.show(context, 'app.select_at_least_one_permission'.tr());
           return;
         }
         Navigator.of(
@@ -1017,13 +1116,18 @@ class _PermissionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/suppliers_provider.dart';
 import '../models/supplier.dart';
@@ -12,6 +12,8 @@ import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
+import '../theme/app_theme.dart';
 
 class SuppliersScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -49,6 +51,11 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     final suppliersState = ref.watch(suppliersProvider);
     final suppliers = suppliersState.suppliers;
     final isMobile = MediaQuery.of(context).size.width < 800;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     final query = _searchController.text.trim().toLowerCase();
     final filteredSuppliers = query.isEmpty
@@ -68,12 +75,14 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     });
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => context.go('/suppliers/create'),
-              backgroundColor: const Color(0xFF0F172A),
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
+                LucideIcons.plus,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             )
           : null,
       body: Padding(
@@ -94,22 +103,19 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF111827), // Gray-900
+                          color: textPrimary,
                           letterSpacing: -0.5,
                         ),
                       ),
                       SizedBox(height: 4),
                       Text(
                         'admin.pages.suppliers.index.subtitle'.tr(),
-                        style: TextStyle(
-                          color: Color(0xFF6B7280),
-                          fontSize: 14,
-                        ), // Gray-500
+                        style: TextStyle(color: textMuted, fontSize: 14),
                       ),
                     ],
                   ),
                   AppButton.primary(
-                    label: 'admin.pages.suppliers.index.addSupplier'.tr(),
+                    label: 'app.admin_pages_suppliers_index_ad'.tr().tr(),
                     icon: LucideIcons.plus,
                     onPressed: () => context.go('/suppliers/create'),
                   ),
@@ -120,9 +126,10 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
 
             ResponsiveFilterBar(
               searchField: FormInput(
-                label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
+                label: 'app.admin_pages_suppliers_index_fi'.tr().tr(),
                 controller: _searchController,
-                hint: 'admin.pages.suppliers.index.filters.searchPlaceholder'.tr(),
+                hint: 'admin.pages.suppliers.index.filters.searchPlaceholder'
+                    .tr(),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 16,
                   vertical: 14,
@@ -134,20 +141,21 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                 SizedBox(
                   width: 200,
                   child: FormSelect<String>(
-                    label: 'Sort',
+                    showLabel: false,
+                    label: 'admin.pages.pos.catalog.actions.sort'.tr(),
                     value: _sortBy,
-                    contentPadding: const EdgeInsets.symmetric(
+                    contentPadding: EdgeInsets.symmetric(
                       horizontal: 16,
                       vertical: 14,
                     ),
-                    items: const [
+                    items: [
                       DropdownMenuItem(
                         value: 'name_asc',
-                        child: Text('Name A-Z'),
+                        child: Text('app.name_a_z'.tr()),
                       ),
                       DropdownMenuItem(
                         value: 'name_desc',
-                        child: Text('Name Z-A'),
+                        child: Text('app.name_z_a'.tr()),
                       ),
                     ],
                     onChanged: (value) {
@@ -167,7 +175,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
             Expanded(
               child: suppliersState.isLoading
                   ? const Center(child: CircularProgressIndicator())
-                  : _buildSuppliersTable(filteredSuppliers),
+                  : _buildSuppliersTable(filteredSuppliers, isDark: isDark),
             ),
           ],
         ),
@@ -175,7 +183,27 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     );
   }
 
-  Widget _buildSuppliersTable(List<Supplier> suppliers) {
+  Widget _buildSuppliersTable(
+    List<Supplier> suppliers, {
+    required bool isDark,
+  }) {
+    final headerTextColor = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final primaryTextColor = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final secondaryTextColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final mutedTextColor = isDark
+        ? AppColors.textMuted
+        : AppColors.lightTextMuted;
+    final avatarBgColor = isDark
+        ? AppColors.greenSurface
+        : const Color(0xFFECFDF5);
+    final avatarTextColor = isDark ? AppColors.greenText : AppColors.green;
+
     return ResponsivePaginatedTable<Supplier>(
       items: suppliers,
       minWidth: 900,
@@ -188,7 +216,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -200,7 +228,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -212,7 +240,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
             ),
@@ -224,7 +252,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 11,
-                color: Color(0xFF6B7280),
+                color: headerTextColor,
                 letterSpacing: 0.5,
               ),
               textAlign: TextAlign.end,
@@ -234,10 +262,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
       ),
       rowBuilder: (context, supplier, index) {
         return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width < 800 ? 12 : 24,
-            vertical: 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -245,30 +270,34 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
-                        color: const Color(0xFFECFDF5), // Emerald-50
-                        borderRadius: BorderRadius.circular(20),
+                        color: avatarBgColor,
+                        borderRadius: BorderRadius.circular(14),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         supplier.name.isNotEmpty
                             ? supplier.name[0].toUpperCase()
                             : '?',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF10B981), // Emerald-500
+                          color: avatarTextColor,
                         ),
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Text(
-                      supplier.name,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xFF111827), // Gray-900
-                        fontSize: 14,
+                    Expanded(
+                      child: Text(
+                        supplier.name,
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: primaryTextColor,
+                          fontSize: 13,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -284,17 +313,21 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                         padding: const EdgeInsets.only(bottom: 4),
                         child: Row(
                           children: [
-                            const Icon(
+                            Icon(
                               LucideIcons.mail,
                               size: 12,
-                              color: Color(0xFF9CA3AF),
+                              color: mutedTextColor,
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              supplier.email!,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Color(0xFF4B5563), // Gray-600
+                            Expanded(
+                              child: Text(
+                                supplier.email!,
+                                style: TextStyle(
+                                  fontSize: 13,
+                                  color: secondaryTextColor,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
@@ -303,17 +336,21 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                     if (supplier.phone != null)
                       Row(
                         children: [
-                          const Icon(
+                          Icon(
                             LucideIcons.phone,
                             size: 12,
-                            color: Color(0xFF9CA3AF),
+                            color: mutedTextColor,
                           ),
                           const SizedBox(width: 6),
-                          Text(
-                            supplier.phone!,
-                            style: const TextStyle(
-                              fontSize: 13,
-                              color: Color(0xFF4B5563), // Gray-600
+                          Expanded(
+                            child: Text(
+                              supplier.phone!,
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: secondaryTextColor,
+                              ),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ],
@@ -325,10 +362,7 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                 flex: 3,
                 child: Text(
                   supplier.address ?? '-',
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF6B7280),
-                  ),
+                  style: TextStyle(fontSize: 13, color: mutedTextColor),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -343,16 +377,16 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
                     alignment: WrapAlignment.end,
                     crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
-                      AppButton.secondary(
-                        label: 'admin.common.edit'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.edit'.tr(),
                         icon: LucideIcons.pencil,
-                        size: AppButtonSize.sm,
-                        onPressed: () => context.go('/suppliers/${supplier.id}'),
+                        onPressed: () =>
+                            context.go('/suppliers/${supplier.id}'),
                       ),
-                      AppButton.danger(
-                        label: 'admin.common.delete'.tr(),
+                      TableActionButton(
+                        tooltip: 'admin.common.delete'.tr(),
                         icon: LucideIcons.trash2,
-                        size: AppButtonSize.sm,
+                        isDanger: true,
                         onPressed: () => _confirmDelete(supplier),
                       ),
                     ],
@@ -370,9 +404,10 @@ class _SuppliersScreenState extends ConsumerState<SuppliersScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AppDialog(
-        title: 'admin.pages.suppliers.index.deleteModal.title'.tr(),
-        description: 'admin.pages.suppliers.index.deleteModal.messageWithName'
-            .tr(namedArgs: {'name': supplier.name}),
+        title: 'app.admin_pages_suppliers_index_de'.tr().tr(),
+        description: 'app.admin_pages_suppliers_index_de2'.tr().tr(
+          namedArgs: {'name': supplier.name},
+        ),
         content: Text(supplier.name),
         secondaryLabel: 'admin.common.cancel'.tr(),
         onSecondary: () => Navigator.pop(context, false),

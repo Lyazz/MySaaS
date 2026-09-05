@@ -28,8 +28,8 @@ describe('Cashboxes + Cash Sessions + Transactions', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await prisma.$transaction([
-            prisma.tenant.create({ data: { name: 'Cash Tenant A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Cash Tenant B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Cash Tenant A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Cash Tenant B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

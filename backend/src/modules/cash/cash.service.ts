@@ -113,6 +113,8 @@ const typePolicy = (type: string): { direction: 'IN' | 'OUT'; needs: Array<'cust
             return { direction: 'IN', needs: [] }
         case 'SALE_REFUND':
             return { direction: 'OUT', needs: [] }
+        case 'ORDER_PAYMENT':
+            return { direction: 'IN', needs: [] }
         case 'CUSTOMER_PAYMENT':
             return { direction: 'IN', needs: ['customer'] }
         case 'SUPPLIER_PAYMENT':
@@ -542,8 +544,14 @@ export class CashService {
             throw new CashValidationError(400, 'cashboxId is required', { code: 'CASHBOX_REQUIRED' })
         }
 
-        const cashbox = await tx.cashbox.findFirst({ where: { tenantId, id: cashboxId }, select: { id: true } })
+        const cashbox = await tx.cashbox.findFirst({ where: { tenantId, id: cashboxId }, select: { id: true, isActive: true } })
         if (!cashbox) throw new CashValidationError(404, 'Cashbox not found')
+        if (!cashbox.isActive) {
+            throw new CashValidationError(409, 'Cashbox is inactive', {
+                code: 'CASHBOX_INACTIVE',
+                meta: { cashboxId }
+            })
+        }
 
         const session = await this.requireOpenSession(tx, tenantId, cashboxId)
 

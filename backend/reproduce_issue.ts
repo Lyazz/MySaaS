@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API_URL = 'http://localhost:3000/api';
-const EMAIL = 'admin@apple.com';
+const EMAIL = 'admin@test.com';
 const PASSWORD = 'password';
 
 async function testIntegration() {

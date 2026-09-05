@@ -1,22 +1,16 @@
 <template>
-  <div>
-    <div class="mb-6">
-      <h1 class="text-2xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.settings.contact.title') }}</h1>
-      <p class="mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.settings.contact.subtitle') }}</p>
-    </div>
-
+  <SettingsShell>
     <ContactInfosForm />
-  </div>
+  </SettingsShell>
 </template>
 
 <script setup lang="ts">
 import ContactInfosForm from '~/components/admin/ContactInfosForm.vue'
+import SettingsShell from '~/components/admin/settings/SettingsShell.vue'
 
 definePageMeta({
   middleware: 'auth',
   layout: 'admin',
   titleKey: 'admin.pages.settings.contact.metaTitle'
 })
-
-const { t } = useI18n({ useScope: 'global' })
 </script>

@@ -8,57 +8,84 @@ datasource db {
 }
 
 model Tenant {
-  id          String   @id @default(uuid())
-  slug        String   @unique
-  name        String
-  isOffline   Boolean  @default(true)
-  isSuspended Boolean  @default(false)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String    @id @default(uuid())
+  slug            String    @unique
+  name            String
+  /// Offline-only is now a deliberate choice, not the birth state. Every
+  /// self-registered tenant starts on an online trial; a super admin puts a
+  /// tenant on the offline-only tier explicitly.
+  isOffline       Boolean   @default(false)
+  isSuspended     Boolean   @default(false)
+  maintenanceMode Boolean   @default(false)
+  /// Null means DRAFT: the public storefront and the public API answer 404 to
+  /// everyone but an authenticated member of this tenant. Set once, by the
+  /// merchant, from the onboarding wizard's publish step. Distinct from
+  /// isOffline, which is the offline-only tier and is super-admin controlled.
+  publishedAt     DateTime?
+  archivedAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
-  users                User[]
-  staffRoles           TenantStaffRole[]
-  staffRolePermissions TenantStaffRolePermission[]
-  customers            Customer[]
-  customerPointsLedger CustomerPointsLedger[]
-  customerPayments     CustomerPayment[]
-  cashboxes            Cashbox[]
-  cashSessions         CashSession[]
-  cashTransactions     CashTransaction[]
-  subscription         TenantSubscription?
-  payments             BillingPayment[]
-  products             Product[]
-  productBundleDeals   ProductBundleDeal[]
-  productImages        ProductImage[]
-  productOptions       ProductOption[]
-  optionValues         ProductOptionValue[]
-  variants             ProductVariant[]
-  variantValues        ProductVariantOptionValue[]
-  variantImages        ProductVariantImage[]
-  inventoryMoves       InventoryMovement[]
-  suppliers            Supplier[]
-  supplierPayments     SupplierPayment[]
-  purchaseOrders       PurchaseOrder[]
-  purchaseOrderItems   PurchaseOrderItem[]
-  categories           Category[]
-  productCategories    ProductCategory[]
-  orders               Order[]
-  orderItems           OrderItem[]
-  sales                Sale[]
-  saleItems            SaleItem[]
-  shipments            Shipment[]
-  deliveryRates        DeliveryRate[]
-  deliveryAccounts     TenantDeliveryAccount[]
-  storeSettings        StoreSettings?
-  contactInfos         TenantContactInfo[]
-  domains              TenantDomain[]
-  shipmentEvents       ShipmentEvent[]             @relation("TenantShipmentEvents")
-  integrations         TenantIntegration[]
-  metaPixels           TenantMetaPixel[]
-  productMetaPixels    ProductMetaPixel[]
-  maystroProductMaps   MaystroProductMapping[]
-  maystroOrderMaps     MaystroOrderMapping[]
-  maystroInventoryLogs MaystroInventoryEvent[]
+  users                     User[]
+  staffRoles                TenantStaffRole[]
+  staffRolePermissions      TenantStaffRolePermission[]
+  customers                 Customer[]
+  customerPointsLedger      CustomerPointsLedger[]
+  customerPayments          CustomerPayment[]
+  cashboxes                 Cashbox[]
+  cashSessions              CashSession[]
+  cashTransactions          CashTransaction[]
+  subscription              TenantSubscription?
+  payments                  BillingPayment[]
+  products                  Product[]
+  productBundleDeals        ProductBundleDeal[]
+  productImages             ProductImage[]
+  productOptions            ProductOption[]
+  optionValues              ProductOptionValue[]
+  variants                  ProductVariant[]
+  variantValues             ProductVariantOptionValue[]
+  variantImages             ProductVariantImage[]
+  inventoryMoves            InventoryMovement[]
+  suppliers                 Supplier[]
+  supplierPayments          SupplierPayment[]
+  purchaseOrders            PurchaseOrder[]
+  purchaseOrderItems        PurchaseOrderItem[]
+  categories                Category[]
+  productCategories         ProductCategory[]
+  orders                    Order[]
+  orderItems                OrderItem[]
+  sales                     Sale[]
+  saleItems                 SaleItem[]
+  salesInvoices             SalesInvoice[]
+  shipments                 Shipment[]
+  deliveryRates             DeliveryRate[]
+  deliveryCarrierRateCache  DeliveryCarrierRateCache[]
+  deliveryAccounts          TenantDeliveryAccount[]
+  storeSettings             StoreSettings?
+  contactInfos              TenantContactInfo[]
+  domains                   TenantDomain[]
+  shipmentEvents            ShipmentEvent[]             @relation("TenantShipmentEvents")
+  integrations              TenantIntegration[]
+  metaPixels                TenantMetaPixel[]
+  productMetaPixels         ProductMetaPixel[]
+  maystroProductMaps        MaystroProductMapping[]
+  maystroOrderMaps          MaystroOrderMapping[]
+  maystroInventoryLogs      MaystroInventoryEvent[]
+  licenses                  License[]
+  devices                   Device[]
+  activationRequests        DeviceActivationRequest[]
+  migrationJobs             TenantMigrationJob[]
+  notificationEvents        NotificationEvent[]
+  notificationSubscriptions NotificationSubscription[]
+  notificationDeliveries    NotificationDelivery[]
+  blacklistEntries          BlacklistEntry[]
+  idempotencyKeys           IdempotencyKey[]
+  whatsappMessages          WhatsAppMessage[]
+  promoCodes                PromoCode[]
+  promoCodeRedemptions      PromoCodeRedemption[]
+  aiDocumentJobs            AiDocumentJob[]
+  aiDocumentCorrections     AiDocumentCorrection[]
+  supplierProductAliases    SupplierProductAlias[]
 }
 
 model Cashbox {
@@ -288,37 +315,82 @@ model StoreSettings {
   defaultCashboxId String?
   defaultCashbox   Cashbox? @relation("StoreSettingsDefaultCashbox", fields: [tenantId, defaultCashboxId], references: [tenantId, id], onDelete: SetNull)
 
-  logoUrl      String? // URL of the tenant's store logo
-  faviconUrl   String? // URL of the tenant's store favicon
-  primaryColor String  @default("#0d9488") // teal-600
-  templateKey  String  @default("modern") // e.g. classic | modern
-  fontFamily   String  @default("Outfit")
-  language     String  @default("fr") // ar | fr | en
+  logoUrl       String? // URL of the tenant's store logo
+  faviconUrl    String? // URL of the tenant's store favicon
+  primaryColor  String  @default("#65A30D") // lime-600
+  useBrandColor Boolean @default(false)
+  templateKey   String  @default("modern") // e.g. classic | modern
+  fontFamily    String  @default("Outfit")
+  language      String  @default("fr") // ar | fr | en
+
+  /// Short store tagline shown in onboarding and used as the storefront's
+  /// meta-description fallback.
+  description String?
 
   announcementText      String?
   announcementScrolling Boolean @default(false)
+
+  // Merchant-facing "closed for maintenance" mode: blocks the public storefront
+  // while leaving /admin reachable so the tenant can turn it back off.
+  maintenanceMessage String?
+
+  // Storefront legal/static pages content by language (FR/EN/AR)
+  // and per-page visibility toggles for footer links.
+  legalPages Json?
 
   // Storefront homepage configuration (carousel + sections).
   // Tenant-scoped via StoreSettings. Treated as an opaque JSON blob but validated at the API layer.
   homeConfig Json?
 
-  cartEnabled     Boolean @default(true)
-  codEnabled      Boolean @default(true)
-  minimumOrderAmountDzd Int @default(1000)
+  cartEnabled           Boolean @default(true)
+  codEnabled            Boolean @default(true)
+  orderIdPrefix         String  @default("ORDR")
+  minimumOrderAmountDzd Int     @default(1000)
   hideOptionalAddress   Boolean @default(true)
-  currencyCode    String  @default("DZD") // ISO currency code
-  currencyCountry String  @default("DZ") // ISO country for flag/locale
+  currencyCode          String  @default("DZD") // ISO currency code
+  currencyCountry       String  @default("DZ") // ISO country for flag/locale
 
-  isCompleted              Boolean  @default(false)
-  allowedDeliveryProviders String[] @default(["SELF"])
-  storePickupEnabled       Boolean  @default(false)
+  /// Default markup applied to a purchase unit cost when proposing a sale price
+  /// (AI document import, and anywhere else a sale price is derived from cost).
+  /// 30 means "cost + 30%".
+  defaultMarginPercent Decimal @default(30)
 
-  loyaltyEnabled                Boolean @default(false)
-  loyaltyMinRedeemPoints        Int     @default(0)
-  loyaltyRedeemRateDzdPerPoint  Decimal @default(1)
-  loyaltyBasePoints             Decimal @default(0)
-  loyaltyMarginFactor           Decimal @default(0)
-  loyaltyPublicFormulaMode      String  @default("SUMMARY")
+  whatsappConfirmationTemplate String? // Customizable WhatsApp confirmation message template
+
+  isCompleted              Boolean   @default(false)
+  /// Resume point for the onboarding wizard, and the timestamp set when the
+  /// merchant chooses "Finish later". While isCompleted is false and
+  /// onboardingExitedAt is null the admin redirects into the wizard; once the
+  /// merchant has stepped out deliberately it stops pulling them back.
+  onboardingStep           Int       @default(0)
+  onboardingExitedAt       DateTime?
+  checklistDismissed       Boolean   @default(false)
+  allowedDeliveryProviders String[]  @default(["SELF"])
+  storePickupEnabled       Boolean   @default(false)
+
+  loyaltyEnabled               Boolean @default(false)
+  loyaltyMinRedeemPoints       Int     @default(0)
+  loyaltyRedeemRateDzdPerPoint Decimal @default(1)
+  loyaltyBasePoints            Decimal @default(0)
+  loyaltyMarginFactor          Decimal @default(0)
+  loyaltyPublicFormulaMode     String  @default("SUMMARY")
+  salesInvoiceEnabled          Boolean @default(false)
+  invoiceNumberPrefix          String  @default("INV")
+  invoiceFooterText            String?
+  invoiceShowLogo              Boolean @default(true)
+
+  // Clearance ("destockage") module settings
+  clearanceEnabled       Boolean @default(false)
+  clearanceMultiple      Int     @default(6)
+  clearanceDivisor       Int     @default(3)
+  clearanceBannerEnabled Boolean @default(false)
+  clearanceBannerText    String?
+
+  // Fraud prevention: blacklist enforcement + duplicate-order throttling at checkout
+  blacklistEnabled           Boolean @default(true)
+  duplicateOrderLimitEnabled Boolean @default(false)
+  duplicateOrderLimit        Int     @default(3)
+  duplicateOrderWindowHours  Int     @default(24)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -346,36 +418,49 @@ model TenantContactInfo {
 }
 
 model User {
-  id           String           @id @default(uuid())
-  email        String
-  passwordHash String?
-  role         String           @default("staff") // owner, admin, staff
-  isSuperAdmin Boolean          @default(false)
-  isActive     Boolean          @default(true)
+  id                 String           @id @default(uuid())
+  email              String
+  passwordHash       String?
+  role               String           @default("staff") // owner, admin, staff
+  isSuperAdmin       Boolean          @default(false)
+  isActive           Boolean          @default(true)
   tokenInvalidBefore DateTime?
-  tenantId     String
-  tenant       Tenant           @relation(fields: [tenantId], references: [id])
-  cashboxId    String?
-  cashbox      Cashbox?         @relation("UserCashbox", fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: SetNull)
-  staffRoleId  String?
-  staffRole    TenantStaffRole? @relation("StaffRoleUsers", fields: [tenantId, staffRoleId], references: [tenantId, id], onDelete: Restrict)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  /// Normalized Algerian MSISDN (213XXXXXXXXX), captured at signup. Nullable
+  /// because staff accounts are created by an owner who may not know it.
+  phone              String?
+  emailVerifiedAt    DateTime?
+  phoneVerifiedAt    DateTime?
+  tenantId           String
+  tenant             Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  cashboxId          String?
+  cashbox            Cashbox?         @relation("UserCashbox", fields: [tenantId, cashboxId], references: [tenantId, id], onDelete: SetNull)
+  staffRoleId        String?
+  staffRole          TenantStaffRole? @relation("StaffRoleUsers", fields: [tenantId, staffRoleId], references: [tenantId, id], onDelete: Restrict)
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
 
-  inventoryMovements      InventoryMovement[]
-  purchaseOrdersCreated   PurchaseOrder[]     @relation("PurchaseOrderCreatedBy")
-  salesCreated            Sale[]              @relation("SaleCreatedBy")
-  customerPointsCreated   CustomerPointsLedger[]
-  customerPaymentsCreated CustomerPayment[]   @relation("CustomerPaymentCreatedBy")
-  supplierPaymentsCreated SupplierPayment[]   @relation("SupplierPaymentCreatedBy")
-  cashSessionsOpened      CashSession[]       @relation("CashSessionOpenedBy")
-  cashSessionsClosed      CashSession[]       @relation("CashSessionClosedBy")
-  cashTransactionsCreated CashTransaction[]   @relation("CashTransactionCreatedBy")
+  inventoryMovements        InventoryMovement[]
+  purchaseOrdersCreated     PurchaseOrder[]            @relation("PurchaseOrderCreatedBy")
+  salesCreated              Sale[]                     @relation("SaleCreatedBy")
+  salesInvoicesCreated      SalesInvoice[]             @relation("SalesInvoiceCreatedBy")
+  customerPointsCreated     CustomerPointsLedger[]
+  customerPaymentsCreated   CustomerPayment[]          @relation("CustomerPaymentCreatedBy")
+  supplierPaymentsCreated   SupplierPayment[]          @relation("SupplierPaymentCreatedBy")
+  cashSessionsOpened        CashSession[]              @relation("CashSessionOpenedBy")
+  cashSessionsClosed        CashSession[]              @relation("CashSessionClosedBy")
+  cashTransactionsCreated   CashTransaction[]          @relation("CashTransactionCreatedBy")
+  notificationSubscriptions NotificationSubscription[]
+  notificationDeliveries    NotificationDelivery[]
+  blacklistEntriesCreated   BlacklistEntry[]
+  promoCodesCreated         PromoCode[]                @relation("PromoCodeCreatedBy")
 
   @@unique([tenantId, email])
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, isActive])
+  /// Cross-tenant on purpose: "forgot my password" arrives on the SaaS domain
+  /// with no tenant context, so the lookup is by phone alone.
+  @@index([phone])
   @@index([tenantId, cashboxId])
   @@index([tenantId, staffRoleId])
 }
@@ -417,13 +502,22 @@ model TenantStaffRolePermission {
   @@index([tenantId, resource])
 }
 
+/// Controls whether a product or category appears in storefront listings,
+/// navigation and search. UNLISTED entries stay reachable at their direct
+/// slug URL but never show up in any browse surface.
+enum Visibility {
+  LISTED
+  UNLISTED
+}
+
 model Category {
-  id       String  @id @default(uuid())
-  title    String
-  slug     String
-  imageUrl String?
-  tenantId String
-  tenant   Tenant  @relation(fields: [tenantId], references: [id])
+  id         String     @id @default(uuid())
+  title      String
+  slug       String
+  imageUrl   String?
+  visibility Visibility @default(LISTED)
+  tenantId   String
+  tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   parentId String?
   parent   Category?  @relation("CategoryHierarchy", fields: [tenantId, parentId], references: [tenantId, id], onDelete: SetNull)
@@ -439,6 +533,7 @@ model Category {
   @@unique([tenantId, id])
   @@index([tenantId])
   @@index([tenantId, parentId])
+  @@index([tenantId, visibility])
 }
 
 model Product {
@@ -447,6 +542,7 @@ model Product {
   slug              String
   description       String?
   miniDescription   String?
+  searchKeywords    String?
   price             Decimal @default(0)
   stock             Int     @default(0)
   lowStockThreshold Int     @default(5)
@@ -458,23 +554,27 @@ model Product {
   promotionEndDate   DateTime?
   showCountdown      Boolean   @default(false)
 
+  // Clearance ("destockage") module: tags this product as part of the tenant's clearance rule
+  isClearance Boolean @default(false)
+
   isActive      Boolean        @default(true)
+  visibility    Visibility     @default(LISTED)
   images        String[]       @default([]) // Deprecated: Use ProductImage model
   productImages ProductImage[]
 
   tenantId String
-  tenant   Tenant @relation(fields: [tenantId], references: [id])
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  categoryId String?
-  category   Category? @relation(fields: [tenantId, categoryId], references: [tenantId, id])
+  categoryId    String?
+  category      Category?         @relation(fields: [tenantId, categoryId], references: [tenantId, id])
   categoryLinks ProductCategory[]
 
   options     ProductOption[]
   variants    ProductVariant[]
   bundleDeals ProductBundleDeal[]
 
-  orderItems OrderItem[]
-  saleItems  SaleItem[]
+  orderItems      OrderItem[]
+  saleItems       SaleItem[]
   maystroMappings MaystroProductMapping[]
 
   createdAt DateTime @default(now())
@@ -485,6 +585,7 @@ model Product {
   @@unique([tenantId, slug])
   @@unique([tenantId, id])
   @@index([tenantId])
+  @@index([tenantId, visibility])
 }
 
 model ProductCategory {
@@ -639,13 +740,18 @@ model ProductVariant {
   productId String
   product   Product @relation(fields: [tenantId, productId], references: [tenantId, id], onDelete: Cascade)
 
-  sku            String   @db.VarChar(32)
-  skuLocked      Boolean  @default(false)
-  barcode        String?  @db.VarChar(32)
-  price          Decimal  @default(0)
-  compareAtPrice Decimal?
-  cost           Decimal  @default(0) // prix d'achat (latest unit cost)
-  isActive       Boolean  @default(true)
+  sku                String    @db.VarChar(32)
+  skuLocked          Boolean   @default(false)
+  barcode            String?   @db.VarChar(32)
+  price              Decimal   @default(0)
+  promotionalPrice   Decimal?
+  isPromotionActive  Boolean   @default(false)
+  promotionStartDate DateTime?
+  promotionEndDate   DateTime?
+  showCountdown      Boolean   @default(false)
+  compareAtPrice     Decimal?
+  cost               Decimal   @default(0) // prix d'achat (latest unit cost)
+  isActive           Boolean   @default(true)
 
   // Inventory
   trackInventory Boolean @default(true)
@@ -659,6 +765,7 @@ model ProductVariant {
   purchaseOrderItems PurchaseOrderItem[]
   orderItems         OrderItem[]
   saleItems          SaleItem[]
+  supplierAliases    SupplierProductAlias[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -749,11 +856,11 @@ model Sale {
   orderId String?
   order   Order?  @relation("SaleOrder", fields: [tenantId, orderId], references: [tenantId, id], onDelete: Restrict)
 
-  totalAmount Float
-  status      String @default("COMPLETED") // COMPLETED | REFUNDED (future)
-  earnedPointsTotal   Int   @default(0)
-  redeemedPointsTotal Int   @default(0)
-  redeemedAmount      Float @default(0)
+  totalAmount         Float
+  status              String @default("COMPLETED") // COMPLETED | REFUNDED (future)
+  earnedPointsTotal   Int    @default(0)
+  redeemedPointsTotal Int    @default(0)
+  redeemedAmount      Float  @default(0)
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
@@ -762,7 +869,8 @@ model Sale {
   customerPhone   String?
   customerAddress String?
 
-  notes String?
+  clientRequestId String?
+  notes           String?
 
   createdByUserId String?
   createdBy       User?   @relation("SaleCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id])
@@ -770,7 +878,7 @@ model Sale {
   items            SaleItem[]
   pointsLedger     CustomerPointsLedger[]
   movements        InventoryMovement[]
-  cashTransactions CashTransaction[]   @relation("CashTxSale")
+  cashTransactions CashTransaction[]      @relation("CashTxSale")
   customerPayments CustomerPayment[]
 
   createdAt DateTime @default(now())
@@ -778,6 +886,7 @@ model Sale {
 
   @@unique([tenantId, id])
   @@unique([tenantId, orderId])
+  @@unique([tenantId, clientRequestId])
   @@index([tenantId])
   @@index([tenantId, customerId])
 }
@@ -803,6 +912,30 @@ model SaleItem {
   @@index([tenantId, saleId])
 }
 
+model SalesInvoice {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  sourceType String // SALE | ORDER
+  sourceId   String
+
+  invoiceNumber String
+  issuedAt      DateTime @default(now())
+
+  createdByUserId String?
+  createdBy       User?   @relation("SalesInvoiceCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: Restrict)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, sourceType, sourceId])
+  @@unique([tenantId, invoiceNumber])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, issuedAt])
+}
+
 model Supplier {
   id       String @id @default(uuid())
   tenantId String
@@ -817,7 +950,9 @@ model Supplier {
 
   purchaseOrders   PurchaseOrder[]
   payments         SupplierPayment[]
-  cashTransactions CashTransaction[] @relation("CashTxSupplier")
+  cashTransactions CashTransaction[]      @relation("CashTxSupplier")
+  aiDocumentJobs   AiDocumentJob[]
+  productAliases   SupplierProductAlias[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -853,6 +988,7 @@ model PurchaseOrder {
   items            PurchaseOrderItem[]
   cashTransactions CashTransaction[]   @relation("CashTxPurchaseOrder")
   supplierPayments SupplierPayment[]
+  aiDocumentJobs   AiDocumentJob[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -888,27 +1024,146 @@ model PurchaseOrderItem {
   @@index([tenantId, variantId])
 }
 
+/// One scanned document (supplier invoice, delivery note or product catalog)
+/// pushed through Claude vision extraction. The original file lives in the
+/// private bucket; `extraction` keeps the model's verbatim output and `draft`
+/// the merchant's working copy while they review it.
+model AiDocumentJob {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  kind   String // PURCHASE_INVOICE | DELIVERY_NOTE | PRODUCT_CATALOG
+  status String @default("PENDING") // PENDING | EXTRACTING | READY | CONFIRMED | FAILED | CANCELLED
+
+  documentRef String // s3://<private>/tenants/<id>/ai-documents/... or local://
+  mimeType    String
+  /// Pages billed against the plan's monthly AI scan quota.
+  pageCount   Int    @default(1)
+
+  model        String?
+  inputTokens  Int?
+  outputTokens Int?
+  errorMessage String?
+
+  /// Verbatim structured output from the model. Never mutated after extraction.
+  extraction Json?
+  /// The merchant's working copy: lines, supplier choice, margin, per-cell review state.
+  draft      Json?
+
+  supplierId      String?
+  supplier        Supplier?      @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: SetNull)
+  purchaseOrderId String?
+  purchaseOrder   PurchaseOrder? @relation(fields: [tenantId, purchaseOrderId], references: [tenantId, id], onDelete: SetNull)
+
+  createdByUserId String?
+
+  startedAt   DateTime?
+  completedAt DateTime?
+  confirmedAt DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  corrections AiDocumentCorrection[]
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+/// Every field the merchant changed between what the model extracted and what
+/// they confirmed. Feeds accuracy reporting; the matching half of the feedback
+/// loop lives in SupplierProductAlias.
+model AiDocumentCorrection {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  jobId String
+  job   AiDocumentJob @relation(fields: [tenantId, jobId], references: [tenantId, id], onDelete: Cascade)
+
+  /// null for document-level fields (supplier, reference, totals).
+  lineIndex  Int?
+  field      String // label | quantity | unitCost | salePrice | supplierName | variantMatch | reference | total
+  aiValue    String?
+  userValue  String?
+  /// What the model claimed for that field, so accuracy can be scored per confidence band.
+  confidence Decimal?
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, jobId])
+  @@index([tenantId, field])
+}
+
+/// Remembers that a supplier's line label maps to one of our variants, so the
+/// same supplier's next invoice matches without the merchant repeating the work.
+model SupplierProductAlias {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  /// null means a store-wide alias, used when no supplier-specific row matches.
+  supplierId String?
+  supplier   Supplier? @relation(fields: [tenantId, supplierId], references: [tenantId, id], onDelete: Cascade)
+
+  /// Normalized supplier label (upper-cased, accents and punctuation stripped).
+  rawLabel  String
+  variantId String
+  variant   ProductVariant @relation(fields: [tenantId, variantId], references: [tenantId, id], onDelete: Cascade)
+
+  hitCount   Int      @default(1)
+  lastSeenAt DateTime @default(now())
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, supplierId, rawLabel])
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, variantId])
+}
+
 model Order {
-  id          String @id @default(uuid())
-  tenantId    String
-  tenant      Tenant @relation(fields: [tenantId], references: [id])
-  status      String @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
-  totalAmount Float
+  id                      String  @id @default(uuid())
+  publicId                String?
+  tenantId                String
+  tenant                  Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  status                  String  @default("PENDING") // PENDING, CONFIRMED, SHIPPED, DELIVERED, CANCELLED
+  paymentStatus           String  @default("UNPAID") // UNPAID | PARTIALLY_PAID | PAID
+  totalAmount             Float
   totalWithShippingAmount Float?
-  earnedPointsTotal   Int   @default(0)
-  redeemedPointsTotal Int   @default(0)
-  redeemedAmount      Float @default(0)
+  paidAmount              Float   @default(0)
+  earnedPointsTotal       Int     @default(0)
+  redeemedPointsTotal     Int     @default(0)
+  redeemedAmount          Float   @default(0)
+  clearanceDiscountAmount Float   @default(0)
+  clearanceBreakdown      Json?
+
+  // Promo code applied at checkout. `promoCode` keeps the literal code typed by
+  // the shopper so the order still reads correctly after the code is renamed or
+  // deleted; `promoCodeId` is null in that case.
+  promoCodeId           String?
+  promoCodeRef          PromoCode? @relation(fields: [tenantId, promoCodeId], references: [tenantId, id], onDelete: SetNull)
+  promoCode             String?
+  promoDiscountAmount   Float      @default(0)
+  promoShippingDiscount Float      @default(0)
 
   customerId String?
   customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
 
-  customerName    String
-  customerPhone   String
-  customerAddress String?
-  customerIp      String?
+  customerName            String
+  customerPhone           String
+  customerPhoneNormalized String?
+  customerAddress         String?
+  customerIp              String?
 
-  callStatus    String  @default("not_called")
+  callStatus    String    @default("not_called")
   internalNotes String?
+  readAt        DateTime?
 
   deliveryMode         String            @default("home") // home | pickup | store
   shippingProvider     ShipmentProvider?
@@ -922,21 +1177,171 @@ model Order {
   shippingNotes        String?
   shippingEtaMinDays   Int?
   shippingEtaMaxDays   Int?
-  shippingPickupPoint  Int?
+
+  // The carrier's own id for the chosen collection point, and null when the carrier has
+  // none for it — a Maystro stop desk is reached through the wilaya's center commune
+  // with no pickup_point at all. The three fields below say which point was chosen well
+  // enough to rebuild the carrier payload without asking the carrier again.
+  shippingPickupPoint        Int?
+  // 'desk' (carrier counter) or 'relay' (third-party shop). Decides Maystro's
+  // delivery_type: 2 for a desk, 3 for a relay.
+  shippingPickupPointKind    String?
+  // The commune the point itself sits in, which is not always the shopper's: a relay
+  // may be offered from a neighbouring commune, and the parcel is addressed to it.
+  shippingPickupPointCommune String?
+  // The label the shopper actually picked, kept for bordereaux and admin screens —
+  // a Maystro stop desk has no numeric id to show in their place.
+  shippingPickupPointName    String?
 
   items              OrderItem[]
   pointsLedger       CustomerPointsLedger[]
   shipments          Shipment[]
   maystroMappings    MaystroOrderMapping[]
   inventoryMovements InventoryMovement[]
-  cashTransactions   CashTransaction[]   @relation("CashTxOrder")
-  sale               Sale?               @relation("SaleOrder")
+  cashTransactions   CashTransaction[]      @relation("CashTxOrder")
+  sale               Sale?                  @relation("SaleOrder")
+  promoRedemption    PromoCodeRedemption?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  confirmationToken     String? @unique
+  confirmationTokenUsed Boolean @default(false)
+
+  // WhatsApp Cloud API confirmation. The manual wa.me flow leaves these null:
+  // only a message actually sent through the API writes here, so the reminder
+  // job never chases an order the seller confirmed by hand.
+  whatsappMessages      WhatsAppMessage[]
+  whatsappConfirmSentAt DateTime?
+  /// Reminders already sent (0, then 1 after 6h, 2 after 24h).
+  whatsappRemindersSent Int               @default(0)
+  /// When the last confirmation/reminder went out — the reminder job's clock.
+  whatsappLastMessageAt DateTime?
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, publicId])
+  @@index([tenantId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, customerPhoneNormalized])
+  @@index([tenantId, readAt])
+  @@index([tenantId, status, whatsappLastMessageAt])
+  @@index([tenantId, promoCodeId])
+}
+
+enum PromoDiscountType {
+  PERCENTAGE
+  FIXED
+  FREE_SHIPPING
+}
+
+/// Tenant-owned discount code redeemed at checkout. Codes are stored uppercase
+/// and matched case-insensitively — shoppers type them by hand.
+model PromoCode {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  code        String
+  description String?
+
+  discountType      PromoDiscountType @default(PERCENTAGE)
+  /// Percent (0-100) for PERCENTAGE, a DZD amount for FIXED, ignored for FREE_SHIPPING.
+  discountValue     Decimal           @default(0)
+  /// Caps a PERCENTAGE discount. Null means uncapped.
+  maxDiscountAmount Decimal?
+  /// The cart subtotal the code needs before it applies at all.
+  minOrderAmount    Decimal           @default(0)
+
+  startsAt DateTime?
+  endsAt   DateTime?
+  isActive Boolean   @default(true)
+
+  /// Total redemptions allowed across the store. Null means unlimited.
+  usageLimit            Int?
+  /// Redemptions allowed per phone number. Null means unlimited.
+  usageLimitPerCustomer Int?
+  /// Live counter, incremented inside the order transaction and decremented
+  /// when the order is cancelled or returned.
+  usedCount             Int  @default(0)
+
+  /// Empty arrays mean "the whole catalogue". When either is filled the discount
+  /// only ever eats the matching lines of the cart.
+  productIds  String[] @default([])
+  categoryIds String[] @default([])
+
+  createdByUserId String?
+  createdBy       User?   @relation("PromoCodeCreatedBy", fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: SetNull)
+
+  orders      Order[]
+  redemptions PromoCodeRedemption[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, code])
   @@unique([tenantId, id])
   @@index([tenantId])
+  @@index([tenantId, isActive])
+}
+
+/// One row per order that used a code. Also the per-customer usage ledger:
+/// CANCELLED rows stop counting against the limits.
+model PromoCodeRedemption {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  promoCodeId String
+  promoCode   PromoCode @relation(fields: [tenantId, promoCodeId], references: [tenantId, id], onDelete: Cascade)
+
+  orderId String
+  order   Order  @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: Cascade)
+
+  customerId              String?
+  customer                Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
+  customerPhoneNormalized String?
+
+  code             String
+  discountAmount   Float  @default(0)
+  shippingDiscount Float  @default(0)
+  /// ACTIVE | CANCELLED
+  status           String @default("ACTIVE")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, orderId])
+  @@index([tenantId])
+  @@index([tenantId, promoCodeId])
+  @@index([tenantId, promoCodeId, customerPhoneNormalized])
+}
+
+enum BlacklistType {
+  PHONE
+  CUSTOMER
+  IP
+}
+
+// Fraud prevention: entries here block matching public checkouts (see OrdersService.createPublicOrder).
+model BlacklistEntry {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  type   BlacklistType
+  value  String // normalized phone, raw IP, or Customer.id depending on type
+  reason String?
+
+  customerId String?
+  customer   Customer? @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: SetNull)
+
+  createdByUserId String?
+  createdBy       User?   @relation(fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, type, value])
+  @@index([tenantId, type])
   @@index([tenantId, customerId])
 }
 
@@ -945,13 +1350,13 @@ model Customer {
   tenantId String
   tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
-  name           String
-  phone          String
+  name            String
+  phone           String
   phoneNormalized String
-  phoneRaw       String?
-  email          String?
-  address        String?
-  openingBalance Decimal @default(0)
+  phoneRaw        String?
+  email           String?
+  address         String?
+  openingBalance  Decimal @default(0)
 
   // For future customer-auth/customer-space. Not used in MVP flows yet.
   passwordHash String?
@@ -960,7 +1365,9 @@ model Customer {
   sales            Sale[]
   pointsLedger     CustomerPointsLedger[]
   payments         CustomerPayment[]
-  cashTransactions CashTransaction[] @relation("CashTxCustomer")
+  cashTransactions CashTransaction[]      @relation("CashTxCustomer")
+  blacklistEntries BlacklistEntry[]
+  promoRedemptions PromoCodeRedemption[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1001,8 +1408,8 @@ model CustomerPointsLedger {
   customerId String
   customer   Customer @relation(fields: [tenantId, customerId], references: [tenantId, id], onDelete: Cascade)
 
-  direction CustomerPointsDirection
-  status    CustomerPointsStatus
+  direction  CustomerPointsDirection
+  status     CustomerPointsStatus
   sourceType CustomerPointsSourceType
   sourceId   String
 
@@ -1015,7 +1422,7 @@ model CustomerPointsLedger {
   order   Order?  @relation(fields: [tenantId, orderId], references: [tenantId, id], onDelete: SetNull)
 
   formulaSnapshot Json?
-  expiresAt DateTime?
+  expiresAt       DateTime?
 
   createdByUserId String?
   createdBy       User?   @relation(fields: [tenantId, createdByUserId], references: [tenantId, id], onDelete: SetNull)
@@ -1122,11 +1529,18 @@ enum MaystroSyncStatus {
 }
 
 model MaystroProductMapping {
-  id             String           @id @default(uuid())
+  id             String  @id @default(uuid())
   tenantId       String
-  tenant         Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  tenant         Tenant  @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   localProductId String
-  product        Product          @relation(fields: [tenantId, localProductId], references: [tenantId, id], onDelete: Cascade)
+  product        Product @relation(fields: [tenantId, localProductId], references: [tenantId, id], onDelete: Cascade)
+
+  /// The variant this remote product stands for, or "" when the product carries no
+  /// attributes. Maystro shows an order's product name from the catalog's
+  /// logistical_description and ignores whatever the order line says, so a variant
+  /// only reaches the picker by name if it owns a remote product. Empty string
+  /// rather than null keeps the compound unique usable with findUnique.
+  localVariantId String @default("")
 
   maystroProductId String
   maystroUuid      String?
@@ -1138,23 +1552,23 @@ model MaystroProductMapping {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  @@unique([tenantId, localProductId])
+  @@unique([tenantId, localProductId, localVariantId])
   @@unique([tenantId, maystroProductId])
   @@index([tenantId])
 }
 
 model MaystroOrderMapping {
-  id          String   @id @default(uuid())
-  tenantId    String
-  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id           String @id @default(uuid())
+  tenantId     String
+  tenant       Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   localOrderId String
-  order       Order    @relation(fields: [tenantId, localOrderId], references: [tenantId, id], onDelete: Cascade)
+  order        Order  @relation(fields: [tenantId, localOrderId], references: [tenantId, id], onDelete: Cascade)
 
-  externalId    String
+  externalId     String
   maystroOrderId String?
-  tracking      String?
-  deliveryPrice Decimal?
-  success       Boolean  @default(false)
+  tracking       String?
+  deliveryPrice  Decimal?
+  success        Boolean  @default(false)
 
   lastSyncedAt DateTime?
   lastError    String?
@@ -1168,9 +1582,9 @@ model MaystroOrderMapping {
 }
 
 model MaystroInventoryEvent {
-  id        String @id @default(uuid())
-  tenantId  String
-  tenant    Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 
   maystroProductId String?
   direction        String?
@@ -1181,6 +1595,27 @@ model MaystroInventoryEvent {
 
   @@index([tenantId])
   @@index([tenantId, createdAt])
+}
+
+/// Carrier-published prices per wilaya, cached so the admin pricing table doesn't
+/// re-quote the carrier on every visit. Building one table costs 58 API calls, and
+/// Yalidine answers that burst with 403 — see DeliveryService.getProviderLiveRatesByWilaya.
+/// Distinct from DeliveryRate, which holds the tenant's own override prices.
+model DeliveryCarrierRateCache {
+  id           String           @id @default(uuid())
+  tenantId     String
+  tenant       Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  provider     ShipmentProvider
+  deliveryMode String
+  serviceLevel String?
+  /// [{ wilayaCode, carrierPrice, currency, serviceLevel }] as returned to the admin.
+  rates        Json
+  fetchedAt    DateTime         @default(now())
+  createdAt    DateTime         @default(now())
+  updatedAt    DateTime         @updatedAt
+
+  @@unique([tenantId, provider, deliveryMode])
+  @@index([tenantId])
 }
 
 model DeliveryRate {
@@ -1275,6 +1710,8 @@ model OrderItem {
   @@index([tenantId, orderId])
 }
 
+/// Deliberately has no tenant FK: audit rows must outlive the tenant they
+/// describe, so deleting a tenant cannot erase the record of what was done to it.
 model AuditLog {
   id        String   @id @default(uuid())
   action    String
@@ -1283,4 +1720,469 @@ model AuditLog {
   targetId  String? // ID of the target entity (e.g. tenantId)
   tenantId  String? // Tenant context usually null for super admin actions but good to have
   createdAt DateTime @default(now())
+
+  @@index([tenantId, createdAt])
+  @@index([action, createdAt])
+  @@index([targetId])
+}
+
+model GoogleOAuthToken {
+  id           String    @id @default(uuid())
+  tenantId     String
+  userId       String
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([tenantId, userId])
+  @@index([tenantId])
+}
+
+model NotificationEvent {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  type       String
+  entityType String
+  entityId   String
+
+  title String
+  body  String
+  data  Json?
+
+  deliveries NotificationDelivery[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([tenantId, id])
+  @@index([tenantId])
+  @@index([tenantId, type, createdAt])
+  @@index([tenantId, entityType, entityId])
+}
+
+model NotificationSubscription {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [tenantId, userId], references: [tenantId, id], onDelete: Cascade)
+
+  hardwareId String
+  platform   String
+  channel    String
+  fcmToken   String?
+  isActive   Boolean  @default(true)
+  lastSeenAt DateTime @default(now())
+
+  deliveries NotificationDelivery[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, id])
+  @@unique([tenantId, userId, hardwareId, channel])
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, isActive])
+  @@index([tenantId, channel])
+}
+
+model NotificationDelivery {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  eventId String
+  event   NotificationEvent @relation(fields: [tenantId, eventId], references: [tenantId, id], onDelete: Cascade)
+
+  userId String
+  user   User   @relation(fields: [tenantId, userId], references: [tenantId, id], onDelete: Cascade)
+
+  subscriptionId String?
+  subscription   NotificationSubscription? @relation(fields: [tenantId, subscriptionId], references: [tenantId, id], onDelete: Cascade)
+
+  channel String
+  status  String    @default("PENDING")
+  error   String?
+  readAt  DateTime?
+  sentAt  DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, eventId, userId, channel, subscriptionId])
+  @@index([tenantId])
+  @@index([tenantId, eventId])
+  @@index([tenantId, userId, readAt])
+  @@index([tenantId, subscriptionId])
+  @@index([tenantId, status])
+}
+
+model License {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  licenseKey String    @unique
+  maxDevices Int       @default(1)
+  isActive   Boolean   @default(true)
+  expiresAt  DateTime?
+
+  /// How long a device may run without reaching the server before it must
+  /// re-validate. Per-license rather than a global so a super admin can widen
+  /// it for a tenant who genuinely has no connectivity, without loosening it
+  /// for everyone.
+  offlineValidityDays Int @default(30)
+  /// Warning period after `offlineValidityDays` elapses, before the app drops
+  /// to read-only. Local data is never destroyed either way.
+  graceDays           Int @default(7)
+
+  devices            Device[]
+  activationRequests DeviceActivationRequest[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId])
+}
+
+model Device {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  licenseId String
+  license   License @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  hardwareId     String
+  deviceName     String?
+  devicePlatform String?
+  /// ACTIVE | REVOKED | RETIRED
+  status         String  @default("ACTIVE")
+
+  /// Bumped on revoke and on transfer. Every activation token and every
+  /// device-bound access token carries the version it was minted under, so a
+  /// stale token stops verifying on the next contact without needing a
+  /// blocklist to be consulted on every request.
+  tokenVersion Int @default(1)
+
+  /// Server-side mirror of the window the last issued token carries, so the
+  /// super-admin panel can show what a device believes without asking it.
+  licenseExpiresAt DateTime?
+  graceUntil       DateTime?
+
+  lastSyncAt DateTime?
+  lastSeenAt DateTime?
+  appVersion String?
+
+  revokedAt       DateTime?
+  revokedByUserId String?
+  revokedReason   String?
+  /// A revoked device may keep pushing writes it already queued offline until
+  /// this instant, so revoking a terminal never destroys the tenant's work.
+  drainUntil      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([licenseId, hardwareId])
+  @@index([tenantId])
+  @@index([tenantId, status])
+  @@index([hardwareId])
+}
+
+enum TenantMigrationStatus {
+  DRAFT
+  UPLOADING
+  VALIDATED
+  APPLIED
+  FAILED
+}
+
+/// A super-admin-driven import of an offline tenant's local database.
+///
+/// Upgrading from offline-only to an online tier used to be a client-side
+/// operation: the app registered a brand-new tenant and rewrote `tenantId` on
+/// every local table. That is a cross-tenant data move decided by the client,
+/// with no validation and no idempotency. This replaces it with a job the
+/// super admin opens, the device uploads into, and only the super admin applies.
+model TenantMigrationJob {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  /// The device the data came from, when known.
+  deviceId String?
+
+  status TenantMigrationStatus @default(DRAFT)
+
+  /// What the device said it would send, then what actually landed. The gap
+  /// between them is the report a super admin reads before flipping the tier.
+  declaredCounts Json?
+  appliedCounts  Json?
+  errors         Json?
+
+  startedByUserId String?
+  appliedByUserId String?
+  appliedAt       DateTime?
+
+  stagingRows TenantMigrationStagingRow[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+}
+
+/// Rows a device has uploaded but that have not been applied yet.
+///
+/// Staged rather than streamed straight into the live tables, so `apply` can run
+/// as one transaction. A link that drops mid-upload leaves a partial *staging*
+/// set, which is discardable; it must never leave a partially migrated tenant.
+model TenantMigrationStagingRow {
+  id      String             @id @default(uuid())
+  jobId   String
+  job     TenantMigrationJob @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  domain  String
+  /// One page of rows, exactly as the device sent them.
+  payload Json
+
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+  @@index([jobId, domain])
+}
+
+enum DeviceActivationRequestStatus {
+  PENDING
+  APPROVED
+  DENIED
+  EXPIRED
+  CANCELLED
+}
+
+/// A device asking for a seat it cannot claim on its own.
+///
+/// The first device on a tenant auto-claims its seat at login. Every subsequent
+/// one is refused and lands here instead, where a super admin approves or denies
+/// it. That is what makes "one activated device, and a second only when the super
+/// admin permits it" enforceable rather than advisory.
+model DeviceActivationRequest {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+
+  licenseId String
+  license   License @relation(fields: [licenseId], references: [id], onDelete: Cascade)
+
+  hardwareId     String
+  deviceName     String?
+  devicePlatform String?
+
+  /// Set when the tenant is moving to a replacement terminal rather than asking
+  /// for an extra seat. Approving frees the old seat in the same transaction.
+  replacesDeviceId  String?
+  requestedByUserId String?
+  reason            String?
+
+  status          DeviceActivationRequestStatus @default(PENDING)
+  decidedAt       DateTime?
+  decidedByUserId String?
+  decisionNote    String?
+
+  /// Minted on approval. The waiting device polls, then swaps this for a real
+  /// activation token exactly once.
+  claimCode String?   @unique
+  claimedAt DateTime?
+  expiresAt DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+/// Replay cache for writes that carry an `Idempotency-Key` header.
+///
+/// A device that queues writes while offline resends them on reconnect. If the
+/// server accepted one but the response never made it back — a timeout, a
+/// dropped connection — the client cannot tell the difference between "not
+/// applied" and "applied, answer lost", so it retries. Without this table that
+/// retry creates a second customer, order or cash movement.
+model IdempotencyKey {
+  id           String    @id @default(uuid())
+  tenantId     String
+  tenant       Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  key          String
+  method       String
+  path         String
+  /// Digest of the request this key first claimed. Reusing one key for a
+  /// different body is a client bug, not a retry, and must not replay.
+  requestHash  String
+  statusCode   Int?
+  responseBody Json?
+  /// Null while the first attempt is still running.
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+
+  @@unique([tenantId, key])
+  @@index([tenantId])
+  @@index([createdAt])
+}
+
+/// One WhatsApp Cloud API message sent for an order.
+///
+/// Two jobs at once. It is the delivery log the seller sees (sent / delivered /
+/// read / failed, with Meta's error), and it is the idempotence guard: the
+/// unique key below means a retried send — a double click, a cron tick that
+/// overlaps the previous one — cannot bill a second conversation to the tenant.
+model WhatsAppMessage {
+  id       String @id @default(uuid())
+  tenantId String
+  tenant   Tenant @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  orderId  String
+  order    Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  /// CONFIRMATION | REMINDER
+  kind    String
+  /// 0 for the first send, then 1..n for reminders.
+  attempt Int    @default(0)
+
+  toPhone      String
+  templateName String
+  languageCode String
+
+  /// Meta's message id (wamid...), used to match incoming status webhooks.
+  wamid        String? @unique
+  /// QUEUED | SENT | DELIVERED | READ | FAILED
+  status       String  @default("QUEUED")
+  errorCode    String?
+  errorMessage String?
+
+  sentAt      DateTime?
+  deliveredAt DateTime?
+  readAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([tenantId, orderId, kind, attempt])
+  @@index([tenantId, orderId])
+  @@index([tenantId, status])
+}
+
+/// Cooperative lock for platform-wide background jobs.
+///
+/// The reminder job runs inside the API process, so every instance behind the
+/// load balancer would otherwise fire the same reminders. A worker takes the
+/// row only when the previous lease has expired, which also releases the lock
+/// on its own if the process that held it died mid-run.
+model JobLock {
+  name        String   @id
+  owner       String
+  lockedAt    DateTime @default(now())
+  lockedUntil DateTime
+  updatedAt   DateTime @updatedAt
+}
+
+enum VerificationPurpose {
+  REGISTRATION
+  PASSWORD_RESET
+}
+
+enum VerificationChannel {
+  EMAIL
+  SMS
+  WHATSAPP
+}
+
+/// One one-time code sent to prove control of an email address or phone number.
+///
+/// Deliberately NOT tenant-scoped, and the single exception to the isolation
+/// rule in CLAUDE.md: a registration code is issued before the tenant it will
+/// create exists, and a password reset arrives on the SaaS domain with no
+/// tenant in the Host header. `tenantId` is therefore a record of which tenant
+/// a reset resolved to, never the scope of the query — the scope is
+/// (purpose, destination), and `userId` is what pins a reset to one account so
+/// a verified code can never be redirected at a different one.
+///
+/// The code itself is never stored: `codeHash` is an HMAC keyed by a
+/// server-side secret, so a database leak does not hand an attacker six digits
+/// they can walk in reverse.
+model VerificationCode {
+  id      String              @id @default(uuid())
+  purpose VerificationPurpose
+  channel VerificationChannel
+
+  /// Lowercased email, or a normalized MSISDN (213XXXXXXXXX). What the code was
+  /// actually sent to, and half the lookup key.
+  destination String
+  codeHash    String
+
+  /// HMAC of the single-use token handed back on a successful verify. That
+  /// token — not the six digits — is what `/register` and the password reset
+  /// accept, so the code cannot be replayed after it has been spent.
+  tokenHash String?
+
+  /// Wrong guesses. The row burns at `MAX_ATTEMPTS`; without this a six-digit
+  /// code is a ten-second brute force.
+  attempts    Int @default(0)
+  /// How many codes this destination has been sent in the current window.
+  resendCount Int @default(0)
+
+  expiresAt  DateTime
+  verifiedAt DateTime?
+  /// Set when the token was spent (account created, password changed).
+  consumedAt DateTime?
+
+  /// Resolved at send time for PASSWORD_RESET. Null for REGISTRATION.
+  userId   String?
+  tenantId String?
+
+  requestIp String?
+  /// Locale the message was rendered in, kept for support requests.
+  locale    String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([purpose, destination, createdAt])
+  @@index([tokenHash])
+  @@index([expiresAt])
+}
+
+/// Platform-wide configuration a super-admin can change without a redeploy.
+///
+/// Deliberately NOT tenant-scoped: this is operator config, not tenant data, so
+/// the usual `tenantId` rule does not apply. Only `requireSuperAdmin` routes
+/// read or write it, and the typed accessors live in `lib/platform-settings.ts`.
+///
+/// One row per namespace (`ai.documents`, …), value shape validated on write.
+model PlatformSetting {
+  key   String @id
+  value Json
+
+  updatedByUserId String?
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
+}
+
+/// Super-admin overrides for the quotas hardcoded in `shared/pricing/plans.ts`.
+///
+/// Also platform-level by design. A null column means "no override" — the code
+/// default wins — so an override can always be reverted without guessing what
+/// the original number was.
+model PlanOverride {
+  planCode String @id
+
+  aiScansPerMonth Int?
+
+  updatedByUserId String?
+  updatedAt       DateTime @updatedAt
+  createdAt       DateTime @default(now())
 }

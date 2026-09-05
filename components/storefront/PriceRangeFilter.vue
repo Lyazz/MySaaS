@@ -155,10 +155,10 @@ const maxSliderClass = computed(() =>
           type="number"
           inputmode="numeric"
           :placeholder="minPlaceholder"
-          class="price-range-input w-full border border-slate-200 bg-white/80 rounded-lg py-2 px-3 pr-10 text-sm text-slate-700 focus:ring-2 focus:ring-brand focus:border-brand outline-none"
+          class="price-range-input w-full border border-slate-200 bg-white/80 rounded-lg py-2 px-3 pe-10 text-sm text-slate-700 focus:ring-2 focus:ring-brand focus:border-brand outline-none"
           @input="onMinInput"
         >
-        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-semibold leading-none text-slate-500 rtl:right-auto rtl:left-2">
+        <span class="absolute end-2 top-1/2 -translate-y-1/2 text-[10px] font-semibold leading-none text-slate-500 rtl:right-auto rtl:left-2">
           {{ currency }}
         </span>
       </label>
@@ -170,10 +170,10 @@ const maxSliderClass = computed(() =>
           type="number"
           inputmode="numeric"
           :placeholder="maxPlaceholder"
-          class="price-range-input w-full border border-slate-200 bg-white/80 rounded-lg py-2 px-3 pr-10 text-sm text-slate-700 focus:ring-2 focus:ring-brand focus:border-brand outline-none"
+          class="price-range-input w-full border border-slate-200 bg-white/80 rounded-lg py-2 px-3 pe-10 text-sm text-slate-700 focus:ring-2 focus:ring-brand focus:border-brand outline-none"
           @input="onMaxInput"
         >
-        <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-semibold leading-none text-slate-500 rtl:right-auto rtl:left-2">
+        <span class="absolute end-2 top-1/2 -translate-y-1/2 text-[10px] font-semibold leading-none text-slate-500 rtl:right-auto rtl:left-2">
           {{ currency }}
         </span>
       </label>

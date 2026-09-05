@@ -3,7 +3,7 @@ import { useCartStore } from '~/stores/cart';
 import ProductGallery from './partials/ProductGallery.vue';
 import ProductDetails from './partials/ProductDetails.vue';
 import ProductOrderForm from './partials/ProductOrderForm.vue';
-import { buildProductPricing } from '~/shared/pricing/product-pricing';
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing';
 
 const props = defineProps<{
   product: any;
@@ -46,13 +46,9 @@ const currentVariant = computed(() => {
   });
 });
 
-const currentPrice = computed(() => {
-  if (currentVariant.value) {
-    return buildProductPricing(props.product, currentVariant.value.price)
-      .effectivePrice;
-  }
-  return buildProductPricing(props.product).effectivePrice;
-});
+const currentPrice = computed(() =>
+  buildScopedProductPricing(props.product, currentVariant.value).effectivePrice
+);
 
 const currentStock = computed(() => {
   if (!currentVariant.value) return props.product?.stock;
@@ -83,6 +79,16 @@ const images = computed(() => {
 });
 
 const cartImage = computed(() => images.value[0]);
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
@@ -96,7 +102,7 @@ const cartImage = computed(() => images.value[0]);
       >
         {{ product?.title }}
       </h1>
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-slate mx-auto prose-img:rounded-none prose-img:w-full prose-headings:font-serif prose-headings:font-bold prose-p:font-light prose-a:text-slate-900"
         :html="product.description"
@@ -140,7 +146,7 @@ const cartImage = computed(() => images.value[0]);
     <!-- Mobile Sticky Bottom Bar (Minimal) -->
     <div
       v-if="cartEnabled"
-      class="fixed bottom-0 left-0 w-full p-4 bg-white border-t border-slate-100 md:hidden z-40 flex items-center justify-between"
+      class="fixed bottom-0 start-0 w-full p-4 bg-white border-t border-slate-100 md:hidden z-40 flex items-center justify-between"
     >
       <div class="flex flex-col">
         <span

@@ -14,8 +14,8 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:selectedOptions']);
 
-const storeSettings = useState<any>('storeSettings');
 const { format: formatPrice } = useCurrency();
+const storefrontContent = useStorefrontContent();
 
 const setOption = (optionId: string, valueId: string) => {
   emit('update:selectedOptions', {
@@ -43,8 +43,8 @@ const isOptionValueUnavailable = (optionId: string, valueId: string): boolean =>
 
 const optionValueSuffix = (optionId: string, valueId: string): string => {
   const state = optionValueState(optionId, valueId);
-  if (state === 'out_of_stock') return '(Out of stock)';
-  if (state === 'unavailable') return '(Unavailable)';
+  if (state === 'out_of_stock') return `(${storefrontContent.value.productForm.stock.outOfStock})`;
+  if (state === 'unavailable') return `(${storefrontContent.value.productForm.stock.unavailable})`;
   return '';
 };
 
@@ -52,97 +52,116 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   if (isOptionValueUnavailable(optionId, valueId)) return;
   setOption(optionId, valueId);
 };
+
+const discountPercent = computed(() => {
+  const full = Number(props.originalPrice ?? 0);
+  if (!full || full <= props.currentPrice) return 0;
+  return Math.round(((full - props.currentPrice) / full) * 100);
+});
+
+const { inviteTick } = useVariantSelectionInvite()
+const optionNudge = ref(false)
+const hasUnselectedOptions = computed(() =>
+  Array.isArray(props.product?.options) &&
+  props.product.options.some((o: any) => !props.selectedOptions?.[o.id])
+)
+watch(inviteTick, () => {
+  optionNudge.value = false
+  setTimeout(() => {
+    optionNudge.value = true
+    setTimeout(() => { optionNudge.value = false }, 700)
+  }, 20)
+})
 </script>
 
 <template>
-  <div
-    class="flex flex-col animate-fade-in-right space-y-7"
-    style="font-family: 'DM Sans', sans-serif"
-  >
-    <!-- Title + Price -->
+  <div class="flex flex-col gap-7">
+    <!-- ══ Title + price ═══════════════════════════════════════════════ -->
     <div>
-      <h1
-        class="text-3xl md:text-4xl font-black text-stone-900 leading-tight mb-4"
-        style="font-family: 'Fredoka', sans-serif"
-      >
+      <h1 class="kw-display text-3xl md:text-[2.5rem] mb-5">
         {{ product?.title }}
       </h1>
 
-      <!-- Pricing -->
-      <div class="flex flex-wrap items-baseline gap-3 mb-5">
+      <div class="flex flex-wrap items-baseline gap-3 mb-6">
+        <span class="kw-num text-[2.4rem] leading-none text-[var(--kw-pink-deep)]">{{ formatPrice(currentPrice) }}</span>
         <span
-          class="text-4xl font-black text-violet-700"
-          style="font-family: 'Fredoka', sans-serif"
-        >
-          {{ formatPrice(currentPrice) }}
-        </span>
+          v-if="discountPercent > 0"
+          class="text-lg font-bold text-[var(--kw-ink-faint)] line-through"
+        >{{ formatPrice(originalPrice!) }}</span>
         <span
-          v-if="originalPrice && originalPrice > currentPrice"
-          class="text-lg text-stone-400 font-bold line-through"
-          >{{ formatPrice(originalPrice) }}</span
-        >
-        <span
-          v-if="originalPrice && originalPrice > currentPrice"
-          class="px-3 py-1 bg-pink-500 text-white text-xs font-black rounded-full border border-pink-400 rotate-[2deg] shrink-0"
-          >-{{
-            Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
-          }}%</span
-        >
+          v-if="discountPercent > 0"
+          class="kw-badge kw-badge-sale"
+        >-{{ discountPercent }}%</span>
       </div>
 
-      <!-- Countdown -->
       <StorefrontSharedCountdownTimer
         v-if="product?.showCountdown && product?.promotionEndDate"
         :end-date="product.promotionEndDate"
         theme="danger"
         show-icon
-        class="mb-5"
+        class="mb-6"
       />
 
-      <!-- Urgency Banner -->
       <div
-        class="bg-violet-50 border-3 border-violet-100 rounded-2xl p-3.5 flex items-center gap-3"
+        class="flex items-center gap-3 rounded-[var(--kw-r)] px-4 py-3.5"
+        style="background: var(--kw-lemon-soft)"
       >
-        <div class="relative flex h-3 w-3 flex-shrink-0">
+        <span class="relative flex h-3 w-3 flex-shrink-0">
           <span
-            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-75"
+            class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-70"
+            style="background: var(--kw-lemon-deep)"
           />
           <span
-            class="relative inline-flex rounded-full h-3 w-3 bg-violet-600"
+            class="relative inline-flex rounded-full h-3 w-3"
+            style="background: var(--kw-lemon-deep)"
           />
-        </div>
-        <span class="text-sm font-bold text-violet-900">
-          <strong class="font-black">{{
-            $t('storefront.product.highDemandBadge')
-          }}</strong>
+        </span>
+        <span class="text-sm font-bold text-[var(--kw-ink)]">
+          <strong class="font-extrabold">{{ $t('storefront.product.highDemandBadge') }}</strong>
           {{ $t('storefront.product.viewingRightNow', { count: 15 }) }}
         </span>
       </div>
     </div>
 
-    <!-- Option Selectors -->
+    <!-- ══ Options ═════════════════════════════════════════════════════ -->
     <div
       v-if="product?.options && product.options.length > 0"
-      class="space-y-5"
+      class="space-y-6"
+      :class="{ 'vux-invite': hasUnselectedOptions, 'vux-invite-nudge': optionNudge }"
     >
-      <div v-for="option in product.options" :key="option.id">
-        <label
-          class="block text-sm font-black text-stone-700 mb-2.5"
-          style="font-family: 'Fredoka', sans-serif"
-        >
-          {{ option.name }}
-        </label>
+      <p
+        v-if="hasUnselectedOptions"
+        class="vux-invite-hint inline-flex items-center gap-1.5 text-xs font-extrabold text-[var(--kw-pink-deep)]"
+      >
+        <Icon
+          name="lucide:arrow-down"
+          class="w-3.5 h-3.5"
+        />
+        {{ storefrontContent.productForm.chooseOptionsPrompt }}
+      </p>
+
+      <div
+        v-for="option in product.options"
+        :key="option.id"
+      >
+        <label class="kw-label !ms-0">{{ option.name }}</label>
 
         <!-- Dropdown -->
-        <div v-if="option.displayType === 'dropdown'" class="relative max-w-xs">
+        <div
+          v-if="option.displayType === 'dropdown'"
+          class="relative max-w-xs"
+        >
           <select
             :value="selectedOptions[option.id] || ''"
-            class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 font-black focus:border-violet-400 hover:border-violet-300 transition-colors outline-none appearance-none cursor-pointer"
-            @change="
-              setOption(option.id, ($event.target as HTMLSelectElement).value)
-            "
+            class="kw-field appearance-none cursor-pointer pe-11"
+            @change="setOption(option.id, ($event.target as HTMLSelectElement).value)"
           >
-            <option value="" disabled>{{ option.name }}</option>
+            <option
+              value=""
+              disabled
+            >
+              {{ option.name }}
+            </option>
             <option
               v-for="value in option.values"
               :key="value.id"
@@ -152,14 +171,13 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               {{ value.label }} {{ optionValueSuffix(option.id, value.id) }}
             </option>
           </select>
-          <div
-            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400"
-          >
-            <Icon name="lucide:chevron-down" class="w-4 h-4" />
-          </div>
+          <Icon
+            name="lucide:chevron-down"
+            class="w-4 h-4 absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-[var(--kw-ink-faint)]"
+          />
         </div>
 
-        <!-- Color -->
+        <!-- Colour -->
         <div
           v-else-if="option.displayType === 'color'"
           class="flex flex-wrap gap-3"
@@ -168,19 +186,22 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             v-for="value in option.values"
             :key="value.id"
             type="button"
+            class="w-11 h-11 rounded-full flex items-center justify-center transition-all duration-300 relative"
             :class="[
-              'w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 relative border-3',
               optionValueState(option.id, value.id) === 'unavailable'
-                ? 'opacity-30 cursor-not-allowed border-transparent'
+                ? 'opacity-30 cursor-not-allowed'
                 : selectedOptions[option.id] === value.id
-                  ? 'border-violet-700 scale-110 shadow-[0_3px_0_0_#4c1d95]'
-                  : 'border-white hover:border-violet-300 hover:scale-105 shadow-sm',
+                  ? 'scale-110'
+                  : 'hover:scale-105',
             ]"
-            :style="{ backgroundColor: value.meta || '#eee' }"
+            :style="{
+              backgroundColor: value.meta || '#eee',
+              boxShadow: selectedOptions[option.id] === value.id
+                ? '0 0 0 3px var(--kw-surface), 0 0 0 5px var(--kw-pink-deep)'
+                : '0 0 0 2px var(--kw-line)'
+            }"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
-            :title="
-              `${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()
-            "
+            :title="`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()"
             @click="setOptionIfAllowed(option.id, value.id)"
           >
             <Icon
@@ -188,159 +209,130 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               name="lucide:check"
               class="w-4 h-4 text-white drop-shadow"
             />
-            <div
+            <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
               class="absolute inset-0 flex items-center justify-center rounded-full overflow-hidden"
             >
-              <div
+              <span
                 class="w-full h-0.5 rotate-45"
-                :class="
-                  optionValueState(option.id, value.id) === 'out_of_stock'
-                    ? 'bg-red-500/70'
-                    : 'bg-stone-500'
-                "
+                :class="optionValueState(option.id, value.id) === 'out_of_stock' ? 'bg-red-500/70' : 'bg-[var(--kw-ink-faint)]'"
               />
-            </div>
+            </span>
           </button>
         </div>
 
-        <!-- Image -->
+        <!-- Image swatches -->
         <div
           v-else-if="option.displayType === 'image'"
-          class="flex flex-wrap gap-2.5"
+          class="flex flex-wrap gap-3"
         >
           <button
             v-for="value in option.values"
             :key="value.id"
             type="button"
+            class="w-16 h-16 kw-blob overflow-hidden transition-all duration-300 relative"
             :class="[
-              'w-16 h-16 rounded-xl border-3 transition-all duration-200 overflow-hidden relative',
               optionValueState(option.id, value.id) === 'unavailable'
-                ? 'opacity-40 grayscale cursor-not-allowed border-stone-100'
+                ? 'opacity-40 grayscale cursor-not-allowed'
                 : selectedOptions[option.id] === value.id
-                  ? 'border-violet-700 shadow-[0_3px_0_0_#4c1d95] -translate-y-0.5'
-                  : 'border-violet-100 hover:border-violet-300 hover:-translate-y-0.5',
+                  ? '-translate-y-1'
+                  : 'hover:-translate-y-0.5',
             ]"
+            :style="{
+              background: 'var(--kw-pink-soft)',
+              boxShadow: selectedOptions[option.id] === value.id ? '0 0 0 3px var(--kw-pink-deep)' : '0 0 0 2px var(--kw-line)'
+            }"
             :disabled="isOptionValueUnavailable(option.id, value.id)"
-            :title="
-              `${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()
-            "
+            :title="`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()"
             @click="setOptionIfAllowed(option.id, value.id)"
           >
             <img
               v-if="value.meta"
               :src="value.meta"
               class="w-full h-full object-cover"
-            />
-            <span v-else class="text-xs text-stone-400 p-1 text-center">{{
-              value.label
-            }}</span>
-            <div
-              v-if="optionValueState(option.id, value.id) === 'out_of_stock'"
-              class="absolute inset-x-1 bottom-1 rounded bg-white/90 text-[10px] font-black text-red-700 px-1 py-0.5 text-center"
+              :alt="value.label"
             >
-              Out
-            </div>
+            <span
+              v-else
+              class="text-[10px] font-extrabold p-1 text-center block"
+            >{{ value.label }}</span>
+            <span
+              v-if="optionValueState(option.id, value.id) === 'out_of_stock'"
+              class="absolute inset-x-1 bottom-1 rounded-full bg-white/95 text-[9px] font-extrabold text-red-600 px-1 py-0.5 text-center"
+            >{{ storefrontContent.productForm.stock.outOfStock }}</span>
           </button>
         </div>
 
         <!-- Radio -->
-        <div v-else-if="option.displayType === 'radio'" class="space-y-2">
-          <div
+        <div
+          v-else-if="option.displayType === 'radio'"
+          class="space-y-2.5"
+        >
+          <label
             v-for="value in option.values"
             :key="value.id"
-            class="flex items-center gap-2"
+            :for="`${option.id}-${value.id}`"
+            class="flex items-center gap-2.5 cursor-pointer"
           >
             <input
-              type="radio"
               :id="`${option.id}-${value.id}`"
+              type="radio"
               :name="option.id"
               :value="value.id"
               :checked="selectedOptions[option.id] === value.id"
               :disabled="isOptionValueUnavailable(option.id, value.id)"
-              class="w-4 h-4 text-violet-700 border-stone-300 focus:ring-violet-400 disabled:opacity-50"
+              class="w-4 h-4 accent-[var(--kw-pink-deep)] disabled:opacity-50"
               @change="setOptionIfAllowed(option.id, value.id)"
-            />
-            <label
-              :for="`${option.id}-${value.id}`"
-              class="text-sm font-medium text-stone-700"
-              :class="{
-                'text-stone-400 line-through':
-                  optionValueState(option.id, value.id) !== 'available',
-                'text-red-600':
-                  optionValueState(option.id, value.id) === 'out_of_stock',
-              }"
-              >{{ value.label }}
-              <span class="text-xs font-normal ml-1">{{
-                optionValueSuffix(option.id, value.id)
-              }}</span></label
             >
-          </div>
-        </div>
-
-        <!-- Default sticker buttons -->
-        <div v-else class="flex flex-wrap gap-2">
-          <button
-            v-for="value in option.values"
-            :key="value.id"
-            class="px-5 py-2.5 rounded-full text-sm font-black border-3 transition-all duration-200 relative"
-            :class="[
-              optionValueState(option.id, value.id) === 'unavailable'
-                ? 'bg-stone-50 text-stone-300 border-stone-100 cursor-not-allowed'
-                : selectedOptions[option.id] === value.id
-                  ? 'bg-violet-700 text-white border-violet-700 shadow-[0_4px_0_0_#4c1d95] -translate-y-1'
-                  : optionValueState(option.id, value.id) === 'out_of_stock'
-                    ? 'bg-white text-red-600 border-red-200 hover:border-red-300'
-                    : 'bg-white text-stone-700 border-violet-100 hover:border-violet-300 hover:-translate-y-0.5',
-            ]"
-            :disabled="isOptionValueUnavailable(option.id, value.id)"
-            :title="
-              `${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()
-            "
-            @click="setOptionIfAllowed(option.id, value.id)"
-          >
             <span
+              class="text-sm font-bold"
               :class="{
-                'line-through':
-                  optionValueState(option.id, value.id) !== 'available',
+                'text-[var(--kw-ink-faint)] line-through': optionValueState(option.id, value.id) !== 'available',
+                'text-red-600': optionValueState(option.id, value.id) === 'out_of_stock',
               }"
             >
               {{ value.label }}
+              <span class="text-xs font-semibold ms-1">{{ optionValueSuffix(option.id, value.id) }}</span>
             </span>
+          </label>
+        </div>
+
+        <!-- Default: candy pills -->
+        <div
+          v-else
+          class="flex flex-wrap gap-2.5"
+        >
+          <button
+            v-for="value in option.values"
+            :key="value.id"
+            type="button"
+            class="kw-chip"
+            :class="[
+              optionValueState(option.id, value.id) === 'unavailable'
+                ? 'opacity-45 cursor-not-allowed'
+                : selectedOptions[option.id] === value.id
+                  ? 'kw-chip-on'
+                  : '',
+            ]"
+            :disabled="isOptionValueUnavailable(option.id, value.id)"
+            :title="`${value.label} ${optionValueSuffix(option.id, value.id)}`.trim()"
+            @click="setOptionIfAllowed(option.id, value.id)"
+          >
+            <span :class="{ 'line-through': optionValueState(option.id, value.id) !== 'available' }">{{ value.label }}</span>
             <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
-              class="ml-1.5 text-[10px] font-bold"
-            >
-              {{ optionValueSuffix(option.id, value.id) }}
-            </span>
+              class="text-[10px] font-bold"
+            >{{ optionValueSuffix(option.id, value.id) }}</span>
           </button>
         </div>
       </div>
     </div>
 
-    <!-- Mini Description -->
     <p
       v-if="product?.miniDescription"
-      class="text-stone-600 text-base leading-relaxed"
+      class="kw-lede"
     >
       {{ product.miniDescription }}
     </p>
   </div>
 </template>
-
-<style scoped>
-.animate-fade-in-right {
-  animation: fadeInRight 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.15s forwards;
-  opacity: 0;
-}
-@keyframes fadeInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-</style>

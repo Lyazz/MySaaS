@@ -1,13 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:intl/intl.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_theme.dart';
 import '../widgets/admin_stat_card.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../providers/admin_dashboard_provider.dart';
+import '../providers/auth_provider.dart';
+import '../models/app_mode.dart';
 import '../providers/store_settings_provider.dart';
 import '../widgets/badges/status_badges.dart';
+import '../utils/tenant_currency.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class DashboardScreen extends ConsumerStatefulWidget {
   const DashboardScreen({super.key});
@@ -33,7 +39,6 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final isMobile = MediaQuery.of(context).size.width < 800;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -54,13 +59,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   if (dashboardState.error != null && !dashboardState.isLoading)
                     const SizedBox(height: 16),
                   LayoutBuilder(
-                    builder: (context, constraints) =>
-                        _buildStatsGrid(
-                          context,
-                          constraints,
-                          dashboardState,
-                          storeSettingsState,
-                        ),
+                    builder: (context, constraints) => _buildStatsGrid(
+                      context,
+                      constraints,
+                      dashboardState,
+                      storeSettingsState,
+                    ),
                   ),
                   const SizedBox(height: 24),
                   _buildMainGrid(context, dashboardState, storeSettingsState),
@@ -81,7 +85,8 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final storeName = storeSettingsState.settings.name.trim().isEmpty
         ? 'your store'
         : storeSettingsState.settings.name.trim();
-    final showFinishSetup = !storeSettingsState.isLoading &&
+    final showFinishSetup =
+        !storeSettingsState.isLoading &&
         storeSettingsState.error == null &&
         storeSettingsState.settings.isCompleted == false;
 
@@ -89,29 +94,41 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome back, $storeName',
-              style: const TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
-                letterSpacing: -0.5,
-                color: Color(0xFF0F172A),
+        // Expanded, so the greeting yields space to the actions instead of
+        // sizing to its natural width: a long store name used to push this Row
+        // past the viewport and overflow it outright on narrow desktops.
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome back, $storeName',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                ),
               ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'A quick snapshot of your store.',
-              style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-            ),
-          ],
+              const SizedBox(height: 4),
+              Text(
+                'admin.pages.dashboard.snapshot'.tr(),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+              ),
+            ],
+          ),
         ),
         Row(
           children: [
             AppButton.secondary(
-              label: 'Refresh',
+              label: 'superAdmin.paymentsPage.actions.refresh'.tr(),
               icon: LucideIcons.refreshCw,
               onPressed: dashboardState.isLoading
                   ? null
@@ -120,14 +137,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                         ref
                             .read(storeSettingsProvider.notifier)
                             .fetchStoreSettings(),
-                        ref.read(adminDashboardProvider.notifier).fetchDashboard(),
+                        ref
+                            .read(adminDashboardProvider.notifier)
+                            .fetchDashboard(),
                       ]);
                     },
             ),
             if (showFinishSetup) ...[
               const SizedBox(width: 12),
               AppButton.primary(
-                label: 'Finish setup',
+                label: 'admin.pages.onboarding.saveFinish'.tr(),
                 icon: LucideIcons.sparkles,
                 onPressed: () => context.go('/settings'),
               ),
@@ -159,18 +178,15 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Could not load dashboard data',
-                  style: TextStyle(
+                Text(
+                  'app.could_not_load_dashboard_data'.tr(),
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF991B1B),
+                    color: const Color(0xFF991B1B),
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  message,
-                  style: const TextStyle(color: Color(0xFF7F1D1D)),
-                ),
+                Text(message, style: const TextStyle(color: Color(0xFF7F1D1D))),
               ],
             ),
           ),
@@ -197,13 +213,13 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     final double itemWidth =
         (width - (crossAxisCount - 1) * spacing) / crossAxisCount;
 
-    final money = NumberFormat.simpleCurrency(
-      name: storeSettingsState.settings.currencyCode,
-    );
+    final money = tenantCurrencyFormatter(storeSettingsState.settings);
     final data = dashboardState.data;
-    final lowStockHint = data.inventory.outOfStockProducts > 0
-        ? '${data.inventory.outOfStockProducts} out of stock'
-        : null;
+
+    int trendOrdersCount = 0;
+    for (final point in data.trends) {
+      trendOrdersCount += point.ordersCount;
+    }
 
     return Wrap(
       spacing: spacing,
@@ -212,9 +228,20 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         SizedBox(
           width: itemWidth,
           child: AdminStatCard(
-            label: 'Orders (7 days)',
-            value: data.last7d.orders.toString(),
-            icon: LucideIcons.clipboardList,
+            label: 'admin.pages.dashboard.stats.totalRevenue'.tr(),
+            value: money.format(data.revenue.total),
+            icon: LucideIcons.wallet,
+            tone: 'brand',
+            isLoading: dashboardState.isLoading,
+            onTap: () => context.go('/sales'),
+          ),
+        ),
+        SizedBox(
+          width: itemWidth,
+          child: AdminStatCard(
+            label: 'admin.pages.dashboard.stats.ordersRevenue'.tr(),
+            value: money.format(data.revenue.orders),
+            icon: LucideIcons.shoppingBag,
             tone: 'blue',
             isLoading: dashboardState.isLoading,
             onTap: () => context.go('/orders'),
@@ -223,35 +250,23 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         SizedBox(
           width: itemWidth,
           child: AdminStatCard(
-            label: 'Revenue (7 days)',
-            value: money.format(data.last7d.revenue),
-            icon: LucideIcons.banknote,
-            tone: 'teal',
+            label: 'admin.pages.dashboard.stats.posRevenue'.tr(),
+            value: money.format(data.revenue.pos),
+            icon: LucideIcons.monitorSmartphone,
+            tone: 'indigo',
+            isLoading: dashboardState.isLoading,
+            onTap: () => context.go('/pos'),
+          ),
+        ),
+        SizedBox(
+          width: itemWidth,
+          child: AdminStatCard(
+            label: 'admin.pages.dashboard.stats.ordersCount'.tr(),
+            value: trendOrdersCount.toString(),
+            icon: LucideIcons.clipboardList,
+            tone: 'amber',
             isLoading: dashboardState.isLoading,
             onTap: () => context.go('/orders'),
-          ),
-        ),
-        SizedBox(
-          width: itemWidth,
-          child: AdminStatCard(
-            label: 'Products',
-            value: data.counts.products.toString(),
-            icon: LucideIcons.package,
-            tone: 'teal',
-            isLoading: dashboardState.isLoading,
-            onTap: () => context.go('/products'),
-          ),
-        ),
-        SizedBox(
-          width: itemWidth,
-          child: AdminStatCard(
-            label: 'Low stock',
-            value: data.inventory.lowStockProducts.toString(),
-            hint: lowStockHint,
-            icon: LucideIcons.alertCircle,
-            tone: 'orange',
-            isLoading: dashboardState.isLoading,
-            onTap: () => context.go('/products'),
           ),
         ),
       ],
@@ -269,7 +284,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     if (!wide) {
       return Column(
         children: [
-          _buildRecentOrdersSection(context, dashboardState, storeSettingsState),
+          _buildRecentOrdersSection(
+            context,
+            dashboardState,
+            storeSettingsState,
+          ),
           const SizedBox(height: 24),
           _buildSideCards(context, dashboardState),
         ],
@@ -281,13 +300,14 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       children: [
         Expanded(
           flex: 2,
-          child: _buildRecentOrdersSection(context, dashboardState, storeSettingsState),
+          child: _buildRecentOrdersSection(
+            context,
+            dashboardState,
+            storeSettingsState,
+          ),
         ),
         const SizedBox(width: 24),
-        Expanded(
-          flex: 1,
-          child: _buildSideCards(context, dashboardState),
-        ),
+        Expanded(flex: 1, child: _buildSideCards(context, dashboardState)),
       ],
     );
   }
@@ -297,11 +317,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     AdminDashboardState dashboardState,
     StoreSettingsState storeSettingsState,
   ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -320,30 +345,33 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Recent orders',
-                      style: TextStyle(
-                        fontSize: 16,
+                    Text(
+                      'admin.pages.dashboard.recentOrders.title'.tr(),
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
                       ),
                     ),
                     const SizedBox(height: 2),
                     Text(
-                      'Latest orders for this tenant.',
-                      style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+                      'app.latest_orders_for_this_tenant'.tr(),
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
                     ),
                   ],
                 ),
                 AppButton.secondary(
-                  label: 'View all',
+                  label: 'superAdmin.dashboard.recentActivity.viewAll'.tr(),
                   icon: LucideIcons.arrowRight,
                   onPressed: () => context.go('/orders'),
                 ),
               ],
             ),
           ),
-          const Divider(height: 1, color: Color(0xFFE2E8F0)),
+          const Divider(height: 1),
           _buildOrdersTable(context, dashboardState, storeSettingsState),
         ],
       ),
@@ -356,9 +384,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     StoreSettingsState storeSettingsState,
   ) {
     final recent = dashboardState.data.recentOrders;
-    final money = NumberFormat.simpleCurrency(
-      name: storeSettingsState.settings.currencyCode,
-    );
+    final money = tenantCurrencyFormatter(storeSettingsState.settings);
     final showStatus = MediaQuery.of(context).size.width > 700;
     final showDate = MediaQuery.of(context).size.width > 900;
 
@@ -392,19 +418,21 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     }
 
     if (recent.isEmpty) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.all(28),
         child: Column(
           children: [
             Icon(LucideIcons.inbox, size: 40, color: Color(0xFFCBD5E1)),
             SizedBox(height: 12),
             Text(
-              'No recent orders',
-              style: TextStyle(fontWeight: FontWeight.w600),
+              'app.no_recent_orders'.tr(),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 4),
             Text(
-              'New orders will appear here.',
+              'app.new_orders_will_appear_here'.tr(),
               style: TextStyle(color: Color(0xFF64748B)),
             ),
           ],
@@ -415,7 +443,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               _tableHeader('Order', width: 110),
@@ -429,7 +457,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
         ),
         const Divider(height: 1, color: Color(0xFFE2E8F0)),
         ...recent.map((order) {
-          final shortId = order.id.length > 8 ? order.id.substring(0, 8) : order.id;
+          final shortId = order.id.length > 8
+              ? order.id.substring(0, 8)
+              : order.id;
           return InkWell(
             onTap: () => context.go('/orders/${order.id}'),
             child: Padding(
@@ -440,10 +470,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     width: 110,
                     child: Text(
                       '#$shortId',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -469,9 +499,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                               : order.customerPhone.trim(),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                         ),
                       ],
@@ -481,10 +513,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     width: 130,
                     child: Text(
                       money.format(order.totalAmount),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 13,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF0F172A),
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                   ),
@@ -501,9 +533,11 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       width: 170,
                       child: Text(
                         DateFormat.yMMMd().add_jm().format(order.createdAt),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 12,
-                          color: Color(0xFF475569),
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
                         ),
                       ),
                     ),
@@ -511,10 +545,9 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                     width: 90,
                     child: Align(
                       alignment: Alignment.centerRight,
-                      child: AppButton.secondary(
-                        label: 'View',
+                      child: TableActionButton(
+                        tooltip: 'admin.pages.billing.history.viewProof'.tr(),
                         icon: LucideIcons.eye,
-                        size: AppButtonSize.sm,
                         onPressed: () => context.go('/orders/${order.id}'),
                       ),
                     ),
@@ -528,7 +561,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildSideCards(BuildContext context, AdminDashboardState dashboardState) {
+  Widget _buildSideCards(
+    BuildContext context,
+    AdminDashboardState dashboardState,
+  ) {
     return Column(
       children: [
         _buildOrderStatusCard(context, dashboardState),
@@ -538,21 +574,59 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _buildOrderStatusCard(BuildContext context, AdminDashboardState dashboardState) {
+  Widget _buildOrderStatusCard(
+    BuildContext context,
+    AdminDashboardState dashboardState,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = Theme.of(context).colorScheme.onSurface;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
+
     final rows = [
-      (status: 'PENDING', label: 'Pending', dot: const Color(0xFFF59E0B)),
-      (status: 'CONFIRMED', label: 'Confirmed', dot: const Color(0xFF3B82F6)),
-      (status: 'SHIPPED', label: 'Shipped', dot: const Color(0xFF06B6D4)),
-      (status: 'DELIVERED', label: 'Delivered', dot: const Color(0xFF22C55E)),
-      (status: 'CANCELLED', label: 'Cancelled', dot: const Color(0xFFEF4444)),
-      (status: 'RETURNED', label: 'Returned', dot: const Color(0xFFA855F7)),
+      (
+        status: 'PENDING',
+        label: 'admin.orderStatus.pending'.tr(),
+        dot: const Color(0xFFF59E0B),
+      ),
+      (
+        status: 'CONFIRMED',
+        label: 'admin.orderStatus.confirmed'.tr(),
+        dot: const Color(0xFF3B82F6),
+      ),
+      (
+        status: 'SHIPPED',
+        label: 'admin.orderStatus.shipped'.tr(),
+        dot: const Color(0xFF06B6D4),
+      ),
+      (
+        status: 'DELIVERED',
+        label: 'admin.orderStatus.delivered'.tr(),
+        dot: const Color(0xFF22C55E),
+      ),
+      (
+        status: 'CANCELLED',
+        label: 'admin.orderStatus.cancelled'.tr(),
+        dot: const Color(0xFFEF4444),
+      ),
+      (
+        status: 'RETURNED',
+        label: 'admin.orderStatus.returned'.tr(),
+        dot: const Color(0xFFA855F7),
+      ),
     ];
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -565,18 +639,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Order status',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
-            ),
+          Text(
+            'admin.pages.dashboard.orderStatus.title'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
-            'Quick overview by status.',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            'app.quick_overview_by_status'.tr(),
+            style: TextStyle(fontSize: 14, color: textMuted),
           ),
           const SizedBox(height: 16),
           ...rows.map((row) {
@@ -584,14 +656,19 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
             return Padding(
               padding: const EdgeInsets.only(bottom: 10),
               child: InkWell(
-                onTap: () => context.go('/orders?status=${Uri.encodeComponent(row.status)}'),
+                onTap: () => context.go(
+                  '/orders?status=${Uri.encodeComponent(row.status)}',
+                ),
                 borderRadius: BorderRadius.circular(12),
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: borderColor),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -608,10 +685,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                           const SizedBox(width: 10),
                           Text(
                             row.label,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF334155),
+                              color: textSecondary,
                             ),
                           ),
                         ],
@@ -621,10 +698,10 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                       else
                         Text(
                           count.toString(),
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w700,
-                            color: Color(0xFF0F172A),
+                            color: textPrimary,
                           ),
                         ),
                     ],
@@ -639,18 +716,54 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
   }
 
   Widget _buildQuickLinksCard(BuildContext context) {
+    final authState = ref.read(authProvider);
+    final isOffline = authState.mode == AppMode.offlineOnly;
+
     final links = [
-      (label: 'Add product', icon: LucideIcons.plus, to: '/products/create'),
-      (label: 'Manage products', icon: LucideIcons.package, to: '/products'),
-      (label: 'Categories', icon: LucideIcons.tags, to: '/categories'),
-      (label: 'Settings', icon: LucideIcons.settings, to: '/settings'),
+      (
+        label: 'admin.pages.products.index.addProduct'.tr(),
+        icon: LucideIcons.plus,
+        to: '/products/create',
+      ),
+      (
+        label: 'admin.pages.dashboard.quickLinks.manageProducts'.tr(),
+        icon: LucideIcons.package,
+        to: '/products',
+      ),
+      (
+        label: 'admin.pages.categories.index.title'.tr(),
+        icon: LucideIcons.tags,
+        to: '/categories',
+      ),
+      (
+        label: 'admin.tours.sidebar.steps.settings.title'.tr(),
+        icon: LucideIcons.settings,
+        to: '/settings',
+      ),
+      if (isOffline)
+        (
+          label: 'app.upgrade_to_online'.tr(),
+          icon: LucideIcons.cloudLightning,
+          to: '/upgrade',
+        ),
     ];
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = Theme.of(context).colorScheme.surface;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = Theme.of(context).colorScheme.onSurface;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surfaceColor,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(color: borderColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -663,18 +776,16 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Quick links',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: Color(0xFF0F172A),
-            ),
+          Text(
+            'app.quick_links'.tr(),
+            style: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 4),
           Text(
-            'Common actions to get things done.',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
+            'app.common_actions_to_get_things_d'.tr(),
+            style: TextStyle(fontSize: 14, color: textMuted),
           ),
           const SizedBox(height: 16),
           ...links.map((link) {
@@ -686,27 +797,34 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                 child: Container(
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: const Color(0xFFE2E8F0)),
+                    border: Border.all(color: borderColor),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Row(
                         children: [
-                          Icon(link.icon, size: 18, color: const Color(0xFF334155)),
+                          Icon(link.icon, size: 18, color: textSecondary),
                           const SizedBox(width: 10),
                           Text(
                             link.label,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w600,
-                              color: Color(0xFF334155),
+                              color: textSecondary,
                             ),
                           ),
                         ],
                       ),
-                      const Icon(LucideIcons.chevronRight, size: 18, color: Color(0xFF94A3B8)),
+                      Icon(
+                        LucideIcons.chevronRight,
+                        size: 18,
+                        color: textMuted,
+                      ),
                     ],
                   ),
                 ),
@@ -718,18 +836,12 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
     );
   }
 
-  Widget _tableHeader(
-    String label, {
-    double? width,
-    bool alignRight = false,
-  }) {
+  Widget _tableHeader(String label, {double? width, bool alignRight = false}) {
     final child = Text(
       label.toUpperCase(),
-      style: const TextStyle(
-        fontSize: 11,
+      style: Theme.of(context).textTheme.labelSmall?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: 0.6,
-        color: Color(0xFF64748B),
       ),
     );
     if (width == null) return child;
@@ -751,7 +863,7 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
       width: width,
       height: height,
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(radius),
       ),
     );

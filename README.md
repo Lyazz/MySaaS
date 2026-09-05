@@ -19,7 +19,7 @@ The platform is designed to start with **~100 tenants** and scale safely.
 - Single shared PostgreSQL database
 - Strict data isolation via `tenant_id`
 - Tenant automatically resolved from domain:
-  - `tenant.platform.com`
+  - `tenant.swekly.com`
   - `www.tenant.com`
 
 ### 🛍️ E-commerce Core
@@ -217,10 +217,10 @@ curl -X POST http://localhost:3000/api/webhooks/maystro \
 
 ### Tenant Resolution
 - Storefront (public):
-  - `{slug}.platform.com` (or `{slug}.localhost` in local dev) resolves tenant by `slug`
+  - `{slug}.swekly.com` (or `{slug}.localhost` in local dev) resolves tenant by `slug`
   - If a tenant subdomain does not exist in DB, the request returns **404** (no fallback to SaaS landing)
 - SaaS (platform):
-  - `platform.com` / `localhost` serves the SaaS landing + tenant auth pages
+  - `swekly.com` / `localhost` serves the SaaS landing + tenant auth pages
   - Tenants can only access `/login` and `/register` from the SaaS host (root domain)
 - Backend resolution is **server-side only** (frontend never sends tenant identifiers)
 

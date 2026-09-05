@@ -1,19 +1,31 @@
-import type { Prisma } from '@prisma/client'
+import { Prisma } from '@prisma/client'
+import { RETRY_CONFLICT } from '../../lib/conflict-codes'
 import prisma from '../../lib/prisma'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
+import { currentUsageWindow } from '../../../../shared/pricing/billing-period'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
+import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
+import { CashService } from '../cash/cash.service'
 
 export class PosValidationError extends Error {
     statusCode: number
     statusMessage: string
+    code?: string
+    meta?: Record<string, unknown>
 
-    constructor(statusCode: number, statusMessage: string) {
+    constructor(
+        statusCode: number,
+        statusMessage: string,
+        opts?: { code?: string; meta?: Record<string, unknown> }
+    ) {
         super(statusMessage)
         this.statusCode = statusCode
         this.statusMessage = statusMessage
+        this.code = opts?.code
+        this.meta = opts?.meta
     }
 }
 
@@ -32,18 +44,25 @@ type PosOrderItemInput = {
 
 export type CreatePosSaleInput = {
     customerId?: string | null
+    clientRequestId?: string | null
+    cashboxId?: string | null
+    payment?: { method?: string | null; reference?: string | null; note?: string | null } | null
     items: PosOrderItemInput[]
 }
 
-const addUtcMonths = (date: Date, months: number) =>
-    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
-
-const addUtcYears = (date: Date, years: number) =>
-    new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
+const normalizeClientRequestId = (value?: string | null) => {
+    const normalized = typeof value === 'string' ? value.trim() : ''
+    if (!normalized) return null
+    if (normalized.length > 200) {
+        throw new PosValidationError(400, 'Idempotency key is too long')
+    }
+    return normalized
+}
 
 export class PosService {
     private loyaltyFormula = new LoyaltyFormulaService()
     private loyaltyLedger = new LoyaltyLedgerService()
+    private cashService = new CashService()
 
     private async enforceOrderLimit(tenantId: string, subscription?: SubscriptionContext | null) {
         if (!subscription) return
@@ -52,22 +71,21 @@ export class PosService {
         const limit = plan?.ordersPerMonth ?? 0
         if (limit <= 0) return
 
-        const periodStart = subscription.currentPeriodStart
-        const periodEnd =
-            subscription.currentPeriodEnd ??
-            (subscription.interval === 'year' ? addUtcYears(periodStart, 1) : addUtcMonths(periodStart, 1))
+        // Counted over the monthly quota window, not the billing term -- see
+        // currentUsageWindow. An annual tenant gets their allowance every month.
+        const quota = currentUsageWindow(subscription.currentPeriodStart)
 
         const [ordersInPeriod, salesInPeriod] = await Promise.all([
             prisma.order.count({
                 where: {
                     tenantId,
-                    createdAt: { gte: periodStart, lt: periodEnd }
+                    createdAt: { gte: quota.start, lt: quota.end }
                 }
             }),
             prisma.sale.count({
                 where: {
                     tenantId,
-                    createdAt: { gte: periodStart, lt: periodEnd }
+                    createdAt: { gte: quota.start, lt: quota.end }
                 }
             })
         ])
@@ -88,6 +106,15 @@ export class PosService {
         subscription?: SubscriptionContext | null,
         actor?: { userId: string | null }
     ) {
+        const clientRequestId = normalizeClientRequestId(input.clientRequestId)
+        if (clientRequestId) {
+            const existing = await tx.sale.findFirst({
+                where: { tenantId, clientRequestId },
+                include: { items: { include: { product: true, variant: true } } }
+            })
+            if (existing) return existing
+        }
+
         await this.enforceOrderLimit(tenantId, subscription)
 
         if (!Array.isArray(input.items) || input.items.length === 0) {
@@ -132,18 +159,45 @@ export class PosService {
 
         const products = await tx.product.findMany({
             where: { id: { in: productIds }, tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true }
+            select: {
+                id: true,
+                slug: true,
+                price: true,
+                title: true,
+                stock: true,
+                isPromotionActive: true,
+                promotionalPrice: true,
+                promotionStartDate: true,
+                promotionEndDate: true,
+                _count: {
+                    select: { options: true }
+                }
+            }
         })
         if (products.length !== productIds.length) {
             throw new PosValidationError(400, 'Some products are invalid or unavailable')
         }
 
-        const productMap = new Map(products.map((p) => [p.id, p]))
+        const productMap = new Map(products.map((p) => [p.id, { ...p, hasVariants: (p as any)._count?.options > 0 }]))
 
         const variantsById = variantIds.length
             ? await tx.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -159,7 +213,21 @@ export class PosService {
                     isActive: true,
                     optionValues: { none: {} }
                 },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -207,7 +275,7 @@ export class PosService {
                 throw new PosValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = Number(variant.price ?? product.price)
+            const price = Number(buildScopedProductPricing(product as any, variant as any).effectivePrice)
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY
@@ -257,7 +325,8 @@ export class PosService {
                 totalAmount: total,
                 status: 'COMPLETED',
                 earnedPointsTotal: resolvedCustomer?.id ? pointsPreview.totalPoints : 0,
-                createdByUserId: actor?.userId ?? null
+                createdByUserId: actor?.userId ?? null,
+                clientRequestId
             }
         })
 
@@ -301,7 +370,7 @@ export class PosService {
                 },
                 data: { stock: { decrement: item.quantity } }
             })
-            if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry')
+            if (updated.count !== 1) throw new PosValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
             touchedProductIds.add(variantBefore.productId)
 
             const after = await tx.productVariant.findFirst({
@@ -349,6 +418,23 @@ export class PosService {
             })
         }
 
+        await this.cashService.createTransactionInTx(
+            tx,
+            tenantId,
+            {
+                cashboxId: input.cashboxId ?? null,
+                type: 'SALE_PAYMENT',
+                direction: 'IN',
+                amount: String(total),
+                method: input.payment?.method ?? 'CASH',
+                customerId: resolvedCustomer?.id ?? null,
+                saleId: createdSale.id,
+                reference: input.payment?.reference ?? 'POS',
+                note: input.payment?.note ?? 'POS sale payment'
+            },
+            actor
+        )
+
         return tx.sale.findFirst({
             where: { id: createdSale.id, tenantId },
             include: { items: { include: { product: true, variant: true } } }
@@ -361,7 +447,23 @@ export class PosService {
         subscription?: SubscriptionContext | null,
         actor?: { userId: string | null }
     ) {
-        return prisma.$transaction(async (tx) => this.createSaleInTx(tx, tenantId, input, subscription ?? null, actor))
+        try {
+            return await prisma.$transaction(async (tx) => this.createSaleInTx(tx, tenantId, input, subscription ?? null, actor))
+        } catch (error) {
+            const clientRequestId = normalizeClientRequestId(input.clientRequestId)
+            if (
+                clientRequestId &&
+                error instanceof Prisma.PrismaClientKnownRequestError &&
+                error.code === 'P2002'
+            ) {
+                const existing = await prisma.sale.findFirst({
+                    where: { tenantId, clientRequestId },
+                    include: { items: { include: { product: true, variant: true } } }
+                })
+                if (existing) return existing
+            }
+            throw error
+        }
     }
 
     async lookupByCode(tenantId: string, code: string) {

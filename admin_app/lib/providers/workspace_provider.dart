@@ -17,11 +17,16 @@ class WorkspaceState {
 class WorkspaceNotifier extends Notifier<WorkspaceState> {
   @override
   WorkspaceState build() {
-    final bootstrap = ref.read(bootstrapProvider);
+    final bootstrap = ref.watch(bootstrapProvider);
     return WorkspaceState(apiBaseUrl: bootstrap.apiBaseUrl);
   }
 
   Future<void> setWorkspaceUrl(String input) async {
+    final bootstrap = ref.read(bootstrapProvider);
+    if (bootstrap.provisioningLocked) {
+      throw Exception('Workspace binding is managed by secure provisioning.');
+    }
+
     final normalized = normalizeApiBaseUrl(input);
     if (normalized.isEmpty) {
       throw Exception('Invalid workspace URL');

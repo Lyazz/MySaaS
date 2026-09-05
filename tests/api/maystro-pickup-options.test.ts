@@ -11,12 +11,13 @@ describe('Maystro pickup point selection', () => {
     beforeAll(async () => {
         const created = await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Pickup Selection Tenant',
                 slug: `pickup-selection-${Date.now()}`
             }
         })
         tenant = { id: created.id, slug: created.slug }
-        host = `${created.slug}.platform.com`
+        host = `${created.slug}.swekly.com`
 
         await prisma.tenantDeliveryAccount.upsert({
             where: { tenantId_provider: { tenantId: created.id, provider: 'MAYSTRO' } },

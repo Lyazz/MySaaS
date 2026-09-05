@@ -5,6 +5,7 @@ import app from '../../backend/src/app'
 import { signAccessToken } from '../../backend/src/lib/jwt'
 import { DeliveryService } from '../../backend/src/modules/delivery/delivery.service'
 import { MaystroIntegrationError } from '../../backend/src/modules/delivery/maystro/maystro.errors'
+import { OrdersService } from '../../backend/src/modules/orders/orders.service'
 
 describe('Public checkout order flow', () => {
     const slug = `checkout-${Date.now()}`
@@ -25,7 +26,7 @@ describe('Public checkout order flow', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Checkout Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Checkout Tenant', slug }
         })
         tenantId = tenant.id
 
@@ -141,7 +142,10 @@ describe('Public checkout order flow', () => {
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
         await prisma.productBundleDeal.deleteMany({ where: { tenantId } })
+        await prisma.productVariantOptionValue.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
+        await prisma.productOptionValue.deleteMany({ where: { tenantId } })
+        await prisma.productOption.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { tenantId } })
@@ -171,6 +175,7 @@ describe('Public checkout order flow', () => {
 
         expect(res.status).toBe(201)
         expect(res.body.orderId).toBeDefined()
+        expect(res.body.publicOrderId).toMatch(/^ORDR-[A-Z0-9]{6}$/)
 
         const saved = await prisma.order.findUnique({
             where: { id: res.body.orderId },
@@ -178,6 +183,7 @@ describe('Public checkout order flow', () => {
         })
 
         expect(saved?.tenantId).toBe(tenantId)
+        expect(saved?.publicId).toBe(res.body.publicOrderId)
         expect(saved?.items[0].variantId).toBe(variantId)
         expect(saved?.items[0].quantity).toBe(2)
 
@@ -208,6 +214,40 @@ describe('Public checkout order flow', () => {
         const afterCancel = await prisma.productVariant.findUnique({ where: { id: variantId } })
         expect(afterCancel?.stock).toBe(variantStockBefore)
         expect(afterCancel?.reserved).toBe(0)
+    })
+
+    it('uses the tenant order prefix and lets admins search by public order id', async () => {
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { orderIdPrefix: 'SHOP1' }
+        })
+
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Searchable Buyer',
+                customerPhone: '0550999000',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(created.status).toBe(201)
+        expect(created.body.publicOrderId).toMatch(/^SHOP1-[A-Z0-9]{6}$/)
+
+        const listed = await request(app)
+            .get('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .query({ search: created.body.publicOrderId })
+
+        expect(listed.status).toBe(200)
+        expect(Array.isArray(listed.body.items)).toBe(true)
+        expect(listed.body.items.some((order: any) => order.id === created.body.orderId && order.publicId === created.body.publicOrderId)).toBe(true)
+
+        await prisma.storeSettings.update({
+            where: { tenantId },
+            data: { orderIdPrefix: 'ORDR' }
+        })
     })
 
     it('enforces tenant minimum order amount from settings', async () => {
@@ -337,7 +377,7 @@ describe('Public checkout order flow', () => {
 
         const otherSlug = `other-${Date.now()}`
         const otherHost = `${otherSlug}.localhost:3000`
-        const otherTenant = await prisma.tenant.create({ data: { name: 'Other', slug: otherSlug } })
+        const otherTenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Other', slug: otherSlug } })
         await prisma.storeSettings.create({
             data: { tenantId: otherTenant.id, cartEnabled: true, codEnabled: true, minimumOrderAmountDzd: 0, hideOptionalAddress: true }
         })
@@ -526,7 +566,62 @@ describe('Public checkout order flow', () => {
         expect(shipmentCount).toBe(0)
     })
 
-    it('prioritizes promotional price at checkout even when promotion flags/date window are inactive', async () => {
+    it('does not roll back inventory when carrier sync fails for an already confirmed order', async () => {
+        const created = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Carrier Retry Buyer',
+                customerPhone: '0550111222',
+                shippingProvider: 'MAYSTRO',
+                shippingWilayaCode: '16',
+                shippingCommuneCode: '1605',
+                shippingAddressLine1: '789 Retry Street',
+                deliveryMode: 'pickup',
+                items: [{ productId, variantId, quantity: 1 }]
+            })
+
+        expect(created.status).toBe(201)
+        const orderId = created.body.orderId as string
+
+        const shipmentSpy = vi.spyOn(DeliveryService.prototype, 'createShipment')
+        const rollbackSpy = vi.spyOn(OrdersService.prototype, 'rollbackCarrierConfirmation')
+
+        // spyOn returns the existing spy when one is already installed, so the counts
+        // below would otherwise include calls made by earlier tests in this file.
+        shipmentSpy.mockClear()
+        rollbackSpy.mockClear()
+
+        shipmentSpy.mockResolvedValueOnce({ id: 'mock-shipment' } as any)
+
+        const firstConfirm = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'CONFIRMED' })
+
+        expect(firstConfirm.status).toBe(200)
+
+        shipmentSpy.mockRejectedValueOnce(
+            new MaystroIntegrationError({ statusCode: 502, statusMessage: 'Carrier unavailable on retry' })
+        )
+
+        const secondConfirm = await request(app)
+            .patch(`/api/admin/orders/${orderId}`)
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({ status: 'CONFIRMED' })
+
+        expect(secondConfirm.status).toBe(502)
+        expect(secondConfirm.body.statusMessage).toBe('Carrier unavailable on retry')
+        expect(shipmentSpy).toHaveBeenCalledTimes(2)
+        expect(rollbackSpy).toHaveBeenCalledTimes(0)
+
+        const saved = await prisma.order.findUnique({ where: { id: orderId } })
+        expect(saved?.status).toBe('CONFIRMED')
+    })
+
+    it('ignores product-level promotional price at checkout when promotion flags/date window are inactive', async () => {
         const promoProduct = await prisma.product.create({
             data: {
                 tenantId,
@@ -569,8 +664,80 @@ describe('Public checkout order flow', () => {
         })
 
         expect(saved?.items).toHaveLength(1)
-        expect(Number(saved?.items[0].price)).toBe(120)
-        expect(Number(saved?.totalAmount)).toBe(240)
+        expect(Number(saved?.items[0].price)).toBe(200)
+        expect(Number(saved?.totalAmount)).toBe(400)
+    })
+
+    it('applies the selected variant promotional price at checkout for variant-priced products', async () => {
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Variant Promo Checkout Product',
+                slug: `variant-promo-checkout-${Date.now()}`,
+                price: 220,
+                stock: 30,
+                isActive: true
+            }
+        })
+
+        const sizeOption = await prisma.productOption.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                name: 'Size',
+                position: 0,
+                displayType: 'dropdown' as any
+            }
+        })
+        const sizeValue = await prisma.productOptionValue.create({
+            data: {
+                tenantId,
+                optionId: sizeOption.id,
+                label: 'L',
+                position: 0
+            }
+        })
+
+        const promoVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                sku: `VARIANT-PROMO-${Date.now()}`,
+                price: 220,
+                promotionalPrice: 175,
+                isPromotionActive: true,
+                promotionStartDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                stock: 30
+            }
+        })
+        await prisma.productVariantOptionValue.create({
+            data: {
+                tenantId,
+                variantId: promoVariant.id,
+                optionValueId: sizeValue.id
+            }
+        })
+
+        const res = await request(app)
+            .post('/api/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .send({
+                customerName: 'Variant Promo Buyer',
+                customerPhone: '0550222334',
+                items: [{ productId: promoProduct.id, variantId: promoVariant.id, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.items).toHaveLength(1)
+        expect(Number(saved?.items[0].price)).toBe(175)
+        expect(Number(saved?.totalAmount)).toBe(350)
     })
 
     it('rejects checkout when phone is missing', async () => {
@@ -684,7 +851,7 @@ describe('Admin Order Creation', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Admin Checkout Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Admin Checkout Tenant', slug }
         })
         tenantId = tenant.id
 
@@ -731,7 +898,10 @@ describe('Admin Order Creation', () => {
         await prisma.inventoryMovement.deleteMany({ where: { tenantId } })
         await prisma.orderItem.deleteMany({ where: { order: { tenantId } } })
         await prisma.order.deleteMany({ where: { tenantId } })
+        await prisma.productVariantOptionValue.deleteMany({ where: { tenantId } })
         await prisma.productVariant.deleteMany({ where: { tenantId } })
+        await prisma.productOptionValue.deleteMany({ where: { tenantId } })
+        await prisma.productOption.deleteMany({ where: { tenantId } })
         await prisma.product.deleteMany({ where: { tenantId } })
         await prisma.storeSettings.deleteMany({ where: { tenantId } })
         await prisma.user.deleteMany({ where: { tenantId } })
@@ -830,7 +1000,7 @@ describe('Admin Order Creation', () => {
         expect(saved?.shippingAddressLine1).toBe('Stored Shipping Address')
     })
 
-    it('prioritizes promotional price on admin order creation when promo is set', async () => {
+    it('ignores product-level promotional price on admin order creation when the promotion is inactive', async () => {
         const promoProduct = await prisma.product.create({
             data: {
                 tenantId,
@@ -875,8 +1045,81 @@ describe('Admin Order Creation', () => {
         })
 
         expect(saved?.items).toHaveLength(1)
-        expect(Number(saved?.items[0].price)).toBe(95)
-        expect(Number(saved?.totalAmount)).toBe(285)
+        expect(Number(saved?.items[0].price)).toBe(180)
+        expect(Number(saved?.totalAmount)).toBe(540)
+    })
+
+    it('applies the selected variant promotional price on admin order creation', async () => {
+        const promoProduct = await prisma.product.create({
+            data: {
+                tenantId,
+                title: 'Admin Variant Promo Product',
+                slug: `admin-variant-promo-${Date.now()}`,
+                price: 210,
+                stock: 35,
+                isActive: true
+            }
+        })
+
+        const option = await prisma.productOption.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                name: 'Color',
+                position: 0,
+                displayType: 'dropdown' as any
+            }
+        })
+        const optionValue = await prisma.productOptionValue.create({
+            data: {
+                tenantId,
+                optionId: option.id,
+                label: 'Black',
+                position: 0
+            }
+        })
+
+        const promoVariant = await prisma.productVariant.create({
+            data: {
+                tenantId,
+                productId: promoProduct.id,
+                sku: `ADM-VARIANT-PROMO-${Date.now()}`,
+                price: 210,
+                promotionalPrice: 160,
+                isPromotionActive: true,
+                promotionStartDate: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                promotionEndDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+                stock: 35
+            }
+        })
+        await prisma.productVariantOptionValue.create({
+            data: {
+                tenantId,
+                variantId: promoVariant.id,
+                optionValueId: optionValue.id
+            }
+        })
+
+        const res = await request(app)
+            .post('/api/admin/orders')
+            .set('X-Forwarded-Host', hostHeader)
+            .set('Authorization', `Bearer ${adminToken}`)
+            .send({
+                customerName: 'Admin Variant Promo Customer',
+                customerPhone: '0550111001',
+                items: [{ productId: promoProduct.id, variantId: promoVariant.id, quantity: 2 }]
+            })
+
+        expect(res.status).toBe(201)
+
+        const saved = await prisma.order.findUnique({
+            where: { id: res.body.orderId },
+            include: { items: true }
+        })
+
+        expect(saved?.items).toHaveLength(1)
+        expect(Number(saved?.items[0].price)).toBe(160)
+        expect(Number(saved?.totalAmount)).toBe(320)
     })
 
     it('rejects admin order creation with empty items', async () => {

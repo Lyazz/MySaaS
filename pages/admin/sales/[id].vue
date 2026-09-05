@@ -1,16 +1,16 @@
 <template>
   <div class="max-w-4xl mx-auto">
     <nav class="flex mb-6" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/sales" class="hover:[color:var(--brand)]" style="color: var(--text-secondary)">
+          <NuxtLink to="/admin/sales" class="hover:[color:var(--brand)] text-secondary">
             {{ t('admin.nav.salesItem') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.breadcrumb', { id: saleId.substring(0, 8) }) }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-tertiary" />
+            <span class="ms-1 text-tertiary">{{ t('admin.pages.sales.detail.breadcrumb', { id: saleId.substring(0, 8) }) }}</span>
           </div>
         </li>
       </ol>
@@ -18,14 +18,25 @@
 
     <div v-if="loading" class="ui-card p-12 text-center">
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">{{ t('admin.pages.sales.detail.loading') }}</p>
+      <p class="mt-2 text-secondary">{{ t('admin.pages.sales.detail.loading') }}</p>
     </div>
 
     <div v-else-if="sale" class="space-y-6">
       <div class="ui-card p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.sales.detail.sections.saleInfo') }}</h2>
+          <h2 class="text-lg font-semibold text-primary">{{ t('admin.pages.sales.detail.sections.saleInfo') }}</h2>
           <div class="flex items-center gap-2">
+            <button
+              v-if="salesInvoiceEnabled"
+              type="button"
+              class="ui-btn ui-btn--secondary ui-btn--sm"
+              :disabled="invoiceLoading"
+              @click="printSaleInvoice"
+            >
+              <Icon v-if="invoiceLoading" name="lucide:loader-2" class="h-4 w-4 animate-spin" />
+              <Icon v-else name="lucide:printer" class="h-4 w-4" />
+              <span>{{ t('admin.pages.sales.actions.invoice') }}</span>
+            </button>
             <button
               type="button"
               class="ui-btn ui-btn--danger ui-btn--sm"
@@ -43,34 +54,34 @@
         </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
-            <p class="text-sm font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.fields.saleId') }}</p>
-            <p class="mt-1 text-sm" style="color: var(--text-primary)">{{ sale.id }}</p>
+            <p class="text-sm font-medium text-tertiary">{{ t('admin.pages.sales.detail.fields.saleId') }}</p>
+            <p class="mt-1 text-sm text-primary">{{ sale.id }}</p>
           </div>
           <div>
-            <p class="text-sm font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.fields.date') }}</p>
-            <p class="mt-1 text-sm" style="color: var(--text-primary)">{{ formatDate(sale.createdAt) }}</p>
+            <p class="text-sm font-medium text-tertiary">{{ t('admin.pages.sales.detail.fields.date') }}</p>
+            <p class="mt-1 text-sm text-primary">{{ formatDate(sale.createdAt) }}</p>
           </div>
         </div>
       </div>
 
       <div class="ui-card p-6">
-        <h2 class="text-lg font-semibold mb-4" style="color: var(--text-primary)">{{ t('admin.pages.sales.detail.sections.client') }}</h2>
+        <h2 class="text-lg font-semibold mb-4 text-primary">{{ t('admin.pages.sales.detail.sections.client') }}</h2>
         <div class="space-y-3">
           <div>
-            <p class="text-sm font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.fields.customerName') }}</p>
-            <p class="mt-1 text-sm" style="color: var(--text-primary)">{{ sale.customerName || t('admin.pages.sales.detail.fields.guest') }}</p>
+            <p class="text-sm font-medium text-tertiary">{{ t('admin.pages.sales.detail.fields.customerName') }}</p>
+            <p class="mt-1 text-sm text-primary">{{ sale.customerName || t('admin.pages.sales.detail.fields.guest') }}</p>
           </div>
           <div>
-            <p class="text-sm font-medium" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.fields.customerPhone') }}</p>
-            <p class="mt-1 text-sm" style="color: var(--text-primary)">{{ sale.customerPhone || '—' }}</p>
+            <p class="text-sm font-medium text-tertiary">{{ t('admin.pages.sales.detail.fields.customerPhone') }}</p>
+            <p class="mt-1 text-sm text-primary">{{ sale.customerPhone || '—' }}</p>
           </div>
         </div>
       </div>
 
       <div class="ui-card p-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.sales.detail.sections.items') }}</h2>
-          <div class="text-sm font-semibold" style="color: var(--text-primary)">{{ formatCurrency(sale.totalAmount) }}</div>
+          <h2 class="text-lg font-semibold text-primary">{{ t('admin.pages.sales.detail.sections.items') }}</h2>
+          <div class="text-sm font-semibold text-primary">{{ formatCurrency(sale.totalAmount) }}</div>
         </div>
         <div class="overflow-x-auto">
           <table class="ui-table">
@@ -78,22 +89,22 @@
               <tr>
                 <th class="ui-th">{{ t('admin.pages.sales.detail.itemsTable.product') }}</th>
                 <th class="ui-th">{{ t('admin.pages.sales.detail.itemsTable.variant') }}</th>
-                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.qty') }}</th>
-                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.price') }}</th>
-                <th class="ui-th text-right">{{ t('admin.pages.sales.detail.itemsTable.total') }}</th>
+                <th class="ui-th text-end">{{ t('admin.pages.sales.detail.itemsTable.qty') }}</th>
+                <th class="ui-th text-end">{{ t('admin.pages.sales.detail.itemsTable.price') }}</th>
+                <th class="ui-th text-end">{{ t('admin.pages.sales.detail.itemsTable.total') }}</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
               <tr v-for="item in sale.items" :key="item.id" class="ui-tr">
-                <td class="ui-td text-sm" style="color: var(--text-primary)">
+                <td class="ui-td text-sm text-primary">
                   {{ item.product?.title || item.productId }}
                 </td>
-                <td class="ui-td text-sm" style="color: var(--text-secondary)">
+                <td class="ui-td text-sm text-secondary">
                   {{ item.variantId ? item.variantId.substring(0, 8) : t('admin.pages.sales.detail.itemsTable.defaultVariant') }}
                 </td>
-                <td class="ui-td text-sm text-right" style="color: var(--text-primary)">{{ item.quantity }}</td>
-                <td class="ui-td text-sm text-right" style="color: var(--text-primary)">{{ formatCurrency(item.price) }}</td>
-                <td class="ui-td text-sm font-semibold text-right" style="color: var(--text-primary)">
+                <td class="ui-td text-sm text-end text-primary">{{ item.quantity }}</td>
+                <td class="ui-td text-sm text-end text-primary">{{ formatCurrency(item.price) }}</td>
+                <td class="ui-td text-sm font-semibold text-end text-primary">
                   {{ formatCurrency(item.price * item.quantity) }}
                 </td>
               </tr>
@@ -106,11 +117,11 @@
     <div v-if="refundModalOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeRefundModal">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="closeRefundModal" />
-        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.sales.refundModal.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+          <p class="mt-1 text-sm text-tertiary">
             {{ t('admin.pages.sales.refundModal.subtitle') }}
           </p>
 
@@ -184,9 +195,9 @@
     </div>
 
     <div v-else class="ui-card p-12 text-center">
-      <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">{{ t('admin.pages.sales.detail.notFound.title') }}</h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">{{ t('admin.pages.sales.detail.notFound.hint') }}</p>
+      <Icon name="lucide:badge-dollar-sign" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">{{ t('admin.pages.sales.detail.notFound.title') }}</h3>
+      <p class="mt-1 text-sm text-tertiary">{{ t('admin.pages.sales.detail.notFound.hint') }}</p>
     </div>
   </div>
 </template>
@@ -208,6 +219,7 @@ const route = useRoute()
 const { format: formatCurrency } = useCurrency()
 const { t, locale } = useI18n({ useScope: 'global' })
 const { showToast } = useToast()
+const storeSettings = useState<any>('storeSettings')
 
 const saleId = String(route.params.id || '')
 const shouldPrint = computed(() => route.query.print === '1')
@@ -245,6 +257,7 @@ const cashboxes = ref<Cashbox[]>([])
 const cashboxesLoaded = ref(false)
 const refundModalOpen = ref(false)
 const refundLoading = ref(false)
+const invoiceLoading = ref(false)
 const refundForm = reactive({
   cashboxId: '',
   method: 'CASH',
@@ -254,6 +267,7 @@ const refundForm = reactive({
 
 const openCashboxes = computed(() => cashboxes.value.filter(c => !!c.openSession))
 const canSubmitRefund = computed(() => !!sale.value && !!refundForm.cashboxId)
+const salesInvoiceEnabled = computed(() => storeSettings.value?.salesInvoiceEnabled === true)
 
 const normalizeStatus = (value: unknown) => String(value || '').trim().toUpperCase()
 const normalizeType = (value: unknown) => String(value || '').trim().toUpperCase()
@@ -274,9 +288,9 @@ const refundBlockedReason = computed(() => {
 async function fetchCashboxes() {
   if (cashboxesLoaded.value) return
   try {
-    const rows = await $fetch<Cashbox[]>('/api/admin/cashboxes', {
+    const rows = await $fetch('/api/admin/cashboxes', {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    }) as Cashbox[]
     cashboxes.value = rows || []
     cashboxesLoaded.value = true
   } catch {
@@ -334,6 +348,33 @@ async function submitRefund() {
   }
 }
 
+async function printSaleInvoice() {
+  if (!process.client || !sale.value || !salesInvoiceEnabled.value) return
+  invoiceLoading.value = true
+  try {
+    const blob = await $fetch(`/api/admin/sales/${sale.value.id}/invoice/pdf`, {
+      headers: { Authorization: `Bearer ${authStore.token}` },
+      responseType: 'blob'
+    }) as Blob
+    const url = URL.createObjectURL(blob)
+    const win = window.open(url, '_blank')
+    if (win) {
+      window.setTimeout(() => {
+        win.focus()
+        win.print()
+        URL.revokeObjectURL(url)
+      }, 500)
+    } else {
+      URL.revokeObjectURL(url)
+      showToast(t('admin.pages.sales.messages.invoicePopupBlocked'), 'error')
+    }
+  } catch (e: any) {
+    showToast(e?.data?.statusMessage || t('admin.pages.sales.messages.invoiceFailed'), 'error')
+  } finally {
+    invoiceLoading.value = false
+  }
+}
+
 function formatDate(dateString: string) {
   const date = new Date(dateString)
   const intlLocale = locale.value === 'fr' ? 'fr-FR' : locale.value === 'ar' ? 'ar-DZ' : 'en-US'
@@ -349,9 +390,9 @@ function formatDate(dateString: string) {
 async function fetchSale() {
   loading.value = true
   try {
-    sale.value = await $fetch<Sale>(`/api/admin/sales/${saleId}`, {
+    sale.value = await $fetch(`/api/admin/sales/${saleId}`, {
       headers: { Authorization: `Bearer ${authStore.token}` }
-    })
+    }) as Sale
     if (process.client && shouldPrint.value && sale.value) {
       await nextTick()
       window.print()

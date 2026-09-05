@@ -1,7 +1,12 @@
 import { MaystroClient } from './maystro.client'
 
-export type MaystroHookType = { id: number; name?: string; code?: string; [key: string]: any }
-export type MaystroHook = { id: number; endpoint: string; trigger_type_id: number; [key: string]: any }
+export type MaystroHookType = { id: string; name?: string; description?: string; [key: string]: any }
+export type MaystroHook = {
+    id: string
+    endpoint: string
+    trigger_type?: { id: string; name?: string; description?: string }
+    [key: string]: any
+}
 
 export class MaystroHooksService {
     async listTypes(input: { apiToken: string }): Promise<MaystroHookType[]> {
@@ -12,11 +17,12 @@ export class MaystroHooksService {
 
     async listHooks(input: { apiToken: string }): Promise<MaystroHook[]> {
         const client = new MaystroClient({ apiToken: input.apiToken })
-        const data = await client.request<any[]>({ method: 'GET', path: '/stores/hooks/costume/' })
-        return Array.isArray(data) ? data : []
+        const data = await client.request<any>({ method: 'GET', path: '/stores/hooks/costume/' })
+        const list = Array.isArray(data) ? data : (Array.isArray(data?.results) ? data.results : [])
+        return list
     }
 
-    async createHook(input: { apiToken: string; endpoint: string; triggerTypeId: number }) {
+    async createHook(input: { apiToken: string; endpoint: string; triggerTypeId: string }) {
         const client = new MaystroClient({ apiToken: input.apiToken })
         return client.request<any>({
             method: 'POST',
@@ -25,12 +31,11 @@ export class MaystroHooksService {
         })
     }
 
-    async deleteHook(input: { apiToken: string; id: number }) {
+    async deleteHook(input: { apiToken: string; id: string }) {
         const client = new MaystroClient({ apiToken: input.apiToken })
         return client.request<any>({
             method: 'DELETE',
-            path: `/stores/hooks/costume/${encodeURIComponent(String(input.id))}/`
+            path: `/stores/hooks/costume/${encodeURIComponent(input.id)}/`
         })
     }
 }
-

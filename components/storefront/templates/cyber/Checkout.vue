@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import CarrierMark from '~/components/storefront/shared/CarrierMark.vue'
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
@@ -7,7 +8,8 @@ const cartStore = useCartStore()
 const router = useRouter()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
-const { currencyCode } = useCurrency()
+const { t } = useI18n({ useScope: 'global' })
+const { currencyCode, formatAmount } = useCurrency()
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false && storeSettings.value?.codEnabled !== false)
 const wilayas = DZ_WILAYAS
 
@@ -25,7 +27,7 @@ const availableProviders = computed(() => {
     YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
     ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
     ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
-    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'teal' }
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'lime' }
   }
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
@@ -35,18 +37,9 @@ const deliveryOptions = computed(() => {
   const options: any[] = []
   
   availableProviders.value.forEach((provider: any) => {
-    const homePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-        ? String(Math.round(maystroPrices.homePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '350'
-    const officePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-        ? String(Math.round(maystroPrices.officePrice.value))
-        : provider.key === 'MAYSTRO'
-          ? '—'
-          : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
 
     options.push({
       id: `${provider.key}-home`,
@@ -100,7 +93,7 @@ const form = ref({
   selectedDeliveryOption: ''
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => form.value.wilaya,
   communeCode: () => form.value.commune
 })
@@ -116,87 +109,88 @@ watchEffect(() => {
 
 const submitting = ref(false)
 const errorMessage = ref('')
-const couponCode = ref('')
+const promo = useCheckoutPromoCode()
+const couponCode = promo.codeInput
+promo.watchCart()
 const loyalty = useCheckoutLoyalty()
 
 watch(() => form.value.phone, (phone) => {
   loyalty.phone.value = phone.trim()
+  promo.phone.value = phone.trim()
 }, { immediate: true })
 
 const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === form.value.selectedDeliveryOption)
 )
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => form.value.wilaya,
+  commune: () => form.value.commune,
+  selected: () => form.value.pickupPoint,
+  onSelect: (name) => { form.value.pickupPoint = name },
+  onCommuneChange: (communeName) => { form.value.commune = communeName }
+})
 
-const syncPickupPointCommune = () => {
-  const name = (form.value.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && form.value.commune !== nextCommune) form.value.commune = nextCommune
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
+
+// The promo code comes off the subtotal, and a free-shipping code off the
+// delivery line. Both are re-priced by the server when the order is placed.
+const promoShippingDiscount = computed(() => {
+  if (!promo.freeShipping.value) return 0
+  const delivery = selectedDelivery.value
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return 0
+  const price = Number(delivery.price)
+  return isNaN(price) ? 0 : price
+})
+
+const promoTotalDiscount = computed(() => promo.discountAmount.value + promoShippingDiscount.value)
+
+const promoDiscountLabel = computed(() => (
+  promo.appliedCode.value
+    ? `${storefrontContent.value.checkout.coupon.title} (${promo.appliedCode.value})`
+    : storefrontContent.value.checkout.coupon.title
+))
+
+const couponButtonLabel = computed(() => {
+  if (promo.checking.value) return storefrontContent.value.checkout.coupon.checking
+  return promo.applied.value
+    ? storefrontContent.value.checkout.coupon.remove
+    : storefrontContent.value.actions.apply
+})
+
+async function applyPromoCode() {
+  if (promo.applied.value) {
+    promo.reset()
+    return
+  }
+  await promo.apply(storefrontContent.value.checkout.coupon.invalid)
 }
 
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => form.value.commune, () => form.value.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    form.value.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-    if (!isPickup) return
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(`/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`)
-      const data = await $fetch<any[]>(url, { headers: { ...(useTenantApiHeaders() || {}) } })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-      if (relaisPoints.length > 0) {
-        form.value.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-        syncPickupPointCommune()
-      } else if (pickupPoints.value.length === 0) {
-        pickupPointsError.value = 'Aucun point relais disponible dans cette région'
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const discountedSubtotal = computed(() => Math.max(0, cartStore.total - cartStore.clearanceDiscount))
+
+const promoAdjustedSubtotal = computed(() => Math.max(0, discountedSubtotal.value - promo.discountAmount.value))
 
 const grandTotal = computed(() => {
   const delivery = selectedDelivery.value
-  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return cartStore.total
+  if (!delivery || delivery.price === 'FREE' || delivery.price === '—') return promoAdjustedSubtotal.value
   const deliveryPrice = Number(delivery.price)
-  return isNaN(deliveryPrice) ? cartStore.total : cartStore.total + deliveryPrice
+  if (isNaN(deliveryPrice)) return promoAdjustedSubtotal.value
+  return promoAdjustedSubtotal.value + Math.max(0, deliveryPrice - promoShippingDiscount.value)
 })
 
 const hasRequiredFields = computed(() => Boolean(
   form.value.fullName.trim() &&
   form.value.phone.trim() &&
+  form.value.wilaya &&
+  form.value.commune &&
   cartStore.hasItems &&
-  cartStore.total >= minimumOrderAmount.value &&
+  discountedSubtotal.value >= minimumOrderAmount.value &&
   form.value.selectedDeliveryOption
 ))
 
@@ -224,6 +218,10 @@ async function handleSubmit() {
       errorMessage.value = storefrontContent.value.checkout.errors.phoneRequired
       return
     }
+    if (!form.value.wilaya || !form.value.commune) {
+      errorMessage.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+      return
+    }
 
     if (!form.value.selectedDeliveryOption) {
       errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
@@ -237,22 +235,20 @@ async function handleSubmit() {
         const url = useTenantApiUrl('/api/orders')
         const isMaystro = delivery?.provider === 'MAYSTRO'
         const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
+        const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
         const maystroShippingAmount =
-          isMaystro
-            ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
-            : null
+          providerPrices
+            ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home)
+          : null
 
         if (isMaystro) {
-          if (!form.value.wilaya || !form.value.commune) {
-            errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
-            return
-          }
-          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() && !stopDeskName.value) {
+          
+          if (delivery?.mode === 'pickup' && !String(form.value.pickupPoint || '').trim() ) {
             errorMessage.value = storefrontContent.value.checkout.errors.deliveryRequired
             return
           }
           if (maystroShippingAmount == null) {
-            errorMessage.value = 'Maystro shipping price unavailable for selected commune'
+            errorMessage.value = storefrontContent.value.checkout.errors.shippingUnavailable
             return
           }
         }
@@ -265,11 +261,12 @@ async function handleSubmit() {
           shippingCommuneCode: form.value.commune || undefined,
           deliveryMode: delivery?.mode,
           shippingProvider: delivery?.provider || undefined,
-          shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
-          shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-          shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-          shippingCurrency: isMaystro ? currencyCode.value : undefined,
+          shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (form.value.pickupPoint || undefined) : undefined,
+          shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+          shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+          shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
           redeemPointsRequested: loyalty.redeemPointsRequested.value || undefined,
+          promoCode: promo.appliedCode.value || undefined,
           items: cartStore.items.map(item => ({
             productId: item.productId,
             variantId: item.variantId,
@@ -286,6 +283,7 @@ async function handleSubmit() {
         })
 
         cartStore.clearCart()
+        promo.reset()
         loyalty.reset()
         router.push({
           path: '/order-success',
@@ -307,9 +305,9 @@ async function handleSubmit() {
   <div class="synthwave-checkout min-h-screen py-10 font-sans relative">
     <!-- Synthwave Background -->
     <div class="fixed inset-0 z-0 pointer-events-none">
-      <div class="absolute inset-0 bg-gradient-to-b from-[#1a0a2e] via-[#16082a] to-[#0d0515]"></div>
-      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[200%] h-[40%] bg-gradient-to-t from-[#ff2d95]/15 via-[#ff6b35]/5 to-transparent"></div>
-      <div class="absolute bottom-0 left-0 right-0 h-[30%] bg-[linear-gradient(rgba(255,45,149,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,45,149,0.1)_1px,transparent_1px)] bg-[size:30px_30px] [perspective:500px] [transform:rotateX(60deg)] origin-bottom opacity-40"></div>
+      <div class="absolute inset-0 bg-gradient-to-b from-[#1a0a2e] via-[#16082a] to-[#0d0515]" />
+      <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-[200%] h-[40%] bg-gradient-to-t from-[#ff2d95]/15 via-[#ff6b35]/5 to-transparent" />
+      <div class="absolute bottom-0 left-0 right-0 h-[30%] bg-[linear-gradient(rgba(255,45,149,0.1)_1px,transparent_1px),linear-gradient(90deg,rgba(255,45,149,0.1)_1px,transparent_1px)] bg-[size:30px_30px] [perspective:500px] [transform:rotateX(60deg)] origin-bottom opacity-40" />
     </div>
     
     <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -334,11 +332,11 @@ async function handleSubmit() {
         <div class="lg:col-span-7 space-y-8">
           <!-- Personal Info -->
           <div class="relative">
-            <div class="absolute -inset-1 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl blur"></div>
+            <div class="absolute -inset-1 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-2xl blur" />
             <div class="relative bg-[#1a0a2e]/95 p-6 rounded-2xl border border-pink-500/30 backdrop-blur-sm">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
+                  <label class="block text-sm font-semibold text-purple-200 ms-1">{{ storefrontContent.checkout.form.fullName.label }}</label>
                   <input
                     v-model="form.fullName"
                     type="text"
@@ -347,7 +345,7 @@ async function handleSubmit() {
                   >
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.phone.label }}</label>
+                  <label class="block text-sm font-semibold text-purple-200 ms-1">{{ storefrontContent.checkout.form.phone.label }}</label>
                   <input
                     v-model="form.phone"
                     type="tel"
@@ -356,29 +354,15 @@ async function handleSubmit() {
                   >
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
-                  <div class="relative">
-                    <select
-                      v-model="form.wilaya"
-                      class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none appearance-none cursor-pointer"
-                    >
-                      <option value="" disabled class="bg-[#1a0a2e]">{{ storefrontContent.checkout.form.wilaya.placeholder }}</option>
-                      <option
-                        v-for="w in wilayas"
-                        :key="w.code"
-                        :value="w.code"
-                        class="bg-[#1a0a2e]"
-                      >
-                        {{ w.code }} - {{ w.name }}
-                      </option>
-                    </select>
-                    <div class="absolute right-4 rtl:right-auto rtl:left-4 top-1/2 -translate-y-1/2 pointer-events-none text-purple-400">
-                      <Icon name="lucide:chevron-down" class="w-4 h-4" />
-                    </div>
-                  </div>
+                  <label class="block text-sm font-semibold text-purple-200 ms-1">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+                  <WilayaField
+                    v-model="form.wilaya"
+                    input-class="w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none appearance-none cursor-pointer"
+                    :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+                  />
                 </div>
                 <div class="col-span-2 md:col-span-1 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.commune.label }}</label>
+                  <label class="block text-sm font-semibold text-purple-200 ms-1">{{ storefrontContent.checkout.form.commune.label }}</label>
                   <CommuneField
                     v-model="form.commune"
                     :wilaya-code="form.wilaya"
@@ -387,8 +371,11 @@ async function handleSubmit() {
                     :select-class="'w-full h-12 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-white focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none'"
                   />
                 </div>
-                <div v-if="!hideOptionalAddress" class="col-span-2 space-y-2">
-                  <label class="block text-sm font-semibold text-purple-200 ml-1 rtl:ml-0 rtl:mr-1">{{ storefrontContent.checkout.form.address.label }}</label>
+                <div
+                  v-if="!hideOptionalAddress"
+                  class="col-span-2 space-y-2"
+                >
+                  <label class="block text-sm font-semibold text-purple-200 ms-1">{{ storefrontContent.checkout.form.address.label }}</label>
                   <input
                     v-model="form.address"
                     type="text"
@@ -401,20 +388,23 @@ async function handleSubmit() {
           </div>
 
           <!-- Delivery Options -->
-          <div v-if="form.wilaya && form.commune" class="relative">
-            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-2xl blur"></div>
+          <div
+            v-if="form.wilaya && form.commune"
+            class="relative"
+          >
+            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-2xl blur" />
             <div class="relative bg-[#1a0a2e]/95 p-6 rounded-2xl border border-cyan-500/30 backdrop-blur-sm">
               <div class="flex items-center justify-between mb-4">
-                  <h3 class="text-sm font-bold text-white uppercase tracking-wide">
+                <h3 class="text-sm font-bold text-white uppercase tracking-wide">
                   {{ storefrontContent.checkout.sections.deliveryOptions }}
-                  </h3>
-                  <span class="text-[10px] font-bold text-pink-400 bg-pink-500/20 px-2 py-1 rounded-full uppercase border border-pink-500/30">
+                </h3>
+                <span class="text-[10px] font-bold text-pink-400 bg-pink-500/20 px-2 py-1 rounded-full uppercase border border-pink-500/30">
                   {{ storefrontContent.checkout.required }}
-                  </span>
-                </div>
-                <p class="text-xs text-purple-300/60 mb-6 font-medium">
+                </span>
+              </div>
+              <p class="text-xs text-purple-300/60 mb-6 font-medium">
                 {{ storefrontContent.checkout.help.deliveryOptions }}
-                </p>
+              </p>
                       
               <div class="space-y-3">
                 <div 
@@ -434,12 +424,12 @@ async function handleSubmit() {
                         ? 'bg-gradient-to-br from-pink-500/30 to-orange-500/30 border-pink-500/50' 
                         : 'bg-purple-900/50 border-purple-500/30'"
                     >
-                      <Icon 
-                        :name="option.icon" 
+                      <CarrierMark
+                        :provider="option.provider"
+                        :icon="option.icon"
+                        :alt="option.providerLabel"
                         class="w-6 h-6 transition-colors duration-300"
-                        :class="form.selectedDeliveryOption === option.id 
-                          ? 'text-pink-400' 
-                          : 'text-purple-400/70'"
+                        :class="form.selectedDeliveryOption === option.id ? 'text-pink-400' : 'text-purple-400/70'"
                       />
                     </div>
                     
@@ -449,7 +439,8 @@ async function handleSubmit() {
                         <h4 class="font-bold text-white text-sm">
                           {{ option.providerLabel }}
                         </h4>
-                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
+                        <span
+                          class="text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide"
                           :class="option.mode === 'home' ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500/30' : option.mode === 'pickup' ? 'bg-purple-500/20 text-purple-300 border border-purple-500/30' : 'bg-green-500/20 text-green-400 border border-green-500/30'"
                         >
                           {{ option.modeLabel }}
@@ -462,10 +453,10 @@ async function handleSubmit() {
                     
                     <!-- Price & Radio -->
                     <div class="flex items-center gap-3 flex-shrink-0">
-                      <div class="text-right">
-                  <div class="font-bold text-pink-400 text-base">
-                    {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
-                  </div>
+                      <div class="text-end">
+                        <div class="font-bold text-pink-400 text-base">
+                          {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
+                        </div>
                       </div>
                       <span
                         class="block w-5 h-5 rounded-full border-2 transition-all duration-300 flex-shrink-0"
@@ -477,59 +468,68 @@ async function handleSubmit() {
                           v-if="form.selectedDeliveryOption === option.id"
                           class="block w-full h-full rounded-full flex items-center justify-center"
                         >
-                          <Icon name="lucide:check" class="w-3 h-3 text-white" />
+                          <Icon
+                            name="lucide:check"
+                            class="w-3 h-3 text-white"
+                          />
                         </span>
                       </span>
                     </div>
                   </div>
-                  <div v-if="option.mode === 'pickup' && option.provider === 'MAYSTRO' && (pickupPointsLoading || stopDeskName || form.pickupPoint || pickupPointsError)" class="mt-3 pt-3 border-t border-cyan-500/20">
-                    <div v-if="pickupPointsLoading" class="flex items-center gap-2 text-xs text-purple-300/60">
-                      <Icon name="lucide:loader-2" class="w-3 h-3 animate-spin" />
-                      Loading...
-                    </div>
-                    <template v-else>
-                      <div v-if="stopDeskName" class="flex items-center gap-2 text-xs text-purple-300/60">
-                        <Icon name="lucide:building-2" class="w-3 h-3 text-cyan-500/40 flex-shrink-0" />
-                        <span>{{ stopDeskName }}</span>
-                      </div>
-                      <div v-if="form.pickupPoint" class="flex items-center gap-2 text-xs mt-1">
-                        <Icon name="lucide:map-pin" class="w-3 h-3 text-cyan-400" />
-                        <span class="font-semibold text-white">{{ form.pickupPoint }}</span>
-                      </div>
-                    </template>
-                    <p v-if="pickupPointsError" class="text-xs text-amber-400 mt-1">{{ pickupPointsError }}</p>
+                  <div
+                    v-if="option.mode === 'pickup' && option.provider && form.selectedDeliveryOption === option.id"
+                    class="mt-3 pt-3 border-t border-slate-200"
+                  >
+                    <StorefrontSharedPickupPointField
+                      v-model="form.pickupPoint"
+                      :points="pickupPoints"
+                      :loading="pickupPointsLoading"
+                      :error="pickupPointsError"
+                      :is-pickup-selected="isPickupSelected"
+                      :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+                      :empty-label="storefrontContent.checkout.help.deliveryOptions"
+                      @change="syncPickupPointCommune"
+                    />
                   </div>
                 </div>
               </div>
             </div>
           </div>
-          <div v-else class="relative">
-            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-2xl blur"></div>
+          <div
+            v-else
+            class="relative"
+          >
+            <div class="absolute -inset-1 bg-gradient-to-r from-cyan-500/20 to-pink-500/20 rounded-2xl blur" />
             <div class="relative bg-[#1a0a2e]/95 p-6 rounded-2xl border border-cyan-500/30 backdrop-blur-sm text-center text-sm text-purple-300/60">
-              <Icon name="lucide:map-pin" class="w-5 h-5 mx-auto mb-2 text-purple-500/40" />
+              <Icon
+                name="lucide:map-pin"
+                class="w-5 h-5 mx-auto mb-2 text-purple-500/40"
+              />
               {{ storefrontContent.checkout.help.deliveryOptions }}
             </div>
           </div>
-
         </div>
 
         <!-- Right Column: Summary -->
         <div class="lg:col-span-5">
           <div class="relative lg:sticky lg:top-8">
-            <div class="absolute -inset-1 bg-gradient-to-r from-orange-500/30 via-pink-500/30 to-purple-500/30 rounded-2xl blur"></div>
+            <div class="absolute -inset-1 bg-gradient-to-r from-orange-500/30 via-pink-500/30 to-purple-500/30 rounded-2xl blur" />
             <div class="relative bg-[#1a0a2e]/95 p-7 rounded-2xl border border-orange-500/30 backdrop-blur-sm">
               <div class="flex items-center justify-between mb-6 pb-4 border-b border-purple-500/20">
                 <h2 class="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">
                   Order Summary
                 </h2>
                 <div class="flex items-center gap-1.5 text-sm font-semibold text-pink-400 bg-pink-500/20 px-3 py-1.5 rounded-full border border-pink-500/30">
-                  <Icon name="lucide:handbag" class="w-4 h-4" />
+                  <Icon
+                    name="lucide:handbag"
+                    class="w-4 h-4"
+                  />
                   <span>{{ cartStore.itemCount }} {{ cartStore.itemCount === 1 ? 'item' : 'items' }}</span>
                 </div>
               </div>
 
               <!-- Cart Items -->
-              <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pr-2">
+              <div class="space-y-4 mb-6 max-h-80 overflow-y-auto pe-2">
                 <div
                   v-for="item in cartStore.items"
                   :key="item.productId"
@@ -546,7 +546,10 @@ async function handleSubmit() {
                       v-else
                       class="h-full w-full flex items-center justify-center text-purple-400/50"
                     >
-                      <Icon name="lucide:image" class="w-8 h-8" />
+                      <Icon
+                        name="lucide:image"
+                        class="w-8 h-8"
+                      />
                     </div>
                   </div>
                   <div class="flex-1 min-w-0">
@@ -558,7 +561,7 @@ async function handleSubmit() {
                     </p>
                   </div>
                   <div class="font-bold text-pink-400 text-sm whitespace-nowrap">
-                    {{ item.price }} {{ currencyCode }}
+                    {{ formatAmount(item.price) }} {{ currencyCode }}
                   </div>
                 </div>
               </div>
@@ -567,7 +570,10 @@ async function handleSubmit() {
               <div class="bg-gradient-to-br from-purple-900/50 to-pink-900/30 p-5 rounded-xl border border-purple-500/30 mb-6">
                 <div class="flex justify-between items-center mb-3">
                   <div class="flex items-center gap-2">
-                    <Icon name="lucide:ticket-percent" class="w-4 h-4 text-pink-400" />
+                    <Icon
+                      name="lucide:ticket-percent"
+                      class="w-4 h-4 text-pink-400"
+                    />
                     <h4 class="text-sm font-bold text-white">
                       {{ storefrontContent.checkout.coupon.title }}
                     </h4>
@@ -579,37 +585,80 @@ async function handleSubmit() {
                 <div class="flex gap-2">
                   <input
                     v-model="couponCode"
+                    :disabled="promo.applied.value"
                     type="text"
                     :placeholder="storefrontContent.checkout.coupon.placeholder"
                     class="flex-1 h-11 rounded-xl border border-purple-500/30 bg-purple-900/30 px-4 text-sm text-white placeholder:text-purple-400/50 focus:border-pink-500 focus:ring-2 focus:ring-pink-500/20 transition-all duration-200 outline-none font-medium"
                   >
-                  <button class="px-5 h-11 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-bold text-sm rounded-xl transition-all duration-200 shadow-lg shadow-pink-500/20 whitespace-nowrap">
-                    {{ storefrontContent.actions.apply }}
+                  <button
+                    type="button"
+                    class="px-5 h-11 bg-gradient-to-r from-pink-500 to-orange-500 hover:from-pink-600 hover:to-orange-600 text-white font-bold text-sm rounded-xl transition-all duration-200 shadow-lg shadow-pink-500/20 whitespace-nowrap"
+                    :disabled="promo.checking.value"
+                    @click="applyPromoCode"
+                  >
+                    {{ couponButtonLabel }}
                   </button>
                 </div>
+                <p
+                  v-if="promo.errorMessage.value"
+                  class="mt-2 text-xs text-red-500"
+                >
+                  {{ promo.errorMessage.value }}
+                </p>
+                <p
+                  v-else-if="promo.applied.value"
+                  class="mt-2 text-xs text-emerald-600"
+                >
+                  {{ promo.freeShipping.value
+                    ? storefrontContent.checkout.coupon.freeShipping
+                    : storefrontContent.checkout.coupon.applied(promo.appliedCode.value) }}
+                </p>
               </div>
 
               <!-- Totals -->
               <div class="space-y-3 pt-4 border-t border-purple-500/20">
-                <div v-if="selectedDelivery" class="flex justify-between text-sm">
+                <div
+                  v-if="selectedDelivery"
+                  class="flex justify-between text-sm"
+                >
                   <span class="text-purple-300/60">{{ storefrontContent.checkout.summary.deliveryOption }}</span>
                   <div class="flex items-center gap-2">
-                    <Icon :name="selectedDelivery.icon" class="w-4 h-4 text-purple-300" />
+                    <Icon
+                      :name="selectedDelivery.icon"
+                      class="w-4 h-4 text-purple-300"
+                    />
                     <span class="font-medium text-white">{{ selectedDelivery.providerLabel }} - {{ selectedDelivery.modeLabel }}</span>
                   </div>
                 </div>
                 <div class="flex justify-between text-sm">
                   <span class="text-purple-300/60">{{ storefrontContent.cart.summary.subtotal }}</span>
-                  <span class="font-bold text-white">{{ cartStore.total }} {{ currencyCode }}</span>
+                  <span class="font-bold text-white">{{ formatAmount(cartStore.total) }} {{ currencyCode }}</span>
                 </div>
-                <div v-if="selectedDelivery" class="flex justify-between text-sm">
+                <div
+                  v-if="cartStore.clearanceDiscount > 0"
+                  class="flex justify-between text-sm"
+                >
+                  <span class="text-amber-400">{{ t('storefront.clearance.discountLine') }}</span>
+                  <span class="font-medium text-amber-400">-{{ formatAmount(cartStore.clearanceDiscount) }} {{ currencyCode }}</span>
+                </div>
+                <div
+                  v-if="promoTotalDiscount > 0"
+                  class="flex justify-between text-sm"
+                >
+                  <span class="text-amber-400">{{ promoDiscountLabel }}</span>
+                  <span class="font-medium text-amber-400">-{{ formatAmount(promoTotalDiscount) }} {{ currencyCode }}</span>
+                </div>
+                <div
+                  v-if="selectedDelivery"
+                  class="flex justify-between text-sm"
+                >
                   <span class="text-purple-300/60">{{ storefrontContent.checkout.summary.shippingFee }}</span>
                   <span class="font-bold text-cyan-400">{{ selectedDelivery.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${selectedDelivery.price} ${currencyCode}` }}</span>
                 </div>
                           
                 <div class="flex justify-between items-end pt-4 border-t border-purple-500/20 mt-4">
                   <span class="font-bold text-xl text-white">{{ storefrontContent.cart.summary.total }}</span>
-                  <span class="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">{{ grandTotal }} {{ currencyCode }}</span>
+                  <span class="font-bold text-xl text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">{{ formatAmount(grandTotal) }} {{ currencyCode }}</span>
                 </div>
               </div>
 
@@ -617,7 +666,10 @@ async function handleSubmit() {
                 v-if="errorMessage"
                 class="mt-4 rounded-xl border border-red-500/50 bg-red-500/10 text-red-300 text-sm px-4 py-3.5 flex items-start gap-3"
               >
-                <Icon name="lucide:alert-circle" class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
+                <Icon
+                  name="lucide:alert-circle"
+                  class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5"
+                />
                 <span class="font-medium">{{ errorMessage }}</span>
               </div>
 

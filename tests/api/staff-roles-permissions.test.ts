@@ -12,7 +12,7 @@ describe('Staff roles: permissions enforcement', () => {
     let staffToken = ''
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Tenant Staff Perms', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant Staff Perms', slug } })
         tenantId = tenant.id
 
         const [admin, otherAdmin] = await Promise.all([

@@ -11,7 +11,7 @@ describe('Custom domain tenant resolution (API)', async () => {
 
   it('resolves tenant from custom domain on public store settings', async () => {
     const tenant = await prisma.tenant.create({
-      data: { name: 'Custom Domain Store', slug }
+      data: { publishedAt: new Date(), name: 'Custom Domain Store', slug }
     })
 
     await prisma.tenantDomain.create({

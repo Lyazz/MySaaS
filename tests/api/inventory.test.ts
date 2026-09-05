@@ -23,8 +23,8 @@ describe('Inventory management + movements', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await prisma.$transaction([
-            prisma.tenant.create({ data: { name: 'Inventory Tenant A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Inventory Tenant B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Inventory Tenant A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Inventory Tenant B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

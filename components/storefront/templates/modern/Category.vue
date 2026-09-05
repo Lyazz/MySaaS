@@ -104,7 +104,7 @@ const categoriesDropdownOpen = ref(false)
           <div>
             <button
               type="button"
-              class="w-full flex items-center justify-between text-left mb-4"
+              class="w-full flex items-center justify-between text-start mb-4"
               @click="categoriesDropdownOpen = !categoriesDropdownOpen"
             >
               <h3 class="font-bold text-slate-900">

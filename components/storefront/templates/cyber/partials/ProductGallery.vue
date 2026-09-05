@@ -3,6 +3,7 @@ const props = defineProps<{
     images: string[]
     title?: string
 }>()
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const activeIndex = ref(0)
 
@@ -20,11 +21,16 @@ const prevImage = () => {
 <template>
   <div class="product-gallery">
     <!-- Main Image -->
-    <div class="relative aspect-[4/5] overflow-hidden rounded-xl bg-purple-900/30 group">
+    <div
+      class="relative aspect-[4/5] overflow-hidden rounded-xl bg-purple-900/30 group cursor-zoom-in"
+      @mousemove="onPointerMove"
+      @mouseleave="onPointerLeave"
+    >
       <img
         :src="activeImage"
         :alt="title || 'Product image'"
-        class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        class="w-full h-full object-contain transition-transform duration-500"
+        :style="zoomStyle"
       >
       
       <!-- Navigation Arrows -->

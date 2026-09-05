@@ -1,26 +1,26 @@
 <template>
   <form
-    class="rounded-xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)"
-    @submit.prevent="emit('submit')"
-  >
+ class="rounded-xl overflow-hidden surface-1 border border-line" 
+ @submit.prevent="emit('submit')"
+>
     <!-- Tabs Navigation -->
-    <div class="overflow-x-auto custom-scrollbar" style="border-bottom: 1px solid var(--surface-border)">
+    <div class="overflow-x-auto custom-scrollbar border-b border-line">
       <nav
         class="flex -mb-px"
         aria-label="Tabs"
       >
         <button
-          v-for="tab in tabs"
-          :key="tab.id"
-          type="button"
-          class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200" style="color: var(--text-secondary)"
-          :class="[
-            currentTab === tab.id
-              ? '[border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]'
-              : 'border-transparent hover:border-white/20'
-          ]"
-          @click="currentTab = tab.id"
-        >
+ v-for="tab in tabs"
+ :key="tab.id"
+ type="button"
+ class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm transition-colors duration-200 text-secondary" 
+ :class="[
+ currentTab === tab.id
+ ? '[border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]'
+ : 'border-transparent hover:border-line-strong'
+ ]"
+ @click="currentTab = tab.id"
+>
           {{ tab.name }}
         </button>
       </nav>
@@ -47,7 +47,6 @@
             placeholder="product-slug"
             hint="URL-friendly version of the title"
             required
-            pattern="[a-z0-9-]+"
           />
 
         <AdminFormField
@@ -105,7 +104,7 @@
               >
                 <input
                   type="checkbox"
-                  class="h-4 w-4 rounded [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
+                  class="h-4 w-4 rounded-lg [color:var(--brand)] focus:[--tw-ring-color:var(--brand)]"
                   :checked="form.categoryIds.includes(cat.id)"
                   @change="toggleCategorySelection(cat.id, ($event.target as HTMLInputElement).checked)"
                 >
@@ -119,15 +118,15 @@
 
         <div class="flex items-center">
           <input
-            id="isActive"
-            v-model="form.isActive"
-            type="checkbox"
-            class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded" style="border-color: var(--surface-border); background: var(--surface-3)"
-          >
+ id="isActive"
+ v-model="form.isActive"
+ type="checkbox"
+ class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded-lg border-line surface-3" 
+>
           <label
-            for="isActive"
-            class="ml-2 block text-sm" style="color: var(--text-primary)"
-          >
+ for="isActive"
+ class="ms-2 block text-sm text-primary" 
+>
             Product is active and visible to customers
           </label>
         </div>
@@ -165,7 +164,7 @@
 
     <div
       v-if="errorMessage"
-      class="p-4 bg-red-50 border border-red-200 rounded-md mx-6 mb-6"
+      class="p-4 bg-red-50 border border-red-200 rounded-lg mx-6 mb-6"
     >
       <p class="text-sm text-red-800">
         {{ errorMessage }}
@@ -173,7 +172,7 @@
     </div>
 
     <!-- Actions Footer -->
-    <div class="px-6 py-4 flex justify-end space-x-3" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
+    <div class="px-6 py-4 flex justify-end space-x-3 rtl:space-x-reverse surface-2 border-t border-line">
       <NuxtLink
         v-if="cancelTo"
         :to="cancelTo"
@@ -184,7 +183,7 @@
       <button
         type="submit"
         :disabled="submitting"
-        class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
+        class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {{ submitting ? submittingLabel : primaryLabel }}
       </button>
@@ -198,6 +197,7 @@ import AdminFormField from '~/components/admin/FormField.vue'
 import ProductImagesUploader from '~/components/admin/ProductImagesUploader.vue'
 import RichTextEditor from '~/components/admin/RichTextEditor.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import { normalizeContentSlug } from '~/shared/content-slug'
 
 interface Category {
   id: string
@@ -331,10 +331,7 @@ watch(images, (val) => {
 }, { deep: true })
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeContentSlug(text)
 }
 </script>
 

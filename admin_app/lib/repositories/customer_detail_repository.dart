@@ -5,6 +5,7 @@ import '../models/customer.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class CustomerDetailRepository {
   final ApiService _apiService;
@@ -12,6 +13,8 @@ class CustomerDetailRepository {
   final SyncService _syncService = SyncService();
 
   CustomerDetailRepository(this._apiService);
+
+  String get _tid => TenantModeService().activeTenantId;
 
   Future<CustomerDetail?> getCustomerDetail(
     String id, {
@@ -30,8 +33,8 @@ class CustomerDetailRepository {
     final db = await _dbService.database;
     final customerRows = await db.query(
       'customers',
-      where: 'id = ?',
-      whereArgs: [trimmed],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [trimmed, _tid],
       limit: 1,
     );
 
@@ -51,8 +54,8 @@ class CustomerDetailRepository {
 
     final salesRows = await db.query(
       'sales',
-      where: 'customerId = ?',
-      whereArgs: [trimmed],
+      where: 'customerId = ? AND tenantId = ?',
+      whereArgs: [trimmed, _tid],
       orderBy: 'createdAt DESC',
     );
 
@@ -70,8 +73,8 @@ class CustomerDetailRepository {
 
     final paymentsRows = await db.query(
       'customer_payments',
-      where: 'customerId = ?',
-      whereArgs: [trimmed],
+      where: 'customerId = ? AND tenantId = ?',
+      whereArgs: [trimmed, _tid],
       orderBy: 'createdAt DESC',
     );
 
@@ -93,4 +96,3 @@ class CustomerDetailRepository {
     return CustomerDetail(summary: summary, sales: sales, payments: payments);
   }
 }
-

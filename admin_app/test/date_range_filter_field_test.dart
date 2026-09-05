@@ -1,7 +1,7 @@
 import 'package:admin_app/widgets/form/date_range_filter_field.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 void main() {
   testWidgets('renders formatted range and clears', (tester) async {
@@ -50,5 +50,35 @@ void main() {
 
     expect(find.byIcon(LucideIcons.x), findsNothing);
   });
-}
 
+  testWidgets('applies today preset', (tester) async {
+    DateTimeRange? changedTo;
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: DateRangeFilterField(
+            range: null,
+            firstDate: DateTime(2020),
+            lastDate: DateTime(2030),
+            onChanged: (r) => changedTo = r,
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('Custom').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Today').last);
+    await tester.pumpAndSettle();
+
+    final today = DateTime.now();
+    expect(changedTo, isNotNull);
+    expect(changedTo!.start.year, today.year);
+    expect(changedTo!.start.month, today.month);
+    expect(changedTo!.start.day, today.day);
+    expect(changedTo!.end.year, today.year);
+    expect(changedTo!.end.month, today.month);
+    expect(changedTo!.end.day, today.day);
+  });
+}

@@ -1,16 +1,16 @@
 <template>
   <div class="max-w-6xl mx-auto space-y-6">
     <nav class="flex" aria-label="Breadcrumb">
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
-          <NuxtLink to="/admin/cash" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)">
+          <NuxtLink to="/admin/cash" class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors text-secondary">
             {{ t('admin.pages.cash.title') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ cashbox?.name ?? cashboxId.substring(0, 8) }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-tertiary" />
+            <span class="ms-1 text-tertiary">{{ cashbox?.name ?? cashboxId.substring(0, 8) }}</span>
           </div>
         </li>
       </ol>
@@ -18,10 +18,10 @@
 
     <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-bold text-primary">
           {{ cashbox?.name ?? t('admin.pages.cash.cashbox.titleFallback') }}
         </h2>
-        <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+        <p class="mt-1 text-sm text-secondary">
           <span v-if="cashbox?.openSession">
             {{ t('admin.pages.cash.cashboxes.openSession', { id: cashbox.openSession.id.substring(0, 8) }) }}
           </span>
@@ -35,7 +35,7 @@
         <button
           v-if="cashbox && !cashbox.openSession"
           type="button"
-          class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-sm font-semibold text-white hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
+          class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-sm font-semibold text-brand-contrast hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
           @click="openOpenSession"
         >
           <Icon name="lucide:play" class="h-4 w-4" />
@@ -54,14 +54,14 @@
       </div>
     </div>
 
-    <section class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-      <div class="border-b p-4" style="border-color: var(--surface-border)">
+    <section class="rounded-2xl overflow-hidden surface-1 border border-line">
+      <div class="border-b p-4 border-line">
         <div class="flex items-center justify-between gap-4">
           <div>
-            <h3 class="text-sm font-semibold" style="color: var(--text-primary)">
+            <h3 class="text-sm font-semibold text-primary">
               {{ t('admin.pages.cash.transactions.title') }}
             </h3>
-            <p class="mt-1 text-xs" style="color: var(--text-tertiary)">
+            <p class="mt-1 text-xs text-tertiary">
               {{ t('admin.pages.cash.cashbox.transactionsHint') }}
             </p>
           </div>
@@ -78,56 +78,56 @@
 
       <div v-if="loading" class="p-10 text-center">
         <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-        <p class="mt-2 text-sm" style="color: var(--text-secondary)">
+        <p class="mt-2 text-sm text-secondary">
           {{ t('admin.pages.cash.transactions.loading') }}
         </p>
       </div>
 
       <div v-else-if="txs.length === 0" class="p-10 text-center">
-        <Icon name="lucide:inbox" class="mx-auto h-10 w-10" style="color: var(--text-muted)" />
-        <p class="mt-3 text-sm font-semibold" style="color: var(--text-primary)">
+        <Icon name="lucide:inbox" class="mx-auto h-10 w-10 text-muted" />
+        <p class="mt-3 text-sm font-semibold text-primary">
           {{ t('admin.pages.cash.transactions.empty') }}
         </p>
       </div>
 
       <div v-else class="overflow-x-auto">
-        <table class="min-w-full divide-y" style="border-color: var(--surface-border)">
-          <thead style="background: var(--surface-2)">
+        <table class="min-w-full divide-y border-line">
+          <thead class="surface-2">
             <tr>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                 {{ t('admin.pages.cash.transactions.table.date') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                 {{ t('admin.pages.cash.transactions.table.type') }}
               </th>
-              <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-start text-xs font-semibold uppercase tracking-wider text-muted">
                 {{ t('admin.pages.cash.transactions.table.method') }}
               </th>
-              <th class="px-4 py-3 text-right text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+              <th class="px-4 py-3 text-end text-xs font-semibold uppercase tracking-wider text-muted">
                 {{ t('admin.pages.cash.transactions.table.amount') }}
               </th>
             </tr>
           </thead>
-          <tbody class="divide-y" style="border-color: var(--surface-border)">
+          <tbody class="divide-y border-line">
             <tr v-for="tx in txs" :key="tx.id" class="transition-colors hover:opacity-80">
-              <td class="px-4 py-3 whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="px-4 py-3 whitespace-nowrap text-sm text-secondary">
                 {{ formatDate(tx.createdAt) }}
               </td>
-              <td class="px-4 py-3 text-sm" style="color: var(--text-secondary)">
-                <p class="font-semibold" style="color: var(--text-primary)">
+              <td class="px-4 py-3 text-sm text-secondary">
+                <p class="font-semibold text-primary">
                   {{ typeLabel(tx.type) }}
                 </p>
-                <p v-if="tx.expenseCategory" class="text-xs" style="color: var(--text-muted)">
+                <p v-if="tx.expenseCategory" class="text-xs text-muted">
                   {{ tx.expenseCategory }}
                 </p>
-                <p v-if="tx.reference" class="text-xs" style="color: var(--text-muted)">
+                <p v-if="tx.reference" class="text-xs text-muted">
                   {{ tx.reference }}
                 </p>
               </td>
-              <td class="px-4 py-3 text-sm" style="color: var(--text-secondary)">
+              <td class="px-4 py-3 text-sm text-secondary">
                 {{ methodLabel(tx.method) }}
               </td>
-              <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-semibold" :class="tx.direction === 'IN' ? 'text-emerald-400' : 'text-rose-400'">
+              <td class="px-4 py-3 whitespace-nowrap text-end text-sm font-semibold" :class="tx.direction === 'IN' ? 'text-emerald-400' : 'text-rose-400'">
                 {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
               </td>
             </tr>
@@ -140,8 +140,8 @@
     <div v-if="openSessionOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="openSessionOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="openSessionOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.openSession.title') }}
           </h3>
 
@@ -150,7 +150,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.openSession.openingFloatLabel') }}
               </label>
-              <BaseInput v-model="openSessionForm.openingFloat" placeholder="0" />
+              <BaseInput v-model="openSessionForm.openingFloat" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -170,7 +170,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+              class="px-4 py-2 rounded-lg [background:var(--brand)] text-brand-contrast text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitOpenSession"
             >
@@ -185,36 +185,36 @@
     <div v-if="closeSessionOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeSessionOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="closeSessionOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.closeSession.title') }}
           </h3>
 
           <div class="mt-4 space-y-3">
-            <div class="rounded-lg p-3" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
-              <div v-if="closeExpectedLoading" class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
+            <div class="rounded-lg p-3 surface-3 border border-line">
+              <div v-if="closeExpectedLoading" class="flex items-center gap-2 text-sm text-secondary">
                 <Icon name="lucide:loader-2" class="h-4 w-4 animate-spin" />
                 {{ t('admin.pages.cash.sessions.expected.loading') }}
               </div>
               <div v-else-if="closeExpected" class="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.openingFloat') }}
                   </p>
-                  <p class="mt-0.5 font-semibold" style="color: var(--text-primary)">
+                  <p class="mt-0.5 font-semibold text-primary">
                     {{ formatCurrency(Number(closeExpected.openingFloat)) }}
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.expectedClosing') }}
                   </p>
-                  <p class="mt-0.5 font-semibold" style="color: var(--text-primary)">
+                  <p class="mt-0.5 font-semibold text-primary">
                     {{ formatCurrency(Number(closeExpected.expectedClosing)) }}
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.directions.in') }}
                   </p>
                   <p class="mt-0.5 font-semibold text-emerald-400">
@@ -222,7 +222,7 @@
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.directions.out') }}
                   </p>
                   <p class="mt-0.5 font-semibold text-rose-400">
@@ -230,7 +230,7 @@
                   </p>
                 </div>
                 <div class="col-span-2 flex items-center justify-between">
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.difference') }}
                   </p>
                   <p class="font-semibold" :class="closeDifference !== null && closeDifference !== 0 ? 'text-rose-400' : ''" :style="!(closeDifference !== null && closeDifference !== 0) ? 'color: var(--text-primary)' : ''">
@@ -238,7 +238,7 @@
                   </p>
                 </div>
               </div>
-              <div v-else class="text-sm" style="color: var(--text-secondary)">
+              <div v-else class="text-sm text-secondary">
                 {{ t('admin.pages.cash.sessions.expected.unavailable') }}
               </div>
             </div>
@@ -246,7 +246,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.closeSession.closingCountLabel') }}
               </label>
-              <BaseInput v-model="closeSessionForm.closingCount" placeholder="0" />
+              <BaseInput v-model="closeSessionForm.closingCount" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -266,7 +266,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md text-white text-sm font-semibold disabled:opacity-50 [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
+              class="px-4 py-2 rounded-lg text-brand-contrast text-sm font-semibold disabled:opacity-50 [background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
               :disabled="actionLoading"
               @click="submitCloseSession"
             >
@@ -282,6 +282,7 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import { parsePriceInput } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'auth',
@@ -339,11 +340,11 @@ const closeExpectedLoading = ref(false)
 
 const closeDifference = computed(() => {
   if (!closeExpected.value) return null
-  const closing = Number.parseFloat(String(closeSessionForm.closingCount || ''))
+  const closing = parsePriceInput(closeSessionForm.closingCount)
   if (!Number.isFinite(closing)) return null
   const expected = Number(closeExpected.value.expectedClosing)
   if (!Number.isFinite(expected)) return null
-  return closing - expected
+  return Number(closing) - expected
 })
 
 function typeLabel(type: string) {
@@ -416,12 +417,14 @@ async function loadCloseExpected(sessionId: string) {
 }
 
 async function submitOpenSession() {
+  const openingFloat = parsePriceInput(openSessionForm.openingFloat)
+  if (!Number.isFinite(openingFloat)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cashboxes/${cashboxId}/sessions/open`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { openingFloat: openSessionForm.openingFloat, note: openSessionForm.note }
+      body: { openingFloat, note: openSessionForm.note }
     })
     openSessionOpen.value = false
     await refresh()
@@ -435,12 +438,14 @@ async function submitOpenSession() {
 async function submitCloseSession() {
   const sessionId = cashbox.value?.openSession?.id
   if (!sessionId) return
+  const closingCount = parsePriceInput(closeSessionForm.closingCount)
+  if (!Number.isFinite(closingCount)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cash-sessions/${sessionId}/close`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { closingCount: closeSessionForm.closingCount, note: closeSessionForm.note }
+      body: { closingCount, note: closeSessionForm.note }
     })
     closeSessionOpen.value = false
     closeExpected.value = null

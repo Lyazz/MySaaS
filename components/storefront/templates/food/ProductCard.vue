@@ -16,6 +16,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -48,7 +49,7 @@ const displayPrice = computed(() => {
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
@@ -59,7 +60,11 @@ const mainImage = computed(() => {
 })
 
 // TODO: Replace with real discount logic when available in backend
-const discount = 0 
+const discount = 0
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 
 const isNew = computed(() => {
@@ -91,6 +96,7 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: Number(props.product.price),
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
@@ -133,7 +139,7 @@ async function handleAddToCart() {
       <div v-if="viewMode !== 'list'" class="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
 
       <!-- Badges (Floating) -->
-      <div class="absolute top-4 left-4 flex flex-col gap-2 items-start z-10">
+      <div class="absolute top-4 start-4 flex flex-col gap-2 items-start z-10">
         <span
           v-if="isNew"
           class="px-3 py-1 bg-white/90 backdrop-blur text-emerald-700 text-xs font-bold rounded-full shadow-sm"
@@ -142,11 +148,15 @@ async function handleAddToCart() {
           v-if="discount > 0"
           class="px-3 py-1 bg-white/90 backdrop-blur text-orange-600 text-xs font-bold rounded-full shadow-sm"
         >-{{ discount }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-3 py-1 bg-amber-600 text-white text-xs font-bold rounded-full shadow-sm"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
       <!-- Quick Action Buttons (Floating on Hover for Grid) -->
       <div 
-        class="absolute bottom-4 right-4 flex gap-2 transition-all duration-300 z-10"
+        class="absolute bottom-4 end-4 flex gap-2 transition-all duration-300 z-10"
         :class="[
            viewMode === 'list' ? 'hidden' : 'translate-y-4 opacity-0 group-hover:translate-y-0 group-hover:opacity-100'
         ]"
@@ -192,7 +202,7 @@ async function handleAddToCart() {
     <div 
       :class="[
         viewMode === 'list' 
-          ? 'flex-1 text-left' 
+          ? 'flex-1 text-start' 
           : 'mt-4 px-2'
       ]"
     >
@@ -213,12 +223,12 @@ async function handleAddToCart() {
         <!-- Price (Top aligned in grid) -->
         <div v-if="viewMode !== 'list'" class="flex flex-col items-end flex-shrink-0">
              <span class="text-sm font-bold text-stone-900 bg-brand-50 px-2 py-0.5 rounded-full text-brand-700 border border-brand-100 whitespace-nowrap">
-                {{ Number(product.price).toLocaleString() }} <span class="text-[10px]">{{ currencyCode }}</span>
+                {{ formatAmount(product.price) }} <span class="text-[10px]">{{ currencyCode }}</span>
             </span>
              <span
                 v-if="originalPrice"
                 class="text-[10px] text-stone-400 line-through mt-0.5"
-                >{{ originalPrice }}</span
+                >{{ formatAmount(originalPrice) }}</span
             >
         </div>
       </div>
@@ -240,11 +250,11 @@ async function handleAddToCart() {
        <!-- List View Price & Actions -->
        <div v-if="viewMode === 'list'" class="mt-4 flex items-center justify-between">
            <div class="flex items-center gap-2">
-                <span class="text-2xl font-bold text-stone-900">{{ Number(product.price).toLocaleString() }} <span class="text-sm font-normal text-stone-500">{{ currencyCode }}</span></span>
+                <span class="text-2xl font-bold text-stone-900">{{ formatAmount(product.price) }} <span class="text-sm font-normal text-stone-500">{{ currencyCode }}</span></span>
                 <span
                 v-if="originalPrice"
                 class="text-sm text-stone-400 line-through"
-                >{{ originalPrice }} {{ currencyCode }}</span>
+                >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
            </div>
 
           <button 
@@ -270,7 +280,7 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 bg-stone-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 border border-stone-700/50 backdrop-blur-md bg-stone-900/95"
+        class="fixed bottom-4 end-4 z-50 bg-stone-900 text-white px-6 py-4 rounded-2xl shadow-xl flex items-center gap-4 border border-stone-700/50 backdrop-blur-md bg-stone-900/95"
       >
         <div class="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center text-white shrink-0">
           <Icon name="lucide:check" class="w-5 h-5" />

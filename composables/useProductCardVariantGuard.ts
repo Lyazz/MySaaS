@@ -1,4 +1,6 @@
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 type TemplateKey =
   | 'classic'
@@ -15,6 +17,9 @@ type TemplateKey =
   | 'activewear'
   | 'chrono'
   | 'maison'
+  | 'arena'
+  | 'nour'
+  | 'embellir'
 
 const TEMPLATE_KEYS: TemplateKey[] = [
   'classic',
@@ -30,7 +35,10 @@ const TEMPLATE_KEYS: TemplateKey[] = [
   'playful',
   'activewear',
   'chrono',
-  'maison'
+  'maison',
+  'arena',
+  'nour',
+  'embellir'
 ]
 
 const resolveTemplateKey = (value?: string | null): TemplateKey => {
@@ -80,7 +88,7 @@ const hasSelectableVariants = (variants: unknown): boolean => {
 }
 
 const defaultFetchProductBySlug = async (slug: string) => {
-  return await $fetch<any>(useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`), {
+  return await $fetch(useTenantApiUrl(`/api/products/${encodeURIComponent(slug)}`), {
     headers: {
       ...(useTenantApiHeaders() || {})
     }
@@ -119,7 +127,7 @@ const buildVariantLabel = (variant: any, optionPosition: Map<string, number>): s
 
 const normalizeVariants = (detail: any): ProductCardVariantModalItem[] => {
   const options = Array.isArray(detail?.options) ? detail.options : []
-  const optionPosition = new Map(
+  const optionPosition = new Map<string, number>(
     options.map((opt: any) => [String(opt?.id || ''), Number(opt?.position ?? 0)])
   )
 
@@ -128,21 +136,30 @@ const normalizeVariants = (detail: any): ProductCardVariantModalItem[] => {
     .map((variant: any) => {
       const label = buildVariantLabel(variant, optionPosition)
       const trackInventory = variant?.trackInventory !== false
-      const rawStock = Number(variant?.stock ?? 0)
-      const inStock = !trackInventory || rawStock > 0
+      const availableStock = Number(
+        variant?.availableStock ?? getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK })
+      )
+      const inStock = !trackInventory || availableStock > 0
       const variantImage = Array.isArray(variant?.images) ? variant.images[0]?.image?.url : undefined
+      const pricing = buildScopedProductPricing(
+        {
+          ...detail,
+          hasVariants: true
+        },
+        variant
+      )
 
       return {
         id: String(variant?.id || ''),
         label,
-        price: Number(variant?.price ?? detail?.price ?? 0),
-        stock: trackInventory ? Math.max(0, rawStock) : 9999,
+        price: Number(pricing.effectivePrice ?? variant?.price ?? detail?.price ?? 0),
+        stock: trackInventory ? Math.max(0, availableStock) : PRODUCT_INFINITE_STOCK,
         trackInventory,
         inStock,
         imageUrl: typeof variantImage === 'string' ? variantImage : undefined
       } satisfies ProductCardVariantModalItem
     })
-    .filter((variant) => variant.id.length > 0 && variant.label.length > 0)
+    .filter((variant: ProductCardVariantModalItem) => variant.id.length > 0 && variant.label.length > 0)
 }
 
 export const useProductCardVariantModalState = () => {

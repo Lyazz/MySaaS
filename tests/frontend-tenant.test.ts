@@ -11,6 +11,7 @@ describe('Frontend Tenant Resolution', async () => {
         // Create tenant
         await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Frontend Tenant',
                 slug,
             }

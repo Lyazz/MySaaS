@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from './ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -140,7 +141,7 @@ const {
       </div>
 
       <!-- Navigation Points (Classic Style) -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-10 left-0 right-0 z-20 flex justify-center space-x-4">
+      <div v-if="hasMultipleSlides" class="absolute bottom-10 start-0 end-0 z-20 flex justify-center space-x-4 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -152,13 +153,13 @@ const {
       
       <!-- Arrows (Minimal) -->
       <button 
-        v-if="hasMultipleSlides" class="absolute left-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
+        v-if="hasMultipleSlides" class="absolute start-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
         @click="prevSlide"
       >
          <Icon name="lucide:arrow-left" class="w-8 h-8 font-light" />
       </button>
       <button 
-        v-if="hasMultipleSlides" class="absolute right-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
+        v-if="hasMultipleSlides" class="absolute end-8 top-1/2 -translate-y-1/2 z-20 text-white/50 hover:text-white transition-colors hidden md:block"
         @click="nextSlide"
       >
          <Icon name="lucide:arrow-right" class="w-8 h-8 font-light" />
@@ -189,9 +190,7 @@ const {
               :alt="categoryDisplayTitle(cat)"
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105 opacity-90 group-hover:opacity-100"
             >
-            <div v-else class="w-full h-full bg-slate-100 flex items-center justify-center text-slate-300">
-                <span class="text-4xl font-serif text-slate-200">{{ cat.title[0] }}</span>
-            </div>
+            <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
             
             <!-- Overlay Content -->
             <div class="absolute inset-0 bg-black/10 group-hover:bg-black/20 transition-colors duration-500" />

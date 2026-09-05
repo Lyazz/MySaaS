@@ -13,18 +13,29 @@
     <div class="relative p-5">
       <div class="flex items-start justify-between gap-3">
         <div class="min-w-0 flex-1">
-          <p class="text-[9.5px] font-bold uppercase tracking-[0.1em]" style="color: var(--text-muted)">
+          <p class="text-micro font-bold uppercase tracking-[0.1em] text-muted">
             {{ label }}
           </p>
 
-          <div v-if="loading" class="mt-3 h-7 w-24 rounded-lg animate-pulse" style="background: rgba(255,255,255,0.06)" />
-          <p v-else class="mt-2 text-[24px] font-semibold leading-none font-mono-nums" style="color: var(--text-primary); letter-spacing: -0.02em">
+          <div v-if="loading" class="mt-3 h-7 w-24 rounded-lg animate-pulse ui-skeleton" />
+          <p v-else class="mt-2 text-2xl font-semibold leading-none font-mono-nums text-primary tracking-tight">
             {{ value }}
           </p>
 
-          <p v-if="hint && !loading" class="mt-1.5 text-[11px]" style="color: var(--text-tertiary)">
+          <p v-if="hint && !loading" class="mt-1.5 text-mini text-tertiary">
             {{ hint }}
           </p>
+
+          <div v-if="changePct !== undefined && changePct !== null && !loading" class="mt-1.5 flex items-center gap-1">
+            <span
+              class="inline-flex items-center gap-0.5 text-mini font-semibold font-mono-nums rounded-lg px-1.5 py-0.5"
+              :style="changeBadgeStyle"
+            >
+              <Icon :name="changePct >= 0 ? 'lucide:arrow-up-right' : 'lucide:arrow-down-right'" class="h-3 w-3" />
+              {{ Math.abs(changePct) }}%
+            </span>
+            <span v-if="compareLabel" class="text-micro text-muted">{{ compareLabel }}</span>
+          </div>
         </div>
 
         <div
@@ -40,7 +51,7 @@
         class="mt-4 pt-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
         style="border-top: 1px solid rgba(255,255,255,0.05)"
       >
-        <span class="text-[11px] font-medium" :style="iconStyle">View details</span>
+        <span class="text-mini font-medium" :style="iconStyle">View details</span>
         <Icon name="lucide:arrow-right" class="w-3 h-3 transition-transform group-hover:translate-x-0.5" :style="iconStyle" />
       </div>
     </div>
@@ -70,16 +81,27 @@ interface Props {
   loading?: boolean
   to?: string
   tone?: Tone
+  changePct?: number | null
+  compareLabel?: string
 }
 
 const props = withDefaults(defineProps<Props>(), {
   loading: false,
   tone: 'brand',
   to: undefined,
-  hint: undefined
+  hint: undefined,
+  changePct: undefined,
+  compareLabel: undefined
 })
 
 const NuxtLink = resolveComponent('NuxtLink')
+
+const changeBadgeStyle = computed(() => {
+  if (props.changePct === undefined || props.changePct === null) return ''
+  if (props.changePct > 0) return 'color: #34d399; background: rgba(52,211,153,0.12);'
+  if (props.changePct < 0) return 'color: #f87171; background: rgba(248,113,113,0.12);'
+  return 'color: var(--text-tertiary); background: var(--surface-2);'
+})
 
 const toneMap: Record<Tone, { icon: string; wrap: string; topLine: string; wash: string }> = {
   brand: {

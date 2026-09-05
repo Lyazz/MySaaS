@@ -1,18 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 import '../providers/sales_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/sale.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../services/api_service.dart';
+import '../theme/app_theme.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../widgets/form/date_range_filter_field.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/responsive_server_paginated_table.dart';
-import '../widgets/badges/status_badges.dart';
+
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
+import '../utils/app_toasts.dart';
 
 class SalesScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -32,18 +37,17 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   DateTime? _endDate;
   final Set<String> _refundingSaleIds = <String>{};
 
-  static DateTime _startOfDay(DateTime dt) => DateTime(dt.year, dt.month, dt.day);
+  static DateTime _startOfDay(DateTime dt) =>
+      DateTime(dt.year, dt.month, dt.day);
   static DateTime _endOfDay(DateTime dt) =>
       DateTime(dt.year, dt.month, dt.day, 23, 59, 59, 999);
 
-  static DateTimeRange _normalizeRange(DateTimeRange range) => DateTimeRange(
-        start: _startOfDay(range.start),
-        end: _endOfDay(range.end),
-      );
+  static DateTimeRange _normalizeRange(DateTimeRange range) =>
+      DateTimeRange(start: _startOfDay(range.start), end: _endOfDay(range.end));
 
   void _setDefaultDateRange() {
     final now = DateTime.now();
-    final start = _startOfDay(now.subtract(const Duration(days: 7)));
+    final start = _startOfDay(now.subtract(const Duration(days: 6)));
     final end = _endOfDay(now);
     _startDate = start;
     _endDate = end;
@@ -79,12 +83,21 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
     final salesState = ref.watch(salesProvider);
     final isMobile = MediaQuery.of(context).size.width < 800;
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textSecondary = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -103,17 +116,14 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                   style: TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A), // Slate-900
+                    color: textPrimary,
                     letterSpacing: -0.5,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   'admin.pages.sales.index.subtitle'.tr(),
-                  style: TextStyle(
-                    color: Color(0xFF64748B), // Slate-500
-                    fontSize: 14,
-                  ),
+                  style: TextStyle(color: textMuted, fontSize: 14),
                 ),
               ],
             ),
@@ -122,7 +132,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
             padding: EdgeInsets.symmetric(horizontal: isMobile ? 12 : 24),
             child: ResponsiveFilterBar(
               searchField: FormInput(
-                label: 'admin.pages.sales.index.filters.searchLabel'.tr(),
+                label: 'app.admin_pages_sales_index_filter'.tr().tr(),
                 controller: _searchController,
                 hint: 'admin.pages.sales.index.filters.searchPlaceholder'.tr(),
                 contentPadding: const EdgeInsets.symmetric(
@@ -138,6 +148,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                 SizedBox(
                   width: 320,
                   child: DateRangeFilterField(
+                    showLabel: false,
                     range: (_startDate != null && _endDate != null)
                         ? DateTimeRange(start: _startDate!, end: _endDate!)
                         : null,
@@ -194,10 +205,6 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       flex: 2,
                     ),
                     _buildHeaderCell(
-                      'admin.pages.cash.transactions.table.type'.tr(),
-                      flex: 2,
-                    ),
-                    _buildHeaderCell(
                       'admin.pages.sales.index.table.customer'.tr(),
                       flex: 3,
                     ),
@@ -210,11 +217,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       flex: 2,
                     ),
                     _buildHeaderCell(
-                      'admin.pages.orders.index.table.status'.tr(),
-                      flex: 2,
-                    ),
-                    _buildHeaderCell(
-                      'admin.pages.orders.index.table.date'.tr(),
+                      'admin.pages.sales.index.table.completed'.tr(),
                       flex: 2,
                     ),
                     Expanded(
@@ -242,7 +245,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                     child: Padding(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 20,
-                        vertical: 12,
+                        vertical: 13,
                       ),
                       child: Row(
                         children: [
@@ -250,18 +253,11 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             flex: 2,
                             child: Text(
                               '#$shortId',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                color: Color(0xFF0F172A), // Slate-900
+                                fontSize: 13,
+                                color: textPrimary,
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: SaleTypeBadge(type: sale.type),
                             ),
                           ),
                           Expanded(
@@ -270,10 +266,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               sale.customerName.isEmpty
                                   ? '—'
                                   : sale.customerName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w500,
-                                fontSize: 14,
-                                color: Color(0xFF0F172A), // Slate-900
+                                fontSize: 13,
+                                color: textPrimary,
                               ),
                             ),
                           ),
@@ -285,8 +281,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                   : sale.customerPhone,
                               style: TextStyle(
                                 color: sale.customerPhone.isEmpty
-                                    ? const Color(0xFF94A3B8) // Slate-400
-                                    : const Color(0xFF475569), // Slate-600
+                                    ? textMuted
+                                    : textSecondary,
                               ),
                             ),
                           ),
@@ -294,28 +290,18 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             flex: 2,
                             child: Text(
                               money.format(sale.totalAmount),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
-                                fontSize: 14,
-                                color: Color(0xFF0F172A), // Slate-900
+                                fontSize: 13,
+                                color: textPrimary,
                               ),
-                            ),
-                          ),
-                          Expanded(
-                            flex: 2,
-                            child: Align(
-                              alignment: Alignment.centerLeft,
-                              child: SaleStatusBadge(status: sale.status),
                             ),
                           ),
                           Expanded(
                             flex: 2,
                             child: Text(
                               DateFormat.yMMMd().format(sale.updatedAt),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                color: Color(0xFF64748B), // Slate-500
-                              ),
+                              style: TextStyle(fontSize: 13, color: textMuted),
                             ),
                           ),
                           Expanded(
@@ -325,11 +311,12 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  AppButton.danger(
-                                    label: 'Refund',
+                                  TableActionButton(
+                                    tooltip: 'admin.pages.sales.actions.refund'
+                                        .tr(),
                                     icon: LucideIcons.rotateCcw,
-                                    size: AppButtonSize.sm,
-                                    loading: refundBusy,
+                                    isDanger: true,
+                                    isLoading: refundBusy,
                                     onPressed: refundBusy
                                         ? null
                                         : () {
@@ -340,20 +327,18 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                                             final reason = isOrder
                                                 ? 'Order-origin sales must be returned from the order flow.'
                                                 : 'Only COMPLETED POS sales can be refunded.';
-                                            ScaffoldMessenger.of(context)
-                                                .showSnackBar(
-                                              SnackBar(content: Text(reason)),
-                                            );
+                                            AppToasts.show(context, reason);
                                           },
                                   ),
                                   const SizedBox(width: 8),
-                                  AppButton.secondary(
-                                    label: isOrder ? 'View order' : 'View',
+                                  TableActionButton(
+                                    tooltip: isOrder ? 'View order' : 'View',
                                     icon: LucideIcons.eye,
-                                    size: AppButtonSize.sm,
                                     onPressed: isOrder
-                                        ? () => context.push('/orders/${sale.id}')
-                                        : () => context.push('/sales/${sale.id}'),
+                                        ? () =>
+                                              context.push('/orders/${sale.id}')
+                                        : () =>
+                                              context.push('/sales/${sale.id}'),
                                   ),
                                 ],
                               ),
@@ -375,20 +360,25 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
 
   Future<void> _handleRefund(Sale sale) async {
     if (_refundingSaleIds.contains(sale.id)) return;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
     setState(() => _refundingSaleIds.add(sale.id));
     try {
       final api = ref.read(apiProvider);
       final response = await api.client.get('/admin/cash/cashboxes');
       final raw = response.data;
-      final cashboxes = raw is List ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList() : <Map<String, dynamic>>[];
+      final cashboxes = raw is List
+          ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
+          : <Map<String, dynamic>>[];
       final openCashboxes = cashboxes
           .where((c) => c['isActive'] == true && c['openSession'] is Map)
           .toList();
 
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No open cashbox available. Open a cash session first.')),
+        AppToasts.show(
+          context,
+          'admin.pages.sales.messages.noOpenCashbox'.tr(),
         );
         return;
       }
@@ -396,7 +386,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       String selectedCashboxId = (openCashboxes.first['id'] ?? '').toString();
       String selectedMethod = 'CASH';
       final referenceCtrl = TextEditingController();
-      final noteCtrl = TextEditingController(text: 'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}');
+      final noteCtrl = TextEditingController(
+        text:
+            'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}',
+      );
       bool submitting = false;
       String? formError;
 
@@ -407,7 +400,7 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
           return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
-                title: const Text('Refund Sale'),
+                title: Text('admin.pages.sales.refundModal.title'.tr()),
                 content: SizedBox(
                   width: 420,
                   child: Column(
@@ -415,8 +408,8 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Create refund cash outflow and mark this sale as REFUNDED.',
-                        style: TextStyle(color: const Color(0xFF64748B), fontSize: 13),
+                        'app.create_refund_cash_outflow_and'.tr(),
+                        style: TextStyle(color: textMuted, fontSize: 13),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -431,26 +424,50 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                             .toList(),
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedCashboxId = v ?? selectedCashboxId),
-                        decoration: const InputDecoration(
-                          labelText: 'Cashbox',
+                            : (v) => setDialogState(
+                                () =>
+                                    selectedCashboxId = v ?? selectedCashboxId,
+                              ),
+                        decoration: InputDecoration(
+                          labelText:
+                              'admin.pages.sales.refundModal.cashboxLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         initialValue: selectedMethod,
-                        items: const [
-                          DropdownMenuItem(value: 'CASH', child: Text('Cash')),
-                          DropdownMenuItem(value: 'CARD', child: Text('Card')),
-                          DropdownMenuItem(value: 'TRANSFER', child: Text('Transfer')),
-                          DropdownMenuItem(value: 'OTHER', child: Text('Other')),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'CASH',
+                            child: Text('admin.pages.cash.methods.CASH'.tr()),
+                          ),
+                          DropdownMenuItem(
+                            value: 'CARD',
+                            child: Text('admin.pages.cash.methods.CARD'.tr()),
+                          ),
+                          DropdownMenuItem(
+                            value: 'TRANSFER',
+                            child: Text(
+                              'admin.pages.cash.transactions.types.TRANSFER'
+                                  .tr(),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'OTHER',
+                            child: Text('admin.pages.cash.methods.OTHER'.tr()),
+                          ),
                         ],
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedMethod = (v ?? 'CASH').toUpperCase()),
-                        decoration: const InputDecoration(
-                          labelText: 'Method',
+                            : (v) => setDialogState(
+                                () => selectedMethod = (v ?? 'CASH')
+                                    .toUpperCase(),
+                              ),
+                        decoration: InputDecoration(
+                          labelText:
+                              'superAdmin.paymentsPage.history.table.method'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -458,8 +475,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                       TextField(
                         controller: referenceCtrl,
                         enabled: !submitting,
-                        decoration: const InputDecoration(
-                          labelText: 'Reference (optional)',
+                        decoration: InputDecoration(
+                          labelText:
+                              'admin.pages.sales.refundModal.referenceLabel'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -468,8 +487,9 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                         controller: noteCtrl,
                         enabled: !submitting,
                         maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Note (optional)',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.noteLabel'
+                              .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -477,7 +497,10 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                         const SizedBox(height: 10),
                         Text(
                           formError!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ],
@@ -485,11 +508,13 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: submitting ? null : () => Navigator.of(dialogContext).pop(false),
-                    child: const Text('Cancel'),
+                    onPressed: submitting
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(false),
+                    child: Text('admin.common.cancel'.tr()),
                   ),
                   AppButton.danger(
-                    label: 'Refund',
+                    label: 'admin.pages.sales.actions.refund'.tr(),
                     icon: LucideIcons.rotateCcw,
                     loading: submitting,
                     onPressed: submitting
@@ -500,12 +525,18 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
                               formError = null;
                             });
                             try {
-                              await ref.read(salesProvider.notifier).refundSale(
+                              await ref
+                                  .read(salesProvider.notifier)
+                                  .refundSale(
                                     saleId: sale.id,
                                     cashboxId: selectedCashboxId,
                                     method: selectedMethod,
-                                    reference: referenceCtrl.text.trim().isEmpty ? null : referenceCtrl.text.trim(),
-                                    note: noteCtrl.text.trim().isEmpty ? null : noteCtrl.text.trim(),
+                                    reference: referenceCtrl.text.trim().isEmpty
+                                        ? null
+                                        : referenceCtrl.text.trim(),
+                                    note: noteCtrl.text.trim().isEmpty
+                                        ? null
+                                        : noteCtrl.text.trim(),
                                   );
                               if (!dialogContext.mounted) return;
                               Navigator.of(dialogContext).pop(true);
@@ -530,15 +561,11 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
       if (confirmed == true) {
         _fetchSales();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sale refunded successfully')),
-        );
+        AppToasts.show(context, 'app.sale_refunded_successfully'.tr());
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to refund sale: $e')),
-      );
+      AppToasts.show(context, 'Failed to refund sale: $e');
     } finally {
       if (mounted) {
         setState(() => _refundingSaleIds.remove(sale.id));
@@ -547,12 +574,14 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   }
 
   Widget _headerText(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF64748B), // Slate-500
-        fontSize: 12,
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -562,12 +591,14 @@ class _SalesScreenState extends ConsumerState<SalesScreen> {
   }
 
   Widget _buildEmptyState() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textMuted = isDark ? AppColors.textMuted : AppColors.lightTextMuted;
     return Center(
       child: Padding(
         padding: EdgeInsets.all(48),
         child: Text(
           'admin.pages.sales.index.empty.title'.tr(),
-          style: const TextStyle(color: Color(0xFF64748B)),
+          style: TextStyle(color: textMuted),
         ),
       ),
     );

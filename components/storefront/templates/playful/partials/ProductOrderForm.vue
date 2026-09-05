@@ -1,7 +1,11 @@
 <script setup lang="ts">
+import CarrierMark from '~/components/storefront/shared/CarrierMark.vue'
 import { useCartStore } from '~/stores/cart'
 import { useTenantApiHeaders, useTenantApiUrl } from '~/composables/useTenantApi'
 import { DZ_WILAYAS } from '~/shared/geo/dz'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
+import { computeClearanceDiscount } from '~/shared/pricing/clearance-pricing'
+import { moneyToCents, centsToMoney } from '~/shared/pricing/bundle-pricing'
 
 const props = defineProps<{
     product: any
@@ -14,9 +18,10 @@ const props = defineProps<{
 const router = useRouter()
 const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 const storeSettings = useState<any>('storeSettings')
 const metaPixel = useMetaPixel()
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const codEnabled = computed(() => storeSettings.value?.codEnabled !== false && storeSettings.value?.cartEnabled !== false)
 const cartEnabled = computed(() => storeSettings.value?.cartEnabled !== false)
 const wilayas = DZ_WILAYAS
@@ -40,9 +45,25 @@ const deliveryFee = computed(() => {
     return Number(p) || 0
 })
 
-const totalPrice = computed(() => subtotal.value + deliveryFee.value)
+const quickOrderClearanceDiscount = computed(() => {
+    if (!clearance.isProductEligible(props.product)) return 0
+    const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
+    if (scopedPricing.promotionApplied) return 0
+    if (Array.isArray(props.product?.bundleDeals) && props.product.bundleDeals.length > 0) return 0
+
+    const result = computeClearanceDiscount({
+        lines: [{ key: 'quick-order', unitPriceCents: moneyToCents(props.currentPrice || 0), quantity: quantity.value }],
+        multiple: clearance.config.value.multiple,
+        divisor: clearance.config.value.divisor
+    })
+    return centsToMoney(result.discountCents)
+})
+
+const totalPrice = computed(() => Math.max(0, subtotal.value - quickOrderClearanceDiscount.value) + deliveryFee.value)
 
 const hasVariants = computed(() => Array.isArray(props.product?.variants) && props.product.variants.length > 0)
+const { invite } = useVariantSelectionInvite()
+const needsVariantChoice = computed(() => hasVariants.value && !props.currentVariant)
 
 const maxQuantity = computed(() => {
     if (props.currentVariant?.trackInventory === false) return 99
@@ -57,7 +78,7 @@ const isInStock = computed(() => {
     return maxQuantity.value > 0
 })
 
-const isOutOfStock = computed(() => !isInStock.value)
+const isOutOfStock = computed(() => !isInStock.value && !needsVariantChoice.value)
 
 const isLowStock = computed(() => {
     if (!isInStock.value) return false
@@ -85,6 +106,9 @@ const selectBundleQty = (qty: number) => {
     quantity.value = Math.max(1, Math.min(qty, cap))
 }
 
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const quickForm = reactive({
     fullName: '',
     phone: '',
@@ -102,12 +126,12 @@ const availableProviders = computed(() => {
     YALIDINE: { label: 'Yalidine', icon: 'lucide:package', color: 'blue' },
     ECOTRACK: { label: 'Ecotrack', icon: 'lucide:send', color: 'purple' },
     ZR_EXPRESS: { label: 'ZR Express', icon: 'lucide:zap', color: 'orange' },
-    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'teal' }
+    SELF: { label: storefrontContent.value.checkout.delivery.provider.self, icon: 'lucide:bike', color: 'lime' }
   }
   return allowed.map((key: string) => ({ key, ...providerMeta[key as keyof typeof providerMeta] }))
 })
 
-const maystroPrices = useMaystroDeliveryPrices({
+const maystroPrices = useDeliveryPrices({
   wilayaCode: () => quickForm.wilaya,
   communeCode: () => quickForm.commune
 })
@@ -115,14 +139,9 @@ const maystroPrices = useMaystroDeliveryPrices({
 const deliveryOptions = computed(() => {
   const options: any[] = []
   availableProviders.value.forEach((provider: any) => {
-    const homePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.homePrice.value != null
-        ? String(Math.round(maystroPrices.homePrice.value))
-        : provider.key === 'MAYSTRO' ? '—' : '350'
-    const officePrice =
-      provider.key === 'MAYSTRO' && maystroPrices.officePrice.value != null
-        ? String(Math.round(maystroPrices.officePrice.value))
-        : provider.key === 'MAYSTRO' ? '—' : '300'
+    const providerPrices = maystroPrices.pricesByProvider.value?.[provider.key]
+    const homePrice = providerPrices?.home != null ? String(Math.round(providerPrices.home)) : '—'
+    const officePrice = providerPrices?.office != null ? String(Math.round(providerPrices.office)) : '—'
 
     options.push({
       id: `${provider.key}-home`,
@@ -167,83 +186,25 @@ const selectedDelivery = computed(() =>
   deliveryOptions.value.find((opt: any) => opt.id === quickForm.selectedDeliveryOption)
 )
 
-const isMaystroPickup = computed(() => selectedDelivery.value?.provider === 'MAYSTRO' && selectedDelivery.value?.mode === 'pickup')
-const isMaystroAvailable = computed(() => availableProviders.value.some((p: any) => p.key === 'MAYSTRO'))
-const pickupPoints = ref<Array<{ pickup_point: number; commune: number; name?: string; name_lt?: string; name_ar?: string; delivery_type: number }>>([])
-const pickupPointsLoading = ref(false)
-const pickupPointsError = ref('')
-const stopDeskName = ref('')
-
-const syncPickupPointCommune = () => {
-  const name = (quickForm.pickupPoint || '').trim()
-  if (!name) return
-  const point = pickupPoints.value.filter(p => p.delivery_type === 3).find((p) => (p.name || p.name_lt || p.name_ar || '') === name)
-  if (!point?.commune) return
-  const nextCommune = String(point.commune)
-  if (nextCommune && quickForm.commune !== nextCommune) quickForm.commune = nextCommune
-}
-
-watchEffect(() => {
-  const options = deliveryOptions.value
-  if (!options.length) return
-  const selected = quickForm.selectedDeliveryOption
-  if (!selected || !options.some((opt: any) => opt.id === selected)) {
-    quickForm.selectedDeliveryOption = options[0].id
-  }
+const pickup = usePickupPoints({
+  provider: () => selectedDelivery.value?.provider,
+  mode: () => selectedDelivery.value?.mode,
+  wilaya: () => quickForm.wilaya,
+  commune: () => quickForm.commune,
+  selected: () => quickForm.pickupPoint,
+  onSelect: (name) => { quickForm.pickupPoint = name },
+  onCommuneChange: (communeName) => { quickForm.commune = communeName }
 })
 
-watch(
-  [isMaystroPickup, isMaystroAvailable, () => quickForm.commune, () => quickForm.wilaya],
-  async ([isPickup, maystroEnabled, commune, wilaya]) => {
-    pickupPointsError.value = ''
-    pickupPoints.value = []
-    stopDeskName.value = ''
-    if (!isPickup) quickForm.pickupPoint = ''
-    if (!maystroEnabled || !wilaya || !commune) return
-
-    pickupPointsLoading.value = true
-    try {
-      const url = useTenantApiUrl(
-        `/api/delivery/maystro/pickup-points?commune=${encodeURIComponent(commune as string)}&wilaya=${encodeURIComponent(wilaya as string)}&nearby=true`
-      )
-      const data = await $fetch<any[]>(url, { headers: { ...(useTenantApiHeaders() || {}) } })
-      pickupPoints.value = Array.isArray(data)
-        ? data.map((p: any) => ({
-            pickup_point: Number(p?.pickup_point),
-            commune: Number(p?.commune),
-            name: p?.name ? String(p.name) : (p?.name_lt ? String(p.name_lt) : (p?.name_ar ? String(p.name_ar) : undefined)),
-            name_lt: p?.name_lt ? String(p.name_lt) : undefined,
-            name_ar: p?.name_ar ? String(p.name_ar) : undefined,
-            delivery_type: Number(p?.delivery_type)
-          })).filter((p) => Number.isFinite(p.commune) && p.commune > 0)
-        : []
-      const stopDesk = pickupPoints.value.find(p => p.delivery_type === 2)
-      stopDeskName.value = stopDesk ? (stopDesk.name || stopDesk.name_lt || stopDesk.name_ar || '') : ''
-      if (isPickup) {
-        const relaisPoints = pickupPoints.value.filter(p => p.delivery_type === 3)
-        if (relaisPoints.length > 0) {
-          const current = (quickForm.pickupPoint || '').trim()
-          if (!current || !relaisPoints.some((p) => (p.name || p.name_lt || p.name_ar || '') === current)) {
-            quickForm.pickupPoint = relaisPoints[0].name || relaisPoints[0].name_lt || relaisPoints[0].name_ar || ''
-            syncPickupPointCommune()
-          }
-        } else {
-          quickForm.pickupPoint = ''
-        }
-      }
-    } catch (e: any) {
-      pickupPoints.value = []
-      pickupPointsError.value = e?.data?.statusMessage || e?.data?.message || 'Failed to load pickup points'
-    } finally {
-      pickupPointsLoading.value = false
-    }
-  },
-  { immediate: true }
-)
+const isPickupSelected = pickup.isPickupSelected
+const pickupPoints = pickup.points
+const pickupPointsLoading = pickup.loading
+const pickupPointsError = pickup.error
+const syncPickupPointCommune = pickup.syncCommune
 
 onMounted(() => cartStore.loadFromLocalStorage())
 
-watch(() => props.currentVariant, () => { quantity.value = 1 })
+watch(() => props.currentVariant, () => { quantity.value = 1; orderError.value = '' })
 
 watch([() => props.currentStock, () => props.currentVariant], () => {
     if (!canPurchase.value) { quantity.value = 1; return }
@@ -252,7 +213,7 @@ watch([() => props.currentStock, () => props.currentVariant], () => {
 
 function getVariantTitle(variant: any) {
     if (!variant.optionValues || variant.optionValues.length === 0) return ''
-    let values = [...variant.optionValues]
+    const values = [...variant.optionValues]
     if (props.product.options && props.product.options.length > 0) {
        const optionPos = new Map(props.product.options.map((o: any) => [o.id, o.position]))
        values.sort((a: any, b: any) => ((optionPos.get(a.optionValue?.optionId) ?? 999) as number) - ((optionPos.get(b.optionValue?.optionId) ?? 999) as number))
@@ -269,10 +230,15 @@ const triggerSuccessToast = (title: string, message: string) => {
 
 const handleOrderSubmit = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); orderError.value = storefrontContent.value.productForm.errors.selectOptions; return }
     orderError.value = ''
     if (!canPurchase.value) { orderError.value = storefrontContent.value.productForm.errors.outOfStockVariant; return }
     if (codEnabled.value && !quickForm.fullName.trim()) { orderError.value = storefrontContent.value.checkout.errors.fullNameRequired; return }
     if (codEnabled.value && !quickForm.phone.trim()) { orderError.value = storefrontContent.value.checkout.errors.phoneRequired; return }
+    if (codEnabled.value && (!quickForm.wilaya || !quickForm.commune)) {
+        orderError.value = storefrontContent.value.checkout.errors.requiredFields || storefrontContent.value.checkout.errors.deliveryRequired
+        return
+    }
     if (codEnabled.value && !quickForm.selectedDeliveryOption) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; return }
 
     orderSubmitting.value = true
@@ -280,14 +246,15 @@ const handleOrderSubmit = async () => {
         const delivery = selectedDelivery.value
         const isMaystro = delivery?.provider === 'MAYSTRO'
         const maystroServiceLevel = delivery?.mode === 'pickup' ? 'office' : 'home'
-        const maystroShippingAmount = isMaystro
-            ? (maystroServiceLevel === 'office' ? maystroPrices.officePrice.value : maystroPrices.homePrice.value)
+        const providerPrices = delivery?.provider ? maystroPrices.pricesByProvider.value?.[delivery.provider] : undefined
+        const maystroShippingAmount = providerPrices
+            ? (maystroServiceLevel === 'office' ? providerPrices.office : providerPrices.home)
             : null
 
         if (isMaystro) {
           if (!quickForm.wilaya || !quickForm.commune) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
-          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() && !stopDeskName.value) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
-          if (maystroShippingAmount == null) { orderError.value = 'Maystro shipping price unavailable for selected commune'; orderSubmitting.value = false; return }
+          if (delivery?.mode === 'pickup' && !String(quickForm.pickupPoint || '').trim() ) { orderError.value = storefrontContent.value.checkout.errors.deliveryRequired; orderSubmitting.value = false; return }
+          if (maystroShippingAmount == null) { orderError.value = storefrontContent.value.checkout.errors.shippingUnavailable; orderSubmitting.value = false; return }
         }
 
         const payload = {
@@ -299,10 +266,10 @@ const handleOrderSubmit = async () => {
             shippingCommuneCode: quickForm.commune || undefined,
             deliveryMode: delivery?.mode,
             shippingProvider: delivery?.provider || undefined,
-            shippingPickupPoint: isMaystro && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
-            shippingServiceLevel: isMaystro ? maystroServiceLevel : undefined,
-            shippingAmount: isMaystro && maystroShippingAmount != null ? maystroShippingAmount : undefined,
-            shippingCurrency: isMaystro ? currencyCode.value : undefined,
+            shippingPickupPoint: delivery?.provider && delivery?.mode === 'pickup' ? (quickForm.pickupPoint || undefined) : undefined,
+            shippingServiceLevel: delivery?.provider ? maystroServiceLevel : undefined,
+            shippingAmount: maystroShippingAmount != null ? maystroShippingAmount : undefined,
+            shippingCurrency: delivery?.provider ? currencyCode.value : undefined,
             items: [{ productId: props.product.id, variantId: props.currentVariant?.id, quantity: quantity.value }]
         }
 
@@ -339,12 +306,14 @@ const handleOrderSubmit = async () => {
 
 const handleAddToCart = async () => {
     if (!props.product) return
+    if (needsVariantChoice.value) { invite(); triggerSuccessToast(storefrontContent.value.productForm.errors.selectOptions, storefrontContent.value.productForm.chooseOptionsPrompt); return }
     if (!canPurchase.value) {
         triggerSuccessToast(storefrontContent.value.actions.outOfStock, storefrontContent.value.toasts.outOfStock.message)
         return
     }
     addToCartSubmitting.value = true
     const variantLabel = props.currentVariant ? getVariantTitle(props.currentVariant) : ''
+    const scopedPricing = buildScopedProductPricing(props.product, props.currentVariant)
     cartStore.addItem({
         productId: props.product.id,
         variantId: props.currentVariant?.id,
@@ -355,7 +324,9 @@ const handleAddToCart = async () => {
         stock: cartStockCap.value,
         image: props.activeImage,
         quantity: quantity.value,
-        metaPixelIds: (props.product as any)?.metaPixelIds
+        metaPixelIds: (props.product as any)?.metaPixelIds,
+        isClearance: Boolean(props.product?.isClearance),
+        promotionApplied: scopedPricing.promotionApplied
     })
     triggerSuccessToast(storefrontContent.value.toasts.addedToCart.title, storefrontContent.value.toasts.addedToCart.message)
     addToCartSubmitting.value = false
@@ -379,7 +350,7 @@ const scrollToForm = () => {
         window.scrollTo({ top: y, behavior: 'smooth' })
         setTimeout(() => {
             if (codEnabled.value && quickForm.fullName === '') {
-                const firstInput = document.querySelector('input[type="text"]') as HTMLElement
+                const firstInput = mainOrderFormRef.value?.querySelector('input[type="text"]') as HTMLElement | null
                 if (firstInput) firstInput.focus()
             }
         }, 500)
@@ -388,43 +359,57 @@ const scrollToForm = () => {
     }
 }
 </script>
-
 <template>
-  <div style="font-family: 'DM Sans', sans-serif">
-    <!-- Quantity + Stock -->
-    <div class="flex items-center justify-between p-4 bg-white rounded-3xl border-3 border-violet-100 shadow-[0_3px_0_0_#ddd6fe] mb-5">
-      <div class="flex flex-col gap-0.5">
-        <span class="font-black text-stone-700 text-sm" style="font-family: 'Fredoka', sans-serif">{{ storefrontContent.productForm.quantity.label }}</span>
-        <span v-if="product?.isActive === false" class="text-xs font-bold text-stone-500">{{ storefrontContent.productForm.stock.unavailable }}</span>
-        <span v-else-if="isOutOfStock" class="text-xs font-bold text-red-600">{{ storefrontContent.productForm.stock.outOfStock }}</span>
-        <span v-else-if="isLowStock" class="text-xs font-bold text-amber-600">{{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}</span>
-        <span v-else class="text-xs font-bold text-emerald-600">{{ storefrontContent.product.inStock }}</span>
+  <div>
+    <!-- ══ Quantity ═══════════════════════════════════════════════════ -->
+    <div class="kw-card flex items-center justify-between gap-4 p-4 mb-5">
+      <div class="flex flex-col gap-0.5 min-w-0">
+        <span class="kw-title text-sm">{{ storefrontContent.productForm.quantity.label }}</span>
+        <span
+          v-if="product?.isActive === false"
+          class="text-xs font-bold text-[var(--kw-ink-soft)]"
+        >{{ storefrontContent.productForm.stock.unavailable }}</span>
+        <span
+          v-else-if="needsVariantChoice"
+          class="text-xs font-bold text-[var(--kw-ink-soft)]"
+        >{{ storefrontContent.productForm.stock.selectOptions }}</span>
+        <span
+          v-else-if="isOutOfStock"
+          class="text-xs font-bold text-red-600"
+        >{{ storefrontContent.productForm.stock.outOfStock }}</span>
+        <span
+          v-else-if="isLowStock"
+          class="text-xs font-bold text-[var(--kw-lemon-deep)]"
+        >{{ storefrontContent.productForm.stock.lowStock(maxQuantity) }}</span>
+        <span
+          v-else
+          class="text-xs font-bold text-[var(--kw-mint-deep)]"
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
-      <!-- Qty stamp buttons -->
-      <div class="flex items-center gap-1">
+
+      <div class="flex items-center gap-1.5 flex-shrink-0">
         <button
           type="button"
-          class="w-10 h-10 rounded-full bg-violet-50 border-3 border-violet-100 flex items-center justify-center text-violet-700 font-black shadow-[0_3px_0_0_#ddd6fe] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none"
+          class="kw-icon-btn w-10 h-10 disabled:opacity-35 disabled:cursor-not-allowed"
           :disabled="!canPurchase || quantity <= 1"
           @click="decrementQuantity"
         >
-          <Icon name="lucide:minus" class="w-4 h-4 stroke-[2.5]" />
+          <Icon
+            name="lucide:minus"
+            class="w-4 h-4"
+          />
         </button>
-        <input
-          v-model.number="quantity"
-          type="number"
-          min="1"
-          :max="maxQuantity"
-          class="w-12 text-center border-none bg-transparent font-black text-stone-900 focus:ring-0 p-0 text-lg appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-          readonly
-        >
+        <span class="kw-num w-11 text-center text-xl">{{ quantity }}</span>
         <button
           type="button"
-          class="w-10 h-10 rounded-full bg-amber-400 border-3 border-amber-300 flex items-center justify-center text-amber-900 font-black shadow-[0_3px_0_0_#d97706] hover:-translate-y-0.5 active:translate-y-0.5 active:shadow-none transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:shadow-none"
+          class="kw-btn w-10 h-10 !p-0 rounded-full"
           :disabled="!canPurchase || (maxQuantity > 0 && quantity >= maxQuantity)"
           @click="incrementQuantity"
         >
-          <Icon name="lucide:plus" class="w-4 h-4 stroke-[2.5]" />
+          <Icon
+            name="lucide:plus"
+            class="w-4 h-4"
+          />
         </button>
       </div>
     </div>
@@ -437,278 +422,333 @@ const scrollToForm = () => {
       @select-qty="selectBundleQty"
     />
 
-    <!-- COD Order Form -->
+    <div
+      v-if="isClearanceEligible"
+      class="flex items-center gap-2.5 px-4 py-3 mb-4 rounded-[var(--kw-r)] text-xs font-extrabold text-[var(--kw-ink)]"
+      style="background: var(--kw-lemon-soft)"
+    >
+      <Icon
+        name="lucide:package-open"
+        class="w-4 h-4 flex-shrink-0 text-[var(--kw-lemon-deep)]"
+      />
+      <span v-if="clearance.remainingForNextThreshold.value > 0">
+        {{ t('storefront.clearance.progressHint', { remaining: clearance.remainingForNextThreshold.value }) }}
+      </span>
+      <span v-else>{{ t('storefront.clearance.unlockedHint') }}</span>
+    </div>
+
+    <!-- ══ Cash-on-delivery order form ════════════════════════════════ -->
     <div
       v-if="codEnabled"
       ref="mainOrderFormRef"
       data-test="cod-order-card"
-      class="bg-white rounded-3xl border-3 border-violet-100 p-6 shadow-[0_4px_0_0_#ddd6fe] relative overflow-hidden mb-4"
+      class="kw-card relative overflow-hidden p-6 md:p-7 mb-4"
     >
-      <!-- Top accent stripe -->
-      <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-violet-500 via-pink-400 to-amber-400 rounded-t-3xl" />
+      <div
+        class="absolute top-0 inset-x-0 h-1.5"
+        style="background: linear-gradient(90deg, var(--kw-pink), var(--kw-lemon), var(--kw-mint), var(--kw-sky), var(--kw-lilac))"
+      />
 
-      <div class="flex items-center gap-3 mb-6 mt-1">
-        <div class="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 flex-shrink-0">
-          <Icon name="lucide:banknote" class="w-5 h-5" />
-        </div>
-        <div>
-          <h3 class="font-black text-stone-900 text-lg leading-none" style="font-family: 'Fredoka', sans-serif">
+      <div class="flex items-center gap-3.5 mb-7 mt-2">
+        <span
+          class="w-11 h-11 kw-blob flex items-center justify-center flex-shrink-0"
+          style="background: var(--kw-mint-soft)"
+        >
+          <Icon
+            name="lucide:banknote"
+            class="w-5 h-5 text-[var(--kw-mint-deep)]"
+          />
+        </span>
+        <div class="min-w-0">
+          <h3 class="kw-title text-lg leading-tight">
             {{ storefrontContent.productForm.cod.title }}
           </h3>
-          <span class="text-xs text-stone-500 font-medium">{{ storefrontContent.productForm.cod.badge }}</span>
+          <span class="text-xs font-bold text-[var(--kw-ink-soft)]">{{ storefrontContent.productForm.cod.badge }}</span>
         </div>
       </div>
 
-      <form class="space-y-4" @submit.prevent="handleOrderSubmit">
-        <!-- Name -->
+      <form
+        class="space-y-4"
+        @submit.prevent="handleOrderSubmit"
+      >
         <div>
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
-            {{ storefrontContent.checkout.form.fullName.label }}
-          </label>
+          <label class="kw-label">{{ storefrontContent.checkout.form.fullName.label }}</label>
           <input
             v-model="quickForm.fullName"
             type="text"
             :placeholder="storefrontContent.checkout.form.fullName.placeholder"
-            class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 placeholder:text-stone-400 focus:border-violet-400 focus:outline-none transition-colors shadow-sm"
+            class="kw-field"
           >
         </div>
 
-        <!-- Phone -->
         <div>
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
-            {{ storefrontContent.checkout.form.phone.label }}
-          </label>
+          <label class="kw-label">{{ storefrontContent.checkout.form.phone.label }}</label>
           <input
             v-model="quickForm.phone"
             type="tel"
             :placeholder="storefrontContent.checkout.form.phone.placeholder"
-            class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 placeholder:text-stone-400 focus:border-violet-400 focus:outline-none transition-colors shadow-sm"
+            class="kw-field"
           >
         </div>
 
-        <!-- Wilaya + Commune -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
-              {{ storefrontContent.checkout.form.wilaya.label }}
-            </label>
-            <div class="relative">
-              <select
-                v-model="quickForm.wilaya"
-                class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 focus:border-violet-400 focus:outline-none appearance-none cursor-pointer transition-colors shadow-sm"
-              >
-                <option value="" disabled>{{ storefrontContent.common.selectPlaceholder }}</option>
-                <option v-for="w in wilayas" :key="w.code" :value="w.code">{{ w.code }} - {{ w.name }}</option>
-              </select>
-              <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-stone-400">
-                <Icon name="lucide:chevron-down" class="w-4 h-4" />
-              </div>
-            </div>
+            <label class="kw-label">{{ storefrontContent.checkout.form.wilaya.label }}</label>
+            <WilayaField
+              v-model="quickForm.wilaya"
+              input-class="kw-field appearance-none cursor-pointer"
+              :placeholder="storefrontContent.checkout.form.wilaya.placeholder"
+            />
           </div>
           <div>
-            <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
-              {{ storefrontContent.checkout.form.commune.label }}
-            </label>
+            <label class="kw-label">{{ storefrontContent.checkout.form.commune.label }}</label>
             <CommuneField
               v-model="quickForm.commune"
               :wilaya-code="quickForm.wilaya"
               :placeholder="storefrontContent.checkout.form.commune.placeholder"
-              :input-class="'block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 placeholder:text-stone-400 focus:border-violet-400 focus:outline-none transition-colors shadow-sm'"
-              :select-class="'block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 focus:border-violet-400 focus:outline-none transition-colors shadow-sm'"
+              input-class="kw-field"
+              select-class="kw-field"
             />
           </div>
         </div>
 
-        <!-- Address -->
         <div v-if="!hideOptionalAddress">
-          <label class="block text-sm font-black text-stone-700 mb-1.5 ml-1" style="font-family: 'Fredoka', sans-serif">
-            {{ storefrontContent.checkout.form.address.label }}
-          </label>
+          <label class="kw-label">{{ storefrontContent.checkout.form.address.label }}</label>
           <input
             v-model="quickForm.address"
             type="text"
             :placeholder="storefrontContent.checkout.form.address.placeholder"
-            class="block w-full h-11 rounded-2xl border-3 border-violet-100 bg-white px-4 text-stone-900 placeholder:text-stone-400 focus:border-violet-400 focus:outline-none transition-colors shadow-sm"
+            class="kw-field"
           >
         </div>
 
-        <!-- Delivery Options -->
-        <div v-if="quickForm.wilaya && quickForm.commune" class="space-y-2 mt-2">
-          <label class="block text-sm font-black text-stone-700 mb-2" style="font-family: 'Fredoka', sans-serif">
-            {{ storefrontContent.checkout.sections.deliveryOptions }}
-          </label>
-          <div
+        <!-- Delivery options -->
+        <div
+          v-if="quickForm.wilaya && quickForm.commune"
+          class="space-y-2.5 pt-1"
+        >
+          <label class="kw-label">{{ storefrontContent.checkout.sections.deliveryOptions }}</label>
+          <button
             v-for="option in deliveryOptions"
             :key="option.id"
-            class="cursor-pointer rounded-2xl p-3.5 border-3 transition-all duration-200 flex items-center gap-3"
+            type="button"
+            class="w-full text-start rounded-[var(--kw-r)] p-3.5 border-2 transition-all duration-300 flex items-center gap-3"
             :class="quickForm.selectedDeliveryOption === option.id
-              ? 'border-violet-500 bg-violet-50 shadow-[0_3px_0_0_#8b5cf6]'
-              : 'border-violet-100 hover:border-violet-300'"
+              ? 'border-[var(--kw-pink-deep)] bg-[var(--kw-pink-soft)]'
+              : 'border-[var(--kw-line)] bg-white hover:border-[var(--kw-pink)]'"
             @click="quickForm.selectedDeliveryOption = option.id"
           >
-            <div
-              class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 transition-colors"
-              :class="quickForm.selectedDeliveryOption === option.id ? 'bg-violet-100' : 'bg-stone-100'"
+            <span
+              class="w-10 h-10 kw-blob flex items-center justify-center flex-shrink-0"
+              :style="{ background: quickForm.selectedDeliveryOption === option.id ? 'var(--kw-surface)' : 'var(--kw-cream-2)' }"
             >
-              <Icon :name="option.icon" class="w-5 h-5"
-                :class="quickForm.selectedDeliveryOption === option.id ? 'text-violet-600' : 'text-stone-400'"
+              <CarrierMark
+                :provider="option.provider"
+                :icon="option.icon"
+                :alt="option.providerLabel"
+                class="w-5 h-5"
+                :class="quickForm.selectedDeliveryOption === option.id ? 'text-[var(--kw-pink-deep)]' : 'text-[var(--kw-ink-faint)]'"
               />
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-2 mb-0.5">
-                <span class="font-black text-stone-900 text-sm">{{ option.providerLabel }}</span>
+            </span>
+            <span class="flex-1 min-w-0">
+              <span class="flex items-center gap-2 mb-0.5">
+                <span class="kw-title text-sm">{{ option.providerLabel }}</span>
                 <span
-                  class="text-[10px] font-black px-2 py-0.5 rounded-full"
-                  :class="option.mode === 'home' ? 'bg-emerald-100 text-emerald-700' : option.mode === 'pickup' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'"
+                  class="kw-badge"
+                  :class="option.mode === 'pickup' ? 'kw-badge-new' : 'kw-badge-low'"
                 >{{ option.modeLabel }}</span>
-              </div>
-              <p class="text-xs text-stone-500">{{ option.description }}</p>
-            </div>
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="font-black text-violet-700 text-sm">
+              </span>
+              <span class="block text-xs font-semibold text-[var(--kw-ink-soft)] line-clamp-2">{{ option.description }}</span>
+            </span>
+            <span class="flex items-center gap-2 flex-shrink-0">
+              <span class="kw-num text-sm text-[var(--kw-pink-deep)]">
                 {{ option.price === 'FREE' ? storefrontContent.checkout.delivery.free : `${option.price} ${currencyCode}` }}
               </span>
               <span
-                class="w-4.5 h-4.5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors"
-                :class="quickForm.selectedDeliveryOption === option.id ? 'border-violet-600 bg-violet-600' : 'border-stone-300'"
+                class="w-5 h-5 rounded-full border-2 flex items-center justify-center transition-colors"
+                :class="quickForm.selectedDeliveryOption === option.id
+                  ? 'border-[var(--kw-pink-deep)] bg-[var(--kw-pink-deep)]'
+                  : 'border-[var(--kw-line)]'"
               >
-                <Icon v-if="quickForm.selectedDeliveryOption === option.id" name="lucide:check" class="w-2.5 h-2.5 text-white" />
+                <Icon
+                  v-if="quickForm.selectedDeliveryOption === option.id"
+                  name="lucide:check"
+                  class="w-3 h-3 text-white"
+                />
               </span>
-            </div>
-          </div>
+            </span>
+          </button>
 
-          <!-- Pickup points -->
-          <div v-if="isMaystroAvailable && (pickupPointsLoading || stopDeskName || isMaystroPickup)" class="space-y-2 mt-3">
-            <label class="block text-sm font-black text-stone-700" style="font-family: 'Fredoka', sans-serif">
-              {{ storefrontContent.checkout.delivery.mode.pickupPoint }}
-            </label>
-            <div v-if="pickupPointsLoading" class="flex items-center gap-2 px-4 py-3 rounded-xl border-3 border-violet-100 bg-violet-50 text-sm text-stone-500">
-              <Icon name="lucide:loader-2" class="w-4 h-4 animate-spin shrink-0" />
-              Loading…
-            </div>
-            <template v-else>
-              <div v-if="stopDeskName" class="flex items-center gap-2 px-4 py-2.5 rounded-xl border-3 border-violet-100 bg-violet-50 text-sm text-stone-600">
-                <Icon name="lucide:building-2" class="w-4 h-4 text-violet-400 shrink-0" />
-                <span>{{ stopDeskName }}</span>
-              </div>
-              <div v-if="isMaystroPickup && quickForm.pickupPoint" class="flex items-center gap-3 px-4 py-3 rounded-xl border-3 border-violet-200 bg-violet-50">
-                <Icon name="lucide:map-pin" class="w-4 h-4 text-violet-600 shrink-0" />
-                <span class="text-sm font-black text-stone-900">{{ quickForm.pickupPoint }}</span>
-              </div>
-            </template>
-            <p v-if="pickupPointsError" class="text-xs text-amber-700">{{ pickupPointsError }}</p>
-          </div>
+          <StorefrontSharedPickupPointField
+            v-model="quickForm.pickupPoint"
+            :points="pickupPoints"
+            :loading="pickupPointsLoading"
+            :error="pickupPointsError"
+            :is-pickup-selected="isPickupSelected"
+            :label="storefrontContent.checkout.delivery.mode.pickupPoint"
+            :empty-label="storefrontContent.checkout.help.deliveryOptions"
+            @change="syncPickupPointCommune"
+          />
         </div>
 
-        <div v-else class="mt-3 px-4 py-3 border-3 border-dashed border-violet-100 rounded-2xl text-center text-xs text-stone-400">
-          <Icon name="lucide:map-pin" class="w-4 h-4 mx-auto mb-1 text-stone-300" />
+        <div
+          v-else
+          class="mt-3 px-4 py-4 rounded-[var(--kw-r)] border-2 border-dashed border-[var(--kw-line)] text-center text-xs font-bold text-[var(--kw-ink-faint)]"
+        >
+          <Icon
+            name="lucide:map-pin"
+            class="w-4 h-4 mx-auto mb-1.5"
+          />
           {{ storefrontContent.checkout.help.deliveryOptions }}
         </div>
 
-        <!-- Error -->
-        <div v-if="orderError" class="p-3 rounded-xl border-3 border-red-200 bg-red-50 text-red-700 text-sm font-medium">
+        <div
+          v-if="orderError"
+          class="px-4 py-3 rounded-[var(--kw-r)] bg-red-50 border-2 border-red-200 text-red-700 text-sm font-bold"
+        >
           {{ orderError }}
         </div>
 
-        <!-- Price Breakdown -->
-        <div class="bg-violet-50 rounded-2xl border-3 border-violet-100 p-4 space-y-2">
+        <!-- Totals -->
+        <div
+          class="rounded-[var(--kw-r)] p-4 space-y-2.5"
+          style="background: var(--kw-cream-2)"
+        >
           <div class="flex items-center justify-between text-sm">
-            <span class="text-stone-600 font-medium">{{ storefrontContent.checkout.summary.subtotal }}</span>
-            <span class="font-black text-stone-900">{{ subtotal.toLocaleString() }} {{ currencyCode }}</span>
+            <span class="font-bold text-[var(--kw-ink-soft)]">{{ storefrontContent.cart.summary.subtotal }}</span>
+            <span class="kw-num">{{ formatAmount(subtotal) }} {{ currencyCode }}</span>
+          </div>
+          <div
+            v-if="quickOrderClearanceDiscount > 0"
+            class="flex items-center justify-between text-sm"
+          >
+            <span class="font-bold text-[var(--kw-lemon-deep)]">{{ t('storefront.clearance.discountLine') }}</span>
+            <span class="kw-num text-[var(--kw-lemon-deep)]">-{{ formatAmount(quickOrderClearanceDiscount) }} {{ currencyCode }}</span>
           </div>
           <div class="flex items-center justify-between text-sm">
-            <span class="text-stone-600 font-medium">{{ storefrontContent.checkout.summary.shipping }}</span>
-            <span class="font-black" :class="deliveryFee === 0 ? 'text-emerald-600' : 'text-stone-900'">
-              {{ deliveryFee === 0 ? storefrontContent.checkout.delivery.free : `${deliveryFee.toLocaleString()} ${currencyCode}` }}
+            <span class="font-bold text-[var(--kw-ink-soft)]">{{ storefrontContent.cart.summary.shipping }}</span>
+            <span
+              class="kw-num"
+              :class="deliveryFee === 0 ? 'text-[var(--kw-mint-deep)]' : ''"
+            >
+              {{ deliveryFee === 0 ? storefrontContent.checkout.delivery.free : `${formatAmount(deliveryFee)} ${currencyCode}` }}
             </span>
           </div>
-          <div class="border-t-2 border-violet-200 pt-2 flex items-center justify-between">
-            <span class="font-black text-stone-900" style="font-family: 'Fredoka', sans-serif">{{ storefrontContent.checkout.summary.total }}</span>
-            <span class="text-xl font-black text-violet-700" style="font-family: 'Fredoka', sans-serif">
-              {{ totalPrice.toLocaleString() }} {{ currencyCode }}
-            </span>
+          <div class="pt-2.5 border-t-2 border-dashed border-[var(--kw-line)] flex items-center justify-between">
+            <span class="kw-title">{{ storefrontContent.cart.summary.total }}</span>
+            <span class="kw-num text-2xl text-[var(--kw-pink-deep)]">{{ formatAmount(totalPrice) }} {{ currencyCode }}</span>
           </div>
         </div>
 
-        <!-- Submit -->
         <button
           type="submit"
-          :disabled="orderSubmitting || !canPurchase"
-          class="w-full h-14 bg-violet-700 text-white font-black text-lg rounded-full shadow-[0_6px_0_0_#4c1d95] hover:-translate-y-1 active:translate-y-2 active:shadow-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-3 mt-2 relative overflow-hidden group"
-          style="font-family: 'Fredoka', sans-serif"
+          :disabled="orderSubmitting || (!canPurchase && !needsVariantChoice)"
+          class="kw-btn kw-btn-lg w-full mt-1"
         >
-          <div class="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/20 to-transparent group-hover:animate-shine z-0" />
-          <span class="relative z-10 flex items-center gap-2" :class="{ 'opacity-0': orderSubmitting }">
-            {{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}
-            <Icon name="lucide:arrow-right" class="w-5 h-5 group-hover:translate-x-1.5 transition-transform" />
-          </span>
-          <div v-if="orderSubmitting" class="absolute inset-0 flex items-center justify-center z-10">
-            <Icon name="lucide:loader-2" class="animate-spin h-6 w-6 text-white" />
-          </div>
+          <Icon
+            v-if="orderSubmitting"
+            name="lucide:loader-2"
+            class="w-5 h-5 animate-spin"
+          />
+          <span>{{ orderSubmitting ? storefrontContent.productForm.cod.submitting : storefrontContent.productForm.cod.submit }}</span>
+          <Icon
+            v-if="!orderSubmitting"
+            name="lucide:arrow-right"
+            class="w-5 h-5 rtl:rotate-180"
+          />
         </button>
       </form>
     </div>
 
-    <!-- Add to Cart -->
-    <div v-if="cartEnabled" class="mt-4">
-      <button
-        type="button"
-        :disabled="addToCartSubmitting || !canPurchase"
-        class="w-full h-13 bg-amber-400 text-amber-900 font-black text-base rounded-full border-3 border-amber-300 shadow-[0_4px_0_0_#d97706] hover:-translate-y-0.5 active:translate-y-1 active:shadow-none transition-all flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:shadow-none"
-        style="font-family: 'Fredoka', sans-serif; height: 3.25rem"
-        @click="handleAddToCart"
-      >
-        <Icon name="lucide:shopping-bag" class="w-5 h-5 stroke-[2.5]" />
-        {{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}
-      </button>
+    <!-- ══ Add to cart ════════════════════════════════════════════════ -->
+    <button
+      v-if="cartEnabled"
+      type="button"
+      :disabled="addToCartSubmitting || (!canPurchase && !needsVariantChoice)"
+      class="kw-btn kw-btn-ghost kw-btn-lg w-full mt-4"
+      @click="handleAddToCart"
+    >
+      <Icon
+        name="lucide:shopping-bag"
+        class="w-5 h-5"
+      />
+      {{ addToCartSubmitting ? storefrontContent.actions.adding : storefrontContent.actions.addToCart }}
+    </button>
+
+    <!-- ══ Reassurance ════════════════════════════════════════════════ -->
+    <div class="mt-7 grid grid-cols-3 gap-2.5">
+      <div class="kw-card-flat flex flex-col items-center text-center gap-2 p-3.5">
+        <span
+          class="w-9 h-9 kw-blob flex items-center justify-center"
+          style="background: var(--kw-sky-soft)"
+        >
+          <Icon
+            name="lucide:truck"
+            class="w-4 h-4 text-[var(--kw-sky-deep)]"
+          />
+        </span>
+        <span class="text-[10px] font-extrabold leading-tight">{{ $t('storefront.product.features.delivery') }}</span>
+      </div>
+      <div class="kw-card-flat flex flex-col items-center text-center gap-2 p-3.5">
+        <span
+          class="w-9 h-9 kw-blob flex items-center justify-center"
+          style="background: var(--kw-lemon-soft)"
+        >
+          <Icon
+            name="lucide:headset"
+            class="w-4 h-4 text-[var(--kw-lemon-deep)]"
+          />
+        </span>
+        <span class="text-[10px] font-extrabold leading-tight">{{ $t('storefront.product.features.support') }}</span>
+      </div>
+      <div class="kw-card-flat flex flex-col items-center text-center gap-2 p-3.5">
+        <span
+          class="w-9 h-9 kw-blob flex items-center justify-center"
+          style="background: var(--kw-mint-soft)"
+        >
+          <Icon
+            name="lucide:shield-check"
+            class="w-4 h-4 text-[var(--kw-mint-deep)]"
+          />
+        </span>
+        <span class="text-[10px] font-extrabold leading-tight">{{ $t('storefront.product.features.securePayment') }}</span>
+      </div>
     </div>
 
-    <!-- Trust badges -->
-    <div class="mt-7 grid grid-cols-3 gap-2">
-      <div class="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-white border-3 border-violet-100">
-        <div class="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
-          <Icon name="lucide:truck" class="w-4.5 h-4.5" />
-        </div>
-        <span class="text-[10px] font-black text-stone-700 leading-tight">{{ $t('storefront.product.features.delivery') }}</span>
-      </div>
-      <div class="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-white border-3 border-violet-100">
-        <div class="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
-          <Icon name="lucide:headset" class="w-4.5 h-4.5" />
-        </div>
-        <span class="text-[10px] font-black text-stone-700 leading-tight">{{ $t('storefront.product.features.support') }}</span>
-      </div>
-      <div class="flex flex-col items-center text-center gap-1.5 p-3 rounded-2xl bg-white border-3 border-violet-100">
-        <div class="w-9 h-9 rounded-full bg-violet-100 text-violet-600 flex items-center justify-center">
-          <Icon name="lucide:shield-check" class="w-4.5 h-4.5" />
-        </div>
-        <span class="text-[10px] font-black text-stone-700 leading-tight">{{ $t('storefront.product.features.securePayment') }}</span>
-      </div>
-    </div>
-
-    <!-- Success Toast -->
+    <!-- ══ Toast ══════════════════════════════════════════════════════ -->
     <Transition
       enter-active-class="transform ease-out duration-300 transition"
       enter-from-class="translate-y-2 opacity-0"
       enter-to-class="translate-y-0 opacity-100"
-      leave-active-class="transition ease-in duration-100"
+      leave-active-class="transition ease-in duration-150"
       leave-from-class="opacity-100"
       leave-to-class="opacity-0"
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 bg-stone-900 text-white px-5 py-3.5 rounded-2xl shadow-xl flex items-center gap-3 border border-stone-700/50"
+        class="fixed bottom-4 end-4 z-50 bg-white px-5 py-3.5 rounded-[var(--kw-r)] shadow-xl flex items-center gap-3 border border-[var(--kw-line)]"
       >
-        <div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center shrink-0">
-          <Icon name="lucide:check" class="w-4 h-4" />
-        </div>
+        <span
+          class="w-8 h-8 kw-blob flex items-center justify-center flex-shrink-0"
+          style="background: var(--kw-mint)"
+        >
+          <Icon
+            name="lucide:check"
+            class="w-4 h-4 text-white"
+          />
+        </span>
         <div>
-          <div class="font-black text-sm">{{ successTitle }}</div>
-          <div class="text-xs text-stone-400">{{ successMessage }}</div>
+          <div class="kw-title text-sm">
+            {{ successTitle }}
+          </div>
+          <div class="text-xs font-semibold text-[var(--kw-ink-soft)]">
+            {{ successMessage }}
+          </div>
         </div>
       </div>
     </Transition>
 
-    <!-- Mobile Sticky Bar -->
+    <!-- ══ Mobile sticky bar ══════════════════════════════════════════ -->
     <Transition
       enter-active-class="transform transition ease-out duration-300"
       enter-from-class="translate-y-full"
@@ -719,35 +759,26 @@ const scrollToForm = () => {
     >
       <div
         v-if="showStickyBar && codEnabled"
-        class="fixed bottom-0 left-0 right-0 z-40 bg-[#fffbf0] border-t-3 border-violet-100 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] p-4 md:hidden flex items-center gap-4"
+        class="fixed bottom-0 inset-x-0 z-40 bg-white border-t border-[var(--kw-line)] p-3.5 md:hidden flex items-center gap-3.5"
+        style="box-shadow: 0 -8px 24px -14px rgba(74,46,77,.5)"
       >
-        <div class="flex flex-col">
-          <span class="text-xs text-stone-500 font-medium">Total</span>
-          <span class="text-xl font-black text-violet-700 leading-none" style="font-family: 'Fredoka', sans-serif">
-            {{ totalPrice.toLocaleString() }} {{ currencyCode }}
-          </span>
+        <div class="flex flex-col min-w-0">
+          <span class="text-[11px] font-bold text-[var(--kw-ink-soft)]">{{ storefrontContent.productForm.totalPrice }}</span>
+          <span class="kw-num text-xl text-[var(--kw-pink-deep)] leading-none">{{ formatAmount(totalPrice) }} {{ currencyCode }}</span>
         </div>
         <button
           type="button"
           :disabled="!canPurchase"
-          class="flex-1 h-13 bg-violet-700 text-white font-black text-base rounded-full shadow-[0_4px_0_0_#4c1d95] hover:-translate-y-0.5 active:translate-y-1 active:shadow-none transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex items-center justify-center gap-2"
-          style="font-family: 'Fredoka', sans-serif; height: 3.25rem"
+          class="kw-btn flex-1"
           @click="scrollToForm"
         >
           {{ storefrontContent.productForm.cod.submit }}
-          <Icon name="lucide:arrow-right" class="w-5 h-5" />
+          <Icon
+            name="lucide:arrow-right"
+            class="w-4 h-4 rtl:rotate-180"
+          />
         </button>
       </div>
     </Transition>
   </div>
 </template>
-
-<style scoped>
-.animate-attention {
-  animation: attentionCaptivate 3s infinite cubic-bezier(0.4, 0, 0.2, 1);
-}
-@keyframes attentionCaptivate {
-  0%, 100% { border-color: #ddd6fe; background-color: white; transform: scale(1); }
-  50% { border-color: #7c3aed; background-color: #f5f3ff; transform: scale(1.01); }
-}
-</style>

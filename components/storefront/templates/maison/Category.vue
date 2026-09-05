@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ProductCard from './ProductCard.vue'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   category: any
@@ -7,6 +8,7 @@ const props = defineProps<{
 }>()
 
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -36,7 +38,7 @@ const categoryProducts = computed(() => {
         :alt="category.title"
         class="cat-banner__img"
       >
-      <div v-else class="cat-banner__placeholder" />
+      <CategoryPlaceholder v-else :title="category.title" font-family="var(--at-f-display)" class="cat-banner__placeholder" />
       <div class="cat-banner__veil" />
       <div class="cat-banner__content">
         <span class="cat-banner__label at-label">{{ storefrontContent.category.label }}</span>
@@ -49,7 +51,7 @@ const categoryProducts = computed(() => {
       <!-- Sidebar: all categories -->
       <aside class="cat-sidebar">
         <div class="cat-sidebar__inner">
-          <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
+          <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.nav.categories }}</span>
           <nav class="cat-sidebar__nav">
             <NuxtLink
               v-for="cat in allCategories"
@@ -98,19 +100,26 @@ const categoryProducts = computed(() => {
   position: relative;
   height: clamp(200px, 30vw, 380px);
   overflow: hidden;
-  background: var(--at-surface-2);
+  background: var(--at-grad-shell);
+  border-end-end-radius: clamp(40px, 7vw, 110px);
 }
 .cat-banner__img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.4) saturate(0.7);
+  filter: brightness(0.96) saturate(0.9);
 }
-.cat-banner__placeholder { width: 100%; height: 100%; background: var(--at-surface-2); }
+.cat-banner__placeholder { width: 100%; height: 100%; background: var(--at-grad-shell); }
 .cat-banner__veil {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to right, rgba(14,13,12,0.7) 0%, rgba(14,13,12,0.1) 70%);
+  background:
+    linear-gradient(to top, rgba(250,242,227,0.94) 0%, rgba(250,242,227,0.42) 34%, transparent 72%),
+    radial-gradient(105% 100% at 0% 100%, rgba(255,251,240,0.86) 0%, rgba(247,231,198,0.34) 42%, transparent 72%),
+    linear-gradient(105deg,
+      color-mix(in srgb, var(--at-green) 22%, transparent) 0%,
+      color-mix(in srgb, var(--at-green) 8%, transparent) 52%,
+      rgba(28,35,24,0.16) 100%);
 }
 .cat-banner__content {
   position: absolute;
@@ -124,17 +133,19 @@ const categoryProducts = computed(() => {
 .cat-banner__title {
   font-family: var(--at-f-display);
   font-size: clamp(2.5rem, 6vw, 5rem);
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   color: var(--at-cream);
   line-height: 1.0;
   margin-bottom: 8px;
+  text-wrap: balance;
 }
 .cat-banner__desc {
   font-family: var(--at-f-mono);
   font-size: 12px;
   font-weight: 300;
-  color: rgba(232,226,217,0.55);
+  line-height: 1.8;
+  color: var(--at-ink-2);
   max-width: 440px;
 }
 
@@ -172,7 +183,8 @@ const categoryProducts = computed(() => {
   transition: color 0.2s;
 }
 .cat-sidebar__link:last-child { border-bottom: none; }
-.cat-sidebar__link:hover, .cat-sidebar__link.is-active { color: var(--at-gold); }
+.cat-sidebar__link:hover, .cat-sidebar__link.is-active { color: var(--at-gold-700); }
+.cat-sidebar__link.is-active { font-weight: 600; }
 .cat-sidebar__link.is-active .cat-sidebar__num { color: var(--at-gold); }
 .cat-sidebar__num {
   font-family: var(--at-f-mono);
@@ -187,7 +199,7 @@ const categoryProducts = computed(() => {
 .cat-count {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   margin-bottom: 20px;
@@ -196,14 +208,16 @@ const categoryProducts = computed(() => {
 .cat-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 1px;
-  background: var(--at-border);
+  gap: clamp(12px, 1.6vw, 20px);
 }
 @media (min-width: 768px) { .cat-grid { grid-template-columns: repeat(3, 1fr); } }
 @media (min-width: 1280px) { .cat-grid { grid-template-columns: repeat(4, 1fr); } }
 
 .cat-empty {
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  background: var(--at-grad-paper);
+  box-shadow: var(--at-shadow-sm);
   padding: 80px 24px;
   display: flex;
   flex-direction: column;
@@ -215,8 +229,9 @@ const categoryProducts = computed(() => {
 .cat-empty__title {
   font-family: var(--at-f-display);
   font-size: 1.6rem;
-  font-weight: 300;
-  color: var(--at-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--at-cream);
 }
 .cat-empty__sub {
   font-family: var(--at-f-mono);

@@ -1,175 +1,221 @@
 <script setup lang="ts">
-import ProductCard from '~/components/storefront/templates/playful/ProductCard.vue'
+import ProductCard from './ProductCard.vue'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
-    category: any,
-    products: any[] // All products passed, we filter here
+  category: any,
+  products: any[] // All products passed, we filter here
 }>()
 
 const storefrontContent = useStorefrontContent()
 
-const categoryDisplayTitle = (category: any): string => {
-    if (!category) return ""
-    return category.parentId ? ("-> " + category.title) : category.title
-}
-
-
-// Fetch dynamic categories for sidebar
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: allCategories } = await useFetch<any[]>(categoriesUrl, {
-    headers: useTenantApiHeaders(),
-    lazy: true
+  headers: useTenantApiHeaders(),
+  lazy: true
 })
 
-// Filter products for this category
 const categoryProducts = computed(() => {
-    const id = props.category.id
-    return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id))
+  const id = props.category.id
+  return (props.products ?? []).filter((p: any) => p.isActive && p.stock > 0 && [...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId].filter(Boolean).includes(id))
 })
 
 type SortOption = 'mostPopular' | 'newest' | 'priceLowToHigh' | 'priceHighToLow'
 const sortOption = ref<SortOption>('mostPopular')
 
 const sortedProducts = computed(() => {
-    const result = [...categoryProducts.value]
-    if (sortOption.value === 'newest') {
-        result.sort((a, b) => Number(new Date(b.createdAt ?? 0)) - Number(new Date(a.createdAt ?? 0)))
-    } else if (sortOption.value === 'priceLowToHigh') {
-        result.sort((a, b) => Number(a.price) - Number(b.price))
-    } else if (sortOption.value === 'priceHighToLow') {
-        result.sort((a, b) => Number(b.price) - Number(a.price))
-    }
-    return result
+  const result = [...categoryProducts.value]
+  if (sortOption.value === 'newest') {
+    result.sort((a, b) => Number(new Date(b.createdAt ?? 0)) - Number(new Date(a.createdAt ?? 0)))
+  } else if (sortOption.value === 'priceLowToHigh') {
+    result.sort((a, b) => Number(a.price) - Number(b.price))
+  } else if (sortOption.value === 'priceHighToLow') {
+    result.sort((a, b) => Number(b.price) - Number(a.price))
+  }
+  return result
 })
 
-// Mock filters removed. We only show Categories logic for navigation.
+/*
+ * The tile rail shows where you can go from here: children of this category
+ * when it has any, otherwise its siblings — never a flat dump of everything.
+ */
+const relatedCategories = computed(() => {
+  const all = allCategories.value || []
+  const children = all.filter((c) => c.parentId === props.category.id)
+  if (children.length > 0) return children
+  const siblings = all.filter((c) => (c.parentId || null) === (props.category.parentId || null) && c.id !== props.category.id)
+  return siblings.length > 0 ? siblings : all.filter((c) => c.id !== props.category.id)
+})
+
+const tileTints = ['var(--kw-pink-soft)', 'var(--kw-sky-soft)', 'var(--kw-lemon-soft)', 'var(--kw-mint-soft)', 'var(--kw-lilac-soft)']
+const tintAt = (index: number) => tileTints[index % tileTints.length]
 </script>
 
 <template>
-  <div class="bg-[#faf5ff] min-h-screen py-8">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Breadcrumb -->
-      <nav class="flex mb-8 text-sm text-slate-500">
-        <NuxtLink
-          to="/"
-          class="hover:text-brand-600"
-        >
-          {{ storefrontContent.nav.home }}
-        </NuxtLink>
-        <span class="mx-2">/</span>
-        <NuxtLink
-          to="/products"
-          class="hover:text-brand-600"
-        >
-          {{ storefrontContent.nav.shop }}
-        </NuxtLink>
-        <span class="mx-2">/</span>
-        <span class="font-medium text-slate-900">{{ category.title }}</span>
-      </nav>
+  <div class="bg-[var(--kw-cream)] min-h-screen pb-16">
+    <!-- ══ Cover ══════════════════════════════════════════════════════ -->
+    <section class="kw-band-mint kw-scallop pt-8 pb-16 md:pb-20">
+      <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+        <nav class="flex items-center gap-2 text-xs font-bold text-[var(--kw-ink-soft)] mb-8">
+          <NuxtLink
+            to="/"
+            class="hover:text-[var(--kw-pink-deep)] transition-colors"
+          >
+            {{ storefrontContent.nav.home }}
+          </NuxtLink>
+          <Icon
+            name="lucide:chevron-right"
+            class="w-3.5 h-3.5 opacity-50 rtl:rotate-180"
+          />
+          <NuxtLink
+            to="/products"
+            class="hover:text-[var(--kw-pink-deep)] transition-colors"
+          >
+            {{ storefrontContent.nav.shop }}
+          </NuxtLink>
+          <Icon
+            name="lucide:chevron-right"
+            class="w-3.5 h-3.5 opacity-50 rtl:rotate-180"
+          />
+          <span class="text-[var(--kw-ink)]">{{ category.title }}</span>
+        </nav>
 
-      <div class="relative overflow-hidden rounded-[2rem] bg-[#4c1d95] text-white mb-8 shadow-sm border-4 border-purple-200">
-        <img
-          v-if="category.imageUrl"
-          :src="category.imageUrl"
-          :alt="category.title"
-          class="absolute inset-0 w-full h-full object-contain opacity-70 bg-[#4c1d95]"
-        >
-        <div class="absolute inset-0 bg-gradient-to-r from-[#4c1d95]/90 via-[#6b21a8]/80 to-[#7e22ce]/60" />
-        <div class="relative p-8 sm:p-10 lg:p-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-brand-200 mb-2">
+        <div class="grid md:grid-cols-[1fr_auto] gap-8 items-center">
+          <div class="kw-rise">
+            <p class="kw-kicker mb-3">
               {{ storefrontContent.category.label }}
             </p>
-            <h1 class="text-3xl sm:text-4xl font-bold font-sans">
+            <h1 class="kw-display text-3xl md:text-[3rem] mb-4">
               {{ category.title }}
             </h1>
-            <p class="mt-3 text-slate-200 text-sm">
+            <p class="kw-lede max-w-xl mb-6">
               {{ category.description || storefrontContent.category.description }}
             </p>
-          </div>
-          <div class="flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-2 text-sm border border-white/20">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white font-semibold">
-              {{ categoryProducts.length }}
+            <span class="kw-chip !cursor-default">
+              <span class="kw-num text-[var(--kw-pink-deep)]">{{ categoryProducts.length }}</span>
+              {{ storefrontContent.category.productsAvailableLabel }}
             </span>
-            <span class="text-slate-100">{{ storefrontContent.category.productsAvailableLabel }}</span>
+          </div>
+
+          <div
+            v-if="category.imageUrl"
+            class="kw-blob kw-float w-40 h-40 md:w-56 md:h-56 overflow-hidden justify-self-center md:justify-self-end"
+            style="box-shadow: 0 0 0 4px rgba(255,255,255,.85)"
+          >
+            <img
+              :src="category.imageUrl"
+              :alt="category.title"
+              class="w-full h-full object-cover"
+            >
           </div>
         </div>
       </div>
+    </section>
 
-        <!-- Horizontal Categories (Replaces Sidebar) -->
-        <div class="flex flex-wrap gap-3 mb-8 pb-6 border-b-4 border-purple-100/50">
-          <!-- Iterate over fetched categories -->
-          <NuxtLink 
-            v-for="cat in allCategories" 
-            :key="cat.id" 
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
+      <!-- ══ Related category tiles ═══════════════════════════════════ -->
+      <section
+        v-if="relatedCategories.length"
+        class="pt-12 pb-4"
+      >
+        <div class="flex gap-4 md:gap-6 overflow-x-auto kw-hide-scroll pt-3 pb-5 snap-x">
+          <NuxtLink
+            v-for="(cat, index) in relatedCategories"
+            :key="cat.id"
             :to="`/category/${cat.slug}`"
-            class="px-6 py-3 rounded-[2rem] text-sm font-black transition-all shadow-sm border-2 whitespace-nowrap"
-            :class="cat.id === category.id ? 'bg-[#fbbf24] text-amber-900 border-amber-300 shadow-[0_4px_0_0_#d97706] -translate-y-1' : 'bg-white text-slate-600 border-purple-100 hover:border-amber-200 hover:-translate-y-1 hover:shadow-md'"
+            class="group snap-start flex-shrink-0 w-20 sm:w-24 text-center"
           >
-            <span class="opacity-80 mr-1">🌟</span> {{ categoryDisplayTitle(cat) }}
-          </NuxtLink>
-        </div>
-
-        <!-- Main Content (Full Width) -->
-        <div class="flex-1 w-full">
-          <!-- Header -->
-          <div class="bg-white p-6 rounded-[2rem] border-4 border-purple-100 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 class="text-2xl font-bold text-slate-900">
-                {{ category.title }}
-              </h1>
-              <p class="text-slate-500 text-sm mt-1">
-                {{ storefrontContent.category.showingResults(categoryProducts.length) }}
-              </p>
-            </div>
-                      
-            <!-- Sort -->
-            <div class="flex items-center gap-3">
-              <span class="text-sm font-bold text-slate-500">{{ storefrontContent.category.sortBy }}</span>
-              <select v-model="sortOption" class="rounded-full border-2 border-purple-200 text-sm font-black text-slate-700 bg-purple-50 focus:border-brand-500 focus:ring-brand-500 px-4 py-2">
-                <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
-                <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
-                <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
-                <option value="priceHighToLow">{{ storefrontContent.category.sort.priceHighToLow }}</option>
-              </select>
-            </div>
-          </div>
-
-          <!-- Grid -->
-          <div
-            v-if="sortedProducts.length === 0"
-            class="bg-white rounded-[2rem] border-4 border-purple-100 shadow-sm p-12 text-center"
-          >
-            <Icon name="lucide:package-open" class="w-16 h-16 text-brand-300 mx-auto mb-4" />
-            <h3 class="text-lg font-medium text-slate-900">
-              {{ storefrontContent.shop.results.noResults }}
-            </h3>
-            <p class="text-slate-500 mt-1">
-              {{ storefrontContent.category.emptyHint }}
-            </p>
-            <NuxtLink
-              to="/products"
-              class="inline-flex items-center justify-center mt-6 px-8 py-3 rounded-full bg-brand-500 font-black text-white hover:bg-brand-400 hover:-translate-y-1 shadow-[0_6px_0_0_#7e22ce] active:translate-y-2 active:shadow-none transition-all"
+            <div
+              class="w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden mb-2.5 transition-transform duration-300 group-hover:-translate-y-1.5"
+              :style="{ background: tintAt(index), boxShadow: `0 0 0 2px var(--kw-line)` }"
             >
-              {{ storefrontContent.shop.allProducts }}
-            </NuxtLink>
-          </div>
-          <div
-            v-else
-            class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
-          >
-            <!-- Apply vertical offset to alternating columns for masonry effect -->
-            <div 
-              v-for="(product, index) in sortedProducts" 
-              :key="product.id"
-              :class="index % 2 === 1 ? 'mt-0 sm:mt-8' : 'mt-0'"
-            >
-              <ProductCard
-                :product="product"
+              <img
+                v-if="cat.imageUrl"
+                :src="cat.imageUrl"
+                :alt="cat.title"
+                class="w-full h-full object-cover"
+              >
+              <CategoryPlaceholder
+                v-else
+                :title="cat.title"
+                class="w-full h-full"
               />
             </div>
-          </div>
+            <p class="text-[11px] sm:text-xs font-extrabold leading-tight line-clamp-2 group-hover:text-[var(--kw-pink-deep)] transition-colors">
+              {{ cat.title }}
+            </p>
+          </NuxtLink>
         </div>
+      </section>
+
+      <!-- ══ Sort bar ═════════════════════════════════════════════════ -->
+      <div class="kw-card-flat p-3 my-8 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <p class="kw-title text-sm ms-2">
+          {{ storefrontContent.category.showingResults(categoryProducts.length) }}
+        </p>
+        <div class="relative sm:w-56">
+          <select
+            v-model="sortOption"
+            class="kw-field h-11 pe-10 appearance-none cursor-pointer bg-[var(--kw-cream-2)] border-transparent"
+          >
+            <option value="mostPopular">
+              {{ storefrontContent.category.sort.mostPopular }}
+            </option>
+            <option value="newest">
+              {{ storefrontContent.category.sort.newest }}
+            </option>
+            <option value="priceLowToHigh">
+              {{ storefrontContent.category.sort.priceLowToHigh }}
+            </option>
+            <option value="priceHighToLow">
+              {{ storefrontContent.category.sort.priceHighToLow }}
+            </option>
+          </select>
+          <Icon
+            name="lucide:chevron-down"
+            class="w-4 h-4 text-[var(--kw-ink-faint)] absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none"
+          />
+        </div>
+      </div>
+
+      <!-- ══ Grid ═════════════════════════════════════════════════════ -->
+      <div
+        v-if="sortedProducts.length === 0"
+        class="kw-card p-14 text-center"
+      >
+        <span
+          class="w-20 h-20 kw-blob mx-auto mb-6 flex items-center justify-center"
+          style="background: var(--kw-sky-soft)"
+        >
+          <Icon
+            name="lucide:package-open"
+            class="w-9 h-9 text-[var(--kw-sky-deep)]"
+          />
+        </span>
+        <h3 class="kw-title text-xl mb-2">
+          {{ storefrontContent.shop.results.noResults }}
+        </h3>
+        <p class="kw-lede mb-7">
+          {{ storefrontContent.category.emptyHint }}
+        </p>
+        <NuxtLink
+          to="/products"
+          class="kw-btn"
+        >
+          {{ storefrontContent.shop.allProducts }}
+        </NuxtLink>
+      </div>
+
+      <div
+        v-else
+        class="grid grid-cols-2 lg:grid-cols-4 gap-x-5 gap-y-10"
+      >
+        <ProductCard
+          v-for="product in sortedProducts"
+          :key="product.id"
+          :product="product"
+        />
+      </div>
     </div>
   </div>
 </template>

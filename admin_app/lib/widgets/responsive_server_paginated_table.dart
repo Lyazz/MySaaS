@@ -3,7 +3,8 @@ import 'dart:math' as math;
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
+import '../theme/app_theme.dart';
 
 class ResponsiveServerPaginatedTable<T> extends StatefulWidget {
   final List<T> items;
@@ -101,7 +102,7 @@ class _ResponsiveServerPaginatedTableState<T>
             child: Padding(
               padding: EdgeInsets.all(48),
               child: Text(
-                'admin.common.noDataAvailable'.tr(),
+                'app.admin_common_nodataavailable'.tr().tr(),
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -117,19 +118,26 @@ class _ResponsiveServerPaginatedTableState<T>
         final tableWidth = availableWidth > widget.minWidth
             ? availableWidth
             : widget.minWidth;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final surface = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+        final border = isDark
+            ? AppColors.surfaceBorder
+            : AppColors.lightSurfaceBorder;
 
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)), // Slate-200
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.02),
-                blurRadius: 4,
-                offset: const Offset(0, 1),
-              ),
-            ],
+            border: Border.all(color: border),
+            boxShadow: isDark
+                ? null
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.02),
+                      blurRadius: 4,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
           ),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -141,15 +149,17 @@ class _ResponsiveServerPaginatedTableState<T>
                     horizontal: 20,
                     vertical: 16,
                   ),
-                  decoration: const BoxDecoration(
-                    border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    border: Border(bottom: BorderSide(color: border)),
+                    color: surface,
                   ),
                   child: DefaultTextStyle.merge(
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A), // Slate-900
+                      color: isDark
+                          ? AppColors.textPrimary
+                          : const Color(0xFF0F172A),
                     ),
                     child: widget.title!,
                   ),
@@ -160,6 +170,7 @@ class _ResponsiveServerPaginatedTableState<T>
                     context,
                     tableWidth,
                     widget.items,
+                    isDark: isDark,
                     useVerticalScroll: true,
                   ),
                 )
@@ -168,17 +179,18 @@ class _ResponsiveServerPaginatedTableState<T>
                   context,
                   tableWidth,
                   widget.items,
+                  isDark: isDark,
                   useVerticalScroll: false,
                 ),
               if (widget.showFooter)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 20,
-                    vertical: 12,
+                    vertical: 4,
                   ),
-                  decoration: const BoxDecoration(
-                    border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-                    color: Colors.white,
+                  decoration: BoxDecoration(
+                    border: Border(top: BorderSide(color: border)),
+                    color: surface,
                   ),
                   child: _buildPaginationFooter(),
                 ),
@@ -194,6 +206,7 @@ class _ResponsiveServerPaginatedTableState<T>
     double tableWidth,
     List<T> items, {
     required bool useVerticalScroll,
+    required bool isDark,
   }) {
     return ScrollConfiguration(
       behavior: const _TableScrollBehavior(),
@@ -217,10 +230,18 @@ class _ResponsiveServerPaginatedTableState<T>
                     horizontal: 20,
                     vertical: 12,
                   ),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF8FAFC), // Slate-50
+                  decoration: BoxDecoration(
+                    color: isDark
+                        ? AppColors.surface2
+                        : const Color(
+                            0xFFF8FAFC,
+                          ), // dark: surface-2 / light: slate-50
                     border: Border(
-                      bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                      bottom: BorderSide(
+                        color: isDark
+                            ? AppColors.surfaceBorder
+                            : const Color(0xFFE2E8F0),
+                      ),
                     ),
                   ),
                   child: widget.header,
@@ -241,9 +262,13 @@ class _ResponsiveServerPaginatedTableState<T>
                           itemCount: items.length,
                           itemBuilder: (context, i) {
                             return Container(
-                              decoration: const BoxDecoration(
+                              decoration: BoxDecoration(
                                 border: Border(
-                                  bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                                  bottom: BorderSide(
+                                    color: isDark
+                                        ? AppColors.surfaceBorder
+                                        : const Color(0xFFF1F5F9),
+                                  ),
                                 ),
                               ),
                               child: widget.rowBuilder(context, items[i], i),
@@ -258,9 +283,13 @@ class _ResponsiveServerPaginatedTableState<T>
                     final index = entry.key;
                     final item = entry.value;
                     return Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         border: Border(
-                          bottom: BorderSide(color: Color(0xFFF1F5F9)),
+                          bottom: BorderSide(
+                            color: isDark
+                                ? AppColors.surfaceBorder
+                                : const Color(0xFFF1F5F9),
+                          ),
                         ),
                       ),
                       child: widget.rowBuilder(context, item, index),
@@ -286,42 +315,32 @@ class _ResponsiveServerPaginatedTableState<T>
     return LayoutBuilder(
       builder: (context, constraints) {
         final isSmall = constraints.maxWidth < 600;
+        final isDark = Theme.of(context).brightness == Brightness.dark;
+        final textSecondary = isDark
+            ? AppColors.textSecondary
+            : AppColors.lightTextSecondary;
+        final textPrimary = isDark
+            ? AppColors.textPrimary
+            : AppColors.lightTextPrimary;
+
+        final showingText = Text(
+          'admin.common.showing'.tr(
+            namedArgs: {
+              'from': from.toString(),
+              'to': to.toString(),
+              'total': totalItems.toString(),
+            },
+          ),
+          style: TextStyle(fontSize: 13, color: textSecondary),
+        );
 
         return Flex(
           direction: isSmall ? Axis.vertical : Axis.horizontal,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (!isSmall)
-              Text(
-                'admin.common.showing'.tr(
-                  namedArgs: {
-                    'from': from.toString(),
-                    'to': to.toString(),
-                    'total': totalItems.toString(),
-                  },
-                ),
-                style: const TextStyle(
-                  fontSize: 13,
-                  color: Color(0xFF64748B), // Slate-500
-                ),
-              ),
+            if (!isSmall) showingText,
             if (isSmall)
-              Align(
-                alignment: Alignment.centerRight,
-                child: Text(
-                  'admin.common.showing'.tr(
-                    namedArgs: {
-                      'from': from.toString(),
-                      'to': to.toString(),
-                      'total': totalItems.toString(),
-                    },
-                  ),
-                  style: const TextStyle(
-                    fontSize: 13,
-                    color: Color(0xFF64748B), // Slate-500
-                  ),
-                ),
-              ),
+              Align(alignment: Alignment.centerRight, child: showingText),
             if (isSmall) const SizedBox(height: 12),
             Row(
               mainAxisAlignment: isSmall
@@ -346,9 +365,9 @@ class _ResponsiveServerPaginatedTableState<T>
                       'total': totalPages.toString(),
                     },
                   ),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
-                    color: Color(0xFF334155), // Slate-700
+                    color: textPrimary,
                     fontWeight: FontWeight.w500,
                   ),
                 ),

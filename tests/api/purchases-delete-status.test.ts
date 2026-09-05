@@ -18,7 +18,7 @@ describe('Purchases delete + status lifecycle policy', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Purchases Policy Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Purchases Policy Tenant', slug }
         })
         tenantId = tenant.id
 

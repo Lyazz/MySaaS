@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class NumpadWidget extends StatelessWidget {
   final Function(String) onNumberTap;
@@ -20,6 +21,7 @@ class NumpadWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     const crossAxisCount = 3;
     const rowCount = 5;
     const spacing = 8.0;
@@ -28,39 +30,47 @@ class NumpadWidget extends StatelessWidget {
 
     Widget placeholder() => const SizedBox.shrink();
 
-    // Fixed 5x3 layout (15 slots) so it always fits without scrolling.
     final buttons = <Widget>[
-      _buildButton('1', onTap: () => onNumberTap('1')),
-      _buildButton('2', onTap: () => onNumberTap('2')),
-      _buildButton('3', onTap: () => onNumberTap('3')),
-      _buildButton('4', onTap: () => onNumberTap('4')),
-      _buildButton('5', onTap: () => onNumberTap('5')),
-      _buildButton('6', onTap: () => onNumberTap('6')),
-      _buildButton('7', onTap: () => onNumberTap('7')),
-      _buildButton('8', onTap: () => onNumberTap('8')),
-      _buildButton('9', onTap: () => onNumberTap('9')),
+      _buildButton(context, '1', isDark: isDark, onTap: () => onNumberTap('1')),
+      _buildButton(context, '2', isDark: isDark, onTap: () => onNumberTap('2')),
+      _buildButton(context, '3', isDark: isDark, onTap: () => onNumberTap('3')),
+      _buildButton(context, '4', isDark: isDark, onTap: () => onNumberTap('4')),
+      _buildButton(context, '5', isDark: isDark, onTap: () => onNumberTap('5')),
+      _buildButton(context, '6', isDark: isDark, onTap: () => onNumberTap('6')),
+      _buildButton(context, '7', isDark: isDark, onTap: () => onNumberTap('7')),
+      _buildButton(context, '8', isDark: isDark, onTap: () => onNumberTap('8')),
+      _buildButton(context, '9', isDark: isDark, onTap: () => onNumberTap('9')),
       _buildButton(
+        context,
         'C',
-        color: Colors.red[50],
-        textColor: Colors.red,
+        isDark: isDark,
+        color: AppColors.redSurface,
+        textColor: AppColors.redText,
         onTap: onClear,
       ),
-      _buildButton('0', onTap: () => onNumberTap('0')),
-      _buildButton(
-        '⌫',
-        color: Colors.grey[200],
-        textColor: Colors.black87,
-        onTap: onBackspace ?? onClear,
-      ),
+      _buildButton(context, '0', isDark: isDark, onTap: () => onNumberTap('0')),
+      _buildButton(context, '⌫', isDark: isDark, onTap: onBackspace ?? onClear),
       if (allowDecimal)
-        _buildButton('.', onTap: () => onNumberTap('.'))
+        _buildButton(
+          context,
+          '.',
+          isDark: isDark,
+          onTap: () => onNumberTap('.'),
+        )
       else
         placeholder(),
-      _buildButton('00', onTap: () => onNumberTap('00')),
       _buildButton(
+        context,
+        '00',
+        isDark: isDark,
+        onTap: () => onNumberTap('00'),
+      ),
+      _buildButton(
+        context,
         'Enter',
-        color: Colors.teal,
-        textColor: Colors.white,
+        isDark: isDark,
+        color: Theme.of(context).colorScheme.primary,
+        textColor: Theme.of(context).colorScheme.onPrimary,
         onTap: onEnter,
       ),
     ];
@@ -104,9 +114,12 @@ class NumpadWidget extends StatelessWidget {
                     label,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 14,
+                      color: isDark
+                          ? AppColors.textSecondary
+                          : AppColors.lightTextSecondary,
                     ),
                   ),
                 ),
@@ -131,28 +144,46 @@ class NumpadWidget extends StatelessWidget {
   }
 
   Widget _buildButton(
+    BuildContext context,
     String text, {
+    required bool isDark,
     Color? color,
     Color? textColor,
     required VoidCallback onTap,
   }) {
+    final defaultBg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
+    final defaultText = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+
     return Material(
-      color: color ?? Colors.grey[100],
+      color: color ?? defaultBg,
       borderRadius: BorderRadius.circular(8),
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(8),
-        child: Center(
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              child: Text(
-                text,
-                style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: textColor ?? Colors.black87,
+        child: Container(
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: color != null ? Colors.transparent : borderColor,
+            ),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          child: Center(
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                child: Text(
+                  text,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: textColor ?? defaultText,
+                  ),
                 ),
               ),
             ),

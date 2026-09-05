@@ -4,6 +4,7 @@ import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
   product: any
@@ -29,9 +30,7 @@ const currentVariant = computed(() => {
   return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
-const currentPrice = computed(() => {
-  return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
-})
+const currentPrice = computed(() => buildScopedProductPricing(props.product, currentVariant.value).effectivePrice)
 
 const currentStock = computed(() => {
   if (!currentVariant.value) return props.product?.stock
@@ -61,6 +60,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
   if (!product?.variants || product.variants.length === 0) return
   const best = findBestVariantForSelection({ product, selectedOptions: selectedOptions.value })
   if (!best) selectedOptions.value = getPreferredInitialSelection(product)
+})
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
 })
 </script>
 
@@ -102,7 +111,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
     <div class="pdp__desc">
       <div class="pdp__desc-inner">
         <h2 class="pdp__desc-title">{{ storefrontContent.product.detailsTitle }}</h2>
-        <SafeRichText
+        <CommonSafeRichText
           v-if="product?.description"
           class="pdp__desc-content"
           :html="product.description"
@@ -118,7 +127,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
 
 .pdp__breadcrumb {
   border-bottom: 1px solid var(--at-border);
-  background: var(--at-surface);
+  background: var(--at-grad-shell);
 }
 .pdp__breadcrumb-inner {
   max-width: 1400px;
@@ -132,13 +141,13 @@ watch([() => props.product, selectedOptions], ([product]) => {
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   text-decoration: none;
   transition: color 0.2s;
 }
-.pdp__bc-link:hover { color: var(--at-gold); }
+.pdp__bc-link:hover { color: var(--at-gold-700); }
 .pdp__bc-sep {
   font-family: var(--at-f-mono);
   font-size: 9px;
@@ -148,7 +157,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.1em;
+  letter-spacing: 0;
   color: var(--at-sub);
   white-space: nowrap;
   overflow: hidden;
@@ -194,13 +203,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
 .pdp__desc-title {
   font-family: var(--at-f-display);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
-  font-weight: 300;
+  font-weight: 600;
+  letter-spacing: -0.025em;
   color: var(--at-cream);
   margin-bottom: 32px;
 }
 .pdp__desc-content {
-  background: var(--at-surface);
+  background: var(--at-grad-paper);
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  box-shadow: var(--at-shadow-sm);
   padding: clamp(24px, 4vw, 48px);
   font-family: var(--at-f-mono);
   font-size: 13px;
@@ -213,11 +225,12 @@ watch([() => props.product, selectedOptions], ([product]) => {
 :deep(.pdp__desc-content h2),
 :deep(.pdp__desc-content h3) {
   font-family: var(--at-f-display);
-  font-weight: 300;
-  color: var(--at-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--at-cream);
   margin: 1.5em 0 0.5em;
 }
-:deep(.pdp__desc-content a) { color: var(--at-gold); }
+:deep(.pdp__desc-content a) { color: var(--at-gold-700); text-decoration-color: var(--at-border-2); }
 :deep(.pdp__desc-content p) { margin-bottom: 1em; }
 
 .pdp__desc-fallback {

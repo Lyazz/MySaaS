@@ -3,6 +3,7 @@ const props = defineProps<{
     images: string[]
     title?: string
 }>()
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const activeImageIndex = ref(0)
 const autoplayTimer = ref<ReturnType<typeof setInterval> | null>(null)
@@ -42,8 +43,9 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
             style="background-color: #131720; border-color: rgba(212,197,169,0.1); border-radius: 2px;"
             @touchstart="handleTouchStart"
             @touchend="handleTouchEnd"
+            @mousemove="onPointerMove"
             @mouseenter="stopAutoplay"
-            @mouseleave="startAutoplay"
+            @mouseleave="startAutoplay(); onPointerLeave()"
         >
             <transition-group name="fade" tag="div" class="w-full h-full relative">
                 <img 
@@ -52,12 +54,13 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
                     :key="img || idx"
                     :src="img" 
                     :alt="title" 
-                    class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+                    class="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-700 ease-out"
+                    :style="zoomStyle"
                 >
             </transition-group>
 
             <!-- Bestseller badge -->
-            <div class="absolute top-4 left-4 z-10">
+            <div class="absolute top-4 start-4 z-10">
                 <span class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium tracking-wider uppercase" style="background-color:rgba(14,17,23,0.85); border:1px solid rgba(166,124,82,0.3); color:#A67C52; border-radius:1px;">
                     <Icon name="lucide:star" class="w-3 h-3" style="color:#A67C52;" />
                     {{ $t('storefront.product.bestsellerBadge') }}
@@ -65,7 +68,7 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
             </div>
 
             <!-- Mobile dots -->
-            <div v-if="images?.length > 1" class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden">
+            <div v-if="images?.length > 1" class="absolute bottom-4 start-0 end-0 flex justify-center gap-2 z-10 md:hidden">
                 <button
                     v-for="(_, idx) in images"
                     :key="'dot-'+idx"
@@ -78,7 +81,7 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
             <!-- Desktop arrows -->
             <button 
                 v-if="images?.length > 1" 
-                class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                class="hidden md:flex absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 style="background-color:rgba(14,17,23,0.85); border:1px solid rgba(212,197,169,0.2); border-radius:1px; color:#D4C5A9;"
                 @click.stop="prevImage" 
             >
@@ -86,7 +89,7 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
             </button>
             <button 
                 v-if="images?.length > 1" 
-                class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
+                class="hidden md:flex absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10"
                 style="background-color:rgba(14,17,23,0.85); border:1px solid rgba(212,197,169,0.2); border-radius:1px; color:#D4C5A9;"
                 @click.stop="nextImage" 
             >
@@ -105,7 +108,7 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
                     : 'border-color:rgba(212,197,169,0.08);border-radius:1px;'"
                 @click="setActiveImage(idx)"
             >
-                <img :src="img" class="w-full h-full object-cover" alt="Thumbnail">
+                <img :src="img" class="w-full h-full object-cover" :alt="title">
             </button>
         </div>
     </div>

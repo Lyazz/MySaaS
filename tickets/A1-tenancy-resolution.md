@@ -2,7 +2,7 @@
 
 ## Goal
 Resolve tenant from request Host for both:
-- {slug}.platform.com
+- {slug}.swekly.com
 - custom domains mapped to a tenant
 
 ## Requirements

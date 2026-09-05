@@ -22,6 +22,7 @@
     /* Brand — default admin primary, aligned with marketing */
     --brand: #C6F432;
     --brand-rgb: 198 244 50;
+    --brand-contrast: #05070A;
 
     /* Admin shell palette — fixed dark chrome */
     --admin-sidebar-bg: #0f1117;
@@ -67,30 +68,60 @@
 
     /* Nav hover */
     --nav-hover-bg: rgba(255,255,255,0.04);
+
+    /* Overlay elevation — modals and popovers. Cast in black on the dark
+       shell; the light theme redefines it far softer. */
+    --shadow-overlay: 0 24px 48px rgba(0,0,0,0.5);
+    --shadow-popover: 0 8px 24px rgba(0,0,0,0.4);
+
+    /* Loading skeletons — a wash one step off the surface they sit on. */
+    --skeleton-bg: rgba(255,255,255,0.06);
+
+    /* Scrollbars — tinted off the surface, not off pure white, so the thumb
+       stays visible in whichever theme is mounted. */
+    --scrollbar-thumb: rgba(255,255,255,0.10);
+    --scrollbar-thumb-hover: rgba(255,255,255,0.22);
+
+    /* Focus — one ring for every interactive element in the admin shell. */
+    --focus-ring: var(--brand);
+
+    /* Native widget rendering (date/time pickers, scrollbars, form controls). */
+    --admin-color-scheme: dark;
+
+    /* Admin active item — use brand directly on dark bg */
+    --admin-active-color: var(--brand);
   }
 
   [data-theme="light"] {
+    /* Brand — darkened for light-mode readability (same hue, ~60% lower luminance) */
+    --brand: #4f7a0a;
+    --brand-rgb: 79 122 10;
+    --brand-contrast: #ffffff;
+
     /* Admin shell — light chrome */
-    --admin-sidebar-bg: #ffffff;
-    --admin-sidebar-surface: #f8fafc;
-    --admin-sidebar-border: rgba(0,0,0,0.08);
-    --admin-topbar-bg: #ffffff;
-    --admin-topbar-border: rgba(0,0,0,0.08);
-    --admin-content-bg: #f1f5f9;
+    --admin-sidebar-bg: #f4f7fb;
+    --admin-sidebar-surface: #edf2f7;
+    --admin-sidebar-border: rgba(15,23,42,0.1);
+    --admin-topbar-bg: #f8fbff;
+    --admin-topbar-border: rgba(15,23,42,0.1);
+    --admin-content-bg: #e6edf4;
 
     /* Surface layers */
-    --surface-1: #ffffff;
-    --surface-2: #f8fafc;
-    --surface-3: #f1f5f9;
-    --surface-border: rgba(0,0,0,0.08);
-    --surface-border-hover: rgba(0,0,0,0.15);
-    --card-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --surface-1: #fbfdff;
+    --surface-2: #f3f7fb;
+    --surface-3: #eaf0f6;
+    --surface-border: rgba(15,23,42,0.12);
+    --surface-border-hover: rgba(15,23,42,0.18);
+    --card-shadow: 0 1px 2px rgba(15,23,42,0.04), 0 12px 30px rgba(15,23,42,0.06);
 
     /* Text hierarchy */
     --text-primary: #0f172a;
-    --text-secondary: #475569;
-    --text-tertiary: #94a3b8;
-    --text-muted: #cbd5e1;
+    --text-secondary: #334155;
+    --text-tertiary: #64748b;
+    --text-muted: #94a3b8;
+
+    /* Admin active item — dark readable color instead of neon lime on light bg */
+    --admin-active-color: #5a7a0a;
 
     /* Accent */
     --accent: #84A60D;
@@ -113,11 +144,47 @@
     --status-returned-text: #7e22ce;
 
     /* Nav hover */
-    --nav-hover-bg: rgba(0,0,0,0.04);
+    --nav-hover-bg: rgba(15,23,42,0.06);
+
+    /* Overlay elevation */
+    --shadow-overlay: 0 24px 48px rgba(15,23,42,0.18);
+    --shadow-popover: 0 8px 24px rgba(15,23,42,0.12);
+
+    /* Loading skeletons */
+    --skeleton-bg: rgba(15,23,42,0.07);
+
+    /* Scrollbars */
+    --scrollbar-thumb: rgba(15,23,42,0.18);
+    --scrollbar-thumb-hover: rgba(15,23,42,0.32);
+
+    /* Focus */
+    --focus-ring: var(--brand);
+
+    /* Native widget rendering */
+    --admin-color-scheme: light;
   }
 }
 
 @layer components {
+  /*
+   * Shared LocaleSwitcher (components/LocaleSwitcher.vue) inside the admin
+   * shell — map its --ls-* tokens onto the chrome palette so the dropdown
+   * follows the theme and flips with [data-theme="light"]. Scoped to
+   * .admin-shell so it never reaches the storefront, where each template's
+   * ThemeProvider supplies its own --ls-* values.
+   */
+  .admin-shell {
+    --ls-surface: var(--surface-2);
+    --ls-border: var(--surface-border);
+    --ls-shadow: var(--shadow-popover);
+    --ls-radius: 10px;
+    --ls-text: var(--text-secondary);
+    --ls-text-strong: var(--text-primary);
+    --ls-hover-bg: var(--surface-3);
+    --ls-accent: var(--brand);
+    --ls-accent-soft: rgba(var(--brand-rgb) / 0.14);
+  }
+
   /* ── Cards ── */
   .ui-card {
     background: var(--surface-1);
@@ -135,10 +202,19 @@
     @apply px-5 py-4;
   }
 
-  /* ── Buttons ── */
-  .ui-btn {
+  /* ── Buttons ──────────────────────────────────────────────────────────
+   * `.settings-btn` / `.header-action` are the settings screens' older copy of
+   * this button; they resolve here so both spellings look identical while the
+   * markup migrates. Delete the legacy halves once no template uses them.
+   */
+  .ui-btn,
+  .settings-page .settings-btn,
+  .settings-page .header-action {
     @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none;
     font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    white-space: nowrap;
+    text-decoration: none;
   }
 
   .ui-btn--sm {
@@ -149,25 +225,33 @@
     @apply px-4 py-2 text-sm;
   }
 
+  .ui-btn--lg {
+    @apply px-5 py-2.5 text-sm;
+    min-height: 42px;
+  }
+
   .ui-btn--primary {
     background-color: var(--brand);
-    color: #05070A;
+    color: var(--brand-contrast);
     @apply shadow-sm hover:opacity-90 active:scale-[0.98];
   }
 
-  /* Admin: keep readable text/icons on light brand color buttons */
-  .admin-shell :is(button, a, [role="button"])[class*='[background:var(--brand)]'],
-  .admin-shell :is(button, a, [role="button"])[class*='bg-brand-'],
-  .admin-shell :is(button, a, [role="button"])[style*='background: var(--brand)'],
-  .admin-shell :is(button, a, [role="button"])[style*='background-color: var(--brand)'],
-  .admin-shell .ui-btn--primary {
-    color: #05070A !important;
+  /* Admin: keep readable text/icons on bright brand surfaces */
+  .admin-shell :is(
+    [class*='[background:var(--brand)]'],
+    [style*='background: var(--brand)'],
+    [style*='background-color: var(--brand)'],
+    .ui-btn--primary
+  ) {
+    color: var(--brand-contrast) !important;
   }
 
-  .admin-shell :is(button, a, [role="button"])[class*='[background:var(--brand)]'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[class*='bg-brand-'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[style*='background: var(--brand)'] :is(svg, i, span),
-  .admin-shell :is(button, a, [role="button"])[style*='background-color: var(--brand)'] :is(svg, i, span) {
+  .admin-shell :is(
+    [class*='[background:var(--brand)]'],
+    [style*='background: var(--brand)'],
+    [style*='background-color: var(--brand)'],
+    .ui-btn--primary
+  ) :is(svg, i, span, p, strong, small) {
     color: inherit !important;
   }
 
@@ -175,20 +259,26 @@
     background: var(--surface-2);
     border: 1px solid var(--surface-border);
     color: var(--text-secondary);
-    @apply hover:border-white/15 hover:text-white active:scale-[0.98];
+    @apply active:scale-[0.98];
+  }
+
+  .ui-btn--secondary:hover:not(:disabled) {
+    background: var(--nav-hover-bg);
+    border-color: var(--surface-border-hover);
+    color: var(--text-primary);
   }
 
   .ui-btn--danger {
-    background: rgba(239,68,68,0.1);
+    background: var(--status-cancelled-bg);
     border: 1px solid rgba(239,68,68,0.2);
-    color: #f87171;
+    color: var(--status-cancelled-text);
     @apply hover:bg-red-500/20 active:scale-[0.98];
   }
 
   .ui-btn--success {
-    background: rgba(34,197,94,0.1);
+    background: var(--status-delivered-bg);
     border: 1px solid rgba(34,197,94,0.2);
-    color: #4ade80;
+    color: var(--status-delivered-text);
     @apply hover:bg-emerald-500/20 active:scale-[0.98];
   }
 
@@ -202,14 +292,66 @@
     color: var(--text-primary);
   }
 
+  /* Legacy settings spellings → kit variants. */
+  .settings-page .settings-btn,
+  .settings-page .header-action {
+    background: var(--surface-2);
+    border: 1px solid var(--surface-border);
+    color: var(--text-secondary);
+  }
+
+  .settings-page .settings-btn:hover:not(:disabled),
+  .settings-page .header-action:hover:not(:disabled) {
+    background: var(--nav-hover-bg);
+    border-color: var(--surface-border-hover);
+    color: var(--text-primary);
+  }
+
+  .settings-page .settings-btn-primary,
+  .settings-page .settings-btn-primary:hover:not(:disabled) {
+    background: var(--brand);
+    border-color: var(--brand);
+    color: var(--brand-contrast);
+  }
+
+  .settings-page .settings-btn-primary:hover:not(:disabled) {
+    opacity: 0.9;
+  }
+
+  .settings-page .settings-btn-danger {
+    background: var(--status-cancelled-bg);
+    border-color: rgba(239,68,68,0.28);
+    color: var(--status-cancelled-text);
+  }
+
+  .settings-page .settings-btn-danger:hover:not(:disabled) {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.4);
+    color: var(--status-cancelled-text);
+  }
+
+  /* ── Focus ────────────────────────────────────────────────────────────
+   * One ring for every interactive element in the admin. Inputs opt out:
+   * they already answer focus with a border colour change plus a glow.
+   */
+  .admin-shell :is(a, button, summary, [role='switch'], [role='button'], [tabindex]:not([tabindex='-1'])):focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  .admin-shell :is(.ui-input, input, textarea, select):focus-visible {
+    outline: none;
+  }
+
   /* ── Badges ── */
   .ui-badge {
-    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-[11px] font-semibold;
+    @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-mini font-semibold;
   }
 
   .ui-badge--slate {
     background: rgba(113,113,122,0.12);
-    color: #a1a1aa;
+    color: var(--text-secondary);
     border: 1px solid rgba(113,113,122,0.2);
   }
 
@@ -225,10 +367,10 @@
     border: 1px solid rgba(99,102,241,0.2);
   }
 
-  .ui-badge--teal {
-    background: rgba(129,140,248,0.1);
-    color: #818cf8;
-    border: 1px solid rgba(129,140,248,0.2);
+  .ui-badge--lime {
+    background: var(--accent-soft);
+    color: var(--brand);
+    border: 1px solid var(--accent-border);
   }
 
   .ui-badge--amber {
@@ -241,6 +383,47 @@
     background: var(--status-cancelled-bg);
     color: var(--status-cancelled-text);
     border: 1px solid rgba(239,68,68,0.2);
+  }
+
+  /* ── Icon tiles (stat cards, quick actions) — theme-safe, translucent so they
+     read correctly on both the forced-dark super-admin shell and light mode ── */
+  .ui-icon-tile {
+    @apply inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl;
+  }
+
+  .ui-icon-tile--slate {
+    background: rgba(113,113,122,0.12);
+    color: var(--text-secondary);
+  }
+
+  .ui-icon-tile--emerald {
+    background: var(--status-delivered-bg);
+    color: var(--status-delivered-text);
+  }
+
+  .ui-icon-tile--blue {
+    background: var(--status-confirmed-bg);
+    color: var(--status-confirmed-text);
+  }
+
+  .ui-icon-tile--indigo {
+    background: var(--status-shipped-bg);
+    color: var(--status-shipped-text);
+  }
+
+  .ui-icon-tile--lime {
+    background: var(--accent-soft);
+    color: var(--brand);
+  }
+
+  .ui-icon-tile--amber {
+    background: var(--status-pending-bg);
+    color: var(--status-pending-text);
+  }
+
+  .ui-icon-tile--red {
+    background: var(--status-cancelled-bg);
+    color: var(--status-cancelled-text);
   }
 
   /* ── Tables ── */
@@ -260,7 +443,7 @@
   }
 
   .ui-th {
-    @apply px-4 py-3 text-left text-[10px] font-bold uppercase tracking-widest;
+    @apply px-4 py-3 text-left text-micro font-bold uppercase tracking-widest;
     color: var(--text-tertiary);
     border-bottom: 1px solid var(--surface-border);
   }
@@ -278,63 +461,260 @@
     background: var(--nav-hover-bg);
   }
 
-  /* ── Form inputs ── */
-  .ui-input {
-    @apply block w-full rounded-xl px-3 py-2.5 text-sm transition-all duration-150 outline-none;
+  .ui-tr--clickable {
+    cursor: pointer;
+  }
+
+  .ui-tr--clickable:focus-visible {
+    outline: 2px solid rgba(var(--brand-rgb) / 0.75);
+    outline-offset: -2px;
+  }
+
+  .ui-table-action {
+    @apply inline-flex min-h-8 min-w-8 items-center justify-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all duration-150 disabled:opacity-40 disabled:pointer-events-none;
+    background: var(--surface-2);
+    border: 1px solid var(--surface-border);
+    color: var(--text-secondary);
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .ui-table-action:hover {
+    border-color: var(--surface-border-hover);
+    color: var(--text-primary);
+  }
+
+  .ui-table-action:active {
+    transform: scale(0.98);
+  }
+
+  .ui-table-action--danger {
+    background: var(--status-cancelled-bg);
+    border-color: rgba(239,68,68,0.2);
+    color: var(--status-cancelled-text);
+  }
+
+  .ui-table-action--danger:hover {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.32);
+    color: #fca5a5;
+  }
+
+  .ui-table-action :is(svg, i) {
+    @apply h-4 w-4;
+  }
+
+  /* ── Form inputs ──────────────────────────────────────────────────────
+   * The `.settings-page .field-*` selectors are the settings screens' older
+   * private copy of this kit. They are listed alongside so both spellings
+   * resolve to one set of declarations while the markup migrates; delete the
+   * legacy halves once no template references them.
+   */
+  .ui-input,
+  .settings-page .field-input,
+  .settings-page .field-textarea,
+  .settings-page .field-select {
+    @apply block w-full rounded-lg px-3 py-2.5 text-sm transition-all duration-150 outline-none;
     background: var(--surface-2);
     border: 1px solid var(--surface-border);
     color: var(--text-primary);
     font-family: 'DM Sans', sans-serif;
   }
 
-  .ui-input::placeholder {
+  .ui-input::placeholder,
+  .settings-page .field-input::placeholder,
+  .settings-page .field-textarea::placeholder {
     color: var(--text-tertiary);
   }
 
-  .ui-input:focus {
+  .ui-input:focus,
+  .settings-page .field-input:focus,
+  .settings-page .field-textarea:focus,
+  .settings-page .field-select:focus {
     border-color: rgba(var(--brand-rgb) / 0.5);
     box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.1);
   }
 
-  /* Force dark color-scheme so native date/time picker popups render dark */
-  input[type="date"],
-  input[type="time"],
-  input[type="datetime-local"],
-  input[type="month"],
-  input[type="week"] {
-    color-scheme: dark;
+  .ui-input:disabled,
+  .settings-page .field-input:disabled,
+  .settings-page .field-textarea:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
   }
 
-  .ui-label {
-    @apply block text-xs font-semibold uppercase tracking-wider mb-1.5;
+  /* A field the server or a validator rejected. */
+  .ui-input[aria-invalid='true'],
+  .settings-page .field-input[aria-invalid='true'],
+  .settings-page .field-textarea[aria-invalid='true'] {
+    border-color: var(--status-cancelled-text);
+  }
+
+  .ui-input[aria-invalid='true']:focus,
+  .settings-page .field-input[aria-invalid='true']:focus,
+  .settings-page .field-textarea[aria-invalid='true']:focus {
+    box-shadow: 0 0 0 3px var(--status-cancelled-bg);
+  }
+
+  /*
+   * A value the AI read but was not sure about. Distinct from
+   * [aria-invalid]: nothing is wrong yet, the merchant simply has to look at
+   * it before the import can go through. Uses the pending status tokens so it
+   * reads as "needs attention" in both themes.
+   */
+  .ui-input--flagged {
+    border-color: var(--status-pending-text);
+    background-color: var(--status-pending-bg);
+  }
+
+  .ui-input--flagged:focus {
+    box-shadow: 0 0 0 3px var(--status-pending-bg);
+  }
+
+  .ui-input--textarea,
+  .settings-page .field-textarea {
+    @apply leading-relaxed;
+    min-height: 110px;
+    resize: vertical;
+  }
+
+  .ui-input--select {
+    @apply appearance-none pe-9;
+  }
+
+  /*
+   * Native date/time popups, scrollbars and form controls follow the admin
+   * theme. This used to be pinned to `dark`, which rendered a black picker on
+   * top of the light shell.
+   */
+  .admin-shell,
+  .admin-shell input[type="date"],
+  .admin-shell input[type="time"],
+  .admin-shell input[type="datetime-local"],
+  .admin-shell input[type="month"],
+  .admin-shell input[type="week"] {
+    color-scheme: var(--admin-color-scheme, dark);
+  }
+
+  /*
+   * One label voice for forms: sentence case, readable. The uppercase
+   * letter-spaced treatment this used to carry now lives on `.ui-eyebrow`,
+   * where it belongs — section kickers and table headers, not every field.
+   */
+  .ui-label,
+  .settings-page .field-label {
+    @apply block text-xs font-semibold mb-1.5;
+    color: var(--text-secondary);
+    letter-spacing: -0.005em;
+  }
+
+  .ui-eyebrow {
+    @apply block text-micro font-bold uppercase tracking-[0.1em];
+    color: var(--text-muted);
+  }
+
+  .ui-hint,
+  .settings-page .field-hint {
+    @apply mt-1 text-mini leading-relaxed;
+    color: var(--text-tertiary);
+  }
+
+  .ui-error,
+  .settings-page .field-error {
+    @apply mt-1 text-mini leading-relaxed;
+    color: var(--status-cancelled-text);
+  }
+
+  /* ── Toggle rows ──────────────────────────────────────────────────────
+   * A switch with a title, a subtitle and an optional icon. Lifted out of the
+   * settings-only stylesheet so integrations, notifications and delivery can
+   * use the same row.
+   */
+  .ui-toggle-list,
+  .settings-page .toggle-list {
+    @apply flex flex-col gap-2.5;
+  }
+
+  .ui-toggle-row,
+  .settings-page .toggle-row {
+    @apply flex items-center justify-between gap-4 rounded-xl px-4 py-3.5;
+    background: var(--surface-1);
+    border: 1px solid var(--surface-border);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .ui-toggle-row:hover,
+  .settings-page .toggle-row:hover {
+    border-color: var(--surface-border-hover);
+  }
+
+  .ui-toggle-row--disabled,
+  .settings-page .toggle-row-disabled {
+    opacity: 0.55;
+  }
+
+  .ui-toggle-row--expanded,
+  .settings-page .toggle-row-expanded {
+    @apply flex-col items-stretch;
+  }
+
+  .ui-toggle-row__body,
+  .settings-page .toggle-row-expanded-body {
+    @apply mt-4 pt-4;
+    border-block-start: 1px solid var(--surface-border);
+  }
+
+  .ui-toggle-row__info,
+  .settings-page .toggle-row-info {
+    @apply flex min-w-0 items-start gap-3;
+  }
+
+  .ui-toggle-row__icon,
+  .settings-page .toggle-row-icon {
+    @apply flex h-8 w-8 shrink-0 items-center justify-center rounded-lg;
+    background: var(--surface-3);
+    color: var(--text-secondary);
+  }
+
+  .ui-toggle-row__title,
+  .settings-page .toggle-row-title {
+    @apply flex flex-wrap items-center gap-2 text-sm font-semibold;
+    color: var(--text-primary);
+  }
+
+  .ui-toggle-row__subtitle,
+  .settings-page .toggle-row-subtitle {
+    @apply mt-0.5 text-mini leading-relaxed;
     color: var(--text-tertiary);
   }
 
   /* ── Checkboxes ── */
-  .admin-checkbox {
-    @apply h-4 w-4 rounded cursor-pointer;
-    color: var(--brand);
-    accent-color: var(--brand);
+  .admin-checkbox,
+  .admin-shell input[type="checkbox"]:not(.sr-only) {
+    @apply inline-grid h-4 w-4 cursor-pointer place-content-center rounded;
+    appearance: none;
+    -webkit-appearance: none;
     border: 1px solid var(--surface-border);
     background-color: var(--surface-2);
-    color-scheme: dark;
+    transition: background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
   }
 
-  .admin-checkbox:checked {
+  .admin-checkbox:checked,
+  .admin-shell input[type="checkbox"]:not(.sr-only):checked {
     background-color: var(--brand);
     border-color: var(--brand);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath fill='none' stroke='%2305070A' stroke-linecap='round' stroke-linejoin='round' stroke-width='2.4' d='M3.5 8.5l2.6 2.6 6-6.2'/%3E%3C/svg%3E");
+    background-position: center;
+    background-repeat: no-repeat;
+    background-size: 0.7rem 0.7rem;
   }
 
-  .admin-checkbox:focus-visible {
+  .admin-checkbox:focus-visible,
+  .admin-shell input[type="checkbox"]:not(.sr-only):focus-visible {
     border-color: rgba(var(--brand-rgb) / 0.5);
     box-shadow: 0 0 0 3px rgba(var(--brand-rgb) / 0.15);
   }
 
-  [data-theme="light"] .admin-checkbox {
-    color-scheme: light;
-  }
-
-  .admin-checkbox:disabled {
+  .admin-checkbox:disabled,
+  .admin-shell input[type="checkbox"]:not(.sr-only):disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }
@@ -350,17 +730,14 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(255,255,255,0.08);
+    background-color: var(--scrollbar-thumb);
     border-radius: 999px;
     transition: background-color 0.2s;
   }
 
-  .custom-scrollbar:hover::-webkit-scrollbar-thumb {
-    background-color: rgba(255,255,255,0.15);
-  }
-
+  .custom-scrollbar:hover::-webkit-scrollbar-thumb,
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255,255,255,0.25);
+    background-color: var(--scrollbar-thumb-hover);
   }
 
   .scrollbar-hide {
@@ -395,10 +772,69 @@
     @apply font-semibold tracking-tight;
   }
 
+  /* ── Brand wash ───────────────────────────────────────────────────────
+   * A tinted surface in the tenant's own colour: active filter chips, the
+   * selected item in a picker, "you are here" markers.
+   */
+  .ui-wash {
+    background: rgba(var(--brand-rgb) / 0.15);
+    color: var(--brand);
+  }
+
+  .ui-wash--bordered {
+    border: 1px solid rgba(var(--brand-rgb) / 0.3);
+  }
+
+  /* ── Drop zone ────────────────────────────────────────────────────────
+   * The dashed target of every file/image uploader.
+   */
+  .ui-dropzone {
+    @apply rounded-xl;
+    background: var(--surface-2);
+    border: 1px dashed var(--surface-border);
+    color: var(--text-tertiary);
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+
+  .ui-dropzone:hover,
+  .ui-dropzone.is-active {
+    border-color: rgba(var(--brand-rgb) / 0.5);
+    background: rgba(var(--brand-rgb) / 0.06);
+  }
+
   /* ── Section divider ── */
   .section-rule {
     border: none;
     border-top: 1px solid var(--surface-border);
+  }
+
+  /* ── Touch targets ────────────────────────────────────────────────────
+   * Coarse pointers get 44px controls, and 16px input text — below 16px iOS
+   * Safari zooms the viewport when a field takes focus and never zooms back.
+   */
+  @media (pointer: coarse) {
+    .admin-shell :is(.ui-btn, .ui-table-action),
+    .settings-page :is(.settings-btn, .header-action) {
+      min-height: 44px;
+      @apply px-4 py-2.5;
+    }
+
+    .admin-shell :is(.ui-input, input, textarea, select),
+    .settings-page :is(.field-input, .field-textarea, .field-select) {
+      font-size: 16px;
+    }
+  }
+
+  /* ── Motion ───────────────────────────────────────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .admin-shell *,
+    .admin-shell *::before,
+    .admin-shell *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
   }
 
   .marketing-shell {
@@ -411,7 +847,7 @@
     --marketing-text-soft: #b2bfd8;
     --marketing-text-muted: #7f8ba6;
     --marketing-cobalt: #3559ff;
-    --marketing-teal: #16d5b3;
+    --marketing-lime: #84CC16;
     --marketing-orange: #ff8a4c;
     min-height: 100vh;
     color: var(--marketing-text);
@@ -564,13 +1000,67 @@
   .focus\:ring-brand:focus { --tw-ring-color: var(--brand); }
   .focus\:border-brand:focus { border-color: var(--brand); }
 
+  /*
+   * The token utilities. Between them and the `.ui-*` components, an admin
+   * template should never need an inline `style` for a static colour — reserve
+   * `:style` for values computed at runtime (chart bars, progress widths).
+   */
   .text-primary   { color: var(--text-primary); }
   .text-secondary { color: var(--text-secondary); }
   .text-tertiary  { color: var(--text-tertiary); }
+  .text-muted     { color: var(--text-muted); }
 
   .surface-1 { background: var(--surface-1); }
   .surface-2 { background: var(--surface-2); }
   .surface-3 { background: var(--surface-3); }
+
+  /* Pair with Tailwind's `border` / `border-b` / `border-t` / `divide-y`. */
+  .border-line        { border-color: var(--surface-border); }
+  .border-line-strong { border-color: var(--surface-border-hover); }
+  .divide-line > :not([hidden]) ~ :not([hidden]) { border-color: var(--surface-border); }
+
+  /* A rule drawn as a filled element rather than a border. */
+  .bg-line { background: var(--surface-border); }
+
+  .bg-admin   { background: var(--admin-content-bg); }
+  .bg-sidebar { background: var(--admin-sidebar-bg); }
+  .bg-topbar  { background: var(--admin-topbar-bg); }
+
+  .border-sidebar { border-color: var(--admin-sidebar-border); }
+  .border-topbar  { border-color: var(--admin-topbar-border); }
+
+  .text-danger  { color: var(--status-cancelled-text); }
+  .text-success { color: var(--status-delivered-text); }
+  .text-warning { color: var(--status-pending-text); }
+  .text-brand-contrast { color: var(--brand-contrast); }
+
+  .shadow-card    { box-shadow: var(--card-shadow); }
+  .shadow-overlay { box-shadow: var(--shadow-overlay); }
+  .shadow-popover { box-shadow: var(--shadow-popover); }
+
+  /* Loading placeholder — pair with `animate-pulse`. */
+  .ui-skeleton {
+    background: var(--skeleton-bg);
+    border-radius: 0.5rem;
+  }
+
+  .bg-hover { background: var(--nav-hover-bg); }
+
+  .placeholder-tertiary::placeholder { color: var(--text-tertiary); }
+
+  /*
+   * Hover variants are written out by hand, the same way `.hover\:text-brand`
+   * above is: these utilities resolve to CSS variables, which Tailwind's
+   * variant machinery can't generate from the theme.
+   */
+  .hover\:bg-hover:hover        { background: var(--nav-hover-bg); }
+  .hover\:text-primary:hover    { color: var(--text-primary); }
+  .hover\:text-secondary:hover  { color: var(--text-secondary); }
+  .hover\:text-tertiary:hover   { color: var(--text-tertiary); }
+  .hover\:border-line:hover        { border-color: var(--surface-border); }
+  .hover\:border-line-strong:hover { border-color: var(--surface-border-hover); }
+  .group:hover .group-hover\:text-primary   { color: var(--text-primary); }
+  .group:hover .group-hover\:text-secondary { color: var(--text-secondary); }
 
   .animate-fadeIn {
     animation: fadeIn 0.4s ease-out forwards;
@@ -609,6 +1099,54 @@
   50% { transform: translate3d(0, -12px, 0); }
 }
 
+/* ── Variant-selection invite ─────────────────────────────────────────────
+ * Draws the shopper's eye to product options they haven't chosen yet. The
+ * gentle "breathe" runs continuously while an option is unselected; the
+ * "nudge" shake fires once when they try to buy without choosing.
+ *
+ * Everything here stays inside the element's own box — inset shadow, a padded
+ * pill, a small transform — so a near-full-width picker group can't push the
+ * page into horizontal scroll. `var(--brand)` is read at use (not baked into a
+ * :root token) so each storefront theme's own brand colour comes through. */
+@keyframes vux-invite-breathe {
+  0%, 100% { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand, #6366f1) 15%, transparent); }
+  50%      { box-shadow: inset 0 0 0 2px color-mix(in srgb, var(--brand, #6366f1) 55%, transparent); }
+}
+
+@keyframes vux-invite-nudge {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-3px); }
+  80% { transform: translateX(2px); }
+}
+
+@keyframes vux-invite-arrow {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(3px); }
+}
+
+.vux-invite {
+  border-radius: 0.75rem;
+  animation: vux-invite-breathe 2.6s ease-in-out infinite;
+}
+
+.vux-invite-nudge {
+  animation: vux-invite-nudge 0.5s ease-in-out both;
+}
+
+/* Pill so the prompt reads as an action, not a stray line of text. */
+.vux-invite-hint {
+  padding: 0.3rem 0.7rem;
+  border-radius: 9999px;
+  background: color-mix(in srgb, var(--brand, #6366f1) 12%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand, #6366f1) 30%, transparent);
+}
+
+.vux-invite-hint :where(svg, .iconify, [class*="i-lucide"]) {
+  animation: vux-invite-arrow 1.4s ease-in-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
@@ -617,6 +1155,13 @@
   .marketing-float,
   .marketing-float--slow,
   .marketing-float--delay {
+    animation: none !important;
+  }
+
+  .vux-invite,
+  .vux-invite-nudge,
+  .vux-invite-hint,
+  .vux-invite-hint :where(svg, .iconify, [class*="i-lucide"]) {
     animation: none !important;
   }
 }

@@ -16,8 +16,8 @@ describe('Tenant users: creation, RBAC, audit', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
-            prisma.tenant.create({ data: { name: 'Tenant A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Tenant B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

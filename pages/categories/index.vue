@@ -72,7 +72,7 @@ definePageMeta({
             />
             <div class="absolute inset-0 bg-gradient-to-t from-black/50 via-black/20 to-transparent" />
             <div class="absolute inset-0 flex items-end p-6">
-              <div class="text-left">
+              <div class="text-start">
                 <h3 class="text-xl font-bold text-white drop-shadow font-sans">
                   {{ categoryDisplayTitle(category) }}
                 </h3>

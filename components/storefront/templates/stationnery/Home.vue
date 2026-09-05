@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/stationnery/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -134,7 +135,7 @@ const {
       </div>
 
       <!-- Arrows -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-4">
+      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 end-8 z-20 gap-4">
         <button
           class="w-12 h-12 rounded-full border border-white/20 flex items-center justify-center text-white hover:bg-white hover:text-slate-900 transition-all backdrop-blur-sm"
           @click="prevSlide"
@@ -150,7 +151,7 @@ const {
       </div>
 
       <!-- Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 left-6 md:left-8 z-20 flex space-x-2">
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 start-6 md:start-8 z-20 flex space-x-2 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -209,10 +210,7 @@ const {
                 :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover opacity-90 transition-transform duration-700 group-hover:scale-105"
               >
-              <div
-                v-else
-                class="w-full h-full bg-stone-50"
-              />
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
               <div class="absolute inset-0 bg-gradient-to-t from-stone-900/60 via-stone-900/20 to-transparent" />
             </div>
 

@@ -4,6 +4,7 @@ import '../models/sale.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class SalesPage {
   final List<Sale> items;
@@ -28,6 +29,8 @@ class SaleRepository {
 
   SaleRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<SalesPage> listSales({
     String? search,
     DateTime? startDate,
@@ -48,7 +51,10 @@ class SaleRepository {
         if (endDate != null) 'endDate': endDate.toIso8601String(),
       };
 
-      final res = await _apiService.client.get('/admin/sales', queryParameters: query);
+      final res = await _apiService.client.get(
+        '/admin/sales',
+        queryParameters: query,
+      );
       final data = res.data;
 
       final itemsRaw = (data is Map && data['items'] is List)
@@ -79,10 +85,13 @@ class SaleRepository {
       );
     }
 
-    // Offline/local POS sales
     final db = await _dbService.database;
 
-    final customersRows = await db.query('customers');
+    final customersRows = await db.query(
+      'customers',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
     final customerById = <String, Map<String, Object?>>{};
     for (final row in customersRows) {
       final id = row['id']?.toString();
@@ -91,6 +100,8 @@ class SaleRepository {
 
     final rows = await db.query(
       'sales',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
       orderBy: 'createdAt DESC',
     );
 
@@ -104,7 +115,9 @@ class SaleRepository {
 
     for (final row in rows) {
       final createdAt = tryParseDate(row['createdAt']?.toString());
-      if (startDate != null && createdAt != null && createdAt.isBefore(startDate)) {
+      if (startDate != null &&
+          createdAt != null &&
+          createdAt.isBefore(startDate)) {
         continue;
       }
       if (endDate != null && createdAt != null && createdAt.isAfter(endDate)) {
@@ -112,8 +125,9 @@ class SaleRepository {
       }
 
       final customerId = row['customerId']?.toString();
-      final customerRow =
-          (customerId != null) ? customerById[customerId] : null;
+      final customerRow = (customerId != null)
+          ? customerById[customerId]
+          : null;
       final customerName = customerRow?['name']?.toString() ?? '';
       final customerPhone = customerRow?['phone']?.toString() ?? '';
 
@@ -144,8 +158,12 @@ class SaleRepository {
         ? (total / resolvedLimit).ceil()
         : 1;
     final start = (resolvedPage - 1) * resolvedLimit;
-    final end = (start + resolvedLimit) > total ? total : (start + resolvedLimit);
-    final items = (start >= 0 && start < total) ? filtered.sublist(start, end) : <Sale>[];
+    final end = (start + resolvedLimit) > total
+        ? total
+        : (start + resolvedLimit);
+    final items = (start >= 0 && start < total)
+        ? filtered.sublist(start, end)
+        : <Sale>[];
 
     return SalesPage(
       items: items,
@@ -158,7 +176,12 @@ class SaleRepository {
 
   Future<Map<String, dynamic>?> getLocalSalePayload(String saleId) async {
     final db = await _dbService.database;
-    final res = await db.query('sales', where: 'id = ?', whereArgs: [saleId], limit: 1);
+    final res = await db.query(
+      'sales',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [saleId, _tid],
+      limit: 1,
+    );
     if (res.isEmpty) return null;
     final row = res.first;
     final payloadJson = row['payloadJson']?.toString();

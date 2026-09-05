@@ -1,13 +1,13 @@
 <template>
   <div v-if="isValid && !isExpired" class="flex items-center gap-2">
     <div class="flex items-center p-2.5 shadow-sm border" :class="themeClasses.container">
-      <div v-if="showIcon" class="flex items-center justify-center mr-2">
+      <div v-if="showIcon" class="flex items-center justify-center me-2">
         <Icon name="lucide:timer" class="w-5 h-5 animate-pulse" />
       </div>
       <div class="flex items-center font-medium tracking-wide">
         <div v-if="timeLeft.days > 0" class="flex items-center">
           <span class="shrink-0 flex items-center justify-center tabular-nums" :class="themeClasses.number">{{ padCount(timeLeft.days) }}</span>
-          <span class="uppercase ml-1 mr-1" :class="themeClasses.text || 'text-xs opacity-80'">{{ $t('store.countdown.days') }}</span>
+          <span class="uppercase ms-1 me-1" :class="themeClasses.text || 'text-xs opacity-80'">{{ $t('store.countdown.days') }}</span>
         </div>
         <div class="flex items-center">
           <span class="shrink-0 flex items-center justify-center tabular-nums" :class="themeClasses.number">{{ padCount(timeLeft.hours) }}</span>

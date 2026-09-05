@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { PRICING_PLANS, pricingPlanCardForUi } from '~/shared/pricing/plans'
+import { PRICING_PLANS, buildDisplayPlan, maxAnnualDiscountPercent } from '~/shared/pricing/plans'
 
 definePageMeta({
   layout: 'marketing'
@@ -15,34 +15,9 @@ useSeoMeta({
 
 const isAnnual = ref(false)
 
-const plans = computed(() => {
-  return PRICING_PLANS.map((plan) => {
-    const cycle = isAnnual.value ? 'year' : 'month'
-    const card = pricingPlanCardForUi(plan, cycle)
-    const featureKeys: Record<string, string[]> = {
-      basic: ['pricing.page.features.store', 'pricing.page.features.delivery'],
-      beginner: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell'],
-      merchant: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell', 'pricing.page.features.analytics'],
-      professional: ['pricing.page.features.store', 'pricing.page.features.delivery', 'pricing.page.features.upsell', 'pricing.page.features.analytics', 'pricing.page.features.team']
-    }
-
-    return {
-      code: plan.code,
-      name: t(`pricing.plans.${plan.code}.name`),
-      description: t(`pricing.plans.${plan.code}.description`),
-      price: card.priceText,
-      currency: card.currency,
-      period: isAnnual.value ? t('pricing.period.perYear') : t('pricing.period.perMonth'),
-      features: [
-        t('pricing.features.ordersPerMonth', { count: plan.ordersPerMonth }),
-        ...(featureKeys[plan.code] || []).map((key) => t(key))
-      ],
-      cta: t(`pricing.plans.${plan.code}.cta`),
-      popular: card.popular,
-      highlight: card.highlight
-    }
-  })
-})
+const plans = computed(() =>
+  PRICING_PLANS.map((plan) => buildDisplayPlan(plan, isAnnual.value ? 'year' : 'month', t))
+)
 </script>
 
 <template>
@@ -72,11 +47,17 @@ const plans = computed(() => {
               {{ t('pricing.toggle.monthly') }}
             </button>
             <button
-              class="rounded-full px-5 py-2 text-sm font-medium transition-all"
+              class="group rounded-full px-5 py-2 text-sm font-medium transition-all inline-flex items-center gap-2"
               :class="isAnnual ? 'bg-lime-neon text-[color:var(--m-bg)]' : 'text-[color:var(--m-text-dim)] hover:text-white'"
               @click="isAnnual = true"
             >
               {{ t('pricing.toggle.annual') }}
+              <span
+                class="rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em]"
+                :class="isAnnual ? 'bg-[color:var(--m-bg)]/15 text-[color:var(--m-bg)]' : 'bg-lime-neon/15 text-lime-neon'"
+              >
+                {{ t('pricing.toggle.save', { percent: maxAnnualDiscountPercent() }) }}
+              </span>
             </button>
           </div>
         </div>
@@ -95,6 +76,7 @@ const plans = computed(() => {
             :price="plan.price"
             :currency="plan.currency"
             :period="plan.period"
+            :billing-note="plan.billingNote"
             :description="plan.description"
             :features="plan.features"
             :cta="plan.cta"

@@ -10,6 +10,7 @@ describe('Checkout Guard (empty cart)', async () => {
   it('redirects /checkout to /cart when cart is empty', async () => {
     await prisma.tenant.create({
       data: {
+        publishedAt: new Date(),
         name: 'Checkout Guard Tenant',
         slug
       }
@@ -32,6 +33,7 @@ describe('Checkout Guard (empty cart)', async () => {
   it('allows /checkout when cart is non-empty', async () => {
     await prisma.tenant.create({
       data: {
+        publishedAt: new Date(),
         name: 'Checkout Guard Tenant 2',
         slug: `${slug}-2`
       }

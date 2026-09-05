@@ -17,24 +17,20 @@
     <!-- Tab filter -->
     <AdminTabFilter v-model="activeTab" :tabs="customerTabs" />
 
-    <div class="ui-card p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label class="ui-label mb-1">{{ t('admin.pages.customers.index.filters.searchLabel') }}</label>
-          <BaseInput
-            v-model="searchQuery"
-            :placeholder="t('admin.pages.customers.index.filters.searchPlaceholder')"
-          />
-        </div>
-      </div>
-    </div>
+    <AdminFilterBar
+      v-model:search="searchQuery"
+      :search-label="t('admin.pages.customers.index.filters.searchLabel')"
+      :search-placeholder="t('admin.pages.customers.index.filters.searchPlaceholder')"
+      testid="customers-filters"
+      @clear="searchQuery = ''"
+    />
 
     <div
       v-if="loading"
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.customers.index.loading') }}
       </p>
     </div>
@@ -43,11 +39,11 @@
       v-else-if="filteredCustomers.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:users" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:users" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.customers.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ emptyHint }}
       </p>
     </div>
@@ -78,36 +74,42 @@
               <th class="ui-th">
                 {{ t('admin.pages.customers.index.table.lastOrder') }}
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.pages.customers.index.table.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="ui-tbody">
+          <tbody class="ui-tbody" @touchstart.passive="onRowTouchStart" @touchmove.passive="onRowTouchMove">
             <tr
               v-for="c in paginatedCustomers"
               :key="c.id"
-              class="ui-tr"
+              class="ui-tr ui-tr--clickable"
+              role="link"
+              tabindex="0"
+              :aria-label="`${t('admin.pages.customers.index.table.customer')}: ${c.name}`"
+              @click="openCustomerRow($event, c.id)"
+              @keydown.enter="openCustomerRow($event, c.id)"
+              @keydown.space="openCustomerRow($event, c.id)"
             >
               <td class="ui-td whitespace-nowrap">
                 <div class="flex items-center">
                   <div class="flex-shrink-0 h-10 w-10 [background:rgba(var(--brand-rgb)/0.12)] rounded-full flex items-center justify-center [color:var(--brand)] font-bold uppercase">
                     {{ c.name.charAt(0) }}
                   </div>
-                  <div class="ml-4">
+                  <div class="ms-4">
                     <NuxtLink
-                      :to="`/admin/customers/${c.id}`"
-                      class="font-medium hover:[color:var(--brand)] transition-colors" style="color: var(--text-primary)"
-                    >
+ :to="`/admin/customers/${c.id}`"
+ class="font-medium hover:[color:var(--brand)] transition-colors text-primary" 
+>
                       {{ c.name }}
                     </NuxtLink>
                   </div>
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="flex flex-col text-sm" style="color: var(--text-secondary)">
+                <div class="flex flex-col text-sm text-secondary">
                   <div v-if="c.email" class="flex items-center gap-1">
-                    <Icon name="lucide:mail" class="w-3 h-3" style="color: var(--text-tertiary)" />
+                    <Icon name="lucide:mail" class="w-3 h-3 text-tertiary" />
                     <a
                       :href="`mailto:${c.email}`"
                       class="hover:[color:var(--brand)] transition-colors"
@@ -116,7 +118,7 @@
                     </a>
                   </div>
                   <div v-if="c.phone" class="flex items-center gap-1 mt-1">
-                    <Icon name="lucide:phone" class="w-3 h-3" style="color: var(--text-tertiary)" />
+                    <Icon name="lucide:phone" class="w-3 h-3 text-tertiary" />
                     <a
                       :href="`tel:${c.phone}`"
                       class="hover:[color:var(--brand)] transition-colors"
@@ -124,10 +126,10 @@
                       {{ c.phone }}
                     </a>
                   </div>
-                  <span v-if="!c.email && !c.phone" style="color: var(--text-muted)">—</span>
+                  <span class="text-muted" v-if="!c.email && !c.phone">—</span>
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 <a
                   v-if="c.address"
                   :href="`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(c.address)}`"
@@ -136,39 +138,39 @@
                 >
                   {{ c.address }}
                 </a>
-                <span v-else style="color: var(--text-muted)">—</span>
+                <span class="text-muted" v-else>—</span>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium" style="color: var(--text-primary)">
+                <div class="font-medium text-primary">
                   {{ c.ordersCount }}
                 </div>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <div class="font-medium" style="color: var(--text-primary)">
+                <div class="font-medium text-primary">
                   {{ formatCurrency(c.totalSpent) }}
                 </div>
               </td>
-              <td class="ui-td whitespace-nowrap" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-secondary">
                 {{ formatDate(c.lastOrderAt) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-1">
+              <td class="ui-td whitespace-nowrap text-end">
+                <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
                   <NuxtLink
                     :to="`/admin/customers/${encodeURIComponent(c.id)}`"
-                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.common.view')"
                   >
                     <Icon name="lucide:eye" class="w-4 h-4" />
                   </NuxtLink>
                   <NuxtLink
                     :to="`/admin/customers/edit/${c.id}`"
-                    class="p-2 rounded-md transition-colors hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-muted)"
+                    class="ui-table-action"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 rounded-md transition-colors hover:text-red-400" style="color: var(--text-muted)"
+                    class="ui-table-action ui-table-action--danger"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(c)"
                   >
@@ -182,7 +184,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border); background: var(--surface-1)">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6 border-t border-line surface-1">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -191,7 +193,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm" style="color: var(--text-secondary)">
+          <span class="text-sm text-secondary">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -204,7 +206,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm" style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.common.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredCustomers.length),
@@ -213,13 +215,13 @@
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
               <button
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
-                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage--"
-              >
+ :disabled="currentPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-tertiary"
+ 
+ @click="currentPage--"
+>
                 {{ t('admin.common.previous') }}
               </button>
               <button
@@ -233,11 +235,11 @@
                 {{ page }}
               </button>
               <button
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
-                style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage++"
-              >
+ :disabled="currentPage === totalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-tertiary"
+ 
+ @click="currentPage++"
+>
                 {{ t('admin.common.next') }}
               </button>
             </nav>
@@ -262,7 +264,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
-import BaseInput from '~/components/ui/BaseInput.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -272,6 +274,7 @@ definePageMeta({
 
 const authStore = useAuthStore()
 const route = useRoute()
+const router = useRouter()
 const { format: formatCurrency } = useCurrency()
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -290,9 +293,9 @@ interface CustomerSummary {
 const loading = ref(true)
 const customers = ref<CustomerSummary[]>([])
 const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
-const activeTab = ref('all')
+const activeTab = ref(typeof route.query.tab === 'string' ? route.query.tab : 'all')
 
-const currentPage = ref(1)
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 
 const showDeleteModal = ref(false)
@@ -390,6 +393,12 @@ function confirmDelete(customer: CustomerSummary) {
   deleteError.value = null
 }
 
+function openCustomerRow(event: Event, customerId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/customers/${encodeURIComponent(customerId)}`)
+}
+
 async function handleDelete() {
   if (!customerToDelete.value) return
 
@@ -421,8 +430,29 @@ onMounted(() => {
   fetchCustomers()
 })
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      tab: activeTab.value === 'all' ? undefined : activeTab.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 watch([searchQuery], () => {
   currentPage.value = 1
+  syncToUrl()
   fetchCustomers()
+})
+
+watch(activeTab, () => {
+  currentPage.value = 1
+  syncToUrl()
+})
+
+watch(currentPage, () => {
+  syncToUrl()
 })
 </script>

@@ -1,7 +1,9 @@
 <script setup lang="ts">
 // ThemeProvider for Cyber Synthwave template
+const brandColor = useStorefrontTemplateBrandColor('cyber')
+
 const storeStyle = computed(() => {
-  const primaryColor = '#F43F5E' // Rose 500
+  const primaryColor = brandColor.value.color
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {
@@ -19,7 +21,17 @@ const storeStyle = computed(() => {
     fontFamily: "'Orbitron', sans-serif",
     backgroundColor: '#0d0515',
     color: '#e9d5ff',
-    minHeight: '100vh'
+    minHeight: '100vh',
+    // Shared LocaleSwitcher — deep violet chrome with a neon edge
+    '--ls-surface': '#1a0a2e',
+    '--ls-border': 'rgba(var(--brand-rgb) / 0.45)',
+    '--ls-shadow': '0 0 0 1px rgba(var(--brand-rgb) / 0.25), 0 20px 46px -16px rgba(0,0,0,0.8)',
+    '--ls-radius': '4px',
+    '--ls-text': '#c4b5fd',
+    '--ls-text-strong': '#f5f3ff',
+    '--ls-hover-bg': 'rgba(233,213,255,0.08)',
+    '--ls-accent': 'rgb(var(--brand-rgb))',
+    '--ls-accent-soft': 'rgba(var(--brand-rgb) / 0.16)'
   } as Record<string, string>
 })
 </script>
@@ -44,23 +56,23 @@ const storeStyle = computed(() => {
 }
 
 .cyber-theme-provider ::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #ff2d95, #ff6b35);
+    background: linear-gradient(to bottom, var(--brand), #ff6b35);
     border-radius: 4px;
 }
 
 .cyber-theme-provider ::-webkit-scrollbar-thumb:hover {
-    background: #ff2d95;
+    background: var(--brand);
 }
 
 /* Selection styling */
 .cyber-theme-provider ::selection {
-    background: rgba(255, 45, 149, 0.3);
+    background: rgba(var(--brand-rgb) / 0.3);
     color: white;
 }
 
 /* Focus outline styling */
 .cyber-theme-provider *:focus-visible {
-    outline: 2px solid #ff2d95;
+    outline: 2px solid var(--brand);
     outline-offset: 2px;
 }
 </style>

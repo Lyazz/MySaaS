@@ -14,8 +14,8 @@ describe('Meta Pixels Admin + Product Assignment', () => {
     let productA: any
 
     beforeAll(async () => {
-        tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: `tenant-a-mp-${Date.now()}` } })
-        tenantB = await prisma.tenant.create({ data: { name: 'Tenant B', slug: `tenant-b-mp-${Date.now()}` } })
+        tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant A', slug: `tenant-a-mp-${Date.now()}` } })
+        tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant B', slug: `tenant-b-mp-${Date.now()}` } })
 
         const userA = await prisma.user.create({
             data: { email: `mp-a-${Date.now()}@test.com`, role: 'owner', tenantId: tenantA.id }
@@ -42,7 +42,7 @@ describe('Meta Pixels Admin + Product Assignment', () => {
     })
 
     it('creates pixels and enforces single global per tenant', async () => {
-        const hostA = `${tenantA.slug}.platform.com`
+        const hostA = `${tenantA.slug}.swekly.com`
 
         const p1 = await request(app)
             .post('/api/admin/meta-pixels')
@@ -72,7 +72,7 @@ describe('Meta Pixels Admin + Product Assignment', () => {
     })
 
     it('assigns pixels to a product and exposes pixelIds in public product response', async () => {
-        const hostA = `${tenantA.slug}.platform.com`
+        const hostA = `${tenantA.slug}.swekly.com`
 
         const created = await request(app)
             .post('/api/admin/meta-pixels')
@@ -99,13 +99,13 @@ describe('Meta Pixels Admin + Product Assignment', () => {
         const res = await request(app)
             .get('/api/admin/meta-pixels')
             .set('Authorization', `Bearer ${tokenA}`)
-            .set('Host', `${tenantB.slug}.platform.com`)
+            .set('Host', `${tenantB.slug}.swekly.com`)
         expect(res.status).toBe(403)
 
         const ok = await request(app)
             .get('/api/admin/meta-pixels')
             .set('Authorization', `Bearer ${tokenB}`)
-            .set('Host', `${tenantB.slug}.platform.com`)
+            .set('Host', `${tenantB.slug}.swekly.com`)
         expect(ok.status).toBe(200)
     })
 })

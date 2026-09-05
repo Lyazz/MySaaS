@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from './ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -12,19 +13,18 @@ const props = defineProps<{
 }>()
 
 const cartStore = useCartStore()
-
 const storefrontContent = useStorefrontContent()
 
 const categoryDisplayTitle = (category: any): string => {
-    if (!category) return ""
-    return category.parentId ? ("-> " + category.title) : category.title
+  if (!category) return ''
+  return category.parentId ? '— ' + category.title : category.title
 }
 
 const homeDefaults = useStorefrontHomeDefaults()
 const isCustomHomeConfig = computed(() => Boolean(props.homeConfig) && !isDefaultStorefrontHomeConfig(props.homeConfig))
 const heroSlides = computed(() => {
-    const slides = isCustomHomeConfig.value ? props.homeConfig?.carousel : undefined
-    return Array.isArray(slides) && slides.length > 0 ? slides : homeDefaults.value.carousel
+  const slides = isCustomHomeConfig.value ? props.homeConfig?.carousel : undefined
+  return Array.isArray(slides) && slides.length > 0 ? slides : homeDefaults.value.carousel
 })
 
 const sections = computed(() => (isCustomHomeConfig.value ? props.homeConfig?.sections : undefined) || homeDefaults.value.sections)
@@ -32,334 +32,250 @@ const bestSellersDisplayed = computed(() => props.bestSellerProducts || [])
 
 const slideTo = (href?: string) => (href && href.startsWith('/') ? href : '/products')
 
+/*
+ * Running section numerals — only the sections the merchant left enabled are
+ * counted, so the contents page never skips a number.
+ */
+const sectionOrder = computed(() => {
+  const list: string[] = []
+  if (sections.value.browseByCategory?.enabled) list.push('browseByCategory')
+  if (sections.value.newArrivals?.enabled) list.push('newArrivals')
+  if (sections.value.bestSellers?.enabled) list.push('bestSellers')
+  return list
+})
+const sectionNo = (key: string) => {
+  const i = sectionOrder.value.indexOf(key)
+  return i === -1 ? '' : String(i + 1).padStart(2, '0')
+}
+
+/* The cover cross-fades between the merchant's slides — no arrows, no dots. */
 const currentSlide = ref(0)
 const hasMultipleSlides = computed(() => heroSlides.value.length > 1)
+const activeSlide = computed(() => heroSlides.value[currentSlide.value] || heroSlides.value[0])
 const nextSlide = () => { currentSlide.value = (currentSlide.value + 1) % heroSlides.value.length }
-const prevSlide = () => { currentSlide.value = (currentSlide.value - 1 + heroSlides.value.length) % heroSlides.value.length }
 
-// Auto-advance slider
 let slideInterval: any
-const pauseSlideAutoplay = () => {
-    clearInterval(slideInterval)
-}
-const resumeSlideAutoplay = () => {
-    clearInterval(slideInterval)
-    slideInterval = setInterval(nextSlide, 6000)
-}
+const pauseSlideAutoplay = () => { clearInterval(slideInterval) }
+const resumeSlideAutoplay = () => { clearInterval(slideInterval); slideInterval = setInterval(nextSlide, 6000) }
 
 onMounted(() => {
-    slideInterval = setInterval(nextSlide, 6000)
+  cartStore.loadFromLocalStorage()
+  slideInterval = setInterval(nextSlide, 6000)
 })
-onUnmounted(() => {
-    clearInterval(slideInterval)
-})
+onUnmounted(() => { clearInterval(slideInterval) })
 
-// Fetch Categories
+// Categories
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: categoriesData } = await useFetch<any[]>(categoriesUrl, {
-    headers: useTenantApiHeaders()
+  headers: useTenantApiHeaders()
 })
-
-// Map categories to view model with visual properties
 const categories = computed(() => {
-    if (!categoriesData.value) return []
-    
-    return categoriesData.value.map((cat, index) => {
-        const colors = ['bg-amber-50', 'bg-rose-50', 'bg-sky-50', 'bg-brand-50']
-        const colorClass = colors[index % colors.length]
-        
-        return {
-            ...cat,
-            itemCount: cat._count?.products || 0,
-            className: colorClass
-        }
-    })
+  if (!categoriesData.value) return []
+  return categoriesData.value.map((cat) => ({ ...cat, itemCount: cat._count?.products || 0 }))
 })
 
-// Check if we have any displayed products
-// Auto-scroll for Featured Products
-const { 
-  scrollContainer: featuredScrollContainer, 
-  infiniteList: featuredInfiniteList, 
-  isHovering: isHoveringFeatured 
-} = useAutoScroll(computed(() => props.featuredProducts || []))
+/* The selection is a staggered grid: every third cell opens a row wide. */
+const featuredDisplayed = computed(() => (props.featuredProducts || []).slice(0, 9))
+const isWideCell = (index: number) => index % 3 === 0
 
-// Auto-scroll for Best Sellers
-const { 
-  scrollContainer: bestSellersScrollContainer, 
-  infiniteList: bestSellersInfiniteList, 
-  isHovering: isHoveringBestSellers 
-} = useAutoScroll(bestSellersDisplayed)
+const rankedBestSellers = computed(() => bestSellersDisplayed.value.slice(0, 5))
 </script>
 
 <template>
-  <div class="min-h-screen pb-24">
-    <!-- Hero Slider - Cozy Style -->
-    <div class="relative w-full h-[400px] md:h-[500px] lg:h-[600px] overflow-hidden group rounded-b-[3rem]"
+  <div class="ed-theme">
+    <!-- ══ La une ══════════════════════════════════════════════════════════ -->
+    <section
+      class="relative min-h-[78vh] md:min-h-[86vh] flex items-end overflow-hidden border-b border-[#DAD2C4]"
       @touchstart.passive="pauseSlideAutoplay"
       @touchend.passive="resumeSlideAutoplay"
     >
-      <!-- Slides -->
-      <div 
-        v-for="(slide, index) in heroSlides" 
+      <img
+        v-for="(slide, index) in heroSlides"
         :key="index"
-        class="absolute inset-0 transition-opacity duration-1000 ease-in-out"
-        :class="index === currentSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'"
+        :src="slide.imageUrl"
+        :alt="slide.title"
+        class="absolute inset-0 w-full h-full object-cover transition-opacity duration-[1100ms] ease-in-out"
+        :class="index === currentSlide ? 'opacity-100' : 'opacity-0'"
       >
-        <img
-          :src="slide.imageUrl"
-          class="w-full h-full object-cover"
-          :alt="slide.title"
-        >
-        <!-- Gradient Overlay -->
-        <div class="absolute inset-0 bg-gradient-to-r from-black/60 via-black/30 to-transparent flex items-center">
-          <div class="max-w-7xl mx-auto px-6 w-full">
-            <div
-              class="max-w-2xl text-white transform transition-all duration-1000 delay-300" 
-              :class="index === currentSlide ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'"
+      <!-- Scrim: the type sits on the photograph, so the plate has to be read -->
+      <div class="absolute inset-0 bg-gradient-to-t from-[#1E1912]/85 via-[#1E1912]/35 to-[#1E1912]/10" />
+
+      <div class="relative w-full max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 pb-14 md:pb-20">
+        <div class="max-w-3xl">
+          <p class="ed-kicker !text-[#E8E0D2]/80 mb-6">{{ storefrontContent.home.welcomeTo(tenantName) }}</p>
+          <Transition name="cover" mode="out-in">
+            <h1
+              :key="currentSlide"
+              class="ed-display !text-[#F4EFE6] text-[13vw] sm:text-6xl lg:text-[clamp(3rem,6vw,5.75rem)]"
+            >{{ activeSlide?.title }}</h1>
+          </Transition>
+          <Transition name="cover" mode="out-in">
+            <p
+              :key="'sub-' + currentSlide"
+              class="mt-6 text-[17px] md:text-[19px] leading-relaxed text-[#E8E0D2]/85 max-w-xl"
+            >{{ activeSlide?.subtitle }}</p>
+          </Transition>
+
+          <div class="mt-10 flex flex-wrap items-center gap-x-8 gap-y-4">
+            <NuxtLink
+              :to="slideTo(activeSlide?.buttonHref)"
+              class="ed-btn-solid !bg-[#F4EFE6] !text-[#262019] !border-[#F4EFE6] hover:!bg-[#B8532E] hover:!text-[#F4EFE6] hover:!border-[#B8532E]"
             >
-              <span class="inline-block px-4 py-2 bg-white/20 backdrop-blur-sm rounded-full text-sm font-medium mb-4 tracking-wide border border-white/10">{{ storefrontContent.home.welcomeTo(tenantName) }}</span>
-              <h2 class="font-cozy text-4xl md:text-5xl lg:text-7xl font-bold mb-4 md:mb-6 leading-tight tracking-tight">
-                {{ slide.title }}
-              </h2>
-              <p class="text-base md:text-lg lg:text-xl mb-6 md:mb-8 text-white/90 max-w-lg leading-relaxed line-clamp-2 md:line-clamp-none">
-                {{ slide.subtitle }}
-              </p>
-              <NuxtLink
-                :to="slideTo(slide.buttonHref)"
-                class="group inline-flex items-center gap-2 px-6 py-3 md:px-8 md:py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-brand-50 transition-all transform hover:scale-105 shadow-lg text-sm md:text-base"
-              >
-                {{ slide.buttonText || storefrontContent.home.cta.shopNow }}
-                <Icon name="lucide:arrow-right" class="w-5 h-5 transition-transform group-hover:translate-x-1" />
-              </NuxtLink>
-            </div>
+              {{ activeSlide?.buttonText || storefrontContent.home.cta.shopNow }}
+              <Icon name="lucide:arrow-right" class="w-4 h-4 rtl:rotate-180" />
+            </NuxtLink>
+            <NuxtLink
+              to="/products"
+              class="ed-ui text-[11px] font-semibold uppercase tracking-[0.16em] text-[#E8E0D2]/75 hover:text-[#F4EFE6] underline underline-offset-4 decoration-[#E8E0D2]/35 transition-colors"
+            >{{ storefrontContent.shop.allProducts }}</NuxtLink>
           </div>
         </div>
-      </div>
 
-      <!-- Arrows -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-4">
-        <button
-          class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white hover:text-slate-900 transition-all"
-          @click="prevSlide"
-        >
-          <Icon name="lucide:chevron-left" class="w-5 h-5" />
-        </button>
-        <button
-          class="w-12 h-12 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white hover:text-slate-900 transition-all"
-          @click="nextSlide"
-        >
-          <Icon name="lucide:chevron-right" class="w-5 h-5" />
-        </button>
-      </div>
-
-      <!-- Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 left-6 md:left-8 z-20 flex space-x-2">
-        <button 
-          v-for="(slide, index) in heroSlides" 
-          :key="index" 
-          class="h-2 rounded-full transition-all duration-300"
-          :class="index === currentSlide ? 'bg-white w-8' : 'bg-white/40 w-2 hover:bg-white/60'"
-          @click="currentSlide = index"
-        />
-      </div>
-    </div>
-
-    <!-- Categories Section -->
-    <section v-if="sections.browseByCategory.enabled" class="py-12 md:py-16">
-      <div class="mb-8 md:mb-10 px-6 max-w-7xl mx-auto flex items-end justify-between">
-        <div class="max-w-2xl">
-          <p class="text-sm font-bold text-brand-500 tracking-widest uppercase mb-2">
-            {{ sections.browseByCategory.eyebrow }}
-          </p>
-          <h2 class="font-cozy text-2xl md:text-3xl lg:text-4xl font-bold text-slate-800 tracking-tight">
-            {{ sections.browseByCategory.title }}
-          </h2>
-        </div>
-         
-        <!-- Scroll Arrows -->
-        <div class="hidden md:flex gap-3">
+        <!-- Folio: which plate of the cover we're on -->
+        <div v-if="hasMultipleSlides" class="absolute bottom-14 md:bottom-20 end-4 sm:end-6 lg:end-10 flex items-center gap-3">
           <button
-            class="w-10 h-10 rounded-full bg-white shadow-soft border border-slate-100 flex items-center justify-center text-slate-500 hover:border-brand-300 hover:text-brand-500 transition-colors"
-            onclick="document.getElementById('cat-scroll').scrollBy({left: -350, behavior: 'smooth'})"
-          >
-            <Icon name="lucide:chevron-left" class="w-5 h-5" />
-          </button>
-          <button
-            class="w-10 h-10 rounded-full bg-white shadow-soft border border-slate-100 flex items-center justify-center text-slate-500 hover:border-brand-300 hover:text-brand-500 transition-colors"
-            onclick="document.getElementById('cat-scroll').scrollBy({left: 350, behavior: 'smooth'})"
-          >
-            <Icon name="lucide:chevron-right" class="w-5 h-5" />
-          </button>
+            v-for="(slide, index) in heroSlides"
+            :key="index"
+            class="ed-ui text-[11px] tabular-nums transition-colors"
+            :class="index === currentSlide ? 'text-[#F4EFE6]' : 'text-[#E8E0D2]/40 hover:text-[#E8E0D2]/80'"
+            @click="currentSlide = index"
+          >{{ String(index + 1).padStart(2, '0') }}</button>
         </div>
       </div>
+    </section>
 
-      <div class="relative w-full">
-        <div
-          id="cat-scroll"
-          class="flex gap-4 md:gap-6 overflow-x-auto snap-x snap-mandatory pb-8 px-4 md:px-6 max-w-7xl mx-auto scrollbar-hide"
-        >
-          <NuxtLink 
-            v-for="(cat) in categories" 
-            :key="cat.slug" 
+    <!-- ══ Sommaire ════════════════════════════════════════════════════════ -->
+    <section v-if="sections.browseByCategory.enabled" class="border-b border-[#DAD2C4]">
+      <div class="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-14 md:py-20">
+        <div class="flex items-baseline gap-4 mb-10 md:mb-12">
+          <span class="ed-num text-lg">{{ sectionNo('browseByCategory') }}</span>
+          <h2 class="ed-display text-3xl md:text-[2.6rem] text-[#262019]">{{ sections.browseByCategory.title }}</h2>
+          <span class="ed-rule flex-1 hidden sm:block" />
+          <span class="ed-ui text-[11px] uppercase tracking-[0.16em] text-[#8A7E6E] hidden sm:block">{{ sections.browseByCategory.eyebrow }}</span>
+        </div>
+
+        <div class="border-t border-[#262019]">
+          <NuxtLink
+            v-for="(cat, index) in categories"
+            :key="cat.slug"
             :to="`/category/${cat.slug}`"
-            class="snap-start flex-shrink-0 w-48 h-64 md:w-64 md:h-80 lg:w-80 lg:h-96 rounded-[2rem] p-6 md:p-8 flex flex-col justify-end items-start hover:shadow-xl transition-all duration-300 relative overflow-hidden group"
-            :class="cat.className"
+            class="group flex items-center gap-4 md:gap-6 py-4 md:py-5 border-b border-[#DAD2C4] hover:bg-[#FBF8F2] transition-colors -mx-3 px-3"
           >
-            <!-- Background Image -->
-            <div class="absolute inset-0">
+            <span class="ed-ui text-[11px] tabular-nums text-[#8A7E6E] w-6 shrink-0">{{ String(index + 1).padStart(2, '0') }}</span>
+
+            <span class="w-12 h-14 md:w-14 md:h-16 shrink-0 overflow-hidden border border-[#DAD2C4] bg-[#FBF8F2]">
               <img
                 v-if="cat.imageUrl"
                 :src="cat.imageUrl"
                 :alt="categoryDisplayTitle(cat)"
-                class="w-full h-full object-cover opacity-70 transition-transform duration-700 group-hover:scale-105"
+                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               >
-              <div
-                v-else
-                class="w-full h-full bg-gradient-to-br from-white/40 via-white/20 to-transparent"
-              />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/30 via-black/10 to-transparent" />
-            </div>
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
+            </span>
 
-            <!-- Background Decoration (Circle) -->
-            <div class="absolute -top-10 -right-10 w-32 h-32 md:w-40 md:h-40 rounded-full bg-white/30 blur-2xl group-hover:scale-150 transition-transform duration-700" />
+            <span class="ed-display text-xl md:text-[1.75rem] text-[#262019] group-hover:text-[#97401F] transition-colors">
+              {{ categoryDisplayTitle(cat) }}
+            </span>
 
-            <div class="z-10 relative transform transition-transform duration-300 group-hover:-translate-y-2 bg-white/90 backdrop-blur-sm px-4 py-3 rounded-2xl shadow-sm">
-              <h3 class="font-cozy text-xl md:text-2xl font-bold text-slate-800 mb-1 group-hover:text-brand-600 transition-colors">
-                {{ categoryDisplayTitle(cat) }}
-              </h3>
-              <p class="text-slate-500 font-medium text-sm md:text-base flex items-center gap-2">
-                {{ storefrontContent.common.productsCount(cat.itemCount) }}
-                <span class="w-8 h-px bg-slate-300 group-hover:w-16 group-hover:bg-brand-500 transition-all hidden md:block" />
-              </p>
-            </div>
-                
-            <!-- Action Icon -->
-            <div class="absolute top-4 right-4 md:top-6 md:right-6 w-8 h-8 md:w-10 md:h-10 rounded-full bg-white/80 backdrop-blur flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-              <Icon name="lucide:arrow-right" class="w-4 h-4 md:w-5 md:h-5 text-slate-800" />
-            </div>
-          </NuxtLink>
-        </div>
-      </div>
-    </section>
+            <span class="ed-leader hidden sm:block" />
 
-    <!-- Featured Products -->
-    <section v-if="sections.newArrivals.enabled" class="py-12 md:py-16 bg-slate-50/50 rounded-[3rem] mx-4">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8 md:mb-10">
-          <div>
-          <p class="text-sm font-bold text-brand-500 tracking-widest uppercase mb-1">
-            {{ sections.newArrivals.eyebrow }}
-          </p>
-            <h2 class="font-cozy text-2xl md:text-3xl font-bold text-slate-800">
-              {{ sections.newArrivals.title }}
-            </h2>
-          </div>
-          <NuxtLink
-            to="/products"
-            class="hidden sm:flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 font-medium hover:border-brand-300 hover:text-brand-500 transition-all items-center gap-2 group"
-          >
-            View all products
-            <span class="inline-block transition-transform group-hover:translate-x-1">&rarr;</span>
-          </NuxtLink>
-        </div>
-
-        <!-- Skeleton Loading - Horizontal -->
-        <div
-          v-if="pending"
-          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
-        >
-          <div
-            v-for="i in 4"
-            :key="i"
-            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72 animate-pulse"
-          >
-            <div class="bg-slate-200 rounded-[2rem] h-64 md:h-80 mb-4" />
-            <div class="h-4 bg-slate-200 rounded-full w-3/4 mb-3" />
-            <div class="h-4 bg-slate-200 rounded-full w-1/3" />
-          </div>
-        </div>
-
-        <div
-          v-else
-          ref="featuredScrollContainer"
-          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
-          style="scroll-behavior: auto;"
-          @mouseenter="isHoveringFeatured = true"
-          @mouseleave="isHoveringFeatured = false"
-        >
-          <div
-            v-for="(product, index) in featuredInfiniteList"
-            :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
-          >
-           <ProductCard
-             :product="product"
-           />
-          </div>
-        </div>
-            
-        <div class="mt-10 text-center sm:hidden">
-          <NuxtLink
-            to="/products"
-            class="inline-flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 font-medium hover:border-brand-300 hover:text-brand-500 transition-all items-center gap-2"
-          >
-            View all products &rarr;
-          </NuxtLink>
-        </div>
-      </div>
-    </section>
-
-    <!-- Best Sellers -->
-    <section v-if="sections.bestSellers.enabled" class="py-12 md:py-16 bg-white rounded-[3rem] mx-4 mt-8">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between mb-8 md:mb-10">
-          <div>
-            <p class="text-sm font-bold text-brand-500 tracking-widest uppercase mb-1">{{ sections.bestSellers.eyebrow }}</p>
-            <h2 class="font-cozy text-2xl md:text-3xl font-bold text-slate-800">
-              {{ sections.bestSellers.title }}
-            </h2>
-          </div>
-          <NuxtLink
-            to="/products"
-            class="hidden sm:flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 font-medium hover:border-brand-300 hover:text-brand-500 transition-all items-center gap-2 group"
-          >
-            View all products
-            <span class="inline-block transition-transform group-hover:translate-x-1">&rarr;</span>
-          </NuxtLink>
-        </div>
-
-        <div v-if="bestSellersDisplayed.length === 0" class="text-sm text-slate-600">
-          No best sellers yet.
-        </div>
-
-        <div v-else 
-          ref="bestSellersScrollContainer"
-          class="flex gap-6 overflow-x-scroll pb-8 scrollbar-hide"
-          style="scroll-behavior: auto;"
-          @mouseenter="isHoveringBestSellers = true"
-          @mouseleave="isHoveringBestSellers = false"
-        >
-          <div
-            v-for="(product, index) in bestSellersInfiniteList"
-            :key="`${product.id}-${index}`"
-            class="flex-shrink-0 w-[calc(50%-0.75rem)] sm:w-64 md:w-72"
-          >
-            <ProductCard
-             :product="product"
+            <span class="ed-ui text-[12px] md:text-[13px] text-[#8A7E6E] tabular-nums ms-auto sm:ms-0 shrink-0">
+              {{ storefrontContent.common.productsCount(cat.itemCount) }}
+            </span>
+            <Icon
+              name="lucide:arrow-right"
+              class="w-4 h-4 text-[#C4B8A4] group-hover:text-[#B8532E] transition-colors shrink-0 rtl:rotate-180"
             />
-           </div>
+          </NuxtLink>
         </div>
+      </div>
+    </section>
 
-        <div class="mt-10 text-center sm:hidden">
+    <!-- ══ La sélection ════════════════════════════════════════════════════ -->
+    <section v-if="sections.newArrivals.enabled" class="border-b border-[#DAD2C4]">
+      <div class="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-14 md:py-20">
+        <div class="flex items-baseline gap-4 mb-10 md:mb-12">
+          <span class="ed-num text-lg">{{ sectionNo('newArrivals') }}</span>
+          <h2 class="ed-display text-3xl md:text-[2.6rem] text-[#262019]">{{ sections.newArrivals.title }}</h2>
+          <span class="ed-rule flex-1 hidden sm:block" />
           <NuxtLink
             to="/products"
-            class="inline-flex px-6 py-2.5 rounded-full border border-slate-200 text-slate-600 font-medium hover:border-brand-300 hover:text-brand-500 transition-all items-center gap-2"
+            class="ed-link ed-ui text-[11px] font-semibold uppercase tracking-[0.16em] hidden sm:inline-flex items-center gap-2 group shrink-0"
           >
-            View all products &rarr;
+            {{ storefrontContent.shop.allProducts }}
+            <span class="inline-block transition-transform group-hover:translate-x-1 rtl:group-hover:-translate-x-1 rtl:rotate-180">→</span>
           </NuxtLink>
+        </div>
+
+        <!-- Skeleton -->
+        <div v-if="pending" class="grid grid-cols-2 md:grid-cols-12 gap-x-5 gap-y-10 md:gap-x-8">
+          <div
+            v-for="i in 6"
+            :key="i"
+            class="animate-pulse"
+            :class="isWideCell(i - 1) ? 'col-span-2 md:col-span-6' : 'col-span-1 md:col-span-3'"
+          >
+            <div class="bg-[#EFE8DA] border border-[#DAD2C4]" :class="isWideCell(i - 1) ? 'aspect-[16/11]' : 'aspect-[4/5]'" />
+            <div class="h-3.5 bg-[#EFE8DA] w-3/4 mt-3 mb-2" />
+            <div class="h-3.5 bg-[#EFE8DA] w-1/3" />
+          </div>
+        </div>
+
+        <div v-else-if="featuredDisplayed.length === 0" class="border border-dashed border-[#C4B8A4] py-14 text-center ed-ui text-sm text-[#8A7E6E]">
+          {{ storefrontContent.shop.results.noResults }}
+        </div>
+
+        <!-- Staggered plate: one wide cell opens each row -->
+        <div v-else class="grid grid-cols-2 md:grid-cols-12 gap-x-5 gap-y-10 md:gap-x-8 md:gap-y-14 items-start">
+          <div
+            v-for="(product, index) in featuredDisplayed"
+            :key="product.id"
+            :class="isWideCell(index) ? 'col-span-2 md:col-span-6' : 'col-span-1 md:col-span-3'"
+          >
+            <ProductCard :product="product" :view-mode="isWideCell(index) ? 'feature' : 'grid'" />
+          </div>
+        </div>
+
+        <div class="mt-10 sm:hidden">
+          <NuxtLink to="/products" class="ed-btn-line w-full">{{ storefrontContent.shop.allProducts }}</NuxtLink>
+        </div>
+      </div>
+    </section>
+
+    <!-- ══ Le palmarès ═════════════════════════════════════════════════════ -->
+    <section v-if="sections.bestSellers.enabled">
+      <div class="max-w-[1360px] mx-auto px-4 sm:px-6 lg:px-10 py-14 md:py-20">
+        <div class="flex items-baseline gap-4 mb-10 md:mb-12">
+          <span class="ed-num text-lg">{{ sectionNo('bestSellers') }}</span>
+          <h2 class="ed-display text-3xl md:text-[2.6rem] text-[#262019]">{{ sections.bestSellers.title }}</h2>
+          <span class="ed-rule flex-1 hidden sm:block" />
+          <span class="ed-ui text-[11px] uppercase tracking-[0.16em] text-[#8A7E6E] hidden sm:block">{{ sections.bestSellers.eyebrow }}</span>
+        </div>
+
+        <div v-if="rankedBestSellers.length === 0" class="border border-dashed border-[#C4B8A4] py-14 text-center ed-ui text-sm text-[#8A7E6E]">
+          {{ storefrontContent.shop.results.noResults }}
+        </div>
+
+        <div v-else class="border-t border-[#262019] max-w-4xl">
+          <div
+            v-for="(product, index) in rankedBestSellers"
+            :key="product.id"
+            class="py-6 md:py-7 border-b border-[#DAD2C4]"
+          >
+            <ProductCard :product="product" view-mode="list" :rank="index + 1" />
+          </div>
         </div>
       </div>
     </section>
   </div>
 </template>
+
+<style scoped>
+.cover-enter-active, .cover-leave-active { transition: opacity 0.45s ease, transform 0.45s ease; }
+.cover-enter-from { opacity: 0; transform: translateY(12px); }
+.cover-leave-to { opacity: 0; transform: translateY(-12px); }
+
+@media (prefers-reduced-motion: reduce) {
+  .cover-enter-active, .cover-leave-active { transition: none; }
+}
+</style>

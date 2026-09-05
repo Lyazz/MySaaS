@@ -17,7 +17,7 @@ const year = new Date().getFullYear()
             {{ t('storefront.templates.street.about.titlePrefix') }}<br><span class="text-stroke-black text-transparent">{{ t('storefront.templates.street.about.titleAccent') }}</span>
         </h1>
 
-        <div class="font-mono text-lg md:text-xl leading-relaxed text-gray-800 border-l-4 border-black pl-8 text-left space-y-8">
+        <div class="font-mono text-lg md:text-xl leading-relaxed text-gray-800 border-s-4 border-black ps-8 text-start space-y-8">
             <p>
                 {{ storeSettings?.description || t('storefront.templates.street.about.descriptionFallback') }}
             </p>
@@ -26,7 +26,7 @@ const year = new Date().getFullYear()
             </p>
         </div>
 
-        <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+        <div class="mt-24 grid grid-cols-1 md:grid-cols-3 gap-8 text-start">
             <div class="bg-black text-white p-6 border-2 border-black shadow-[8px_8px_0_0_var(--brand)]">
                 <h3 class="font-street text-3xl mb-4 text-brand">{{ t('storefront.templates.street.about.values.quality.title') }}</h3>
                 <p class="font-mono text-xs uppercase">{{ t('storefront.templates.street.about.values.quality.description') }}</p>

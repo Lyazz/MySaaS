@@ -25,8 +25,8 @@ describe('Admin dashboard API', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await prisma.$transaction([
-            prisma.tenant.create({ data: { name: 'Dash Tenant A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Dash Tenant B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Dash Tenant A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Dash Tenant B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id
@@ -293,9 +293,10 @@ describe('Admin dashboard API', () => {
         await prisma.tenant.deleteMany({ where: { id: { in: [tenantAId, tenantBId] } } })
     })
 
-    it('returns tenant-scoped dashboard analytics for default range (7d)', async () => {
+    it('returns tenant-scoped dashboard analytics for range=7d', async () => {
         const res = await request(app)
             .get('/api/admin/dashboard')
+            .query({ range: '7d' })
             .set('X-Forwarded-Host', hostA)
             .set('Authorization', `Bearer ${tokenA}`)
 
@@ -340,6 +341,17 @@ describe('Admin dashboard API', () => {
         expect(res30.body?.revenue?.orders).toBe(250)
         expect(res30.body?.revenue?.pos).toBe(80)
         expect(res30.body?.revenue?.total).toBe(330)
+
+        const resToday = await request(app)
+            .get('/api/admin/dashboard')
+            .query({ range: 'today' })
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${tokenA}`)
+
+        expect(resToday.status).toBe(200)
+        expect(resToday.body?.period?.range).toBe('today')
+        expect(resToday.body?.period?.days).toBe(1)
+        expect(resToday.body?.trends?.length).toBe(1)
 
         const res90 = await request(app)
             .get('/api/admin/dashboard')

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
-import { homeTemplates, storeShellTemplates } from '~/components/storefront/templates/registry'
+import { resolveTemplateKey } from '~/components/storefront/templates/registry'
+import { TEMPLATE_SPECIMENS } from '~/components/admin/onboarding/template-specimens'
 import { useAuthStore } from '~/stores/auth'
 
 definePageMeta({
@@ -12,25 +13,16 @@ const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
 
-const templateKey = computed(() => (route.query.template as string) || 'classic')
 const previewMode = ref<'desktop' | 'mobile'>('desktop')
 
-// Define the templates metadata (we can duplicate this briefly or import if it was a separate file, but for simplicity we keep it here to run the preview)
-const templatesMeta = [
-  { key: 'classic', label: 'Classic Elegance' },
-  { key: 'modern', label: 'Modern Edge' },
-  { key: 'street', label: 'Streetwear' },
-  { key: 'cozy', label: 'Cozy Basics' },
-  { key: 'food', label: 'Fresh Food' },
-  { key: 'cyber', label: 'Cyber Tech' },
-  { key: 'stationnery', label: 'Stationery' },
-  { key: 'wellness', label: 'Wellness Space' },
-  { key: 'chrono', label: 'Chrono Luxe' },
-]
-
-const activeTemplateDef = computed(() => {
-  return templatesMeta.find((tpl) => tpl.key === templateKey.value) || templatesMeta[0]
-})
+// Resolved through the registry rather than a local copy of the theme list. The
+// copy that lived here had fallen two themes behind, so asking to preview
+// Interior or Minimal silently showed Classic instead.
+const activeTemplateKey = computed(() => resolveTemplateKey(route.query.template as string))
+const activeTemplateDef = computed(() => ({
+  key: activeTemplateKey.value,
+  label: TEMPLATE_SPECIMENS[activeTemplateKey.value].label
+}))
 
 // Create a computed iframe URL that points to the isolated preview route
 const iframeUrl = computed(() => {
@@ -87,39 +79,39 @@ const capturePreviewClicks = (e: MouseEvent) => {
 </script>
 
 <template>
-  <div class="h-screen w-screen bg-slate-900 flex flex-col overflow-hidden font-sans">
+  <div class="h-screen w-screen surface-1 flex flex-col overflow-hidden font-sans">
     
     <!-- Top Control Bar -->
-    <div class="h-16 bg-slate-800 border-b border-slate-700/50 px-6 flex items-center justify-between shadow-sm z-50 shrink-0">
+    <div class="h-16 surface-2 border-b border-line px-6 flex items-center justify-between shadow-sm z-50 shrink-0">
        <div class="flex items-center gap-4">
          <button 
             @click="goBack" 
-            class="p-2 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
+            class="p-2 text-tertiary hover:text-primary hover:bg-hover rounded-lg transition-colors flex items-center gap-2 text-sm font-medium"
          >
             <Icon name="lucide:arrow-left" class="w-4 h-4" />
             Retour
          </button>
-         <div class="h-6 w-px bg-slate-700 mx-2"></div>
+         <div class="h-6 w-px surface-3 mx-2"></div>
          <div class="flex flex-col">
-           <span class="text-white font-semibold text-sm">Simulateur de Template</span>
-           <span class="text-slate-400 text-xs">Aperçu en direct : <span class="text-brand-400 font-medium">{{ activeTemplateDef.label }}</span></span>
+           <span class="text-primary font-semibold text-sm">Simulateur de Template</span>
+           <span class="text-tertiary text-xs">Aperçu en direct : <span class="text-brand-400 font-medium">{{ activeTemplateDef.label }}</span></span>
          </div>
        </div>
 
        <!-- Device Toggles -->
-       <div class="flex bg-slate-950/50 p-1 rounded-lg border border-slate-700/50">
+       <div class="flex surface-1 p-1 rounded-lg border border-line">
          <button 
            @click.prevent="previewMode = 'desktop'"
-           class="px-4 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-all duration-200"
-           :class="previewMode === 'desktop' ? 'bg-slate-700 text-white shadow-sm ring-1 ring-slate-600' : 'text-slate-400 hover:text-slate-200'"
+           class="px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200"
+           :class="previewMode === 'desktop' ? 'surface-3 text-primary shadow-sm ring-1 ring-slate-600' : 'text-tertiary hover:text-primary'"
          >
            <Icon name="lucide:monitor" class="w-4 h-4" />
            Desktop
          </button>
          <button 
            @click.prevent="previewMode = 'mobile'"
-           class="px-4 py-1.5 rounded-md text-sm font-medium flex items-center gap-2 transition-all duration-200"
-           :class="previewMode === 'mobile' ? 'bg-slate-700 text-white shadow-sm ring-1 ring-slate-600' : 'text-slate-400 hover:text-slate-200'"
+           class="px-4 py-1.5 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200"
+           :class="previewMode === 'mobile' ? 'surface-3 text-primary shadow-sm ring-1 ring-slate-600' : 'text-tertiary hover:text-primary'"
          >
            <Icon name="lucide:smartphone" class="w-4 h-4" />
            Mobile
@@ -127,7 +119,7 @@ const capturePreviewClicks = (e: MouseEvent) => {
        </div>
 
        <div class="flex items-center gap-3">
-          <button @click="goBack" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-black text-sm font-medium rounded-lg shadow-sm transition-colors">
+          <button @click="goBack" class="px-4 py-2 bg-brand-600 hover:bg-brand-500 text-brand-contrast text-sm font-medium rounded-lg shadow-sm transition-colors">
             Sélectionner ce template
           </button>
        </div>
@@ -137,7 +129,7 @@ const capturePreviewClicks = (e: MouseEvent) => {
     <div ref="previewContainer" class="flex-1 flex justify-center items-center overflow-hidden p-4 md:p-8 relative">
        <!-- Dynamic Viewport (Device Frame) -->
        <div 
-          class="relative bg-white shadow-[0_0_50px_rgba(0,0,0,0.3)] transition-all duration-500 flex flex-col overflow-hidden ring-1 ring-slate-800"
+          class="relative surface-1 shadow-[0_0_50px_rgba(0,0,0,0.3)] transition-all duration-500 flex flex-col overflow-hidden ring-1 ring-slate-800"
           :class="[
             previewMode === 'desktop' 
               ? 'w-full max-w-[1440px] h-full rounded-xl' 
@@ -147,11 +139,11 @@ const capturePreviewClicks = (e: MouseEvent) => {
        >
          <!-- Mobile Notch -->
          <div v-if="previewMode === 'mobile'" class="absolute top-0 inset-x-0 h-6 flex justify-center z-[100] pointer-events-none">
-            <div class="w-32 h-6 bg-slate-950 rounded-b-2xl"></div>
+            <div class="w-32 h-6 surface-1 rounded-b-2xl"></div>
          </div>
 
          <!-- Internal Iframe Area for perfect responsive media queries -->
-         <div class="w-full h-full bg-white rounded-inherit relative">
+         <div class="w-full h-full surface-1 rounded-inherit relative">
             <iframe 
               :key="previewMode"
               :src="iframeUrl"

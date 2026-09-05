@@ -3,14 +3,18 @@ import axios from 'axios'
 import prisma from '../../../lib/prisma'
 import { MaystroClient } from './maystro.client'
 import { MaystroIntegrationError } from './maystro.errors'
+import { normalizeLocationName } from '../shared/normalize-location-name'
 
-export type MaystroWilaya = { id: number; name: string }
+export type MaystroWilaya = { id: number; name: string; centerCommune?: number | null }
 export type MaystroCommune = { id: number; wilaya: number; name: string; postcode?: string; zone?: string }
 export type ResolvedMaystroLocation = {
     wilayaId: number
     wilayaName: string
     communeId: number
     communeName: string
+    /// Maystro runs a single stop desk per wilaya, sited in this commune. Orders sent
+    /// with delivery_type=2 are only accepted when they carry it (error code 45).
+    centerCommuneId?: number | null
 }
 
 type CacheEntry<T> = { value: T; expiresAt: number }
@@ -56,11 +60,15 @@ export class MaystroLocationService {
             throw new MaystroIntegrationError({ statusCode: 502, statusMessage: 'Maystro: invalid wilayas response' })
         }
 
-        const wilayas: MaystroWilaya[] = data.map((w: any) => ({
-            // Maystro wilayas API returns "code" and "display_id", not "id"
-            id: Number(w?.id ?? w?.code ?? w?.display_id),
-            name: String(w?.name ?? w?.name_lt ?? w?.name_ar ?? '')
-        }))
+        const wilayas: MaystroWilaya[] = data.map((w: any) => {
+            const centerCommune = Number(w?.center_commune)
+            return {
+                // Maystro API returns "code" and "display_id" (equal), not "id"
+                id: Number(w?.code ?? w?.display_id),
+                name: String(w?.name_lt ?? w?.name_ar ?? w?.name ?? ''),
+                centerCommune: Number.isFinite(centerCommune) && centerCommune > 0 ? centerCommune : null
+            }
+        })
 
         this.wilayasCache = { value: wilayas, expiresAt: nowMs() + this.cacheTtlMs() }
         return wilayas
@@ -104,7 +112,7 @@ export class MaystroLocationService {
         apiToken?: string
         wilaya: string
         commune: string
-    }): Promise<{ wilaya: string | number; commune: string | number }> {
+    }): Promise<{ wilaya: string | number; commune: string | number; centerCommune: number | null }> {
         const resolved = await this.resolveWilayaAndCommune({
             apiToken: input.apiToken,
             wilaya: input.wilaya,
@@ -112,7 +120,11 @@ export class MaystroLocationService {
         })
 
         // Prefer stable IDs/codes for downstream calls.
-        return { wilaya: resolved.wilayaId, commune: resolved.communeId }
+        return {
+            wilaya: resolved.wilayaId,
+            commune: resolved.communeId,
+            centerCommune: resolved.centerCommuneId ?? null
+        }
     }
 
     async resolveWilayaAndCommune(input: {
@@ -130,7 +142,7 @@ export class MaystroLocationService {
         const wilayaId = Number.parseInt(wilayaTrimmed, 10)
         const wilayaMatch = Number.isFinite(wilayaId)
             ? wilayas.find((w) => w.id === wilayaId)
-            : wilayas.find((w) => w.name.toLowerCase() === wilayaTrimmed.toLowerCase())
+            : wilayas.find((w) => normalizeLocationName(w.name) === normalizeLocationName(wilayaTrimmed))
 
         if (!wilayaMatch) {
             throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'Invalid wilaya' })
@@ -140,7 +152,7 @@ export class MaystroLocationService {
         const communeId = Number.parseInt(communeTrimmed, 10)
         const communeMatch = Number.isFinite(communeId)
             ? communes.find((c) => c.id === communeId)
-            : communes.find((c) => c.name.toLowerCase() === communeTrimmed.toLowerCase())
+            : communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(communeTrimmed))
 
         if (!communeMatch) {
             throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'Invalid commune for wilaya' })
@@ -150,7 +162,8 @@ export class MaystroLocationService {
             wilayaId: wilayaMatch.id,
             wilayaName: wilayaMatch.name,
             communeId: communeMatch.id,
-            communeName: communeMatch.name
+            communeName: communeMatch.name,
+            centerCommuneId: wilayaMatch.centerCommune ?? null
         }
     }
 }

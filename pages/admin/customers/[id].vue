@@ -3,65 +3,65 @@
     <div class="flex items-center justify-between mb-6">
       <div>
         <NuxtLink
-          to="/admin/customers"
-          class="inline-flex items-center text-sm hover:[color:var(--brand)]" style="color: var(--text-tertiary)"
-        >
-          <Icon name="lucide:arrow-left" class="w-4 h-4 mr-1" />
+ to="/admin/customers"
+ class="inline-flex items-center text-sm hover:[color:var(--brand)] text-tertiary" 
+>
+          <Icon name="lucide:arrow-left" class="w-4 h-4 me-1" />
           {{ t('admin.nav.customers') }}
         </NuxtLink>
         <div class="flex items-center gap-3 mt-2">
-          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+          <h2 class="text-2xl font-bold text-primary">
             {{ summary?.name || t('admin.pages.customers.detail.fallbackTitle') }}
           </h2>
           <NuxtLink
-            v-if="summary"
-            :to="`/admin/customers/edit/${summary.id}`"
-            class="inline-flex items-center px-3 py-1.5 shadow-sm text-sm font-medium rounded-md transition-colors" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
-          >
-            <Icon name="lucide:pencil" class="w-4 h-4 mr-1.5" />
+ v-if="summary"
+ :to="`/admin/customers/edit/${summary.id}`"
+ class="inline-flex items-center px-3 py-1.5 shadow-sm text-sm font-medium rounded-lg transition-colors border border-line text-secondary surface-1" 
+>
+            <Icon name="lucide:pencil" class="w-4 h-4 me-1.5" />
             {{ t('admin.common.edit') }}
           </NuxtLink>
         </div>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ summary?.phone || '' }}
           <span v-if="summary?.address"> · {{ summary?.address }}</span>
         </p>
         <p
-          v-if="summary?.phoneNormalized"
-          class="mt-1 text-sm"
-          style="color: var(--text-tertiary)"
-        >
+ v-if="summary?.phoneNormalized"
+ class="mt-1 text-sm text-tertiary"
+ 
+>
           Brut: {{ summary?.phoneRaw || summary?.phone }} · Normalise: +{{ summary?.phoneNormalized }}
         </p>
       </div>
 
       <div class="flex flex-wrap gap-3 justify-end">
         <div class="ui-card px-4 py-3">
-          <div class="text-xs" style="color: var(--text-tertiary)">
+          <div class="text-xs text-tertiary">
             {{ t('admin.pages.customers.detail.stats.orders') }}
           </div>
-          <div class="text-lg font-semibold" style="color: var(--text-primary)">
+          <div class="text-lg font-semibold text-primary">
             {{ sales.length }}
           </div>
         </div>
         <div class="ui-card px-4 py-3">
-          <div class="text-xs" style="color: var(--text-tertiary)">
+          <div class="text-xs text-tertiary">
             {{ t('admin.pages.customers.detail.stats.totalSpent') }}
           </div>
-          <div class="text-lg font-semibold" style="color: var(--text-primary)">
+          <div class="text-lg font-semibold text-primary">
             {{ formatCurrency(totalSpent) }}
           </div>
         </div>
         <div class="ui-card px-4 py-3">
-          <div class="text-xs" style="color: var(--text-tertiary)">
+          <div class="text-xs text-tertiary">
             {{ t('admin.pages.customers.detail.stats.totalPaid') }}
           </div>
-          <div class="text-lg font-semibold" style="color: var(--text-primary)">
+          <div class="text-lg font-semibold text-primary">
             {{ formatCurrency(totalPaid) }}
           </div>
         </div>
         <div class="ui-card px-4 py-3">
-          <div class="text-xs" style="color: var(--text-tertiary)">
+          <div class="text-xs text-tertiary">
             {{ t('admin.pages.customers.detail.stats.currentBalance') }}
           </div>
           <div class="text-lg font-semibold" :class="currentBalance >= 0 ? 'text-amber-700' : 'text-emerald-700'">
@@ -69,18 +69,18 @@
           </div>
         </div>
         <div class="ui-card px-4 py-3">
-          <div class="text-xs" style="color: var(--text-tertiary)">
+          <div class="text-xs text-tertiary">
             Points disponibles
           </div>
-          <div class="text-lg font-semibold" style="color: var(--text-primary)">
+          <div class="text-lg font-semibold text-primary">
             {{ pointsSummary.availablePoints }}
           </div>
         </div>
         <div class="ui-card px-4 py-3">
-          <div class="text-xs" style="color: var(--text-tertiary)">
+          <div class="text-xs text-tertiary">
             Points consommes
           </div>
-          <div class="text-lg font-semibold" style="color: var(--text-primary)">
+          <div class="text-lg font-semibold text-primary">
             {{ pointsSummary.redeemedPointsTotal }}
           </div>
         </div>
@@ -92,7 +92,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.customers.detail.loading') }}
       </p>
     </div>
@@ -101,11 +101,11 @@
       v-else-if="!summary"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:users" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:users" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.customers.detail.notFound.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ t('admin.pages.customers.detail.notFound.hint') }}
       </p>
     </div>
@@ -114,36 +114,36 @@
       v-else-if="sales.length === 0 && payments.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:clipboard-list" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.customers.detail.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ t('admin.pages.customers.detail.empty.hint') }}
       </p>
     </div>
 
     <div v-else class="space-y-6">
       <div class="ui-card overflow-hidden">
-        <div class="px-6 py-4" style="border-bottom: 1px solid var(--surface-border)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">Points fidelite</h3>
+        <div class="px-6 py-4 border-b border-line">
+          <h3 class="text-lg font-semibold text-primary">Points fidelite</h3>
         </div>
         <div class="p-6 grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
-            <div class="text-xs" style="color: var(--text-tertiary)">Disponibles</div>
-            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.availablePoints }}</div>
+          <div class="rounded-xl border p-4 border-line surface-1">
+            <div class="text-xs text-tertiary">Disponibles</div>
+            <div class="mt-2 text-xl font-semibold text-primary">{{ pointsSummary.availablePoints }}</div>
           </div>
-          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
-            <div class="text-xs" style="color: var(--text-tertiary)">En attente</div>
-            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.pendingRedeemPoints }}</div>
+          <div class="rounded-xl border p-4 border-line surface-1">
+            <div class="text-xs text-tertiary">En attente</div>
+            <div class="mt-2 text-xl font-semibold text-primary">{{ pointsSummary.pendingRedeemPoints }}</div>
           </div>
-          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
-            <div class="text-xs" style="color: var(--text-tertiary)">Gagnes</div>
-            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.earnedPointsTotal }}</div>
+          <div class="rounded-xl border p-4 border-line surface-1">
+            <div class="text-xs text-tertiary">Gagnes</div>
+            <div class="mt-2 text-xl font-semibold text-primary">{{ pointsSummary.earnedPointsTotal }}</div>
           </div>
-          <div class="rounded-xl border p-4" style="border-color: var(--surface-border); background: var(--surface-1)">
-            <div class="text-xs" style="color: var(--text-tertiary)">Consommes</div>
-            <div class="mt-2 text-xl font-semibold" style="color: var(--text-primary)">{{ pointsSummary.redeemedPointsTotal }}</div>
+          <div class="rounded-xl border p-4 border-line surface-1">
+            <div class="text-xs text-tertiary">Consommes</div>
+            <div class="mt-2 text-xl font-semibold text-primary">{{ pointsSummary.redeemedPointsTotal }}</div>
           </div>
         </div>
         <div v-if="pointItems.length > 0" class="overflow-x-auto">
@@ -154,16 +154,16 @@
                 <th class="ui-th">Type</th>
                 <th class="ui-th">Statut</th>
                 <th class="ui-th">Source</th>
-                <th class="ui-th text-right">Points</th>
+                <th class="ui-th text-end">Points</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
               <tr v-for="entry in pointItems" :key="entry.id" class="ui-tr">
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ formatDate(entry.createdAt) }}</td>
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-primary)">{{ entry.direction }}</td>
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ entry.status }}</td>
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">{{ entry.sourceType }} #{{ entry.sourceId.slice(0, 8) }}</td>
-                <td class="ui-td whitespace-nowrap text-right font-semibold" :class="entry.direction === 'REDEEM' ? 'text-red-600' : 'text-emerald-700'">
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">{{ formatDate(entry.createdAt) }}</td>
+                <td class="ui-td whitespace-nowrap text-sm text-primary">{{ entry.direction }}</td>
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">{{ entry.status }}</td>
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">{{ entry.sourceType }} #{{ entry.sourceId.slice(0, 8) }}</td>
+                <td class="ui-td whitespace-nowrap text-end font-semibold" :class="entry.direction === 'REDEEM' ? 'text-red-600' : 'text-emerald-700'">
                   {{ entry.direction === 'REDEEM' ? '-' : '+' }}{{ entry.points }}
                 </td>
               </tr>
@@ -173,8 +173,8 @@
       </div>
 
       <div v-if="sales.length > 0" class="ui-card overflow-hidden">
-        <div class="px-6 py-4" style="border-bottom: 1px solid var(--surface-border)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.nav.salesItem') }}</h3>
+        <div class="px-6 py-4 border-b border-line">
+          <h3 class="text-lg font-semibold text-primary">{{ t('admin.nav.salesItem') }}</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="ui-table">
@@ -192,7 +192,7 @@
                 <th class="ui-th">
                   {{ t('admin.pages.customers.detail.table.date') }}
                 </th>
-                <th class="ui-th text-right">
+                <th class="ui-th text-end">
                   {{ t('admin.pages.customers.detail.table.actions') }}
                 </th>
               </tr>
@@ -204,12 +204,12 @@
                 class="ui-tr"
               >
                 <td class="ui-td whitespace-nowrap">
-                  <div class="font-medium" style="color: var(--text-primary)">
+                  <div class="font-medium text-primary">
                     #{{ s.id.substring(0, 8) }}
                   </div>
                 </td>
                 <td class="ui-td whitespace-nowrap">
-                  <div class="font-medium" style="color: var(--text-primary)">
+                  <div class="font-medium text-primary">
                     {{ formatCurrency(s.totalAmount) }}
                   </div>
                 </td>
@@ -218,16 +218,16 @@
                     {{ s.status }}
                   </span>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">
                   {{ formatDate(s.createdAt) }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-right">
+                <td class="ui-td whitespace-nowrap text-end">
                   <div class="flex items-center justify-end">
                     <NuxtLink
                       :to="`/admin/sales/${s.id}`"
                       class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
-                      <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
+                      <Icon name="lucide:eye" class="w-4 h-4 me-1" />
                       <span>{{ t('admin.common.view') }}</span>
                     </NuxtLink>
                   </div>
@@ -239,8 +239,8 @@
       </div>
 
       <div v-if="payments.length > 0" class="ui-card overflow-hidden">
-        <div class="px-6 py-4" style="border-bottom: 1px solid var(--surface-border)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.customers.detail.stats.payments') }}</h3>
+        <div class="px-6 py-4 border-b border-line">
+          <h3 class="text-lg font-semibold text-primary">{{ t('admin.pages.customers.detail.stats.payments') }}</h3>
         </div>
         <div class="overflow-x-auto">
           <table class="ui-table">
@@ -258,7 +258,7 @@
                 <th class="ui-th">
                   {{ t('admin.pages.customers.detail.stats.reference') }}
                 </th>
-                <th class="ui-th text-right">
+                <th class="ui-th text-end">
                   {{ t('admin.pages.customers.detail.table.actions') }}
                 </th>
               </tr>
@@ -269,31 +269,31 @@
                 :key="p.id"
                 class="ui-tr"
               >
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">
                   {{ formatDate(p.createdAt) }}
                 </td>
                 <td class="ui-td whitespace-nowrap">
-                  <div class="text-sm font-semibold" style="color: var(--text-primary)">
+                  <div class="text-sm font-semibold text-primary">
                     {{ formatCurrency(p.amount) }}
                   </div>
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">
                   {{ p.method }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">
                   {{ p.reference || '—' }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-right">
+                <td class="ui-td whitespace-nowrap text-end">
                   <div class="flex items-center justify-end">
                     <NuxtLink
                       v-if="p.saleId"
                       :to="`/admin/sales/${p.saleId}`"
                       class="ui-btn ui-btn--secondary ui-btn--sm"
                     >
-                      <Icon name="lucide:eye" class="w-4 h-4 mr-1" />
+                      <Icon name="lucide:eye" class="w-4 h-4 me-1" />
                       <span>{{ t('admin.common.view') }}</span>
                     </NuxtLink>
-                    <span v-else style="color: var(--text-muted)">—</span>
+                    <span class="text-muted" v-else>—</span>
                   </div>
                 </td>
               </tr>

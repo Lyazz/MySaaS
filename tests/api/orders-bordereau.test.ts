@@ -14,7 +14,7 @@ describe('Order bordereau PDF', () => {
     let productId: string
 
     beforeAll(async () => {
-        const tenant = await prisma.tenant.create({ data: { name: 'Bordereau Tenant', slug } })
+        const tenant = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Bordereau Tenant', slug } })
         tenantId = tenant.id
 
         const user = await prisma.user.create({

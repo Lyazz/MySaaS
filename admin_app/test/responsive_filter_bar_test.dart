@@ -1,7 +1,7 @@
 import 'package:admin_app/widgets/responsive_filter_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 
 import 'helpers/pump_localized_app.dart';
 
@@ -37,6 +37,51 @@ void main() {
     await tester.pump();
 
     expect(cleared, isTrue);
+  });
+
+  testWidgets('compact desktop layout opens filters modal and clears', (
+    WidgetTester tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(1200, 700));
+    addTearDown(() async {
+      await tester.binding.setSurfaceSize(null);
+    });
+
+    var cleared = false;
+
+    await tester.pumpWidget(
+      buildLocalizedTestApp(
+        home: Scaffold(
+          body: ResponsiveFilterBar(
+            searchField: const TextField(),
+            filters: const [Text('Status')],
+            collapseDesktopFilters: true,
+            activeFilterCount: 1,
+            activeFilterChips: const [Text('Active')],
+            onClearFilters: () => cleared = true,
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ErrorWidget), findsNothing);
+    expect(find.text('Active'), findsOneWidget);
+    expect(find.text('Status'), findsNothing);
+    expect(find.byIcon(LucideIcons.listFilter), findsOneWidget);
+
+    await tester.tap(find.byIcon(LucideIcons.listFilter));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Filters'), findsWidgets);
+    expect(find.text('Status'), findsOneWidget);
+    expect(find.text('Clear'), findsOneWidget);
+
+    await tester.tap(find.text('Clear'));
+    await tester.pumpAndSettle();
+
+    expect(cleared, isTrue);
+    expect(find.text('Filters'), findsOneWidget);
   });
 
   testWidgets('mobile layout opens filters modal and clears', (

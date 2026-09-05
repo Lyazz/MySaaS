@@ -5,19 +5,19 @@
       class="flex mb-6"
       aria-label="Breadcrumb"
     >
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink
-            to="/admin/products"
-            class="hover:[color:var(--brand)]" style="color: var(--text-secondary)"
-          >
+ to="/admin/products"
+ class="hover:[color:var(--brand)] text-secondary" 
+>
             {{ t('admin.nav.products') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-tertiary" />
+            <span class="ms-1 text-tertiary">
               <span v-if="isNewProduct">{{ t('admin.pages.products.create.title', 'Créer un produit') }}</span>
               <span v-else>{{ t('admin.pages.products.edit.breadcrumbEdit', { title: form.title || t('admin.pages.products.edit.fallbackTitle') }) }}</span>
             </span>
@@ -32,7 +32,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.products.edit.loading') }}
       </p>
     </div>
@@ -42,70 +42,70 @@
       <!-- Header -->
       <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+          <h2 class="text-2xl font-bold text-primary">
             <template v-if="isNewProduct">{{ t('admin.pages.products.create.title', 'Créer un produit') }}</template>
             <template v-else>{{ t('admin.pages.products.edit.title') }}</template>
           </h2>
-          <p class="mt-1" style="color: var(--text-secondary)">
+          <p class="mt-1 text-secondary">
             <template v-if="isNewProduct">{{ t('admin.pages.products.create.subtitle', 'Configurez les détails de votre nouveau produit') }}</template>
             <template v-else>{{ t('admin.pages.products.edit.subtitle') }}</template>
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <!-- Public Links -->
-          <div class="flex items-center space-x-2 p-1.5 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
-            <span class="text-xs font-medium px-2" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.label') }}:</span>
+          <div class="flex items-center space-x-2 p-1.5 rounded-lg rtl:space-x-reverse surface-2 border border-line">
+            <span class="text-xs font-medium px-2 text-tertiary">{{ t('admin.pages.products.edit.links.label') }}:</span>
 
             <!-- Product Page -->
-            <div class="flex items-center space-x-1 pr-2" style="border-right: 1px solid var(--surface-border)">
-              <span class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.product') }}</span>
+            <div class="flex items-center space-x-1 pe-2 rtl:space-x-reverse border-e border-line">
+              <span class="text-xs text-tertiary">{{ t('admin.pages.products.edit.links.product') }}</span>
               <a
                 :href="productUrl"
                 target="_blank"
-                class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded"
+                class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-lg"
                 :title="t('admin.pages.products.edit.links.openProduct')"
               >
                 <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
-                class="p-1 rounded" style="color: var(--text-tertiary)"
-                :title="t('admin.pages.products.edit.links.copyProduct')"
-                @click="copyUrl(productUrl)"
-              >
+ class="p-1 rounded-lg text-tertiary" 
+ :title="t('admin.pages.products.edit.links.copyProduct')"
+ @click="copyUrl(productUrl)"
+>
                 <Icon name="lucide:copy" class="w-4 h-4" />
               </button>
             </div>
 
             <!-- Landing Page -->
-            <div class="flex items-center space-x-1 pl-1">
-              <span class="text-xs" style="color: var(--text-tertiary)">{{ t('admin.pages.products.edit.links.landing') }}</span>
+            <div class="flex items-center space-x-1 ps-1 rtl:space-x-reverse">
+              <span class="text-xs text-tertiary">{{ t('admin.pages.products.edit.links.landing') }}</span>
               <a
                 :href="landingUrl"
                 target="_blank"
-                class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded"
+                class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-lg"
                 :title="t('admin.pages.products.edit.links.openLanding')"
               >
                 <Icon name="lucide:external-link" class="w-4 h-4" />
               </a>
               <button
-                class="p-1 rounded" style="color: var(--text-tertiary)"
-                :title="t('admin.pages.products.edit.links.copyLanding')"
-                @click="copyUrl(landingUrl)"
-              >
+ class="p-1 rounded-lg text-tertiary" 
+ :title="t('admin.pages.products.edit.links.copyLanding')"
+ @click="copyUrl(landingUrl)"
+>
                 <Icon name="lucide:copy" class="w-4 h-4" />
               </button>
             </div>
           </div>
 
           <NuxtLink
-            to="/admin/products"
-            class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
-          >
+ to="/admin/products"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary" 
+>
             {{ t('admin.common.cancel') }}
           </NuxtLink>
           <button
             :disabled="submitting"
-            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
             @click="handleSubmit"
           >
             {{ submitting ? t('admin.common.updating') : t('admin.pages.products.edit.submit') }}
@@ -118,7 +118,7 @@
         @submit.prevent="handleSubmit"
       >
         <!-- Tabs Navigation -->
-        <div class="overflow-x-auto custom-scrollbar" style="border-bottom: 1px solid var(--surface-border)">
+        <div class="overflow-x-auto custom-scrollbar border-b border-line">
           <nav
             class="flex -mb-px"
             aria-label="Tabs"
@@ -131,7 +131,7 @@
               :class="[
                 currentTab === tab.id
                   ? '[border-color:var(--brand)] [color:var(--brand)]'
-                  : 'border-transparent hover:border-white/20 text-[var(--text-tertiary)]'
+                  : 'border-transparent hover:border-line-strong text-[var(--text-tertiary)]'
               ]"
               @click="currentTab = tab.id"
             >
@@ -146,6 +146,56 @@
             v-show="currentTab === 'general'"
             class="space-y-6"
           >
+            <!-- Active Status -->
+            <div
+ class="flex items-center justify-between rounded-xl border px-4 py-3 border-line surface-2"
+ 
+>
+              <div>
+                <p class="text-sm font-medium text-primary">
+                  {{ t('admin.forms.product.isActive.label') }}
+                </p>
+                <p class="text-xs text-secondary">
+                  {{ form.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
+                </p>
+              </div>
+              <BaseToggle
+                v-model="form.isActive"
+                :sr-label="t('admin.forms.product.isActive.label')"
+              />
+            </div>
+
+            <!-- Visibility -->
+            <BaseSelect
+              v-model="form.visibility"
+              :label="t('admin.forms.product.visibility.label')"
+              :hint="t('admin.forms.product.visibility.hint')"
+            >
+              <option value="LISTED">
+                {{ t('admin.forms.product.visibility.listed') }}
+              </option>
+              <option value="UNLISTED">
+                {{ t('admin.forms.product.visibility.unlisted') }}
+              </option>
+            </BaseSelect>
+
+            <!-- Not-listed indication -->
+            <div
+              v-if="notListedReason"
+              class="flex items-start gap-2 rounded-xl border px-4 py-3 text-sm"
+              style="border-color: color-mix(in srgb, var(--warning, #d97706) 45%, var(--surface-border)); background: color-mix(in srgb, var(--warning, #d97706) 12%, transparent); color: var(--text-primary)"
+            >
+              <Icon name="lucide:eye-off" class="w-4 h-4 mt-0.5 shrink-0" />
+              <div>
+                <p class="font-medium">{{ t('admin.pages.products.edit.notListed.title') }}</p>
+                <p class="mt-0.5 text-secondary">
+                  {{ notListedReason === 'category'
+                    ? t('admin.pages.products.edit.notListed.reasonCategory')
+                    : t('admin.pages.products.edit.notListed.reasonProduct') }}
+                </p>
+              </div>
+            </div>
+
             <!-- Title -->
             <!-- Title -->
             <BaseInput
@@ -167,7 +217,6 @@
               @change="handleSlugChange"
               @blur="handleSlugChange"
               required
-              pattern="[a-z0-9-]+"
             />
 
             <!-- Mini Description -->
@@ -178,32 +227,57 @@
             >
               <template #default="{ inputId }">
                 <textarea
-                  :id="inputId"
-                  v-model="form.miniDescription"
-                  rows="3"
-                  class="w-full px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)]" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
-                  :placeholder="t('admin.forms.product.miniDescription.placeholder')"
-                />
+ :id="inputId"
+ v-model="form.miniDescription"
+ rows="3"
+ class="w-full px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] border border-line surface-1 text-primary" 
+ :placeholder="t('admin.forms.product.miniDescription.placeholder')"
+ />
               </template>
             </AdminFormField>
 
-            <!-- Price and Stock Row -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <!-- Price -->
-              <!-- Price -->
-            <BaseInput
-              v-model.number="form.price"
-              :label="t('admin.forms.product.price.label')"
-              :error="errors.price"
-              type="number"
-              min="0"
-              step="0.01"
-              required
-              :placeholder="t('admin.forms.product.price.placeholder')"
-            />
+            <!-- Search Keywords -->
+            <div class="space-y-1">
+              <label class="block text-sm font-medium text-primary">
+                {{ t('admin.forms.product.searchKeywords.label', 'Mots-clés de recherche') }}
+              </label>
+              <div class="flex flex-wrap items-center gap-2 p-2 rounded-lg focus-within:ring-2 focus-within:[--tw-ring-color:var(--brand)] border border-line surface-1">
+                <span
+ v-for="(keyword, index) in keywordList"
+ :key="index"
+ class="inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg surface-2 border border-line text-primary" 
+>
+                  {{ keyword }}
+                  <button type="button" class="hover:text-red-500 transition-colors" @click="removeKeyword(index)">
+                    <Icon name="lucide:x" class="w-3 h-3" />
+                  </button>
+                </span>
+                <input
+ v-model="newKeyword"
+ type="text"
+ :placeholder="t('admin.forms.product.searchKeywords.placeholder', 'Tapez et appuyez sur Entrée...')"
+ class="flex-1 min-w-[120px] bg-transparent outline-none text-sm text-primary" 
+ @keydown.enter.prevent="addKeyword"
+>
+              </div>
+              <p class="text-xs mt-1 text-tertiary">
+                {{ t('admin.forms.product.searchKeywords.hint', 'Mots-clés pour aider les clients à trouver ce produit dans la recherche de la boutique.') }}
+              </p>
+            </div>
 
-              <!-- Stock -->
-              <!-- Stock -->
+            <div
+ class="rounded-2xl border p-4 space-y-2 border-line surface-2"
+ 
+>
+              <p class="text-sm font-semibold text-primary">
+                {{ t('admin.pages.products.edit.generalTab.variantPricingTitle', 'Selling price is managed from Variants') }}
+              </p>
+              <p class="text-sm text-secondary">
+                {{ t('admin.pages.products.edit.generalTab.variantPricingMessage', 'Set the selling price for this product in the Variants tab. Simple products use their default variant, and optioned products use each selectable variant.') }}
+              </p>
+            </div>
+
+            <!-- Stock -->
             <BaseInput
               v-model.number="form.stock"
               :label="t('admin.forms.product.stock.label')"
@@ -215,7 +289,6 @@
               disabled
               :hint="t('admin.forms.product.stock.hintSystemManaged')"
             />
-            </div>
 
             <!-- Low Stock Threshold -->
             <BaseInput
@@ -235,13 +308,13 @@
               :hint="t('admin.forms.product.category.hintMulti', 'Select one or more categories/subcategories')"
             >
               <template #default>
-                <div class="max-h-48 overflow-y-auto rounded-md p-3 space-y-2" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
+                <div class="max-h-48 overflow-y-auto rounded-lg p-3 space-y-2 border border-line surface-1">
                   <label
-                    v-for="cat in sortedCategories"
-                    :key="cat.id"
-                    class="flex items-center gap-2 text-sm"
-                    style="color: var(--text-primary)"
-                  >
+ v-for="cat in sortedCategories"
+ :key="cat.id"
+ class="flex items-center gap-2 text-sm text-primary"
+ 
+>
                     <input
                       type="checkbox"
                       class="admin-checkbox"
@@ -251,10 +324,10 @@
                     <span>{{ categoryDisplayTitle(cat) }}</span>
                   </label>
                   <p
-                    v-if="sortedCategories.length === 0"
-                    class="text-xs"
-                    style="color: var(--text-tertiary)"
-                  >
+ v-if="sortedCategories.length === 0"
+ class="text-xs text-tertiary"
+ 
+>
                     {{ t('admin.pages.products.edit.noCategories', 'No categories available') }}
                   </p>
                 </div>
@@ -263,22 +336,6 @@
 
             <!-- Product Images -->
             <ProductImagesUploader v-model="productImages" />
-
-            <!-- Active Status -->
-            <div class="flex items-center">
-              <input
-                id="isActive"
-                v-model="form.isActive"
-                type="checkbox"
-                class="admin-checkbox"
-              >
-              <label
-                for="isActive"
-                class="ml-2 block text-sm" style="color: var(--text-primary)"
-              >
-                {{ t('admin.forms.product.isActive.label') }}
-              </label>
-            </div>
           </div>
 
           <!-- Promotions Tab -->
@@ -286,66 +343,100 @@
             v-show="currentTab === 'promotions'"
             class="space-y-6"
           >
-            <!-- Active Status -->
-            <div class="flex items-center">
-              <input
-                id="isPromotionActive"
-                v-model="form.isPromotionActive"
-                type="checkbox"
-                class="admin-checkbox"
-              >
-              <label
-                for="isPromotionActive"
-                class="ml-2 block text-sm" style="color: var(--text-primary)"
-              >
-                {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
-              </label>
+            <div
+ v-if="productHasVariantOptions"
+ class="rounded-2xl border p-4 space-y-2 border-line surface-2"
+ 
+>
+              <p class="text-sm font-semibold text-primary">
+                {{ t('admin.pages.products.edit.promotions.variantPromotionTitle', 'Use variant promotions for this product') }}
+              </p>
+              <p class="text-sm text-secondary">
+                {{ t('admin.pages.products.edit.promotions.variantPromotionMessage', 'This product has selectable variants. Product-level promotions are disabled and each variant now manages its own promotional price, schedule, and countdown state.') }}
+              </p>
             </div>
-
-            <!-- Promotional Price -->
-            <div v-if="form.isPromotionActive" class="space-y-6">
-              <BaseInput
-                v-model.number="form.promotionalPrice"
-                :label="t('admin.forms.product.promotionalPrice.label', 'Prix promotionnel')"
-                :error="errors.promotionalPrice"
-                type="number"
-                min="0"
-                step="0.01"
-                required
-                :placeholder="t('admin.forms.product.promotionalPrice.placeholder', 'Nouveau prix')"
-              />
-
-              <!-- Start Date -->
-              <BaseInput
-                v-model="form.promotionStartDate"
-                :label="t('admin.forms.product.promotionStartDate.label', 'Date de début (optionnel)')"
-                :error="errors.promotionStartDate"
-                type="datetime-local"
-              />
-
-              <!-- End Date -->
-              <BaseInput
-                v-model="form.promotionEndDate"
-                :label="t('admin.forms.product.promotionEndDate.label', 'Date de fin (requis pour le compte à rebours)')"
-                :error="errors.promotionEndDate"
-                type="datetime-local"
-              />
-
-              <!-- Show Countdown -->
+            <template v-else>
               <div class="flex items-center">
                 <input
-                  id="showCountdown"
-                  v-model="form.showCountdown"
+                  id="isPromotionActive"
+                  v-model="form.isPromotionActive"
                   type="checkbox"
                   class="admin-checkbox"
                 >
                 <label
-                  for="showCountdown"
-                  class="ml-2 block text-sm" style="color: var(--text-primary)"
-                >
-                  {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
+ for="isPromotionActive"
+ class="ms-2 block text-sm text-primary" 
+>
+                  {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
                 </label>
               </div>
+
+	              <div v-if="form.isPromotionActive" class="space-y-6">
+	                <BaseInput
+	                  :model-value="form.promotionalPrice ?? undefined"
+	                  :label="t('admin.forms.product.promotionalPrice.label', 'Prix promotionnel')"
+	                  :error="errors.promotionalPrice"
+	                  type="number"
+	                  min="0"
+	                  step="0.01"
+	                  required
+	                  :placeholder="t('admin.forms.product.promotionalPrice.placeholder', 'Nouveau prix')"
+	                  @update:model-value="form.promotionalPrice = $event === '' || $event == null ? null : Number($event)"
+	                />
+
+                <BaseInput
+                  v-model="form.promotionStartDate"
+                  :label="t('admin.forms.product.promotionStartDate.label', 'Date de début (optionnel)')"
+                  :error="errors.promotionStartDate"
+                  type="datetime-local"
+                />
+
+                <BaseInput
+                  v-model="form.promotionEndDate"
+                  :label="t('admin.forms.product.promotionEndDate.label', 'Date de fin (requis pour le compte à rebours)')"
+                  :error="errors.promotionEndDate"
+                  type="datetime-local"
+                />
+
+                <div class="flex items-center">
+                  <input
+                    id="showCountdown"
+                    v-model="form.showCountdown"
+                    type="checkbox"
+                    class="admin-checkbox"
+                  >
+                  <label
+ for="showCountdown"
+ class="ms-2 block text-sm text-primary" 
+>
+                    {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
+                  </label>
+                </div>
+              </div>
+            </template>
+
+            <div class="rounded-2xl border p-4 space-y-3 border-line surface-2">
+              <div class="flex items-center">
+                <input
+                  id="isClearance"
+                  v-model="form.isClearance"
+                  type="checkbox"
+                  class="admin-checkbox"
+                  :disabled="form.isPromotionActive"
+                >
+                <label
+ for="isClearance"
+ class="ms-2 block text-sm text-primary" 
+>
+                  {{ t('admin.forms.product.isClearance.label', 'Produit en destockage') }}
+                </label>
+              </div>
+              <p class="text-sm text-secondary">
+                {{ t('admin.forms.product.isClearance.hint', 'Ce produit participe à la remise destockage configurée dans Réglages > Fonctionnel. Un produit ne peut pas être à la fois en destockage et en promotion.') }}
+              </p>
+              <p v-if="form.isPromotionActive" class="text-sm font-medium" style="color: var(--warning, #d97706)">
+                {{ t('admin.forms.product.isClearance.blockedByPromotion', 'Désactivez la promotion pour pouvoir activer le destockage.') }}
+              </p>
             </div>
           </div>
 
@@ -376,9 +467,12 @@
           >
             <!-- Options & Variants -->
             <div>
-              <h2 class="text-xl font-bold mb-4" style="color: var(--text-primary)">
+              <h2 class="text-xl font-bold mb-4 text-primary">
                 {{ t('admin.pages.products.edit.variantsTab.title') }}
               </h2>
+              <p class="text-sm mb-4 text-secondary">
+                {{ t('admin.pages.products.edit.variantsTab.pricingHint', 'Manage selling prices, costs, inventory, and per-variant promotions here.') }}
+              </p>
               <ProductOptionsEditor 
                 :product-id="productId" 
                 :options="options" 
@@ -386,8 +480,74 @@
                 @refresh="fetchProduct"
               />
 
+              <div
+                v-if="stockAllocationRequired && stockAllocationSourceBalance"
+                class="mb-6 rounded-2xl border p-4 space-y-4"
+                style="border-color: rgba(var(--brand-rgb)/0.3); background: color-mix(in srgb, var(--brand) 7%, var(--surface-2))"
+              >
+                <div class="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                  <div class="space-y-1">
+                    <p class="text-sm font-semibold text-primary">
+                      {{ t('admin.pages.products.edit.variantsTab.allocationTitle', 'Allocate stock before using these variants') }}
+                    </p>
+                    <p class="text-sm text-secondary">
+                      {{ t('admin.pages.products.edit.variantsTab.allocationMessage', 'Existing stock is still parked on the hidden source variant. Split the full stock, reserved stock, and safety stock across active variants to make inventory sellable again.') }}
+                    </p>
+                    <p class="text-xs text-tertiary">
+                      {{ stockAllocationSourceVariantTitle || t('admin.variantsTable.defaultVariant', 'Default') }}:
+                      {{ stockAllocationSourceBalance.stock }} {{ t('admin.pages.products.edit.variantsTab.onHandShort', 'on hand') }},
+                      {{ stockAllocationSourceBalance.reserved }} {{ t('admin.pages.products.edit.variantsTab.reservedShort', 'reserved') }},
+                      {{ stockAllocationSourceBalance.safetyStock }} {{ t('admin.pages.products.edit.variantsTab.safetyShort', 'safety') }}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    class="ui-btn ui-btn--primary ui-btn--md"
+                    :disabled="allocatingStock || !stockAllocationBalanced"
+                    @click="allocateVariantStock"
+                  >
+                    {{ allocatingStock ? t('admin.common.saving', 'Saving...') : t('admin.pages.products.edit.variantsTab.allocateAction', 'Allocate stock') }}
+                  </button>
+                </div>
+
+                <div class="grid gap-3 md:grid-cols-[minmax(0,2fr)_repeat(3,minmax(0,1fr))]">
+                  <div class="text-xs font-semibold uppercase tracking-wide text-tertiary">
+                    {{ t('admin.variantsTable.columns.variant', 'Variant') }}
+                  </div>
+                  <div class="text-xs font-semibold uppercase tracking-wide text-tertiary">
+                    {{ t('admin.variantsTable.columns.onHand', 'On hand') }}
+                  </div>
+                  <div class="text-xs font-semibold uppercase tracking-wide text-tertiary">
+                    {{ t('admin.variantsTable.columns.reserved', 'Reserved') }}
+                  </div>
+                  <div class="text-xs font-semibold uppercase tracking-wide text-tertiary">
+                    {{ t('admin.variantsTable.columns.safety', 'Safety') }}
+                  </div>
+
+                  <template v-for="row in stockAllocationRows" :key="row.variantId">
+                    <div class="text-sm font-medium self-center text-primary">
+                      {{ row.title }}
+                    </div>
+                    <BaseInput v-model.number="row.stock" type="number" min="0" step="1" />
+                    <BaseInput v-model.number="row.reserved" type="number" min="0" step="1" />
+                    <BaseInput v-model.number="row.safetyStock" type="number" min="0" step="1" />
+                  </template>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-4 text-xs text-secondary">
+                  <span>{{ t('admin.pages.products.edit.variantsTab.totalOnHand', 'Allocated on hand') }}: {{ stockAllocationTotals.stock }}/{{ stockAllocationSourceBalance.stock }}</span>
+                  <span>{{ t('admin.pages.products.edit.variantsTab.totalReserved', 'Allocated reserved') }}: {{ stockAllocationTotals.reserved }}/{{ stockAllocationSourceBalance.reserved }}</span>
+                  <span>{{ t('admin.pages.products.edit.variantsTab.totalSafety', 'Allocated safety') }}: {{ stockAllocationTotals.safetyStock }}/{{ stockAllocationSourceBalance.safetyStock }}</span>
+                  <span :style="stockAllocationBalanced ? 'color: var(--success, #059669)' : 'color: var(--danger, #dc2626)'">
+                    {{ stockAllocationBalanced
+                      ? t('admin.pages.products.edit.variantsTab.allocationBalanced', 'Allocation is balanced')
+                      : t('admin.pages.products.edit.variantsTab.allocationUnbalanced', 'Allocation must match the hidden source balances exactly') }}
+                  </span>
+                </div>
+              </div>
+
               <div class="flex items-center justify-between mb-3">
-                <label class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
+                <label class="flex items-center gap-2 text-sm text-secondary">
                   <input
                     v-model="showArchivedVariants"
                     type="checkbox"
@@ -395,7 +555,7 @@
                   >
                   {{ t('admin.pages.products.edit.variantsTab.showArchived') }}
                 </label>
-                <span class="text-xs" style="color: var(--text-tertiary)">
+                <span class="text-xs text-tertiary">
                   {{ t('admin.pages.products.edit.variantsTab.archivedCount', { count: archivedVariantsCount }) }}
                 </span>
               </div>
@@ -418,10 +578,10 @@
           >
             <div class="flex items-center justify-between">
               <div>
-                <h2 class="text-xl font-bold" style="color: var(--text-primary)">
+                <h2 class="text-xl font-bold text-primary">
                   {{ t('admin.pages.products.edit.bundlesTab.title') }}
                 </h2>
-                <p class="text-sm mt-1" style="color: var(--text-secondary)">
+                <p class="text-sm mt-1 text-secondary">
                   {{ t('admin.pages.products.edit.bundlesTab.hint') }}
                 </p>
               </div>
@@ -436,7 +596,7 @@
 
             <div
               v-if="bundleDealsError"
-              class="p-4 bg-red-50 border border-red-200 rounded-md"
+              class="p-4 bg-red-50 border border-red-200 rounded-lg"
             >
               <p class="text-sm text-red-800">
                 {{ bundleDealsError }}
@@ -452,12 +612,12 @@
                       <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.price') }}</th>
                       <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.tag') }}</th>
                       <th class="ui-th">{{ t('admin.pages.products.edit.bundlesTab.table.active') }}</th>
-                      <th class="ui-th text-right">{{ t('admin.pages.products.edit.bundlesTab.table.actions') }}</th>
+                      <th class="ui-th text-end">{{ t('admin.pages.products.edit.bundlesTab.table.actions') }}</th>
                     </tr>
                   </thead>
                   <tbody class="ui-tbody">
                     <tr v-if="bundleDeals.length === 0">
-                      <td colspan="5" class="px-4 py-6 text-sm" style="color: var(--text-tertiary)">
+                      <td colspan="5" class="px-4 py-6 text-sm text-tertiary">
                         {{ t('admin.pages.products.edit.bundlesTab.table.empty') }}
                       </td>
                     </tr>
@@ -468,26 +628,26 @@
                     >
                       <td class="ui-td">
                         <input
-                          v-model.number="deal.bundleQty"
-                          type="number"
-                          min="2"
-                          class="w-24 px-3 py-2 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
-                        >
+ v-model.number="deal.bundleQty"
+ type="number"
+ min="2"
+ class="w-24 px-3 py-2 rounded-lg border border-line surface-1 text-primary" 
+>
                       </td>
                       <td class="ui-td">
                         <input
-                          v-model="deal.bundlePrice"
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          class="w-40 px-3 py-2 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
-                        >
+ v-model="deal.bundlePrice"
+ type="number"
+ min="0"
+ step="0.01"
+ class="w-40 px-3 py-2 rounded-lg border border-line surface-1 text-primary" 
+>
                       </td>
                       <td class="ui-td">
                         <select
-                          v-model="deal.tag"
-                          class="w-48 px-3 py-2 rounded-lg" style="border: 1px solid var(--surface-border); background: var(--surface-1); color: var(--text-primary)"
-                        >
+ v-model="deal.tag"
+ class="w-48 px-3 py-2 rounded-lg border border-line surface-1 text-primary" 
+>
                           <option :value="null">{{ t('admin.pages.products.edit.bundlesTab.tags.none') }}</option>
                           <option value="MOST_POPULAR">{{ t('admin.pages.products.edit.bundlesTab.tags.mostPopular') }}</option>
                           <option value="BEST_VALUE">{{ t('admin.pages.products.edit.bundlesTab.tags.bestValue') }}</option>
@@ -500,10 +660,10 @@
                             type="checkbox"
                             class="admin-checkbox"
                           >
-                          <span class="text-sm" style="color: var(--text-secondary)">{{ t('admin.common.active') }}</span>
+                          <span class="text-sm text-secondary">{{ t('admin.common.active') }}</span>
                         </label>
                       </td>
-                      <td class="ui-td text-right space-x-2">
+                      <td class="ui-td text-end space-x-2 rtl:space-x-reverse">
                         <button
                           type="button"
                           class="ui-btn ui-btn--primary ui-btn--sm"
@@ -533,11 +693,11 @@
             v-show="currentTab === 'tracking'"
             class="space-y-6"
           >
-            <div class="rounded-lg p-6" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
+            <div class="rounded-lg p-6 border border-line surface-1">
               <div class="flex items-start justify-between gap-4">
                 <div>
-                  <h2 class="text-xl font-bold" style="color: var(--text-primary)">{{ t('admin.pages.products.edit.metaPixels.title') }}</h2>
-                  <p class="text-sm mt-1" style="color: var(--text-secondary)">{{ t('admin.pages.products.edit.metaPixels.subtitle') }}</p>
+                  <h2 class="text-xl font-bold text-primary">{{ t('admin.pages.products.edit.metaPixels.title') }}</h2>
+                  <p class="text-sm mt-1 text-secondary">{{ t('admin.pages.products.edit.metaPixels.subtitle') }}</p>
                 </div>
                 <button
                   type="button"
@@ -549,31 +709,31 @@
                 </button>
               </div>
 
-              <div v-if="metaPixelsError" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-800">
+              <div v-if="metaPixelsError" class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
                 {{ metaPixelsError }}
               </div>
 
-              <div v-if="metaPixelsLoading" class="mt-4 text-sm" style="color: var(--text-secondary)">
+              <div v-if="metaPixelsLoading" class="mt-4 text-sm text-secondary">
                 Loading pixels...
               </div>
 
               <div v-else class="mt-4">
-                <div v-if="metaPixels.length === 0" class="text-sm" style="color: var(--text-secondary)">
+                <div v-if="metaPixels.length === 0" class="text-sm text-secondary">
                   No meta pixels configured yet. Create them in Admin → Integrations → Meta Pixels.
                 </div>
                 <div v-else class="space-y-3">
                   <label
-                    v-for="p in metaPixels"
-                    :key="p.id"
-                    class="flex items-center justify-between gap-4 rounded-lg px-4 py-3" style="border: 1px solid var(--surface-border)"
-                  >
+ v-for="p in metaPixels"
+ :key="p.id"
+ class="flex items-center justify-between gap-4 rounded-lg px-4 py-3 border border-line" 
+>
                     <div class="min-w-0">
-                      <div class="font-medium truncate" style="color: var(--text-primary)">
+                      <div class="font-medium truncate text-primary">
                         {{ p.name || '—' }}
-                        <span v-if="p.isGlobal" class="ml-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
-                        <span v-if="!p.isActive" class="ml-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium" style="background: var(--surface-3); color: var(--text-secondary)">{{ t('admin.common.inactive') }}</span>
+                        <span v-if="p.isGlobal" class="ms-2 inline-flex items-center rounded-full bg-blue-100 px-2 py-0.5 text-xs font-medium text-blue-800">{{ t('admin.pages.integrations.metaPixels.table.global') }}</span>
+                        <span v-if="!p.isActive" class="ms-2 inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium surface-3 text-secondary">{{ t('admin.common.inactive') }}</span>
                       </div>
-                      <div class="text-xs font-mono truncate" style="color: var(--text-secondary)">{{ p.pixelId }}</div>
+                      <div class="text-xs font-mono truncate text-secondary">{{ p.pixelId }}</div>
                     </div>
                     <input
                       type="checkbox"
@@ -591,7 +751,7 @@
         <!-- Error Message -->
         <div
           v-if="errorMessage"
-          class="p-4 bg-red-50 border border-red-200 rounded-md mx-6 mb-6"
+          class="p-4 bg-red-50 border border-red-200 rounded-lg mx-6 mb-6"
         >
           <p class="text-sm text-red-800">
             {{ errorMessage }}
@@ -599,17 +759,17 @@
         </div>
 
         <!-- Actions Footer (Sticky on Mobile if needed, or just bottom) -->
-        <div class="px-6 py-4 flex justify-end space-x-3" style="background: var(--surface-2); border-top: 1px solid var(--surface-border)">
+        <div class="px-6 py-4 flex justify-end space-x-3 rtl:space-x-reverse surface-2 border-t border-line">
           <NuxtLink
-            to="/admin/products"
-            class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
-          >
+ to="/admin/products"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary" 
+>
             {{ t('admin.common.cancel') }}
           </NuxtLink>
           <button
             type="submit"
             :disabled="submitting"
-            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
+            class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {{ submitting ? t('admin.common.updating') : t('admin.pages.products.edit.submit') }}
           </button>
@@ -629,6 +789,8 @@ import ProductOptionsEditor from '~/components/admin/ProductOptionsEditor.vue'
 import ProductVariantsTable from '~/components/admin/ProductVariantsTable.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseToggle from '~/components/ui/BaseToggle.vue'
+import { CONTENT_SLUG_PATTERN, CONTENT_SLUG_RULE_HINT, normalizeContentSlug } from '~/shared/content-slug'
 
 definePageMeta({
   middleware: 'auth',
@@ -650,6 +812,7 @@ interface Category {
   displayTitle?: string
   parentId?: string | null
   parent?: { id: string; title: string } | null
+  visibility?: 'LISTED' | 'UNLISTED'
 }
 type CategoryOption = Category & { depth: number }
 
@@ -672,22 +835,92 @@ interface BundleDeal {
   _isNew?: boolean
 }
 
+interface StockAllocationBalance {
+  stock: number
+  reserved: number
+  safetyStock: number
+}
+
+interface StockAllocationRow extends StockAllocationBalance {
+  variantId: string
+  title: string
+}
+
+function toDateTimeLocal(value: string | Date | null | undefined): string {
+  if (!value) return ''
+  const parsed = value instanceof Date ? value : new Date(value)
+  if (Number.isNaN(parsed.getTime())) return ''
+  return parsed.toISOString().slice(0, 16)
+}
+
+function createVariantServerState(variant: any) {
+  return {
+    price: Number(variant?.price ?? 0),
+    cost: variant?.cost != null ? Number(variant.cost) : null,
+    sku: variant?.sku || '',
+    barcode: variant?.barcode || '',
+    isActive: variant?.isActive !== false,
+    compareAtPrice: variant?.compareAtPrice != null ? Number(variant.compareAtPrice) : null,
+    promotionalPrice: variant?.promotionalPrice != null ? Number(variant.promotionalPrice) : null,
+    isPromotionActive: variant?.isPromotionActive === true,
+    promotionStartDateInput: toDateTimeLocal(variant?.promotionStartDate),
+    promotionEndDateInput: toDateTimeLocal(variant?.promotionEndDate),
+    showCountdown: variant?.showCountdown === true,
+    stock: Number(variant?.stock ?? 0),
+    reserved: Number(variant?.reserved ?? 0),
+    safetyStock: Number(variant?.safetyStock ?? 0),
+    trackInventory: variant?.trackInventory !== false,
+    availableStock: Number(variant?.availableStock ?? 0)
+  }
+}
+
+function mapVariantForEditor(variant: any) {
+  const normalized = {
+    ...variant,
+    price: Number(variant?.price ?? 0),
+    cost: variant?.cost != null ? Number(variant.cost) : null,
+    compareAtPrice: variant?.compareAtPrice != null ? Number(variant.compareAtPrice) : null,
+    promotionalPrice: variant?.promotionalPrice != null ? Number(variant.promotionalPrice) : null,
+    promotionStartDateInput: toDateTimeLocal(variant?.promotionStartDate),
+    promotionEndDateInput: toDateTimeLocal(variant?.promotionEndDate),
+    availableStock: Number(
+      variant?.availableStock ??
+        Math.max(
+          Number(variant?.stock ?? 0) - Number(variant?.reserved ?? 0) - Number(variant?.safetyStock ?? 0),
+          0
+        )
+    )
+  }
+
+  return {
+    ...normalized,
+    __serverState: createVariantServerState(normalized)
+  }
+}
+
 const form = ref({
   title: '',
   slug: '',
   miniDescription: '',
+  searchKeywords: '',
   description: '',
   price: 0,
   stock: 0,
   lowStockThreshold: 5,
   categoryIds: [] as string[],
   isActive: true,
+  visibility: 'LISTED' as 'LISTED' | 'UNLISTED',
   images: [] as string[], // Legacy field for backwards compatibility
   promotionalPrice: null as number | null,
   isPromotionActive: false,
   promotionStartDate: '',
   promotionEndDate: '',
-  showCountdown: false
+  showCountdown: false,
+  isClearance: false
+})
+
+watch(() => form.value.isPromotionActive, (active) => {
+  if (active) form.value.isClearance = false
 })
 
 const options = ref<any[]>([])
@@ -698,10 +931,17 @@ const variants = computed(() => {
   return allVariants.value.filter((v) => v?.isActive !== false)
 })
 const archivedVariantsCount = computed(() => allVariants.value.filter((v) => v?.isActive === false).length)
+const productHasVariantOptions = computed(() => Array.isArray(options.value) && options.value.length > 0)
 const productImages = ref<ProductImage[]>([])
 const bundleDeals = ref<BundleDeal[]>([])
 const bundleDealsSubmitting = ref(false)
 const bundleDealsError = ref('')
+const stockAllocationRequired = ref(false)
+const stockAllocationSourceVariantId = ref('')
+const stockAllocationSourceVariantTitle = ref('')
+const stockAllocationSourceBalance = ref<StockAllocationBalance | null>(null)
+const stockAllocationRows = ref<StockAllocationRow[]>([])
+const allocatingStock = ref(false)
 
 const errors = ref<Record<string, string>>({})
 const errorMessage = ref('')
@@ -709,8 +949,30 @@ const submitting = ref(false)
 const loading = ref(true)
 const categories = ref<Category[]>([])
 const lastAutoSlug = ref('')
-const slugPattern = /^[a-z0-9-]+$/
+const slugPattern = CONTENT_SLUG_PATTERN
 const slugSuggestionSeq = ref(0)
+const { showToast } = useToast()
+
+const newKeyword = ref('')
+const keywordList = computed(() => {
+  if (!form.value.searchKeywords) return []
+  return form.value.searchKeywords.split(',').map(k => k.trim()).filter(k => k)
+})
+
+function addKeyword() {
+  const kw = newKeyword.value.trim()
+  if (kw && !keywordList.value.includes(kw)) {
+    const newList = [...keywordList.value, kw]
+    form.value.searchKeywords = newList.join(',')
+  }
+  newKeyword.value = ''
+}
+
+function removeKeyword(index: number) {
+  const newList = [...keywordList.value]
+  newList.splice(index, 1)
+  form.value.searchKeywords = newList.join(',')
+}
 
 const categoryDisplayTitle = (category: CategoryOption) => {
   return `${'-> '.repeat(category.depth)}${category.title}`
@@ -756,6 +1018,16 @@ function toggleCategorySelection(categoryId: string, checked: boolean) {
   form.value.categoryIds = Array.from(next)
 }
 
+// Why the product is hidden from storefront browse surfaces (grid, search, nav).
+// 'product' = its own visibility is UNLISTED; 'category' = every category it
+// belongs to is UNLISTED. It stays reachable at its direct link either way.
+const notListedReason = computed<'product' | 'category' | null>(() => {
+  if (form.value.visibility === 'UNLISTED') return 'product'
+  const selected = categories.value.filter((c) => form.value.categoryIds.includes(c.id))
+  if (selected.length > 0 && selected.every((c) => c.visibility === 'UNLISTED')) return 'category'
+  return null
+})
+
 watch(() => form.value.title, (newTitle) => {
   void syncAutoSlugFromTitle(newTitle)
 })
@@ -777,6 +1049,71 @@ const metaPixelsLoading = ref(false)
 const metaPixelsSaving = ref(false)
 const metaPixelsError = ref('')
 
+function getVariantTitle(variant: any): string {
+  if (!Array.isArray(variant?.optionValues) || variant.optionValues.length === 0) {
+    return t('admin.variantsTable.defaultVariant', 'Default')
+  }
+
+  const optionPositions = new Map(options.value.map((option: any) => [option.id, Number(option.position ?? 0)]))
+  return [...variant.optionValues]
+    .sort((a: any, b: any) => {
+      const posA = optionPositions.get(a?.optionValue?.optionId) ?? 999
+      const posB = optionPositions.get(b?.optionValue?.optionId) ?? 999
+      return posA - posB
+    })
+    .map((entry: any) => entry?.optionValue?.label)
+    .filter((label: unknown): label is string => typeof label === 'string' && label.trim().length > 0)
+    .join(' / ')
+}
+
+function syncStockAllocationState(data: any) {
+  stockAllocationRequired.value = data?.stockAllocationRequired === true
+  stockAllocationSourceVariantId.value = data?.stockAllocationSourceVariantId || ''
+  stockAllocationSourceVariantTitle.value = data?.stockAllocationSourceVariantTitle || ''
+  stockAllocationSourceBalance.value = data?.stockAllocationSourceBalance
+    ? {
+        stock: Number(data.stockAllocationSourceBalance.stock ?? 0),
+        reserved: Number(data.stockAllocationSourceBalance.reserved ?? 0),
+        safetyStock: Number(data.stockAllocationSourceBalance.safetyStock ?? 0)
+      }
+    : null
+
+  const nextRows = (Array.isArray(data?.variants) ? data.variants : [])
+    .filter((variant: any) => Array.isArray(variant?.optionValues) && variant.optionValues.length > 0 && variant?.isActive !== false)
+    .map((variant: any) => {
+      const existing = stockAllocationRows.value.find((row) => row.variantId === variant.id)
+      return {
+        variantId: variant.id,
+        title: getVariantTitle(variant),
+        stock: existing?.stock ?? 0,
+        reserved: existing?.reserved ?? 0,
+        safetyStock: existing?.safetyStock ?? 0
+      } satisfies StockAllocationRow
+    })
+
+  stockAllocationRows.value = nextRows
+}
+
+const stockAllocationTotals = computed(() => {
+  return stockAllocationRows.value.reduce(
+    (totals, row) => ({
+      stock: totals.stock + Number(row.stock || 0),
+      reserved: totals.reserved + Number(row.reserved || 0),
+      safetyStock: totals.safetyStock + Number(row.safetyStock || 0)
+    }),
+    { stock: 0, reserved: 0, safetyStock: 0 }
+  )
+})
+
+const stockAllocationBalanced = computed(() => {
+  if (!stockAllocationSourceBalance.value) return false
+  return (
+    stockAllocationTotals.value.stock === stockAllocationSourceBalance.value.stock &&
+    stockAllocationTotals.value.reserved === stockAllocationSourceBalance.value.reserved &&
+    stockAllocationTotals.value.safetyStock === stockAllocationSourceBalance.value.safetyStock
+  )
+})
+
 async function fetchProduct() {
   loading.value = true
   try {
@@ -792,9 +1129,10 @@ async function fetchProduct() {
     }
 
     form.value = {
-      title: data.title,
-      slug: data.slug,
+      title: data.title || '',
+      slug: data.slug || '',
       miniDescription: data.miniDescription || '',
+      searchKeywords: data.searchKeywords || '',
       description: data.description || '',
       price: Number(data.price),
       stock: data.stock,
@@ -803,17 +1141,20 @@ async function fetchProduct() {
         ? data.categoryIds.filter((id: unknown) => typeof id === 'string' && id.length > 0)
         : (data.categoryId ? [data.categoryId] : []),
       isActive: data.isActive,
+      visibility: data.visibility === 'UNLISTED' ? 'UNLISTED' : 'LISTED',
       images: data.images || [],
       promotionalPrice: data.promotionalPrice ? Number(data.promotionalPrice) : null,
       isPromotionActive: data.isPromotionActive ?? false,
       promotionStartDate: data.promotionStartDate ? new Date(data.promotionStartDate).toISOString().slice(0, 16) : '',
       promotionEndDate: data.promotionEndDate ? new Date(data.promotionEndDate).toISOString().slice(0, 16) : '',
-      showCountdown: data.showCountdown ?? false
+      showCountdown: data.showCountdown ?? false,
+      isClearance: data.isClearance ?? false
     }
     lastAutoSlug.value = slugify(data.slug || data.title || '')
 
     options.value = data.options || []
-    allVariants.value = data.variants || []
+    allVariants.value = (data.variants || []).map((variant: any) => mapVariantForEditor(variant))
+    syncStockAllocationState(data)
     bundleDeals.value = (data.bundleDeals || []).map((d: any) => ({
       id: d.id,
       bundleQty: Number(d.bundleQty),
@@ -854,11 +1195,41 @@ async function fetchProduct() {
   }
 }
 
+async function allocateVariantStock() {
+  if (!stockAllocationSourceBalance.value) return
+
+  allocatingStock.value = true
+  errorMessage.value = ''
+
+  try {
+    await $fetch(`/api/admin/products/${productId}/variants/allocate-stock`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      body: {
+        sourceVariantId: stockAllocationSourceVariantId.value || null,
+        allocations: stockAllocationRows.value.map((row) => ({
+          variantId: row.variantId,
+          stock: Number(row.stock || 0),
+          reserved: Number(row.reserved || 0),
+          safetyStock: Number(row.safetyStock || 0)
+        }))
+      }
+    })
+
+    await fetchProduct()
+    showToast(t('admin.pages.products.edit.variantsTab.allocationSaved', 'Variant stock allocation saved'), 'success')
+  } catch (error: any) {
+    console.error('Failed to allocate variant stock:', error)
+    errorMessage.value = error?.data?.statusMessage || t('admin.pages.products.edit.errors.updateFailed')
+  } finally {
+    allocatingStock.value = false
+  }
+}
+
 function slugify(text: string): string {
-  return String(text || '')
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeContentSlug(text)
 }
 
 function normalizeSlugInput(): string {
@@ -932,7 +1303,7 @@ async function checkSlugAvailability(): Promise<boolean> {
     return false
   }
   if (!slugPattern.test(slug)) {
-    errors.value.slug = 'Slug must contain only lowercase letters, numbers, and hyphens'
+    errors.value.slug = CONTENT_SLUG_RULE_HINT
     return false
   }
 
@@ -1083,20 +1454,23 @@ async function handleSubmit() {
     if (!slugOk) return
 
     // First update basic product info
+    const allowProductPromotion = !productHasVariantOptions.value
     const payload: any = {
       title: form.value.title,
       slug: form.value.slug,
       miniDescription: form.value.miniDescription || null,
+      searchKeywords: form.value.searchKeywords || null,
       description: form.value.description || null,
-      price: form.value.price,
       isActive: form.value.isActive,
+      visibility: form.value.visibility,
       lowStockThreshold: Number(form.value.lowStockThreshold),
       images: productImages.value.map(img => img.url), // Keep legacy images in sync
-      promotionalPrice: form.value.isPromotionActive && form.value.promotionalPrice ? Number(form.value.promotionalPrice) : null,
-      isPromotionActive: form.value.isPromotionActive,
-      promotionStartDate: form.value.isPromotionActive && form.value.promotionStartDate ? new Date(form.value.promotionStartDate).toISOString() : null,
-      promotionEndDate: form.value.isPromotionActive && form.value.promotionEndDate ? new Date(form.value.promotionEndDate).toISOString() : null,
-      showCountdown: form.value.isPromotionActive && form.value.showCountdown
+      promotionalPrice: allowProductPromotion && form.value.isPromotionActive && form.value.promotionalPrice ? Number(form.value.promotionalPrice) : null,
+      isPromotionActive: allowProductPromotion && form.value.isPromotionActive,
+      promotionStartDate: allowProductPromotion && form.value.isPromotionActive && form.value.promotionStartDate ? new Date(form.value.promotionStartDate).toISOString() : null,
+      promotionEndDate: allowProductPromotion && form.value.isPromotionActive && form.value.promotionEndDate ? new Date(form.value.promotionEndDate).toISOString() : null,
+      showCountdown: allowProductPromotion && form.value.isPromotionActive && form.value.showCountdown,
+      isClearance: !(allowProductPromotion && form.value.isPromotionActive) && form.value.isClearance
     }
 
     payload.categoryIds = form.value.categoryIds
@@ -1136,7 +1510,6 @@ async function handleSubmit() {
     }
 
     // Show success toast instead of redirecting
-    const { showToast } = useToast()
     showToast(t('admin.common.saved') || 'Product updated successfully', 'success')
 
   } catch (error: any) {

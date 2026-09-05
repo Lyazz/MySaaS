@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProductCard from '~/components/storefront/templates/modern/ProductCard.vue'
-
+import { normalizeSearchText } from '~/shared/text/normalize-search'
 const props = defineProps<{
     products: any[]
 }>()
@@ -28,7 +28,14 @@ const filters = computed(() => ({
 
 // Filtering Logic
 const selectedCategories = ref<string[]>([])
-const searchQuery = ref('')
+const route = useRoute()
+const searchQuery = ref((route.query.q as string) || '')
+
+watch(() => route.query.q, (newQ) => {
+    if (newQ !== undefined) {
+        searchQuery.value = newQ as string
+    }
+})
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
@@ -66,8 +73,11 @@ const filteredProducts = computed(() => {
 
     // Filter by Search
     if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase()
-        result = result.filter(p => p.title.toLowerCase().includes(q))
+        const q = normalizeSearchText(searchQuery.value)
+        result = result.filter(p => 
+            normalizeSearchText(p.title).includes(q) || 
+            (p.searchKeywords && normalizeSearchText(p.searchKeywords).includes(q))
+        )
     }
 
     // Filter by Price
@@ -178,14 +188,14 @@ const closeQuickView = () => {
     >
       <aside
         v-if="isFilterDrawerOpen"
-        class="fixed inset-y-0 right-0 w-[300px] bg-white z-50 shadow-2xl p-6 overflow-y-auto lg:hidden"
+        class="fixed inset-y-0 end-0 w-[300px] bg-white z-50 shadow-2xl p-6 overflow-y-auto lg:hidden"
       >
         <div class="flex items-center justify-between mb-6">
           <h3 class="font-bold text-slate-900 text-lg">
             {{ storefrontContent.actions.filters }}
           </h3>
           <button
-            class="p-2 -mr-2 text-slate-500 hover:text-slate-900"
+            class="p-2 -me-2 text-slate-500 hover:text-slate-900"
             @click="isFilterDrawerOpen = false"
           >
             <Icon name="lucide:x" class="w-6 h-6" />
@@ -197,7 +207,7 @@ const closeQuickView = () => {
           <div>
             <button
               type="button"
-              class="w-full flex items-center justify-between text-left mb-4"
+              class="w-full flex items-center justify-between text-start mb-4"
               @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
             >
               <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
@@ -298,7 +308,7 @@ const closeQuickView = () => {
           <div>
             <button
               type="button"
-              class="w-full flex items-center justify-between text-left mb-4"
+              class="w-full flex items-center justify-between text-start mb-4"
               @click="desktopCategoriesDropdownOpen = !desktopCategoriesDropdownOpen"
             >
               <h4 class="font-bold text-slate-900 text-xs uppercase tracking-wider">
@@ -408,9 +418,9 @@ const closeQuickView = () => {
                 v-model="searchQuery" 
                 type="text"
                 :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
-                class="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-100 focus:border-brand-500 block pl-5 pr-10 py-3 shadow-sm transition-shadow hover:shadow-md" 
+                class="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-100 focus:border-brand-500 block ps-5 pe-10 py-3 shadow-sm transition-shadow hover:shadow-md" 
               >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+              <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
                 <Icon name="lucide:search" class="w-5 h-5 text-slate-400" />
               </div>
             </div>
@@ -421,14 +431,14 @@ const closeQuickView = () => {
               <div class="relative w-full sm:w-48">
                 <select
                   v-model="sortOption"
-                  class="w-full appearance-none bg-white rounded-full border border-slate-200 text-sm py-3 pl-4 pr-10 focus:border-brand-500 focus:ring-brand-500 shadow-sm cursor-pointer hover:border-brand-300 transition-colors text-slate-700 font-medium"
+                  class="w-full appearance-none bg-white rounded-full border border-slate-200 text-sm py-3 ps-4 pe-10 focus:border-brand-500 focus:ring-brand-500 shadow-sm cursor-pointer hover:border-brand-300 transition-colors text-slate-700 font-medium"
                 >
                   <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                   <!-- <option>Newest Arrivals</option> -->
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
                   <Icon name="lucide:chevron-down" class="w-4 h-4 text-slate-500" />
                 </div>
               </div>
@@ -523,7 +533,7 @@ const closeQuickView = () => {
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
           <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="closeQuickView"></div>
           <div class="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden">
-              <button @click="closeQuickView" class="absolute top-4 right-4 z-20 p-2 bg-white/50 rounded-full hover:bg-white transition-colors">
+              <button @click="closeQuickView" class="absolute top-4 end-4 z-20 p-2 bg-white/50 rounded-full hover:bg-white transition-colors">
                   <Icon name="lucide:x" class="w-6 h-6 text-slate-600" />
               </button>
               

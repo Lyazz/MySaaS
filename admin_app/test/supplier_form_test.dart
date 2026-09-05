@@ -9,7 +9,9 @@ void main() {
     WidgetTester tester,
   ) async {
     await tester.pumpWidget(
-      ProviderScope(child: buildLocalizedTestApp(home: const SupplierFormScreen())),
+      ProviderScope(
+        child: buildLocalizedTestApp(home: const SupplierFormScreen()),
+      ),
     );
     await tester.pumpAndSettle();
 

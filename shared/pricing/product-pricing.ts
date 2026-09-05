@@ -7,6 +7,13 @@ export type ProductLikeWithPromotionSchedule = ProductLikeWithPromotion & {
     isPromotionActive?: unknown
     promotionStartDate?: unknown
     promotionEndDate?: unknown
+    hasVariants?: unknown
+    options?: unknown
+    variants?: unknown
+}
+
+export type VariantLikeWithPromotionSchedule = ProductLikeWithPromotionSchedule & {
+    optionValues?: unknown
 }
 
 export type ProductPricing = {
@@ -82,8 +89,55 @@ export const buildActiveProductPricing = (
     nowInput: Date = new Date()
 ): ProductPricing => {
     if (!product) return buildProductPricing(product, basePriceInput)
+    if (productUsesVariantPricing(product)) {
+        return buildProductPricing({ price: basePriceInput ?? product?.price, promotionalPrice: null }, basePriceInput ?? product?.price)
+    }
     if (!isPromotionActiveNow(product, nowInput)) {
         return buildProductPricing({ ...product, promotionalPrice: null }, basePriceInput)
     }
     return buildProductPricing(product, basePriceInput)
+}
+
+export const productUsesVariantPricing = (
+    product: ProductLikeWithPromotionSchedule | null | undefined,
+    variant?: VariantLikeWithPromotionSchedule | null
+): boolean => {
+    if (product?.hasVariants === true) return true
+
+    if (Array.isArray(product?.options) && product.options.length > 0) {
+        return true
+    }
+
+    if (Array.isArray(product?.variants)) {
+        return product.variants.some((entry: any) => Array.isArray(entry?.optionValues) && entry.optionValues.length > 0)
+    }
+
+    if (Array.isArray(variant?.optionValues) && variant.optionValues.length > 0) {
+        return true
+    }
+
+    return false
+}
+
+export const buildScopedProductPricing = (
+    product: ProductLikeWithPromotionSchedule | null | undefined,
+    variant?: VariantLikeWithPromotionSchedule | null,
+    nowInput: Date = new Date()
+): ProductPricing => {
+    const useVariantPricing = productUsesVariantPricing(product, variant)
+
+    if (useVariantPricing) {
+        const basePrice = variant?.price ?? product?.price
+        if (!variant) {
+            return buildProductPricing({ price: basePrice, promotionalPrice: null }, basePrice)
+        }
+
+        if (!isPromotionActiveNow(variant, nowInput)) {
+            return buildProductPricing({ price: basePrice, promotionalPrice: null }, basePrice)
+        }
+
+        return buildProductPricing(variant, basePrice)
+    }
+
+    return buildActiveProductPricing(product, product?.price, nowInput)
 }

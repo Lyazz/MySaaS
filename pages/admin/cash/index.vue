@@ -3,17 +3,17 @@
     <!-- Header -->
     <div class="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-semibold tracking-tight text-primary">
           {{ t('admin.pages.cash.title') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ t('admin.pages.cash.subtitle') }}
         </p>
       </div>
 
       <!-- Actions Menu -->
       <Menu as="div" class="relative hidden md:block">
-        <MenuButton class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2.5 text-sm font-medium text-black shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
+        <MenuButton class="inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-4 py-2.5 text-sm font-medium text-brand-contrast shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
           <Icon name="lucide:plus" class="h-4 w-4" />
           {{ t('admin.pages.cash.actions.newAction') }}
           <Icon name="lucide:chevron-down" class="h-4 w-4" />
@@ -26,7 +26,7 @@
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
-          <MenuItems class="absolute right-0 z-10 mt-2 w-64 origin-top-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
+          <MenuItems class="absolute end-0 z-10 mt-2 w-64 origin-top-right rounded-lg focus:outline-none surface-2 border border-line shadow-popover">
             <div class="py-1">
               <MenuItem v-slot="{ active }">
                 <button
@@ -34,7 +34,7 @@
                   :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openCustomerPaymentModal"
                 >
-                  <Icon name="lucide:user-round" class="h-4 w-4" style="color: var(--text-muted)" />
+                  <Icon name="lucide:user-round" class="h-4 w-4 text-muted" />
                   {{ t('admin.pages.cash.actions.newCustomerPayment') }}
                 </button>
               </MenuItem>
@@ -44,18 +44,18 @@
                   :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openSupplierPaymentModal"
                 >
-                  <Icon name="lucide:truck" class="h-4 w-4" style="color: var(--text-muted)" />
+                  <Icon name="lucide:truck" class="h-4 w-4 text-muted" />
                   {{ t('admin.pages.cash.actions.newSupplierPayment') }}
                 </button>
               </MenuItem>
-              <div class="my-1 border-t" style="border-color: var(--surface-border)" />
+              <div class="my-1 border-t border-line" />
               <MenuItem v-slot="{ active }">
                 <button
                   class="flex w-full items-center gap-3 px-4 py-2.5 text-sm transition-colors"
                   :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openExpenseModal('EXPENSE')"
                 >
-                  <Icon name="lucide:minus-circle" class="h-4 w-4" style="color: var(--text-muted)" />
+                  <Icon name="lucide:minus-circle" class="h-4 w-4 text-muted" />
                   {{ t('admin.pages.cash.actions.newExpense') }}
                 </button>
               </MenuItem>
@@ -65,11 +65,11 @@
                   :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                   @click="openExpenseModal('CHARGE')"
                 >
-                  <Icon name="lucide:receipt" class="h-4 w-4" style="color: var(--text-muted)" />
+                  <Icon name="lucide:receipt" class="h-4 w-4 text-muted" />
                   {{ t('admin.pages.cash.actions.newCharge') }}
                 </button>
               </MenuItem>
-              <div class="my-1 border-t" style="border-color: var(--surface-border)" />
+              <div class="my-1 border-t border-line" />
               <MenuItem v-slot="{ active }">
                 <button
                   class="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium [color:rgba(var(--brand-rgb)/0.85)] transition-colors"
@@ -87,8 +87,8 @@
     </div>
 
     <!-- Mobile FAB -->
-    <Menu as="div" class="fixed bottom-6 right-6 z-40 md:hidden">
-      <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full [background:var(--brand)] text-black shadow-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
+    <Menu as="div" class="fixed bottom-6 end-6 z-40 md:hidden">
+      <MenuButton class="flex h-14 w-14 items-center justify-center rounded-full [background:var(--brand)] text-brand-contrast shadow-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] focus:outline-none focus:ring-2 focus:[--tw-ring-color:var(--brand)] focus:ring-offset-2">
         <Icon name="lucide:plus" class="h-6 w-6" />
       </MenuButton>
       <transition
@@ -99,7 +99,7 @@
         leave-from-class="transform opacity-100 scale-100"
         leave-to-class="transform opacity-0 scale-95"
       >
-        <MenuItems class="absolute bottom-full right-0 mb-2 w-64 origin-bottom-right rounded-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 8px 24px rgba(0,0,0,0.4)">
+        <MenuItems class="absolute bottom-full end-0 mb-2 w-64 origin-bottom-right rounded-lg focus:outline-none surface-2 border border-line shadow-popover">
           <div class="py-1">
             <MenuItem v-slot="{ active }">
               <button
@@ -107,7 +107,7 @@
                 :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openCustomerPaymentModal"
               >
-                <Icon name="lucide:user-round" class="h-5 w-5" style="color: var(--text-muted)" />
+                <Icon name="lucide:user-round" class="h-5 w-5 text-muted" />
                 {{ t('admin.pages.cash.actions.newCustomerPayment') }}
               </button>
             </MenuItem>
@@ -117,18 +117,18 @@
                 :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openSupplierPaymentModal"
               >
-                <Icon name="lucide:truck" class="h-5 w-5" style="color: var(--text-muted)" />
+                <Icon name="lucide:truck" class="h-5 w-5 text-muted" />
                 {{ t('admin.pages.cash.actions.newSupplierPayment') }}
               </button>
             </MenuItem>
-            <div class="my-1 border-t" style="border-color: var(--surface-border)" />
+            <div class="my-1 border-t border-line" />
             <MenuItem v-slot="{ active }">
               <button
                 class="flex w-full items-center gap-3 px-4 py-3 text-sm transition-colors"
                 :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openExpenseModal('EXPENSE')"
               >
-                <Icon name="lucide:minus-circle" class="h-5 w-5" style="color: var(--text-muted)" />
+                <Icon name="lucide:minus-circle" class="h-5 w-5 text-muted" />
                 {{ t('admin.pages.cash.actions.newExpense') }}
               </button>
             </MenuItem>
@@ -138,11 +138,11 @@
                 :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                 @click="openExpenseModal('CHARGE')"
               >
-                <Icon name="lucide:receipt" class="h-5 w-5" style="color: var(--text-muted)" />
+                <Icon name="lucide:receipt" class="h-5 w-5 text-muted" />
                 {{ t('admin.pages.cash.actions.newCharge') }}
               </button>
             </MenuItem>
-            <div class="my-1 border-t" style="border-color: var(--surface-border)" />
+            <div class="my-1 border-t border-line" />
             <MenuItem v-slot="{ active }">
               <button
                 class="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium [color:rgba(var(--brand-rgb)/0.85)] transition-colors"
@@ -160,49 +160,49 @@
 
     <!-- Summary Statistics -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="rounded-xl p-4 surface-1 border border-line">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-400">
             <Icon name="lucide:arrow-down-left" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.totalIn') || 'Total In (Today)' }}</p>
+            <p class="text-xs font-medium text-secondary">{{ t('admin.pages.cash.stats.totalIn') || 'Total In (Today)' }}</p>
             <p class="mt-0.5 text-lg font-bold text-emerald-400">{{ formatCurrency(todayStats.totalIn) }}</p>
           </div>
         </div>
       </div>
 
-      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="rounded-xl p-4 surface-1 border border-line">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-rose-500/10 text-rose-400">
             <Icon name="lucide:arrow-up-right" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.totalOut') || 'Total Out (Today)' }}</p>
+            <p class="text-xs font-medium text-secondary">{{ t('admin.pages.cash.stats.totalOut') || 'Total Out (Today)' }}</p>
             <p class="mt-0.5 text-lg font-bold text-rose-400">{{ formatCurrency(todayStats.totalOut) }}</p>
           </div>
         </div>
       </div>
 
-      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="rounded-xl p-4 surface-1 border border-line">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10 text-indigo-400">
             <Icon name="lucide:wallet" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.activeSessions') || 'Active Sessions' }}</p>
-            <p class="mt-0.5 text-lg font-bold" style="color: var(--text-primary)">{{ activeSessions }}</p>
+            <p class="text-xs font-medium text-secondary">{{ t('admin.pages.cash.stats.activeSessions') || 'Active Sessions' }}</p>
+            <p class="mt-0.5 text-lg font-bold text-primary">{{ activeSessions }}</p>
           </div>
         </div>
       </div>
 
-      <div class="rounded-xl p-4" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+      <div class="rounded-xl p-4 surface-1 border border-line">
         <div class="flex items-center gap-3">
           <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-amber-500/10 text-amber-400">
             <Icon name="lucide:trending-up" class="h-5 w-5" />
           </div>
           <div class="min-w-0">
-            <p class="text-xs font-medium" style="color: var(--text-secondary)">{{ t('admin.pages.cash.stats.netBalance') || 'Net (Today)' }}</p>
+            <p class="text-xs font-medium text-secondary">{{ t('admin.pages.cash.stats.netBalance') || 'Net (Today)' }}</p>
             <p class="mt-0.5 text-lg font-bold" :class="todayStats.net >= 0 ? 'text-emerald-400' : 'text-rose-400'">
               {{ formatCurrency(todayStats.net) }}
             </p>
@@ -223,9 +223,9 @@
     </div>
 
     <!-- Cashboxes - Horizontal Scrollable -->
-    <section class="rounded-2xl p-5" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
+    <section class="rounded-2xl p-5 surface-1 border border-line">
       <div class="flex items-center justify-between gap-3 mb-4">
-        <h3 class="font-semibold" style="color: var(--text-primary)">
+        <h3 class="font-semibold text-primary">
           {{ t('admin.pages.cash.cashboxes.title') }}
         </h3>
         <div class="flex items-center gap-2">
@@ -250,22 +250,22 @@
       </div>
 
       <div v-if="loadingCashboxes" class="flex gap-3 overflow-x-auto pb-2">
-        <div v-for="i in 3" :key="i" class="min-w-[280px] h-32 rounded-xl animate-pulse" style="background: var(--surface-3)" />
+        <div v-for="i in 3" :key="i" class="min-w-[280px] h-32 rounded-xl animate-pulse surface-3" />
       </div>
 
-      <div v-else-if="cashboxes.length === 0" class="rounded-xl border border-dashed p-6 text-center" style="border-color: var(--surface-border)">
-        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full" style="background: var(--surface-3)">
-          <Icon name="lucide:inbox" class="h-5 w-5" style="color: var(--text-muted)" />
+      <div v-else-if="cashboxes.length === 0" class="rounded-xl border border-dashed p-6 text-center border-line">
+        <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full surface-3">
+          <Icon name="lucide:inbox" class="h-5 w-5 text-muted" />
         </div>
-        <p class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+        <p class="mt-2 text-sm font-medium text-primary">
           {{ t('admin.pages.cash.cashboxes.empty') }}
         </p>
-        <p class="mt-1 text-xs" style="color: var(--text-tertiary)">
+        <p class="mt-1 text-xs text-tertiary">
           {{ t('admin.pages.cash.cashboxes.emptyHint') }}
         </p>
         <button
           type="button"
-          class="mt-4 inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-xs font-semibold text-white shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
+          class="mt-4 inline-flex items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-2 text-xs font-semibold text-brand-contrast shadow-sm hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
           @click="openCashboxCreate"
         >
           <Icon name="lucide:plus" class="h-3.5 w-3.5" />
@@ -275,17 +275,17 @@
 
       <div v-else class="flex gap-3 overflow-x-auto pb-2 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         <div
-          v-for="c in cashboxes"
-          :key="c.id"
-          class="group relative min-w-[280px] overflow-hidden rounded-xl p-4 transition-all" style="background: var(--surface-2); border: 1px solid var(--surface-border)"
-        >
+ v-for="c in cashboxes"
+ :key="c.id"
+ class="group relative min-w-[280px] overflow-hidden rounded-xl p-4 transition-all surface-2 border border-line" 
+>
           <div class="flex items-start justify-between gap-3">
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-2">
                 <div class="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
                   <Icon name="lucide:wallet" class="h-4 w-4" />
                 </div>
-                <p class="font-semibold truncate" style="color: var(--text-primary)">
+                <p class="font-semibold truncate text-primary">
                   {{ c.name }}
                 </p>
               </div>
@@ -293,7 +293,7 @@
               <div class="mt-2 flex items-center gap-2">
                 <span
                   class="inline-flex h-2 w-2 rounded-full"
-                  :class="c.openSession ? 'bg-emerald-500' : 'bg-white/20'"
+                  :class="c.openSession ? 'bg-emerald-500' : 'bg-line'"
                 />
                 <span class="text-xs font-medium" :class="c.openSession ? 'text-emerald-400' : ''" :style="c.openSession ? '' : 'color: var(--text-tertiary)'">
                   <span v-if="c.openSession">
@@ -307,11 +307,11 @@
             </div>
 
             <NuxtLink
-              :to="`/admin/cash/${c.id}`"
-              class="shrink-0 p-2 opacity-0 transition-all hover:[color:rgba(var(--brand-rgb)/0.85)] group-hover:opacity-100"
-              style="color: var(--text-muted)"
-              :title="t('common.view')"
-            >
+ :to="`/admin/cash/${c.id}`"
+ class="shrink-0 p-2 opacity-0 transition-all hover:[color:rgba(var(--brand-rgb)/0.85)] group-hover:opacity-100 text-muted"
+ 
+ :title="t('common.view')"
+>
               <Icon name="lucide:arrow-right" class="h-4 w-4" />
             </NuxtLink>
           </div>
@@ -320,7 +320,7 @@
             <button
               v-if="!c.openSession"
               type="button"
-              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-1.5 text-xs font-medium text-white hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
+              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg [background:var(--brand)] px-3 py-1.5 text-xs font-medium text-brand-contrast hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]"
               @click="openOpenSession(c.id)"
             >
               <Icon name="lucide:play" class="h-3 w-3" />
@@ -328,20 +328,20 @@
             </button>
 
             <button
-              v-else
-              type="button"
-              class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-              style="border: 1px solid var(--surface-border); color: var(--text-secondary)"
-              @click="openCloseSession(c.openSession.id)"
-            >
+ v-else
+ type="button"
+ class="flex-1 inline-flex justify-center items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition-colors border border-line text-secondary"
+ 
+ @click="openCloseSession(c.openSession.id)"
+>
               <Icon name="lucide:lock" class="h-3 w-3" />
               {{ t('admin.pages.cash.cashboxes.close') }}
             </button>
             <NuxtLink
-              :to="`/admin/cash/${c.id}`"
-              class="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors"
-              style="border: 1px solid var(--surface-border); background: var(--surface-3); color: var(--text-secondary)"
-            >
+ :to="`/admin/cash/${c.id}`"
+ class="inline-flex items-center justify-center rounded-lg px-3 py-1.5 text-xs font-medium transition-colors border border-line surface-3 text-secondary"
+ 
+>
               {{ t('common.details') }}
             </NuxtLink>
           </div>
@@ -352,9 +352,9 @@
     <!-- Main Content - Full Width -->
     <!-- Transactions & Sessions Tabs - Full Width -->
     <section>
-      <TabGroup @change="onTabChange">
-          <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-            <div class="border-b" style="border-color: var(--surface-border)">
+      <TabGroup :default-index="activeTabIndex" @change="onTabChange">
+          <div class="rounded-2xl overflow-hidden surface-1 border border-line">
+            <div class="border-b border-line">
               <TabList class="flex gap-4 px-5 pt-5">
                 <Tab v-slot="{ selected }" as="template">
                   <button
@@ -380,119 +380,105 @@
             <TabPanels>
               <!-- Transactions Tab -->
               <TabPanel>
-                <!-- Collapsible Filters -->
-                <Disclosure v-slot="{ open }" defaultOpen>
-                  <div class="border-b px-5 py-4" style="border-color: var(--surface-border)">
-                    <DisclosureButton class="flex w-full items-center justify-between text-left">
-                      <div class="flex items-center gap-2">
-                        <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.transactions.filters.title') }}</h3>
-                        <span v-if="activeTransactionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full [background:rgba(var(--brand-rgb)/0.12)] px-2 py-0.5 text-xs font-medium [color:var(--brand)]">
-                          {{ activeTransactionFiltersCount }}
-                        </span>
-                      </div>
-                      <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5" style="color: var(--text-muted)" />
-                    </DisclosureButton>
-                    <transition
-                      enter-active-class="transition duration-200 ease-out"
-                      enter-from-class="opacity-0 -translate-y-1"
-                      enter-to-class="opacity-100 translate-y-0"
-                      leave-active-class="transition duration-150 ease-in"
-                      leave-from-class="opacity-100 translate-y-0"
-                      leave-to-class="opacity-0 -translate-y-1"
-                    >
-                      <DisclosurePanel class="pt-4 space-y-3">
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          <BaseSelect v-model="filters.cashboxId">
-                            <option value="">{{ t('admin.pages.cash.transactions.filters.allCashboxes') }}</option>
-                            <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
-                          </BaseSelect>
-                          <BaseSelect v-model="filters.type" class="">
-                            <option value="">{{ t('admin.pages.cash.transactions.filters.allTypes') }}</option>
-                            <option value="SALE_PAYMENT">{{ t('admin.pages.cash.transactions.types.SALE_PAYMENT') }}</option>
-                            <option value="CUSTOMER_PAYMENT">{{ t('admin.pages.cash.transactions.types.CUSTOMER_PAYMENT') }}</option>
-                            <option value="SUPPLIER_PAYMENT">{{ t('admin.pages.cash.transactions.types.SUPPLIER_PAYMENT') }}</option>
-                            <option value="EXPENSE">{{ t('admin.pages.cash.transactions.types.EXPENSE') }}</option>
-                            <option value="CHARGE">{{ t('admin.pages.cash.transactions.types.CHARGE') }}</option>
-                            <option value="TRANSFER">{{ t('admin.pages.cash.transactions.types.TRANSFER') }}</option>
-                          </BaseSelect>
-                          <BaseSelect v-model="filters.direction" class="">
-                            <option value="">{{ t('admin.pages.cash.transactions.filters.allDirections') }}</option>
-                            <option value="IN">{{ t('admin.pages.cash.directions.in') }}</option>
-                            <option value="OUT">{{ t('admin.pages.cash.directions.out') }}</option>
-                          </BaseSelect>
-                          <BaseSelect v-model="filters.method" class="">
-                            <option value="">{{ t('admin.pages.cash.transactions.filters.allMethods') }}</option>
-                            <option value="CASH">{{ t('admin.pages.cash.methods.CASH') }}</option>
-                            <option value="CARD">{{ t('admin.pages.cash.methods.CARD') }}</option>
-                            <option value="TRANSFER">{{ t('admin.pages.cash.methods.TRANSFER') }}</option>
-                            <option value="OTHER">{{ t('admin.pages.cash.methods.OTHER') }}</option>
-                          </BaseSelect>
-                          <BaseSelect v-model="filters.userId" class="">
-                            <option value="">{{ t('admin.pages.cash.transactions.filters.allUsers') }}</option>
-                            <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
-                          </BaseSelect>
-                        </div>
-                        <DateFilter v-model:start-date="filters.startDate" v-model:end-date="filters.endDate" />
-                        <button
-                          type="button"
-                          class="ui-btn ui-btn--secondary text-xs"
-                          @click="resetTxFilters"
-                        >
-                          <Icon name="lucide:rotate-ccw" class="h-3.5 w-3.5" />
-                          {{ t('admin.common.reset') }}
-                        </button>
-                      </DisclosurePanel>
-                    </transition>
-                  </div>
-                </Disclosure>
+                <!-- Filters -->
+                <div class="border-b px-5 py-4 border-line">
+                  <AdminFilterBar
+                    hide-search
+                    :chips="txFilterChips"
+                    :advanced-count="txAdvancedFilterCount"
+                    :clearable="activeTransactionFiltersCount > 0"
+                    class="!mb-0"
+                    testid="cash-tx-filters"
+                    @clear="resetTxFilters"
+                    @remove-chip="removeTxFilterChip"
+                  >
+                    <AdminDateRangeFilter
+                      v-model:start-date="filters.startDate"
+                      v-model:end-date="filters.endDate"
+                      testid="cash-tx-filters"
+                    />
+
+                    <template #advanced>
+                      <BaseSelect v-model="filters.cashboxId">
+                        <option value="">{{ t('admin.pages.cash.transactions.filters.allCashboxes') }}</option>
+                        <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
+                      </BaseSelect>
+                      <BaseSelect v-model="filters.type">
+                        <option value="">{{ t('admin.pages.cash.transactions.filters.allTypes') }}</option>
+                        <option value="SALE_PAYMENT">{{ t('admin.pages.cash.transactions.types.SALE_PAYMENT') }}</option>
+                        <option value="CUSTOMER_PAYMENT">{{ t('admin.pages.cash.transactions.types.CUSTOMER_PAYMENT') }}</option>
+                        <option value="SUPPLIER_PAYMENT">{{ t('admin.pages.cash.transactions.types.SUPPLIER_PAYMENT') }}</option>
+                        <option value="EXPENSE">{{ t('admin.pages.cash.transactions.types.EXPENSE') }}</option>
+                        <option value="CHARGE">{{ t('admin.pages.cash.transactions.types.CHARGE') }}</option>
+                        <option value="TRANSFER">{{ t('admin.pages.cash.transactions.types.TRANSFER') }}</option>
+                      </BaseSelect>
+                      <BaseSelect v-model="filters.direction">
+                        <option value="">{{ t('admin.pages.cash.transactions.filters.allDirections') }}</option>
+                        <option value="IN">{{ t('admin.pages.cash.directions.in') }}</option>
+                        <option value="OUT">{{ t('admin.pages.cash.directions.out') }}</option>
+                      </BaseSelect>
+                      <BaseSelect v-model="filters.method">
+                        <option value="">{{ t('admin.pages.cash.transactions.filters.allMethods') }}</option>
+                        <option value="CASH">{{ t('admin.pages.cash.methods.CASH') }}</option>
+                        <option value="CARD">{{ t('admin.pages.cash.methods.CARD') }}</option>
+                        <option value="TRANSFER">{{ t('admin.pages.cash.methods.TRANSFER') }}</option>
+                        <option value="OTHER">{{ t('admin.pages.cash.methods.OTHER') }}</option>
+                      </BaseSelect>
+                      <BaseSelect v-model="filters.userId">
+                        <option value="">{{ t('admin.pages.cash.transactions.filters.allUsers') }}</option>
+                        <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
+                      </BaseSelect>
+                    </template>
+                  </AdminFilterBar>
+                </div>
 
         <div v-if="loadingTxs" class="p-10 text-center">
           <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 [border-color:var(--brand)]" />
-          <p class="mt-2 text-sm" style="color: var(--text-tertiary)">
+          <p class="mt-2 text-sm text-tertiary">
             {{ t('admin.pages.cash.transactions.loading') }}
           </p>
         </div>
 
         <div v-else-if="txs.length === 0" class="p-10 text-center">
-           <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full" style="background: var(--surface-3)">
-             <Icon name="lucide:inbox" class="h-5 w-5" style="color: var(--text-muted)" />
+           <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full surface-3">
+             <Icon name="lucide:inbox" class="h-5 w-5 text-muted" />
            </div>
-          <p class="mt-3 text-sm font-medium" style="color: var(--text-primary)">
+          <p class="mt-3 text-sm font-medium text-primary">
             {{ t('admin.pages.cash.transactions.empty') }}
           </p>
-          <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+          <p class="mt-1 text-sm text-tertiary">
             {{ t('admin.pages.cash.transactions.emptyHint') }}
           </p>
         </div>
 
         <div v-else>
-          <div class="sm:hidden divide-y" style="border-color: var(--surface-border)">
+          <div class="sm:hidden divide-y border-line">
             <div v-for="tx in txs" :key="tx.id" class="p-4">
               <div class="flex items-start justify-between gap-3">
                 <div class="min-w-0">
-                  <p class="text-sm font-semibold truncate" style="color: var(--text-primary)">{{ typeLabel(tx.type) }}</p>
-                  <p class="mt-0.5 text-xs" style="color: var(--text-muted)">
+                  <p class="text-sm font-semibold truncate text-primary">{{ typeLabel(tx.type) }}</p>
+                  <p class="mt-0.5 text-xs text-muted">
                     {{ formatDate(tx.createdAt) }}
                   </p>
-                  <p class="mt-2 text-xs truncate" style="color: var(--text-secondary)">
+                  <p class="mt-2 text-xs truncate text-secondary">
                     {{ cashboxName(tx.cashboxId) }} · {{ userEmail(tx.createdByUserId) }}
                   </p>
                   <div class="mt-2 flex flex-wrap items-center gap-2">
-                    <span class="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-[11px] font-medium" style="background: var(--surface-3); color: var(--text-secondary)">
+                    <span class="inline-flex items-center gap-1.5 rounded-lg px-2 py-1 text-mini font-medium surface-3 text-secondary">
                       <Icon v-if="tx.method === 'CASH'" name="lucide:banknote" class="h-3 w-3" />
                       <Icon v-else-if="tx.method === 'CARD'" name="lucide:credit-card" class="h-3 w-3" />
                       <Icon v-else name="lucide:arrow-left-right" class="h-3 w-3" />
                       {{ methodLabel(tx.method) }}
                     </span>
-                    <span v-if="tx.expenseCategory" class="rounded-md px-2 py-1 text-[11px]" style="background: var(--surface-3); color: var(--text-tertiary)">
+                    <span v-if="tx.expenseCategory" class="rounded-lg px-2 py-1 text-mini surface-3 text-tertiary">
                       {{ tx.expenseCategory }}
                     </span>
-                    <span v-if="tx.reference" class="rounded-md px-2 py-1 text-[11px] truncate max-w-[220px]" style="background: var(--surface-3); color: var(--text-tertiary)">
+                    <span v-if="tx.reference" class="rounded-lg px-2 py-1 text-mini truncate max-w-[220px] surface-3 text-tertiary">
                       Ref: {{ tx.reference }}
                     </span>
                   </div>
                 </div>
-                <p class="shrink-0 whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+                <p class="shrink-0 whitespace-nowrap text-end text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
                   {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
                 </p>
               </div>
@@ -518,42 +504,42 @@
                   <th class="ui-th">
                     {{ t('admin.pages.cash.transactions.table.method') }}
                   </th>
-                  <th class="ui-th text-right">
+                  <th class="ui-th text-end">
                     {{ t('admin.pages.cash.transactions.table.amount') }}
                   </th>
                 </tr>
               </thead>
               <tbody class="ui-tbody">
                 <tr v-for="tx in paginatedTxs" :key="tx.id" class="ui-tr">
-                  <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+                  <td class="ui-td whitespace-nowrap text-sm text-secondary">
                     {{ formatDate(tx.createdAt) }}
                   </td>
-                  <td class="ui-td text-sm font-medium" style="color: var(--text-primary)">
+                  <td class="ui-td text-sm font-medium text-primary">
                     {{ cashboxName(tx.cashboxId) }}
                   </td>
-                  <td class="ui-td text-sm max-w-[220px] truncate" style="color: var(--text-secondary)">
+                  <td class="ui-td text-sm max-w-[220px] truncate text-secondary">
                     {{ userEmail(tx.createdByUserId) }}
                   </td>
-                  <td class="ui-td text-sm" style="color: var(--text-secondary)">
+                  <td class="ui-td text-sm text-secondary">
                     <div class="flex flex-col">
-                      <span class="font-medium" style="color: var(--text-primary)">{{ typeLabel(tx.type) }}</span>
-                      <span v-if="tx.expenseCategory" class="text-xs mt-0.5" style="color: var(--text-muted)">
+                      <span class="font-medium text-primary">{{ typeLabel(tx.type) }}</span>
+                      <span v-if="tx.expenseCategory" class="text-xs mt-0.5 text-muted">
                         {{ tx.expenseCategory }}
                       </span>
-                      <span v-if="tx.reference" class="text-xs mt-0.5" style="color: var(--text-muted)">
+                      <span v-if="tx.reference" class="text-xs mt-0.5 text-muted">
                         Ref: {{ tx.reference }}
                       </span>
                     </div>
                   </td>
-                  <td class="ui-td text-sm" style="color: var(--text-secondary)">
-                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-xs font-medium" style="background: var(--surface-3); color: var(--text-secondary)">
+                  <td class="ui-td text-sm text-secondary">
+                    <span class="inline-flex items-center gap-1.5 px-2 py-1 rounded-lg text-xs font-medium surface-3 text-secondary">
                       <Icon v-if="tx.method === 'CASH'" name="lucide:banknote" class="h-3 w-3" />
                       <Icon v-else-if="tx.method === 'CARD'" name="lucide:credit-card" class="h-3 w-3" />
                       <Icon v-else name="lucide:arrow-left-right" class="h-3 w-3" />
                       {{ methodLabel(tx.method) }}
                     </span>
                   </td>
-                  <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
+                  <td class="ui-td whitespace-nowrap text-end text-sm font-bold" :class="tx.direction === 'IN' ? 'text-emerald-600' : 'text-rose-600'">
                     {{ tx.direction === 'IN' ? '+' : '-' }}{{ formatCurrency(Number(tx.amount)) }}
                   </td>
                 </tr>
@@ -562,7 +548,7 @@
           </div>
 
           <!-- Transactions Pagination -->
-          <div class="px-4 py-3 flex items-center justify-between border-t sm:px-6" style="border-color: var(--surface-border)">
+          <div class="px-4 py-3 flex items-center justify-between border-t sm:px-6 border-line">
             <div class="flex flex-1 items-center justify-between sm:hidden">
               <button
                 :disabled="txPage === 1"
@@ -571,7 +557,7 @@
               >
                 <Icon name="lucide:chevron-left" class="w-4 h-4" />
               </button>
-              <span class="text-sm" style="color: var(--text-secondary)">
+              <span class="text-sm text-secondary">
                 {{ t('admin.common.page', { page: txPage, total: txTotalPages }) }}
               </span>
               <button
@@ -584,7 +570,7 @@
             </div>
             <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
               <div>
-                <p class="text-sm" style="color: var(--text-secondary)">
+                <p class="text-sm text-secondary">
                   {{ t('admin.common.showing', {
                     from: txTotal === 0 ? 0 : (txPage - 1) * txPerPage + 1,
                     to: Math.min(txPage * txPerPage, txTotal),
@@ -593,13 +579,13 @@
                 </p>
               </div>
               <div>
-                <nav class="relative z-0 inline-flex rounded-md -space-x-px">
+                <nav class="relative z-0 inline-flex rounded-lg -space-x-px">
                   <button
-                    :disabled="txPage === 1"
-                    class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
-                    style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-                    @click="txPage--; fetchTransactions()"
-                  >
+ :disabled="txPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-secondary"
+ 
+ @click="txPage--; fetchTransactions()"
+>
                     {{ t('admin.common.previous') }}
                   </button>
                   <button
@@ -613,11 +599,11 @@
                     {{ page }}
                   </button>
                   <button
-                    :disabled="txPage === txTotalPages"
-                    class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
-                    style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-                    @click="txPage++; fetchTransactions()"
-                  >
+ :disabled="txPage === txTotalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-secondary"
+ 
+ @click="txPage++; fetchTransactions()"
+>
                     {{ t('admin.common.next') }}
                   </button>
                 </nav>
@@ -628,81 +614,67 @@
       </TabPanel>
         <!-- Sessions Tab -->
         <TabPanel>
-          <!-- Collapsible Filters -->
-          <Disclosure v-slot="{ open }" defaultOpen>
-            <div class="border-b px-5 py-4" style="border-color: var(--surface-border)">
-              <DisclosureButton class="flex w-full items-center justify-between text-left">
-                <div class="flex items-center gap-2">
-                  <h3 class="font-semibold" style="color: var(--text-primary)">{{ t('admin.pages.cash.sessions.filters.title') }}</h3>
-                  <span v-if="activeSessionFiltersCount > 0" class="inline-flex items-center justify-center rounded-full [background:rgba(var(--brand-rgb)/0.12)] px-2 py-0.5 text-xs font-medium [color:var(--brand)]">
-                    {{ activeSessionFiltersCount }}
-                  </span>
-                </div>
-                <Icon :name="open ? 'lucide:chevron-up' : 'lucide:chevron-down'" class="h-5 w-5" style="color: var(--text-muted)" />
-              </DisclosureButton>
-              <transition
-                enter-active-class="transition duration-200 ease-out"
-                enter-from-class="opacity-0 -translate-y-1"
-                enter-to-class="opacity-100 translate-y-0"
-                leave-active-class="transition duration-150 ease-in"
-                leave-from-class="opacity-100 translate-y-0"
-                leave-to-class="opacity-0 -translate-y-1"
-              >
-                <DisclosurePanel class="pt-4 space-y-3">
-                  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <BaseSelect v-model="sessionFilters.cashboxId" class="">
-                      <option value="">{{ t('admin.pages.cash.sessions.filters.allCashboxes') }}</option>
-                      <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
-                    </BaseSelect>
-                    <BaseSelect v-model="sessionFilters.status" class="">
-                      <option value="">{{ t('admin.pages.cash.sessions.filters.allStatuses') }}</option>
-                      <option value="OPEN">{{ t('admin.pages.cash.status.OPEN') }}</option>
-                      <option value="CLOSED">{{ t('admin.pages.cash.status.CLOSED') }}</option>
-                    </BaseSelect>
-                    <BaseSelect v-model="sessionFilters.userId" class="">
-                      <option value="">{{ t('admin.pages.cash.sessions.filters.allUsers') }}</option>
-                      <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
-                    </BaseSelect>
-                  </div>
-                  <DateFilter v-model:start-date="sessionFilters.startDate" v-model:end-date="sessionFilters.endDate" />
-                  <button
-                    type="button"
-                    class="ui-btn ui-btn--secondary text-xs"
-                    @click="resetSessionFilters"
-                  >
-                    <Icon name="lucide:rotate-ccw" class="h-3.5 w-3.5" />
-                    {{ t('admin.common.reset') }}
-                  </button>
-                </DisclosurePanel>
-              </transition>
-            </div>
-          </Disclosure>
+          <!-- Filters -->
+          <div class="border-b px-5 py-4 border-line">
+            <AdminFilterBar
+              hide-search
+              :chips="sessionFilterChips"
+              :advanced-count="sessionAdvancedFilterCount"
+              :clearable="activeSessionFiltersCount > 0"
+              class="!mb-0"
+              testid="cash-session-filters"
+              @clear="resetSessionFilters"
+              @remove-chip="removeSessionFilterChip"
+            >
+              <AdminDateRangeFilter
+                v-model:start-date="sessionFilters.startDate"
+                v-model:end-date="sessionFilters.endDate"
+                testid="cash-session-filters"
+              />
+
+              <template #advanced>
+                <BaseSelect v-model="sessionFilters.cashboxId">
+                  <option value="">{{ t('admin.pages.cash.sessions.filters.allCashboxes') }}</option>
+                  <option v-for="c in cashboxes" :key="c.id" :value="c.id">{{ c.name }}</option>
+                </BaseSelect>
+                <BaseSelect v-model="sessionFilters.status">
+                  <option value="">{{ t('admin.pages.cash.sessions.filters.allStatuses') }}</option>
+                  <option value="OPEN">{{ t('admin.pages.cash.status.OPEN') }}</option>
+                  <option value="CLOSED">{{ t('admin.pages.cash.status.CLOSED') }}</option>
+                </BaseSelect>
+                <BaseSelect v-model="sessionFilters.userId">
+                  <option value="">{{ t('admin.pages.cash.sessions.filters.allUsers') }}</option>
+                  <option v-for="u in cashUsers" :key="u.id" :value="u.id">{{ u.email }}</option>
+                </BaseSelect>
+              </template>
+            </AdminFilterBar>
+          </div>
 
           <div v-if="loadingSessions" class="p-10 text-center">
             <div class="inline-block animate-spin rounded-full h-6 w-6 border-b-2 [border-color:var(--brand)]" />
-            <p class="mt-2 text-sm" style="color: var(--text-tertiary)">
+            <p class="mt-2 text-sm text-tertiary">
               {{ t('admin.pages.cash.sessions.loading') }}
             </p>
           </div>
 
           <div v-else-if="sessions.length === 0" class="p-10 text-center">
-             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full" style="background: var(--surface-3)">
-                 <Icon name="lucide:inbox" class="h-5 w-5" style="color: var(--text-muted)" />
+             <div class="mx-auto flex h-10 w-10 items-center justify-center rounded-full surface-3">
+                 <Icon name="lucide:inbox" class="h-5 w-5 text-muted" />
              </div>
-            <p class="mt-3 text-sm font-medium" style="color: var(--text-primary)">
+            <p class="mt-3 text-sm font-medium text-primary">
               {{ t('admin.pages.cash.sessions.empty') }}
             </p>
-            <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+            <p class="mt-1 text-sm text-tertiary">
               {{ t('admin.pages.cash.sessions.emptyHint') }}
             </p>
           </div>
 
           <div v-else>
-            <div class="sm:hidden divide-y" style="border-color: var(--surface-border)">
+            <div class="sm:hidden divide-y border-line">
               <div v-for="s in sessions" :key="s.id" class="p-4">
                 <div class="flex items-start justify-between gap-3">
                   <div class="min-w-0">
-                    <p class="text-sm font-semibold truncate" style="color: var(--text-primary)">
+                    <p class="text-sm font-semibold truncate text-primary">
                       {{ cashboxName(s.cashboxId) }}
                     </p>
                     <div class="mt-2 flex items-center gap-2">
@@ -711,11 +683,11 @@
                         :class="s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-400' : ''"
                         :style="s.status !== 'OPEN' ? 'background: var(--surface-3); color: var(--text-secondary)' : ''"
                       >
-                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
+                        <span class="me-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-line'" />
                         {{ t(`admin.pages.cash.status.${s.status}`) }}
                       </span>
                     </div>
-                    <div class="mt-3 space-y-1.5 text-xs" style="color: var(--text-secondary)">
+                    <div class="mt-3 space-y-1.5 text-xs text-secondary">
                       <p>{{ t('admin.pages.cash.sessions.table.user') }}: {{ userEmail(s.openedByUserId) }}</p>
                       <p>{{ t('admin.pages.cash.sessions.table.opened') }}: {{ formatDate(s.openedAt) }}</p>
                       <p v-if="s.closedAt">{{ t('admin.pages.cash.sessions.table.closed') }}: {{ formatDate(s.closedAt) }}</p>
@@ -749,23 +721,23 @@
                     <th class="ui-th">
                       {{ t('admin.pages.cash.sessions.table.closedAt') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.openingFloat') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.expectedClosing') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.closingCount') }}
                     </th>
-                    <th class="ui-th text-right">
+                    <th class="ui-th text-end">
                       {{ t('admin.pages.cash.sessions.table.difference') }}
                     </th>
                   </tr>
                 </thead>
                 <tbody class="ui-tbody">
                   <tr v-for="s in paginatedSessions" :key="s.id" class="ui-tr">
-                    <td class="ui-td text-sm font-medium" style="color: var(--text-primary)">
+                    <td class="ui-td text-sm font-medium text-primary">
                       {{ cashboxName(s.cashboxId) }}
                     </td>
                     <td class="ui-td text-sm">
@@ -774,29 +746,29 @@
                         :class="s.status === 'OPEN' ? 'bg-emerald-500/10 text-emerald-400' : ''"
                         :style="s.status !== 'OPEN' ? 'background: var(--surface-3); color: var(--text-secondary)' : ''"
                       >
-                        <span class="mr-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-white/30'" />
+                        <span class="me-1.5 h-1.5 w-1.5 rounded-full" :class="s.status === 'OPEN' ? 'bg-emerald-500' : 'bg-line'" />
                         {{ t(`admin.pages.cash.status.${s.status}`) }}
                       </span>
                     </td>
-                    <td class="ui-td text-sm max-w-[220px] truncate" style="color: var(--text-secondary)">
+                    <td class="ui-td text-sm max-w-[220px] truncate text-secondary">
                       {{ userEmail(s.openedByUserId) }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+                    <td class="ui-td whitespace-nowrap text-sm text-secondary">
                       {{ formatDate(s.openedAt) }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+                    <td class="ui-td whitespace-nowrap text-sm text-secondary">
                       {{ s.closedAt ? formatDate(s.closedAt) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-medium text-primary">
                       {{ formatCurrency(Number(s.openingFloat)) }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-medium text-primary">
                       {{ s.expectedClosing ? formatCurrency(Number(s.expectedClosing)) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-medium" style="color: var(--text-primary)">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-medium text-primary">
                       {{ s.closingCount ? formatCurrency(Number(s.closingCount)) : '—' }}
                     </td>
-                    <td class="ui-td whitespace-nowrap text-right text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-400' : ''" :style="!(s.difference && Number(s.difference) !== 0) ? 'color: var(--text-primary)' : ''">
+                    <td class="ui-td whitespace-nowrap text-end text-sm font-bold" :class="s.difference && Number(s.difference) !== 0 ? 'text-rose-400' : ''" :style="!(s.difference && Number(s.difference) !== 0) ? 'color: var(--text-primary)' : ''">
                       {{ s.difference ? formatCurrency(Number(s.difference)) : '—' }}
                     </td>
                   </tr>
@@ -805,7 +777,7 @@
             </div>
 
             <!-- Sessions Pagination -->
-            <div class="px-4 py-3 flex items-center justify-between border-t sm:px-6" style="border-color: var(--surface-border)">
+            <div class="px-4 py-3 flex items-center justify-between border-t sm:px-6 border-line">
               <div class="flex flex-1 items-center justify-between sm:hidden">
                 <button
                   :disabled="sessionsPage === 1"
@@ -814,7 +786,7 @@
                 >
                   <Icon name="lucide:chevron-left" class="w-4 h-4" />
                 </button>
-                <span class="text-sm" style="color: var(--text-secondary)">
+                <span class="text-sm text-secondary">
                   {{ t('admin.common.page', { page: sessionsPage, total: sessionsTotalPages }) }}
                 </span>
                 <button
@@ -827,7 +799,7 @@
               </div>
               <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                 <div>
-                  <p class="text-sm" style="color: var(--text-secondary)">
+                  <p class="text-sm text-secondary">
                     {{ t('admin.common.showing', {
                       from: sessionsTotal === 0 ? 0 : (sessionsPage - 1) * sessionsPerPage + 1,
                       to: Math.min(sessionsPage * sessionsPerPage, sessionsTotal),
@@ -836,13 +808,13 @@
                   </p>
                 </div>
                 <div>
-                  <nav class="relative z-0 inline-flex rounded-md -space-x-px">
+                  <nav class="relative z-0 inline-flex rounded-lg -space-x-px">
                     <button
-                      :disabled="sessionsPage === 1"
-                      class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50"
-                      style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-                      @click="sessionsPage--; fetchSessions()"
-                    >
+ :disabled="sessionsPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-secondary"
+ 
+ @click="sessionsPage--; fetchSessions()"
+>
                       {{ t('admin.common.previous') }}
                     </button>
                     <button
@@ -856,11 +828,11 @@
                       {{ page }}
                     </button>
                     <button
-                      :disabled="sessionsPage === sessionsTotalPages"
-                      class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50"
-                      style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-                      @click="sessionsPage++; fetchSessions()"
-                    >
+ :disabled="sessionsPage === sessionsTotalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-secondary"
+ 
+ @click="sessionsPage++; fetchSessions()"
+>
                       {{ t('admin.common.next') }}
                     </button>
                   </nav>
@@ -878,11 +850,11 @@
     <div v-if="openSessionOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="openSessionOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="openSessionOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.openSession.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             {{ t('admin.pages.cash.modals.openSession.subtitle') }}
           </p>
 
@@ -891,7 +863,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.openSession.openingFloatLabel') }}
               </label>
-              <BaseInput v-model="openSessionForm.openingFloat" placeholder="0" />
+              <BaseInput v-model="openSessionForm.openingFloat" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -911,7 +883,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+              class="px-4 py-2 rounded-lg [background:var(--brand)] text-brand-contrast text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitOpenSession"
             >
@@ -926,39 +898,39 @@
     <div v-if="closeSessionOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="closeSessionOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="closeSessionOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.closeSession.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             {{ t('admin.pages.cash.modals.closeSession.subtitle') }}
           </p>
 
           <div class="mt-4 space-y-3">
-            <div class="rounded-lg p-3" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
-              <div v-if="closeExpectedLoading" class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
+            <div class="rounded-lg p-3 surface-3 border border-line">
+              <div v-if="closeExpectedLoading" class="flex items-center gap-2 text-sm text-secondary">
                 <Icon name="lucide:loader-2" class="h-4 w-4 animate-spin" />
                 {{ t('admin.pages.cash.sessions.expected.loading') }}
               </div>
               <div v-else-if="closeExpected" class="grid grid-cols-2 gap-3 text-sm">
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.openingFloat') }}
                   </p>
-                  <p class="mt-0.5 font-semibold" style="color: var(--text-primary)">
+                  <p class="mt-0.5 font-semibold text-primary">
                     {{ formatCurrency(Number(closeExpected.openingFloat)) }}
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.expectedClosing') }}
                   </p>
-                  <p class="mt-0.5 font-semibold" style="color: var(--text-primary)">
+                  <p class="mt-0.5 font-semibold text-primary">
                     {{ formatCurrency(Number(closeExpected.expectedClosing)) }}
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.directions.in') }}
                   </p>
                   <p class="mt-0.5 font-semibold text-emerald-700">
@@ -966,7 +938,7 @@
                   </p>
                 </div>
                 <div>
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.directions.out') }}
                   </p>
                   <p class="mt-0.5 font-semibold text-rose-700">
@@ -974,7 +946,7 @@
                   </p>
                 </div>
                 <div class="col-span-2 flex items-center justify-between">
-                  <p class="text-xs font-semibold uppercase tracking-wider" style="color: var(--text-muted)">
+                  <p class="text-xs font-semibold uppercase tracking-wider text-muted">
                     {{ t('admin.pages.cash.difference') }}
                   </p>
                   <p class="font-semibold" :class="closeDifference !== null && closeDifference !== 0 ? 'text-rose-400' : ''" :style="!(closeDifference !== null && closeDifference !== 0) ? 'color: var(--text-primary)' : ''">
@@ -982,7 +954,7 @@
                   </p>
                 </div>
               </div>
-              <div v-else class="text-sm" style="color: var(--text-secondary)">
+              <div v-else class="text-sm text-secondary">
                 {{ t('admin.pages.cash.sessions.expected.unavailable') }}
               </div>
             </div>
@@ -990,7 +962,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.closeSession.closingCountLabel') }}
               </label>
-              <BaseInput v-model="closeSessionForm.closingCount" placeholder="0" />
+              <BaseInput v-model="closeSessionForm.closingCount" money placeholder="0" />
             </div>
             <div>
               <label class="ui-label mb-1 block">
@@ -1009,11 +981,11 @@
               {{ t('admin.common.cancel') }}
             </button>
             <button
-              type="button"
-              class="px-4 py-2 rounded-md text-white text-sm font-semibold disabled:opacity-50" style="background: var(--surface-3); border: 1px solid var(--surface-border)"
-              :disabled="actionLoading"
-              @click="submitCloseSession"
-            >
+ type="button"
+ class="px-4 py-2 rounded-lg text-primary text-sm font-semibold disabled:opacity-50 surface-3 border border-line" 
+ :disabled="actionLoading"
+ @click="submitCloseSession"
+>
               {{ actionLoading ? t('admin.common.updating') : t('admin.pages.cash.modals.closeSession.confirm') }}
             </button>
           </div>
@@ -1025,11 +997,11 @@
     <div v-if="customerPaymentOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="customerPaymentOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="customerPaymentOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.customerPayment.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             {{ t('admin.pages.cash.modals.customerPayment.subtitle') }}
           </p>
 
@@ -1059,7 +1031,7 @@
                   </option>
                 </BaseSelect>
               </div>
-              <p v-if="customerLoading" class="mt-1 text-xs" style="color: var(--text-muted)">
+              <p v-if="customerLoading" class="mt-1 text-xs text-muted">
                 {{ t('admin.pages.cash.modals.customerPayment.loadingCustomers') }}
               </p>
             </div>
@@ -1068,7 +1040,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.customerPayment.amountLabel') }}
               </label>
-              <BaseInput v-model="customerPaymentForm.amount" placeholder="0" />
+              <BaseInput v-model="customerPaymentForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1108,7 +1080,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+              class="px-4 py-2 rounded-lg [background:var(--brand)] text-brand-contrast text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading || !canSubmitCustomerPayment"
               @click="submitCustomerPayment"
             >
@@ -1123,11 +1095,11 @@
     <div v-if="supplierPaymentOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="supplierPaymentOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="supplierPaymentOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.supplierPayment.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             {{ t('admin.pages.cash.modals.supplierPayment.subtitle') }}
           </p>
 
@@ -1178,7 +1150,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.supplierPayment.amountLabel') }}
               </label>
-              <BaseInput v-model="supplierPaymentForm.amount" placeholder="0" />
+              <BaseInput v-model="supplierPaymentForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1218,7 +1190,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+              class="px-4 py-2 rounded-lg [background:var(--brand)] text-brand-contrast text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading || !canSubmitSupplierPayment"
               @click="submitSupplierPayment"
             >
@@ -1233,11 +1205,11 @@
     <div v-if="expenseOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="expenseOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="expenseOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ expenseType === 'EXPENSE' ? t('admin.pages.cash.modals.expense.title') : t('admin.pages.cash.modals.charge.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             {{ t('admin.pages.cash.modals.expense.subtitle') }}
           </p>
 
@@ -1260,7 +1232,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.expense.amountLabel') }}
               </label>
-              <BaseInput v-model="expenseForm.amount" placeholder="0" />
+              <BaseInput v-model="expenseForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1310,7 +1282,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+              class="px-4 py-2 rounded-lg [background:var(--brand)] text-brand-contrast text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitExpense"
             >
@@ -1325,11 +1297,11 @@
     <div v-if="transferOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="transferOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="transferOpen = false" />
-        <div class="relative z-10 w-full max-w-lg rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-lg rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.transfer.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             {{ t('admin.pages.cash.modals.transfer.subtitle') }}
           </p>
 
@@ -1362,7 +1334,7 @@
               <label class="ui-label mb-1 block">
                 {{ t('admin.pages.cash.modals.transfer.amountLabel') }}
               </label>
-              <BaseInput v-model="transferForm.amount" placeholder="0" />
+              <BaseInput v-model="transferForm.amount" money placeholder="0" />
             </div>
 
             <div>
@@ -1390,7 +1362,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+              class="px-4 py-2 rounded-lg [background:var(--brand)] text-brand-contrast text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading"
               @click="submitTransfer"
             >
@@ -1405,11 +1377,11 @@
     <div v-if="cashboxCreateOpen" class="fixed inset-0 z-50 overflow-y-auto" @click.self="cashboxCreateOpen = false">
       <div class="flex min-h-screen items-center justify-center px-4">
         <div class="fixed inset-0 bg-black/70 backdrop-blur-sm" @click="cashboxCreateOpen = false" />
-        <div class="relative z-10 w-full max-w-md rounded-xl p-6" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 48px rgba(0,0,0,0.5)">
-          <h3 class="text-lg font-semibold" style="color: var(--text-primary)">
+        <div class="relative z-10 w-full max-w-md rounded-xl p-6 surface-2 border border-line shadow-overlay">
+          <h3 class="text-lg font-semibold text-primary">
             {{ t('admin.pages.cash.modals.createCashbox.title') }}
           </h3>
-          <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+          <p class="mt-1 text-sm text-secondary">
             {{ t('admin.pages.cash.modals.createCashbox.subtitle') }}
           </p>
 
@@ -1420,8 +1392,8 @@
               </label>
               <BaseInput v-model="cashboxForm.name" :placeholder="t('admin.pages.cash.modals.createCashbox.namePlaceholder')" />
             </div>
-            <label class="inline-flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
-              <input v-model="cashboxForm.isActive" type="checkbox" class="h-4 w-4 rounded [color:var(--brand)]" style="border-color: var(--surface-border)" />
+            <label class="inline-flex items-center gap-2 text-sm text-secondary">
+              <input v-model="cashboxForm.isActive" type="checkbox" class="h-4 w-4 rounded-lg [color:var(--brand)] border-line" />
               {{ t('admin.pages.cash.modals.createCashbox.activeLabel') }}
             </label>
           </div>
@@ -1436,7 +1408,7 @@
             </button>
             <button
               type="button"
-              class="px-4 py-2 rounded-md [background:var(--brand)] text-white text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+              class="px-4 py-2 rounded-lg [background:var(--brand)] text-brand-contrast text-sm font-semibold hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
               :disabled="actionLoading || !canCreateCashbox"
               @click="submitCreateCashbox"
             >
@@ -1450,11 +1422,14 @@
 </template>
 
 <script setup lang="ts">
-import { Menu, MenuButton, MenuItem, MenuItems, Tab, TabGroup, TabList, TabPanel, TabPanels, Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
+import { Menu, MenuButton, MenuItem, MenuItems, Tab, TabGroup, TabList, TabPanel, TabPanels } from '@headlessui/vue'
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
-import DateFilter from '~/components/ui/DateFilter.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
+import AdminDateRangeFilter from '~/components/admin/AdminDateRangeFilter.vue'
+import { parsePriceInput } from '~/shared/pricing/money-format'
+import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
 
 definePageMeta({
   middleware: 'auth',
@@ -1515,15 +1490,19 @@ type CashUser = { id: string; email: string }
 const authStore = useAuthStore()
 const { t, locale } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
+const route = useRoute()
+const router = useRouter()
 
 const errorMessage = ref('')
 
 const cashboxes = ref<Cashbox[]>([])
 const loadingCashboxes = ref(true)
 
+const activeTabIndex = ref(route.query.tab === 'sessions' ? 1 : 0)
+
 const txs = ref<CashTx[]>([])
 const loadingTxs = ref(true)
-const txPage = ref(1)
+const txPage = ref(Number(route.query.txPage) || 1)
 const txPerPage = ref(25)
 const txTotal = ref(0)
 const txTotalPages = ref(1)
@@ -1531,33 +1510,31 @@ const paginatedTxs = computed(() => txs.value)
 
 const sessions = ref<CashSession[]>([])
 const loadingSessions = ref(true)
-const sessionsPage = ref(1)
+const sessionsPage = ref(Number(route.query.sessionPage) || 1)
 const sessionsPerPage = ref(25)
 const sessionsTotal = ref(0)
 const sessionsTotalPages = ref(1)
 const paginatedSessions = computed(() => sessions.value)
-const today = new Date()
-const lastWeek = new Date(today)
-lastWeek.setDate(lastWeek.getDate() - 7)
+const defaultDateRange = getDashboardPresetDateRange('today')
 
 const sessionFilters = reactive({
-  cashboxId: '',
-  status: '',
-  userId: '',
-  startDate: lastWeek.toISOString().split('T')[0],
-  endDate: today.toISOString().split('T')[0]
+  cashboxId: typeof route.query.sessionCashboxId === 'string' ? route.query.sessionCashboxId : '',
+  status: typeof route.query.sessionStatus === 'string' ? route.query.sessionStatus : '',
+  userId: typeof route.query.sessionUserId === 'string' ? route.query.sessionUserId : '',
+  startDate: typeof route.query.sessionStartDate === 'string' ? route.query.sessionStartDate : defaultDateRange.from,
+  endDate: typeof route.query.sessionEndDate === 'string' ? route.query.sessionEndDate : defaultDateRange.to
 })
 
 const actionLoading = ref(false)
 
 const filters = reactive({
-  cashboxId: '',
-  type: '',
-  direction: '',
-  method: '',
-  userId: '',
-  startDate: lastWeek.toISOString().split('T')[0],
-  endDate: today.toISOString().split('T')[0]
+  cashboxId: typeof route.query.txCashboxId === 'string' ? route.query.txCashboxId : '',
+  type: typeof route.query.txType === 'string' ? route.query.txType : '',
+  direction: typeof route.query.txDirection === 'string' ? route.query.txDirection : '',
+  method: typeof route.query.txMethod === 'string' ? route.query.txMethod : '',
+  userId: typeof route.query.txUserId === 'string' ? route.query.txUserId : '',
+  startDate: typeof route.query.txStartDate === 'string' ? route.query.txStartDate : defaultDateRange.from,
+  endDate: typeof route.query.txEndDate === 'string' ? route.query.txEndDate : defaultDateRange.to
 })
 
 const cashUsers = ref<CashUser[]>([])
@@ -1598,6 +1575,58 @@ const activeTransactionFiltersCount = computed(() => {
   return count
 })
 
+const txAdvancedFilterCount = computed(() => [
+  filters.cashboxId,
+  filters.type,
+  filters.direction,
+  filters.method,
+  filters.userId
+].filter(Boolean).length)
+
+const txFilterChips = computed(() => {
+  const chips: { key: string; value: string }[] = []
+  if (filters.cashboxId) {
+    const cashbox = cashboxes.value.find((c) => c.id === filters.cashboxId)
+    chips.push({ key: 'cashboxId', value: cashbox ? cashbox.name : filters.cashboxId })
+  }
+  if (filters.type) chips.push({ key: 'type', value: t(`admin.pages.cash.transactions.types.${filters.type}`) })
+  if (filters.direction) chips.push({ key: 'direction', value: t(`admin.pages.cash.directions.${filters.direction === 'IN' ? 'in' : 'out'}`) })
+  if (filters.method) chips.push({ key: 'method', value: t(`admin.pages.cash.methods.${filters.method}`) })
+  if (filters.userId) chips.push({ key: 'userId', value: userEmail(filters.userId) })
+  return chips
+})
+
+function removeTxFilterChip(key: string) {
+  if (key === 'cashboxId') filters.cashboxId = ''
+  if (key === 'type') filters.type = ''
+  if (key === 'direction') filters.direction = ''
+  if (key === 'method') filters.method = ''
+  if (key === 'userId') filters.userId = ''
+}
+
+const sessionAdvancedFilterCount = computed(() => [
+  sessionFilters.cashboxId,
+  sessionFilters.status,
+  sessionFilters.userId
+].filter(Boolean).length)
+
+const sessionFilterChips = computed(() => {
+  const chips: { key: string; value: string }[] = []
+  if (sessionFilters.cashboxId) {
+    const cashbox = cashboxes.value.find((c) => c.id === sessionFilters.cashboxId)
+    chips.push({ key: 'cashboxId', value: cashbox ? cashbox.name : sessionFilters.cashboxId })
+  }
+  if (sessionFilters.status) chips.push({ key: 'status', value: t(`admin.pages.cash.status.${sessionFilters.status}`) })
+  if (sessionFilters.userId) chips.push({ key: 'userId', value: userEmail(sessionFilters.userId) })
+  return chips
+})
+
+function removeSessionFilterChip(key: string) {
+  if (key === 'cashboxId') sessionFilters.cashboxId = ''
+  if (key === 'status') sessionFilters.status = ''
+  if (key === 'userId') sessionFilters.userId = ''
+}
+
 const activeSessionFiltersCount = computed(() => {
   let count = 0
   if (sessionFilters.cashboxId) count++
@@ -1608,7 +1637,8 @@ const activeSessionFiltersCount = computed(() => {
 })
 
 function onTabChange(index: number) {
-  // Optional: add any logic needed when switching tabs
+  activeTabIndex.value = index
+  syncToUrl()
 }
 
 const resetTxFilters = () => {
@@ -1618,12 +1648,9 @@ const resetTxFilters = () => {
   filters.method = ''
   filters.userId = ''
   
-  const today = new Date()
-  const lastWeek = new Date(today)
-  lastWeek.setDate(lastWeek.getDate() - 7)
-  
-  filters.startDate = lastWeek.toISOString().split('T')[0]
-  filters.endDate = today.toISOString().split('T')[0]
+  const range = getDashboardPresetDateRange('today')
+  filters.startDate = range.from
+  filters.endDate = range.to
 }
 
 const resetSessionFilters = () => {
@@ -1631,12 +1658,9 @@ const resetSessionFilters = () => {
   sessionFilters.status = ''
   sessionFilters.userId = ''
   
-  const today = new Date()
-  const lastWeek = new Date(today)
-  lastWeek.setDate(lastWeek.getDate() - 7)
-  
-  sessionFilters.startDate = lastWeek.toISOString().split('T')[0]
-  sessionFilters.endDate = today.toISOString().split('T')[0]
+  const range = getDashboardPresetDateRange('today')
+  sessionFilters.startDate = range.from
+  sessionFilters.endDate = range.to
 }
 
 const openSessionOpen = ref(false)
@@ -1651,11 +1675,11 @@ const closeExpectedLoading = ref(false)
 
 const closeDifference = computed(() => {
   if (!closeExpected.value) return null
-  const closing = Number.parseFloat(String(closeSessionForm.closingCount || ''))
+  const closing = parsePriceInput(closeSessionForm.closingCount)
   if (!Number.isFinite(closing)) return null
   const expected = Number(closeExpected.value.expectedClosing)
   if (!Number.isFinite(expected)) return null
-  return closing - expected
+  return Number(closing) - expected
 })
 
 const expenseOpen = ref(false)
@@ -1746,12 +1770,12 @@ const filteredSuppliers = computed(() => {
 })
 
 const canSubmitCustomerPayment = computed(() => {
-  const amount = Number.parseFloat(String(customerPaymentForm.amount || ''))
+  const amount = parsePriceInput(customerPaymentForm.amount)
   return Boolean(customerPaymentForm.cashboxId && customerPaymentForm.customerId && Number.isFinite(amount) && amount > 0)
 })
 
 const canSubmitSupplierPayment = computed(() => {
-  const amount = Number.parseFloat(String(supplierPaymentForm.amount || ''))
+  const amount = parsePriceInput(supplierPaymentForm.amount)
   return Boolean(supplierPaymentForm.cashboxId && supplierPaymentForm.supplierId && Number.isFinite(amount) && amount > 0)
 })
 
@@ -1909,12 +1933,14 @@ async function loadCloseExpected(sessionId: string) {
 
 async function submitOpenSession() {
   if (!openSessionCashboxId.value) return
+  const openingFloat = parsePriceInput(openSessionForm.openingFloat)
+  if (!Number.isFinite(openingFloat)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cashboxes/${openSessionCashboxId.value}/sessions/open`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { openingFloat: openSessionForm.openingFloat, note: openSessionForm.note }
+      body: { openingFloat, note: openSessionForm.note }
     })
     openSessionOpen.value = false
     await refreshAll()
@@ -1928,12 +1954,14 @@ async function submitOpenSession() {
 
 async function submitCloseSession() {
   if (!closeSessionId.value) return
+  const closingCount = parsePriceInput(closeSessionForm.closingCount)
+  if (!Number.isFinite(closingCount)) return
   actionLoading.value = true
   try {
     await $fetch(`/api/admin/cash-sessions/${closeSessionId.value}/close`, {
       method: 'POST',
       headers: { Authorization: `Bearer ${authStore.token}` },
-      body: { closingCount: closeSessionForm.closingCount, note: closeSessionForm.note }
+      body: { closingCount, note: closeSessionForm.note }
     })
     closeSessionOpen.value = false
     closeExpected.value = null
@@ -1958,6 +1986,8 @@ function openExpenseModal(type: 'EXPENSE' | 'CHARGE') {
 }
 
 async function submitExpense() {
+  const amount = parsePriceInput(expenseForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transactions', {
@@ -1967,7 +1997,7 @@ async function submitExpense() {
         cashboxId: expenseForm.cashboxId,
         type: expenseType.value,
         direction: 'OUT',
-        amount: expenseForm.amount,
+        amount,
         method: expenseForm.method,
         expenseCategory: expenseForm.category,
         reference: expenseForm.reference,
@@ -1986,6 +2016,8 @@ async function submitExpense() {
 }
 
 async function submitTransfer() {
+  const amount = parsePriceInput(transferForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transfers', {
@@ -1994,7 +2026,7 @@ async function submitTransfer() {
       body: {
         fromCashboxId: transferForm.fromCashboxId,
         toCashboxId: transferForm.toCashboxId,
-        amount: transferForm.amount,
+        amount,
         reference: transferForm.reference,
         note: transferForm.note
       }
@@ -2066,6 +2098,8 @@ async function openSupplierPaymentModal() {
 
 async function submitCustomerPayment() {
   if (!canSubmitCustomerPayment.value) return
+  const amount = parsePriceInput(customerPaymentForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transactions', {
@@ -2075,7 +2109,7 @@ async function submitCustomerPayment() {
         cashboxId: customerPaymentForm.cashboxId,
         type: 'CUSTOMER_PAYMENT',
         direction: 'IN',
-        amount: customerPaymentForm.amount,
+        amount,
         customerId: customerPaymentForm.customerId,
         method: customerPaymentForm.method,
         reference: customerPaymentForm.reference,
@@ -2094,6 +2128,8 @@ async function submitCustomerPayment() {
 
 async function submitSupplierPayment() {
   if (!canSubmitSupplierPayment.value) return
+  const amount = parsePriceInput(supplierPaymentForm.amount)
+  if (!Number.isFinite(amount) || amount <= 0) return
   actionLoading.value = true
   try {
     await $fetch('/api/admin/cash-transactions', {
@@ -2103,7 +2139,7 @@ async function submitSupplierPayment() {
         cashboxId: supplierPaymentForm.cashboxId,
         type: 'SUPPLIER_PAYMENT',
         direction: 'OUT',
-        amount: supplierPaymentForm.amount,
+        amount,
         supplierId: supplierPaymentForm.supplierId,
         purchaseOrderId: supplierPaymentForm.purchaseOrderId || undefined,
         method: supplierPaymentForm.method,
@@ -2165,9 +2201,34 @@ onMounted(async () => {
   await refreshAll()
 })
 
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      tab: activeTabIndex.value === 1 ? 'sessions' : undefined,
+      txCashboxId: filters.cashboxId || undefined,
+      txType: filters.type || undefined,
+      txDirection: filters.direction || undefined,
+      txMethod: filters.method || undefined,
+      txUserId: filters.userId || undefined,
+      txStartDate: filters.startDate === defaultDateRange.from ? undefined : filters.startDate,
+      txEndDate: filters.endDate === defaultDateRange.to ? undefined : filters.endDate,
+      txPage: txPage.value > 1 ? String(txPage.value) : undefined,
+      sessionCashboxId: sessionFilters.cashboxId || undefined,
+      sessionStatus: sessionFilters.status || undefined,
+      sessionUserId: sessionFilters.userId || undefined,
+      sessionStartDate: sessionFilters.startDate === defaultDateRange.from ? undefined : sessionFilters.startDate,
+      sessionEndDate: sessionFilters.endDate === defaultDateRange.to ? undefined : sessionFilters.endDate,
+      sessionPage: sessionsPage.value > 1 ? String(sessionsPage.value) : undefined
+    }
+  })
+}
+
 watch(
   () => ({ ...filters }),
   () => {
+    txPage.value = 1
+    syncToUrl()
     fetchTransactions(true)
   }
 )
@@ -2183,7 +2244,17 @@ watch(customerSearch, (value) => {
 watch(
   () => ({ ...sessionFilters }),
   () => {
+    sessionsPage.value = 1
+    syncToUrl()
     fetchSessions(true)
   }
 )
+
+watch(txPage, () => {
+  syncToUrl()
+})
+
+watch(sessionsPage, () => {
+  syncToUrl()
+})
 </script>

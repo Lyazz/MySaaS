@@ -1,6 +1,10 @@
 import 'dart:io';
-import 'package:flutter/material.dart';
+
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
+
+import '../services/tenant_mode_service.dart';
+import '../services/workspace_cache_service.dart';
 import '../utils/image_storage_manager.dart';
 
 class OfflineImageWidget extends StatelessWidget {
@@ -21,11 +25,15 @@ class OfflineImageWidget extends StatelessWidget {
     this.errorWidget,
   }) : super(key: key);
 
+  static final WorkspaceCacheService _cacheService = WorkspaceCacheService();
+
   @override
   Widget build(BuildContext context) {
     if (ImageStorageManager.isRemoteUrl(imagePath)) {
+      final namespaceKey = TenantModeService().activeNamespaceKey;
       return CachedNetworkImage(
         imageUrl: imagePath,
+        cacheManager: _cacheService.imageCacheManager(namespaceKey),
         width: width,
         height: height,
         fit: fit,

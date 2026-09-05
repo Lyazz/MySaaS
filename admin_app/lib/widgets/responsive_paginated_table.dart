@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'form/form_select.dart';
 import 'package:easy_localization/easy_localization.dart';
+import '../theme/app_theme.dart';
 
 class ResponsivePaginatedTable<T> extends StatefulWidget {
   final List<T> items;
@@ -85,7 +86,7 @@ class _ResponsivePaginatedTableState<T>
             child: Padding(
               padding: EdgeInsets.all(48.0),
               child: Text(
-                'admin.common.noDataAvailable'.tr(),
+                'app.admin_common_nodataavailable'.tr().tr(),
                 style: const TextStyle(color: Colors.grey),
               ),
             ),
@@ -118,11 +119,16 @@ class _ResponsivePaginatedTableState<T>
             ? availableWidth
             : widget.minWidth;
 
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         return Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: Theme.of(context).colorScheme.surface,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: const Color(0xFFE2E8F0)), // Slate-200
+            border: Border.all(
+              color: isDark
+                  ? AppColors.surfaceBorder
+                  : AppColors.lightSurfaceBorder,
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -161,9 +167,15 @@ class _ResponsivePaginatedTableState<T>
                   horizontal: 20,
                   vertical: 12,
                 ),
-                decoration: const BoxDecoration(
-                  border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-                  color: Colors.white,
+                decoration: BoxDecoration(
+                  border: Border(
+                    top: BorderSide(
+                      color: isDark
+                          ? AppColors.surfaceBorder
+                          : AppColors.lightSurfaceBorder,
+                    ),
+                  ),
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: _buildPaginationFooter(
                   startIndex + 1,
@@ -209,10 +221,16 @@ class _ResponsivePaginatedTableState<T>
                     horizontal: 20,
                     vertical: 12,
                   ),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF8FAFC), // Slate-50
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppColors.surface2
+                        : AppColors.lightSurface2,
                     border: Border(
-                      bottom: BorderSide(color: Color(0xFFE2E8F0)),
+                      bottom: BorderSide(
+                        color: Theme.of(context).brightness == Brightness.dark
+                            ? AppColors.surfaceBorder
+                            : AppColors.lightSurfaceBorder,
+                      ),
                     ),
                   ),
                   child: widget.header,
@@ -286,7 +304,7 @@ class _ResponsivePaginatedTableState<T>
               SizedBox(
                 width: 96,
                 child: FormSelect<int>(
-                  label: 'admin.common.rowsPerPage'.tr(),
+                  label: 'app.admin_common_rowsperpage'.tr().tr(),
                   showLabel: false,
                   value: _rowsPerPage,
                   icon: const Icon(LucideIcons.chevronDown, size: 14),
@@ -327,17 +345,15 @@ class _ResponsivePaginatedTableState<T>
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             textAlign: align,
-            style: const TextStyle(
-              fontSize: 13,
-              color: Color(0xFF64748B),
-            ),
+            style: const TextStyle(fontSize: 13, color: Color(0xFF64748B)),
           );
         }
 
         Widget paginationControls() {
           return Row(
-            mainAxisAlignment:
-                isSmall ? MainAxisAlignment.center : MainAxisAlignment.end,
+            mainAxisAlignment: isSmall
+                ? MainAxisAlignment.center
+                : MainAxisAlignment.end,
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
@@ -410,10 +426,7 @@ class _ResponsivePaginatedTableState<T>
                 crossAxisAlignment: WrapCrossAlignment.center,
                 spacing: 24,
                 runSpacing: 8,
-                children: [
-                  rowsPerPageControl(),
-                  showingText(),
-                ],
+                children: [rowsPerPageControl(), showingText()],
               ),
             ),
             const SizedBox(width: 12),

@@ -1,9 +1,17 @@
 import prisma from '../../lib/prisma'
 import { Prisma } from '@prisma/client'
+import { isValidOrderIdPrefix, sanitizeOrderIdPrefix } from '../../lib/order-public-id'
+import {
+    isValidStoreLegalPagesConfig,
+    normalizeStoreLegalPagesConfig,
+    type StoreLegalPagesConfig
+} from '../../../../shared/storefront/legal-pages'
 
 export type StoreTemplateKey =
     | 'classic'
     | 'modern'
+    | 'interior'
+    | 'minimal'
     | 'street'
     | 'cozy'
     | 'cyber'
@@ -13,13 +21,18 @@ export type StoreTemplateKey =
     | 'playful'
     | 'activewear'
     | 'chrono'
+    | 'arena'
     | 'maison'
+    | 'nour'
+    | 'embellir'
 export type StoreLanguage = 'ar' | 'fr' | 'en'
 
 
 export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; description: string }[] = [
     { key: 'classic', label: 'Classic', description: 'Clean layout, ideal for most stores.' },
     { key: 'modern', label: 'Modern', description: 'Bolder typography and more visual spacing.' },
+    { key: 'interior', label: 'Interior', description: 'A modern layout tuned for home and interior-decor stores, with a soft emerald accent.' },
+    { key: 'minimal', label: 'Minimal', description: 'A pared-back take on the modern layout, with tighter corners and a quieter accent.' },
     { key: 'street', label: 'Street', description: 'High-energy, bold layout with high-contrast elements.' },
     { key: 'cozy', label: 'Cozy', description: 'Soft, minimalist design with warm colors.' },
     { key: 'cyber', label: 'Cyber', description: 'Futuristic dark mode with neon accents.' },
@@ -29,7 +42,10 @@ export const STORE_TEMPLATES: { key: StoreTemplateKey; label: string; descriptio
     { key: 'playful', label: 'Playful', description: 'Kids & fun' },
     { key: 'activewear', label: 'Activewear', description: 'Bold, aggressive typography and neon colors for sports.' },
     { key: 'chrono', label: 'Chrono Luxe', description: 'Luxury dark theme with gold accents for premium accessories.' },
-    { key: 'maison', label: 'Maison', description: 'Warm editorial theme for home decor and interior accessories.' }
+    { key: 'arena', label: 'Arena Performance', description: 'Dark esports and gaming gear theme with cyan performance accents.' },
+    { key: 'maison', label: 'Pistachio', description: 'Luxury pistachio-green theme for premium food, nuts, decor, and refined retail.' },
+    { key: 'nour', label: 'Nour Élégance', description: 'Refined modest-fashion theme with soft draped silhouettes and warm neutral tones.' },
+    { key: 'embellir', label: 'Embellir', description: 'Beauty and wellness theme built on deep glazed zellige green, warm plaster and orange-blossom amber.' }
 ]
 
 export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [
@@ -39,6 +55,21 @@ export const STORE_LANGUAGES: { key: StoreLanguage; label: string }[] = [
 ]
 
 
+
+/**
+ * Publishing was refused because the store is not sellable yet. 409 rather than
+ * 400: the request was well-formed, the store's state is what disqualified it.
+ */
+export class StorePublishBlockedError extends Error {
+    statusCode = 409
+    statusMessage = 'Store is not ready to publish'
+    missing: string[]
+
+    constructor(missing: string[]) {
+        super('Store is not ready to publish')
+        this.missing = missing
+    }
+}
 
 export class StoreSettingsValidationError extends Error {
     statusCode = 400
@@ -63,7 +94,9 @@ export type StoreSettingsPatchInput = Partial<{
     slug: string
     logoUrl: string | null
     faviconUrl: string | null
+    description: string | null
     primaryColor: string
+    useBrandColor: boolean
     templateKey: string
 
     announcementText: string
@@ -72,11 +105,15 @@ export type StoreSettingsPatchInput = Partial<{
     language: string
     cartEnabled: boolean
     codEnabled: boolean
+    orderIdPrefix: string
     minimumOrderAmountDzd: number
     hideOptionalAddress: boolean
     currencyCode: string
     currencyCountry: string
     isCompleted: boolean
+    onboardingStep: number
+    onboardingExited: boolean
+    checklistDismissed: boolean
     allowedDeliveryProviders: string[]
     storePickupEnabled: boolean
     loyaltyEnabled: boolean
@@ -84,6 +121,23 @@ export type StoreSettingsPatchInput = Partial<{
     loyaltyRedeemRateDzdPerPoint: number | string
     loyaltyBasePoints: number | string
     loyaltyMarginFactor: number | string
+    salesInvoiceEnabled: boolean
+    invoiceNumberPrefix: string
+    invoiceFooterText: string | null
+    invoiceShowLogo: boolean
+    whatsappConfirmationTemplate: string | null
+    legalPages: StoreLegalPagesConfig
+    clearanceEnabled: boolean
+    clearanceMultiple: number
+    clearanceDivisor: number
+    clearanceBannerEnabled: boolean
+    clearanceBannerText: string | null
+    blacklistEnabled: boolean
+    duplicateOrderLimitEnabled: boolean
+    duplicateOrderLimit: number
+    duplicateOrderWindowHours: number
+    maintenanceMode: boolean
+    maintenanceMessage: string | null
 }>
 
 const toDecimalString = (value: unknown, field: string): string => {
@@ -92,6 +146,11 @@ const toDecimalString = (value: unknown, field: string): string => {
         throw new StoreSettingsValidationError(`${field} must be a valid number`)
     }
     return String(n)
+}
+
+export const sanitizeInvoiceNumberPrefix = (value: unknown): string => {
+    const normalized = typeof value === 'string' ? value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12) : ''
+    return normalized || 'INV'
 }
 
 export class StoreSettingsService {
@@ -147,11 +206,29 @@ export class StoreSettingsService {
             updateSettings.faviconUrl = input.faviconUrl
         }
 
+        if (input.description !== undefined) {
+            if (input.description !== null && typeof input.description !== 'string') {
+                throw new StoreSettingsValidationError('description must be a string or null')
+            }
+            const description = typeof input.description === 'string' ? input.description.trim() : ''
+            if (description.length > 300) {
+                throw new StoreSettingsValidationError('description is too long (max 300 chars)')
+            }
+            updateSettings.description = description || null
+        }
+
         if (input.primaryColor !== undefined) {
             if (typeof input.primaryColor !== 'string' || !isHexColor(input.primaryColor)) {
                 throw new StoreSettingsValidationError('primaryColor must be a hex color like #4F46E5')
             }
             updateSettings.primaryColor = input.primaryColor.toUpperCase()
+        }
+
+        if (input.useBrandColor !== undefined) {
+            if (typeof input.useBrandColor !== 'boolean') {
+                throw new StoreSettingsValidationError('useBrandColor must be a boolean')
+            }
+            updateSettings.useBrandColor = input.useBrandColor
         }
 
         if (input.templateKey !== undefined) {
@@ -201,6 +278,14 @@ export class StoreSettingsService {
             updateSettings.codEnabled = input.codEnabled
         }
 
+        if (input.orderIdPrefix !== undefined) {
+            const orderIdPrefix = sanitizeOrderIdPrefix(input.orderIdPrefix)
+            if (!isValidOrderIdPrefix(orderIdPrefix)) {
+                throw new StoreSettingsValidationError('orderIdPrefix must be 4 to 5 uppercase letters or numbers')
+            }
+            updateSettings.orderIdPrefix = orderIdPrefix
+        }
+
         if (input.minimumOrderAmountDzd !== undefined) {
             const minimumOrderAmountDzd = Math.trunc(Number(input.minimumOrderAmountDzd))
             if (!Number.isFinite(minimumOrderAmountDzd) || minimumOrderAmountDzd < 0) {
@@ -235,6 +320,31 @@ export class StoreSettingsService {
                 throw new StoreSettingsValidationError('isCompleted must be a boolean')
             }
             updateSettings.isCompleted = input.isCompleted
+        }
+
+        if (input.onboardingStep !== undefined) {
+            const onboardingStep = Math.trunc(Number(input.onboardingStep))
+            if (!Number.isFinite(onboardingStep) || onboardingStep < 0 || onboardingStep > 50) {
+                throw new StoreSettingsValidationError('onboardingStep must be an integer between 0 and 50')
+            }
+            updateSettings.onboardingStep = onboardingStep
+        }
+
+        // The client says "I stepped out" or "I came back"; the server owns the
+        // timestamp. Exposing the raw date would let a client backdate itself out
+        // of the redirect.
+        if (input.onboardingExited !== undefined) {
+            if (typeof input.onboardingExited !== 'boolean') {
+                throw new StoreSettingsValidationError('onboardingExited must be a boolean')
+            }
+            updateSettings.onboardingExitedAt = input.onboardingExited ? new Date() : null
+        }
+
+        if (input.checklistDismissed !== undefined) {
+            if (typeof input.checklistDismissed !== 'boolean') {
+                throw new StoreSettingsValidationError('checklistDismissed must be a boolean')
+            }
+            updateSettings.checklistDismissed = input.checklistDismissed
         }
 
         if (input.allowedDeliveryProviders !== undefined) {
@@ -282,6 +392,144 @@ export class StoreSettingsService {
             updateSettings.loyaltyMarginFactor = new Prisma.Decimal(toDecimalString(input.loyaltyMarginFactor, 'loyaltyMarginFactor'))
         }
 
+        if (input.salesInvoiceEnabled !== undefined) {
+            if (typeof input.salesInvoiceEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('salesInvoiceEnabled must be a boolean')
+            }
+            updateSettings.salesInvoiceEnabled = input.salesInvoiceEnabled
+        }
+
+        if (input.invoiceNumberPrefix !== undefined) {
+            updateSettings.invoiceNumberPrefix = sanitizeInvoiceNumberPrefix(input.invoiceNumberPrefix)
+        }
+
+        if (input.invoiceFooterText !== undefined) {
+            if (input.invoiceFooterText !== null && typeof input.invoiceFooterText !== 'string') {
+                throw new StoreSettingsValidationError('invoiceFooterText must be a string or null')
+            }
+            const footerText = typeof input.invoiceFooterText === 'string' ? input.invoiceFooterText.trim() : ''
+            if (footerText.length > 1000) {
+                throw new StoreSettingsValidationError('invoiceFooterText is too long (max 1000 chars)')
+            }
+            updateSettings.invoiceFooterText = footerText || null
+        }
+
+        if (input.whatsappConfirmationTemplate !== undefined) {
+            if (input.whatsappConfirmationTemplate !== null && typeof input.whatsappConfirmationTemplate !== 'string') {
+                throw new StoreSettingsValidationError('whatsappConfirmationTemplate must be a string or null')
+            }
+            const templateText = typeof input.whatsappConfirmationTemplate === 'string' ? input.whatsappConfirmationTemplate.trim() : ''
+            if (templateText.length > 2000) {
+                throw new StoreSettingsValidationError('whatsappConfirmationTemplate is too long (max 2000 chars)')
+            }
+            updateSettings.whatsappConfirmationTemplate = templateText || null
+        }
+
+        if (input.invoiceShowLogo !== undefined) {
+            if (typeof input.invoiceShowLogo !== 'boolean') {
+                throw new StoreSettingsValidationError('invoiceShowLogo must be a boolean')
+            }
+            updateSettings.invoiceShowLogo = input.invoiceShowLogo
+        }
+
+        if (input.clearanceEnabled !== undefined) {
+            if (typeof input.clearanceEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('clearanceEnabled must be a boolean')
+            }
+            updateSettings.clearanceEnabled = input.clearanceEnabled
+        }
+
+        if (input.clearanceMultiple !== undefined) {
+            const clearanceMultiple = Math.trunc(Number(input.clearanceMultiple))
+            if (!Number.isFinite(clearanceMultiple) || clearanceMultiple < 1) {
+                throw new StoreSettingsValidationError('clearanceMultiple must be a positive integer')
+            }
+            updateSettings.clearanceMultiple = clearanceMultiple
+        }
+
+        if (input.clearanceDivisor !== undefined) {
+            const clearanceDivisor = Math.trunc(Number(input.clearanceDivisor))
+            if (!Number.isFinite(clearanceDivisor) || clearanceDivisor < 1) {
+                throw new StoreSettingsValidationError('clearanceDivisor must be a positive integer')
+            }
+            updateSettings.clearanceDivisor = clearanceDivisor
+        }
+
+        if (input.clearanceBannerEnabled !== undefined) {
+            if (typeof input.clearanceBannerEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('clearanceBannerEnabled must be a boolean')
+            }
+            updateSettings.clearanceBannerEnabled = input.clearanceBannerEnabled
+        }
+
+        if (input.clearanceBannerText !== undefined) {
+            if (input.clearanceBannerText !== null && typeof input.clearanceBannerText !== 'string') {
+                throw new StoreSettingsValidationError('clearanceBannerText must be a string or null')
+            }
+            const bannerText = typeof input.clearanceBannerText === 'string' ? input.clearanceBannerText.trim() : ''
+            if (bannerText.length > 300) {
+                throw new StoreSettingsValidationError('clearanceBannerText is too long (max 300 chars)')
+            }
+            updateSettings.clearanceBannerText = bannerText || null
+        }
+
+        if (input.blacklistEnabled !== undefined) {
+            if (typeof input.blacklistEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('blacklistEnabled must be a boolean')
+            }
+            updateSettings.blacklistEnabled = input.blacklistEnabled
+        }
+
+        if (input.duplicateOrderLimitEnabled !== undefined) {
+            if (typeof input.duplicateOrderLimitEnabled !== 'boolean') {
+                throw new StoreSettingsValidationError('duplicateOrderLimitEnabled must be a boolean')
+            }
+            updateSettings.duplicateOrderLimitEnabled = input.duplicateOrderLimitEnabled
+        }
+
+        if (input.duplicateOrderLimit !== undefined) {
+            const duplicateOrderLimit = Math.trunc(Number(input.duplicateOrderLimit))
+            if (!Number.isFinite(duplicateOrderLimit) || duplicateOrderLimit < 1) {
+                throw new StoreSettingsValidationError('duplicateOrderLimit must be a positive integer')
+            }
+            updateSettings.duplicateOrderLimit = duplicateOrderLimit
+        }
+
+        if (input.duplicateOrderWindowHours !== undefined) {
+            const duplicateOrderWindowHours = Math.trunc(Number(input.duplicateOrderWindowHours))
+            if (!Number.isFinite(duplicateOrderWindowHours) || duplicateOrderWindowHours < 1) {
+                throw new StoreSettingsValidationError('duplicateOrderWindowHours must be a positive integer')
+            }
+            updateSettings.duplicateOrderWindowHours = duplicateOrderWindowHours
+        }
+
+        if (input.maintenanceMode !== undefined) {
+            if (typeof input.maintenanceMode !== 'boolean') {
+                throw new StoreSettingsValidationError('maintenanceMode must be a boolean')
+            }
+            updateTenant.maintenanceMode = input.maintenanceMode
+        }
+
+        if (input.maintenanceMessage !== undefined) {
+            if (input.maintenanceMessage !== null && typeof input.maintenanceMessage !== 'string') {
+                throw new StoreSettingsValidationError('maintenanceMessage must be a string or null')
+            }
+            const maintenanceMessage = typeof input.maintenanceMessage === 'string' ? input.maintenanceMessage.trim() : ''
+            if (maintenanceMessage.length > 300) {
+                throw new StoreSettingsValidationError('maintenanceMessage is too long (max 300 chars)')
+            }
+            updateSettings.maintenanceMessage = maintenanceMessage || null
+        }
+
+        if (input.legalPages !== undefined) {
+            if (!isValidStoreLegalPagesConfig(input.legalPages)) {
+                throw new StoreSettingsValidationError(
+                    'legalPages must include terms/privacy/returns/contact with enabled, title.{fr,en,ar} and content.{fr,en,ar}'
+                )
+            }
+            updateSettings.legalPages = normalizeStoreLegalPagesConfig(input.legalPages) as unknown as Prisma.InputJsonValue
+        }
+
         // Execute Transaction if tenant fields need updating
         if (Object.keys(updateTenant).length > 0) {
             const [updatedTenant, updatedSettings] = await prisma.$transaction([
@@ -292,7 +540,12 @@ export class StoreSettingsService {
                     update: updateSettings
                 })
             ])
-            return { ...updatedSettings, name: updatedTenant.name, slug: updatedTenant.slug }
+            return {
+                ...updatedSettings,
+                name: updatedTenant.name,
+                slug: updatedTenant.slug,
+                maintenanceMode: updatedTenant.maintenanceMode
+            }
         }
 
         // Just update settings
@@ -304,7 +557,104 @@ export class StoreSettingsService {
 
         // We need to fetch tenant data to return consistent shape
         const t = await prisma.tenant.findUnique({ where: { id: tenantId } })
-        return { ...s, name: t?.name, slug: t?.slug }
+        return { ...s, name: t?.name, slug: t?.slug, maintenanceMode: t?.maintenanceMode ?? false }
+    }
+
+    async clearanceAppliesToAllProducts(tenantId: string): Promise<boolean> {
+        const taggedCount = await prisma.product.count({ where: { tenantId, isClearance: true } })
+        return taggedCount === 0
+    }
+
+    /**
+     * What a store must have before its public storefront may open. A store that
+     * is live but cannot take an order is worse for the merchant than one that is
+     * still dark, so both of these are hard requirements rather than warnings.
+     *
+     * Delivery counts SELF: a merchant who delivers personally is ready to sell,
+     * and demanding a Maystro or Yalidine account on day one would strand them.
+     */
+    async getPublishReadiness(tenantId: string) {
+        const [productCount, settings] = await Promise.all([
+            prisma.product.count({ where: { tenantId } }),
+            prisma.storeSettings.findUnique({
+                where: { tenantId },
+                select: { allowedDeliveryProviders: true, storePickupEnabled: true }
+            })
+        ])
+
+        const hasProduct = productCount > 0
+        const hasDelivery =
+            (settings?.allowedDeliveryProviders ?? []).length > 0 || settings?.storePickupEnabled === true
+
+        const missing: string[] = []
+        if (!hasProduct) missing.push('product')
+        if (!hasDelivery) missing.push('delivery')
+
+        return { hasProduct, hasDelivery, canPublish: missing.length === 0, missing }
+    }
+
+    async getOnboardingChecklist(tenantId: string) {
+        const [settings, tenant, productCount, categoryCount, readiness] = await Promise.all([
+            prisma.storeSettings.findUnique({ where: { tenantId } }),
+            prisma.tenant.findUnique({ where: { id: tenantId } }),
+            prisma.product.count({ where: { tenantId } }),
+            prisma.category.count({ where: { tenantId } }),
+            this.getPublishReadiness(tenantId)
+        ])
+
+        if (!tenant) {
+            throw new Error(`Tenant not found: ${tenantId}`)
+        }
+
+        const hasLogo = settings?.logoUrl != null
+        const hasProducts = productCount > 0
+        const hasCategories = categoryCount > 0
+        // Any delivery method the store can actually fulfil with, SELF included.
+        // Reading only MAYSTRO/YALIDINE marked self-delivering merchants as
+        // permanently incomplete.
+        const hasDelivery = readiness.hasDelivery
+        // Published is publishedAt, not isOffline. isOffline is the offline-only
+        // tier and defaults to false, which is why this item used to show as done
+        // on a store that had never been published.
+        const isPublished = tenant.publishedAt != null
+        const checklistDismissed = settings?.checklistDismissed ?? false
+
+        return {
+            hasLogo,
+            hasProducts,
+            hasCategories,
+            hasDelivery,
+            isPublished,
+            checklistDismissed,
+            canPublish: readiness.canPublish,
+            missingToPublish: readiness.missing
+        }
+    }
+
+    /**
+     * Opens the public storefront. Idempotent: publishing an already-published
+     * store keeps its original publishedAt rather than resetting the date.
+     */
+    async publishStore(tenantId: string) {
+        const tenant = await prisma.tenant.findUnique({ where: { id: tenantId }, select: { publishedAt: true } })
+        if (!tenant) {
+            throw new Error(`Tenant not found: ${tenantId}`)
+        }
+        if (tenant.publishedAt) {
+            return { publishedAt: tenant.publishedAt }
+        }
+
+        const readiness = await this.getPublishReadiness(tenantId)
+        if (!readiness.canPublish) {
+            throw new StorePublishBlockedError(readiness.missing)
+        }
+
+        const updated = await prisma.tenant.update({
+            where: { id: tenantId },
+            data: { publishedAt: new Date() },
+            select: { publishedAt: true }
+        })
+        return { publishedAt: updated.publishedAt }
     }
 
     buildFrontendAgentSummary(args: {
@@ -313,6 +663,7 @@ export class StoreSettingsService {
             logoUrl: string | null
             faviconUrl: string | null
             primaryColor: string
+            useBrandColor?: boolean
             templateKey: string
             announcementText: string | null
             announcementScrolling: boolean
@@ -323,11 +674,12 @@ export class StoreSettingsService {
             hideOptionalAddress: boolean
             currencyCode: string
             currencyCountry: string
+            orderIdPrefix: string
         }
         apiBasePath?: string
     }): { markdown: string; data: any } {
         const apiBasePath = args.apiBasePath ?? '/api'
-        const tenantHostHint = `${args.tenant.slug}.platform.com (or ${args.tenant.slug}.localhost in dev)`
+        const tenantHostHint = `${args.tenant.slug}.swekly.com (or ${args.tenant.slug}.localhost in dev)`
 
         const data = {
             tenant: args.tenant,
@@ -363,10 +715,12 @@ export class StoreSettingsService {
             `- Logo: ${args.settings.logoUrl ? args.settings.logoUrl : '(none)'}`,
             `- Favicon: ${args.settings.faviconUrl ? args.settings.faviconUrl : '(none)'}`,
             `- Primary color: ${args.settings.primaryColor}`,
+            `- Apply brand color to template: ${args.settings.useBrandColor ? 'yes' : 'no'}`,
             `- Announcement: ${args.settings.announcementText ? `"${args.settings.announcementText}"` : '(none)'} (scrolling: ${args.settings.announcementScrolling})`,
             `- Language: ${args.settings.language}`,
             `- Cart + checkout enabled: ${args.settings.cartEnabled ? 'yes' : 'no'}`,
             `- Product page COD form: ${args.settings.codEnabled ? 'enabled' : 'disabled'}`,
+            `- Customer order prefix: ${args.settings.orderIdPrefix}`,
             `- Minimum order amount: ${args.settings.minimumOrderAmountDzd} DZD`,
             `- Hide optional address at checkout: ${args.settings.hideOptionalAddress ? 'yes' : 'no'}`,
             `- Currency: ${args.settings.currencyCode} (${args.settings.currencyCountry})`,

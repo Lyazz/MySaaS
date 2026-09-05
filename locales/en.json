@@ -11,10 +11,21 @@
         "title": "An error occurred",
         "message": "Something went wrong. Please try again later."
       },
+      "maintenance": {
+        "title": "Store under maintenance",
+        "message": "This store is temporarily closed for maintenance. Please check back soon."
+      },
       "actions": {
         "backHome": "Back to Home"
       },
       "details": "Error details"
+    },
+    "siteClosed": {
+      "badge": "Site paused",
+      "title": "The platform is temporarily closed",
+      "message": "",
+      "haveAccount": "Already have a store?",
+      "logIn": "Log in"
     }
   },
   "i18n": {
@@ -42,7 +53,7 @@
       "description": "Build your store, take orders, and manage payments and shipping from one dashboard."
     },
     "hero": {
-      "kicker": "The SaaS for Algerian merchants",
+      "kicker": "The SaaS for modern merchants",
       "title": {
         "buildSell": "Launch. Run.",
         "scale": "Grow."
@@ -99,7 +110,7 @@
           "number": "03",
           "caption": "Ship",
           "title": "Pick the carrier. We dispatch.",
-          "description": "Native integrations with Maystro, Yalidine and self-delivery fleets."
+          "description": "Multi-carrier integrations with real-time webhook updates and self-delivery options."
         },
         "grow": {
           "number": "04",
@@ -150,9 +161,9 @@
     },
     "stats": {
       "activeMerchants": "Active stores",
-      "revenueGenerated": "Sales processed",
+      "revenueGenerated": "Monthly sales",
       "uptime": "Uptime",
-      "gmvDetail": "Monthly sales volume"
+      "gmvDetail": "Sales processed monthly"
     },
     "faq": {
       "title": "Frequently Asked Questions",
@@ -170,7 +181,8 @@
           "question": "What changes between plans right now?",
           "answer": "Right now, the main difference is how many orders are included per month."
         }
-      }
+      },
+      "eyebrow": "FAQ"
     },
     "testimonials": {
       "eyebrow": "Testimonials",
@@ -179,39 +191,39 @@
         "accent": "people",
         "suffix": "like you."
       },
-      "subtitle": "Merchants in Algeria who want a fast store and simple operations.",
+      "subtitle": "Merchants who want a fast store and simple operations.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "User avatar",
       "items": [
         {
           "quote": "We put our products online quickly. Orders come in, and everything stays in one place.",
           "author": "Nassim",
-          "role": "Owner, Nokhba Store"
+          "role": "Owner"
         },
         {
-          "quote": "Custom domains were easy to set up, and sales are clear in the dashboard.",
-          "author": "Amina",
-          "role": "Founder, Dzair Cosmetics"
+          "quote": "The dashboard visibility and inventory management tools transformed how we operate. Très pratique.",
+          "author": "Karim",
+          "role": "Founder"
         },
         {
           "quote": "Local shipping integrations save us time every day. Dispatching became a habit.",
           "author": "Yanis",
-          "role": "Director, TechAlgeria"
+          "role": "Director"
         },
         {
-          "quote": "Even with high traffic, the store stays fast. We can focus on selling.",
-          "author": "Lyes",
-          "role": "Owner, Oran Fashion"
+          "quote": "Integration with local payment methods was seamless. Our customers across Senegal love the options.",
+          "author": "Fatou",
+          "role": "Owner"
         },
         {
-          "quote": "No more lost orders in DMs. Customers order and pay easily.",
-          "author": "Meriem",
-          "role": "CEO, BioAtlas"
+          "quote": "The mobile-first design helped us reach more customers. Conversion rate improved remarkably.",
+          "author": "Sophie",
+          "role": "Marketing Manager"
         },
         {
-          "quote": "We launched the store in an afternoon. Simple, clean, and ready to sell.",
-          "author": "Sofiane",
-          "role": "Manager, Casbah Gifts"
+          "quote": "Setup was straightforward, and the support team was helpful. Muy recomendado.",
+          "author": "Carlos",
+          "role": "Owner"
         }
       ]
     },
@@ -249,7 +261,7 @@
         "sales": {
           "title": "Talk to Sales",
           "description": "Interested in our enterprise plans? Just pick up the phone to chat with a member of our sales team.",
-          "contact": "+213 550 00 00 00"
+          "contact": "+XX X XXX XXXX"
         },
         "support": {
           "title": "Contact Support",
@@ -283,7 +295,7 @@
       "today": "Today",
       "operationsRail": "What runs in the background",
       "whatsapp": "WhatsApp confirmations",
-      "carriers": "Delivery sent to Maystro or Yalidine",
+      "carriers": "Real-time carrier sync with webhooks",
       "analytics": "Sales and campaign tracking",
       "readinessLabel": "Ready to sell",
       "readinessText": "Everything stays simple for your team: your shop, your orders, your delivery options, and your daily follow-up.",
@@ -309,15 +321,86 @@
     },
     "cinematic": {
       "hero": {
-        "eyebrow": "Built for Algerian commerce",
+        "eyebrow": "Built for modern commerce",
         "headlinePre": "One commerce engine.",
         "headlineAccent": "Every",
-        "headlinePost": "Algerian merchant.",
+        "headlinePost": "merchant.",
         "subhead": "Storefront, checkout, delivery, and analytics — unified on a single platform that ships in minutes, not months.",
         "ctaPrimary": "Start for free",
         "ctaSecondary": "See it work"
       },
-      "logoCloud": "Our integrations +50",
+      "heroCarousel": {
+        "ctaRegister": "Start scaling for free",
+        "ctaFeatures": "Explore features",
+        "slides": {
+          "delivery": {
+            "eyebrow": "Delivery network",
+            "headlinePre": "Ship with",
+            "headlineAccent": "any",
+            "headlinePost": " carrier.",
+            "subhead": "",
+            "meta": [
+              "Multi-carrier integrations",
+              "Live status sync",
+              "Returns reconciled automatically"
+            ],
+            "address": "swekly.com/admin/delivery"
+          },
+          "warehouse": {
+            "eyebrow": "Advanced inventory control",
+            "headlinePre": "Stock,",
+            "headlineAccent": "live",
+            "headlinePost": ".",
+            "subhead": "",
+            "meta": [
+              "Variants, SKUs, barcodes & batches",
+              "Reorder points & low-stock alerts",
+              "Purchases, suppliers & stock audits"
+            ],
+            "address": "swekly.com/admin/inventory"
+          },
+          "themes": {
+            "eyebrow": "Storefront templates",
+            "headlinePre": "Several themes.",
+            "headlineAccent": "One",
+            "headlinePost": " click.",
+            "subhead": "",
+            "meta": [
+              "Mobile-first themes",
+              "RTL & multilingual",
+              "Live theme builder"
+            ],
+            "address": "swekly.com/admin/themes"
+          },
+          "conversion": {
+            "eyebrow": "Conversion & analytics",
+            "headlinePre": "Track",
+            "headlineAccent": "every",
+            "headlinePost": " conversion.",
+            "subhead": "",
+            "meta": [
+              "Real-time funnel",
+              "Meta Pixel built-in",
+              "Live order dashboard"
+            ],
+            "address": "swekly.com/admin/analytics"
+          },
+          "pos": {
+            "eyebrow": "Cross-platform POS",
+            "headlinePre": "One register.",
+            "headlineAccent": "Every",
+            "headlinePost": " device.",
+            "subhead": "",
+            "meta": [
+              "Native apps · iOS · Android · Windows · macOS",
+              "Offline-first checkout, instant cloud resync",
+              "Loyalty, promos & receipts in a single tap"
+            ],
+            "address": "swekly.com/admin/pos"
+          }
+        }
+      },
+      "logoCloud": "Our integrations — carriers, pixels, tools",
       "howItWorks": {
         "titlePre": "From idea to",
         "titleAccent": "income",
@@ -339,7 +422,7 @@
         "titlePre": "Everything you need.",
         "titleAccent": "Nothing",
         "titlePost": "you don't.",
-        "description": "Multi-tenant by design. Localized for Algeria. Engineered to scale without rewriting your stack."
+        "description": "Global-ready platform. Beautiful in every language. Built to grow with your business."
       },
       "pricing": {
         "eyebrow": "Pricing",
@@ -370,7 +453,7 @@
       },
       "footer": {
         "languages": "Language",
-        "madeFor": "Made for Algeria"
+        "madeFor": "Made for merchants"
       },
       "templates": {
         "eyebrow": "Storefront themes",
@@ -461,17 +544,13 @@
       "integrations": {
         "eyebrow": "Built-in integrations",
         "titlePre": "Every tool",
-        "titleAccent": "Algerian merchants",
+        "titleAccent": "merchants",
         "titlePost": "actually use",
         "description": "From local delivery couriers to WhatsApp automation, Meta Pixel tracking to AI-powered tools — it all works out of the box.",
         "tools": {
-          "maystro": {
-            "name": "Maystro",
-            "description": "Algeria's #1 delivery network. Create and track shipments without leaving your dashboard."
-          },
-          "yalidine": {
-            "name": "Yalidine",
-            "description": "Nationwide express delivery with real-time tracking and automatic status updates."
+          "multicarrier": {
+            "name": "Multi-Carrier Support",
+            "description": "Connect with multiple carriers via real-time webhooks. Automatic dispatch, tracking, and status updates all in one place."
           },
           "whatsapp": {
             "name": "WhatsApp API",
@@ -504,20 +583,32 @@
       "heroProof": {
         "rating": "4.9 / 5 rating",
         "ratingLabel": "from 800+ merchants",
-        "merchants": "1,200+",
-        "merchantsLabel": "active stores in DZ",
+        "merchants": "500+",
+        "merchantsLabel": "active stores",
         "cod": "COD ready",
         "codLabel": "out of the box",
         "noCard": "No credit card",
         "noCardLabel": "free 14-day trial"
       },
       "trustStrip": {
-        "eyebrow": "Made for Algeria",
+        "eyebrow": "Made for merchants",
         "items": {
-          "cod": { "title": "Cash on delivery", "description": "Built-in COD with auto reconciliation across every wilaya." },
-          "wilayas": { "title": "58 wilayas covered", "description": "Yalidine, Maystro, ZR & Noest — one-click activation." },
-          "rtl": { "title": "Arabic-first storefront", "description": "Full RTL, Darija-friendly UI, AR/FR/EN with one switch." },
-          "dzd": { "title": "DZD pricing", "description": "Local currency, taxes, and invoicing — no FX surprises." }
+          "cod": {
+            "title": "Cash on delivery",
+            "description": "Built-in COD with auto reconciliation across all carriers."
+          },
+          "wilayas": {
+            "title": "Carrier integrations",
+            "description": "Connect with delivery carriers seamlessly — one-click activation."
+          },
+          "rtl": {
+            "title": "Multi-language support",
+            "description": "Full RTL, Arabic-friendly UI, AR/FR/EN with one switch."
+          },
+          "dzd": {
+            "title": "Stock management",
+            "description": "Real-time inventory tracking and automated reorder alerts."
+          }
         }
       },
       "stickyCta": {
@@ -531,7 +622,30 @@
     "nav": {
       "features": "Features",
       "pricing": "Pricing",
+      "templates": "Templates",
       "about": "About"
+    },
+    "templatesPage": {
+      "hero": {
+        "pill": "Store templates",
+        "title": {
+          "prefix": "Design built to ",
+          "accent": "sell"
+        },
+        "subtitle": "Pick from {count} professionally designed templates. Every theme is mobile-first, RTL-ready, blazing fast and fully customizable to your brand."
+      },
+      "card": {
+        "viewDemo": "View demo store",
+        "accent": "Color",
+        "shotAlt": "{name} demo store"
+      },
+      "cta": {
+        "eyebrow": "Ready to launch?",
+        "headlinePre": "Pick a template,",
+        "headlineAccent": "open",
+        "headlinePost": "your store today",
+        "button": "Start for free"
+      }
     },
     "actions": {
       "dashboard": "Dashboard",
@@ -553,12 +667,12 @@
           "description": "Launch a clean, mobile-first store and customize it around your products in a short time."
         },
         "tenancy": {
-          "title": "Multi-tenant by design",
-          "description": "Each store has its own data, domain, and brand — fully isolated and secure from day one."
+          "title": "Scalable infrastructure",
+          "description": "Enterprise-grade platform built for performance and reliability at any scale."
         },
         "localization": {
-          "title": "Built for Algeria",
-          "description": "Arabic, French, and English with full RTL support, plus local currency and delivery flows."
+          "title": "Global-ready",
+          "description": "Arabic, French, and English with full RTL support and multi-language checkout flows."
         },
         "mobile": {
           "title": "Mobile-first experience",
@@ -578,7 +692,7 @@
         },
         "logistics": {
           "title": "Delivery connections",
-          "description": "Send orders to Maystro, Yalidine, or your own delivery workflow without copy-pasting."
+          "description": "Integrate with your carriers seamlessly for streamlined order fulfillment."
         },
         "domains": {
           "title": "Your own domain",
@@ -587,7 +701,7 @@
       },
       "bullets": {
         "checkout": "Fast order form",
-        "carriers": "Maystro and Yalidine",
+        "carriers": "Multi-carrier support",
         "dispatch": "Easy dispatch follow-up"
       },
       "visual": {
@@ -624,10 +738,10 @@
       "copyright": "© {year} Swekly Platform. All rights reserved."
     },
     "aboutPage": {
-      "heroTitle": "Built for the way Algerian commerce actually runs",
+      "heroTitle": "Built for the way commerce actually runs",
       "heroSubtitle": "Swekly helps merchants launch faster, stay organized, and keep delivery simple from the first day.",
       "storyTitle": "Not another generic store builder",
-      "storyBody": "We designed Swekly around the realities of Algerian merchants: mobile-first shopping, COD confirmation, local delivery networks, and teams that need a smoother daily routine.",
+      "storyBody": "We designed Swekly around the realities of modern merchants: mobile-first shopping, COD confirmation, local delivery networks, and teams that need a smoother daily routine.",
       "context": {
         "storyLabel": "Why merchants switch",
         "label": "Built around real habits",
@@ -649,7 +763,7 @@
           },
           "cod": {
             "title": "Built for COD conversion",
-            "body": "Phone-first checkout, clear trust signals, and delivery-friendly steps match how customers order in Algeria."
+            "body": "Phone-first checkout, clear trust signals, and delivery-friendly steps match how customers actually order."
           },
           "ops": {
             "title": "Made for daily execution",
@@ -659,7 +773,7 @@
       },
       "final": {
         "title": "Start with a stronger storefront foundation",
-        "subtitle": "Launch faster, keep operations cleaner, and scale on a platform designed for Algerian commerce."
+        "subtitle": "Launch faster, keep operations cleaner, and scale on a platform designed for modern commerce."
       }
     }
   },
@@ -694,7 +808,7 @@
           },
           "shipping": {
             "title": "Smart Shipping",
-            "description": "Auto-dispatch to Yalidine, Eckoz, and 50+ Algerian carriers."
+            "description": "Auto-dispatch to 50+ carriers with real-time webhook updates and automatic tracking."
           },
           "analytics": {
             "title": "Deep Analytics",
@@ -733,6 +847,13 @@
       }
     },
     "register": {
+      "closed": {
+        "badge": "Registration paused",
+        "title": "Sign-ups are temporarily closed",
+        "message": "New store registration is paused for now. We'll reopen it soon — thanks for your patience.",
+        "haveAccount": "Already have an account?",
+        "logIn": "Log in"
+      },
       "hero": {
         "launchYour": "Launch your",
         "empire": "Empire",
@@ -781,15 +902,36 @@
           "label": "Work Email",
           "placeholder": "name{'@'}company.com"
         },
+        "phone": {
+          "label": "Phone Number",
+          "placeholder": "+XX X XXX XXXX"
+        },
+        "otp": {
+          "label": "OTP Confirmation",
+          "placeholder": "Enter OTP code",
+          "send": "Send Code",
+          "verify": "Verify Code",
+          "verified": "Contact confirmed.",
+          "channelPrompt": "Where should we send your code?",
+          "sentTo": "Code sent to {destination}. It expires in {minutes} minutes.",
+          "sending": "Sending…",
+          "verifying": "Verifying…",
+          "resendIn": "Resend in {seconds}s"
+        },
         "password": {
           "label": "Password"
         },
+        "confirmPassword": {
+          "label": "Confirm Password"
+        },
         "submit": {
           "creating": "Creating Account...",
-          "register": "Register & Create Store"
+          "register": "Register & Create Store",
+          "verifyOtp": "Verify OTP to Continue"
         },
         "haveAccount": "Already have an account?",
-        "logIn": "Log in"
+        "logIn": "Log in",
+        "forgotPassword": "Forgot password?"
       },
       "success": {
         "title": "You're in!",
@@ -797,7 +939,17 @@
         "cta": "Go to Dashboard"
       },
       "errors": {
-        "generic": "An error occurred during registration."
+        "generic": "An error occurred during registration.",
+        "sessionMissing": "Your account was created, but automatic sign-in failed. Please log in to continue.",
+        "emailInvalid": "Enter a valid email address.",
+        "passwordTooShort": "Password must be at least {min} characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "phoneRequired": "Phone number is required.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "phoneRestricted": "Registration is currently unavailable.",
+        "otpRequired": "Enter the OTP code.",
+        "otpSendFirst": "Send OTP code first.",
+        "otpVerifyFirst": "Verify OTP before creating your account."
       },
       "social": {
         "divider": "or continue with",
@@ -805,6 +957,62 @@
         "facebook": "Continue with Facebook",
         "apple": "Continue with Apple"
       }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "We will send you a one-time code to confirm it is you, then you can choose a new password.",
+      "backToLogin": "Back to login",
+      "email": {
+        "label": "Email Address",
+        "placeholder": "name{'@'}company.com"
+      },
+      "phone": {
+        "label": "Phone Number",
+        "placeholder": "05 55 55 55 55"
+      },
+      "password": {
+        "label": "New Password",
+        "placeholder": "At least 8 characters"
+      },
+      "confirmPassword": {
+        "label": "Confirm New Password",
+        "placeholder": "Repeat your new password"
+      },
+      "otp": {
+        "channelLabel": "Send my code by",
+        "label": "Verification Code",
+        "placeholder": "000000",
+        "sentTo": "If an account matches, a code is on its way to {destination}. It expires in {minutes} minutes.",
+        "resend": "Send the code again",
+        "resendIn": "Send again in {seconds}s",
+        "changeDestination": "Use a different address"
+      },
+      "submit": {
+        "send": "Send Code",
+        "sending": "Sending…",
+        "verify": "Verify Code",
+        "verifying": "Verifying…",
+        "save": "Save New Password",
+        "saving": "Saving…"
+      },
+      "done": {
+        "title": "Password updated",
+        "subtitle": "You have been signed out everywhere. Log in with your new password.",
+        "logIn": "Go to login"
+      },
+      "errors": {
+        "emailInvalid": "Enter a valid email address.",
+        "phoneRequired": "Enter your phone number.",
+        "codeRequired": "Enter the code you received.",
+        "passwordTooShort": "Password must be at least {min} characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "generic": "Your password could not be updated. Try again."
+      }
+    },
+    "channels": {
+      "email": "Email",
+      "sms": "SMS",
+      "whatsapp": "WhatsApp"
     }
   },
   "pricing": {
@@ -830,7 +1038,10 @@
       "perYear": "/yr"
     },
     "features": {
-      "ordersPerMonth": "{count} Orders/mo"
+      "ordersPerMonth": "{count} Orders/mo",
+      "maxProducts": "Up to {count} products",
+      "maxPixels": "{count} marketing pixels",
+      "aiScansPerMonth": "{count} AI document scans per month"
     },
     "page": {
       "title": "Simple, transparent pricing",
@@ -879,6 +1090,11 @@
         "description": "For brands handling larger volumes every month",
         "cta": "Get 15 days for free"
       }
+    },
+    "billing": {
+      "monthly": "Billed every month",
+      "yearly": "Billed {total} once a year",
+      "free": "Free, no payment needed"
     }
   },
   "storefront": {
@@ -891,7 +1107,8 @@
     "common": {
       "productsCount": "{count} Products",
       "selectPlaceholder": "Select…",
-      "storeFallback": "Store"
+      "storeFallback": "Store",
+      "collection": "Collection"
     },
     "actions": {
       "addToCart": "Add to cart",
@@ -922,7 +1139,28 @@
       "buy": "Buy {qty}",
       "save": "Save {amount}"
     },
+    "clearance": {
+      "badge": "Clearance",
+      "progressHint": "Buy {remaining} more clearance item(s) to unlock a discount",
+      "unlockedHint": "You've unlocked a clearance discount!",
+      "discountLine": "Clearance discount",
+      "bannerFallback": "Clearance sale — buy more, save more!",
+      "dialogTitle": "Big clearance sale is on!",
+      "dialogBody": "Buy {multiple} clearance items and the {free} cheapest among them are on us. And it stacks: {multiple2} items = {free2} free, {multiple4} items = {free4} free.",
+      "dialogCta": "Got it",
+      "dialogDismissAria": "Close clearance dialog",
+      "dialogBuyLabel": "bought",
+      "dialogFreeLabel": "free"
+    },
     "pages": {
+      "about": {
+        "seo": {
+          "title": "About - {tenant}",
+          "description": "Learn more about {tenant}."
+        },
+        "heading": "About {tenant}",
+        "placeholder": "This is the store about page. Replace this text from the store settings wizard to tell customers who you are."
+      },
       "contact": {
         "seo": {
           "title": "Contact - {tenant}",
@@ -938,7 +1176,42 @@
           "emailUs": "Email Us",
           "visitUs": "Visit Us"
         },
-        "addressPlaceholder": "123 Store St, City, Country"
+        "addressPlaceholder": "123 Store St, City, Country",
+        "intro": "A question about a product, an order, or just want to say hello? We are here for you.",
+        "form": {
+          "name": {
+            "label": "Full name",
+            "placeholder": "Your name"
+          },
+          "email": {
+            "label": "Email",
+            "placeholder": "you{'@'}email.com"
+          },
+          "message": {
+            "label": "Message",
+            "placeholder": "Your message…"
+          },
+          "send": "Send the message"
+        },
+        "mailSubject": "Message from {name}"
+      },
+      "categories": {
+        "title": "Categories",
+        "subtitle": "Browse every collection in the store.",
+        "card": {
+          "viewCollection": "View collection"
+        },
+        "empty": {
+          "title": "No categories yet",
+          "subtitle": "Categories appear here as soon as they are added."
+        },
+        "errors": {
+          "loadFailed": "Categories could not be loaded. Refresh the page to try again."
+        },
+        "seo": {
+          "title": "Categories",
+          "description": "Browse every collection in the store."
+        }
       }
     },
     "home": {
@@ -981,7 +1254,12 @@
     "nav": {
       "home": "Home",
       "shop": "Shop",
-      "contact": "Contact"
+      "contact": "Contact",
+      "categories": "Categories",
+      "menu": "Menu",
+      "closeMenu": "Close menu",
+      "previous": "Previous",
+      "next": "Next"
     },
     "cart": {
       "label": "Cart",
@@ -1024,7 +1302,20 @@
       "coupon": {
         "title": "Coupon code",
         "badge": "Discount",
-        "placeholder": "Enter code (e.g., WELCOME10)"
+        "placeholder": "Enter code (e.g., WELCOME10)",
+        "checking": "Checking…",
+        "remove": "Remove",
+        "invalid": "This promo code is not valid",
+        "freeShipping": "Free shipping applied",
+        "applied": "Code {code} applied",
+        "errors": {
+          "notStarted": "This promo code is not active yet",
+          "expired": "This promo code has expired",
+          "usageLimit": "This promo code has reached its usage limit",
+          "customerLimit": "You have already used this promo code",
+          "notApplicable": "This promo code does not apply to the items in your cart",
+          "minOrder": "This promo code needs a minimum order of {amount} {currency}"
+        }
       },
       "summary": {
         "deliveryOption": "Delivery option",
@@ -1039,7 +1330,8 @@
         "phoneRequired": "Phone number is required to place your order.",
         "deliveryRequired": "Please select a delivery option.",
         "requiredFields": "Please fill in all required fields.",
-        "submitFailed": "Failed to place order. Please try again."
+        "submitFailed": "Failed to place order. Please try again.",
+        "shippingUnavailable": "Shipping is unavailable for the selected commune. Please pick another delivery option."
       },
       "actions": {
         "returnToCart": "Return to cart",
@@ -1091,13 +1383,30 @@
           "self": "Self delivery",
           "storePickup": "Store pickup",
           "homeDelivery": "Home delivery"
-        }
+        },
+        "noPickupPoints": "No pickup point serves this commune. Pick another commune, or choose home delivery."
       }
+    },
+    "orderSuccess": {
+      "title": "Order Placed Successfully!",
+      "subtitle": "Thank you for your order. We'll contact you shortly to confirm.",
+      "orderId": "Order ID",
+      "whatsNext": "What's Next?",
+      "callTitle": "We'll call you soon",
+      "callDescription": "Our team will contact you to confirm your order and delivery details.",
+      "prepareTitle": "We'll prepare your order",
+      "prepareDescription": "Once confirmed, we'll prepare your items for delivery.",
+      "deliveryTitle": "Delivery on the way",
+      "deliveryDescription": "Your order will be delivered to your address. Pay in cash when you receive it.",
+      "paymentInfo": "Payment: Cash on Delivery - Pay when you receive your order",
+      "continueShopping": "Continue Shopping",
+      "backToHome": "Back to Home"
     },
     "product": {
       "detailsTitle": "Product Details",
       "addedToCart": "{title} added to cart!",
       "inStock": "In stock",
+      "lowStock": "Low stock",
       "perUnit": "per unit",
       "descriptionFallback": "Experience the perfect blend of style and functionality.",
       "viewFullDetails": "View full details",
@@ -1122,7 +1431,8 @@
       "stock": {
         "unavailable": "Unavailable",
         "outOfStock": "Out of stock",
-        "lowStock": "Low stock: {count} left"
+        "lowStock": "Low stock: {count} left",
+        "selectOptions": "Choose an option to see availability"
       },
       "cod": {
         "title": "Order now",
@@ -1130,9 +1440,11 @@
         "submit": "Confirm order",
         "submitting": "Submitting…"
       },
+      "chooseOptionsPrompt": "Select your options to continue",
       "totalPrice": "Total price:",
       "errors": {
-        "outOfStockVariant": "This variant is out of stock."
+        "outOfStockVariant": "This variant is out of stock.",
+        "selectOptions": "Please choose your options first"
       }
     },
     "toasts": {
@@ -1205,7 +1517,11 @@
       "emptyHint": "Try checking other categories or browse all products."
     },
     "search": {
-      "placeholder": "Search products..."
+      "placeholder": "Search products...",
+      "keywords": "Related Keywords",
+      "searching": "Searching...",
+      "noResults": "No products found.",
+      "seeMore": "See more"
     },
     "header": {
       "wishlistTitle": "Wishlist",
@@ -1231,6 +1547,124 @@
     },
     "announcement": {
       "dismissAria": "Dismiss announcement"
+    },
+    "templates": {
+      "maison": {
+        "about": {
+          "kicker": "Our story",
+          "body": "We believe every living space deserves to be beautiful, useful and inspiring. That is why each product is chosen with care, to bring you the best in decoration and home accessories.",
+          "lead": "A store devoted to the art of living, to interior decoration and to carefully chosen home accessories.",
+          "valuesTitle": "Our values",
+          "values": {
+            "quality": {
+              "title": "Quality",
+              "text": "Products chosen for how they are made and how long they last."
+            },
+            "living": {
+              "title": "Art of living",
+              "text": "Every piece is meant to make your day-to-day both better and lovelier."
+            },
+            "passion": {
+              "title": "Passion",
+              "text": "A team that genuinely cares about interiors and design."
+            }
+          },
+          "ctaTitle": "Discover",
+          "ctaAccent": "our store",
+          "ctaAction": "Browse the products"
+        },
+        "home": {
+          "trust": {
+            "delivery": "Delivery across Algeria",
+            "curation": "Carefully curated",
+            "returns": "Easy returns"
+          },
+          "manifestoKicker": "Our world",
+          "manifestoTitle": "The art of decorating",
+          "manifestoAccent": "your space",
+          "manifestoBody": "Pieces meant to make every corner of your home better. From the living room to the bedroom, from the kitchen to the study.",
+          "manifestoCta": "Browse the store"
+        }
+      },
+      "food": {
+        "badges": {
+          "organic": "Organic",
+          "fastDelivery": "Fast delivery",
+          "premium": "Premium quality"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "Since {year}",
+          "titlePrefix": "Built for",
+          "titleAccent": "the street",
+          "descriptionFallback": "We make pieces that hold up to real wear. No filler, no seasonal noise — just clothes that earn their place in your rotation.",
+          "missionPrefix": "Our mission is simple:",
+          "missionAccent": "quality you can feel, priced without the markup.",
+          "values": {
+            "quality": {
+              "title": "Quality",
+              "description": "Materials picked to last, checked piece by piece."
+            },
+            "design": {
+              "title": "Design",
+              "description": "Cuts drawn in-house, made to wear every day."
+            },
+            "culture": {
+              "title": "Culture",
+              "description": "Rooted in the scene we come from, made with it."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "Get in",
+          "titleAccent": "touch",
+          "sections": {
+            "hqLocation": "Where to find us",
+            "directLine": "Call us",
+            "emailProtocol": "Write to us"
+          },
+          "form": {
+            "name": {
+              "label": "Name",
+              "placeholder": "Your name"
+            },
+            "email": {
+              "label": "Email",
+              "placeholder": "you{'@'}email.com"
+            },
+            "message": {
+              "label": "Message",
+              "placeholder": "How can we help?"
+            },
+            "send": "Send"
+          },
+          "alert": {
+            "sent": "Thanks — your message is on its way. We will get back to you shortly."
+          }
+        }
+      },
+      "wellness": {
+        "home": {
+          "curatedSelection": "Curated selection",
+          "shopCollection": "Shop the collection"
+        }
+      },
+      "embellir": {
+        "controls": {
+          "previous": "Previous",
+          "next": "Next"
+        },
+        "search": {
+          "showMore": "Show more"
+        }
+      }
+    },
+    "draftBar": {
+      "title": "Draft store",
+      "hint": "Only you can see this. Customers get a 404.",
+      "cta": "Publish"
     }
   },
   "admin": {
@@ -1254,6 +1688,8 @@
       "search": "Search",
       "searchAction": "Search",
       "clear": "Clear",
+      "filters": "Filters",
+      "clearFilters": "Clear filters",
       "reset": "Reset",
       "startDate": "Start date",
       "endDate": "End date",
@@ -1290,8 +1726,37 @@
       "processing": "Processing…",
       "error": "An error occurred. Please try again.",
       "saved": "Saved!",
-      "filters": "Filters",
-      "noDataAvailable": "No data available"
+      "noDataAvailable": "No data available",
+      "unsavedChanges": "Unsaved changes",
+      "unsavedChangesHint": "Don't forget to save your changes.",
+      "discard": "Discard",
+      "noResults": "No results",
+      "replace": "Replace",
+      "soon": "Soon",
+      "moveUp": "Move up",
+      "moveDown": "Move down",
+      "amount": "Amount",
+      "paid": "Paid",
+      "remaining": "Remaining",
+      "discardChangesTitle": "Discard changes?",
+      "discardChangesMessage": "Your unsaved changes on this page will be lost.",
+      "keepEditing": "Keep editing",
+      "leaveTitle": "Leave without saving?",
+      "leaveMessage": "You have unsaved changes. They'll be lost if you leave this page.",
+      "leaveConfirm": "Leave page",
+      "clickToUpload": "Click to upload your receipt",
+      "confirmDelete": "Are you sure you want to delete this?",
+      "done": "Done",
+      "remove": "Remove",
+      "retry": "Retry",
+      "receive": "Receive",
+      "receiveAll": "Receive all",
+      "recordPayment": "Record payment",
+      "invalid": "is invalid",
+      "moreActions": "More actions",
+      "errors": {
+        "amountTooHigh": "Amount cannot be greater than the remaining balance."
+      }
     },
     "confirmModal": {
       "defaults": {
@@ -1364,13 +1829,6 @@
           "loadFailed": "Failed to load image in cropper."
         }
       }
-    },
-    "help": {
-      "button": "Help Center",
-      "title": "Swekly Support",
-      "subtitle": "How can we help you today?",
-      "greeting": "Hi there! I'm the Swekly assistant. How can I help you manage your store today?",
-      "inputPlaceholder": "Type your message..."
     },
     "storeSettingsForm": {
       "title": "Store appearance & settings",
@@ -1447,6 +1905,11 @@
         "noImage": "No image",
         "uploadImage": "Upload image",
         "addSlide": "Add slide",
+        "slide": "slide",
+        "slides": "slides",
+        "untitled": "Untitled slide",
+        "noSlides": "No slides yet",
+        "createFirst": "Create your first slide",
         "defaults": {
           "title": "New slide"
         }
@@ -1459,8 +1922,10 @@
         "buttonLinkHint": "Use internal paths like \"/products\" or \"/category/shoes\".",
         "imageUrl": "Image URL",
         "imageUrlHint": "Or paste a URL if you already have one.",
-        "eyebrow": "Eyebrow",
-        "limit": "Limit"
+        "eyebrow": "Eyebrow text",
+        "limit": "Limit",
+        "sectionTitle": "Section title",
+        "numberOfProducts": "Number of products"
       },
       "sections": {
         "title": "Homepage sections",
@@ -1489,6 +1954,28 @@
       }
     },
     "functionalSettingsForm": {
+      "themeGroups": {
+        "sales": {
+          "title": "Sales & checkout",
+          "subtitle": "Orders, cart, and purchase rules."
+        },
+        "invoices": {
+          "title": "Invoicing",
+          "subtitle": "Documents generated from sales."
+        },
+        "marketing": {
+          "title": "Marketing & loyalty",
+          "subtitle": "Storefront announcement and customer points."
+        },
+        "localization": {
+          "title": "Localization",
+          "subtitle": "Store currency and language."
+        },
+        "security": {
+          "title": "Security",
+          "subtitle": "Reduce fake and duplicate orders."
+        }
+      },
       "features": {
         "title": "Store features",
         "subtitle": "Enable or disable core functionality for your storefront.",
@@ -1504,15 +1991,87 @@
         }
       },
       "checkoutRules": {
+        "title": "Checkout rules",
+        "subtitle": "Order conditions and checkout behavior.",
         "minimumOrder": {
           "title": "Minimum order amount",
           "subtitle": "Block checkout when cart subtotal is below this amount.",
           "unit": "DZD"
         },
+        "orderIdPrefix": {
+          "title": "Customer order prefix",
+          "subtitle": "Prefix used in the public order reference shown to customers.",
+          "placeholder": "ORDR",
+          "hint": "4-5 chars"
+        },
         "hideOptionalAddress": {
           "title": "Hide optional address field",
           "subtitle": "Remove the optional address input from checkout and quick order forms.",
           "toggle": "Hide optional address"
+        }
+      },
+      "invoices": {
+        "title": "Sales invoices",
+        "subtitle": "Enable printable PDF invoices for POS and delivered sales.",
+        "enable": {
+          "title": "Enable invoicing",
+          "subtitle": "Allow admins to generate and print invoices from Sales.",
+          "toggle": "Enable sales invoices"
+        },
+        "prefix": {
+          "label": "Invoice prefix",
+          "placeholder": "INV"
+        },
+        "logo": {
+          "label": "Branding",
+          "title": "Show store logo",
+          "subtitle": "Use the logo from Appearance settings when available.",
+          "toggle": "Show logo on invoices"
+        },
+        "footer": {
+          "label": "Footer note",
+          "placeholder": "Thank you for your purchase."
+        }
+      },
+      "loyalty": {
+        "title": "Loyalty points",
+        "subtitle": "Configure points calculation and redemption rules.",
+        "enable": "Enable points",
+        "enableSubtitle": "Activate points calculation and checkout redemption.",
+        "basePoints": "Base points per order",
+        "marginFactor": "Margin factor",
+        "minRedeem": "Minimum redemption (points)",
+        "dzdPerPoint": "DZD per point"
+      },
+      "clearance": {
+        "title": "Clearance (destockage)",
+        "subtitle": "Reward customers who buy in bulk from your clearance products.",
+        "enable": "Enable clearance module",
+        "enableSubtitle": "Give a discount equal to the cheapest items once a quantity threshold is reached.",
+        "multiple": "Quantity threshold",
+        "multipleHint": "Reached every N clearance items bought (e.g. 6).",
+        "divisor": "Divisor",
+        "divisorHint": "The cheapest quantity/divisor items become free (e.g. 6/3 = 2 free).",
+        "scopeHint": "Tag eligible products from their product page. If no product is tagged, the offer applies to your whole catalog.",
+        "banner": "Show homepage banner",
+        "bannerSubtitle": "Display a banner announcing the clearance offer.",
+        "bannerText": "Banner text",
+        "bannerTextPlaceholder": "Big clearance sale — buy more, save more!"
+      },
+      "fraud": {
+        "title": "Fraud prevention",
+        "subtitle": "Block fake orders from blacklisted contacts and throttle duplicate orders.",
+        "blacklist": {
+          "title": "Enable blacklist",
+          "subtitle": "Block checkout for blacklisted phone numbers, IPs and customers.",
+          "manageLink": "Manage blacklisted entries"
+        },
+        "duplicate": {
+          "title": "Limit duplicate orders",
+          "subtitle": "Block checkout once a phone number has placed too many orders in a short time.",
+          "limit": "Max orders",
+          "window": "Time window (hours)",
+          "hint": "Once a phone number reaches this many orders within the time window, further checkouts are blocked."
         }
       },
       "currency": {
@@ -1540,11 +2099,76 @@
       },
       "messages": {
         "loadFailed": "Failed to load settings.",
-        "saved": "Functional settings saved successfully!",
+        "saved": "Sales settings saved successfully!",
         "saveFailed": "Failed to save changes. Please try again."
       },
       "confirm": {
         "discard": "Are you sure you want to discard your unsaved changes?"
+      },
+      "messaging": {
+        "title": "Messaging",
+        "subtitle": "Customize communication templates sent to your customers.",
+        "whatsappTemplate": {
+          "label": "WhatsApp Confirmation Template",
+          "hint": "Customize the message sent when you click 'Send WhatsApp' in the order details.",
+          "keywordsLabel": "Available keywords:",
+          "keywords": {
+            "customerName": "Customer's name",
+            "productsRecap": "List of ordered products",
+            "total": "Total amount with shipping",
+            "address": "Full delivery address (including wilaya/commune)",
+            "confirmLink": "The secure confirmation link",
+            "payment": "Payment",
+            "remaining": "Remaining"
+          },
+          "preview": "Preview"
+        }
+      },
+      "maintenance": {
+        "title": "Maintenance mode",
+        "subtitle": "Temporarily close your storefront to customers.",
+        "enable": {
+          "title": "Close store for maintenance",
+          "subtitle": "Customers will see a maintenance page instead of your storefront. The admin panel stays accessible.",
+          "toggle": "Enable maintenance mode"
+        },
+        "warning": "Your storefront is unreachable by customers while this is on. Don't forget to turn it back off.",
+        "message": {
+          "label": "Message shown to customers (optional)",
+          "placeholder": "We are performing scheduled maintenance and will be back soon."
+        }
+      }
+    },
+    "domainSettingsForm": {
+      "customDomain": {
+        "title": "Custom domain",
+        "subtitle": "Add the exact hostname customers will visit, for example www.example.com."
+      },
+      "fields": {
+        "domain": "Domain name"
+      },
+      "actions": {
+        "add": "Add domain"
+      },
+      "dns": {
+        "title": "DNS record",
+        "subtitle": "Create this CNAME record at your domain provider, then keep the domain added here.",
+        "apexNote": "For an apex domain like example.com, use ALIAS/ANAME if your DNS provider supports it, or redirect it to www.example.com."
+      },
+      "connected": {
+        "title": "Connected domains",
+        "subtitle": "Domains listed here are allowed to resolve this tenant storefront.",
+        "empty": "No custom domains connected yet."
+      },
+      "messages": {
+        "loadFailed": "Failed to load domains.",
+        "saved": "Domain connected.",
+        "saveFailed": "Failed to add domain.",
+        "deleted": "Domain removed.",
+        "deleteFailed": "Failed to remove domain."
+      },
+      "confirm": {
+        "delete": "Remove this domain?"
       }
     },
     "contactInfosForm": {
@@ -1602,7 +2226,7 @@
         },
         "whatsapp": {
           "label": "WhatsApp",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "Facebook",
@@ -1638,7 +2262,7 @@
         },
         "viber": {
           "label": "Viber",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "Pinterest",
@@ -1685,7 +2309,8 @@
         "sku": "SKU",
         "barcode": "Barcode",
         "active": "Active",
-        "images": "Images"
+        "images": "Images",
+        "promotion": "Promotion"
       },
       "actions": {
         "manageImages": "Manage ({count})",
@@ -1728,7 +2353,8 @@
         "suggestSkuFailed": "Failed to suggest SKU",
         "suggestSkuUnavailable": "Suggested SKU is not available",
         "saveImagesFailed": "Failed to save images"
-      }
+      },
+      "promotionSimpleProduct": "Use the product promotion tab for the default variant of a simple product."
     },
     "productOptionsEditor": {
       "title": "Options",
@@ -1799,7 +2425,10 @@
         "logo": {
           "label": "Brand logo",
           "upload": "Upload logo",
-          "hint": "Square (1:1), PNG recommended."
+          "hint": "Square (1:1), PNG recommended.",
+          "magicIdentity": "Magic identity",
+          "magicHint": "Upload a logo first to generate a brand identity.",
+          "magicSuccess": "Magic identity applied."
         },
         "favicon": {
           "label": "Favicon",
@@ -1808,7 +2437,10 @@
         },
         "primaryColor": {
           "label": "Primary color",
-          "hint": "Used for buttons, links, and highlights."
+          "hint": "Used for buttons, links, and highlights.",
+          "suggested": "Suggested palettes",
+          "overrideLabel": "Apply brand color to template",
+          "overrideHint": "Turn off to keep the selected template's original accent color."
         }
       },
       "announcement": {
@@ -1822,7 +2454,37 @@
       },
       "templates": {
         "title": "Store template",
-        "subtitle": "Choose the layout that best fits your brand.",
+        "subtitle": "Every theme sets your storefront's typography, colour and shape. Preview any of them on your own store before you switch.",
+        "quickView": "Preview",
+        "searchPlaceholder": "Search themes",
+        "previewStore": "Preview storefront",
+        "previewNeedsSlug": "Save your store address first to preview a theme.",
+        "liveNow": "Live",
+        "selected": "Selected",
+        "pending": "Switching to {name} when you save",
+        "bestFor": "Best for",
+        "sampleBrand": "Your store",
+        "sampleTagline": "New arrivals",
+        "emptyTitle": "No theme matches that search.",
+        "emptyAction": "Clear filters",
+        "categories": {
+          "all": "All",
+          "classic": "Classic",
+          "minimalist": "Minimal",
+          "bold": "Bold",
+          "tech": "Tech",
+          "luxury": "Luxury",
+          "elegant": "Elegant"
+        },
+        "moods": {
+          "dark": "Dark",
+          "light": "Light"
+        },
+        "voices": {
+          "serif": "Serif",
+          "sans": "Sans serif",
+          "display": "Display"
+        },
         "options": {
           "classic": {
             "label": "Classic Shop",
@@ -1874,10 +2536,40 @@
             "description": "Bold and high-energy for sports & gym.",
             "storeTypes": "Sports, gym, outdoor gear"
           },
+          "arena": {
+            "label": "Arena",
+            "description": "Dark performance storefront with esports energy and cyan highlights.",
+            "storeTypes": "Gaming gear, peripherals, tech, esports"
+          },
           "chrono": {
             "label": "Chrono Luxe",
             "description": "Luxury dark theme with gold accents for premium accessories.",
             "storeTypes": "Watches, sunglasses, jewelry, luxury accessories"
+          },
+          "maison": {
+            "label": "Pistachio",
+            "description": "Warm premium editorial look for gourmet and refined retail.",
+            "storeTypes": "Premium food, gifts, nuts, gourmet retail"
+          },
+          "nour": {
+            "label": "Nour Élégance",
+            "description": "Soft draped elegance for modest fashion.",
+            "storeTypes": "Abayas, hijabs, kaftans, modest fashion"
+          },
+          "embellir": {
+            "label": "Embellir",
+            "description": "Deep glazed tile, warm plaster and a high-contrast display face.",
+            "storeTypes": "Skincare, cosmetics, bath and body, wellness"
+          },
+          "interior": {
+            "label": "Interior",
+            "description": "Calm, airy layouts with room to breathe.",
+            "storeTypes": "Furniture, home decor, lighting"
+          },
+          "minimal": {
+            "label": "Minimal",
+            "description": "Stripped back to the product itself.",
+            "storeTypes": "Accessories, stationery, tech"
           }
         }
       },
@@ -1909,8 +2601,10 @@
       "finance": "Finance",
       "cash": "Cash",
       "storeParameters": "Store Parameters",
+      "settingsHub": "Settings",
       "settings": "Administration",
       "dashboard": "Dashboard",
+      "statistics": "Statistics",
       "products": "Products",
       "inventory": "Inventory",
       "categories": "Categories",
@@ -1919,16 +2613,57 @@
       "orders": "Orders",
       "salesItem": "Sales",
       "pos": "POS",
+      "devices": "Devices",
       "customers": "Customers",
       "deliveryItem": "Delivery",
       "billing": "Billing",
       "appearance": "Appearance",
       "homepage": "Homepage",
       "contactInfo": "Contact Info",
-      "functional": "Functional",
+      "legalPages": "Legal Pages",
+      "functional": "Sales & checkout",
+      "domains": "Domains",
       "apps": "Apps",
       "integrations": "Integrations",
-      "users": "Users"
+      "users": "Users",
+      "storefront": "Storefront",
+      "account": "Account",
+      "connections": "Connections",
+      "promoCodes": "Promo codes"
+    },
+    "settingsNav": {
+      "ariaLabel": "Settings",
+      "groups": {
+        "store": "Store",
+        "commerce": "Commerce",
+        "content": "Content & marketing",
+        "localization": "Localization",
+        "connections": "Connections",
+        "administration": "Administration"
+      },
+      "items": {
+        "identity": "Identity & branding",
+        "theme": "Storefront theme",
+        "homepage": "Homepage",
+        "checkout": "Checkout & cart",
+        "fraud": "Fraud prevention",
+        "loyalty": "Loyalty program",
+        "clearance": "Clearance sales",
+        "invoices": "Invoices",
+        "contact": "Contact info",
+        "legal": "Legal pages",
+        "announcement": "Announcement bar",
+        "messaging": "Messaging",
+        "localization": "Currency & language",
+        "domains": "Domains",
+        "integrations": "Integrations",
+        "team": "Team & roles",
+        "billing": "Billing",
+        "maintenance": "Maintenance mode"
+      },
+      "searchPlaceholder": "Search settings",
+      "noResults": "Nothing matches “{query}”",
+      "browse": "Browse settings"
     },
     "roles": {
       "owner": "Owner",
@@ -1941,7 +2676,24 @@
       "shipped": "Shipped",
       "delivered": "Delivered",
       "cancelled": "Cancelled",
-      "returned": "Returned"
+      "returned": "Returned",
+      "providerDetail": {
+        "created": "Created",
+        "pick_up_requested": "Pickup requested",
+        "in_process": "In process",
+        "waiting_transit": "Waiting for transit",
+        "in_transit_to_be_shipped": "In transit to be shipped",
+        "in_transit_to_be_returned": "In transit to be returned",
+        "out_of_stock": "Out of stock",
+        "ready_to_ship": "Ready to ship",
+        "assigned": "Assigned to courier",
+        "alerted": "Courier alerted",
+        "postponed": "Postponed",
+        "aborted": "Aborted",
+        "ready_to_return": "Ready to return",
+        "taken_by_store": "Taken by store",
+        "not_received": "Not received"
+      }
     },
     "forms": {
       "product": {
@@ -1959,6 +2711,11 @@
           "label": "Mini description",
           "hint": "Short description for landing page header (optional)",
           "placeholder": "Enter a short summary…"
+        },
+        "searchKeywords": {
+          "label": "Search Keywords",
+          "hint": "Keywords to help customers find this product in storefront search.",
+          "placeholder": "Type and press Enter..."
         },
         "description": {
           "label": "Description",
@@ -1980,10 +2737,38 @@
         },
         "category": {
           "label": "Category",
-          "placeholder": "Select a category (optional)"
+          "placeholder": "Select a category (optional)",
+          "hintMulti": "Select one or more categories or subcategories."
         },
         "isActive": {
           "label": "Product is active and visible to customers"
+        },
+        "visibility": {
+          "label": "Visibility",
+          "hint": "Unlisted products are hidden from the shop grid, search and related products, but stay reachable at their direct link.",
+          "listed": "Listed — shown in the shop grid, search and related products",
+          "unlisted": "Unlisted — only reachable via direct link"
+        },
+        "isClearance": {
+          "label": "Clearance product",
+          "hint": "This product takes the clearance discount configured in Settings > Functional. A product cannot be in clearance and on promotion at the same time.",
+          "blockedByPromotion": "Turn the promotion off before enabling clearance."
+        },
+        "isPromotionActive": {
+          "label": "Enable promotion"
+        },
+        "promotionalPrice": {
+          "label": "Promotional price",
+          "placeholder": "New price"
+        },
+        "promotionStartDate": {
+          "label": "Start date (optional)"
+        },
+        "promotionEndDate": {
+          "label": "End date (required for the countdown)"
+        },
+        "showCountdown": {
+          "label": "Show countdown"
         }
       },
       "category": {
@@ -2000,6 +2785,18 @@
         "image": {
           "label": "Category image (optional)",
           "hint": "Shown on storefront category tiles"
+        },
+        "visibility": {
+          "label": "Visibility",
+          "hint": "Unlisted categories are hidden from storefront navigation and listings, but stay reachable at their direct link.",
+          "listed": "Listed — shown in navigation and listings",
+          "unlisted": "Unlisted — only reachable via direct link",
+          "unlistedNotice": "This category is hidden from storefront navigation and listings. Its products are also hidden from the shop grid unless they belong to another listed category. The category page stays reachable at its direct link."
+        },
+        "parent": {
+          "label": "Parent category",
+          "hint": "Optional — choose a parent to create a subcategory.",
+          "none": "No parent (top-level category)"
         }
       },
       "customer": {
@@ -2070,7 +2867,7 @@
             "discount": "Discount",
             "reprint": "Reprint Last",
             "reprintLastOrder": "Reprint Last Order",
-            "quickCharge": "Quick Charge",
+            "customAmount": "Custom Amount",
             "sort": "Sort",
             "columns": "Columns"
           },
@@ -2099,7 +2896,8 @@
           "order": "Order {index}"
         },
         "customer": {
-          "addClient": "Add Client"
+          "addClient": "Add Client",
+          "defaultClient": "Default customer"
         },
         "variants": {
           "loading": "Loading variants...",
@@ -2132,7 +2930,12 @@
           "saleFailed": "Sale failed: {message}",
           "unknownError": "An unknown error occurred",
           "featureComingSoon": "Feature {feature} coming soon",
-          "reprintNotImplemented": "Reprinting last sale is not implemented yet"
+          "reprintNotImplemented": "Reprinting last sale is not implemented yet",
+          "printInvoicePrompt": "Print invoice for this sale?",
+          "invoicePopupBlocked": "Invoice popup was blocked by the browser.",
+          "invoiceFailed": "Invoice failed: {message}",
+          "invoicesDisabled": "Sales invoices are disabled in Functional settings.",
+          "noLastSale": "No recent sale to reprint."
         }
       },
       "cash": {
@@ -2359,7 +3162,11 @@
             "openingFloat": "Opening float",
             "expectedClosing": "Expected",
             "closingCount": "Counted",
-            "difference": "Difference"
+            "difference": "Difference",
+            "opened": "Opened",
+            "closed": "Closed",
+            "opening": "Opening float",
+            "closing": "Closing count"
           },
           "expected": {
             "loading": "Calculating expected amount…",
@@ -2460,6 +3267,47 @@
               "addPixel": "Add Pixel"
             }
           }
+        },
+        "whatsapp": {
+          "title": "WhatsApp Business",
+          "description": "Confirm orders from your own WhatsApp number, with Confirm and Cancel buttons.",
+          "modal": {
+            "title": "WhatsApp Business",
+            "intro": "Connect your WhatsApp Business account to send order confirmations automatically from your own number. Customers confirm or cancel with a button, and orders left unanswered are chased after 6 hours and again after 24 hours.",
+            "unavailable": "WhatsApp sign-up is not configured on this platform yet. Contact Swekly support.",
+            "connect": "Connect WhatsApp",
+            "connecting": "Connecting...",
+            "reconnect": "Connect a different number",
+            "number": "Connected number",
+            "businessName": "Business name",
+            "autoSend": {
+              "label": "Send automatically on new orders",
+              "hint": "Storefront orders only. Orders you create yourself still use the button on the order page."
+            },
+            "reminders": {
+              "label": "Chase unanswered orders",
+              "hint": "One reminder after 6 hours, a second after 24 hours."
+            },
+            "templates": {
+              "title": "Message templates",
+              "hint": "Meta reviews each template before it can be sent. This usually takes a few minutes.",
+              "confirmation": "Order confirmation",
+              "reminder": "Reminder",
+              "refresh": "Refresh statuses",
+              "resubmit": "Resubmit templates"
+            },
+            "templateStatus": {
+              "APPROVED": "Approved",
+              "PENDING": "Under review",
+              "REJECTED": "Rejected",
+              "PAUSED": "Paused",
+              "DISABLED": "Disabled",
+              "MISSING": "Not submitted"
+            },
+            "disconnect": "Disconnect",
+            "disconnectConfirm": "Disconnect this WhatsApp account? Orders will fall back to the manual WhatsApp link.",
+            "error": "Something went wrong. Please try again."
+          }
         }
       },
       "users": {
@@ -2541,7 +3389,8 @@
           },
           "resources": {
             "variants": "Variants",
-            "metaPixels": "Meta pixels"
+            "metaPixels": "Meta pixels",
+            "promoCodes": "Promo codes"
           },
           "validation": {
             "invalidName": "Invalid name (min 2 characters).",
@@ -2564,6 +3413,7 @@
         "filters": {
           "range": "Range",
           "ranges": {
+            "today": "Today",
             "7d": "Last 7 days",
             "30d": "Last 30 days",
             "90d": "Last 90 days",
@@ -2648,108 +3498,326 @@
           "newLandingPage": "New Landing Page"
         }
       },
-      "billing": {
-        "metaTitle": "Billing",
-        "title": "Billing",
-        "subtitle": "View your current plan, limits, and usage.",
-        "seePricing": "See Pricing",
-        "errors": {
-          "loadFailed": "Failed to load billing info."
-        },
-        "status": {
-          "pending": {
-            "title": "Payment under review",
-            "desc": "We received your payment proof and our team is reviewing it. Your subscription will be updated once approved.",
-            "badge": "pending"
+      "statistics": {
+        "title": "Statistics",
+        "subtitle": "Analyze your store's performance in detail.",
+        "loadErrorTitle": "Statistics could not be loaded.",
+        "loadErrorHint": "Try refreshing. If this persists, check your connection or session.",
+        "refresh": "Refresh",
+        "export": "Export CSV",
+        "compareLabel": "vs previous period",
+        "noCostData": "Purchase cost unknown for {pct}% of sales — margin is estimated.",
+        "filters": {
+          "range": "Period",
+          "channel": "Channel",
+          "channels": {
+            "all": "All",
+            "online": "Online",
+            "pos": "Point of Sale"
           },
-          "approved": {
-            "title": "Payment approved",
-            "desc": "Your latest payment was approved and your subscription is active."
+          "category": "Category",
+          "allCategories": "All categories",
+          "wilaya": "Wilaya",
+          "allWilayas": "All wilayas",
+          "provider": "Carrier",
+          "allProviders": "All carriers"
+        },
+        "tabs": {
+          "sales": "Sales",
+          "delivery": "Delivery",
+          "products": "Products & Stock",
+          "customers": "Customers",
+          "profitability": "Profitability"
+        },
+        "sales": {
+          "kpis": {
+            "revenue": "Revenue",
+            "onlineRevenue": "Online revenue",
+            "posRevenue": "POS revenue",
+            "ordersCount": "Orders",
+            "avgBasket": "Average basket"
+          },
+          "trend": {
+            "title": "Revenue trend",
+            "hint": "Click a point to filter the period below."
+          },
+          "byCategory": {
+            "title": "Revenue by category",
+            "empty": "No sales in this period."
           }
         },
-        "currentPlan": {
-          "title": "Current Plan",
-          "hint": "You can switch plans for testing (monthly only).",
-          "changePlan": "Change plan",
-          "paySimulate": "Pay (Simulate) & Apply",
-          "cards": {
-            "plan": "Plan",
-            "interval": "Billing interval",
-            "source": "Source: {source}",
-            "ordersThisPeriod": "Orders this period"
+        "delivery": {
+          "kpis": {
+            "totalShipments": "Shipments",
+            "deliveredRate": "Delivered rate",
+            "returnedRate": "Returned rate",
+            "cancelledRate": "Cancelled rate",
+            "avgDeliveryDays": "Avg delivery time (days)"
           },
-          "limitsTitle": "Plan Limits"
+          "byProvider": {
+            "title": "Performance by carrier",
+            "empty": "No shipments in this period."
+          },
+          "byWilaya": {
+            "title": "Performance by wilaya",
+            "empty": "No delivery data in this period."
+          },
+          "selfProvider": "Self delivery",
+          "table": {
+            "provider": "Carrier",
+            "total": "Total",
+            "delivered": "Delivered",
+            "returned": "Returned",
+            "cancelled": "Cancelled",
+            "rate": "Delivered rate",
+            "wilaya": "Wilaya"
+          }
         },
-        "limits": {
-          "ordersPerMonth": "Orders / month"
+        "products": {
+          "kpis": {
+            "activeProducts": "Active products",
+            "lowStockProducts": "Low stock",
+            "outOfStockProducts": "Out of stock",
+            "neverSoldProducts": "Never sold",
+            "clearanceDiscountTotal": "Clearance discounts"
+          },
+          "top": {
+            "title": "Best sellers",
+            "empty": "No sales in this period."
+          },
+          "flop": {
+            "title": "Lowest sellers",
+            "empty": "No sales in this period."
+          },
+          "rotation": {
+            "title": "Stock rotation",
+            "hint": "Quantity sold relative to current stock.",
+            "empty": "No stock data."
+          },
+          "criticalStock": {
+            "title": "Critical stock",
+            "empty": "No products currently in critical stock."
+          },
+          "table": {
+            "product": "Product",
+            "quantity": "Quantity",
+            "revenue": "Revenue",
+            "stock": "Stock",
+            "rotation": "Rotation",
+            "threshold": "Threshold"
+          }
         },
-        "planOption": "{name} ({orders} orders/mo)",
-        "availablePlans": {
-          "title": "Available Plans",
-          "ordersPerMonth": "{count} Orders / month",
-          "perMonth": "/mo"
+        "customers": {
+          "kpis": {
+            "newCustomers": "New customers",
+            "returningCustomers": "Returning customers",
+            "repeatPurchaseRate": "Repeat purchase rate",
+            "avgOrdersPerCustomer": "Orders / customer"
+          },
+          "top": {
+            "title": "Top customers",
+            "empty": "No customers in this period."
+          },
+          "byWilaya": {
+            "title": "Customers by wilaya",
+            "empty": "No customer data in this period."
+          },
+          "table": {
+            "customer": "Customer",
+            "phone": "Phone",
+            "orders": "Orders",
+            "revenue": "Revenue",
+            "wilaya": "Wilaya",
+            "customers": "Customers"
+          }
+        },
+        "profitability": {
+          "kpis": {
+            "revenue": "Revenue",
+            "cogs": "Cost of goods sold",
+            "grossMargin": "Gross margin",
+            "grossMarginPct": "Gross margin %",
+            "shippingCost": "Shipping cost",
+            "netMargin": "Net margin",
+            "netMarginPct": "Net margin %",
+            "costDataCoverage": "Cost data coverage"
+          },
+          "byProduct": {
+            "title": "Margin by product",
+            "empty": "No margin data in this period."
+          },
+          "table": {
+            "product": "Product",
+            "quantity": "Quantity",
+            "revenue": "Revenue",
+            "cogs": "Cost",
+            "margin": "Margin",
+            "marginPct": "Margin %"
+          }
+        }
+      },
+      "billing": {
+        "metaTitle": "Billing",
+        "title": "Billing & subscription",
+        "subtitle": "Your plan, what it costs, when it renews and how much of it you are using.",
+        "seePricing": "See public pricing",
+        "perMonth": "/ month",
+        "errors": {
+          "loadFailed": "Failed to load your billing information.",
+          "updateFailed": "Could not update your subscription. Please try again."
+        },
+        "status": {
+          "active": "Active",
+          "trialing": "Free trial",
+          "pastDue": "Expired",
+          "canceling": "Ends at period end"
+        },
+        "state": {
+          "pastDue": {
+            "title": "Your subscription has expired",
+            "desc": "Your term ended on {date}. Your storefront and admin stay limited until a new payment is approved.",
+            "action": "Renew now"
+          },
+          "pending": {
+            "title": "Payment under review",
+            "desc": "We received {amount} DA by {method} on {date}. Your plan updates as soon as our team approves it.",
+            "action": "View"
+          },
+          "rejected": {
+            "title": "Your last payment was rejected",
+            "desc": "The receipt submitted on {date} could not be validated. Check the amount and the account details, then send it again.",
+            "action": "Try again"
+          },
+          "canceling": {
+            "title": "Automatic renewal is off",
+            "desc": "You keep full access until {date}. After that your store falls back to the free limits.",
+            "action": "Turn renewal back on"
+          },
+          "trial": {
+            "title": "{days} days left in your free trial",
+            "desc": "Your trial ends on {date}. Pick a plan before then to keep your store running without interruption.",
+            "action": "Choose a plan"
+          }
+        },
+        "current": {
+          "eyebrow": "Current plan",
+          "billedAs": "Billing",
+          "renewsOn": "Renews on",
+          "trialEnds": "Trial ends",
+          "accessEnds": "Access ends",
+          "nextCharge": "Next charge",
+          "daysLeft": "in {days} days",
+          "today": "today",
+          "expiredAgo": "{days} days ago",
+          "savingPerYear": "saves {amount} DA vs monthly",
+          "stopRenewal": "Turn off automatic renewal",
+          "resumeRenewal": "Turn renewal back on"
+        },
+        "usage": {
+          "title": "Usage",
+          "window": "This month · {range}",
+          "orders": "Orders",
+          "products": "Products",
+          "pixels": "Meta pixels",
+          "unlimited": "Unlimited",
+          "ordersBlocked": "Limit reached — new storefront orders are refused until the next window or an upgrade."
         },
         "interval": {
-          "monthly": "Monthly Billing",
-          "yearly": "Yearly Billing",
+          "monthly": "Monthly",
+          "yearly": "Yearly",
           "annual": "Annual",
           "save": "Save {pct}%"
         },
-        "mo": "mo",
-        "yr": "yr",
-        "currentPlanBadge": "Your Plan",
-        "unlimitedOrders": "Unlimited Orders",
-        "upToOrders": "Up to {count} orders/mo",
-        "selectedBtn": "Selected",
-        "selectBtn": "Select Plan",
-        "prioritySupport": "Priority support",
-        "customBranding": "Custom branding & SMS config",
+        "plans": {
+          "title": "Change plan",
+          "subtitle": "Prices are per month. Yearly terms are paid upfront for twelve months.",
+          "currentBadge": "Your plan",
+          "freeForever": "Free, no payment needed",
+          "billedMonthly": "Billed every month",
+          "billedYearly": "Billed {total} once a year",
+          "ordersLine": "{count} orders / month",
+          "productsLine": "{count} products",
+          "pixelsLine": "{count} Meta pixels",
+          "cta": {
+            "current": "Current plan",
+            "upgrade": "Upgrade",
+            "downgrade": "Switch to this plan",
+            "switchToYearly": "Switch to yearly",
+            "switchToMonthly": "Switch to monthly"
+          }
+        },
+        "checkout": {
+          "eyebrow": "Order summary",
+          "emptyTitle": "No plan selected",
+          "emptyDesc": "Pick a plan on the left to see what it costs and how to pay.",
+          "monthlyTerm": "Monthly term",
+          "yearlyTerm": "Yearly term, paid upfront",
+          "unitLine": "{price} DA x {months} month(s)",
+          "listLine": "Instead of {price} DA month by month",
+          "total": "Total to transfer",
+          "termNote": "Covers {start} to {end}. Days left on your current term are kept.",
+          "methodLabel": "How are you paying?",
+          "soon": "Soon",
+          "copy": "Copy",
+          "eurNote": "Indicative conversion at 1 EUR = {rate} DA. The amount owed is the DZD total above.",
+          "instructions": {
+            "dzd": "Transfer exactly {amount} to the account below, then upload the receipt.",
+            "eur": "Transfer about {amount} to the account below, then upload the receipt."
+          },
+          "fileHint": "PNG, JPG, WEBP or PDF, up to 10 MB",
+          "submit": "Submit {amount} for review",
+          "submitSuccess": "Payment submitted. Our team reviews receipts within one business day and your plan updates automatically once approved.",
+          "blocked": {
+            "pending": "You already have a payment awaiting review.",
+            "noMethod": "Choose a payment method to continue.",
+            "noProof": "Attach your transfer receipt to continue."
+          },
+          "downgradeToFree": "The free plan takes no payment. Your paid term runs to {date} — turn off automatic renewal and your store moves to the free limits then.",
+          "turnOffRenewal": "Turn off automatic renewal",
+          "renewalAlreadyOff": "Automatic renewal is already off"
+        },
         "payment": {
           "methods": {
             "myfin": "MyFin",
             "paysera": "Paysera",
             "baridimob": "BaridiMob",
             "ccp": "CCP / Poste",
-            "chargily": "Chargily (CIB/Edahabia)"
+            "chargily": "Chargily"
           },
-          "emptyTitle": "Checkout",
-          "emptyDesc": "Select a plan from the list to start your upgrade.",
-          "instructions": {
-            "myfin": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our MyFin account:\nIBAN: BG98MYFI123123123\nName: MySaaS LLC",
-            "paysera": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our Paysera account:\nEmail: payments{'@'}mysaas.com\nName: MySaaS LLC",
-            "baridimob": "Please send {amount} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +213 555 55 55 55",
-            "ccp": "Please deposit {amount} DZD to our CCP account:\nAccount: 12345678 99\nName: MySaaS LLC"
+          "account": {
+            "rip": "RIP",
+            "ccp": "CCP account",
+            "iban": "IBAN",
+            "email": "Email",
+            "holder": "Account holder"
           },
-          "title": "Complete your upgrade",
-          "subtitle": "Select a payment method to proceed.",
-          "totalLabel": "Total to pay",
-          "uploadProof": "Upload Receipt/Proof",
-          "uploadSuccess": "Receipt attached successfully",
-          "chargilyNote": "Automatic payment gateway integration is currently unavailable. Please choose another manual method like CCP or BaridiMob in the meantime.",
-          "submitBtn": "Confirm & Submit Payment",
-          "submitting": "Submitting…",
-          "success": "Payment submitted! Our team will review your receipt and activate your subscription.",
+          "uploadProof": "Transfer receipt",
+          "uploadSuccess": "Receipt attached",
           "errors": {
-            "proofRequired": "Please attach a payment proof.",
-            "submitFailed": "Failed to submit payment. Please try again."
+            "uploadFailed": "Upload failed. Please try another file.",
+            "submitFailed": "Could not submit your payment. Please try again."
           }
         },
         "history": {
           "title": "Payment history",
-          "entries": "entries",
+          "count": "{count} payment(s)",
+          "empty": "No payment recorded yet.",
+          "viewProof": "View",
+          "status": {
+            "pending": "Pending",
+            "paid": "Paid",
+            "rejected": "Rejected",
+            "imported": "Imported"
+          },
           "col": {
             "date": "Date",
             "plan": "Plan",
+            "period": "Covers",
             "amount": "Amount",
             "method": "Method",
             "status": "Status",
-            "proof": "Proof"
-          },
-          "viewProof": "View"
-        },
-        "common": {
-          "uploading": "Uploading...",
-          "clickToUpload": "Click to upload receipt"
+            "proof": "Receipt"
+          }
         }
       },
       "products": {
@@ -2764,7 +3832,8 @@
             "allCategories": "All categories",
             "status": "Status",
             "allStatus": "All status",
-            "lowStock": "Low stock"
+            "lowStock": "Low stock",
+            "clearance": "Clearance"
           },
           "loading": "Loading products…",
           "empty": {
@@ -2790,7 +3859,9 @@
             "actions": "Actions",
             "uncategorized": "Uncategorized",
             "lowStock": "Low stock",
-            "outOfStock": "Out of stock"
+            "outOfStock": "Out of stock",
+            "clearance": "Clearance",
+            "selectAllHint": "Select every product matching the current filters (all pages)"
           },
           "links": {
             "product": "Product",
@@ -2812,19 +3883,26 @@
           "bulk": {
             "selected": "{count} selected",
             "export": "Export CSV",
-            "import": "Import CSV",
+            "import": "Import CSV / Archive",
+            "exportArchive": "Export archive (ZIP with images)",
             "update": "Bulk edit",
             "duplicate": "Duplicate",
             "delete": "Delete",
             "deleteTitle": "Delete products",
             "deleteMessage": "Are you sure you want to delete {count} selected product(s)? This action cannot be undone.",
             "exportError": "Failed to export CSV. Please try again.",
-            "importTitle": "Import products CSV",
-            "importHint": "Upload a CSV with columns: id (optional), slug, title, price, stock (create only), isActive, categoryId/categorySlug, description, miniDescription, images.",
+            "exportArchiveError": "Failed to export the ZIP archive. Please try again.",
+            "progressDoNotClose": "This can take a while for large catalogs. Please don't close this window.",
+            "progressExporting": "Exporting products…",
+            "progressUploadingImages": "Uploading images…",
+            "progressImporting": "Importing products…",
+            "progressDone": "Done",
+            "importTitle": "Import products",
+            "importHint": "Upload a CSV with columns: id (optional), slug, title, price, stock (create only), isActive, categoryId/categorySlug, description, miniDescription, images. Or upload a ZIP archive (produced by \"Export archive\") to restore products together with their actual image files.",
             "importTemplateTitle": "CSV template",
             "importTemplateHint": "Use “|” to separate multiple images. Images can be file names (uploaded in your store), /uploads paths, or full https URLs.",
             "importTemplateDownload": "Download template",
-            "importError": "Failed to import CSV. Please check the file and try again.",
+            "importError": "Failed to import. Please check the file and try again.",
             "importResult": "Created {created}, updated {updated}, skipped {skipped}.",
             "importErrors": "{count} rows had errors.",
             "updateTitle": "Bulk update",
@@ -2841,9 +3919,16 @@
               "category": "Category",
               "noChange": "No change",
               "clearCategory": "Clear category",
-              "propagatePrice": "Also update variant prices"
+              "propagatePrice": "Also update variant prices",
+              "clearance": "Clearance",
+              "clearanceHint": "Products with an active promotion are skipped.",
+              "clearanceOn": "Mark as clearance",
+              "clearanceOff": "Remove from clearance",
+              "clearanceSkippedSuffix": "product(s) skipped because a promotion is active."
             }
-          }
+          },
+          "loadingError": "Failed to load products",
+          "categoriesLoadError": "Failed to load categories"
         },
         "create": {
           "metaTitle": "Create product",
@@ -2852,7 +3937,8 @@
           "subtitle": "Add a new product to your catalog",
           "submit": "Create product",
           "errors": {
-            "createFailed": "Failed to create product. Please try again."
+            "createFailed": "Failed to create product. Please try again.",
+            "title": "Unable to create draft product"
           }
         },
         "edit": {
@@ -2863,11 +3949,17 @@
           "title": "Edit product",
           "subtitle": "Update product information",
           "submit": "Update product",
+          "notListed": {
+            "title": "Not listed in your store",
+            "reasonProduct": "This product's visibility is set to Unlisted. It is hidden from the shop grid, search and related products, but customers can still reach it at its direct link.",
+            "reasonCategory": "Every category this product belongs to is unlisted, so it is hidden from the shop grid. It stays reachable at its direct link and on its category pages."
+          },
           "tabs": {
             "general": "General",
             "description": "Landing page description",
             "variants": "Variants / Stock",
-            "bundles": "Bundles"
+            "bundles": "Bundles",
+            "promotions": "Promotions"
           },
           "links": {
             "label": "Links",
@@ -2884,7 +3976,20 @@
           "variantsTab": {
             "title": "Options / Variants / Stock",
             "showArchived": "Show archived variants",
-            "archivedCount": "Archived: {count}"
+            "archivedCount": "Archived: {count}",
+            "pricingHint": "Manage selling prices, costs, inventory, and per-variant promotions here.",
+            "allocationTitle": "Allocate stock before using these variants",
+            "allocationMessage": "Existing stock is still parked on the hidden source variant. Split the full stock, reserved stock, and safety stock across active variants to make inventory sellable again.",
+            "allocateAction": "Allocate stock",
+            "allocationSaved": "Variant stock allocation saved",
+            "allocationBalanced": "Allocation is balanced",
+            "allocationUnbalanced": "Allocation must match the hidden source balances exactly",
+            "onHandShort": "on hand",
+            "reservedShort": "reserved",
+            "safetyShort": "safety",
+            "totalOnHand": "Allocated on hand",
+            "totalReserved": "Allocated reserved",
+            "totalSafety": "Allocated safety"
           },
           "bundlesTab": {
             "title": "Bundle deals",
@@ -2910,6 +4015,19 @@
             "bundlesLoadFailed": "Failed to load bundle deals",
             "bundlesSaveFailed": "Failed to save bundle deal",
             "bundlesDeleteFailed": "Failed to delete bundle deal"
+          },
+          "noCategories": "No categories available",
+          "generalTab": {
+            "variantPricingTitle": "Selling price is managed from Variants",
+            "variantPricingMessage": "Set the selling price for this product in the Variants tab. Simple products use their default variant, and optioned products use each selectable variant."
+          },
+          "promotions": {
+            "variantPromotionTitle": "Use variant promotions for this product",
+            "variantPromotionMessage": "This product has selectable variants. Product-level promotions are disabled and each variant now manages its own promotional price, schedule, and countdown state."
+          },
+          "metaPixels": {
+            "title": "Meta pixels",
+            "subtitle": "Choose which pixels fire on this product's page."
           }
         }
       },
@@ -3025,12 +4143,23 @@
           "itemsSection": "Order items",
           "emptyCart": "Cart is empty",
           "itemsTotal": "Items total",
-          "submit": "Create order"
+          "inStock": "in stock",
+          "submit": "Create order",
+          "pickupPoint": "Stop desk",
+          "selfDelivery": "Own delivery"
+        },
+        "badges": {
+          "destockage": "Clearance"
         },
         "index": {
           "title": "Orders",
           "subtitle": "Manage customer orders",
           "addBtn": "New order",
+          "deliveryModes": {
+            "home": "Home delivery",
+            "pickup": "Stop desk",
+            "store": "Store pickup"
+          },
           "filters": {
             "searchLabel": "Search",
             "searchPlaceholder": "Search by customer name or phone…",
@@ -3050,19 +4179,59 @@
             "total": "Total",
             "status": "Status",
             "date": "Date",
+            "actions": "Actions",
+            "delivery": "Delivery",
+            "paymentStatus": "Payment"
+          },
+          "bulkDeleteBtn": "Delete selected",
+          "selectedCount": "{count} selected",
+          "deleteOneConfirm": "Delete this order? Only unconfirmed (pending) orders can be deleted.",
+          "deleteManyConfirm": "Delete {count} orders? Only unconfirmed (pending) orders can be deleted."
+        },
+        "blacklist": {
+          "title": "Order blacklist",
+          "subtitle": "Phone numbers, IP addresses and customers blocked from checking out.",
+          "backToOrders": "Back to orders",
+          "form": {
+            "type": "Type",
+            "value": "Value",
+            "reason": "Reason (optional)",
+            "reasonPlaceholder": "e.g. repeated fake orders",
+            "submit": "Add to blacklist"
+          },
+          "types": {
+            "PHONE": "Phone",
+            "IP": "IP address",
+            "CUSTOMER": "Customer"
+          },
+          "empty": {
+            "title": "No blacklisted entries",
+            "hint": "Phone numbers, IPs, and customers you block will show up here."
+          },
+          "table": {
+            "type": "Type",
+            "value": "Value",
+            "reason": "Reason",
+            "createdAt": "Added",
             "actions": "Actions"
-          }
+          },
+          "deleteConfirm": "Remove this entry from the blacklist?"
         },
         "detail": {
           "metaTitle": "Order detail",
           "breadcrumb": "Order #{id}",
           "loading": "Loading order…",
+          "printBordereau": "Print bordereau",
           "sections": {
             "orderInfo": "Order information",
             "customerInfo": "Customer information",
             "orderItems": "Order items",
             "internalNotes": "Internal Notes",
-            "securityAndFraud": "Security & Fraud"
+            "securityAndFraud": "Security & Fraud",
+            "previousOrders": "Previous orders",
+            "remainingAmount": "Remaining Amount",
+            "callPanel": "Call panel",
+            "deliveryAndCustomer": "Delivery & customer"
           },
           "fields": {
             "orderId": "Order ID",
@@ -3079,29 +4248,80 @@
               "attempt_1": "1st Attempt",
               "attempt_2": "2nd Attempt",
               "attempt_3": "3rd Attempt",
-              "switched_off": "Switched Off"
+              "switched_off": "Switched Off",
+              "whatsapp_sms_sent": "WhatsApp SMS Sent",
+              "whatsapp_link_confirmed": "WhatsApp Link Confirmed",
+              "whatsapp_declined": "Declined on WhatsApp"
             },
-            "internalNotesPlaceholder": "Add private remarks about this order..."
+            "internalNotesPlaceholder": "Add private remarks about this order...",
+            "currency": "Currency",
+            "deliveryCompany": "Provider",
+            "deliveryMode": "Mode",
+            "pickupPoint": "Pickup point",
+            "shippingFee": "Shipping fee",
+            "totalWithDelivery": "Total (with delivery)",
+            "wilayaCommune": "Wilaya / Commune"
           },
           "actions": {
             "blacklistCustomer": "Blacklist Customer",
             "blacklistIp": "Blacklist IP Address",
             "blacklistPhone": "Blacklist Phone Number"
           },
+          "blacklist": {
+            "confirm": {
+              "customer": "Blacklist this customer? Their future orders will be blocked automatically.",
+              "phone": "Blacklist this phone number? Future orders using this number will be blocked automatically.",
+              "ip": "Blacklist this IP address? Future orders from this IP will be blocked automatically."
+            },
+            "confirmBtn": "Blacklist",
+            "success": "Added to blacklist"
+          },
           "securityHelp": "Advanced actions to manage risky behavior.",
+          "deleteConfirm": "Delete this order? This cannot be undone. If the order is confirmed with a carrier, it will also be cancelled there.",
+          "cancelConfirm": "Cancel this order? This cannot be undone.",
+          "editHint": "Save from the items section to apply changes.",
+          "internalNotesHelp": "Notes are only visible to your team.",
+          "sendWhatsapp": "Send WhatsApp",
+          "variantSelect": "Select Variant",
+          "paymentRecorded": "Payment recorded",
+          "nba": {
+            "confirm": "Confirm order",
+            "callCustomer": "Call customer",
+            "callAgain": "Call again",
+            "cancelOrder": "Cancel order",
+            "pushTo": "Push to {provider}",
+            "pushToMaystro": "Push to Maystro",
+            "markShipped": "Mark shipped",
+            "markDelivered": "Mark delivered",
+            "reopen": "Reopen order",
+            "lockedNote": "Status is managed by the carrier."
+          },
+          "previousOrders": {
+            "matchCustomer": "Matched by linked customer record.",
+            "matchPhone": "Matched by normalized phone number.",
+            "matchNone": "Phone could not be normalized.",
+            "emptyCustomer": "No previous orders for this customer.",
+            "emptyPhone": "No previous orders for this phone.",
+            "emptyNone": "Phone could not be normalized.",
+            "noItems": "No items",
+            "moreItems": "+ {count} more"
+          },
           "itemsTable": {
             "product": "Product",
             "price": "Price",
             "quantity": "Quantity",
             "subtotal": "Subtotal",
             "total": "Total",
-            "fallbackProduct": "Product"
+            "fallbackProduct": "Product",
+            "clearance": "Clearance: {count} free unit(s)",
+            "promoCode": "Promo code {code}"
           },
           "statusUpdate": {
             "title": "Update order status",
             "statusLabel": "Status",
             "submit": "Update status",
             "success": "Order status updated successfully!",
+            "lockedByCarrier": "Status is controlled by the delivery carrier. You cannot change it manually.",
             "errors": {
               "loadCashboxesFailed": "Failed to load cashboxes. Please open a cash session first.",
               "updateFailed": "Failed to update order status"
@@ -3127,6 +4347,13 @@
           "notFound": {
             "title": "Order not found",
             "hint": "This order may not exist or you don't have permission to view it."
+          }
+        },
+        "modals": {
+          "payment": {
+            "title": "Record payment",
+            "subtitle": "Record a new payment for this order.",
+            "confirm": "Record payment"
           }
         }
       },
@@ -3288,14 +4515,12 @@
       "delivery": {
         "metaTitle": "Delivery companies",
         "title": "Delivery companies",
-        "subtitle": "Manage delivery providers and pricing per Wilaya",
+        "subtitle": "Choose which carriers appear at checkout and what each wilaya costs",
         "providers": {
           "toggleLabel": "Use setting",
           "noCredentials": "No credentials",
           "connected": "Connected",
-          "notConnected": "Not connected",
-          "wilayasSupported": "{count} Wilayas supported",
-          "managePricing": "Manage pricing"
+          "notConnected": "Not connected"
         },
         "credentials": {
           "title": "API credentials — {provider}",
@@ -3309,7 +4534,8 @@
           "secretPlaceholderNotSet": "Enter token",
           "errors": {
             "saveFailed": "Failed to save credentials"
-          }
+          },
+          "save": "Save connection"
         },
         "pricing": {
           "title": "Pricing configuration: {provider}",
@@ -3320,7 +4546,7 @@
             "office": "Office"
           },
           "searchPlaceholder": "Search wilaya (code or name)…",
-          "overridePlaceholder": "Leave blank to use carrier",
+          "overridePlaceholder": "Carrier rate",
           "filters": {
             "all": "All",
             "overrides": "Overrides",
@@ -3328,7 +4554,6 @@
             "missingCarrier": "Missing carrier rate"
           },
           "showingCount": "Showing {shown} of {total}",
-          "pageOf": "Page {page} / {pages}",
           "fetchCarrierRates": "Fetch carrier rates",
           "fetchingCarrierRates": "Fetching…",
           "table": {
@@ -3336,73 +4561,270 @@
             "wilaya": "Wilaya name",
             "price": "Price (DZD)",
             "carrierPrice": "Carrier rate",
-            "overridePrice": "Your rate"
-          }
+            "overridePrice": "Your rate",
+            "margin": "Margin"
+          },
+          "save": "Save pricing",
+          "discard": "Discard",
+          "unsaved": "unsaved rate | unsaved rates",
+          "noMatches": "No wilaya matches this search.",
+          "clearFilters": "Clear filters",
+          "loadFailed": "Could not load saved rates. Reload the page.",
+          "carrierSource": {
+            "title": "Carrier rates",
+            "empty": "Not fetched yet — fetch them to compare against your prices.",
+            "loaded": "{count} rates fetched from the carrier.",
+            "needsConnection": "Connect this carrier first.",
+            "cached": "{count} rates, last checked {age}.",
+            "ageJustNow": "less than an hour ago",
+            "ageHours": "{hours}h ago",
+            "ageDays": "{days}d ago"
+          },
+          "margin": {
+            "prefix": "Set every visible rate to carrier +",
+            "unit": "Margin unit",
+            "apply": "Apply to {count} rates",
+            "hint": "Fills the rate boxes below. Nothing is saved until you press Save pricing.",
+            "needsCarrierRates": "Fetch carrier rates first to use this."
+          },
+          "refreshCarrierRates": "Refresh from carrier"
         },
         "errors": {
           "updateProviderFailed": "Failed to update provider status",
           "saveFailed": "Failed to save pricing",
           "fetchCarrierRatesFailed": "Failed to fetch carrier rates"
+        },
+        "section": "Shipping",
+        "stats": {
+          "offered": "at checkout",
+          "connected": "connected",
+          "wilayas": "wilayas"
+        },
+        "rail": {
+          "carriers": "Carriers",
+          "alsoAtCheckout": "Also at checkout",
+          "offerToggle": "Show {provider} at checkout"
+        },
+        "tabs": {
+          "connection": "Connection",
+          "pricing": "Wilaya pricing"
+        },
+        "workspace": {
+          "offered": "Customers can choose this carrier at checkout",
+          "notOffered": "Hidden from checkout",
+          "emptyTitle": "Pick a carrier",
+          "emptyHint": "Select a carrier on the left to connect it and set its per-wilaya rates."
+        },
+        "storePickup": {
+          "title": "Pickup at store",
+          "hint": "Customers who pick this skip delivery and collect the order themselves.",
+          "on": "Offered at checkout",
+          "off": "Hidden from checkout",
+          "toggleLabel": "Offer pickup at store"
+        },
+        "maystro": {
+          "resync": {
+            "title": "Resync Maystro products",
+            "hint": "Repairs products Maystro accepted without returning a product ID — the usual cause of \"missing products\" errors when pushing an order. Safe to run any time.",
+            "action": "Resync products",
+            "running": "Resyncing…",
+            "done": "{fixed} product(s) fixed, {skipped} skipped.",
+            "failed": "Resync failed. Try again.",
+            "needsConnection": "Connect Maystro first."
+          }
+        },
+        "yalidine": {
+          "title": "Yalidine webhook setup",
+          "hint": "Add this URL in the Yalidine Webhooks Dashboard so delivery statuses update in your store automatically.",
+          "urlLabel": "Webhook URL to give Yalidine",
+          "urlHint": "Must be a public HTTPS tenant domain. Replace the domain if your store uses a custom one.",
+          "localhostNotice": "Localhost cannot receive Yalidine webhooks, so this shows your production tenant URL.",
+          "copy": "Copy URL",
+          "copied": "Copied",
+          "copyFailed": "Copy failed. Select the URL and copy it manually.",
+          "stepsTitle": "In the Yalidine dashboard",
+          "steps": {
+            "open": "Open the Webhooks Dashboard.",
+            "paste": "Add a webhook and paste the URL above.",
+            "secret": "Set the same secret there and in the Webhook Secret field here.",
+            "activate": "Test the webhook, then activate it."
+          },
+          "eventsTitle": "Select these events"
+        },
+        "probe": {
+          "title": "Check an exact commune price",
+          "hint": "Carrier rates in the table are sampled per wilaya. Check one commune for the carrier's exact price.",
+          "commune": "Commune",
+          "selectCommune": "Select a commune",
+          "loadingCommunes": "Loading communes…",
+          "noCommunes": "No communes",
+          "action": "Check price",
+          "checking": "Checking…",
+          "communesFailed": "Could not load communes. Check this carrier’s credentials.",
+          "pricesFailed": "Could not fetch prices from this carrier. Try again."
         }
       },
       "onboarding": {
         "metaTitle": "Store setup",
         "title": "Store setup",
-        "subtitle": "Choose your brand color, template, and language.",
+        "subtitle": "Set up your store in a few quick steps.",
         "loadingSettings": "Loading your store settings…",
+        "finishLater": "Finish later",
         "progress": {
           "stepOf": "Step {current} of {total}"
         },
         "steps": {
-          "brand": "Brand",
-          "template": "Template",
-          "language": "Language",
-          "summary": "Summary"
+          "storeInfo": "Your store",
+          "template": "Theme",
+          "brandColor": "Brand colour",
+          "firstProduct": "First product",
+          "delivery": "Delivery",
+          "publish": "Go live"
         },
-        "brand": {
-          "title": "Brand color",
-          "pickColor": "Pick a color",
-          "hexValue": "Hex value",
-          "example": "Example: {value}",
-          "preview": "Preview",
-          "primaryButton": "Primary button"
+        "preview": {
+          "eyebrow": "Live preview",
+          "desktop": "Desktop",
+          "mobile": "Mobile"
+        },
+        "storeInfo": {
+          "title": "Tell us about your store",
+          "subtitle": "The name and logo customers will see on every page.",
+          "nameLabel": "Store name",
+          "namePlaceholder": "My Store",
+          "logoLabel": "Store logo",
+          "logoHint": "Recommended: 200×200px PNG or SVG",
+          "logoUpload": "Upload logo",
+          "logoChange": "Change logo",
+          "logoRemove": "Remove",
+          "descriptionLabel": "Short description",
+          "descriptionHint": "Used as your store’s description in search results.",
+          "descriptionPlaceholder": "A few words about your store…"
         },
         "template": {
-          "title": "Store template"
-        },
-        "templates": {
-          "classic": {
-            "label": "Classic",
-            "description": "Clean layout, ideal for most stores."
+          "title": "Pick a theme",
+          "subtitle": "Every theme is a complete storefront. You can change it later.",
+          "searchPlaceholder": "Search themes…",
+          "buy": "BUY",
+          "audiences": {
+            "fashion": "Fashion",
+            "beauty": "Beauty",
+            "food": "Food",
+            "tech": "Tech",
+            "home": "Home",
+            "kids": "Kids"
           },
-          "modern": {
-            "label": "Modern",
-            "description": "Bolder typography and more visual spacing."
+          "specimens": {
+            "classic": "Timeless & elegant",
+            "modern": "Minimal & modern",
+            "interior": "Home & interiors",
+            "minimal": "Pared back",
+            "street": "Limited drop",
+            "cozy": "Soft & warm",
+            "cyber": "Next-gen tech",
+            "stationnery": "Fine stationery",
+            "food": "Artisan flavours",
+            "wellness": "Organic & natural",
+            "playful": "Candy kawaii",
+            "activewear": "High performance",
+            "chrono": "Luxury accessories",
+            "maison": "Pistachio luxe",
+            "arena": "Esports performance",
+            "nour": "Draped elegance",
+            "embellir": "Beauty & wellbeing"
           }
         },
-        "language": {
-          "title": "Language",
-          "label": "Language",
-          "rtlHint": "If Arabic, consider RTL layout."
+        "brand": {
+          "title": "Your brand colour",
+          "subtitle": "Buttons, links and highlights across your storefront.",
+          "suggested": "Suggested",
+          "pickColor": "Pick a colour",
+          "hexValue": "Hex value",
+          "hexInvalid": "Enter a six-digit hex colour, like #0D9488.",
+          "contrastWarning": "This colour is very light. Text on your buttons may be hard to read."
         },
-        "summary": {
-          "title": "Summary",
-          "cards": {
-            "template": "Template",
-            "primaryColor": "Primary color",
-            "language": "Language"
-          },
-          "aiTitle": "Frontend AI summary",
-          "generate": "Generate",
-          "generating": "Generating…",
-          "placeholder": "Click Generate to create a brief for your frontend agent."
+        "firstProduct": {
+          "title": "Add your first product",
+          "subtitle": "A store needs one product before it can open. You can add more later.",
+          "created": "Product created. Edit it any time from Products.",
+          "nameLabel": "Product name",
+          "namePlaceholder": "e.g. T-shirt, phone case…",
+          "priceLabel": "Price (DZD)",
+          "imageLabel": "Product image",
+          "imageUpload": "Upload image",
+          "imageChange": "Change image"
         },
-        "saveFinish": "Save & finish",
+        "delivery": {
+          "title": "How will you deliver?",
+          "subtitle": "Pick at least one. You can change this any time.",
+          "required": "Pick at least one delivery method to open your store.",
+          "carrierNote": "Connect the carrier’s API later in",
+          "options": {
+            "SELF": {
+              "label": "I deliver myself",
+              "hint": "Your own drivers, or you."
+            },
+            "PICKUP": {
+              "label": "Store pickup",
+              "hint": "Customers collect their order in person."
+            },
+            "MAYSTRO": {
+              "label": "Maystro Delivery",
+              "hint": "Nationwide carrier."
+            },
+            "YALIDINE": {
+              "label": "Yalidine",
+              "hint": "Nationwide carrier."
+            }
+          }
+        },
+        "publish": {
+          "title": "Ready to open?",
+          "subtitle": "Your storefront is private until you publish it.",
+          "liveTitle": "Your store is live",
+          "liveSubtitle": "Anyone with the link can now shop and order.",
+          "cta": "Publish my store",
+          "statusDraft": "Draft — only you can see this.",
+          "statusLive": "Live — open to customers.",
+          "blockedTitle": "Before you can open:",
+          "noProduct": "None yet",
+          "noDelivery": "None yet",
+          "missing": {
+            "product": "Add at least one product",
+            "delivery": "Pick at least one delivery method"
+          }
+        },
+        "done": {
+          "storeUrlLabel": "Your store URL",
+          "ctaDashboard": "Go to dashboard"
+        },
         "errors": {
           "loadFailed": "Failed to load store settings.",
           "saveFailed": "Failed to save store settings.",
-          "summaryFailed": "Failed to generate summary."
+          "publishFailed": "Failed to publish your store.",
+          "uploadFailed": "Upload failed. Please try again.",
+          "nameRequired": "Your store needs a name."
+        },
+        "language": {
+          "label": "Store language",
+          "rtlHint": "Arabic displays your storefront right-to-left."
         }
+      },
+      "gettingStarted": {
+        "title": "Getting Started",
+        "progress": "{done} of {total} completed",
+        "dismiss": "Dismiss",
+        "complete": "Setup complete",
+        "items": {
+          "logo": "Upload your logo",
+          "product": "Add your first product",
+          "category": "Create a category",
+          "delivery": "Configure delivery",
+          "publish": "Publish your store"
+        },
+        "publishBtn": "Publish now",
+        "publishing": "Publishing…",
+        "publishBlocked": "Add a product and a delivery method first.",
+        "publishMissing": "Still needed: {items}"
       },
       "purchases": {
         "index": {
@@ -3483,7 +4905,9 @@
             "itemsOrdered": "Items ordered",
             "itemsReceived": "Items received",
             "estimatedTotal": "Estimated total cost",
-            "notesPlaceholder": "Notes & attachments coming soon"
+            "notesPlaceholder": "Notes & attachments coming soon",
+            "paidAmount": "Paid amount",
+            "balance": "Balance"
           },
           "items": {
             "title": "Order items",
@@ -3582,7 +5006,9 @@
           }
         },
         "actions": {
-          "refund": "Refund"
+          "refund": "Refund",
+          "invoice": "Invoice",
+          "printInvoice": "Print invoice"
         },
         "refundModal": {
           "title": "Refund sale",
@@ -3602,7 +5028,9 @@
           "onlyCompletedPos": "Only completed POS sales can be refunded.",
           "noOpenCashbox": "No open cashbox available. Open a cash session first.",
           "refundSuccess": "Sale refunded successfully.",
-          "refundFailed": "Failed to refund sale."
+          "refundFailed": "Failed to refund sale.",
+          "invoiceFailed": "Failed to generate invoice.",
+          "invoicePopupBlocked": "Invoice popup was blocked by the browser."
         },
         "detail": {
           "metaTitle": "Sale",
@@ -3635,6 +5063,11 @@
         }
       },
       "settings": {
+        "index": {
+          "metaTitle": "Settings",
+          "title": "Settings by theme",
+          "subtitle": "Find each setting by business intent: storefront, sales, localization, marketing, domains, and administration."
+        },
         "appearance": {
           "metaTitle": "Appearance",
           "title": "Appearance settings",
@@ -3651,9 +5084,14 @@
           "subtitle": "Manage the contact details shown in your storefront footer."
         },
         "functional": {
-          "metaTitle": "Functional",
-          "title": "Functional settings",
-          "subtitle": "Manage core functionality and features of your store."
+          "metaTitle": "Sales & checkout",
+          "title": "Sales, checkout, and operations",
+          "subtitle": "Tune checkout, invoices, localization, announcements, and loyalty."
+        },
+        "domains": {
+          "metaTitle": "Domains",
+          "title": "Domain settings",
+          "subtitle": "Connect a bought domain to this storefront with a CNAME record."
         }
       },
       "suppliers": {
@@ -3716,10 +5154,335 @@
             "updateFailed": "Failed to update supplier. Please try again."
           }
         }
+      },
+      "promoCodes": {
+        "title": "Promo codes",
+        "subtitle": "Discount codes shoppers type at checkout.",
+        "actions": {
+          "create": "New promo code"
+        },
+        "filters": {
+          "search": "Search",
+          "searchPlaceholder": "Code or description",
+          "status": "Status",
+          "all": "All"
+        },
+        "status": {
+          "active": "Active",
+          "inactive": "Inactive",
+          "scheduled": "Scheduled",
+          "expired": "Expired",
+          "exhausted": "Limit reached"
+        },
+        "types": {
+          "PERCENTAGE": "Percentage",
+          "FIXED": "Fixed amount",
+          "FREE_SHIPPING": "Free shipping"
+        },
+        "stats": {
+          "total": "codes",
+          "active": "live",
+          "redemptions": "redemptions"
+        },
+        "empty": {
+          "title": "No promo codes yet",
+          "description": "Create a code and shoppers can enter it at checkout."
+        },
+        "table": {
+          "code": "Code",
+          "discount": "Discount",
+          "conditions": "Conditions",
+          "usage": "Used",
+          "window": "Window",
+          "status": "Status",
+          "cappedAt": "Capped at {amount}",
+          "minOrder": "Min. order {amount}",
+          "perCustomer": "{count} per customer",
+          "noStart": "No start date",
+          "noEnd": "No end date",
+          "wholeCatalog": "Whole catalogue",
+          "categoriesCount": "{count} categories",
+          "productsCount": "{count} products"
+        },
+        "form": {
+          "createTitle": "New promo code",
+          "editTitle": "Edit promo code",
+          "description": "Set what the code takes off and when it can be used.",
+          "code": "Code",
+          "codeHint": "Letters, digits, dots, dashes. Shoppers type it, and it is matched case-insensitively.",
+          "descriptionPlaceholder": "Internal note, e.g. Ramadan campaign",
+          "discountType": "Discount type",
+          "percentValue": "Percentage off (%)",
+          "fixedValue": "Amount off ({currency})",
+          "maxDiscount": "Maximum discount ({currency})",
+          "maxDiscountHint": "Caps a percentage discount. Leave empty for no cap.",
+          "minOrder": "Minimum order ({currency})",
+          "minOrderHint": "Cart subtotal needed before the code applies.",
+          "startsAt": "Starts at",
+          "startsAtHint": "Leave empty to start immediately.",
+          "endsAt": "Ends at",
+          "endsAtHint": "Leave empty for no expiry.",
+          "usageLimit": "Total uses",
+          "usageLimitHint": "Leave empty for unlimited.",
+          "usageLimitPerCustomer": "Uses per customer",
+          "usageLimitPerCustomerHint": "Counted by phone number. Leave empty for unlimited.",
+          "scope": "Where it applies",
+          "scopeHint": "Pick nothing to discount the whole cart. Otherwise only the selected products and categories are discounted.",
+          "categories": "Categories",
+          "products": "Products",
+          "noCategories": "No categories yet",
+          "noProducts": "No products yet",
+          "active": "Active",
+          "activeHint": "Inactive codes are refused at checkout."
+        },
+        "delete": {
+          "title": "Delete this promo code?",
+          "message": "{code} will stop working at checkout. Past orders keep the code they were placed with."
+        }
+      },
+      "aiImport": {
+        "title": "AI document import",
+        "kicker": "AI import",
+        "entry": {
+          "scan": "Scan a document",
+          "importFromDocument": "Import from a document"
+        },
+        "kinds": {
+          "invoice": "Supplier invoice",
+          "invoiceHint": "Becomes a draft purchase order",
+          "deliveryNote": "Delivery note",
+          "deliveryNoteHint": "Bon de livraison",
+          "catalog": "Catalogue or price list",
+          "catalogHint": "Creates products only",
+          "invoiceTrait": "Has quantities, unit prices and a total to pay.",
+          "deliveryNoteTrait": "Has quantities, usually with no prices.",
+          "catalogTrait": "Has prices with no quantities ordered."
+        },
+        "upload": {
+          "title": "Scan a document",
+          "intro": "Photograph or upload a supplier document. The AI reads it, and you check every line before anything is saved.",
+          "kindLabel": "What is this document?",
+          "dropHint": "Drop the file here",
+          "formats": "JPEG, PNG, WebP or PDF · up to 10 MB · 10 pages",
+          "choose": "Choose a file",
+          "uploading": "Uploading…",
+          "submit": "Read it",
+          "tips": {
+            "title": "For the most accurate reading",
+            "frame": "Fit the whole page in the frame, including the totals row.",
+            "flat": "Lay it flat and shoot straight on, not at an angle.",
+            "light": "Even light — avoid the shadow of your hand or phone.",
+            "focus": "Check handwritten quantities are sharp before sending.",
+            "pages": "More than one page? Send a PDF rather than several photos."
+          }
+        },
+        "review": {
+          "subtitle": "Check every line, then import. Nothing is saved until you confirm.",
+          "reading": "Reading your document…",
+          "readingHint": "This takes up to a minute for a multi-page document. You can leave this page and come back.",
+          "originalTitle": "Original document",
+          "openOriginal": "Open the original in a new tab",
+          "zoomIn": "Zoom in",
+          "zoomOut": "Zoom out",
+          "noPreview": "No preview available",
+          "noPreviewHint": "The extracted values are still shown on the right.",
+          "detailsTitle": "Document details",
+          "reference": "Document number",
+          "issuedAt": "Issue date",
+          "modelNotes": "Note from the AI: {notes}",
+          "needsReview": "{count} value(s) need your review",
+          "needsReviewHint": "Highlighted cells are the ones the AI was unsure about. Check each one, then import.",
+          "totalsMismatch": "The lines add up to {computed} but the document says {printed}. Check the quantities.",
+          "failedTitle": "This document could not be read",
+          "failedHint": "Try a sharper, better-lit photograph of the invoice itself.",
+          "tryAgain": "Try another document",
+          "alreadyImported": "Already imported",
+          "alreadyImportedHint": "This document has already been turned into a purchase order.",
+          "openPurchase": "Open the purchase order"
+        },
+        "supplier": {
+          "title": "Supplier",
+          "selectLabel": "Supplier",
+          "createOption": "Create “{name}”",
+          "noneOption": "No supplier",
+          "nameLabel": "Supplier name",
+          "nameHint": "This is what the AI read from the document.",
+          "phoneLabel": "Phone",
+          "addressLabel": "Address",
+          "matchedNote": "Matched at {percent}% to an existing supplier."
+        },
+        "margin": {
+          "label": "Margin %",
+          "hint": "Applied to unit cost",
+          "apply": "Recalculate sale prices",
+          "pinnedNote": "{count} price(s) you set by hand are kept."
+        },
+        "table": {
+          "title": "Lines ({count})",
+          "total": "Total {total}",
+          "label": "On the document",
+          "product": "Your product",
+          "quantity": "Qty",
+          "unitCost": "Unit cost",
+          "salePrice": "Sale price",
+          "margin": "Margin",
+          "actions": "Actions",
+          "skip": "Skip this line",
+          "include": "Put this line back",
+          "unpin": "Follow the margin again",
+          "emptyTitle": "No lines were found",
+          "emptyHint": "The AI could not find any product rows in this document."
+        },
+        "match": {
+          "createNew": "Create a new product",
+          "willCreate": "will be created",
+          "source": {
+            "barcode": "Barcode",
+            "sku": "Reference",
+            "alias": "Remembered",
+            "fuzzy": "Name match",
+            "none": "Not matched"
+          }
+        },
+        "confirm": {
+          "lines": "lines",
+          "units": "units",
+          "discard": "Discard this scan",
+          "submit": "Import",
+          "done": "Document imported."
+        },
+        "errors": {
+          "tooLarge": "The document must be smaller than 10 MB.",
+          "uploadFailed": "The document could not be uploaded."
+        }
+      },
+      "devices": {
+        "title": "Device management",
+        "subtitle": "Review devices, activation capacity, and generate offline activation codes."
       }
     },
     "validation": {
       "invalidNumber": "Enter a valid number"
+    },
+    "tours": {
+      "next": "Next",
+      "prev": "Back",
+      "done": "Done",
+      "menuLabel": "Tours & Help",
+      "sidebar": {
+        "label": "Admin overview",
+        "steps": {
+          "logo": {
+            "title": "Your store",
+            "desc": "This is your store name and logo. You can change them in Appearance settings."
+          },
+          "dashboard": {
+            "title": "Dashboard",
+            "desc": "Get a quick overview of your sales, orders, and revenue at a glance."
+          },
+          "products": {
+            "title": "Products",
+            "desc": "Add and manage everything you sell — products, prices, images, and stock."
+          },
+          "orders": {
+            "title": "Orders",
+            "desc": "Track every customer order from new to delivered. Update statuses and export reports."
+          },
+          "delivery": {
+            "title": "Delivery",
+            "desc": "Connect with multiple carriers via webhooks or manage your own delivery. Set up zones and rates here."
+          },
+          "settings": {
+            "title": "Settings",
+            "desc": "Customize your store's look, contact details, language, and go live when ready."
+          },
+          "help": {
+            "title": "Tours & Help",
+            "desc": "Click here anytime to relaunch this tour or start a tour for a specific section."
+          }
+        }
+      },
+      "dashboard": {
+        "label": "Dashboard tour",
+        "steps": {
+          "stats": {
+            "title": "Your metrics",
+            "desc": "See total orders, revenue, and new customers for the selected period."
+          },
+          "checklist": {
+            "title": "Launch checklist",
+            "desc": "Complete these steps to get your store fully ready. You can dismiss it once done."
+          },
+          "chart": {
+            "title": "Sales trend",
+            "desc": "This chart shows your sales volume over time so you can spot patterns."
+          }
+        }
+      },
+      "products": {
+        "label": "Products tour",
+        "steps": {
+          "create": {
+            "title": "Add a product",
+            "desc": "Click here to create a new product. Add a name, price, images, and stock."
+          },
+          "search": {
+            "title": "Find products",
+            "desc": "Search by name, filter by category or status to quickly locate any product."
+          },
+          "table": {
+            "title": "Product list",
+            "desc": "All your products are listed here. Click any row to edit it."
+          }
+        }
+      },
+      "orders": {
+        "label": "Orders tour",
+        "steps": {
+          "tabs": {
+            "title": "Filter by status",
+            "desc": "Switch between All, Pending, Confirmed, Shipped, Delivered, and Cancelled orders."
+          },
+          "export": {
+            "title": "Export orders",
+            "desc": "Export your orders to Excel or Google Sheets for reporting and accounting."
+          },
+          "table": {
+            "title": "Order list",
+            "desc": "Each row is a customer order. Click it to see details, update status, or print a receipt."
+          }
+        }
+      },
+      "delivery": {
+        "label": "Delivery tour",
+        "steps": {
+          "providers": {
+            "title": "Delivery partners",
+            "desc": "Choose from multiple carriers or self-managed delivery. Enable real-time webhooks for instant updates."
+          },
+          "config": {
+            "title": "Provider settings",
+            "desc": "Enter your API credentials and configure fees, zones, and pickup options."
+          }
+        }
+      },
+      "settings": {
+        "label": "Settings tour",
+        "steps": {
+          "appearance": {
+            "title": "Appearance",
+            "desc": "Change your store template, brand color, and logo to match your identity."
+          },
+          "template": {
+            "title": "Store template",
+            "desc": "Pick from 10 storefront themes. Each has a unique layout tailored to a product type."
+          },
+          "color": {
+            "title": "Brand color",
+            "desc": "Your brand color is used on buttons and accents across your entire storefront."
+          }
+        }
+      }
     }
   },
   "superAdmin": {
@@ -3736,8 +5499,11 @@
     "nav": {
       "dashboard": "Dashboard",
       "tenants": "Tenants",
+      "ai": "AI",
       "analytics": "Analytics",
-      "auditLogs": "Audit logs"
+      "auditLogs": "Audit logs",
+      "payments": "Payments",
+      "devices": "Devices"
     },
     "login": {
       "title": "Super Admin",
@@ -3800,7 +5566,14 @@
         "deleteTenant": "Delete tenant",
         "suspendTenant": "Suspend tenant",
         "unsuspendTenant": "Activate tenant",
-        "impersonateUser": "Impersonate user"
+        "impersonateUser": "Impersonate user",
+        "archiveTenant": "Archive tenant",
+        "restoreTenant": "Restore tenant",
+        "setTenantPlan": "Change plan",
+        "importPaymentProof": "Import payment proof",
+        "reviewPayment": "Review payment",
+        "viewPaymentProof": "View payment proof",
+        "listTenantPayments": "List tenant payments"
       }
     },
     "tenants": {
@@ -3809,7 +5582,12 @@
         "createTenant": "Create tenant",
         "payments": "Payments",
         "suspend": "Suspend",
-        "activate": "Activate"
+        "activate": "Activate",
+        "showArchived": "Show archived",
+        "viewDetails": "View details",
+        "archive": "Archive",
+        "restore": "Restore",
+        "deletePermanently": "Delete permanently"
       },
       "search": {
         "placeholder": "Search tenants..."
@@ -3828,7 +5606,8 @@
       },
       "status": {
         "active": "Active",
-        "suspended": "Suspended"
+        "suspended": "Suspended",
+        "archived": "Archived"
       },
       "modal": {
         "createTitle": "Create new tenant",
@@ -3842,7 +5621,7 @@
             "label": "Slug (subdomain)",
             "placeholder": "your-store",
             "slugFallback": "slug",
-            "hint": "Will be accessible at {slug}.localhost:3000"
+            "hint": "Accessible at {domain}"
           },
           "ownerEmail": {
             "label": "Owner email",
@@ -3857,11 +5636,77 @@
         "generic": "An error occurred",
         "suspendFailed": "Failed to suspend tenant",
         "activateFailed": "Failed to activate tenant",
-        "deleteFailed": "Failed to delete tenant"
+        "deleteFailed": "Failed to delete tenant",
+        "archiveFailed": "Failed to archive tenant",
+        "restoreFailed": "Failed to restore tenant"
       },
       "confirm": {
         "suspend": "Are you sure you want to suspend {name}?",
-        "delete": "Are you sure you want to DELETE {name}? This action cannot be undone!"
+        "archive": "Archive {name}? Its storefront and admin login will be disabled. You can restore it later.",
+        "restore": "Restore {name}? This will re-enable its storefront and admin login.",
+        "deletePermanently": "Permanently delete {name}? This cannot be undone."
+      },
+      "detail": {
+        "breadcrumb": "Details",
+        "loading": "Loading tenant...",
+        "notFound": "Tenant not found",
+        "storefrontLink": "Open storefront",
+        "overview": {
+          "title": "Overview",
+          "createdAt": "Created",
+          "slug": "Slug"
+        },
+        "plan": {
+          "title": "Plan & usage",
+          "currentPlan": "Current plan",
+          "interval": "Billing interval",
+          "status": "Subscription status",
+          "currentPeriod": "Current period",
+          "trialEnds": "Trial ends",
+          "noSubscription": "No subscription on file",
+          "changePlan": "Change plan",
+          "changePlanCta": "Apply plan",
+          "updating": "Applying..."
+        },
+        "usage": {
+          "title": "Usage this period",
+          "products": "Products",
+          "orders": "Orders",
+          "users": "Users"
+        },
+        "users": {
+          "title": "Users",
+          "empty": "No users yet",
+          "table": {
+            "email": "Email",
+            "role": "Role",
+            "status": "Status",
+            "created": "Created"
+          }
+        },
+        "integrations": {
+          "title": "Social integrations",
+          "empty": "No integrations connected",
+          "deliveryTitle": "Delivery accounts",
+          "deliveryEmpty": "No delivery accounts connected",
+          "table": {
+            "provider": "Provider",
+            "status": "Status",
+            "updated": "Updated"
+          }
+        },
+        "domains": {
+          "title": "Custom domains",
+          "empty": "No custom domains",
+          "table": {
+            "domain": "Domain",
+            "created": "Added"
+          }
+        },
+        "errors": {
+          "loadFailed": "Failed to load tenant details",
+          "planUpdateFailed": "Failed to update plan"
+        }
       }
     },
     "paymentsPage": {
@@ -3924,6 +5769,93 @@
         "loadFailed": "Failed to load payments",
         "importFailed": "Failed to import payment",
         "reviewFailed": "Failed to review payment"
+      }
+    },
+    "analytics": {
+      "title": "Platform Analytics",
+      "revenue": {
+        "title": "Total Platform Revenue",
+        "subtitle": "From confirmed, shipped, and delivered orders"
+      },
+      "stats": {
+        "tenants": "Active Tenants",
+        "users": "Total Users",
+        "products": "Total Products",
+        "orders": "Total Orders"
+      },
+      "byTenant": {
+        "title": "Revenue by Tenant",
+        "loading": "Loading...",
+        "empty": "No revenue data available",
+        "unknownTenant": "Unknown Tenant"
+      },
+      "topTenants": {
+        "title": "Top Performing Tenants",
+        "table": {
+          "rank": "Rank",
+          "tenant": "Tenant",
+          "revenue": "Revenue",
+          "orders": "Orders",
+          "products": "Products"
+        }
+      }
+    },
+    "auditLogs": {
+      "title": "Audit Logs",
+      "actions": {
+        "refresh": "Refresh"
+      },
+      "filters": {
+        "search": {
+          "label": "Search",
+          "placeholder": "Search by action, details, or user ID..."
+        },
+        "actionType": "Action Type",
+        "allActions": "All Actions",
+        "sortBy": "Sort By",
+        "sort": {
+          "newestFirst": "Newest First",
+          "oldestFirst": "Oldest First"
+        }
+      },
+      "loading": "Loading audit logs...",
+      "empty": "No audit logs found",
+      "table": {
+        "timestamp": "Timestamp",
+        "action": "Action",
+        "details": "Details",
+        "userId": "User ID",
+        "target": "Target"
+      },
+      "pagination": {
+        "showing": "Showing {from}-{to} of {total}",
+        "previous": "Previous",
+        "next": "Next"
+      }
+    },
+    "pendingPayments": {
+      "title": "Pending Payments",
+      "subtitle": "Review and approve or reject payment proofs submitted by tenants.",
+      "pending": "pending",
+      "noProof": "No file",
+      "stats": {
+        "pending": "Pending proofs",
+        "tenants": "Tenants waiting",
+        "total": "Total value"
+      },
+      "table": {
+        "title": "Submitted proofs awaiting review",
+        "tenant": "Tenant",
+        "plan": "Plan",
+        "amount": "Amount",
+        "submitted": "Submitted",
+        "proof": "Proof",
+        "notes": "Notes",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "All caught up!",
+        "subtitle": "No pending payment proofs at the moment."
       }
     }
   }

@@ -17,6 +17,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -40,10 +41,14 @@ const originalPrice = computed(() => pricing.value.originalPrice)
 const displayPrice = computed(() => pricing.value.effectivePrice)
 const promotionApplied = computed(() => pricing.value.promotionApplied)
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
@@ -85,6 +90,7 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: displayPrice.value,
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
@@ -124,7 +130,7 @@ async function handleAddToCart() {
       </NuxtLink>
         
       <!-- Badges (Top Left) -->
-      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
+      <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10">
         <span
           v-if="isNew"
           class="px-2 py-0.5 bg-white text-slate-900 text-[10px] font-bold uppercase tracking-wider border border-slate-200"
@@ -133,11 +139,15 @@ async function handleAddToCart() {
           v-if="discount > 0"
           class="px-2 py-0.5 bg-brand-600 text-white text-[10px] font-bold uppercase tracking-wider"
         >-{{ discount }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-2 py-0.5 bg-amber-600 text-white text-[10px] font-bold uppercase tracking-wider"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
       <!-- Floating Actions (Right) -->
       <div 
-        class="absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 z-10"
+        class="absolute top-3 end-3 flex flex-col gap-2 transition-all duration-300 z-10"
         :class="[
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'opacity-0 group-hover:opacity-100'
         ]"
@@ -171,7 +181,7 @@ async function handleAddToCart() {
       <!-- Static In Stock Badge (Grid Only) -->
       <div
         v-if="product.stock > 0 && viewMode !== 'list'"
-        class="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute bottom-3 start-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <span
           v-if="isLowStock"
@@ -181,7 +191,7 @@ async function handleAddToCart() {
 
       <div
         v-if="isOutOfStock && viewMode !== 'list'"
-        class="absolute bottom-0 left-0 w-full bg-white/90 py-2 text-center"
+        class="absolute bottom-0 start-0 w-full bg-white/90 py-2 text-center"
       >
         <span class="text-slate-900 text-xs font-bold uppercase tracking-widest">
           {{ storefrontContent.actions.outOfStock }}
@@ -204,7 +214,7 @@ async function handleAddToCart() {
     <div 
       :class="[
         viewMode === 'list' 
-          ? 'flex-1 text-left' 
+          ? 'flex-1 text-start' 
           : 'mt-4 text-center w-full px-1'
       ]"
     >
@@ -229,11 +239,11 @@ async function handleAddToCart() {
         class="flex items-center gap-2" 
         :class="[ viewMode === 'list' ? '' : 'justify-center mt-2' ]"
       >
-        <span class="text-base font-medium text-slate-600">{{ displayPrice.toLocaleString() }} <span class="text-xs font-normal text-slate-500">{{ currencyCode }}</span></span>
+        <span class="text-base font-medium text-slate-600">{{ formatAmount(displayPrice) }} <span class="text-xs font-normal text-slate-500">{{ currencyCode }}</span></span>
         <span
           v-if="promotionApplied && originalPrice !== displayPrice"
           class="text-xs text-slate-400 line-through"
-        >{{ originalPrice }} {{ currencyCode }}</span>
+        >{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
       </div>
       
       <!-- List View Extra Actions -->
@@ -260,7 +270,7 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 bg-slate-900 text-white px-6 py-4 shadow-xl flex items-center gap-4 border border-slate-700"
+        class="fixed bottom-4 end-4 z-50 bg-slate-900 text-white px-6 py-4 shadow-xl flex items-center gap-4 border border-slate-700"
       >
         <div class="w-6 h-6 flex items-center justify-center text-white shrink-0">
           <Icon name="lucide:check" class="w-5 h-5" />

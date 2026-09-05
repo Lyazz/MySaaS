@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import ProductCard from '~/components/storefront/templates/activewear/ProductCard.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 
 const props = defineProps<{
   tenantName: string
@@ -150,7 +151,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Arrows -->
-      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 right-8 z-20 gap-4">
+      <div v-if="hasMultipleSlides" class="hidden md:flex absolute bottom-8 end-8 z-20 gap-4">
         <button
           class="w-12 h-12 skew-x-[-15deg] border-2 border-white/30 flex items-center justify-center text-white hover:bg-brand-500 hover:text-black hover:border-brand-500 transition-all backdrop-blur-sm"
           @click="prevSlide"
@@ -166,7 +167,7 @@ const displayedProducts = computed(() => {
       </div>
 
       <!-- Dots -->
-      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 left-6 md:left-8 z-20 flex space-x-3">
+      <div v-if="hasMultipleSlides" class="absolute bottom-6 md:bottom-8 start-6 md:start-8 z-20 flex space-x-3 rtl:space-x-reverse">
         <button 
           v-for="(slide, index) in heroSlides" 
           :key="index" 
@@ -226,10 +227,7 @@ const displayedProducts = computed(() => {
                 :alt="categoryDisplayTitle(cat)"
                 class="w-full h-full object-cover opacity-50 transition-transform duration-700 group-hover:scale-105 mix-blend-luminosity group-hover:mix-blend-normal group-hover:opacity-80"
               >
-              <div
-                v-else
-                class="w-full h-full bg-gradient-to-br from-zinc-800 to-[#050505]"
-              />
+              <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" class="w-full h-full" />
               <div class="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
             </div>
 
@@ -243,7 +241,7 @@ const displayedProducts = computed(() => {
             </div>
                 
             <!-- Action Icon -->
-            <div class="absolute top-4 right-4 md:top-6 md:right-6 w-10 h-10 skew-x-[8deg] bg-brand-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
+            <div class="absolute top-4 end-4 md:top-6 md:end-6 w-10 h-10 skew-x-[8deg] bg-brand-500 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-x-4 group-hover:translate-x-0">
               <Icon name="lucide:arrow-right" class="w-5 h-5 text-black font-bold -skew-x-[8deg]" />
             </div>
           </NuxtLink>
@@ -304,7 +302,7 @@ const displayedProducts = computed(() => {
             to="/products"
             class="inline-flex px-8 py-3 bg-brand-500 text-black font-black skew-x-[-15deg] uppercase tracking-widest hover:bg-white transition-all transform hover:-translate-y-1 shadow-[4px_4px_0_theme(colors.zinc.700)] hover:shadow-[8px_8px_0_#fff] items-center gap-3 group"
           >
-            <span class="block skew-x-[15deg]">View all products</span>
+            <span class="block skew-x-[15deg]">{{ storefrontContent.shop.allProducts }}</span>
             <Icon name="lucide:zap" class="w-5 h-5 skew-x-[15deg] transition-transform group-hover:scale-110" />
           </NuxtLink>
         </div>
@@ -327,7 +325,7 @@ const displayedProducts = computed(() => {
             to="/products"
             class="hidden sm:flex px-8 py-3 bg-brand-500 text-black font-black skew-x-[-15deg] uppercase tracking-widest hover:bg-white transition-all transform hover:-translate-y-1 shadow-[4px_4px_0_theme(colors.zinc.700)] hover:shadow-[8px_8px_0_#fff] items-center gap-2 group"
           >
-            <span class="block skew-x-[15deg]">View all products</span>
+            <span class="block skew-x-[15deg]">{{ storefrontContent.shop.allProducts }}</span>
             <Icon name="lucide:zap" class="w-5 h-5 skew-x-[15deg] transition-transform group-hover:scale-110" />
           </NuxtLink>
         </div>
@@ -359,7 +357,7 @@ const displayedProducts = computed(() => {
             to="/products"
             class="inline-flex px-8 py-3 bg-brand-500 text-black font-black skew-x-[-15deg] uppercase tracking-widest hover:bg-white transition-all transform hover:-translate-y-1 shadow-[4px_4px_0_theme(colors.zinc.700)] hover:shadow-[8px_8px_0_#fff] items-center gap-2 group"
           >
-            <span class="block skew-x-[15deg]">View all products</span>
+            <span class="block skew-x-[15deg]">{{ storefrontContent.shop.allProducts }}</span>
             <Icon name="lucide:zap" class="w-5 h-5 skew-x-[15deg] transition-transform group-hover:scale-110" />
           </NuxtLink>
         </div>

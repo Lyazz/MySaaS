@@ -11,8 +11,8 @@ const { t } = useI18n({ useScope: 'global' })
 
 const navLinks = computed(() => [
   { name: t('marketing.nav.features'), to: '/features' },
+  { name: t('marketing.nav.templates'), to: '/themes' },
   { name: t('marketing.nav.pricing'), to: '/pricing' },
-  { name: t('marketing.nav.about'), to: '/about' },
   { name: t('marketing.footer.support.contact'), to: '/contact' }
 ])
 
@@ -62,7 +62,7 @@ const handleLogout = () => {
             >
               {{ link.name }}
               <span
-                class="pointer-events-none absolute left-1/2 -bottom-0.5 h-px -translate-x-1/2 bg-lime-neon transition-all duration-300"
+                class="pointer-events-none absolute start-1/2 -bottom-0.5 h-px -translate-x-1/2 bg-lime-neon transition-all duration-300"
                 :class="isActive(link.to) ? 'w-6 opacity-100' : 'w-0 opacity-0'"
               />
             </NuxtLink>

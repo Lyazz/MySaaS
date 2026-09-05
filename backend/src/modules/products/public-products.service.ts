@@ -1,6 +1,9 @@
 import prisma from '../../lib/prisma'
 import { coalesceProductImageUrls } from '../../lib/product-images'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '../../../../shared/inventory/variant-availability'
+import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
+import { normalizeSearchText } from '../../../../shared/text/normalize-search'
 
 const extractMetaPixelIds = (metaPixels: any[]): string[] => {
     return (metaPixels || [])
@@ -54,7 +57,8 @@ export class PublicProductsService {
         })
     }
 
-    async listProducts(tenantId: string, search?: string) {
+    async listProducts(tenantId: string, options: { search?: string; categorySlug?: string } = {}) {
+        const { search, categorySlug } = options
         const now = new Date()
         const settings = await prisma.storeSettings.findUnique({
             where: { tenantId },
@@ -66,13 +70,27 @@ export class PublicProductsService {
             }
         })
 
-        const where: any = { tenantId, isActive: true }
-        if (search) {
+        const where: any = { tenantId, isActive: true, visibility: 'LISTED' }
+
+        if (categorySlug) {
+            // Category page reached by its own link: show every listed+active product
+            // in that category, regardless of the category's own visibility.
             where.OR = [
-                { title: { contains: search, mode: 'insensitive' } },
-                { description: { contains: search, mode: 'insensitive' } }
+                { category: { slug: categorySlug } },
+                { categoryLinks: { some: { tenantId, category: { slug: categorySlug } } } }
+            ]
+        } else {
+            // Browse surfaces: a product disappears when it has categories and every
+            // one of them is UNLISTED. Products with no category stay visible.
+            where.OR = [
+                { AND: [{ categoryId: null }, { categoryLinks: { none: {} } }] },
+                { category: { visibility: 'LISTED' } },
+                { categoryLinks: { some: { tenantId, category: { visibility: 'LISTED' } } } }
             ]
         }
+        // Note: search filtering is done in-memory (below) using normalizeSearchText
+        // so that Arabic Alef variants and Latin diacritics are handled correctly.
+        // Prisma's `contains: mode: insensitive` cannot normalize Arabic characters.
 
         const products = await prisma.product.findMany({
             where,
@@ -93,6 +111,11 @@ export class PublicProductsService {
                     select: {
                         id: true,
                         price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
                         cost: true,
                         optionValues: { select: { optionValueId: true } }
                     }
@@ -114,14 +137,39 @@ export class PublicProductsService {
             orderBy: { createdAt: 'desc' }
         })
 
-        return products.map(({ metaPixels, productImages, images, variants, _count, ...rest }: any) => {
+        const normalizedSearch = search ? normalizeSearchText(search) : null
+
+        const matchesSearch = (product: any): boolean => {
+            if (!normalizedSearch) return true
+            return (
+                normalizeSearchText(product.title ?? '').includes(normalizedSearch) ||
+                normalizeSearchText(product.description ?? '').includes(normalizedSearch) ||
+                normalizeSearchText(product.searchKeywords ?? '').includes(normalizedSearch)
+            )
+        }
+
+        return products.filter(matchesSearch).map(({ metaPixels, productImages, images, variants, _count, ...rest }: any) => {
             const withCategories = mapProductCategories(rest)
+            const hasVariants = Number(_count?.options || 0) > 0
+            const mappedVariants = Array.isArray(variants)
+                ? variants.map((variant: any) => {
+                    const pricing = buildScopedProductPricing({ ...rest, hasVariants }, variant)
+                    return {
+                        ...variant,
+                        referencePrice: variant.price,
+                        price: pricing.effectivePrice,
+                        availableStock: getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK }),
+                        cost: undefined
+                    }
+                })
+                : []
             return {
                 ...withCategories,
                 productImages,
                 images: coalesceProductImageUrls(images, productImages),
                 metaPixelIds: extractMetaPixelIds(metaPixels),
-                hasVariants: Number(_count?.options || 0) > 0,
+                hasVariants,
+                variants: mappedVariants,
                 loyaltyPreview: this.buildProductLoyaltyPreview(settings, { ...rest, variants })
             }
         })
@@ -161,6 +209,11 @@ export class PublicProductsService {
                         sku: true,
                         barcode: true,
                         price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
                         compareAtPrice: true,
                         isActive: true,
                         trackInventory: true,
@@ -195,15 +248,21 @@ export class PublicProductsService {
         return {
             ...mapProductCategories(rest),
             variants: Array.isArray(variants)
-                ? variants.map((variant: any) => ({
-                    ...variant,
-                    loyaltyPreview: this.loyalty.buildPublicPreview(settings, {
-                        quantity: 1,
-                        referencePrice: variant.price ?? rest.price ?? 0,
-                        cost: variant.cost ?? 0
-                    }),
-                    cost: undefined
-                }))
+                ? variants.map((variant: any) => {
+                    const pricing = buildScopedProductPricing({ ...rest, hasVariants: true }, variant)
+                    return {
+                        ...variant,
+                        referencePrice: variant.price,
+                        price: pricing.effectivePrice,
+                        availableStock: getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK }),
+                        loyaltyPreview: this.loyalty.buildPublicPreview(settings, {
+                            quantity: 1,
+                            referencePrice: variant.price ?? rest.price ?? 0,
+                            cost: variant.cost ?? 0
+                        }),
+                        cost: undefined
+                    }
+                })
                 : [],
             productImages,
             images: coalesceProductImageUrls(images, productImages),

@@ -1,27 +1,27 @@
 <template>
   <Teleport to="body">
     <div v-if="modelValue" class="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 py-8">
-      <div class="w-full max-w-4xl rounded-2xl flex flex-col max-h-[90vh]" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
+      <div class="w-full max-w-4xl rounded-2xl flex flex-col max-h-[90vh] surface-2 border border-line shadow-overlay">
         <!-- Header -->
-        <div class="px-6 py-4 flex justify-between items-center" style="border-bottom: 1px solid var(--surface-border)">
-          <h3 class="text-[15px] font-semibold" style="color: var(--text-primary)">{{ t('admin.components.variantSelectorModal.title') }}</h3>
-          <button @click="close" class="rounded-lg p-1.5 transition-colors" style="color: var(--text-tertiary)"
-            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
-            @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }">
+        <div class="px-6 py-4 flex justify-between items-center border-b border-line">
+          <h3 class="text-base font-semibold text-primary">{{ t('admin.components.variantSelectorModal.title') }}</h3>
+          <button @click="close" class="rounded-lg p-1.5 transition-colors text-tertiary" 
+ @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.06)'; (e.currentTarget as HTMLElement).style.color = 'var(--text-primary)' }"
+ @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = ''; (e.currentTarget as HTMLElement).style.color = 'var(--text-tertiary)' }">
             <Icon name="lucide:x" class="w-5 h-5" />
           </button>
         </div>
 
         <!-- Search -->
-        <div class="p-4" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-1)">
+        <div class="p-4 border-b border-line surface-1">
           <div class="relative">
-            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none" style="color: var(--text-tertiary)">
+            <div class="absolute inset-y-0 start-0 ps-3 flex items-center pointer-events-none text-tertiary">
               <Icon name="lucide:search" class="h-4 w-4" />
             </div>
             <input
               v-model="searchQuery"
               type="text"
-              class="ui-input pl-9"
+              class="ui-input ps-9"
               :placeholder="t('admin.components.variantSelectorModal.search.placeholder')"
               @input="handleSearch"
             />
@@ -32,9 +32,9 @@
         <div class="flex-1 overflow-y-auto custom-scrollbar">
           <div v-if="loading" class="p-8 text-center">
             <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]"></div>
-            <p class="mt-2 text-sm" style="color: var(--text-tertiary)">{{ t('admin.components.variantSelectorModal.loading') }}</p>
+            <p class="mt-2 text-sm text-tertiary">{{ t('admin.components.variantSelectorModal.loading') }}</p>
           </div>
-          <div v-else-if="variants.length === 0" class="p-8 text-center text-sm" style="color: var(--text-tertiary)">
+          <div v-else-if="variants.length === 0" class="p-8 text-center text-sm text-tertiary">
             {{ t('admin.components.variantSelectorModal.empty') }}
           </div>
           <table v-else class="ui-table">
@@ -42,12 +42,12 @@
               <tr>
                 <th scope="col" class="ui-th w-10">
                   <input
-                    type="checkbox"
-                    :checked="allSelected"
-                    class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
-                    style="border-color: var(--surface-border); background: var(--surface-3)"
-                    @change="toggleAll"
-                  />
+ type="checkbox"
+ :checked="allSelected"
+ class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded-lg border-line surface-3"
+ 
+ @change="toggleAll"
+ />
                 </th>
                 <th scope="col" class="ui-th">
                   {{ t('admin.components.variantSelectorModal.table.productVariant') }}
@@ -69,21 +69,21 @@
               >
                 <td class="ui-td whitespace-nowrap" @click.stop>
                   <input
-                    type="checkbox"
-                    :checked="isSelected(variant)"
-                    class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded"
-                    style="border-color: var(--surface-border); background: var(--surface-3)"
-                    @change="toggleSelection(variant)"
-                  />
+ type="checkbox"
+ :checked="isSelected(variant)"
+ class="h-4 w-4 [color:var(--brand)] focus:[--tw-ring-color:var(--brand)] rounded-lg border-line surface-3"
+ 
+ @change="toggleSelection(variant)"
+ />
                 </td>
                 <td class="ui-td">
-                  <div class="text-[13px] font-medium" style="color: var(--text-primary)">{{ variant.productTitle }}</div>
-                  <div class="text-[12px]" style="color: var(--text-tertiary)">{{ variant.optionTitle }}</div>
+                  <div class="text-sm font-medium text-primary">{{ variant.productTitle }}</div>
+                  <div class="text-xs text-tertiary">{{ variant.optionTitle }}</div>
                 </td>
-                <td class="ui-td whitespace-nowrap text-[13px]" style="color: var(--text-secondary)">
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">
                   {{ variant.sku || '—' }}
                 </td>
-                <td class="ui-td whitespace-nowrap text-[13px]" style="color: var(--text-secondary)">
+                <td class="ui-td whitespace-nowrap text-sm text-secondary">
                   {{ variant.stock }}
                 </td>
               </tr>
@@ -92,11 +92,11 @@
         </div>
 
         <!-- Footer -->
-        <div class="px-6 py-4 flex justify-between items-center rounded-b-2xl" style="border-top: 1px solid var(--surface-border); background: var(--surface-1)">
-          <div class="text-[13px]" style="color: var(--text-secondary)">
+        <div class="px-6 py-4 flex justify-between items-center rounded-b-2xl border-t border-line surface-1">
+          <div class="text-sm text-secondary">
             {{ t('admin.components.variantSelectorModal.selectedCount', { count: selectedVariants.length }) }}
           </div>
-          <div class="flex space-x-3">
+          <div class="flex space-x-3 rtl:space-x-reverse">
             <button
               @click="close"
               class="ui-btn ui-btn--secondary ui-btn--md"

@@ -11,7 +11,7 @@ test.describe('Storefront SEO', () => {
 
     test.beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'SEO Store', slug: tenantSlug }
+            data: { publishedAt: new Date(), name: 'SEO Store', slug: tenantSlug }
         })
         tenantId = tenant.id
 

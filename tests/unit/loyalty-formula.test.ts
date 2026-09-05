@@ -20,11 +20,14 @@ describe('LoyaltyFormulaService', () => {
             ]
         )
 
-        expect(result.lines[0].computedPointsPerUnit).toBe(8)
+        expect(result.lines[0].productPointsPerUnit).toBe(6)
+        expect(result.lines[0].totalPointsPerUnit).toBe(8)
+        expect(result.basePointsTotal).toBe(6)
+        expect(result.productPointsTotal).toBe(18)
         expect(result.totalPoints).toBe(24)
     })
 
-    it('builds a public preview without exposing sensitive cost details', () => {
+    it('builds a public preview as base plus product points without exposing sensitive internals', () => {
         const preview = service.buildPublicPreview(
             {
                 loyaltyEnabled: true,
@@ -40,8 +43,10 @@ describe('LoyaltyFormulaService', () => {
         )
 
         expect(preview?.enabled).toBe(true)
-        expect(preview?.estimatedPoints).toBe(9)
+        expect(preview?.basePoints).toBe(1)
+        expect(preview?.productPoints).toBe(8)
+        expect(preview?.totalPoints).toBe(9)
         expect(preview?.displayText).toContain('points fidelite')
-        expect(preview?.formulaBreakdown?.detail).not.toContain('10')
+        expect(preview).not.toHaveProperty('formulaBreakdown')
     })
 })

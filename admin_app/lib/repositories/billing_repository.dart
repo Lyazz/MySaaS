@@ -1,65 +1,78 @@
-import 'package:sqflite_sqlcipher/sqflite.dart';
-
 import '../models/billing_models.dart';
 import '../services/api_service.dart';
-import '../services/database_service.dart';
-import '../services/sync_service.dart';
 
 class BillingRepository {
   final ApiService _apiService;
-  final DatabaseService _dbService = DatabaseService();
-  final SyncService _syncService = SyncService();
 
   BillingRepository(this._apiService);
 
-  Future<Subscription> getSubscription({bool forceRefresh = false}) async {
-    // Mock for now as there is no local table or API endpoint implemented yet
-    return Subscription(
-      planCode: 'pro',
-      status: 'ACTIVE',
-      nextBillingDate: DateTime.now().add(const Duration(days: 15)),
+  Future<List<SubscriptionPlan>> listPlans() async {
+    final res = await _apiService.client.get('/admin/billing/plans');
+    final data = res.data is Map
+        ? Map<String, dynamic>.from(res.data)
+        : const {};
+    final rawPlans = data['plans'] is List ? data['plans'] as List : const [];
+    return rawPlans
+        .whereType<Map>()
+        .map(
+          (item) => SubscriptionPlan.fromJson(Map<String, dynamic>.from(item)),
+        )
+        .toList();
+  }
+
+  Future<BillingSnapshot> getSnapshot() async {
+    final res = await _apiService.client.get('/admin/billing/subscription');
+    return BillingSnapshot.fromJson(
+      res.data is Map ? Map<String, dynamic>.from(res.data) : const {},
     );
   }
 
-  Future<List<Invoice>> getInvoices({bool forceRefresh = false}) async {
-    final db = await _dbService.database;
-    final localData = await db.query('billing_invoices');
-
-    final localInvoices = localData
-        .map(
-          (e) => Invoice.fromJson({
-            'id': e['id'],
-            'amount': e['amount'],
-            'status': e['status'],
-            'dueDate': e['dueDate'],
-            'pdfUrl': e['pdfUrl'],
-          }),
-        )
+  Future<List<BillingPayment>> listPayments() async {
+    final res = await _apiService.client.get('/admin/billing/payments');
+    final data = res.data is Map
+        ? Map<String, dynamic>.from(res.data)
+        : const {};
+    final rawPayments = data['payments'] is List
+        ? data['payments'] as List
+        : const [];
+    return rawPayments
+        .whereType<Map>()
+        .map((item) => BillingPayment.fromJson(Map<String, dynamic>.from(item)))
         .toList();
+  }
 
-    if (forceRefresh || await _syncService.isOnline) {
-      try {
-        final res = await _apiService.client.get('/admin/billing/invoices');
-        final List<dynamic> data = res.data['invoices'] ?? [];
-        final remoteInvoices = data.map((e) => Invoice.fromJson(e)).toList();
+  Future<BillingSnapshot> simulatePayment({
+    required String planCode,
+    required String interval,
+  }) async {
+    final res = await _apiService.client.post(
+      '/admin/billing/payments/simulate',
+      data: {'planCode': planCode, 'interval': interval},
+    );
+    return BillingSnapshot.fromJson(
+      res.data is Map ? Map<String, dynamic>.from(res.data) : const {},
+    );
+  }
 
-        await db.transaction((txn) async {
-          await txn.delete('billing_invoices');
-          for (var i in remoteInvoices) {
-            await txn.insert('billing_invoices', {
-              'id': i.id,
-              'amount': i.amount,
-              'status': i.status,
-              'dueDate': i.dueDate?.toIso8601String(),
-              'pdfUrl': i.pdfUrl,
-            }, conflictAlgorithm: ConflictAlgorithm.replace);
-          }
-        });
-        return remoteInvoices;
-      } catch (e) {
-        print('Background invoices fetch failed: \$e');
-      }
-    }
-    return localInvoices;
+  Future<BillingPayment> submitPayment({
+    required String planCode,
+    required String interval,
+    required String method,
+    required int amountDzd,
+    String? notes,
+  }) async {
+    final res = await _apiService.client.post(
+      '/admin/billing/payments/submit',
+      data: {
+        'planCode': planCode,
+        'interval': interval,
+        'method': method,
+        'amountDzd': amountDzd,
+        if (notes != null && notes.trim().isNotEmpty) 'notes': notes.trim(),
+      },
+    );
+    return BillingPayment.fromJson(
+      res.data is Map ? Map<String, dynamic>.from(res.data) : const {},
+    );
   }
 }

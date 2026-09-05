@@ -1,6 +1,6 @@
 import prisma from '../../lib/prisma'
 
-export type AdminDashboardRange = '7d' | '30d' | '90d' | 'custom'
+export type AdminDashboardRange = 'today' | '7d' | '30d' | '90d' | 'custom'
 
 export type AdminDashboardQuery = {
     range: AdminDashboardRange
@@ -72,13 +72,18 @@ export type AdminDashboardData = {
 const DAY_MS = 24 * 60 * 60 * 1000
 const ORDER_REVENUE_EXCLUDED_STATUSES = ['CANCELLED', 'RETURNED']
 
-const startOfUtcDay = (date: Date) =>
-    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
+const startOfDay = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0)
 
-const endOfUtcDay = (date: Date) =>
-    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate(), 23, 59, 59, 999))
+const endOfDay = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate(), 23, 59, 59, 999)
 
-const isoDay = (date: Date) => startOfUtcDay(date).toISOString().slice(0, 10)
+const isoDay = (date: Date) => {
+    const year = date.getFullYear()
+    const month = `${date.getMonth() + 1}`.padStart(2, '0')
+    const day = `${date.getDate()}`.padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
 
 const numberOrZero = (value: unknown) => {
     const n = Number(value ?? 0)
@@ -99,22 +104,22 @@ type ResolvedPeriod = {
 export class DashboardService {
     private resolvePeriod(query: AdminDashboardQuery): ResolvedPeriod {
         const now = new Date()
-        const range = query.range || '7d'
+        const range = query.range || 'today'
 
         if (range === 'custom' && query.from && query.to) {
-            const fromAt = startOfUtcDay(query.from)
-            const toAt = endOfUtcDay(query.to)
-            const days = Math.floor((startOfUtcDay(query.to).getTime() - startOfUtcDay(query.from).getTime()) / DAY_MS) + 1
+            const fromAt = startOfDay(query.from)
+            const toAt = endOfDay(query.to)
+            const days = Math.floor((startOfDay(query.to).getTime() - startOfDay(query.from).getTime()) / DAY_MS) + 1
             return { range, fromAt, toAt, from: isoDay(fromAt), to: isoDay(toAt), days }
         }
 
-        const days = range === '90d' ? 90 : range === '30d' ? 30 : 7
-        const toAt = endOfUtcDay(now)
-        const fromAt = startOfUtcDay(new Date(toAt.getTime() - (days - 1) * DAY_MS))
+        const days = range === 'today' ? 1 : range === '90d' ? 90 : range === '30d' ? 30 : 7
+        const toAt = endOfDay(now)
+        const fromAt = startOfDay(new Date(toAt.getTime() - (days - 1) * DAY_MS))
         return { range, fromAt, toAt, from: isoDay(fromAt), to: isoDay(toAt), days }
     }
 
-    async getAdminDashboard(tenantId: string, query: AdminDashboardQuery = { range: '7d' }): Promise<AdminDashboardData> {
+    async getAdminDashboard(tenantId: string, query: AdminDashboardQuery = { range: 'today' }): Promise<AdminDashboardData> {
         const period = this.resolvePeriod(query)
         const sevenDaysAgo = new Date(Date.now() - 7 * DAY_MS)
 

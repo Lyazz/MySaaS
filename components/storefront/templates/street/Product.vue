@@ -4,6 +4,7 @@ import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     product: any
@@ -33,9 +34,7 @@ const currentVariant = computed(() => {
     return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
-const currentPrice = computed(() => {
-    return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
-})
+const currentPrice = computed(() => buildScopedProductPricing(props.product, currentVariant.value).effectivePrice)
 
 const currentStock = computed(() => {
     if (!currentVariant.value) return props.product?.stock
@@ -81,6 +80,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
         selectedOptions.value = getPreferredInitialSelection(product)
     }
 })
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
@@ -120,7 +129,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
     <!-- Full Description -->
     <div class="mt-16 border-t-4 border-black pt-8">
         <h2 class="font-street text-3xl uppercase mb-6">{{ storefrontContent.product.detailsTitle }}</h2>
-        <SafeRichText 
+        <CommonSafeRichText 
           v-if="product?.description" 
           class="prose prose-lg prose-headings:font-street prose-headings:uppercase max-w-none font-mono bg-white border-4 border-black p-8"
           :html="product.description"

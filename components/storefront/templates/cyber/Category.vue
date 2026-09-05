@@ -98,7 +98,7 @@ const closeQuickView = () => {
               <option value="priceLowToHigh" class="bg-[#1a0a2e]">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
               <option value="priceHighToLow" class="bg-[#1a0a2e]">{{ storefrontContent.category.sort.priceHighToLow }}</option>
             </select>
-            <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
               <Icon name="lucide:chevron-down" class="w-4 h-4 text-purple-400" />
             </div>
           </div>
@@ -169,7 +169,7 @@ const closeQuickView = () => {
       <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
         <div class="absolute inset-0 bg-black/80 backdrop-blur-sm" @click="closeQuickView"></div>
         <div class="bg-gradient-to-br from-[#1a0a2e] to-[#0d0515] rounded-2xl shadow-2xl shadow-pink-500/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden border border-pink-500/30">
-          <button @click="closeQuickView" class="absolute top-4 right-4 z-20 p-2 bg-purple-900/50 rounded-full hover:bg-pink-500/30 transition-colors">
+          <button @click="closeQuickView" class="absolute top-4 end-4 z-20 p-2 bg-purple-900/50 rounded-full hover:bg-pink-500/30 transition-colors">
             <Icon name="lucide:x" class="w-6 h-6 text-purple-300" />
           </button>
 

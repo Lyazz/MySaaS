@@ -1,0 +1,82 @@
+/* Override driver.js styles to match admin theme */
+.driver-popover {
+  background-color: var(--surface-1) !important;
+  border: 1px solid var(--surface-border) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.24) !important;
+  font-family: 'DM Sans', system-ui, sans-serif !important;
+  max-width: 340px !important;
+}
+
+.driver-popover-title {
+  color: var(--text-primary) !important;
+  font-size: 14px !important;
+  font-weight: 600 !important;
+  margin-bottom: 6px !important;
+}
+
+.driver-popover-description {
+  color: var(--text-secondary) !important;
+  font-size: 13px !important;
+  line-height: 1.5 !important;
+}
+
+.driver-popover-footer {
+  margin-top: 14px !important;
+  gap: 8px !important;
+}
+
+.driver-popover-next-btn {
+  background-color: var(--brand) !important;
+  color: var(--brand-contrast) !important;
+  border: none !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  font-weight: 600 !important;
+  padding: 6px 14px !important;
+}
+
+.driver-popover-next-btn:hover {
+  opacity: 0.88 !important;
+}
+
+.driver-popover-prev-btn {
+  background: var(--surface-3) !important;
+  color: var(--text-secondary) !important;
+  border: 1px solid var(--surface-border) !important;
+  border-radius: 8px !important;
+  font-size: 12px !important;
+  padding: 6px 14px !important;
+}
+
+.driver-popover-prev-btn:hover {
+  color: var(--text-primary) !important;
+}
+
+.driver-popover-close-btn {
+  color: var(--text-muted) !important;
+  font-size: 18px !important;
+}
+
+.driver-popover-close-btn:hover {
+  color: var(--text-primary) !important;
+}
+
+.driver-popover-progress-text {
+  color: var(--text-muted) !important;
+  font-size: 11px !important;
+}
+
+/* Arrow color */
+.driver-popover-arrow-side-left.driver-popover-arrow::before {
+  border-right-color: var(--surface-1) !important;
+}
+.driver-popover-arrow-side-right.driver-popover-arrow::before {
+  border-left-color: var(--surface-1) !important;
+}
+.driver-popover-arrow-side-top.driver-popover-arrow::before {
+  border-bottom-color: var(--surface-1) !important;
+}
+.driver-popover-arrow-side-bottom.driver-popover-arrow::before {
+  border-top-color: var(--surface-1) !important;
+}

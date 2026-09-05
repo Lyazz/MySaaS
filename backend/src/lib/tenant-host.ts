@@ -3,7 +3,7 @@ export type ParsedHost =
     | { kind: 'tenant-subdomain'; slug: string }
     | { kind: 'custom-domain'; domain: string }
 
-const DEFAULT_PLATFORM_BASE_DOMAIN = process.env.PLATFORM_BASE_DOMAIN || 'platform.com'
+const DEFAULT_PLATFORM_BASE_DOMAIN = process.env.PLATFORM_BASE_DOMAIN || 'swekly.com'
 
 const normalizeHostHeader = (rawHostHeader: string): string => {
     const first = rawHostHeader.split(',')[0]?.trim() ?? ''
@@ -77,4 +77,21 @@ export const parseHost = (
     // Custom domain: resolve via TenantDomain mapping table.
     if (host.includes('.')) return { kind: 'custom-domain', domain: host }
     return { kind: 'saas' }
+}
+
+/**
+ * The public origin a shopper reaches this tenant on: its custom domain when it
+ * has one, otherwise `{slug}.{PLATFORM_BASE_DOMAIN}`. Used to build links that
+ * leave the server (WhatsApp templates, notifications), where there is no
+ * incoming Host header to derive the origin from.
+ */
+export const buildTenantOrigin = (input: { slug: string; customDomain?: string | null }): string => {
+    const customDomain = typeof input.customDomain === 'string' ? input.customDomain.trim() : ''
+    if (customDomain) return `https://${customDomain}`
+
+    const platformDomain = (process.env.PLATFORM_BASE_DOMAIN ?? process.env.PLATFORM_DOMAIN ?? '').trim()
+    if (platformDomain) return `https://${input.slug}.${platformDomain}`
+
+    // Dev fallback when no public domain is configured.
+    return `http://${input.slug}.localhost:3000`
 }

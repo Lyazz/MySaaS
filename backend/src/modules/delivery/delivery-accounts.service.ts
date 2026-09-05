@@ -215,7 +215,7 @@ export class DeliveryAccountsService {
                 : normalizeProviderConfigPatch(provider, pickAllowedKeys(provider, normalizeConfigUpdate(input.config)))
 
         if (provider === 'MAYSTRO' && patch && (patch.apiToken === '' || patch.apiToken == null)) {
-            ;(patch as any).apiKey = ''
+            (patch as any).apiKey = ''
         }
 
         // Carry forward system-managed keys (e.g. webhookSecret) regardless of what the user sends.
@@ -302,7 +302,10 @@ export class DeliveryAccountsService {
         if (!apiToken) return
 
         const platformDomain = (process.env.PLATFORM_BASE_DOMAIN ?? process.env.PLATFORM_DOMAIN ?? '').trim()
-        if (!platformDomain) return  // not configured — skip silently
+        if (!platformDomain) {
+            console.warn(`[delivery-accounts] Maystro webhook registration skipped: PLATFORM_BASE_DOMAIN not configured.`)
+            return  // not configured — skip silently
+        }
 
         const tenant = await this.prisma.tenant.findUnique({
             where: { id: tenantId },
@@ -327,34 +330,51 @@ export class DeliveryAccountsService {
 
         const hooks = new MaystroHooksService()
 
-        // Per Maystro docs, the "all" trigger type catches every event (orderCreated,
-        // OrderStatusChanged, InventoryMovement). Prefer it; fall back to first available.
+        // 'OrderStatusChanged' no longer exists in Maystro's trigger type list, and the 'all'
+        // catch-all trigger does not reliably fire for order status/field changes in practice
+        // (confirmed zero webhook deliveries across months of production use while registered
+        // under 'all'). Register the specific event types instead.
+        const desiredTriggerNames = ['OrderFieldUpdated', 'OrderDelivered', 'DeliveryInfoUpdated']
+
         const types = await hooks.listTypes({ apiToken })
-        const allType = types.find((t) => String(t.name ?? t.code ?? '').toLowerCase() === 'all')
-            ?? types[0]
-        if (!allType) return
+        const targetTypes = desiredTriggerNames
+            .map((name) => types.find((t) => String(t.name ?? t.code ?? '').toLowerCase() === name.toLowerCase()))
+            .filter((t): t is NonNullable<typeof t> => Boolean(t))
+
+        if (targetTypes.length === 0) {
+            console.warn(`[delivery-accounts] Maystro webhook registration skipped: No suitable trigger types found in API.`)
+            return
+        }
 
         const existing = await hooks.listHooks({ apiToken })
 
-        // Remove any stale registrations pointing to our host without the correct secret.
-        // This handles the migration from the previous secret-less URL.
+        const registeredTriggerNamesForUrl = new Set(
+            existing
+                .filter((h) => h.endpoint === webhookUrl)
+                .map((h) => String(h.trigger_type?.name ?? '').toLowerCase())
+        )
+
+        // Remove stale registrations pointing to our host: wrong/old secret, or the previous
+        // unreliable 'all'/'OrderStatusChanged' registration this replaces.
         for (const h of existing) {
             const url = typeof h.endpoint === 'string' ? h.endpoint : ''
-            if (url.includes(`${host}/api/webhooks/maystro`) && url !== webhookUrl) {
-                try {
-                    await hooks.deleteHook({ apiToken, id: h.id })
-                    console.log(`[delivery-accounts] Removed stale Maystro webhook for tenant ${tenantId}`)
-                } catch {
-                    // best-effort: log but don't block registration
-                }
+            if (!url.includes(`${host}/api/webhooks/maystro`)) continue
+            const triggerName = String(h.trigger_type?.name ?? '').toLowerCase()
+            const isDesired = url === webhookUrl && desiredTriggerNames.some((n) => n.toLowerCase() === triggerName)
+            if (isDesired) continue
+            try {
+                await hooks.deleteHook({ apiToken, id: h.id })
+                console.log(`[delivery-accounts] Removed stale Maystro webhook (${triggerName || 'unknown'}) for tenant ${tenantId}`)
+            } catch {
+                // best-effort: log but don't block registration
             }
         }
 
-        // Check if the correct URL is already registered to avoid duplicates.
-        const alreadyRegistered = existing.some((h) => h.endpoint === webhookUrl)
-        if (alreadyRegistered) return
-
-        await hooks.createHook({ apiToken, endpoint: webhookUrl, triggerTypeId: allType.id })
-        console.log(`[delivery-accounts] Maystro webhook registered for tenant ${tenantId}`)
+        for (const type of targetTypes) {
+            const name = String(type.name ?? type.code ?? '').toLowerCase()
+            if (registeredTriggerNamesForUrl.has(name)) continue
+            await hooks.createHook({ apiToken, endpoint: webhookUrl, triggerTypeId: type.id })
+            console.log(`[delivery-accounts] Maystro webhook (${type.name || type.code || type.id}) registered for tenant ${tenantId}`)
+        }
     }
 }

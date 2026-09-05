@@ -26,12 +26,30 @@ class CashboxSummary {
     return CashboxSummary(
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
-      isActive: json['isActive'] == true,
+      isActive: json['isActive'] == true || json['isActive'] == 1,
       createdAt: parseDate(json['createdAt']),
       updatedAt: parseDate(json['updatedAt']),
       openSession: open is Map
           ? CashOpenSession.fromJson(open.cast<String, dynamic>())
           : null,
+    );
+  }
+
+  CashboxSummary copyWith({
+    String? id,
+    String? name,
+    bool? isActive,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    CashOpenSession? openSession,
+  }) {
+    return CashboxSummary(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      isActive: isActive ?? this.isActive,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      openSession: openSession ?? this.openSession,
     );
   }
 }

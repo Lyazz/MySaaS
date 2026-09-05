@@ -11,7 +11,7 @@ describe('Meta Pixels routing (product vs global)', () => {
 
     beforeAll(async () => {
         tenant = await prisma.tenant.create({
-            data: { name: 'Apple Tenant', slug: `apple-${Date.now()}` }
+            data: { publishedAt: new Date(), name: 'Apple Tenant', slug: `apple-${Date.now()}` }
         })
 
         globalPixel = await prisma.tenantMetaPixel.create({

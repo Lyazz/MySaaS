@@ -46,135 +46,139 @@ const sortedProducts = computed(() => {
 </script>
 
 <template>
-  <div class="bg-[#f8faf9] min-h-screen py-8">
+  <div class="bg-wl-paper min-h-screen py-8 font-wellness text-wl-ink">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Breadcrumb -->
-      <nav class="flex mb-8 text-sm text-slate-500">
+      <nav class="flex items-center mb-8 wl-label text-wl-muted">
         <NuxtLink
           to="/"
-          class="hover:text-brand-600"
+          class="hover:text-wl-ink transition-colors"
         >
           {{ storefrontContent.nav.home }}
         </NuxtLink>
-        <span class="mx-2">/</span>
+        <span class="mx-2 text-wl-oliveSoft">/</span>
         <NuxtLink
           to="/products"
-          class="hover:text-brand-600"
+          class="hover:text-wl-ink transition-colors"
         >
           {{ storefrontContent.nav.shop }}
         </NuxtLink>
-        <span class="mx-2">/</span>
-        <span class="font-medium text-slate-900">{{ category.title }}</span>
+        <span class="mx-2 text-wl-oliveSoft">/</span>
+        <span class="text-wl-ink">{{ category.title }}</span>
       </nav>
 
-      <div class="relative overflow-hidden rounded-2xl bg-slate-900 text-white mb-8 shadow-sm border border-slate-200">
+      <!-- Category plate: image behind, label panel in front -->
+      <div class="wl-specimen relative overflow-hidden border border-wl-rule bg-wl-card mb-10">
         <img
           v-if="category.imageUrl"
           :src="category.imageUrl"
           :alt="category.title"
-          class="absolute inset-0 w-full h-full object-contain opacity-90 bg-slate-900"
+          class="absolute inset-0 w-full h-full object-cover"
         >
-        <div class="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-slate-900/60 to-black/30" />
-        <div class="relative p-8 sm:p-10 lg:p-12 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div>
-            <p class="text-xs uppercase tracking-[0.2em] text-brand-200 mb-2">
+        <div v-if="category.imageUrl" class="absolute inset-0 bg-wl-paper/50" />
+        <div class="relative p-4 sm:p-8 lg:p-10 flex">
+          <div class="wl-plate wl-plate-lg relative z-10 p-6 sm:p-8 max-w-xl w-full">
+            <p class="wl-eyebrow wl-label mb-3">
               {{ storefrontContent.category.label }}
             </p>
-            <h1 class="text-3xl sm:text-4xl font-bold font-wellness">
+            <h1 class="wl-display text-3xl sm:text-4xl text-wl-ink leading-tight">
               {{ category.title }}
             </h1>
-            <p class="mt-3 text-slate-200 text-sm">
+            <p class="mt-3 text-wl-muted text-sm leading-relaxed">
               {{ category.description || storefrontContent.category.description }}
             </p>
-          </div>
-          <div class="flex items-center gap-3 bg-white/10 backdrop-blur rounded-full px-5 py-2 text-sm border border-white/20">
-            <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-white/20 text-white font-semibold">
-              {{ categoryProducts.length }}
-            </span>
-            <span class="text-slate-100">{{ storefrontContent.category.productsAvailableLabel }}</span>
+            <div class="flex items-baseline gap-2 mt-5 pt-4 border-t border-wl-rule">
+              <span class="wl-num wl-display text-2xl text-wl-ink">
+                {{ categoryProducts.length }}
+              </span>
+              <span class="wl-label text-wl-muted">{{ storefrontContent.category.productsAvailableLabel }}</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="flex flex-col lg:flex-row gap-8">
+      <div class="flex flex-col lg:flex-row gap-10">
         <!-- Sidebar Filters -->
-        <aside class="w-full lg:w-64 flex-shrink-0 space-y-8">
-          <!-- Categories -->
-          <div>
-            <div class="flex items-center justify-between mb-4">
-              <h3 class="font-bold text-slate-900">
-                {{ storefrontContent.shop.categories }}
-              </h3>
-            </div>
-            <div class="space-y-2">
-              <!-- Iterate over fetched categories -->
-              <NuxtLink 
-                v-for="cat in allCategories" 
-                :key="cat.id" 
+        <aside class="w-full lg:w-60 flex-shrink-0">
+          <div class="lg:sticky lg:top-28">
+            <h3 class="wl-label text-wl-muted pb-3 mb-1 border-b border-wl-rule">
+              {{ storefrontContent.shop.categories }}
+            </h3>
+            <div class="flex flex-col">
+              <NuxtLink
+                v-for="cat in allCategories"
+                :key="cat.id"
                 :to="`/category/${cat.slug}`"
-                class="flex items-center gap-3 cursor-pointer group p-1 rounded-lg hover:bg-slate-50 transition-colors"
-                :class="cat.id === category.id ? 'bg-brand-50 text-brand-700 font-medium' : 'text-slate-600'"
+                class="flex items-center gap-3 py-2.5 border-b border-wl-rule/60 transition-colors"
+                :class="cat.id === category.id ? 'text-wl-oliveDeep' : 'text-wl-muted hover:text-wl-oliveDeep'"
               >
-                <!-- Mock Icon or simple bullet -->
                 <span
-                  class="w-1.5 h-1.5 rounded-full bg-slate-300 group-hover:bg-brand-500 transition-colors"
-                  :class="cat.id === category.id ? 'bg-brand-600' : ''"
+                  class="w-4 h-px flex-shrink-0 transition-colors"
+                  :class="cat.id === category.id ? 'bg-wl-olive h-0.5' : 'bg-wl-ruleStrong'"
                 />
-                <span class="text-sm transition-colors">{{ categoryDisplayTitle(cat) }}</span>
+                <span class="text-sm">{{ categoryDisplayTitle(cat) }}</span>
               </NuxtLink>
             </div>
           </div>
-
-          <!-- Removed Price (Mock) -->
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
           <!-- Header -->
-          <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-5 mb-8 border-b border-wl-rule">
             <div>
-              <h1 class="text-2xl font-bold text-slate-900">
+              <h2 class="wl-display text-2xl text-wl-ink leading-none">
                 {{ category.title }}
-              </h1>
-              <p class="text-slate-500 text-sm mt-1">
+              </h2>
+              <p class="wl-label wl-num text-wl-muted mt-2.5">
                 {{ storefrontContent.category.showingResults(categoryProducts.length) }}
               </p>
             </div>
-                      
+
             <!-- Sort -->
-            <div class="flex items-center gap-3">
-              <span class="text-sm text-slate-500">{{ storefrontContent.category.sortBy }}</span>
-              <select v-model="sortOption" class="rounded-lg border-slate-200 text-sm focus:border-brand-500 focus:ring-brand-500">
-                <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
-                <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
-                <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
-                <option value="priceHighToLow">{{ storefrontContent.category.sort.priceHighToLow }}</option>
-              </select>
+            <div class="flex items-center gap-3 flex-shrink-0">
+              <span class="wl-label text-wl-muted whitespace-nowrap">{{ storefrontContent.category.sortBy }}</span>
+              <div class="relative w-48">
+                <select
+                  v-model="sortOption"
+                  class="wl-field w-full appearance-none text-sm py-2.5 ps-4 pe-10 cursor-pointer"
+                >
+                  <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
+                  <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
+                  <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
+                  <option value="priceHighToLow">{{ storefrontContent.category.sort.priceHighToLow }}</option>
+                </select>
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
+                  <Icon name="lucide:chevron-down" class="w-4 h-4 text-wl-muted" />
+                </div>
+              </div>
             </div>
           </div>
 
           <!-- Grid -->
           <div
             v-if="sortedProducts.length === 0"
-            class="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center"
+            class="wl-plate p-14 text-center"
           >
-            <Icon name="lucide:package-open" class="w-16 h-16 text-slate-200 mx-auto mb-4" />
-            <h3 class="text-lg font-medium text-slate-900">
+            <div class="w-14 h-14 bg-wl-oliveWash border border-wl-oliveSoft flex items-center justify-center mx-auto mb-6">
+              <Icon name="lucide:package-open" class="w-6 h-6 text-wl-oliveDeep" />
+            </div>
+            <h3 class="wl-display text-2xl text-wl-ink mb-3">
               {{ storefrontContent.shop.results.noResults }}
             </h3>
-            <p class="text-slate-500 mt-1">
+            <p class="text-wl-muted leading-relaxed">
               {{ storefrontContent.category.emptyHint }}
             </p>
             <NuxtLink
               to="/products"
-              class="inline-flex items-center justify-center mt-6 px-6 py-2 rounded-full bg-brand-600 text-white text-sm font-semibold hover:bg-brand-700 transition-colors"
+              class="inline-flex items-center justify-center mt-8 px-8 py-3.5 wl-cta wl-label"
             >
               {{ storefrontContent.shop.allProducts }}
             </NuxtLink>
           </div>
           <div
             v-else
-            class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6"
+            class="grid grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6 lg:gap-y-10"
           >
             <ProductCard
               v-for="product in sortedProducts"

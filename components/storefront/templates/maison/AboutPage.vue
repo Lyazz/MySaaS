@@ -1,7 +1,9 @@
 <script setup lang="ts">
 const tenant = useState<any>('tenant')
 const storeSettings = useState<any>('storeSettings')
-const tenantName = computed(() => tenant.value?.name || 'Maison')
+// "Pistachio" was the design reference, not a tenant: never show it to a shopper.
+const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
 </script>
 
 <template>
@@ -11,9 +13,9 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
       <div class="about__hero-inner">
         <div class="about__hero-rule" />
         <div class="about__hero-text">
-          <span class="at-label" style="animation:at-fade-up 0.6s ease forwards">Notre histoire</span>
+          <span class="at-label" style="animation:at-fade-up 0.6s ease forwards">{{ t('storefront.templates.maison.about.kicker') }}</span>
           <h1 class="about__title">
-            À propos<br><em>de {{ tenantName }}</em>
+            <em>{{ t('storefront.pages.about.heading', { tenant: tenantName }) }}</em>
           </h1>
         </div>
       </div>
@@ -28,10 +30,10 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
         <div class="about__desc-num">01</div>
         <div class="about__desc-content">
           <p class="about__desc-lead">
-            {{ storeSettings?.description || "Une boutique dédiée à l'art de vivre, à la décoration intérieure et aux accessoires maison soigneusement sélectionnés." }}
+            {{ storeSettings?.description || t('storefront.templates.maison.about.lead') }}
           </p>
           <p class="about__desc-body">
-            Nous croyons que chaque espace de vie mérite d'être beau, fonctionnel et inspirant. C'est pourquoi nous sélectionnons avec soin chaque produit pour vous offrir le meilleur de la décoration et des accessoires maison.
+            {{ t('storefront.templates.maison.about.body') }}
           </p>
         </div>
       </section>
@@ -42,7 +44,7 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
       <section class="about__values-section">
         <div class="about__section-head">
           <div class="about__desc-num">02</div>
-          <h2 class="about__section-title">Nos valeurs</h2>
+          <h2 class="about__section-title">{{ t('storefront.templates.maison.about.valuesTitle') }}</h2>
         </div>
 
         <div class="about__values-grid">
@@ -54,8 +56,8 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
                 <path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="0.75"/>
               </svg>
             </div>
-            <h3 class="about__value-title">Qualité</h3>
-            <p class="about__value-text">Des produits sélectionnés pour leur qualité de fabrication et leur durabilité.</p>
+            <h3 class="about__value-title">{{ t('storefront.templates.maison.about.values.quality.title') }}</h3>
+            <p class="about__value-text">{{ t('storefront.templates.maison.about.values.quality.text') }}</p>
           </div>
 
           <div class="about__value-card about__value-card--accent">
@@ -66,8 +68,8 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
                 <path d="M7 10h6M10 7v6" stroke="currentColor" stroke-width="0.75"/>
               </svg>
             </div>
-            <h3 class="about__value-title">Art de vivre</h3>
-            <p class="about__value-text">Chaque pièce est pensée pour embellir et améliorer votre quotidien.</p>
+            <h3 class="about__value-title">{{ t('storefront.templates.maison.about.values.living.title') }}</h3>
+            <p class="about__value-text">{{ t('storefront.templates.maison.about.values.living.text') }}</p>
           </div>
 
           <div class="about__value-card">
@@ -77,8 +79,8 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
                 <path d="M10 17S3 13 3 7.5A4 4 0 0110 4.7 4 4 0 0117 7.5C17 13 10 17 10 17z" stroke="currentColor" stroke-width="0.75"/>
               </svg>
             </div>
-            <h3 class="about__value-title">Passion</h3>
-            <p class="about__value-text">Une équipe passionnée par la décoration intérieure et le design.</p>
+            <h3 class="about__value-title">{{ t('storefront.templates.maison.about.values.passion.title') }}</h3>
+            <p class="about__value-text">{{ t('storefront.templates.maison.about.values.passion.text') }}</p>
           </div>
         </div>
       </section>
@@ -89,9 +91,9 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
       <section class="about__cta-section">
         <div class="about__desc-num">03</div>
         <div class="about__cta-content">
-          <h2 class="about__cta-title">Découvrir<br><em>notre boutique</em></h2>
+          <h2 class="about__cta-title">{{ t('storefront.templates.maison.about.ctaTitle') }}<br><em>{{ t('storefront.templates.maison.about.ctaAccent') }}</em></h2>
           <NuxtLink to="/products" class="at-btn-primary" style="width:fit-content">
-            <span>Explorer les produits</span>
+            <span>{{ t('storefront.templates.maison.about.ctaAction') }}</span>
             <svg width="16" height="8" viewBox="0 0 16 8" fill="none">
               <path d="M1 4h14M10 1l5 3-5 3" stroke="currentColor" stroke-width="0.85"/>
             </svg>
@@ -111,7 +113,8 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   border-bottom: 1px solid var(--at-border);
   padding: clamp(64px, 12vw, 140px) clamp(20px, 6vw, 96px) clamp(48px, 8vw, 96px);
   overflow: hidden;
-  background: var(--at-surface);
+  background: var(--at-grad-shell);
+  border-end-end-radius: clamp(48px, 9vw, 130px);
 }
 .about__hero-inner {
   max-width: 1400px;
@@ -123,40 +126,42 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   z-index: 1;
 }
 .about__hero-rule {
-  width: 1px;
+  width: 2px;
   height: clamp(80px, 16vw, 180px);
-  background: var(--at-gold);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, var(--at-gold) 18%, var(--at-cream) 92%);
   flex-shrink: 0;
 }
 .about__hero-text {}
 .about__title {
   font-family: var(--at-f-display);
   font-size: clamp(3.5rem, 8vw, 8rem);
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.035em;
   line-height: 0.97;
   color: var(--at-cream);
   margin-top: 12px;
 }
 .about__title em {
   font-style: italic;
+  font-weight: 400;
   color: var(--at-gold);
 }
 
 .about__hero-orb {
   position: absolute;
-  border: 1px solid var(--at-border);
+  border: 1px solid var(--at-border-2);
   border-radius: 50%;
   pointer-events: none;
 }
 .about__hero-orb--1 {
   width: 500px; height: 500px;
-  top: -200px; right: -100px;
+  top: -200px; inset-inline-end: -100px;
   opacity: 0.3;
 }
 .about__hero-orb--2 {
   width: 280px; height: 280px;
-  bottom: -120px; right: 120px;
+  bottom: -120px; inset-inline-end: 120px;
   opacity: 0.2;
 }
 
@@ -168,7 +173,8 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
 }
 .about__divider {
   height: 1px;
-  background: var(--at-border);
+  background: var(--at-grad-hair);
+  opacity: 0.7;
 }
 
 /* Description section */
@@ -182,7 +188,7 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   font-family: var(--at-f-mono);
   font-size: 9px;
   font-weight: 300;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   color: var(--at-muted);
   flex-shrink: 0;
   width: 24px;
@@ -192,10 +198,12 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
 .about__desc-lead {
   font-family: var(--at-f-display);
   font-size: clamp(1.4rem, 2.5vw, 2rem);
-  font-weight: 300;
-  color: var(--at-text);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  color: var(--at-cream);
   line-height: 1.4;
   margin-bottom: 20px;
+  text-wrap: balance;
 }
 .about__desc-body {
   font-family: var(--at-f-mono);
@@ -218,9 +226,9 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
 .about__section-title {
   font-family: var(--at-f-display);
   font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 300;
+  font-weight: 600;
   color: var(--at-cream);
-  letter-spacing: -0.01em;
+  letter-spacing: -0.025em;
 }
 
 .about__values-grid {
@@ -228,6 +236,10 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
   grid-template-columns: 1fr;
   gap: 1px;
   background: var(--at-border);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  box-shadow: var(--at-shadow-sm);
+  overflow: hidden;
 }
 @media (min-width: 768px) {
   .about__values-grid { grid-template-columns: repeat(3, 1fr); }
@@ -247,22 +259,25 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
 .about__value-num {
   font-family: var(--at-f-mono);
   font-size: 8px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   color: var(--at-gold);
 }
 .about__value-icon {
-  width: 36px;
-  height: 36px;
-  background: var(--at-gold-dim);
+  width: 38px;
+  height: 38px;
+  background: var(--at-grad-green);
+  border-radius: var(--at-r-pill);
+  box-shadow: var(--at-shadow-xs);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--at-gold);
+  color: #FFFBF0;
 }
 .about__value-title {
   font-family: var(--at-f-display);
   font-size: 1.4rem;
-  font-weight: 400;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--at-cream);
 }
 .about__value-text {
@@ -284,14 +299,16 @@ const tenantName = computed(() => tenant.value?.name || 'Maison')
 .about__cta-title {
   font-family: var(--at-f-display);
   font-size: clamp(2.5rem, 5vw, 5rem);
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.032em;
   line-height: 1.0;
   color: var(--at-cream);
   margin-bottom: 32px;
+  text-wrap: balance;
 }
 .about__cta-title em {
   font-style: italic;
+  font-weight: 400;
   color: var(--at-gold);
 }
 </style>

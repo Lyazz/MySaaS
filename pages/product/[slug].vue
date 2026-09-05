@@ -1,12 +1,14 @@
 <script setup lang="ts">
-import { productTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
+import { productLandingPageTemplates, productTemplates, resolveTemplateKey } from '~/components/storefront/templates/registry'
 import type { TemplateKey } from '~/components/storefront/templates/registry'
+import type { PublicLoyaltyPreview } from '~/composables/useActiveProductLoyaltyPreview'
 import { normalizeMiniDescription, normalizeRichDescription } from '~/shared/product-content'
 
 const route = useRoute()
 const slug = route.params.slug as string
 const storeSettings = useState<any>('storeSettings')
 const templateKey = computed<TemplateKey>(() => resolveTemplateKey(storeSettings.value?.templateKey))
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
 
 type Product = {
   id: string
@@ -14,6 +16,7 @@ type Product = {
   slug: string
   description?: string | null
   miniDescription?: string | null
+  searchKeywords?: string | null
   price: string | number
   stock: number
   isActive: boolean
@@ -25,9 +28,11 @@ type Product = {
   categories?: Array<{ id: string; title: string; slug: string }>
   loyaltyPreview?: {
     enabled: boolean
-    estimatedPoints: number
+    basePoints: number
+    productPoints: number
+    totalPoints: number
     displayText: string
-    formulaBreakdown?: { detail?: string }
+    mode?: string | null
   } | null
 }
 
@@ -55,7 +60,8 @@ const normalizedProduct = computed<Product | null>(() => {
       normalizeMiniDescription(rawMiniDescription) ??
       (typeof rawMiniDescription === 'string' && rawMiniDescription.trim().length > 0
         ? rawMiniDescription.trim()
-        : null)
+        : null),
+    searchKeywords: (product.value as any).searchKeywords
   }
 })
 
@@ -126,14 +132,15 @@ onMounted(() => {
 
     const value = Number(normalizedProduct.value?.price || 0) || undefined
     const extraPixelIds = Array.isArray((normalizedProduct.value as any)?.metaPixelIds) ? ((normalizedProduct.value as any).metaPixelIds as string[]) : []
+    metaPixel.pageView({
+      pixelIds: extraPixelIds
+    })
     metaPixel.viewContent({
       productId: id,
       value,
       currency: currencyCode.value,
       contents: [{ id, quantity: 1, item_price: value }],
-      pixelIds: extraPixelIds,
-      // If this product has assigned pixels, fire ViewContent only to those pixels (not the global one).
-      includeGlobal: extraPixelIds.length === 0
+      pixelIds: extraPixelIds
     })
   })
 })
@@ -168,36 +175,37 @@ const isLandingMode = computed(() => route.query.mode === 'landing' || route.que
 
 const ActiveTemplate = computed(() => {
   if (isLandingMode.value) {
-    return defineAsyncComponent(() => import('~/components/storefront/templates/modern/ProductLandingPage.vue')) 
+    return productLandingPageTemplates[templateKey.value]
   }
   return productTemplates[templateKey.value]
 })
 
 const layoutName = computed(() => isLandingMode.value ? 'landing' : 'store')
+const displayedLoyaltyPreview = computed<PublicLoyaltyPreview>(() => {
+  if (activeLoyaltyPreview.preview.value?.enabled) return activeLoyaltyPreview.preview.value
+  return normalizedProduct.value?.loyaltyPreview ?? null
+})
+
+onUnmounted(() => {
+  activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
   <NuxtLayout :name="layoutName">
-    <div
-      v-if="normalizedProduct?.loyaltyPreview?.enabled"
-      class="mx-auto max-w-6xl px-4 pt-4"
-    >
-      <div class="rounded-2xl border border-amber-200 bg-amber-50/90 px-4 py-3 text-sm text-amber-900 shadow-sm">
-        <div class="font-semibold">
-          {{ normalizedProduct.loyaltyPreview.displayText }}
-        </div>
-        <div
-          v-if="normalizedProduct.loyaltyPreview.formulaBreakdown?.detail"
-          class="mt-1 text-xs text-amber-800/90"
-        >
-          {{ normalizedProduct.loyaltyPreview.formulaBreakdown.detail }}
-        </div>
-      </div>
+    <div v-if="displayedLoyaltyPreview?.enabled" class="mx-auto max-w-6xl px-4 pt-4">
+      <LoyaltyProductLoyaltyPreview :preview="displayedLoyaltyPreview" />
     </div>
     <component
         :is="ActiveTemplate"
         :product="normalizedProduct"
         :related-products="relatedProducts"
+    />
+    <!-- Themed product tags / search keywords -->
+    <StorefrontSharedProductKeywordTags
+      v-if="normalizedProduct?.searchKeywords"
+      :keywords="normalizedProduct.searchKeywords"
+      :template-key="templateKey"
     />
   </NuxtLayout>
 </template>

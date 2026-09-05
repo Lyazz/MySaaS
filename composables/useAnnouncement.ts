@@ -5,8 +5,11 @@ export const useAnnouncement = () => {
     // Default values
     const defaultText = "Welcome to our store! Check out our latest offers."
 
-    // Visibility state
-    const isVisible = useState<boolean>('announcement-visible', () => true)
+    // Dismissal is stored in a session cookie so it's readable during SSR
+    // (avoids a flash of the banner on refresh) and persists across reloads
+    // until the browser session ends.
+    const dismissed = useCookie<boolean>('announcement-dismissed', { default: () => false })
+    const isVisible = computed(() => !dismissed.value)
 
     // Computed text: Query Param > Store Settings > Default
     const text = computed(() => {
@@ -37,11 +40,11 @@ export const useAnnouncement = () => {
     })
 
     const dismiss = () => {
-        isVisible.value = false
+        dismissed.value = true
     }
 
     const show = () => {
-        isVisible.value = true
+        dismissed.value = false
     }
 
     return {

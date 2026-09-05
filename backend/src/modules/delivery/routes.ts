@@ -13,6 +13,11 @@ const maystroController = new MaystroController()
 // Public-ish: needs tenant context, no auth
 router.post('/delivery/options', controller.getOptions.bind(controller))
 router.get('/delivery/companies', controller.listCompanies.bind(controller))
+router.get('/delivery/communes', controller.listCommuneNames.bind(controller))
+router.get(
+    '/delivery/providers/:provider/pickup-points',
+    controller.getPublicProviderPickupPoints.bind(controller)
+)
 router.get('/delivery/maystro/wilayas', maystroController.listWilayas.bind(maystroController))
 router.get('/delivery/maystro/communes', maystroController.listCommunes.bind(maystroController))
 router.get('/delivery/maystro/pickup-points', maystroController.listPickupPoints.bind(maystroController))
@@ -66,6 +71,30 @@ router.get(
     requireStaffPermission('delivery', 'read'),
     controller.getProviderLiveRates.bind(controller)
 )
+router.get(
+    '/admin/delivery/providers/:provider/communes',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    controller.getProviderCommunes.bind(controller)
+)
+router.get(
+    '/admin/delivery/providers/:provider/rate-cache',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    controller.getProviderRateCacheInfo.bind(controller)
+)
+router.get(
+    '/admin/delivery/providers/:provider/pickup-points',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    controller.getProviderPickupPoints.bind(controller)
+)
+router.get(
+    '/admin/delivery/providers/:provider/commune-price',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'read'),
+    controller.getProviderCommunePrice.bind(controller)
+)
 
 // Maystro management (admin)
 router.get(
@@ -98,6 +127,12 @@ router.post(
     requireStaffPermission('delivery', 'read'),
     maystroController.createBordereau.bind(maystroController)
 )
+router.post(
+    '/admin/delivery/providers/MAYSTRO/resync-products',
+    requireTenantMember,
+    requireStaffPermission('delivery', 'update'),
+    maystroController.resyncProducts.bind(maystroController)
+)
 
 
 
@@ -117,6 +152,8 @@ router.put(
 
 // Webhooks
 router.post('/webhooks/maystro', controller.maystroWebhook.bind(controller))
+router.get('/webhooks/yalidine', controller.yalidineWebhookChallenge.bind(controller))
+router.post('/webhooks/yalidine', controller.yalidineWebhook.bind(controller))
 
 // Self delivery admin status update
 router.post(

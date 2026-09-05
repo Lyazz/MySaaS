@@ -5,6 +5,7 @@ const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
+const { t } = useI18n({ useScope: 'global' })
 </script>
 
 <template>
@@ -39,9 +40,9 @@ const { currencyCode, format: formatCurrency } = useCurrency()
               <li
                 v-for="item in cartStore.items"
                 :key="item.variantId || item.productId"
-                class="bg-white border-4 border-black p-4 flex gap-6 relative group hover:-translate-y-1 hover:shadow-[8px_8px_0_0_var(--brand)] transition-all"
+                class="bg-white border-4 border-black p-4 flex gap-4 sm:gap-6 relative group hover:-translate-y-1 hover:shadow-[8px_8px_0_0_var(--brand)] transition-all"
               >
-                <div class="w-32 aspect-square border-2 border-black bg-gray-100 flex-shrink-0 overflow-hidden">
+                <div class="w-24 sm:w-32 aspect-square border-2 border-black bg-gray-100 flex-shrink-0 overflow-hidden">
                   <img
                     v-if="item.image"
                     :src="item.image"
@@ -56,17 +57,17 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                   </div>
                 </div>
 
-                <div class="flex-grow flex flex-col justify-between">
+                <div class="flex-grow min-w-0 flex flex-col justify-between">
                   <div>
-                    <div class="flex justify-between items-start">
-                      <h3 class="font-street text-2xl uppercase leading-none mb-2">
+                    <div class="flex justify-between items-start gap-2">
+                      <h3 class="font-street text-2xl uppercase leading-none mb-2 min-w-0 break-words">
                         <NuxtLink :to="`/product/${item.slug}`" class="hover:text-brand transition-colors">
                           {{ item.title }}
                         </NuxtLink>
                       </h3>
                       <button
                         type="button"
-                        class="text-xs font-mono uppercase underline hover:bg-black hover:text-white px-1 transition-colors"
+                        class="shrink-0 text-xs font-mono uppercase underline hover:bg-black hover:text-white px-1 transition-colors"
                         @click="cartStore.removeItem(item.productId, item.variantId)"
                       >
                         <span class="sr-only">{{ storefrontContent.cart.item.remove }}</span>
@@ -78,8 +79,8 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                     </p>
                   </div>
 
-                  <div class="flex justify-between items-end mt-4">
-                    <div class="flex items-center border-2 border-black">
+                  <div class="flex flex-wrap justify-between items-end gap-2 mt-4">
+                    <div class="flex items-center border-2 border-black shrink-0">
                       <button
                         :disabled="item.quantity <= 1"
                         class="px-3 py-1 hover:bg-brand font-bold disabled:opacity-30 disabled:hover:bg-transparent transition-colors"
@@ -96,7 +97,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
                         <Icon name="lucide:plus" class="w-4 h-4" />
                       </button>
                     </div>
-                    <div class="font-mono font-bold text-xl">
+                    <div class="font-mono font-bold text-lg sm:text-xl shrink-0">
                       {{ formatCurrency(item.lineTotal ?? (item.price * item.quantity)) }}
                     </div>
                   </div>
@@ -120,6 +121,10 @@ const { currencyCode, format: formatCurrency } = useCurrency()
               <dt class="text-gray-400">{{ storefrontContent.cart.summary.subtotal }}</dt>
               <dd>{{ formatCurrency(cartStore.total) }}</dd>
             </div>
+            <div v-if="cartStore.clearanceDiscount > 0" class="flex justify-between text-brand">
+              <dt>{{ t('storefront.clearance.discountLine') }}</dt>
+              <dd>-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+            </div>
             <div class="flex justify-between">
               <dt class="text-gray-400">{{ storefrontContent.cart.summary.shipping }}</dt>
               <dd class="text-sm">{{ storefrontContent.cart.summary.shippingHint }}</dd>
@@ -130,7 +135,7 @@ const { currencyCode, format: formatCurrency } = useCurrency()
             </div>
             <div class="flex justify-between text-xl font-bold pt-4 border-t-2 border-white text-brand">
               <dt>{{ storefrontContent.cart.summary.total }}</dt>
-              <dd>{{ formatCurrency(cartStore.total) }}</dd>
+              <dd>{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</dd>
             </div>
           </dl>
 

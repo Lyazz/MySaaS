@@ -5,7 +5,7 @@
     --m-bg: #05070A;
     --m-bg-elev: #0A1014;
     --m-bg-elev-2: #0E161B;
-    --m-teal-deep: #062A2A;
+    --m-lime-deep: #062A2A;
     --m-line: rgba(198, 244, 50, 0.10);
     --m-line-soft: rgba(255, 255, 255, 0.06);
     --m-text: #E7ECEE;
@@ -238,7 +238,7 @@
 
   .cinematic-section {
     position: relative;
-    padding: clamp(4rem, 9vw, 8rem) 0;
+    padding: clamp(2.5rem, 6vw, 5rem) 0;
   }
 
   .cinematic-container {

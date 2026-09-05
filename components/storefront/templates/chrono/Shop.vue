@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProductCard from '~/components/storefront/templates/chrono/ProductCard.vue'
-
+import { normalizeSearchText } from '~/shared/text/normalize-search'
 const props = defineProps<{
     products: any[]
 }>()
@@ -25,7 +25,14 @@ const filters = computed(() => ({
 }))
 
 const selectedCategories = ref<string[]>([])
-const searchQuery = ref('')
+const route = useRoute()
+const searchQuery = ref((route.query.q as string) || '')
+
+watch(() => route.query.q, (newQ) => {
+    if (newQ !== undefined) {
+        searchQuery.value = newQ as string
+    }
+})
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
@@ -57,8 +64,8 @@ const filteredProducts = computed(() => {
         result = result.filter(p => selectedIds.some((id) => [ ...((Array.isArray(p.categoryIds) ? p.categoryIds : [])), p.categoryId ].filter(Boolean).includes(id)))
     }
     if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase()
-        result = result.filter(p => p.title.toLowerCase().includes(q))
+        const q = normalizeSearchText(searchQuery.value)
+        result = result.filter(p => normalizeSearchText(p.title).includes(q) || (p.searchKeywords && normalizeSearchText(p.searchKeywords).includes(q)))
     }
     result = result.filter(p => {
         const price = Number(p.price)
@@ -278,7 +285,7 @@ const closeQuickView = () => {
 
             <div class="relative max-w-md w-full">
               <input v-model="searchQuery" type="text" :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" class="w-full bg-[#0B0E16] border border-[#A67C52]/20 text-gray-300 text-sm focus:ring-2 focus:ring-[#A67C52]/30 focus:border-[#A67C52] block pl-5 pr-10 py-3 transition-shadow placeholder:text-gray-600" style="border-radius: 2px;" >
-              <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
+              <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
                 <Icon name="lucide:search" class="w-5 h-5 text-gray-600" />
               </div>
             </div>

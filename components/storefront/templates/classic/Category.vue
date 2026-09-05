@@ -103,14 +103,14 @@ const sortedProducts = computed(() => {
               <div class="relative">
                   <select 
                       v-model="sortOption"
-                      class="appearance-none bg-transparent border-none text-sm py-2 pr-8 pl-0 focus:ring-0 cursor-pointer text-slate-900 font-bold hover:text-slate-700 transition-colors"
+                      class="appearance-none bg-transparent border-none text-sm py-2 pe-8 ps-0 focus:ring-0 cursor-pointer text-slate-900 font-bold hover:text-slate-700 transition-colors"
                   >
                     <option value="mostPopular">{{ storefrontContent.category.sort.mostPopular }}</option>
                     <option value="newest">{{ storefrontContent.category.sort.newest }}</option>
                     <option value="priceLowToHigh">{{ storefrontContent.category.sort.priceLowToHigh }}</option>
                     <option value="priceHighToLow">{{ storefrontContent.category.sort.priceHighToLow }}</option>
                   </select>
-                  <Icon name="lucide:chevron-down" class="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rtl:right-auto rtl:left-0" />
+                  <Icon name="lucide:chevron-down" class="absolute end-0 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none rtl:right-auto rtl:left-0" />
               </div>
             </div>
           </div>

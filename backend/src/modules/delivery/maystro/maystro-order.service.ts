@@ -4,7 +4,13 @@ import { MaystroClient } from './maystro.client'
 import { MaystroIntegrationError } from './maystro.errors'
 import { MaystroLocationService } from './maystro-location.service'
 import { MaystroPickupPointService } from './maystro-pickup-point.service'
-import { MaystroProductService } from './maystro-product.service'
+import {
+    MAYSTRO_VARIANT_INCLUDE,
+    MaystroProductService,
+    maystroProductNaming,
+    type MaystroNamedVariant
+} from './maystro-product.service'
+import { MAYSTRO_STATUS_ABORTED, maystroOrderStatusToString } from './maystro-status'
 
 type MaystroOrderDetail = {
     product: string
@@ -66,10 +72,15 @@ export class MaystroOrderService {
         totalAmount?: unknown
         totalWithShippingAmount?: unknown
         shippingAmount?: unknown
+        paidAmount?: unknown
     }) {
+        const paidAmount = Number.isFinite(Number(order.paidAmount)) ? Number(order.paidAmount) : 0
         const totalWithShippingRaw = order.totalWithShippingAmount
         const totalWithShipping = totalWithShippingRaw == null ? NaN : Number(totalWithShippingRaw)
-        if (Number.isFinite(totalWithShipping)) return Math.round(totalWithShipping)
+
+        if (Number.isFinite(totalWithShipping)) {
+            return Math.round(Math.max(0, totalWithShipping - paidAmount))
+        }
 
         const itemsTotalRaw = order.totalAmount
         const itemsTotal = Number.isFinite(Number(itemsTotalRaw)) ? Number(itemsTotalRaw) : 0
@@ -77,7 +88,7 @@ export class MaystroOrderService {
         const shippingRaw = order.shippingAmount
         const shippingAmount = Number.isFinite(Number(shippingRaw)) ? Number(shippingRaw) : 0
 
-        return Math.round(itemsTotal + shippingAmount)
+        return Math.round(Math.max(0, (itemsTotal + shippingAmount) - paidAmount))
     }
 
     private async buildPayload(input: {
@@ -95,10 +106,12 @@ export class MaystroOrderService {
         noteToDriver?: string
         deliveryType: 1 | 2 | 3
         pickupPoint?: number
+        /** The commune the relay itself sits in, when it differs from the shopper's. */
+        pickupPointCommune?: string | number
     }): Promise<{ externalId: string; payload: MaystroOrderPayload }> {
         const order = await this.prisma.order.findFirst({
             where: { tenantId: input.tenantId, id: input.localOrderId },
-            include: { items: { include: { product: true } } }
+            include: { items: { include: { product: true, variant: MAYSTRO_VARIANT_INCLUDE } } }
         })
         if (!order) {
             throw new MaystroIntegrationError({ statusCode: 404, statusMessage: 'Order not found for tenant' })
@@ -123,11 +136,28 @@ export class MaystroOrderService {
             orderId: order.id
         })
 
+        // A variant that carries attributes owns its own Maystro product, so a line is
+        // identified by product *and* variant, not by product alone.
+        const lines = order.items.map((item) => {
+            const naming = maystroProductNaming({
+                title: item.product?.title ?? '',
+                variant: item.variant as MaystroNamedVariant
+            })
+            return { item, naming, key: `${item.productId}:${naming.localVariantId}` }
+        })
+
         const mappings = await this.prisma.maystroProductMapping.findMany({
             where: { tenantId: input.tenantId, localProductId: { in: order.items.map((i) => i.productId) } }
         })
-        const mappedSet = new Set(mappings.filter((m) => m.syncStatus === 'SYNCED').map((m) => m.localProductId))
-        const missing = Array.from(new Set(order.items.map((i) => i.productId))).filter((id) => !mappedSet.has(id))
+        const maystroProductIdByKey = new Map(
+            mappings
+                .filter((mapping) => mapping.syncStatus === 'SYNCED')
+                .map((mapping) => [`${mapping.localProductId}:${mapping.localVariantId}`, mapping.maystroProductId])
+        )
+
+        const missing = Array.from(
+            new Set(lines.filter((line) => !maystroProductIdByKey.has(line.key)).map((line) => line.item.productId))
+        )
         if (missing.length) {
             throw new MaystroIntegrationError({
                 statusCode: 400,
@@ -142,22 +172,68 @@ export class MaystroOrderService {
             commune: input.commune
         })
 
+        // A relay parcel travels to the relay, so it is addressed to the relay's own
+        // commune whenever that differs from the shopper's. Validating the pickup_point
+        // against the shopper's commune instead is what rejected a relay the storefront
+        // had legitimately offered from a neighbouring commune.
+        const relayCommune =
+            input.deliveryType === 3 && input.pickupPointCommune != null
+                ? await this.resolveRelayCommune({
+                    apiToken: input.apiToken,
+                    wilaya: normalizedLocation.wilaya,
+                    commune: input.pickupPointCommune
+                })
+                : null
+
+        // Where the parcel is actually addressed. For a stop desk that is the wilaya's
+        // center commune: Maystro runs one desk per wilaya and it sits there, so a
+        // delivery_type=2 order addressed anywhere else is refused with "SD delivery type
+        // is not allowed outside center commune" (error 45). For a relay it is the relay's
+        // commune. Either way the shopper's own address is carried by destination_text.
+        const destinationCommune =
+            input.deliveryType === 2 && normalizedLocation.centerCommune != null
+                ? normalizedLocation.centerCommune
+                : relayCommune ?? normalizedLocation.commune
+
         if (input.deliveryType === 3) {
             if (!input.pickupPoint) {
                 throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'pickup_point is required for delivery_type=3' })
             }
             await this.pickupPoints.assertPickupPointValid({
                 apiToken: input.apiToken,
-                commune: normalizedLocation.commune,
+                commune: destinationCommune,
                 pickupPoint: input.pickupPoint
             })
         }
 
-        const details: MaystroOrderDetail[] = order.items.map((item) => ({
-            product: item.productId,
-            description: item.product?.title ? String(item.product.title) : undefined,
-            quantity: item.quantity
-        }))
+        // Maystro refuses an order that names the same product on two detail lines —
+        // "Inconsistent products(missing products)", error 50. Distinct attribute
+        // combinations now resolve to distinct remote products, so what is left to
+        // collapse is genuine repetition: the same product and variant on two lines.
+        const detailsByProduct = new Map<string, MaystroOrderDetail>()
+        for (const line of lines) {
+            const maystroProductId = maystroProductIdByKey.get(line.key)
+            if (!maystroProductId) {
+                throw new MaystroIntegrationError({
+                    statusCode: 400,
+                    statusMessage: 'Cannot create Maystro order: some products are not synced',
+                    details: { missingProductIds: [line.item.productId] }
+                })
+            }
+
+            const merged = detailsByProduct.get(maystroProductId)
+            if (merged) {
+                merged.quantity += line.item.quantity
+                continue
+            }
+
+            detailsByProduct.set(maystroProductId, {
+                product: maystroProductId,
+                description: line.naming.logisticalDescription || undefined,
+                quantity: line.item.quantity
+            })
+        }
+        const details: MaystroOrderDetail[] = Array.from(detailsByProduct.values())
 
         const payload: MaystroOrderPayload = {
             customer_name: input.customerName,
@@ -170,12 +246,40 @@ export class MaystroOrderService {
             total_price: this.computeCarrierTotalPrice(order as any),
             delivery_type: input.deliveryType,
             pickup_point: input.deliveryType === 3 ? input.pickupPoint : undefined,
-            commune: normalizedLocation.commune,
+            commune: destinationCommune,
             wilaya: normalizedLocation.wilaya,
             details
         }
 
         return { externalId, payload }
+    }
+
+    /**
+     * The relay's commune as a Maystro id. It arrives as whatever the order recorded —
+     * an id, or the name the storefront showed — so both forms are accepted here.
+     * Returns null when it cannot be placed, leaving the shopper's own commune to stand.
+     */
+    private async resolveRelayCommune(input: {
+        apiToken: string
+        wilaya: string | number
+        commune: string | number
+    }): Promise<number | null> {
+        const raw = String(input.commune ?? '').trim()
+        if (!raw) return null
+
+        const numeric = Number.parseInt(raw, 10)
+        if (Number.isFinite(numeric) && String(numeric) === raw) return numeric
+
+        try {
+            const resolved = await this.location.resolveWilayaAndCommune({
+                apiToken: input.apiToken,
+                wilaya: input.wilaya,
+                commune: raw
+            })
+            return resolved.communeId
+        } catch {
+            return null
+        }
     }
 
     private async persistOrderMapping(input: {
@@ -232,6 +336,8 @@ export class MaystroOrderService {
         noteToDriver?: string
         deliveryType: 1 | 2 | 3
         pickupPoint?: number
+        /** The commune the relay itself sits in, when it differs from the shopper's. */
+        pickupPointCommune?: string | number
     }) {
         const existing = await this.prisma.maystroOrderMapping.findUnique({
             where: { tenantId_localOrderId: { tenantId: input.tenantId, localOrderId: input.localOrderId } }
@@ -242,11 +348,29 @@ export class MaystroOrderService {
         const { externalId, payload } = await this.buildPayload(input)
 
         try {
-            const response = await client.request<MaystroOrderResponse>({
-                method: 'POST',
-                path: '/orders/',
-                data: payload
-            })
+            let response: MaystroOrderResponse;
+            try {
+                response = await client.request<MaystroOrderResponse>({
+                    method: 'POST',
+                    path: '/orders/',
+                    data: payload
+                })
+            } catch (error: any) {
+                // Code 55 means duplicate order in the last 24h. We bypass it by modifying the name slightly.
+                const isDuplicate = error?.details?.errors?.some((e: any) => e.code === 55)
+                if (isDuplicate) {
+                    payload.customer_name = (payload.customer_name || '').trim() + ' (2)'
+                    console.log('Retrying Maystro push with modified name to bypass duplicate check:', payload.customer_name)
+                    response = await client.request<MaystroOrderResponse>({
+                        method: 'POST',
+                        path: '/orders/',
+                        data: payload
+                    })
+                } else {
+                    throw error
+                }
+            }
+
             return this.persistOrderMapping({
                 tenantId: input.tenantId,
                 localOrderId: input.localOrderId,
@@ -272,6 +396,35 @@ export class MaystroOrderService {
             })
             throw error
         }
+    }
+
+    async cancelMaystroOrder(input: {
+        tenantId: string
+        apiToken: string
+        localOrderId: string
+    }) {
+        const mapping = await this.prisma.maystroOrderMapping.findUnique({
+            where: { tenantId_localOrderId: { tenantId: input.tenantId, localOrderId: input.localOrderId } }
+        })
+        if (!mapping?.maystroOrderId) return null
+
+        const client = new MaystroClient({ apiToken: input.apiToken })
+        try {
+            // Orders are not deletable — DELETE on this path answers 405 (the endpoint
+            // allows GET, PUT, PATCH, HEAD, OPTIONS). Cancelling is a move to ABORTED.
+            await client.request({
+                method: 'PATCH',
+                path: `/orders/${mapping.maystroOrderId}/`,
+                data: { status: MAYSTRO_STATUS_ABORTED }
+            })
+        } catch (error: any) {
+            // Maystro no longer knows this order, so there is nothing left to cancel.
+            // Anything else means the parcel is still live on their side and the caller
+            // must hear about it rather than believe the cancellation went through.
+            if (error?.statusCode !== 404) throw error
+        }
+
+        return mapping
     }
 
     async createOrdersFromLocalOrdersBulk(input: {
@@ -387,5 +540,64 @@ export class MaystroOrderService {
         }
 
         return [...existing, ...saved]
+    }
+
+    async syncOrderFromBackendApi(input: { tenantId: string; apiToken: string; localOrderId: string }) {
+        const mapping = await this.prisma.maystroOrderMapping.findUnique({
+            where: { tenantId_localOrderId: { tenantId: input.tenantId, localOrderId: input.localOrderId } }
+        })
+
+        if (!mapping?.maystroOrderId) {
+            throw new MaystroIntegrationError({ statusCode: 404, statusMessage: 'Order is not mapped to Maystro or missing maystroOrderId' })
+        }
+
+        const client = new MaystroClient({ apiToken: input.apiToken })
+        
+        let response: any
+        try {
+            response = await client.request<any>({
+                method: 'GET',
+                path: `/orders/${mapping.maystroOrderId}/`
+            })
+        } catch (error: any) {
+            throw new MaystroIntegrationError({
+                statusCode: error.statusCode || 500,
+                statusMessage: `Failed to fetch manual sync for ${mapping.maystroOrderId}: ${error.statusMessage || error.message}`
+            })
+        }
+
+        const statusCode = response?.status ?? response?.status_code
+        if (statusCode == null) {
+            throw new MaystroIntegrationError({ statusCode: 500, statusMessage: 'No status returned from Maystro backend API' })
+        }
+
+        // We use the MaystroWebhookService to handle the side effects precisely the same way 
+        // as a real webhook, including shipment tracking and converting to Sales when DELIVERED.
+        // We import dynamically to avoid circular dependencies if any exist, but it's safe to require it.
+        const { MaystroWebhookService } = await import('./maystro-webhook.service')
+        const webhookService = new MaystroWebhookService(this.prisma)
+
+        const result = await webhookService.handleWebhook({
+            tenantId: input.tenantId,
+            inventorySyncEnabled: false,
+            raw: {
+                event: 'ManualSync',
+                payload: {
+                    id: mapping.maystroOrderId,
+                    status: statusCode,
+                    order_id: mapping.maystroOrderId,
+                    external_id: mapping.externalId
+                }
+            }
+        })
+
+        const maystroStatusStr = maystroOrderStatusToString(statusCode)
+        return {
+            localOrderId: input.localOrderId,
+            maystroOrderId: mapping.maystroOrderId,
+            statusCode,
+            synced: result?.handled ?? false,
+            newStatus: result?.status ? `${result.status} (${maystroStatusStr})` : maystroStatusStr
+        }
     }
 }

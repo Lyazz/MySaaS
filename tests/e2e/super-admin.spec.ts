@@ -33,6 +33,7 @@ test.describe('Super Admin Dashboard', () => {
         // Create a test tenant
         const tenant = await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Super Admin Test Tenant',
                 slug: tenantSlug
             }
@@ -144,6 +145,7 @@ test.describe('Super Admin Dashboard', () => {
         suspendTenantSlug = `test-sa-suspend-${timestamp}`
         const tenant = await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Suspend Test Tenant',
                 slug: suspendTenantSlug!
             }

@@ -24,7 +24,7 @@ test.describe('Tenant Storefront', () => {
 
     test.beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Tenant E2E Store', slug: tenantSlug }
+            data: { publishedAt: new Date(), name: 'Tenant E2E Store', slug: tenantSlug }
         })
         tenantId = tenant.id
         await prisma.storeSettings.create({ data: { tenantId: tenant.id, templateKey: 'modern' } })

@@ -4,8 +4,7 @@
       v-for="btn in buttons"
       :key="btn.label"
       class="h-12 rounded-xl text-lg font-semibold transition-all duration-100 active:scale-95 flex items-center justify-center"
-      :class="btn.action === 'confirm' ? 'text-white hover:opacity-90 col-span-1' : 'hover:opacity-80'"
-      :style="btn.action === 'confirm' ? 'background: var(--brand)' : 'background: var(--surface-3); border: 1px solid var(--surface-border); color: var(--text-primary)'"
+      :class="btn.action === 'confirm' ? 'bg-brand text-brand-contrast hover:opacity-90 col-span-1' : 'surface-3 border border-line text-primary hover:opacity-80'"
       @click="handleInput(btn)"
     >
       <Icon

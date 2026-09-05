@@ -19,6 +19,16 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+subprojects {
+    plugins.withId("com.android.library") {
+        if (project.name == "flutter_bluetooth_serial") {
+            extensions.configure<com.android.build.gradle.LibraryExtension>("android") {
+                namespace = "io.github.edufolly.flutterbluetoothserial"
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

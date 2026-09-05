@@ -1,12 +1,22 @@
+import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../app_config.dart';
 import '../bootstrap.dart';
+import '../models/app_mode.dart';
+import '../models/bootstrap_config.dart';
+import '../models/subscription_tier.dart';
 import '../services/api_service.dart';
 import '../services/app_storage.dart';
+import '../services/device_info_service.dart';
+import '../services/activation_service.dart';
+import '../services/license_service.dart';
 import '../services/sync_service.dart';
 import '../services/tenant_mode_service.dart';
+import '../services/workspace_data_cleaner.dart';
+import '../utils/algerian_phone.dart';
+import '../utils/auth_error.dart';
 
-// Simple user model for now
 class User {
   final String id;
   final String email;
@@ -15,7 +25,6 @@ class User {
   final bool isSuperAdmin;
   final String tenantId;
   final String? staffRoleId;
-  final bool isOfflineTenant;
 
   User({
     required this.id,
@@ -25,15 +34,9 @@ class User {
     required this.tenantId,
     this.name,
     this.staffRoleId,
-    this.isOfflineTenant = false,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
-    bool isOffline = false;
-    if (json['tenant'] != null && json['tenant']['isOffline'] == true) {
-      isOffline = true;
-    }
-
     return User(
       id: json['id'] ?? '',
       email: json['email'] ?? '',
@@ -42,7 +45,6 @@ class User {
       isSuperAdmin: json['isSuperAdmin'] == true,
       tenantId: json['tenantId'] ?? '',
       staffRoleId: json['staffRoleId'],
-      isOfflineTenant: isOffline,
     );
   }
 
@@ -54,7 +56,6 @@ class User {
     'isSuperAdmin': isSuperAdmin,
     'tenantId': tenantId,
     'staffRoleId': staffRoleId,
-    'tenant': {'isOffline': isOfflineTenant},
   };
 }
 
@@ -74,6 +75,8 @@ class StaffRoleInfo {
 class AuthState {
   final User? user;
   final String? token;
+  final AppMode mode;
+  final SubscriptionTier subscriptionTier;
   final StaffRoleInfo? staffRole;
   final List<String> staffPermissions;
   final bool isLoading;
@@ -82,6 +85,8 @@ class AuthState {
   const AuthState({
     this.user,
     this.token,
+    this.mode = AppMode.online,
+    this.subscriptionTier = SubscriptionTier.online,
     this.staffRole,
     this.staffPermissions = const [],
     this.isLoading = false,
@@ -93,15 +98,24 @@ class AuthState {
   AuthState copyWith({
     User? user,
     String? token,
+    AppMode? mode,
+    SubscriptionTier? subscriptionTier,
     StaffRoleInfo? staffRole,
     List<String>? staffPermissions,
     bool? isLoading,
     String? error,
+    bool clearUser = false,
+    bool clearToken = false,
+    bool clearStaffRole = false,
   }) {
+    // `error` is intentionally not `??`-merged: every state transition states
+    // its own error, so a successful step clears the previous failure.
     return AuthState(
-      user: user ?? this.user,
-      token: token ?? this.token,
-      staffRole: staffRole ?? this.staffRole,
+      user: clearUser ? null : (user ?? this.user),
+      token: clearToken ? null : (token ?? this.token),
+      mode: mode ?? this.mode,
+      subscriptionTier: subscriptionTier ?? this.subscriptionTier,
+      staffRole: clearStaffRole ? null : (staffRole ?? this.staffRole),
       staffPermissions: staffPermissions ?? this.staffPermissions,
       isLoading: isLoading ?? this.isLoading,
       error: error,
@@ -110,32 +124,43 @@ class AuthState {
 }
 
 class AuthNotifier extends Notifier<AuthState> {
+  /// Guards against re-entering [logout] while a sign-out is already running.
+  bool _isSigningOut = false;
+
   @override
   AuthState build() {
-    final bootstrap = ref.read(bootstrapProvider);
+    final bootstrap = ref.watch(bootstrapProvider);
     final apiService = ref.read(apiProvider);
+
+    // Initialize mode service from persisted bootstrap — before any network call.
+    TenantModeService().initialize(
+      mode: bootstrap.mode,
+      tenantId: bootstrap.tenantId,
+      workspaceId: bootstrap.workspaceId,
+    );
+    SyncService().initialize(ref.read(apiProvider), mode: bootstrap.mode);
+    LicenseService().initialize(ref.read(activationServiceProvider));
 
     final token = bootstrap.authToken;
     if (token != null && token.trim().isNotEmpty) {
       apiService.setToken(token);
     }
 
-    final userJson = bootstrap.userJson;
-    final staffRoleJson = bootstrap.staffRoleJson;
-    final user = userJson != null ? User.fromJson(userJson) : null;
-    final staffRole = staffRoleJson != null
-        ? StaffRoleInfo.fromJson(staffRoleJson)
+    final user = bootstrap.userJson != null
+        ? User.fromJson(bootstrap.userJson!)
+        : null;
+    final staffRole = bootstrap.staffRoleJson != null
+        ? StaffRoleInfo.fromJson(bootstrap.staffRoleJson!)
         : null;
 
     final initial = AuthState(
       token: token,
       user: user,
+      mode: bootstrap.mode,
+      subscriptionTier: bootstrap.subscriptionTier,
       staffRole: staffRole,
       staffPermissions: bootstrap.staffPermissions,
     );
-
-    TenantModeService().setOfflineTenant(user?.isOfflineTenant ?? false);
-    SyncService().setOfflineTenant(user?.isOfflineTenant ?? false);
 
     if (token != null) {
       Future.microtask(() => refreshMe());
@@ -144,69 +169,227 @@ class AuthNotifier extends Notifier<AuthState> {
     return initial;
   }
 
+  /// Signs in with email + password.
+  ///
+  /// Throws an [AuthFailure] carrying a message that is safe to render as-is.
   Future<void> login(String email, String password) async {
+    final normalizedEmail = email.trim().toLowerCase();
     state = state.copyWith(isLoading: true, error: null);
+
     try {
+      _assertNetworkAllowed();
+
       final apiService = ref.read(apiProvider);
+      final deviceInfo = DeviceInfoService();
+
+      String? hardwareId;
+      String? deviceName;
+      String? devicePlatform;
+      try {
+        hardwareId = await deviceInfo.getHardwareId();
+        deviceName = deviceInfo.getDeviceDisplayName();
+        devicePlatform = deviceInfo.getPlatformType();
+      } catch (_) {
+        // Device identity is optional — it only drives POS auto-activation.
+        hardwareId = null;
+        deviceName = null;
+        devicePlatform = null;
+      }
+
       final response = await apiService.client.post(
         '/login',
-        data: {'email': email, 'password': password},
+        data: {
+          'email': normalizedEmail,
+          'password': password,
+          if (hardwareId != null) 'hardwareId': hardwareId,
+          if (deviceName != null) 'deviceName': deviceName,
+          if (devicePlatform != null) 'devicePlatform': devicePlatform,
+        },
       );
 
-      if (response.data != null && response.data['token'] != null) {
-        final token = response.data['token']?.toString() ?? '';
-        final rawUser = (response.data['user'] as Map?)
-            ?.cast<String, dynamic>();
-        final user = User.fromJson(rawUser ?? {'id': '', 'email': email});
-        final rawStaffRole = (response.data['staffRole'] as Map?)
-            ?.cast<String, dynamic>();
-        final staffRole = rawStaffRole != null
-            ? StaffRoleInfo.fromJson(rawStaffRole)
-            : null;
-        final staffPermissionsRaw = response.data['staffPermissions'];
-        final staffPermissions = (staffPermissionsRaw is List)
-            ? staffPermissionsRaw.map((e) => e.toString()).toList()
-            : <String>[];
-
-        if (user.isSuperAdmin) {
-          apiService.setToken(null);
-          state = state.copyWith(
-            isLoading: false,
-            token: null,
-            user: null,
-            staffRole: null,
-            staffPermissions: const [],
-            error: 'Super-admin accounts must use the web super-admin console.',
-          );
-          await AppStorage.clearAuthSession();
-          throw Exception(state.error);
-        }
-
-        apiService.setToken(token);
-        TenantModeService().setOfflineTenant(user.isOfflineTenant);
-        SyncService().setOfflineTenant(user.isOfflineTenant);
-
-        state = state.copyWith(
-          isLoading: false,
-          token: token,
-          user: user,
-          staffRole: staffRole,
-          staffPermissions: staffPermissions,
-        );
-
-        await AppStorage.saveAuthSession(
-          token: token,
-          userJson: user.toJson(),
-          staffRoleJson: staffRole?.toJson(),
-          staffPermissions: staffPermissions,
-        );
-      } else {
-        throw Exception("Invalid response from server");
-      }
-    } catch (e) {
-      state = state.copyWith(isLoading: false, error: e.toString());
-      rethrow;
+      await _applyAuthResponse(
+        payload: (response.data as Map?)?.cast<String, dynamic>(),
+        fallbackEmail: normalizedEmail,
+        rejectSuperAdmin: true,
+      );
+    } catch (error) {
+      throw _fail(error);
     }
+  }
+
+  /// Creates a tenant + owner account and signs the new owner in.
+  ///
+  /// Returns the created tenant name when the API reports one. Throws an
+  /// [AuthFailure] on any failure.
+  Future<String?> register({
+    required String name,
+    required String slug,
+    required String email,
+    required String password,
+    required String phone,
+  }) async {
+    state = state.copyWith(isLoading: true, error: null);
+
+    try {
+      _assertNetworkAllowed();
+
+      final apiService = ref.read(apiProvider);
+      // Send the same shape the backend normalizes to, so a number typed as
+      // `05 40 80 14 36` is not rejected for formatting reasons.
+      final normalizedPhone = AlgerianPhone.tryNormalize(phone) ?? phone.trim();
+
+      final response = await apiService.client.post(
+        '/register',
+        data: {
+          'name': name.trim(),
+          'slug': slug.trim().toLowerCase(),
+          'email': email.trim().toLowerCase(),
+          'password': password,
+          'phone': normalizedPhone,
+        },
+      );
+
+      final payload = (response.data as Map?)?.cast<String, dynamic>();
+      await _applyAuthResponse(
+        payload: payload,
+        fallbackEmail: email.trim().toLowerCase(),
+        rejectSuperAdmin: false,
+      );
+      final tenantRaw = payload?['tenant'];
+      if (tenantRaw is Map) {
+        final tenant = tenantRaw.cast<String, dynamic>();
+        final tenantName = tenant['name'];
+        if (tenantName is String && tenantName.trim().isNotEmpty) {
+          return tenantName.trim();
+        }
+      }
+      return null;
+    } catch (error) {
+      throw _fail(error);
+    }
+  }
+
+  /// Local-only installs never reach the API, so fail fast with an explanation
+  /// instead of letting the offline guard surface a cancelled request.
+  void _assertNetworkAllowed() {
+    if (state.mode.allowsNetworkRequests) return;
+    throw AuthFailure(
+      AuthErrorKind.offlineMode,
+      'auth.errors.offlineMode'.tr(),
+    );
+  }
+
+  /// Records [error] on the state and returns the failure to rethrow.
+  AuthFailure _fail(Object error) {
+    final failure = AuthErrorMapper.toFailure(error);
+    state = state.copyWith(isLoading: false, error: failure.message);
+    return failure;
+  }
+
+  Future<void> _applyAuthResponse({
+    required Map<String, dynamic>? payload,
+    required String fallbackEmail,
+    required bool rejectSuperAdmin,
+  }) async {
+    final body = payload ?? const <String, dynamic>{};
+    final token = body['token']?.toString().trim() ?? '';
+    if (token.isEmpty) {
+      throw AuthFailure(
+        AuthErrorKind.unknown,
+        'auth.errors.invalidResponse'.tr(),
+      );
+    }
+
+    final apiService = ref.read(apiProvider);
+    final activationToken = body['activationToken']?.toString();
+    final rawUser = (body['user'] as Map?)?.cast<String, dynamic>();
+    final user = User.fromJson(rawUser ?? {'id': '', 'email': fallbackEmail});
+
+    if (rejectSuperAdmin && user.isSuperAdmin) {
+      apiService.setToken(null);
+      final message = 'auth.errors.superAdmin'.tr();
+      // clearToken/clearUser are required here: the `??` merge in copyWith
+      // would otherwise keep the rejected session on the state.
+      state = state.copyWith(
+        isLoading: false,
+        clearToken: true,
+        clearUser: true,
+        clearStaffRole: true,
+        staffPermissions: const [],
+        error: message,
+      );
+      await AppStorage.clearAuthSession();
+      throw AuthFailure(AuthErrorKind.forbidden, message, statusCode: 403);
+    }
+
+    final rawStaffRole = (body['staffRole'] as Map?)?.cast<String, dynamic>();
+    final staffRole = rawStaffRole != null
+        ? StaffRoleInfo.fromJson(rawStaffRole)
+        : null;
+    final staffPermissionsRaw = body['staffPermissions'];
+    final staffPermissions = (staffPermissionsRaw is List)
+        ? staffPermissionsRaw.map((e) => e.toString()).toList()
+        : <String>[];
+
+    final runtime = _resolveTenantRuntime(
+      body['tenant'],
+      fallbackMode: state.mode,
+      fallbackTier: state.subscriptionTier,
+    );
+    final bootstrap = ref.read(bootstrapProvider);
+
+    apiService.setToken(token);
+    TenantModeService().initialize(
+      mode: runtime.mode,
+      tenantId: user.tenantId,
+      workspaceId: bootstrap.workspaceId,
+    );
+    SyncService().initialize(apiService, mode: runtime.mode);
+    LicenseService().initialize(ref.read(activationServiceProvider));
+
+    await AppStorage.saveProvisioningState(
+      mode: runtime.mode,
+      subscriptionTier: runtime.subscriptionTier,
+      tenantId: user.tenantId,
+      workspaceId: bootstrap.workspaceId,
+    );
+    await AppStorage.saveAuthSession(
+      token: token,
+      userJson: user.toJson(),
+      staffRoleJson: staffRole?.toJson(),
+      staffPermissions: staffPermissions,
+    );
+
+    // Save activation token if it was returned by auto-registration
+    if (activationToken != null && activationToken.isNotEmpty) {
+      // Hand it to the licence engine too, not just to storage: otherwise the
+      // device would keep evaluating an empty licence until the next cold start.
+      await LicenseService().applyActivationToken(activationToken);
+    }
+    ref
+        .read(bootstrapProvider.notifier)
+        .replace(
+          bootstrap.copyWith(
+            apiBaseUrl: apiService.baseUrl,
+            mode: runtime.mode,
+            subscriptionTier: runtime.subscriptionTier,
+            tenantId: user.tenantId,
+            authToken: token,
+            userJson: user.toJson(),
+            staffRoleJson: staffRole?.toJson(),
+            staffPermissions: staffPermissions,
+          ),
+        );
+
+    state = state.copyWith(
+      isLoading: false,
+      token: token,
+      user: user,
+      mode: runtime.mode,
+      subscriptionTier: runtime.subscriptionTier,
+      staffRole: staffRole,
+      staffPermissions: staffPermissions,
+    );
   }
 
   Future<void> refreshMe() async {
@@ -217,14 +400,19 @@ class AuthNotifier extends Notifier<AuthState> {
       final apiService = ref.read(apiProvider);
       final response = await apiService.client.get('/me');
       final rawUser = (response.data?['user'] as Map?)?.cast<String, dynamic>();
+      if (rawUser == null) return;
 
-      if (response.data?['tenant'] != null && rawUser != null) {
+      if (response.data?['tenant'] != null) {
         rawUser['tenant'] = response.data?['tenant'];
       }
 
-      if (rawUser == null) return;
-
       final user = User.fromJson(rawUser);
+      final runtime = _resolveTenantRuntime(
+        response.data?['tenant'],
+        fallbackMode: state.mode,
+        fallbackTier: state.subscriptionTier,
+      );
+
       final rawStaffRole = (response.data?['staffRole'] as Map?)
           ?.cast<String, dynamic>();
       final staffRole = rawStaffRole != null
@@ -234,38 +422,211 @@ class AuthNotifier extends Notifier<AuthState> {
       final staffPermissions = (staffPermissionsRaw is List)
           ? staffPermissionsRaw.map((e) => e.toString()).toList()
           : <String>[];
+      final bootstrap = ref.read(bootstrapProvider);
 
-      TenantModeService().setOfflineTenant(user.isOfflineTenant);
-      SyncService().setOfflineTenant(user.isOfflineTenant);
-
-      state = state.copyWith(
-        user: user,
-        staffRole: staffRole,
-        staffPermissions: staffPermissions,
+      TenantModeService().initialize(
+        mode: runtime.mode,
+        tenantId: user.tenantId,
+        workspaceId: bootstrap.workspaceId,
       );
+      SyncService().initialize(apiService, mode: runtime.mode);
+      LicenseService().initialize(ref.read(activationServiceProvider));
 
+      await AppStorage.saveProvisioningState(
+        mode: runtime.mode,
+        subscriptionTier: runtime.subscriptionTier,
+        tenantId: user.tenantId,
+        workspaceId: bootstrap.workspaceId,
+      );
       await AppStorage.saveAuthSession(
         token: token,
         userJson: user.toJson(),
         staffRoleJson: staffRole?.toJson(),
         staffPermissions: staffPermissions,
       );
+      ref
+          .read(bootstrapProvider.notifier)
+          .replace(
+            bootstrap.copyWith(
+              apiBaseUrl: apiService.baseUrl,
+              mode: runtime.mode,
+              subscriptionTier: runtime.subscriptionTier,
+              tenantId: user.tenantId,
+              authToken: token,
+              userJson: user.toJson(),
+              staffRoleJson: staffRole?.toJson(),
+              staffPermissions: staffPermissions,
+            ),
+          );
+
+      state = state.copyWith(
+        user: user,
+        mode: runtime.mode,
+        subscriptionTier: runtime.subscriptionTier,
+        staffRole: staffRole,
+        staffPermissions: staffPermissions,
+      );
     } catch (_) {
-      // Avoid logging out on transient network errors
-      // await logout();
+      // Avoid logout on transient network errors.
     }
   }
 
-  Future<void> logout() async {
+  void applyProvisioning({
+    required AppMode mode,
+    required SubscriptionTier subscriptionTier,
+  }) {
+    state = AuthState(mode: mode, subscriptionTier: subscriptionTier);
+  }
+
+  /// Ends the session.
+  ///
+  /// [clearWorkspaceData] wipes the encrypted workspace database and its files.
+  /// That is right for a deliberate sign-out, but never for a session that
+  /// expired on its own — see [handleSessionExpired].
+  Future<void> logout({
+    bool clearProvisioning = false,
+    bool clearWorkspaceData = true,
+  }) async {
+    // The 401 interceptor calls into here from inside a Dio error handler, so
+    // a sync pass failing several requests at once re-enters this method. Left
+    // unguarded, the second call tears down state the first is still using.
+    if (_isSigningOut) return;
+    _isSigningOut = true;
+    try {
+      await _performLogout(
+        clearProvisioning: clearProvisioning,
+        clearWorkspaceData: clearWorkspaceData,
+      );
+    } finally {
+      _isSigningOut = false;
+    }
+  }
+
+  /// Handles a 401 on an authenticated request: the token expired or was
+  /// revoked server-side.
+  ///
+  /// Drops the session so the user is sent back to sign-in, but leaves the
+  /// workspace database in place. A device that spent longer offline than the
+  /// token's lifetime reconnects straight into this path, and wiping there
+  /// would destroy every write queued during the outage — the exact loss the
+  /// outbox exists to prevent. The queue flushes on its own once the same
+  /// tenant signs back in and [SyncService.initialize] runs again.
+  Future<void> handleSessionExpired() => logout(clearWorkspaceData: false);
+
+  Future<void> _performLogout({
+    required bool clearProvisioning,
+    required bool clearWorkspaceData,
+  }) async {
+    final bootstrap = ref.read(bootstrapProvider);
     final apiService = ref.read(apiProvider);
+    final dataCleaner = WorkspaceDataCleaner();
+
+    try {
+      if (state.token != null && bootstrap.mode.allowsNetworkRequests) {
+        await apiService.client.post('/logout');
+      }
+    } catch (_) {}
+
+    // Stop syncing before touching the database, and await it: `reset()` waits
+    // for the pass already in flight, which still holds the database handle.
+    // Deleting underneath it used to leave the pass writing into a closing
+    // handle, and on Windows the open file made the delete fail outright.
+    await SyncService().reset();
     apiService.setToken(null);
-    TenantModeService().setOfflineTenant(false);
-    SyncService().setOfflineTenant(false);
-    state = const AuthState();
+    if (clearWorkspaceData) {
+      await dataCleaner.clearProvisionedWorkspace(bootstrap);
+    }
     await AppStorage.clearAuthSession();
+
+    if (clearProvisioning) {
+      await AppStorage.clearProvisioningState();
+      TenantModeService().initialize(mode: AppMode.online, tenantId: '');
+      ref
+          .read(bootstrapProvider.notifier)
+          .replace(const BootstrapConfig(apiBaseUrl: defaultApiBaseUrl));
+      state = const AuthState();
+      return;
+    }
+
+    TenantModeService().initialize(
+      mode: bootstrap.mode,
+      tenantId: bootstrap.tenantId,
+      workspaceId: bootstrap.workspaceId,
+    );
+    ref
+        .read(bootstrapProvider.notifier)
+        .replace(
+          bootstrap.copyWith(
+            clearAuthToken: true,
+            clearUserJson: true,
+            clearStaffRoleJson: true,
+            clearStaffPermissions: true,
+          ),
+        );
+    state = AuthState(
+      mode: bootstrap.mode,
+      subscriptionTier: bootstrap.subscriptionTier,
+    );
+  }
+
+  _TenantRuntime _resolveTenantRuntime(
+    dynamic rawTenant, {
+    required AppMode fallbackMode,
+    required SubscriptionTier fallbackTier,
+  }) {
+    final tenant = rawTenant is Map
+        ? Map<String, dynamic>.from(rawTenant)
+        : const <String, dynamic>{};
+
+    final runtimeMode = _parseRuntimeMode(tenant);
+    final subscriptionTier = _parseSubscriptionTier(tenant);
+
+    return _TenantRuntime(
+      mode:
+          runtimeMode ??
+          (tenant['isOffline'] == true
+              ? AppMode.offlineOnly
+              : (fallbackMode == AppMode.online
+                    ? AppMode.hybrid
+                    : fallbackMode)),
+      subscriptionTier:
+          subscriptionTier ??
+          (tenant['isOffline'] == true
+              ? SubscriptionTier.offlineOnly
+              : fallbackTier),
+    );
+  }
+
+  AppMode? _parseRuntimeMode(Map<String, dynamic> tenant) {
+    final raw = (tenant['runtimeMode'] ?? tenant['mode'] ?? tenant['appMode'])
+        ?.toString()
+        .trim();
+    if (raw == null || raw.isEmpty) return null;
+    for (final mode in AppMode.values) {
+      if (mode.name == raw) return mode;
+    }
+    return null;
+  }
+
+  SubscriptionTier? _parseSubscriptionTier(Map<String, dynamic> tenant) {
+    final raw = (tenant['subscriptionTier'] ?? tenant['tier'])
+        ?.toString()
+        .trim();
+    if (raw == null || raw.isEmpty) return null;
+    for (final tier in SubscriptionTier.values) {
+      if (tier.name == raw) return tier;
+    }
+    return null;
   }
 }
 
 final authProvider = NotifierProvider<AuthNotifier, AuthState>(
   AuthNotifier.new,
 );
+
+class _TenantRuntime {
+  final AppMode mode;
+  final SubscriptionTier subscriptionTier;
+
+  const _TenantRuntime({required this.mode, required this.subscriptionTier});
+}

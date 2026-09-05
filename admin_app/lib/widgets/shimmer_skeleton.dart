@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
-/// A shimmer skeleton widget for loading states
 class ShimmerSkeleton extends StatefulWidget {
   final double? width;
   final double? height;
@@ -42,6 +42,10 @@ class _ShimmerSkeletonState extends State<ShimmerSkeleton>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final baseColor = isDark ? AppColors.surface2 : const Color(0xFFE2E8F0);
+    final shimmerColor = isDark ? AppColors.surface3 : const Color(0xFFF1F5F9);
+
     return AnimatedBuilder(
       animation: _animation,
       builder: (context, child) {
@@ -53,11 +57,7 @@ class _ShimmerSkeletonState extends State<ShimmerSkeleton>
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: const [
-                Color(0xFFE2E8F0),
-                Color(0xFFF1F5F9),
-                Color(0xFFE2E8F0),
-              ],
+              colors: [baseColor, shimmerColor, baseColor],
               stops: [
                 _animation.value - 0.3,
                 _animation.value,
@@ -71,60 +71,63 @@ class _ShimmerSkeletonState extends State<ShimmerSkeleton>
   }
 }
 
-/// Product card skeleton for loading state
 class ProductCardSkeleton extends StatelessWidget {
+  static const double _imageAspectRatio = 3 / 2;
+
   const ProductCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surface1,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Image skeleton
-          Expanded(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(
-                top: Radius.circular(16),
-              ),
-              child: const ShimmerSkeleton(borderRadius: 0),
+          ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+            child: const AspectRatio(
+              aspectRatio: _imageAspectRatio,
+              child: ShimmerSkeleton(borderRadius: 0),
             ),
           ),
-          // Content skeleton
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const ShimmerSkeleton(
-                  width: double.infinity,
-                  height: 16,
-                  borderRadius: 4,
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const ShimmerSkeleton(
-                      width: 80,
-                      height: 20,
-                      borderRadius: 4,
-                    ),
-                    ShimmerSkeleton(width: 40, height: 40, borderRadius: 20),
-                  ],
-                ),
-              ],
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const ShimmerSkeleton(
+                    width: double.infinity,
+                    height: 16,
+                    borderRadius: 4,
+                  ),
+                  const SizedBox(height: 8),
+                  const Wrap(
+                    spacing: 6,
+                    runSpacing: 6,
+                    children: [
+                      ShimmerSkeleton(width: 72, height: 22, borderRadius: 999),
+                      ShimmerSkeleton(width: 92, height: 22, borderRadius: 999),
+                    ],
+                  ),
+                  const Spacer(),
+                  const ShimmerSkeleton(
+                    width: double.infinity,
+                    height: 22,
+                    borderRadius: 4,
+                  ),
+                ],
+              ),
             ),
           ),
         ],
@@ -133,23 +136,22 @@ class ProductCardSkeleton extends StatelessWidget {
   }
 }
 
-/// Category card skeleton for loading state
 class CategoryCardSkeleton extends StatelessWidget {
   const CategoryCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surface1,
         borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        border: Border.all(color: borderColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -162,11 +164,11 @@ class CategoryCardSkeleton extends StatelessWidget {
               child: const ShimmerSkeleton(borderRadius: 0),
             ),
           ),
-          Padding(
-            padding: const EdgeInsets.all(12),
+          const Padding(
+            padding: EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
+              children: [
                 ShimmerSkeleton(
                   width: double.infinity,
                   height: 16,

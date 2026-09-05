@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import ProductCard from './ProductCard.vue'
+import CategoryPlaceholder from '~/components/storefront/CategoryPlaceholder.vue'
 import { isDefaultStorefrontHomeConfig, type StorefrontHomeConfig } from '~/shared/storefront/homepage'
 
 const props = defineProps<{
@@ -11,6 +12,7 @@ const props = defineProps<{
 }>()
 
 const storefrontContent = useStorefrontContent()
+const { t } = useI18n({ useScope: 'global' })
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -72,10 +74,10 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 <template>
   <div class="atelier-root">
-    <!-- Cormorant Garamond + DM Mono from Google Fonts -->
+    <!-- Pistachio typography from Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Noto+Sans+Arabic:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- ─── HERO ─────────────────────────────────────────────── -->
     <section
@@ -122,7 +124,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
       <!-- Slide counter + nav -->
       <div v-if="hasMultipleSlides" class="atelier-hero__nav">
-        <button class="atelier-hero__arrow" @click="prevSlide" aria-label="Précédent">
+        <button class="atelier-hero__arrow" @click="prevSlide" :aria-label="t('storefront.nav.previous')">
           <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
             <path d="M15 5H1M6 1L1 5l5 4" stroke="currentColor" stroke-width="1"/>
           </svg>
@@ -130,7 +132,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
         <span class="atelier-hero__count">
           {{ String(currentSlide + 1).padStart(2, '0') }} / {{ String(heroSlides.length).padStart(2, '0') }}
         </span>
-        <button class="atelier-hero__arrow" @click="nextSlide" aria-label="Suivant">
+        <button class="atelier-hero__arrow" @click="nextSlide" :aria-label="t('storefront.nav.next')">
           <svg width="16" height="10" viewBox="0 0 16 10" fill="none">
             <path d="M1 5h14M10 1l5 4-5 4" stroke="currentColor" stroke-width="1"/>
           </svg>
@@ -152,17 +154,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
     <div class="atelier-strip">
       <div class="atelier-strip__item">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="1" width="12" height="12" stroke="currentColor" stroke-width="0.75"/><path d="M4 7h6M7 4v6" stroke="currentColor" stroke-width="0.75"/></svg>
-        <span>Livraison partout en Algérie</span>
+        <span>{{ t('storefront.templates.maison.home.trust.delivery') }}</span>
       </div>
       <div class="atelier-strip__sep" />
       <div class="atelier-strip__item">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="currentColor" stroke-width="0.75"/><path d="M5 7l2 2 3-3" stroke="currentColor" stroke-width="0.75"/></svg>
-        <span>Sélection rigoureuse</span>
+        <span>{{ t('storefront.templates.maison.home.trust.curation') }}</span>
       </div>
       <div class="atelier-strip__sep" />
       <div class="atelier-strip__item">
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7c0-2.76 2.24-5 5-5s5 2.24 5 5-2.24 5-5 5" stroke="currentColor" stroke-width="0.75"/><path d="M5 10l-3 2V9" stroke="currentColor" stroke-width="0.75"/></svg>
-        <span>Retours facilités</span>
+        <span>{{ t('storefront.templates.maison.home.trust.returns') }}</span>
       </div>
     </div>
 
@@ -195,7 +197,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
               :alt="categoryDisplayTitle(cat)"
               class="atelier-cats__img"
             >
-            <div v-else class="atelier-cats__img-placeholder" />
+            <CategoryPlaceholder v-else :title="categoryDisplayTitle(cat)" font-family="var(--at-f-display)" class="atelier-cats__img-placeholder" />
             <div class="atelier-cats__overlay" />
           </div>
           <div class="atelier-cats__meta">
@@ -269,18 +271,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
     <section class="atelier-manifesto">
       <div class="atelier-manifesto__inner">
         <div class="atelier-manifesto__eyebrow">
-          <span class="atelier-label atelier-label--light">Notre Univers</span>
+          <span class="atelier-label atelier-label--light">{{ t('storefront.templates.maison.home.manifestoKicker') }}</span>
           <div class="atelier-manifesto__line" />
         </div>
         <blockquote class="atelier-manifesto__quote">
-          L'art de décorer<br><em>votre espace</em>
+          {{ t('storefront.templates.maison.home.manifestoTitle') }}<br><em>{{ t('storefront.templates.maison.home.manifestoAccent') }}</em>
         </blockquote>
         <p class="atelier-manifesto__body">
-          Des pièces pensées pour embellir chaque coin de votre maison.<br class="hidden md:block">
-          Du salon à la chambre, de la cuisine au bureau.
+          {{ t('storefront.templates.maison.home.manifestoBody') }}
         </p>
         <NuxtLink to="/products" class="atelier-cta atelier-cta--light">
-          <span>Découvrir la boutique</span>
+          <span>{{ t('storefront.templates.maison.home.manifestoCta') }}</span>
           <svg width="18" height="10" viewBox="0 0 18 10" fill="none">
             <path d="M1 5h16M12 1l5 4-5 4" stroke="currentColor" stroke-width="1"/>
           </svg>
@@ -322,19 +323,31 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 <style scoped>
 /* ── Tokens ────────────────────────────────────────────────────── */
 .atelier-root {
-  --c-bg:       #0E0D0C;
-  --c-surface:  #161412;
-  --c-border:   #2A2622;
-  --c-muted:    #4A4440;
-  --c-text:     #E8E2D9;
-  --c-sub:      #9A9088;
-  --c-gold:     #B8924A;
-  --c-cream:    #F2EDE5;
+  /* Aliases onto the theme tokens — the palette lives in ThemeProvider.vue,
+     so a tenant's brand colour reaches this page too. */
+  --c-bg:        var(--at-bg);
+  --c-surface:   var(--at-surface);
+  --c-surface-2: var(--at-surface-2);
+  --c-surface-3: var(--at-surface-3);
+  --c-border:    var(--at-border);
+  --c-border-2:  var(--at-border-2);
+  --c-muted:     var(--at-muted);
+  --c-faint:     var(--at-faint);
+  --c-text:      var(--at-text);
+  --c-sub:       var(--at-sub);
+  --c-gold:      var(--at-gold);
+  --c-gold-700:  var(--at-gold-700);
+  --c-gold-300:  var(--at-gold-300);
+  --c-cream:     var(--at-cream);
+  --c-skin:      var(--at-skin);
+  --c-leaf:      var(--at-leaf);
 
-  --f-display: 'Cormorant Garamond', Georgia, serif;
-  --f-mono:    'DM Mono', 'Courier New', monospace;
+  --f-display: var(--at-f-display);
+  --f-mono:    var(--at-f-mono);
 
-  background: var(--c-bg);
+  /* Transparent: the grain and the two corner washes are painted by
+     .atelier-theme and should read through the whole page. */
+  background: transparent;
   color: var(--c-text);
   font-family: var(--f-mono);
   min-height: 100vh;
@@ -343,44 +356,66 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 /* ── Typography helpers ───────────────────────────────────────── */
 .atelier-label {
-  display: block;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
   font-family: var(--f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.28em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--c-gold);
+  color: var(--c-gold-700);
   margin-bottom: 10px;
   opacity: 0;
   transform: translateY(6px);
   animation: fadeUp 0.6s ease forwards;
   animation-delay: var(--delay, 0ms);
 }
-.atelier-label--light { color: var(--c-gold); }
+.atelier-label::before {
+  content: '';
+  width: 18px;
+  height: 1px;
+  background: currentColor;
+  opacity: 0.55;
+  flex-shrink: 0;
+}
+.atelier-label--light { color: var(--c-gold-300); }
 
 .atelier-section-title {
   font-family: var(--f-display);
   font-size: clamp(2rem, 4vw, 3.5rem);
-  font-weight: 300;
-  letter-spacing: -0.01em;
-  line-height: 1.05;
-  color: var(--c-text);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  color: var(--c-cream);
+  text-wrap: balance;
 }
 
 .atelier-ghost-link {
   display: inline-flex;
   align-items: center;
   gap: 10px;
+  padding: 9px 18px;
+  border: 1px solid var(--c-border);
+  border-radius: var(--at-r-pill);
+  background: var(--c-surface);
   font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--c-sub);
   text-decoration: none;
-  transition: color 0.25s;
+  white-space: nowrap;
+  box-shadow: var(--at-shadow-xs);
+  transition: color 0.25s, border-color 0.25s, background 0.25s, box-shadow 0.25s;
 }
-.atelier-ghost-link:hover { color: var(--c-gold); }
+.atelier-ghost-link:hover {
+  color: var(--c-gold-700);
+  border-color: var(--c-gold);
+  background: var(--c-surface-2);
+  box-shadow: var(--at-shadow-sm);
+}
 .atelier-ghost-link svg { transition: transform 0.25s; }
 .atelier-ghost-link:hover svg { transform: translateX(4px); }
 
@@ -391,18 +426,21 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   display: inline-flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 28px;
-  border: 1px solid rgba(232,226,217,0.35);
+  padding: 15px 32px;
+  border: 1px solid var(--at-hair);
+  border-radius: var(--at-r-pill);
+  background: var(--c-surface);
   font-family: var(--f-mono);
-  font-size: 10px;
-  font-weight: 400;
-  letter-spacing: 0.22em;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--c-text);
   text-decoration: none;
   position: relative;
   overflow: hidden;
-  transition: color 0.3s, border-color 0.3s;
+  box-shadow: var(--at-shadow-sm);
+  transition: color 0.3s, border-color 0.3s, box-shadow 0.3s, transform 0.3s;
   opacity: 0;
   transform: translateY(6px);
   animation: fadeUp 0.6s ease forwards;
@@ -412,23 +450,35 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--c-gold);
+  background: var(--at-grad-gold-ink);
   transform: translateX(-101%);
-  transition: transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+  transition: transform 0.45s cubic-bezier(0.76, 0, 0.24, 1);
   z-index: 0;
 }
 .atelier-cta:hover::before { transform: translateX(0); }
-.atelier-cta:hover { border-color: var(--c-gold); }
+.atelier-cta:hover {
+  border-color: transparent;
+  color: #FFFBF0;
+  box-shadow: var(--at-shadow-md);
+  transform: translateY(-2px);
+}
 .atelier-cta span, .atelier-cta svg { position: relative; z-index: 1; }
+.atelier-cta svg { transition: transform 0.3s; }
+.atelier-cta:hover svg { transform: translateX(4px); }
 
+/* On the dark manifesto slab the CTA inverts: paper outline, gold fill. */
 .atelier-cta--light {
-  border-color: rgba(232,226,217,0.6);
-  color: var(--c-cream);
+  border-color: rgba(255,251,240,0.28);
+  background: rgba(255,251,240,0.05);
+  color: #FFFBF0;
+  box-shadow: none;
   opacity: 1;
   transform: none;
   animation: none;
 }
-.atelier-cta--light::before { background: var(--c-gold); }
+.atelier-cta--light::before { background: var(--at-grad-gold); }
+.atelier-cta--light:hover { color: var(--at-green-900); }
+.atelier-cta--light:hover { color: var(--at-green-900); box-shadow: var(--at-shadow-lg); }
 
 /* ── Animations ───────────────────────────────────────────────── */
 @keyframes fadeUp {
@@ -447,7 +497,21 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   min-height: 560px;
   max-height: 920px;
   overflow: hidden;
-  background: var(--c-bg);
+  background: var(--at-grad-paper);
+  border-end-end-radius: clamp(56px, 10vw, 150px);
+  box-shadow: inset 0 -1px 0 var(--c-border);
+}
+/* The tooth of the paper carried over the photograph, so the image sits
+   in the page instead of on top of it. */
+.atelier-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  pointer-events: none;
+  background: var(--at-grain);
+  opacity: 0.55;
+  mix-blend-mode: multiply;
 }
 
 .atelier-hero__slide {
@@ -464,7 +528,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   height: 100%;
   object-fit: cover;
   object-position: center;
-  filter: brightness(0.45) saturate(0.8);
+  filter: brightness(0.97) saturate(0.94) contrast(1.02);
   transition: transform 8s ease;
 }
 .atelier-hero__slide.is-active .atelier-hero__img {
@@ -475,8 +539,18 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to right, rgba(14,13,12,0.7) 0%, rgba(14,13,12,0.1) 60%),
-    linear-gradient(to top, rgba(14,13,12,0.5) 0%, transparent 50%);
+    radial-gradient(118% 96% at 2% 50%,
+      rgba(255,251,240,0.97) 0%,
+      rgba(252,244,227,0.88) 24%,
+      rgba(247,231,198,0.46) 47%,
+      rgba(247,231,198,0.08) 66%,
+      transparent 80%),
+    linear-gradient(to top, rgba(250,242,227,0.92) 0%, rgba(250,242,227,0.24) 26%, transparent 54%),
+    radial-gradient(70% 70% at 92% 88%, var(--at-gold-dim), transparent 70%),
+    linear-gradient(105deg,
+      color-mix(in srgb, var(--at-green) 24%, transparent) 0%,
+      color-mix(in srgb, var(--at-green) 10%, transparent) 46%,
+      rgba(28,35,24,0.18) 100%);
 }
 
 .atelier-hero__body {
@@ -489,10 +563,11 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 }
 
 .atelier-hero__rule {
-  width: 1px;
+  width: 2px;
   height: 0;
-  background: var(--c-gold);
-  margin-right: clamp(20px, 3vw, 48px);
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, var(--c-gold) 18%, var(--c-cream) 92%);
+  margin-inline-end: clamp(20px, 3vw, 48px);
   flex-shrink: 0;
   transition: height 1s cubic-bezier(0.76, 0, 0.24, 1) 0.2s;
 }
@@ -507,10 +582,11 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-hero__title {
   font-family: var(--f-display);
   font-size: clamp(3rem, 7vw, 7rem);
-  font-weight: 300;
-  line-height: 0.97;
-  letter-spacing: -0.02em;
+  font-weight: 700;
+  line-height: 0.95;
+  letter-spacing: -0.03em;
   color: var(--c-cream);
+  text-wrap: balance;
   margin-bottom: 20px;
   opacity: 0;
   transform: translateY(12px);
@@ -523,10 +599,10 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-family: var(--f-mono);
   font-size: clamp(11px, 1.4vw, 14px);
   font-weight: 300;
-  line-height: 1.7;
-  color: rgba(232,226,217,0.55);
+  line-height: 1.8;
+  color: var(--at-ink-2);
   margin-bottom: 36px;
-  max-width: 340px;
+  max-width: 360px;
   opacity: 0;
   transform: translateY(8px);
   animation: fadeUp 0.7s ease forwards;
@@ -547,26 +623,33 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-hero__count {
   font-family: var(--f-mono);
   font-size: 10px;
-  font-weight: 300;
-  letter-spacing: 0.15em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  font-variant-numeric: tabular-nums;
   color: var(--c-sub);
 }
 
 .atelier-hero__arrow {
-  width: 38px;
-  height: 38px;
+  width: 40px;
+  height: 40px;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid var(--c-border);
+  border-radius: var(--at-r-pill);
   color: var(--c-sub);
-  background: transparent;
+  background: rgba(255,251,240,0.82);
+  backdrop-filter: blur(6px);
+  box-shadow: var(--at-shadow-xs);
   cursor: pointer;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s, transform 0.2s;
 }
 .atelier-hero__arrow:hover {
-  border-color: var(--c-gold);
-  color: var(--c-gold);
+  border-color: transparent;
+  color: #FFFBF0;
+  background: var(--at-grad-gold-ink);
+  box-shadow: var(--at-shadow-sm);
+  transform: translateY(-1px);
 }
 
 .atelier-hero__progress {
@@ -576,12 +659,13 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   right: 0;
   z-index: 20;
   display: flex;
-  height: 1px;
+  gap: 2px;
+  height: 2px;
 }
 
 .atelier-hero__progress-bar {
   flex: 1;
-  background: var(--c-border);
+  background: color-mix(in srgb, var(--c-border) 70%, transparent);
   position: relative;
   overflow: hidden;
 }
@@ -589,7 +673,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   content: '';
   position: absolute;
   inset: 0;
-  background: var(--c-gold);
+  background: var(--at-grad-gold);
   transform: scaleX(0);
   transform-origin: left;
 }
@@ -597,11 +681,31 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   animation: progressFill 7s linear forwards;
 }
 
+/* In Arabic the paper side of the scrim moves with the text. */
+[dir='rtl'] .atelier-hero__veil {
+  background:
+    radial-gradient(118% 96% at 98% 50%,
+      rgba(255,251,240,0.97) 0%,
+      rgba(252,244,227,0.88) 24%,
+      rgba(247,231,198,0.46) 47%,
+      rgba(247,231,198,0.08) 66%,
+      transparent 80%),
+    linear-gradient(to top, rgba(250,242,227,0.92) 0%, rgba(250,242,227,0.24) 26%, transparent 54%),
+    radial-gradient(70% 70% at 8% 88%, var(--at-gold-dim), transparent 70%),
+    linear-gradient(255deg,
+      color-mix(in srgb, var(--at-green) 24%, transparent) 0%,
+      color-mix(in srgb, var(--at-green) 10%, transparent) 46%,
+      rgba(28,35,24,0.18) 100%);
+}
+[dir='rtl'] .atelier-manifesto::before { right: auto; left: -40px; }
+[dir='rtl'] .atelier-manifesto::after  { right: auto; left: 40px; }
+
 /* ── Strip ─────────────────────────────────────────────────────── */
 .atelier-strip {
-  background: var(--c-surface);
+  background: var(--at-grad-shell);
   border-top: 1px solid var(--c-border);
   border-bottom: 1px solid var(--c-border);
+  box-shadow: inset 0 1px 0 rgba(255,251,240,0.6);
   padding: 18px 24px;
   display: flex;
   align-items: center;
@@ -616,17 +720,25 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   gap: 10px;
   font-family: var(--f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.2em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--c-sub);
 }
-.atelier-strip__item svg { color: var(--c-gold); flex-shrink: 0; }
+.atelier-strip__item svg {
+  color: var(--c-gold-700);
+  flex-shrink: 0;
+  padding: 5px;
+  box-sizing: content-box;
+  border-radius: var(--at-r-pill);
+  background: var(--at-gold-dim);
+}
 
 .atelier-strip__sep {
   width: 1px;
   height: 16px;
-  background: var(--c-border);
+  background: var(--c-border-2);
+  opacity: 0.7;
   display: none;
 }
 @media (min-width: 640px) { .atelier-strip__sep { display: block; } }
@@ -650,8 +762,8 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__grid {
   display: flex;
   flex-direction: column;
-  gap: 1px;
-  background: var(--c-border);
+  gap: 18px;
+  background: transparent;
 }
 @media (min-width: 768px) {
   .atelier-cats__grid {
@@ -670,6 +782,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   position: relative;
   background: var(--c-surface);
   overflow: hidden;
+  border: 1px solid var(--c-border);
+  border-radius: var(--at-r-leaf);
+  box-shadow: var(--at-shadow-sm);
+  transition: transform 0.35s cubic-bezier(0.25,0.46,0.45,0.94), box-shadow 0.35s, border-color 0.35s;
+}
+@media (min-width: 768px) {
+  .atelier-cats__item:hover {
+    transform: translateY(-5px);
+    border-color: var(--c-border-2);
+    box-shadow: var(--at-shadow-lg);
+  }
 }
 
 .atelier-cats__img-wrap {
@@ -686,45 +809,56 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: brightness(0.5) saturate(0.75);
+  filter: brightness(0.96) saturate(0.9);
   transition: filter 0.5s ease, transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 .atelier-cats__item:hover .atelier-cats__img {
-  filter: brightness(0.65) saturate(0.9);
+  filter: brightness(1) saturate(0.98);
   transform: scale(1.04);
 }
 
 .atelier-cats__img-placeholder {
   width: 100%;
   height: 100%;
-  background: var(--c-surface);
+  background: var(--at-grad-shell);
 }
 
 .atelier-cats__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(14,13,12,0.75) 0%, transparent 55%);
+  background:
+    linear-gradient(to top, var(--c-surface) 0%, rgba(255,251,240,0.55) 22%, transparent 58%),
+    linear-gradient(160deg, color-mix(in srgb, var(--at-green) 18%, transparent) 0%, transparent 46%);
   pointer-events: none;
+  transition: opacity 0.4s;
 }
+.atelier-cats__item:hover .atelier-cats__overlay { opacity: 0.8; }
 
 .atelier-cats__meta {
   display: flex;
   align-items: center;
   gap: 14px;
-  padding: 14px 18px;
+  padding: 15px 20px;
   border-top: 1px solid var(--c-border);
   background: var(--c-surface);
   transition: background 0.25s;
 }
-.atelier-cats__item:hover .atelier-cats__meta { background: #1A1714; }
+.atelier-cats__item:hover .atelier-cats__meta { background: var(--c-surface-2); }
 
+/* The index reads as a plate number, set in the display face. */
 .atelier-cats__num {
-  font-family: var(--f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  color: var(--c-gold);
+  font-family: var(--f-display);
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-gold-700);
   flex-shrink: 0;
+  padding-inline-end: 12px;
+  border-inline-end: 1px solid var(--c-border);
+  align-self: stretch;
+  display: flex;
+  align-items: center;
 }
 
 .atelier-cats__info { flex: 1; }
@@ -732,8 +866,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-cats__name {
   font-family: var(--f-display);
   font-size: 1.15rem;
-  font-weight: 400;
-  color: var(--c-text);
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--c-cream);
   line-height: 1.2;
   margin: 0 0 2px;
 }
@@ -765,22 +900,31 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 .atelier-tag {
   display: inline-block;
-  padding: 7px 14px;
+  padding: 8px 16px;
   border: 1px solid var(--c-border);
+  border-radius: var(--at-r-pill);
+  background: var(--c-surface);
   font-family: var(--f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--c-sub);
   text-decoration: none;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, box-shadow 0.2s;
 }
-.atelier-tag:hover { border-color: var(--c-gold); color: var(--c-gold); }
+.atelier-tag:hover {
+  border-color: var(--c-gold);
+  color: var(--c-gold-700);
+  background: var(--c-surface-2);
+  box-shadow: var(--at-shadow-xs);
+}
 
 /* ── Divider ─────────────────────────────────────────────────────── */
 .atelier-divider {
   height: 1px;
-  background: var(--c-border);
+  background: var(--at-grad-hair);
+  opacity: 0.7;
   margin: 0 clamp(24px, 6vw, 80px);
 }
 
@@ -818,8 +962,13 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   flex-shrink: 0;
   width: calc((100% - 16px) / 2);
   height: 340px;
-  background: var(--c-surface);
-  animation: pulse 1.4s ease-in-out infinite;
+  border-radius: var(--at-r-leaf);
+  border: 1px solid var(--c-border);
+  background:
+    linear-gradient(100deg, transparent 20%, rgba(255,251,240,0.9) 50%, transparent 80%),
+    var(--c-surface-2);
+  background-size: 220% 100%, auto;
+  animation: at-shimmer 1.8s linear infinite;
 }
 @media (min-width: 640px) {
   .atelier-products__skel-card { width: 240px; }
@@ -838,13 +987,16 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 
 /* ── Manifesto ───────────────────────────────────────────────────── */
 .atelier-manifesto {
-  background: var(--c-surface);
-  border-top: 1px solid var(--c-border);
-  border-bottom: 1px solid var(--c-border);
+  background: var(--at-grad-green);
+  color: #FFFBF0;
+  border-top: 1px solid var(--at-green-900);
+  border-bottom: 1px solid var(--at-green-900);
   padding: clamp(60px, 10vw, 120px) clamp(24px, 6vw, 80px);
   position: relative;
   overflow: hidden;
+  isolation: isolate;
 }
+/* Two honey rings, the way a nut's shell is scored. */
 .atelier-manifesto::before {
   content: '';
   position: absolute;
@@ -852,9 +1004,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   right: -40px;
   width: 400px;
   height: 400px;
-  border: 1px solid var(--c-border);
+  border: 1px solid var(--c-gold);
   border-radius: 50%;
-  opacity: 0.35;
+  opacity: 0.28;
 }
 .atelier-manifesto::after {
   content: '';
@@ -863,9 +1015,9 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   right: 40px;
   width: 240px;
   height: 240px;
-  border: 1px solid var(--c-border);
+  border: 1px solid var(--c-gold-300);
   border-radius: 50%;
-  opacity: 0.2;
+  opacity: 0.18;
 }
 
 .atelier-manifesto__inner {
@@ -883,7 +1035,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-manifesto__line {
   height: 1px;
   width: 48px;
-  background: var(--c-gold);
+  background: linear-gradient(90deg, var(--c-gold-300), transparent);
 }
 .atelier-manifesto__eyebrow .atelier-label {
   opacity: 1;
@@ -895,15 +1047,17 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
 .atelier-manifesto__quote {
   font-family: var(--f-display);
   font-size: clamp(2.8rem, 6vw, 5.5rem);
-  font-weight: 300;
+  font-weight: 500;
   line-height: 1.02;
-  letter-spacing: -0.02em;
-  color: var(--c-cream);
+  letter-spacing: -0.03em;
+  color: #FFFBF0;
   margin: 0 0 28px;
+  text-wrap: balance;
 }
 .atelier-manifesto__quote em {
   font-style: italic;
-  color: var(--c-gold);
+  font-weight: 600;
+  color: var(--c-gold-300);
 }
 
 .atelier-manifesto__body {
@@ -911,7 +1065,7 @@ onMounted(() => { setTimeout(() => { heroVisible.value = true }, 80) })
   font-size: 12px;
   font-weight: 300;
   line-height: 1.9;
-  color: var(--c-sub);
+  color: rgba(255,251,240,0.74);
   margin-bottom: 40px;
 }
 </style>

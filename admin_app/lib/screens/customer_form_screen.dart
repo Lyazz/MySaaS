@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../providers/customers_provider.dart';
+import '../providers/store_settings_provider.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/form/admin_form_shell.dart';
 import '../widgets/form/form_input.dart';
@@ -38,7 +40,9 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
     _phone = TextEditingController();
     _email = TextEditingController();
     _address = TextEditingController();
-    _openingBalance = TextEditingController(text: '0');
+    _openingBalance = TextEditingController(
+      text: 'admin.forms.product.stock.placeholder'.tr(),
+    );
 
     if (widget.customerId != null) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _loadCustomer());
@@ -150,6 +154,9 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
 
     final isEditing =
         widget.customerId != null && widget.customerId!.trim().isNotEmpty;
+    final currencyCode = tenantCurrencyCode(
+      ref.watch(storeSettingsProvider).settings,
+    );
 
     return AdminFormShell(
       title: isEditing
@@ -209,7 +216,7 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
 
                     final openingBalanceField = FormInput(
                       controller: _openingBalance,
-                      label: 'admin.forms.customer.openingBalance.label'.tr(),
+                      label: 'app.admin_forms_customer_openingba'.tr().tr(),
                       hint: isEditing
                           ? 'admin.forms.customer.openingBalance.hint'.tr()
                           : 'admin.forms.customer.openingBalance.placeholder'
@@ -217,12 +224,10 @@ class _CustomerFormScreenState extends ConsumerState<CustomerFormScreen> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      prefixText: 'DZD ',
+                      prefixText: '$currencyCode ',
                       enabled: !isEditing,
                       inputFormatters: [
-                        FilteringTextInputFormatter.allow(
-                          RegExp(r'[0-9.,]'),
-                        ),
+                        FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
                       ],
                       validator: isEditing
                           ? null

@@ -15,7 +15,7 @@ Examples: tenants, plans, feature_flags, integration_catalog.
 
 ## Tenant resolution
 Tenant is resolved from HTTP Host.
-- If host matches `{slug}.platform.com` => slug identifies tenant.
+- If host matches `{slug}.swekly.com` => slug identifies tenant.
 - If host matches a custom domain => map domain -> tenant.
 
 Tenant resolution must run early (middleware).

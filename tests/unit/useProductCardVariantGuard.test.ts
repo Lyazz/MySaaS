@@ -29,8 +29,12 @@ describe('useProductCardVariantGuard', () => {
         {
           id: 'v_1',
           price: 1200,
+          promotionalPrice: 900,
+          isPromotionActive: true,
           trackInventory: true,
           stock: 5,
+          reserved: 2,
+          safetyStock: 1,
           optionValues: [{ optionValue: { optionId: 'o_size', label: 'L' } }],
           images: []
         }
@@ -49,6 +53,9 @@ describe('useProductCardVariantGuard', () => {
     expect(modal.open.value).toBe(true)
     expect(modal.variants.value).toHaveLength(1)
     expect(modal.variants.value[0]?.label).toBe('L')
+    expect(modal.variants.value[0]?.price).toBe(900)
+    expect(modal.variants.value[0]?.stock).toBe(2)
+    expect(modal.variants.value[0]?.inStock).toBe(true)
   })
 
   it('does not open modal when list payload says no variants', async () => {

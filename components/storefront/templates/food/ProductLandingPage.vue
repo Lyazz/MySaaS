@@ -82,6 +82,16 @@ const images = computed(() => {
 const cartImage = computed(() => images.value[0]);
 
 // Price Formatting handled by useCurrency
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
@@ -90,7 +100,7 @@ const cartImage = computed(() => images.value[0]);
   >
     <!-- Description Section (Raw & Full Width & No Margins) -->
     <div class="w-full mb-8 animate-fade-in-up">
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-img:rounded-xl prose-img:w-full prose-img:shadow-sm max-w-none text-stone-800"
         :html="product.description"

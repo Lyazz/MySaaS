@@ -16,6 +16,7 @@ interface Product {
   promotionEndDate?: string | Date | null
   showCountdown?: boolean
   bundleDeals?: any[]
+  isClearance?: boolean
 }
 
 const props = defineProps<{
@@ -28,7 +29,7 @@ defineEmits(['quick-view'])
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const storeSettings = useState<any>('storeSettings')
-const { currencyCode } = useCurrency()
+const { currencyCode, formatAmount } = useCurrency()
 const storefrontContent = useStorefrontContent()
 
 const mainImage = computed(() => {
@@ -53,6 +54,10 @@ const displayPrice = computed(() => {
 const originalPrice = computed(() => {
     return (isPromoValid.value && props.product.promotionalPrice) ? Number(props.product.price) : null
 })
+
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
 
 const isNew = computed(() => false)
 
@@ -79,11 +84,15 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: displayPrice.value,
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -120,7 +129,7 @@ async function handleAddToCart() {
       <div v-if="viewMode !== 'list'" class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" style="background: linear-gradient(to top, rgba(8,11,18,0.4) 0%, transparent 50%);" />
 
       <!-- Badges (Top Left) -->
-      <div class="absolute top-3 left-3 flex flex-col gap-2 items-start z-10">
+      <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10">
         <span
           v-if="isNew"
           class="px-2.5 py-1 text-xs font-medium tracking-wider uppercase"
@@ -131,11 +140,16 @@ async function handleAddToCart() {
           class="px-2.5 py-1 text-xs font-medium tracking-wider"
           style="background-color: #C1440E; color: #fff; border-radius: 1px;"
         >-{{ Math.round(((Number(product.price) - Number(product.promotionalPrice)) / Number(product.price)) * 100) }}%</span>
+        <span
+          v-if="isClearanceEligible"
+          class="px-2.5 py-1 text-xs font-medium tracking-wider uppercase"
+          style="background-color: #D9A050; color: #0E1117; border-radius: 1px;"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
 
       <!-- Floating Actions (Right) -->
       <div 
-        class="absolute top-3 right-3 flex flex-col gap-2 transition-all duration-300 z-10"
+        class="absolute top-3 end-3 flex flex-col gap-2 transition-all duration-300 z-10"
         :class="[
            viewMode === 'list' ? 'opacity-0 group-hover:opacity-100' : 'translate-x-0 opacity-100 lg:translate-x-8 lg:opacity-0 lg:group-hover:translate-x-0 lg:group-hover:opacity-100'
         ]"
@@ -156,7 +170,7 @@ async function handleAddToCart() {
         <button
            class="w-9 h-9 backdrop-blur-md flex items-center justify-center shadow-md transition-all duration-200" 
            style="background-color: rgba(14,17,23,0.85); border: 1px solid rgba(212,197,169,0.2); color: #D4C5A9; border-radius: 1px;"
-           title="Quick View"
+           :title="storefrontContent.actions.quickView"
            @click.prevent="$emit('quick-view', product)"
         >
             <Icon name="lucide:eye" class="w-4 h-4" />
@@ -177,28 +191,28 @@ async function handleAddToCart() {
       <!-- Stock Badge -->
       <div
         v-if="product.stock > 0 && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <span
           v-if="isLowStock"
           class="px-2 py-1 text-[10px] font-medium tracking-wider uppercase"
           style="background-color: rgba(120,60,10,0.9); color: #FCD34D; border-radius: 1px;"
-        >Low Stock</span>
+        >{{ storefrontContent.product.lowStock }}</span>
         <span
           v-else
           class="px-2 py-1 text-[10px] font-medium tracking-wider uppercase"
           style="background-color: rgba(14,17,23,0.85); color: #A67C52; border: 1px solid rgba(166,124,82,0.25); border-radius: 1px;"
-        >In Stock</span>
+        >{{ storefrontContent.product.inStock }}</span>
       </div>
 
       <div
         v-if="isOutOfStock && viewMode !== 'list'"
-        class="absolute bottom-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+        class="absolute bottom-3 end-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
       >
         <span 
           class="px-2 py-1 text-[10px] font-medium tracking-wider uppercase"
           style="background-color: rgba(139,20,20,0.85); color: #FCA5A5; border-radius: 1px;"
-        >Out of Stock</span>
+        >{{ storefrontContent.actions.outOfStock }}</span>
       </div>
     
       <!-- Countdown Overlay -->
@@ -217,8 +231,8 @@ async function handleAddToCart() {
     <div 
       :class="[
         viewMode === 'list' 
-          ? 'flex-1 text-left' 
-          : 'mt-4 text-left w-full px-1'
+          ? 'flex-1 text-start' 
+          : 'mt-4 text-start w-full px-1'
       ]"
     >
       <NuxtLink :to="`/product/${product.slug}`" class="block">
@@ -239,8 +253,8 @@ async function handleAddToCart() {
         class="flex items-baseline gap-2.5" 
         :class="[ viewMode === 'list' ? '' : 'mt-1.5' ]"
       >
-        <span class="text-base font-medium" style="color: #D4C5A9;">{{ displayPrice.toLocaleString() }} <span class="text-xs font-normal" style="color: #7A7060;">{{ currencyCode }}</span></span>
-        <span v-if="originalPrice" class="text-xs line-through" style="color: #4A4540;">{{ originalPrice.toLocaleString() }} {{ currencyCode }}</span>
+        <span class="text-base font-medium" style="color: #D4C5A9;">{{ formatAmount(displayPrice) }} <span class="text-xs font-normal" style="color: #7A7060;">{{ currencyCode }}</span></span>
+        <span v-if="originalPrice" class="text-xs line-through" style="color: #4A4540;">{{ formatAmount(originalPrice) }} {{ currencyCode }}</span>
       </div>
 
       <!-- List View CTA -->
@@ -268,7 +282,7 @@ async function handleAddToCart() {
     >
       <div
         v-if="showSuccess"
-        class="fixed bottom-4 right-4 z-50 px-6 py-4 shadow-2xl flex items-center gap-4"
+        class="fixed bottom-4 end-4 z-50 px-6 py-4 shadow-2xl flex items-center gap-4"
         style="background-color: #1A1F2E; border: 1px solid rgba(212,197,169,0.15); border-radius: 2px; color: #E8E0D5;"
       >
         <div class="w-8 h-8 flex items-center justify-center shrink-0" style="background-color: #A67C52; border-radius: 1px; color: #fff;">

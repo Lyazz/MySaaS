@@ -5,6 +5,7 @@ import '../models/receipt_layout.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class ReceiptLayoutRepository {
   final ApiService _apiService;
@@ -13,9 +14,15 @@ class ReceiptLayoutRepository {
 
   ReceiptLayoutRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<ReceiptLayout>> getLayouts({bool forceRefresh = false}) async {
     final db = await _dbService.database;
-    final localData = await db.query('receipt_layouts');
+    final localData = await db.query(
+      'receipt_layouts',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     final localLayouts = localData
         .map(
@@ -23,6 +30,15 @@ class ReceiptLayoutRepository {
             'id': e['id'],
             'name': e['name'],
             'showLogo': e['showLogo'] == 1,
+            'cachedLogoUrl': e['cachedLogoUrl'],
+            'showStoreName': e['showStoreName'] == 1,
+            'storeNameOverride': e['storeNameOverride'],
+            'showStoreAddress': e['showStoreAddress'] == 1,
+            'storeAddressOverride': e['storeAddressOverride'],
+            'showStorePhone': e['showStorePhone'] == 1,
+            'storePhoneOverride': e['storePhoneOverride'],
+            'showStoreEmail': e['showStoreEmail'] == 1,
+            'storeEmailOverride': e['storeEmailOverride'],
             'showHeader': e['showHeader'] == 1,
             'headerText': e['headerText'],
             'showDate': e['showDate'] == 1,
@@ -46,12 +62,26 @@ class ReceiptLayoutRepository {
             .toList();
 
         await db.transaction((txn) async {
-          await txn.delete('receipt_layouts', where: "syncStatus = 'synced'");
+          await txn.delete(
+            'receipt_layouts',
+            where: "tenantId = ? AND syncStatus = 'synced'",
+            whereArgs: [_tid],
+          );
           for (var r in remoteLayouts) {
             await txn.insert('receipt_layouts', {
               'id': r.id,
+              'tenantId': _tid,
               'name': r.name,
               'showLogo': r.showLogo ? 1 : 0,
+              'cachedLogoUrl': r.cachedLogoUrl,
+              'showStoreName': r.showStoreName ? 1 : 0,
+              'storeNameOverride': r.storeNameOverride,
+              'showStoreAddress': r.showStoreAddress ? 1 : 0,
+              'storeAddressOverride': r.storeAddressOverride,
+              'showStorePhone': r.showStorePhone ? 1 : 0,
+              'storePhoneOverride': r.storePhoneOverride,
+              'showStoreEmail': r.showStoreEmail ? 1 : 0,
+              'storeEmailOverride': r.storeEmailOverride,
               'showHeader': r.showHeader ? 1 : 0,
               'headerText': r.headerText,
               'showDate': r.showDate ? 1 : 0,
@@ -65,36 +95,31 @@ class ReceiptLayoutRepository {
           }
         });
         return remoteLayouts;
-      } catch (e) {
-        print('Background receipt layout fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localLayouts;
   }
 
   Future<ReceiptLayout> createLayout(ReceiptLayout layout) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
-    final newLayout = ReceiptLayout(
-      id: id,
-      name: layout.name,
-      showLogo: layout.showLogo,
-      showHeader: layout.showHeader,
-      headerText: layout.headerText,
-      showDate: layout.showDate,
-      showOrderNumber: layout.showOrderNumber,
-      showCustomerInfo: layout.showCustomerInfo,
-      showFooter: layout.showFooter,
-      footerText: layout.footerText,
-      showTaxBreakdown: layout.showTaxBreakdown,
-    );
+    final newLayout = layout.copyWith(id: id);
 
     await db.insert('receipt_layouts', {
       'id': newLayout.id,
+      'tenantId': _tid,
       'name': newLayout.name,
       'showLogo': newLayout.showLogo ? 1 : 0,
+      'cachedLogoUrl': newLayout.cachedLogoUrl,
+      'showStoreName': newLayout.showStoreName ? 1 : 0,
+      'storeNameOverride': newLayout.storeNameOverride,
+      'showStoreAddress': newLayout.showStoreAddress ? 1 : 0,
+      'storeAddressOverride': newLayout.storeAddressOverride,
+      'showStorePhone': newLayout.showStorePhone ? 1 : 0,
+      'storePhoneOverride': newLayout.storePhoneOverride,
+      'showStoreEmail': newLayout.showStoreEmail ? 1 : 0,
+      'storeEmailOverride': newLayout.storeEmailOverride,
       'showHeader': newLayout.showHeader ? 1 : 0,
       'headerText': newLayout.headerText,
       'showDate': newLayout.showDate ? 1 : 0,
@@ -103,27 +128,29 @@ class ReceiptLayoutRepository {
       'showFooter': newLayout.showFooter ? 1 : 0,
       'footerText': newLayout.footerText,
       'showTaxBreakdown': newLayout.showTaxBreakdown ? 1 : 0,
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
-
-    await _syncService.enqueueOperation(
-      entityType: 'receiptLayout',
-      action: 'create',
-      payload: newLayout.toMap(),
-    );
 
     return newLayout;
   }
 
   Future<void> updateLayout(ReceiptLayout layout) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     await db.update(
       'receipt_layouts',
       {
         'name': layout.name,
         'showLogo': layout.showLogo ? 1 : 0,
+        'cachedLogoUrl': layout.cachedLogoUrl,
+        'showStoreName': layout.showStoreName ? 1 : 0,
+        'storeNameOverride': layout.storeNameOverride,
+        'showStoreAddress': layout.showStoreAddress ? 1 : 0,
+        'storeAddressOverride': layout.storeAddressOverride,
+        'showStorePhone': layout.showStorePhone ? 1 : 0,
+        'storePhoneOverride': layout.storePhoneOverride,
+        'showStoreEmail': layout.showStoreEmail ? 1 : 0,
+        'storeEmailOverride': layout.storeEmailOverride,
         'showHeader': layout.showHeader ? 1 : 0,
         'headerText': layout.headerText,
         'showDate': layout.showDate ? 1 : 0,
@@ -132,27 +159,22 @@ class ReceiptLayoutRepository {
         'showFooter': layout.showFooter ? 1 : 0,
         'footerText': layout.footerText,
         'showTaxBreakdown': layout.showTaxBreakdown ? 1 : 0,
-        'syncStatus': online ? 'synced' : 'pending',
+        'syncStatus': SyncStatus.pending.name,
       },
-      where: 'id = ?',
-      whereArgs: [layout.id],
-    );
-
-    await _syncService.enqueueOperation(
-      entityType: 'receiptLayout',
-      action: 'update',
-      payload: layout.toMap(),
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [layout.id, _tid],
     );
   }
 
   Future<void> deleteLayout(String id) async {
     final db = await _dbService.database;
-    await db.delete('receipt_layouts', where: 'id = ?', whereArgs: [id]);
-
-    await _syncService.enqueueOperation(
-      entityType: 'receiptLayout',
-      action: 'delete',
-      payload: {'id': id},
+    // Deletes outright. This used to only flag the row and leave the
+    // actual removal to a sync round-trip that has no endpoint behind
+    // it, so deleted entries came back on the next read.
+    await db.delete(
+      'receipt_layouts',
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
     );
   }
 }

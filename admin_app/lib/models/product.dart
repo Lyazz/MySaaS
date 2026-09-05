@@ -4,7 +4,13 @@ class Product {
   final String slug;
   final String? miniDescription;
   final String? description;
+  final String? searchKeywords;
   final double price;
+  final double? promotionalPrice;
+  final bool isPromotionActive;
+  final DateTime? promotionStartDate;
+  final DateTime? promotionEndDate;
+  final bool showCountdown;
   final int stock;
   final int lowStockThreshold;
   final bool isActive;
@@ -14,6 +20,10 @@ class Product {
   final String? categoryId;
   final List<ProductOption> options;
   final List<ProductVariant> variants;
+  final bool stockAllocationRequired;
+  final String? stockAllocationSourceVariantId;
+  final String? stockAllocationSourceVariantTitle;
+  final StockAllocationBalance? stockAllocationSourceBalance;
 
   Product({
     required this.id,
@@ -21,7 +31,13 @@ class Product {
     required this.slug,
     this.miniDescription,
     this.description,
+    this.searchKeywords,
     required this.price,
+    this.promotionalPrice,
+    this.isPromotionActive = false,
+    this.promotionStartDate,
+    this.promotionEndDate,
+    this.showCountdown = false,
     required this.stock,
     this.lowStockThreshold = 5,
     required this.isActive,
@@ -31,6 +47,10 @@ class Product {
     this.categoryId,
     this.options = const [],
     this.variants = const [],
+    this.stockAllocationRequired = false,
+    this.stockAllocationSourceVariantId,
+    this.stockAllocationSourceVariantTitle,
+    this.stockAllocationSourceBalance,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -52,7 +72,15 @@ class Product {
       slug: json['slug'] ?? '',
       miniDescription: json['miniDescription'],
       description: json['description'],
+      searchKeywords: json['searchKeywords'],
       price: _parseCheckDouble(json['price']),
+      promotionalPrice: json['promotionalPrice'] != null
+          ? _parseCheckDouble(json['promotionalPrice'])
+          : null,
+      isPromotionActive: json['isPromotionActive'] == true,
+      promotionStartDate: _parseCheckDateTime(json['promotionStartDate']),
+      promotionEndDate: _parseCheckDateTime(json['promotionEndDate']),
+      showCountdown: json['showCountdown'] == true,
       stock: _parseCheckInt(json['stock']),
       lowStockThreshold: _parseCheckInt(json['lowStockThreshold']) > 0
           ? _parseCheckInt(json['lowStockThreshold'])
@@ -77,6 +105,16 @@ class Product {
         variants: variants,
         options: options,
       ),
+      stockAllocationRequired: json['stockAllocationRequired'] == true,
+      stockAllocationSourceVariantId: json['stockAllocationSourceVariantId']
+          ?.toString(),
+      stockAllocationSourceVariantTitle:
+          json['stockAllocationSourceVariantTitle']?.toString(),
+      stockAllocationSourceBalance: json['stockAllocationSourceBalance'] is Map
+          ? StockAllocationBalance.fromJson(
+              Map<String, dynamic>.from(json['stockAllocationSourceBalance']),
+            )
+          : null,
     );
   }
 
@@ -86,10 +124,16 @@ class Product {
       'slug': slug,
       'miniDescription': miniDescription,
       'description': description,
+      'searchKeywords': searchKeywords,
       'price': price,
       'stock': stock,
       'lowStockThreshold': lowStockThreshold,
       'isActive': isActive,
+      'isPromotionActive': isPromotionActive,
+      'promotionalPrice': promotionalPrice,
+      'promotionStartDate': promotionStartDate?.toIso8601String(),
+      'promotionEndDate': promotionEndDate?.toIso8601String(),
+      'showCountdown': showCountdown,
       'categoryId': categoryId,
       'images': images, // Simplified for creation
     };
@@ -124,9 +168,15 @@ class ProductImage {
   });
 
   factory ProductImage.fromJson(Map<String, dynamic> json) {
+    final resolvedUrl =
+        json['url']?.toString() ??
+        json['imageUrl']?.toString() ??
+        json['src']?.toString() ??
+        '';
+
     return ProductImage(
       id: json['id'],
-      url: json['url'] ?? '',
+      url: resolvedUrl,
       isMain: json['isMain'] ?? false,
       position: json['position'] ?? 0,
     );
@@ -144,6 +194,9 @@ class Category {
   final String? imageUrl;
   final DateTime? createdAt;
   final int productCount;
+  final String? parentId;
+  final Category? parent;
+  final int subcategoriesCount;
 
   Category({
     required this.id,
@@ -152,6 +205,9 @@ class Category {
     this.imageUrl,
     this.createdAt,
     this.productCount = 0,
+    this.parentId,
+    this.parent,
+    this.subcategoriesCount = 0,
   });
 
   factory Category.fromJson(Map<String, dynamic> json) {
@@ -164,11 +220,19 @@ class Category {
           ? DateTime.tryParse(json['createdAt'].toString())
           : null,
       productCount: json['_count']?['products'] ?? 0,
+      parentId: json['parentId'],
+      parent: json['parent'] != null ? Category.fromJson(json['parent']) : null,
+      subcategoriesCount: json['_count']?['subcategories'] ?? 0,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {'title': title, 'slug': slug, 'imageUrl': imageUrl};
+    return {
+      'title': title,
+      'slug': slug,
+      'imageUrl': imageUrl,
+      if (parentId != null) 'parentId': parentId,
+    };
   }
 }
 
@@ -229,6 +293,11 @@ class ProductVariant {
   final String id;
   final double price;
   final double? compareAtPrice;
+  final double? promotionalPrice;
+  final bool isPromotionActive;
+  final DateTime? promotionStartDate;
+  final DateTime? promotionEndDate;
+  final bool showCountdown;
   final double cost;
   final int stock;
   final String sku;
@@ -238,6 +307,7 @@ class ProductVariant {
   final bool trackInventory;
   final int safetyStock;
   final int reserved;
+  final int? availableStock;
   final List<String> images;
   final List<ProductVariantOptionValue> optionValues;
 
@@ -245,6 +315,11 @@ class ProductVariant {
     required this.id,
     required this.price,
     this.compareAtPrice,
+    this.promotionalPrice,
+    this.isPromotionActive = false,
+    this.promotionStartDate,
+    this.promotionEndDate,
+    this.showCountdown = false,
     required this.cost,
     required this.stock,
     required this.sku,
@@ -254,6 +329,7 @@ class ProductVariant {
     required this.trackInventory,
     required this.safetyStock,
     required this.reserved,
+    this.availableStock,
     this.images = const [],
     this.optionValues = const [],
   });
@@ -265,6 +341,13 @@ class ProductVariant {
       compareAtPrice: json['compareAtPrice'] != null
           ? _parseCheckDouble(json['compareAtPrice'])
           : null,
+      promotionalPrice: json['promotionalPrice'] != null
+          ? _parseCheckDouble(json['promotionalPrice'])
+          : null,
+      isPromotionActive: json['isPromotionActive'] == true,
+      promotionStartDate: _parseCheckDateTime(json['promotionStartDate']),
+      promotionEndDate: _parseCheckDateTime(json['promotionEndDate']),
+      showCountdown: json['showCountdown'] == true,
       cost: _parseCheckDouble(json['cost']),
       stock: _parseCheckInt(json['stock']),
       sku: json['sku']?.toString() ?? '',
@@ -274,11 +357,14 @@ class ProductVariant {
       trackInventory: json['trackInventory'] ?? true,
       safetyStock: _parseCheckInt(json['safetyStock']),
       reserved: _parseCheckInt(json['reserved']),
+      availableStock: json['availableStock'] == null
+          ? null
+          : _parseCheckInt(json['availableStock']),
       images:
           (json['images'] as List?)?.map((e) {
             if (e is String) return e;
             if (e is Map) {
-              return e['url'] as String; // Handle nested image object if any
+              return (e['url'] ?? e['imageUrl'] ?? '').toString();
             }
             return '';
           }).toList() ??
@@ -346,6 +432,11 @@ class ProductVariant {
         id: variant.id,
         price: variant.price,
         compareAtPrice: variant.compareAtPrice,
+        promotionalPrice: variant.promotionalPrice,
+        isPromotionActive: variant.isPromotionActive,
+        promotionStartDate: variant.promotionStartDate,
+        promotionEndDate: variant.promotionEndDate,
+        showCountdown: variant.showCountdown,
         cost: variant.cost,
         stock: variant.stock,
         sku: variant.sku,
@@ -355,6 +446,7 @@ class ProductVariant {
         trackInventory: variant.trackInventory,
         safetyStock: variant.safetyStock,
         reserved: variant.reserved,
+        availableStock: variant.availableStock,
         images: variant.images,
         optionValues: resolvedOptionValues,
       );
@@ -401,4 +493,31 @@ int _parseCheckInt(dynamic value) {
   if (value is int) return value;
   if (value is String) return int.tryParse(value) ?? 0;
   return 0;
+}
+
+DateTime? _parseCheckDateTime(dynamic value) {
+  if (value == null) return null;
+  if (value is DateTime) return value;
+  if (value is String) return DateTime.tryParse(value);
+  return DateTime.tryParse(value.toString());
+}
+
+class StockAllocationBalance {
+  final int stock;
+  final int reserved;
+  final int safetyStock;
+
+  const StockAllocationBalance({
+    required this.stock,
+    required this.reserved,
+    required this.safetyStock,
+  });
+
+  factory StockAllocationBalance.fromJson(Map<String, dynamic> json) {
+    return StockAllocationBalance(
+      stock: _parseCheckInt(json['stock']),
+      reserved: _parseCheckInt(json['reserved']),
+      safetyStock: _parseCheckInt(json['safetyStock']),
+    );
+  }
 }

@@ -10,12 +10,12 @@ useTenantSeo({
 </script>
 
 <template>
-  <div class="max-w-5xl mx-auto px-4 py-12">
-    <h1 class="text-4xl font-wellness font-bold text-slate-900 mb-4">
+  <div class="bg-wl-paper font-wellness text-wl-ink"><div class="max-w-3xl mx-auto px-4 py-16">
+    <h1 class="wl-display text-4xl text-wl-ink mb-5">
       {{ t('storefront.pages.contact.heading', { tenant: tenantName }) }}
     </h1>
-    <p class="text-slate-600 leading-relaxed">
+    <p class="text-wl-muted leading-relaxed">
       {{ t('storefront.pages.contact.placeholder') }}
     </p>
-  </div>
+  </div></div>
 </template>

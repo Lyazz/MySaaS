@@ -4,6 +4,13 @@ const tenant = useState('tenant')
 definePageMeta({
   layout: false
 })
+
+if (!tenant.value) {
+  const auth = useAuthStore()
+  if (auth.isAuthenticated && auth.user) {
+    await navigateTo(auth.user.isSuperAdmin ? '/super-admin' : '/admin')
+  }
+}
 </script>
 
 

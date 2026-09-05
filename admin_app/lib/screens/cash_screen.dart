@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../models/cash.dart';
@@ -9,13 +9,17 @@ import '../models/customer.dart';
 import '../models/supplier.dart';
 import '../providers/cash_provider.dart';
 import '../providers/customers_provider.dart';
+import '../providers/store_settings_provider.dart';
 import '../providers/suppliers_provider.dart';
+import '../theme/app_theme.dart';
 import '../utils/debouncer.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/form/form_input.dart';
 import '../widgets/form/form_select.dart';
 import '../widgets/dialogs/app_dialog.dart';
 import '../widgets/buttons/app_button.dart';
+import '../utils/app_toasts.dart';
 
 class CashScreen extends ConsumerStatefulWidget {
   final bool autoFetch;
@@ -84,7 +88,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     final width = MediaQuery.of(context).size.width;
     final isMobile = width < 768;
 
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
+    final money = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
     final todayStart = _startOfDay(DateTime.now());
 
     double totalIn = 0;
@@ -107,12 +113,14 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     final userById = {for (final u in cash.cashUsers) u.id: u.email};
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
       floatingActionButton: isMobile
           ? FloatingActionButton(
               onPressed: () => _openMobileActions(context),
-              backgroundColor: const Color(0xFF0F766E), // teal-700
-              child: const Icon(LucideIcons.plus, color: Colors.white),
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              child: Icon(
+                LucideIcons.plus,
+                color: Theme.of(context).colorScheme.onPrimary,
+              ),
             )
           : null,
       body: ListView(
@@ -136,6 +144,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           _buildMainPanel(
             context,
             cash: cash,
+            money: money,
             isMobile: isMobile,
             cashboxById: cashboxById,
             userById: userById,
@@ -150,23 +159,28 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        const Expanded(
+        Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Cash',
+                'admin.pages.cash.methods.CASH'.tr(),
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A),
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
-              SizedBox(height: 4),
+              const SizedBox(height: 4),
               Text(
-                'Cashboxes, transactions, and session history.',
-                style: TextStyle(color: Color(0xFF64748B), fontSize: 14),
+                'admin.pages.cash.subtitle'.tr(),
+                style: TextStyle(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  fontSize: 14,
+                ),
               ),
             ],
           ),
@@ -179,13 +193,13 @@ class _CashScreenState extends ConsumerState<CashScreen> {
   Widget _buildDesktopActionsMenu(BuildContext context) {
     return PopupMenuButton<_CashAction>(
       onSelected: (action) => _handleAction(context, action),
-      itemBuilder: (context) => const [
+      itemBuilder: (context) => [
         PopupMenuItem(
           value: _CashAction.customerPayment,
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.user, size: 18),
-            title: Text('New customer payment'),
+            title: Text('admin.pages.cash.actions.newCustomerPayment'.tr()),
           ),
         ),
         PopupMenuItem(
@@ -193,7 +207,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.truck, size: 18),
-            title: Text('New supplier payment'),
+            title: Text('admin.pages.cash.actions.newSupplierPayment'.tr()),
           ),
         ),
         PopupMenuDivider(),
@@ -202,7 +216,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.minusCircle, size: 18),
-            title: Text('New expense'),
+            title: Text('admin.pages.cash.modals.expense.title'.tr()),
           ),
         ),
         PopupMenuItem(
@@ -210,7 +224,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           child: ListTile(
             dense: true,
             leading: Icon(LucideIcons.receipt, size: 18),
-            title: Text('New charge'),
+            title: Text('admin.pages.cash.modals.charge.title'.tr()),
           ),
         ),
         PopupMenuDivider(),
@@ -221,9 +235,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             leading: Icon(
               LucideIcons.arrowLeftRight,
               size: 18,
-              color: Color(0xFF0F766E),
+              color: Color(0xFF4D7C0F),
             ),
-            title: Text('Transfer'),
+            title: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
           ),
         ),
       ],
@@ -232,7 +246,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
         // PopupMenuButton from opening. IgnorePointer lets PopupMenuButton
         // handle taps while keeping the same visual styling.
         child: AppButton.primary(
-          label: 'New action',
+          label: 'admin.pages.cash.actions.newAction'.tr(),
           icon: LucideIcons.plus,
           trailing: const Icon(LucideIcons.chevronDown, size: 18),
           onPressed: null,
@@ -245,7 +259,6 @@ class _CashScreenState extends ConsumerState<CashScreen> {
     showModalBottomSheet<void>(
       context: context,
       showDragHandle: true,
-      backgroundColor: Colors.white,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -255,7 +268,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           children: [
             ListTile(
               leading: const Icon(LucideIcons.user),
-              title: const Text('New customer payment'),
+              title: Text('admin.pages.cash.actions.newCustomerPayment'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.customerPayment);
@@ -263,7 +276,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.truck),
-              title: const Text('New supplier payment'),
+              title: Text('admin.pages.cash.actions.newSupplierPayment'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.supplierPayment);
@@ -272,7 +285,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             const Divider(height: 1),
             ListTile(
               leading: const Icon(LucideIcons.minusCircle),
-              title: const Text('New expense'),
+              title: Text('admin.pages.cash.modals.expense.title'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.expense);
@@ -280,7 +293,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             ),
             ListTile(
               leading: const Icon(LucideIcons.receipt),
-              title: const Text('New charge'),
+              title: Text('admin.pages.cash.modals.charge.title'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.charge);
@@ -290,9 +303,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
             ListTile(
               leading: const Icon(
                 LucideIcons.arrowLeftRight,
-                color: Color(0xFF0F766E),
+                color: Color(0xFF4D7C0F),
               ),
-              title: const Text('Transfer'),
+              title: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
               onTap: () {
                 Navigator.of(ctx).pop();
                 _handleAction(context, _CashAction.transfer);
@@ -330,7 +343,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               icon: LucideIcons.arrowDownLeft,
               iconBg: const Color(0xFFD1FAE5), // emerald-100
               iconColor: const Color(0xFF059669), // emerald-600
-              label: 'Total In (Today)',
+              label: 'admin.pages.cash.stats.totalIn'.tr(),
               value: money.format(totalIn),
               valueColor: const Color(0xFF059669),
             ),
@@ -338,7 +351,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               icon: LucideIcons.arrowUpRight,
               iconBg: const Color(0xFFFFE4E6), // rose-100
               iconColor: const Color(0xFFE11D48), // rose-600
-              label: 'Total Out (Today)',
+              label: 'admin.pages.cash.stats.totalOut'.tr(),
               value: money.format(totalOut),
               valueColor: const Color(0xFFE11D48),
             ),
@@ -346,14 +359,14 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               icon: LucideIcons.wallet,
               iconBg: const Color(0xFFE0E7FF), // indigo-100
               iconColor: const Color(0xFF4F46E5), // indigo-600
-              label: 'Active Sessions',
+              label: 'admin.pages.dashboard.stats.activeSessions'.tr(),
               value: activeSessions.toString(),
             ),
             _CashStatCard(
               icon: LucideIcons.trendingUp,
               iconBg: const Color(0xFFFEF3C7), // amber-100
               iconColor: const Color(0xFFD97706), // amber-600
-              label: 'Net (Today)',
+              label: 'admin.pages.cash.stats.netBalance'.tr(),
               value: money.format(net),
               valueColor: net >= 0
                   ? const Color(0xFF059669)
@@ -377,17 +390,17 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              const Expanded(
+              Expanded(
                 child: Text(
-                  'Cashboxes',
+                  'admin.pages.cash.cashboxes.title'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
               AppButton.secondary(
-                label: 'Create',
+                label: 'admin.pages.users.roles.actions.create'.tr(),
                 icon: LucideIcons.plus,
                 size: AppButtonSize.sm,
                 onPressed: cash.isLoadingCashboxes
@@ -396,7 +409,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               ),
               const SizedBox(width: 12),
               AppButton.secondary(
-                label: 'Refresh',
+                label: 'superAdmin.paymentsPage.actions.refresh'.tr(),
                 icon: LucideIcons.refreshCw,
                 size: AppButtonSize.sm,
                 onPressed: cash.isLoadingCashboxes ? null : _refreshAll,
@@ -415,7 +428,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     height: 132,
                     margin: EdgeInsets.only(right: i == 2 ? 0 : 12),
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF1F5F9),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.surfaceContainerHighest,
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
@@ -423,31 +438,49 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               ),
             )
           else if (cash.cashboxes.isEmpty)
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(
-                  color: const Color(0xFFE2E8F0),
-                  style: BorderStyle.solid,
-                ),
-              ),
-              child: const Column(
-                children: [
-                  Icon(LucideIcons.inbox, color: Color(0xFF94A3B8)),
-                  SizedBox(height: 8),
-                  Text(
-                    'No cashboxes yet',
-                    style: TextStyle(fontWeight: FontWeight.w600),
+            Builder(
+              builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                return Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(14),
+                    border: Border.all(
+                      color: isDark
+                          ? AppColors.surfaceBorder
+                          : AppColors.lightSurfaceBorder,
+                    ),
                   ),
-                  SizedBox(height: 4),
-                  Text(
-                    'Create one to start tracking cash sessions.',
-                    style: TextStyle(color: Color(0xFF64748B)),
+                  child: Column(
+                    children: [
+                      Icon(
+                        LucideIcons.inbox,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.3),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'admin.pages.cash.cashboxes.empty'.tr(),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w600,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'admin.pages.cash.cashboxes.emptyHint'.tr(),
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.5),
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                );
+              },
             )
           else
             SingleChildScrollView(
@@ -481,16 +514,20 @@ class _CashScreenState extends ConsumerState<CashScreen> {
   Widget _buildMainPanel(
     BuildContext context, {
     required CashState cash,
+    required NumberFormat money,
     required bool isMobile,
     required Map<String, CashboxSummary> cashboxById,
     required Map<String, String> userById,
   }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFE2E8F0).withValues(alpha: 0.7),
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
         ),
         boxShadow: [
           BoxShadow(
@@ -505,8 +542,14 @@ class _CashScreenState extends ConsumerState<CashScreen> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            decoration: const BoxDecoration(
-              border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+            decoration: BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: isDark
+                      ? AppColors.surfaceBorder
+                      : AppColors.lightSurfaceBorder,
+                ),
+              ),
             ),
             padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
             child: Row(
@@ -535,6 +578,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           if (_mainTab == 0)
             _TransactionsPanel(
               cash: cash,
+              money: money,
               isMobile: isMobile,
               cashboxById: cashboxById,
               userById: userById,
@@ -560,6 +604,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           else
             _SessionsPanel(
               cash: cash,
+              money: money,
               isMobile: isMobile,
               cashboxById: cashboxById,
               userById: userById,
@@ -744,12 +789,12 @@ class _CashScreenState extends ConsumerState<CashScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocalState) => AppDialog(
-          title: 'Create cashbox',
+          title: 'admin.pages.cash.cashboxes.create'.tr(),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               FormInput(
-                label: 'Name',
+                label: 'superAdmin.tenants.table.name'.tr(),
                 controller: nameController,
                 hint: 'e.g. Main register',
               ),
@@ -757,7 +802,7 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               SwitchListTile(
                 value: isActive,
                 onChanged: (v) => setLocalState(() => isActive = v),
-                title: const Text('Active'),
+                title: Text('superAdmin.tenants.status.active'.tr()),
                 contentPadding: EdgeInsets.zero,
               ),
             ],
@@ -785,16 +830,19 @@ class _CashScreenState extends ConsumerState<CashScreen> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setLocalState) => AppDialog(
-          title: 'Edit cashbox',
+          title: 'admin.pages.cash.edit'.tr(),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              FormInput(label: 'Name', controller: nameController),
+              FormInput(
+                label: 'superAdmin.tenants.table.name'.tr(),
+                controller: nameController,
+              ),
               const SizedBox(height: 16),
               SwitchListTile(
                 value: isActive,
                 onChanged: (v) => setLocalState(() => isActive = v),
-                title: const Text('Active'),
+                title: Text('superAdmin.tenants.status.active'.tr()),
                 contentPadding: EdgeInsets.zero,
               ),
             ],
@@ -832,13 +880,16 @@ class _CashScreenState extends ConsumerState<CashScreen> {
           mainAxisSize: MainAxisSize.min,
           children: [
             FormInput(
-              label: 'Opening float',
+              label: 'admin.pages.cash.sessions.table.openingFloat'.tr(),
               controller: openingController,
               keyboardType: TextInputType.number,
               hint: '0',
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'Note (optional)', controller: noteController),
+            FormInput(
+              label: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+              controller: noteController,
+            ),
           ],
         ),
         secondaryLabel: 'Cancel',
@@ -875,6 +926,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
       text: expected?.expectedClosing.toStringAsFixed(2) ?? '',
     );
     final noteController = TextEditingController();
+    final money = tenantCurrencyFormatter(
+      ref.read(storeSettingsProvider).settings,
+    );
 
     final ok = await showDialog<bool>(
       context: context,
@@ -888,29 +942,30 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF8FAFC),
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFE2E8F0)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Expected closing: ${NumberFormat.simpleCurrency(name: 'DZD').format(expected.expectedClosing)}',
+                      'Expected closing: ${money.format(expected.expectedClosing)}',
                       style: const TextStyle(fontWeight: FontWeight.w800),
                     ),
                     const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Opening',
-                          style: TextStyle(color: Color(0xFF64748B)),
+                        Text(
+                          'app.opening'.tr(),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
                         ),
                         Text(
-                          NumberFormat.simpleCurrency(
-                            name: 'DZD',
-                          ).format(expected.openingFloat),
+                          money.format(expected.openingFloat),
                           style: const TextStyle(fontWeight: FontWeight.w700),
                         ),
                       ],
@@ -919,12 +974,16 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'In',
-                          style: TextStyle(color: Color(0xFF64748B)),
+                        Text(
+                          'admin.pages.cash.directions.in'.tr(),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
                         ),
                         Text(
-                          '+${NumberFormat.simpleCurrency(name: 'DZD').format(expected.inSum)}',
+                          '+${money.format(expected.inSum)}',
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xFF059669),
@@ -936,12 +995,16 @@ class _CashScreenState extends ConsumerState<CashScreen> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text(
-                          'Out',
-                          style: TextStyle(color: Color(0xFF64748B)),
+                        Text(
+                          'admin.pages.cash.directions.out'.tr(),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
+                          ),
                         ),
                         Text(
-                          '-${NumberFormat.simpleCurrency(name: 'DZD').format(expected.outSum)}',
+                          '-${money.format(expected.outSum)}',
                           style: const TextStyle(
                             fontWeight: FontWeight.w700,
                             color: Color(0xFFE11D48),
@@ -954,13 +1017,16 @@ class _CashScreenState extends ConsumerState<CashScreen> {
               ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'Closing count',
+              label: 'admin.pages.cash.closingCount'.tr(),
               controller: closingController,
               keyboardType: TextInputType.number,
               hint: '0',
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'Note (optional)', controller: noteController),
+            FormInput(
+              label: 'admin.pages.sales.refundModal.noteLabel'.tr(),
+              controller: noteController,
+            ),
           ],
         ),
         secondaryLabel: 'Cancel',
@@ -1010,6 +1076,9 @@ class _CashScreenState extends ConsumerState<CashScreen> {
         suppliers: ref.read(suppliersProvider).suppliers,
         initialType: initialType,
         lockType: lockType,
+        initialCurrency: tenantCurrencyCode(
+          ref.read(storeSettingsProvider).settings,
+        ),
       ),
     );
     if (result == null) return;
@@ -1040,8 +1109,12 @@ class _CashScreenState extends ConsumerState<CashScreen> {
 
     final result = await showDialog<_TransferFormResult>(
       context: context,
-      builder: (ctx) =>
-          _TransferDialog(cashboxes: ref.read(cashProvider).cashboxes),
+      builder: (ctx) => _TransferDialog(
+        cashboxes: ref.read(cashProvider).cashboxes,
+        initialCurrency: tenantCurrencyCode(
+          ref.read(storeSettingsProvider).settings,
+        ),
+      ),
     );
     if (result == null) return;
 
@@ -1065,12 +1138,15 @@ class _Card extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFE2E8F0).withValues(alpha: 0.7),
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
         ),
         boxShadow: [
           BoxShadow(
@@ -1113,8 +1189,8 @@ class _ErrorBanner extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'Something went wrong',
+                Text(
+                  'app.something_went_wrong'.tr(),
                   style: TextStyle(
                     fontWeight: FontWeight.w700,
                     color: Color(0xFF991B1B),
@@ -1150,13 +1226,16 @@ class _CashStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: const Color(0xFFE2E8F0).withValues(alpha: 0.7),
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
         ),
         boxShadow: [
           BoxShadow(
@@ -1184,10 +1263,12 @@ class _CashStatCard extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF475569),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -1196,7 +1277,8 @@ class _CashStatCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.w800,
-                    color: valueColor ?? const Color(0xFF0F172A),
+                    color:
+                        valueColor ?? Theme.of(context).colorScheme.onSurface,
                     letterSpacing: -0.5,
                   ),
                 ),
@@ -1227,13 +1309,18 @@ class _CashboxCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final open = cashbox.openSession;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: 280,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1266,9 +1353,9 @@ class _CashboxCard extends StatelessWidget {
                             cashbox.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontWeight: FontWeight.w700,
-                              color: Color(0xFF0F172A),
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ),
@@ -1298,7 +1385,8 @@ class _CashboxCard extends StatelessWidget {
                               fontWeight: FontWeight.w600,
                               color: open != null
                                   ? const Color(0xFF047857)
-                                  : const Color(0xFF475569),
+                                  : Theme.of(context).colorScheme.onSurface
+                                        .withValues(alpha: 0.5),
                             ),
                           ),
                         ),
@@ -1313,21 +1401,25 @@ class _CashboxCard extends StatelessWidget {
                   if (onEdit != null)
                     IconButton(
                       onPressed: onEdit,
-                      icon: const Icon(
+                      icon: Icon(
                         LucideIcons.pencil,
                         size: 18,
-                        color: Color(0xFF94A3B8),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.4),
                       ),
-                      tooltip: 'Edit',
+                      tooltip: 'admin.pages.customers.edit.breadcrumb'.tr(),
                     ),
                   IconButton(
                     onPressed: onDetails,
-                    icon: const Icon(
+                    icon: Icon(
                       LucideIcons.arrowRight,
                       size: 18,
-                      color: Color(0xFF94A3B8),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.4),
                     ),
-                    tooltip: 'Details',
+                    tooltip: 'common.details'.tr(),
                   ),
                 ],
               ),
@@ -1339,14 +1431,16 @@ class _CashboxCard extends StatelessWidget {
               Expanded(
                 child: open == null
                     ? AppButton.primary(
-                        label: 'Open',
+                        label: 'superAdmin.paymentsPage.history.proof.open'
+                            .tr(),
                         icon: LucideIcons.play,
                         size: AppButtonSize.sm,
                         onPressed: onOpen,
                         fullWidth: true,
                       )
                     : AppButton.secondary(
-                        label: 'Close',
+                        label: 'admin.pages.cash.modals.closeSession.confirm'
+                            .tr(),
                         icon: LucideIcons.lock,
                         size: AppButtonSize.sm,
                         onPressed: onClose,
@@ -1355,7 +1449,7 @@ class _CashboxCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               AppButton.secondary(
-                label: 'Details',
+                label: 'common.details'.tr(),
                 size: AppButtonSize.sm,
                 onPressed: onDetails,
               ),
@@ -1388,7 +1482,7 @@ class _TopTabButton extends StatelessWidget {
         decoration: BoxDecoration(
           border: Border(
             bottom: BorderSide(
-              color: selected ? const Color(0xFF0F766E) : Colors.transparent,
+              color: selected ? const Color(0xFF4D7C0F) : Colors.transparent,
               width: 2,
             ),
           ),
@@ -1397,7 +1491,11 @@ class _TopTabButton extends StatelessWidget {
           label,
           style: TextStyle(
             fontWeight: FontWeight.w700,
-            color: selected ? const Color(0xFF0F766E) : const Color(0xFF475569),
+            color: selected
+                ? const Color(0xFF4D7C0F)
+                : Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
           ),
         ),
       ),
@@ -1415,7 +1513,7 @@ class _FilterCountBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
-        color: const Color(0xFFCCFBF1), // teal-100
+        color: const Color(0xFFECFCCB), // lime-100
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
@@ -1423,7 +1521,7 @@ class _FilterCountBadge extends StatelessWidget {
         style: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.w700,
-          color: Color(0xFF0F766E),
+          color: Color(0xFF4D7C0F),
         ),
       ),
     );
@@ -1432,6 +1530,7 @@ class _FilterCountBadge extends StatelessWidget {
 
 class _TransactionsPanel extends StatelessWidget {
   final CashState cash;
+  final NumberFormat money;
   final bool isMobile;
   final Map<String, CashboxSummary> cashboxById;
   final Map<String, String> userById;
@@ -1454,6 +1553,7 @@ class _TransactionsPanel extends StatelessWidget {
 
   const _TransactionsPanel({
     required this.cash,
+    required this.money,
     required this.isMobile,
     required this.cashboxById,
     required this.userById,
@@ -1477,14 +1577,13 @@ class _TransactionsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
     final isCompact = MediaQuery.of(context).size.width < 640;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _FilterPanel(
-          title: 'Filters',
+          title: 'admin.pages.cash.sessions.filters.title'.tr(),
           open: filtersOpen,
           onToggle: onToggleFilters,
           count: activeFiltersCount,
@@ -1507,11 +1606,11 @@ class _TransactionsPanel extends StatelessWidget {
           ),
         ),
         if (cash.isLoadingTransactions)
-          const _LoadingState(label: 'Loading transactions...')
+          _LoadingState(label: 'admin.pages.cash.transactions.loading'.tr())
         else if (cash.transactions.isEmpty)
-          const _EmptyState(
-            title: 'No transactions found',
-            subtitle: 'Try expanding the date range or clearing filters.',
+          _EmptyState(
+            title: 'admin.pages.cash.transactions.empty'.tr(),
+            subtitle: 'admin.pages.cash.transactions.emptyHint'.tr(),
           )
         else if (isCompact)
           ListView.separated(
@@ -1543,6 +1642,7 @@ class _TransactionsPanel extends StatelessWidget {
 
 class _SessionsPanel extends StatelessWidget {
   final CashState cash;
+  final NumberFormat money;
   final bool isMobile;
   final Map<String, CashboxSummary> cashboxById;
   final Map<String, String> userById;
@@ -1561,6 +1661,7 @@ class _SessionsPanel extends StatelessWidget {
 
   const _SessionsPanel({
     required this.cash,
+    required this.money,
     required this.isMobile,
     required this.cashboxById,
     required this.userById,
@@ -1580,14 +1681,13 @@ class _SessionsPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final money = NumberFormat.simpleCurrency(name: 'DZD');
     final isCompact = MediaQuery.of(context).size.width < 640;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         _FilterPanel(
-          title: 'Filters',
+          title: 'admin.pages.cash.sessions.filters.title'.tr(),
           open: filtersOpen,
           onToggle: onToggleFilters,
           count: activeFiltersCount,
@@ -1606,11 +1706,11 @@ class _SessionsPanel extends StatelessWidget {
           ),
         ),
         if (cash.isLoadingSessions)
-          const _LoadingState(label: 'Loading sessions...')
+          _LoadingState(label: 'admin.pages.cash.sessions.loading'.tr())
         else if (cash.sessions.isEmpty)
-          const _EmptyState(
-            title: 'No sessions found',
-            subtitle: 'Try expanding the date range or clearing filters.',
+          _EmptyState(
+            title: 'admin.pages.cash.sessions.empty'.tr(),
+            subtitle: 'admin.pages.cash.transactions.emptyHint'.tr(),
           )
         else if (isCompact)
           ListView.separated(
@@ -1657,9 +1757,16 @@ class _FilterPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(
+            color: isDark
+                ? AppColors.surfaceBorder
+                : AppColors.lightSurfaceBorder,
+          ),
+        ),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       child: Column(
@@ -1673,9 +1780,9 @@ class _FilterPanel extends StatelessWidget {
                     children: [
                       Text(
                         title,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -1686,7 +1793,9 @@ class _FilterPanel extends StatelessWidget {
                 Icon(
                   open ? LucideIcons.chevronUp : LucideIcons.chevronDown,
                   size: 18,
-                  color: const Color(0xFF94A3B8),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.4),
                 ),
               ],
             ),
@@ -1749,11 +1858,14 @@ class _TxFilters extends StatelessWidget {
 
     final fields = [
       FormSelect<String>(
-        label: 'Cashbox',
+        label: 'admin.pages.sales.refundModal.cashboxLabel'.tr(),
         value: txCashboxId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
-          const DropdownMenuItem(value: '', child: Text('All cashboxes')),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.cash.sessions.filters.allCashboxes'.tr()),
+          ),
           ...cashboxes.map(
             (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
           ),
@@ -1761,56 +1873,97 @@ class _TxFilters extends StatelessWidget {
         onChanged: (v) => onCashboxChanged(v ?? ''),
       ),
       FormSelect<String>(
-        label: 'Type',
+        label: 'admin.pages.inventory.movements.table.type'.tr(),
         value: txType,
-        fillColor: const Color(0xFFF8FAFC),
-        items: const [
-          DropdownMenuItem(value: '', child: Text('All types')),
-          DropdownMenuItem(value: 'SALE_PAYMENT', child: Text('SALE_PAYMENT')),
+        fillColor: null,
+        items: [
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.cash.transactions.filters.allTypes'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'SALE_PAYMENT',
+            child: Text('app.sale_payment'.tr()),
+          ),
           DropdownMenuItem(
             value: 'CUSTOMER_PAYMENT',
-            child: Text('CUSTOMER_PAYMENT'),
+            child: Text('app.customer_payment'.tr()),
           ),
           DropdownMenuItem(
             value: 'SUPPLIER_PAYMENT',
-            child: Text('SUPPLIER_PAYMENT'),
+            child: Text('app.supplier_payment'.tr()),
           ),
-          DropdownMenuItem(value: 'EXPENSE', child: Text('EXPENSE')),
-          DropdownMenuItem(value: 'CHARGE', child: Text('CHARGE')),
-          DropdownMenuItem(value: 'TRANSFER', child: Text('TRANSFER')),
+          DropdownMenuItem(
+            value: 'EXPENSE',
+            child: Text('admin.pages.cash.transactions.types.EXPENSE'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'CHARGE',
+            child: Text('admin.pages.cash.transactions.types.CHARGE'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'TRANSFER',
+            child: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
+          ),
         ],
         onChanged: (v) => onTypeChanged(v ?? ''),
       ),
       FormSelect<String>(
-        label: 'Direction',
+        label: 'app.direction'.tr(),
         value: txDirection,
-        fillColor: const Color(0xFFF8FAFC),
-        items: const [
-          DropdownMenuItem(value: '', child: Text('All directions')),
-          DropdownMenuItem(value: 'IN', child: Text('IN')),
-          DropdownMenuItem(value: 'OUT', child: Text('OUT')),
+        fillColor: null,
+        items: [
+          DropdownMenuItem(value: '', child: Text('app.all_directions'.tr())),
+          DropdownMenuItem(
+            value: 'IN',
+            child: Text('admin.pages.cash.directions.in'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'OUT',
+            child: Text('admin.pages.cash.directions.out'.tr()),
+          ),
         ],
         onChanged: (v) => onDirectionChanged(v ?? ''),
       ),
       FormSelect<String>(
-        label: 'Method',
+        label: 'superAdmin.paymentsPage.history.table.method'.tr(),
         value: txMethod,
-        fillColor: const Color(0xFFF8FAFC),
-        items: const [
-          DropdownMenuItem(value: '', child: Text('All methods')),
-          DropdownMenuItem(value: 'CASH', child: Text('CASH')),
-          DropdownMenuItem(value: 'CARD', child: Text('CARD')),
-          DropdownMenuItem(value: 'TRANSFER', child: Text('TRANSFER')),
-          DropdownMenuItem(value: 'OTHER', child: Text('OTHER')),
+        fillColor: null,
+        items: [
+          DropdownMenuItem(
+            value: '',
+            child: Text(
+              'admin.pages.cash.transactions.filters.allMethods'.tr(),
+            ),
+          ),
+          DropdownMenuItem(
+            value: 'CASH',
+            child: Text('admin.pages.cash.methods.CASH'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'CARD',
+            child: Text('admin.pages.cash.methods.CARD'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'TRANSFER',
+            child: Text('admin.pages.cash.transactions.types.TRANSFER'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'OTHER',
+            child: Text('admin.pages.cash.methods.OTHER'.tr()),
+          ),
         ],
         onChanged: (v) => onMethodChanged(v ?? ''),
       ),
       FormSelect<String>(
-        label: 'User',
+        label: 'admin.pages.sales.index.table.user'.tr(),
         value: txUserId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
-          const DropdownMenuItem(value: '', child: Text('All users')),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.sales.index.filters.allUsers'.tr()),
+          ),
           ...users.map(
             (u) => DropdownMenuItem(value: u.id, child: Text(u.email)),
           ),
@@ -1844,7 +1997,7 @@ class _TxFilters extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             AppButton.secondary(
-              label: 'Reset',
+              label: 'admin.common.reset'.tr(),
               icon: LucideIcons.rotateCcw,
               size: AppButtonSize.sm,
               onPressed: onReset,
@@ -1889,11 +2042,14 @@ class _SessionFilters extends StatelessWidget {
 
     final fields = [
       FormSelect<String>(
-        label: 'Cashbox',
+        label: 'admin.pages.sales.refundModal.cashboxLabel'.tr(),
         value: cashboxId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
-          const DropdownMenuItem(value: '', child: Text('All cashboxes')),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.cash.sessions.filters.allCashboxes'.tr()),
+          ),
           ...cashboxes.map(
             (c) => DropdownMenuItem(value: c.id, child: Text(c.name)),
           ),
@@ -1901,22 +2057,34 @@ class _SessionFilters extends StatelessWidget {
         onChanged: (v) => onCashboxChanged(v ?? ''),
       ),
       FormSelect<String>(
-        label: 'Status',
+        label: 'superAdmin.paymentsPage.history.table.status'.tr(),
         value: status,
-        fillColor: const Color(0xFFF8FAFC),
-        items: const [
-          DropdownMenuItem(value: '', child: Text('All statuses')),
-          DropdownMenuItem(value: 'OPEN', child: Text('OPEN')),
-          DropdownMenuItem(value: 'CLOSED', child: Text('CLOSED')),
+        fillColor: null,
+        items: [
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.purchases.index.filters.allStatuses'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'OPEN',
+            child: Text('superAdmin.paymentsPage.history.proof.open'.tr()),
+          ),
+          DropdownMenuItem(
+            value: 'CLOSED',
+            child: Text('admin.pages.cash.status.CLOSED'.tr()),
+          ),
         ],
         onChanged: (v) => onStatusChanged(v ?? ''),
       ),
       FormSelect<String>(
-        label: 'User',
+        label: 'admin.pages.sales.index.table.user'.tr(),
         value: userId,
-        fillColor: const Color(0xFFF8FAFC),
+        fillColor: null,
         items: [
-          const DropdownMenuItem(value: '', child: Text('All users')),
+          DropdownMenuItem(
+            value: '',
+            child: Text('admin.pages.sales.index.filters.allUsers'.tr()),
+          ),
           ...users.map(
             (u) => DropdownMenuItem(value: u.id, child: Text(u.email)),
           ),
@@ -1950,7 +2118,7 @@ class _SessionFilters extends StatelessWidget {
             ),
             const SizedBox(width: 12),
             AppButton.secondary(
-              label: 'Reset',
+              label: 'admin.common.reset'.tr(),
               icon: LucideIcons.rotateCcw,
               size: AppButtonSize.sm,
               onPressed: onReset,
@@ -1978,7 +2146,14 @@ class _LoadingState extends StatelessWidget {
           const SizedBox(height: 12),
           const CircularProgressIndicator(),
           const SizedBox(height: 12),
-          Text(label, style: const TextStyle(color: Color(0xFF64748B))),
+          Text(
+            label,
+            style: TextStyle(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
         ],
       ),
     );
@@ -1997,17 +2172,30 @@ class _EmptyState extends StatelessWidget {
       padding: const EdgeInsets.all(32),
       child: Column(
         children: [
-          const Icon(LucideIcons.inbox, size: 40, color: Color(0xFFCBD5E1)),
+          Icon(
+            LucideIcons.inbox,
+            size: 40,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.2),
+          ),
           const SizedBox(height: 10),
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           const SizedBox(height: 4),
-          Text(subtitle, style: const TextStyle(color: Color(0xFF64748B))),
+          Text(
+            subtitle,
+            style: TextStyle(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
         ],
       ),
     );
@@ -2040,25 +2228,29 @@ class _TxMobileRow extends StatelessWidget {
               children: [
                 Text(
                   _typeLabel(tx.type),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   _formatDate(tx.createdAt),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   '$cashboxName · $userEmail',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF475569),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
                 const SizedBox(height: 8),
@@ -2122,9 +2314,9 @@ class _SessionMobileRow extends StatelessWidget {
                     Expanded(
                       child: Text(
                         cashboxName,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -2136,9 +2328,11 @@ class _SessionMobileRow extends StatelessWidget {
                 const SizedBox(height: 6),
                 Text(
                   '$userEmail · ${_formatDate(session.openedAt)}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
-                    color: Color(0xFF64748B),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                   ),
                 ),
                 if (session.closedAt != null)
@@ -2146,9 +2340,11 @@ class _SessionMobileRow extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 4),
                     child: Text(
                       'Closed: ${_formatDate(session.closedAt)}',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: Color(0xFF64748B),
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                     ),
                   ),
@@ -2158,23 +2354,24 @@ class _SessionMobileRow extends StatelessWidget {
                   runSpacing: 6,
                   children: [
                     _Metric(
-                      label: 'Opening',
+                      label: 'app.opening'.tr(),
                       value: money.format(session.openingFloat),
                     ),
                     _Metric(
-                      label: 'Expected',
+                      label: 'admin.pages.cash.sessions.table.expectedClosing'
+                          .tr(),
                       value: session.expectedClosing == null
                           ? '—'
                           : money.format(session.expectedClosing!),
                     ),
                     _Metric(
-                      label: 'Closing',
+                      label: 'app.closing'.tr(),
                       value: session.closingCount == null
                           ? '—'
                           : money.format(session.closingCount!),
                     ),
                     _Metric(
-                      label: 'Diff',
+                      label: 'app.diff'.tr(),
                       value: session.difference == null
                           ? '—'
                           : money.format(session.difference!),
@@ -2209,9 +2406,11 @@ class _Metric extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 11,
-            color: Color(0xFF94A3B8),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.4),
             fontWeight: FontWeight.w700,
           ),
         ),
@@ -2221,7 +2420,7 @@ class _Metric extends StatelessWidget {
           style: TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: valueColor ?? const Color(0xFF0F172A),
+            color: valueColor ?? Theme.of(context).colorScheme.onSurface,
           ),
         ),
       ],
@@ -2236,18 +2435,23 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8FAFC),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Text(
         text,
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
-          color: Color(0xFF475569),
+          color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -2274,20 +2478,28 @@ class _MethodChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1F5F9),
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(10),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 14, color: const Color(0xFF334155)),
+          Icon(
+            icon,
+            size: 14,
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
           const SizedBox(width: 6),
           Text(
             method,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF334155),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.7),
             ),
           ),
         ],
@@ -2307,7 +2519,9 @@ class _StatusChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: isOpen ? const Color(0xFFECFDF5) : const Color(0xFFF1F5F9),
+        color: isOpen
+            ? const Color(0xFF10B981).withValues(alpha: 0.1)
+            : Theme.of(context).colorScheme.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -2317,7 +2531,11 @@ class _StatusChip extends StatelessWidget {
             width: 6,
             height: 6,
             decoration: BoxDecoration(
-              color: isOpen ? const Color(0xFF10B981) : const Color(0xFF64748B),
+              color: isOpen
+                  ? const Color(0xFF10B981)
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.4),
               shape: BoxShape.circle,
             ),
           ),
@@ -2327,7 +2545,11 @@ class _StatusChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w700,
-              color: isOpen ? const Color(0xFF047857) : const Color(0xFF334155),
+              color: isOpen
+                  ? const Color(0xFF047857)
+                  : Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
             ),
           ),
         ],
@@ -2349,15 +2571,15 @@ class _TxTable extends StatelessWidget {
     required this.money,
   });
 
-  static const TextStyle _headerStyle = TextStyle(
-    fontWeight: FontWeight.w600,
-    fontSize: 11,
-    color: Color(0xFF64748B), // Slate-500
-    letterSpacing: 0.5,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerStyle = TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 11,
+      color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+      letterSpacing: 0.5,
+    );
     return ResponsivePaginatedTable<CashTransactionSummary>(
       items: transactions,
       minWidth: 980,
@@ -2368,35 +2590,35 @@ class _TxTable extends StatelessWidget {
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.date'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.cashbox'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.user'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 3,
             child: Text(
               'admin.pages.cash.transactions.table.type'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.transactions.table.method'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
@@ -2405,7 +2627,7 @@ class _TxTable extends StatelessWidget {
               alignment: Alignment.centerRight,
               child: Text(
                 'admin.pages.cash.transactions.table.amount'.tr().toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2413,23 +2635,28 @@ class _TxTable extends StatelessWidget {
       ),
       rowBuilder: (context, tx, index) {
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
                 flex: 2,
                 child: Text(
                   _formatDate(tx.createdAt),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(
                   _cashboxName(cashboxById, tx.cashboxId),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2438,7 +2665,11 @@ class _TxTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _userEmail(userById, tx.createdByUserId),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -2449,9 +2680,10 @@ class _TxTable extends StatelessWidget {
                   children: [
                     Text(
                       _typeLabel(tx.type),
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.w700,
-                        color: Color(0xFF0F172A),
+                        fontSize: 13,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (tx.expenseCategory != null &&
@@ -2460,9 +2692,11 @@ class _TxTable extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
                           tx.expenseCategory!,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -2472,9 +2706,11 @@ class _TxTable extends StatelessWidget {
                         padding: const EdgeInsets.only(top: 2),
                         child: Text(
                           'Ref: ${tx.reference!}',
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 12,
-                            color: Color(0xFF64748B),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                           ),
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -2491,6 +2727,7 @@ class _TxTable extends StatelessWidget {
                     '${tx.direction == 'IN' ? '+' : '-'}${money.format(tx.amount)}',
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
+                      fontSize: 13,
                       color: tx.direction == 'IN'
                           ? const Color(0xFF059669)
                           : const Color(0xFFE11D48),
@@ -2519,15 +2756,15 @@ class _SessionsTable extends StatelessWidget {
     required this.money,
   });
 
-  static const TextStyle _headerStyle = TextStyle(
-    fontWeight: FontWeight.w600,
-    fontSize: 11,
-    color: Color(0xFF64748B), // Slate-500
-    letterSpacing: 0.5,
-  );
-
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final headerStyle = TextStyle(
+      fontWeight: FontWeight.w600,
+      fontSize: 11,
+      color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+      letterSpacing: 0.5,
+    );
     return ResponsivePaginatedTable<CashSessionSummary>(
       items: sessions,
       minWidth: 1080,
@@ -2538,35 +2775,35 @@ class _SessionsTable extends StatelessWidget {
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.cashbox'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.status'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.user'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.openedAt'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
             flex: 2,
             child: Text(
               'admin.pages.cash.sessions.table.closedAt'.tr().toUpperCase(),
-              style: _headerStyle,
+              style: headerStyle,
             ),
           ),
           Expanded(
@@ -2577,7 +2814,7 @@ class _SessionsTable extends StatelessWidget {
                 'admin.pages.cash.sessions.table.openingFloat'
                     .tr()
                     .toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2589,7 +2826,7 @@ class _SessionsTable extends StatelessWidget {
                 'admin.pages.cash.sessions.table.expectedClosing'
                     .tr()
                     .toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2601,7 +2838,7 @@ class _SessionsTable extends StatelessWidget {
                 'admin.pages.cash.sessions.table.closingCount'
                     .tr()
                     .toUpperCase(),
-                style: _headerStyle,
+                style: headerStyle,
               ),
             ),
           ),
@@ -2610,10 +2847,8 @@ class _SessionsTable extends StatelessWidget {
             child: Align(
               alignment: Alignment.centerRight,
               child: Text(
-                'admin.pages.cash.sessions.table.difference'
-                    .tr()
-                    .toUpperCase(),
-                style: _headerStyle,
+                'admin.pages.cash.sessions.table.difference'.tr().toUpperCase(),
+                style: headerStyle,
               ),
             ),
           ),
@@ -2622,16 +2857,17 @@ class _SessionsTable extends StatelessWidget {
       rowBuilder: (context, s, index) {
         final diff = s.difference;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
                 flex: 2,
                 child: Text(
                   _cashboxName(cashboxById, s.cashboxId),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF0F172A),
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -2641,7 +2877,11 @@ class _SessionsTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _userEmail(userById, s.openedByUserId),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -2649,14 +2889,22 @@ class _SessionsTable extends StatelessWidget {
                 flex: 2,
                 child: Text(
                   _formatDate(s.openedAt),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(
                   s.closedAt == null ? '—' : _formatDate(s.closedAt),
-                  style: const TextStyle(color: Color(0xFF64748B)),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                  ),
                 ),
               ),
               Expanded(
@@ -2665,9 +2913,10 @@ class _SessionsTable extends StatelessWidget {
                   alignment: Alignment.centerRight,
                   child: Text(
                     money.format(s.openingFloat),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2680,9 +2929,10 @@ class _SessionsTable extends StatelessWidget {
                     s.expectedClosing == null
                         ? '—'
                         : money.format(s.expectedClosing!),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2695,9 +2945,10 @@ class _SessionsTable extends StatelessWidget {
                     s.closingCount == null
                         ? '—'
                         : money.format(s.closingCount!),
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w700,
-                      color: Color(0xFF0F172A),
+                      fontSize: 13,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2710,9 +2961,10 @@ class _SessionsTable extends StatelessWidget {
                     diff == null ? '—' : money.format(diff),
                     style: TextStyle(
                       fontWeight: FontWeight.w800,
+                      fontSize: 13,
                       color: diff != null && diff != 0
                           ? const Color(0xFFE11D48)
-                          : const Color(0xFF0F172A),
+                          : Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                 ),
@@ -2795,12 +3047,14 @@ class _TransactionDialog extends StatefulWidget {
   final List<Customer> customers;
   final List<Supplier> suppliers;
   final String initialType;
+  final String initialCurrency;
   final bool lockType;
 
   const _TransactionDialog({
     required this.cashboxes,
     required this.customers,
     required this.suppliers,
+    required this.initialCurrency,
     this.initialType = 'EXPENSE',
     this.lockType = false,
   });
@@ -2817,7 +3071,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
   String _direction = 'OUT';
   String _method = 'CASH';
   final _amount = TextEditingController();
-  final _currency = TextEditingController(text: 'DZD');
+  late final TextEditingController _currency;
   final _reference = TextEditingController();
   final _note = TextEditingController();
   String? _customerId;
@@ -2829,6 +3083,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
   @override
   void initState() {
     super.initState();
+    _currency = TextEditingController(text: widget.initialCurrency);
     _applyType(widget.initialType);
   }
 
@@ -2900,21 +3155,20 @@ class _TransactionDialogState extends State<_TransactionDialog> {
 
     return AppDialog(
       title: _dialogTitle(),
-      description:
-          'Record a transaction (expense, charge, or customer/supplier payment).',
+      description: 'app.record_a_transaction_expense_c'.tr(),
       maxWidth: 760,
       content: Form(
         key: _formKey,
         child: Column(
           children: [
             FormSelect<String>(
-              label: 'Cashbox',
+              label: 'admin.pages.sales.refundModal.cashboxLabel'.tr(),
               value: _cashboxId,
               items: [
-                const DropdownMenuItem(
+                DropdownMenuItem(
                   value: null,
                   enabled: false,
-                  child: Text('Select cashbox'),
+                  child: Text('app.select_cashbox'.tr()),
                 ),
                 ...widget.cashboxes.map(
                   (c) => DropdownMenuItem(
@@ -2931,45 +3185,71 @@ class _TransactionDialogState extends State<_TransactionDialog> {
               onChanged: (v) => setState(() => _cashboxId = v),
               validator: (v) => v == null ? 'Cashbox required' : null,
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             if (!widget.lockType)
               FormSelect<String>(
-                label: 'Type',
+                label: 'admin.pages.inventory.movements.table.type'.tr(),
                 value: _type,
-                items: const [
-                  DropdownMenuItem(value: 'EXPENSE', child: Text('EXPENSE')),
-                  DropdownMenuItem(value: 'CHARGE', child: Text('CHARGE')),
+                items: [
+                  DropdownMenuItem(
+                    value: 'EXPENSE',
+                    child: Text(
+                      'admin.pages.cash.transactions.types.EXPENSE'.tr(),
+                    ),
+                  ),
+                  DropdownMenuItem(
+                    value: 'CHARGE',
+                    child: Text(
+                      'admin.pages.cash.transactions.types.CHARGE'.tr(),
+                    ),
+                  ),
                   DropdownMenuItem(
                     value: 'CUSTOMER_PAYMENT',
-                    child: Text('CUSTOMER_PAYMENT'),
+                    child: Text('app.customer_payment'.tr()),
                   ),
                   DropdownMenuItem(
                     value: 'SUPPLIER_PAYMENT',
-                    child: Text('SUPPLIER_PAYMENT'),
+                    child: Text('app.supplier_payment'.tr()),
                   ),
                 ],
                 onChanged: (v) => _applyType(v ?? 'EXPENSE'),
               )
             else
               InputDecorator(
-                decoration: const InputDecoration(labelText: 'Type'),
+                decoration: InputDecoration(
+                  labelText: 'admin.pages.inventory.movements.table.type'.tr(),
+                ),
                 child: Align(
                   alignment: Alignment.centerLeft,
                   child: Text(
                     _type,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
+                    style: TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16),
             FormSelect<String>(
-              label: 'Method',
+              label: 'superAdmin.paymentsPage.history.table.method'.tr(),
               value: _method,
-              items: const [
-                DropdownMenuItem(value: 'CASH', child: Text('CASH')),
-                DropdownMenuItem(value: 'CARD', child: Text('CARD')),
-                DropdownMenuItem(value: 'TRANSFER', child: Text('TRANSFER')),
-                DropdownMenuItem(value: 'OTHER', child: Text('OTHER')),
+              items: [
+                DropdownMenuItem(
+                  value: 'CASH',
+                  child: Text('admin.pages.cash.methods.CASH'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'CARD',
+                  child: Text('admin.pages.cash.methods.CARD'.tr()),
+                ),
+                DropdownMenuItem(
+                  value: 'TRANSFER',
+                  child: Text(
+                    'admin.pages.cash.transactions.types.TRANSFER'.tr(),
+                  ),
+                ),
+                DropdownMenuItem(
+                  value: 'OTHER',
+                  child: Text('admin.pages.cash.methods.OTHER'.tr()),
+                ),
               ],
               onChanged: (v) => setState(() => _method = v ?? 'CASH'),
             ),
@@ -2978,7 +3258,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
               children: [
                 Expanded(
                   child: FormInput(
-                    label: 'Amount',
+                    label: 'superAdmin.paymentsPage.history.table.amount'.tr(),
                     controller: _amount,
                     keyboardType: TextInputType.number,
                     validator: (v) {
@@ -2993,27 +3273,30 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                 const SizedBox(width: 16),
                 SizedBox(
                   width: 110,
-                  child: FormInput(label: 'Currency', controller: _currency),
+                  child: FormInput(
+                    label: 'admin.settingsHub.links.currency'.tr(),
+                    controller: _currency,
+                  ),
                 ),
               ],
             ),
             if (isCustomer) ...[
               const SizedBox(height: 16),
               FormInput(
-                label: 'Client',
+                label: 'admin.pages.sales.detail.sections.client'.tr(),
                 controller: _customerSearch,
                 hint: 'Search a customer by name or phone…',
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 12),
               FormSelect<String>(
-                label: 'Customer',
+                label: 'admin.pages.sales.index.table.customer'.tr(),
                 value: _customerId,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
                     enabled: false,
-                    child: Text('Select customer'),
+                    child: Text('app.select_customer'.tr()),
                   ),
                   ...filteredCustomers.map(
                     (c) => DropdownMenuItem(
@@ -3026,12 +3309,12 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                 validator: (v) => v == null ? 'Customer required' : null,
               ),
               if (filteredCustomers.isEmpty)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'No customers match your search.',
+                      'app.no_customers_match_your_search'.tr(),
                       style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                     ),
                   ),
@@ -3040,20 +3323,22 @@ class _TransactionDialogState extends State<_TransactionDialog> {
             if (isSupplier) ...[
               const SizedBox(height: 16),
               FormInput(
-                label: 'Supplier',
+                label: 'admin.pages.purchases.detail.cards.supplier'.tr(),
                 controller: _supplierSearch,
                 hint: 'Search a supplier by name…',
                 onChanged: (_) => setState(() {}),
               ),
               const SizedBox(height: 12),
               FormSelect<String>(
-                label: 'Supplier',
+                label: 'admin.pages.purchases.detail.cards.supplier'.tr(),
                 value: _supplierId,
                 items: [
-                  const DropdownMenuItem(
+                  DropdownMenuItem(
                     value: null,
                     enabled: false,
-                    child: Text('Select supplier'),
+                    child: Text(
+                      'admin.pages.purchases.create.supplier.label'.tr(),
+                    ),
                   ),
                   ...filteredSuppliers.map(
                     (s) => DropdownMenuItem(value: s.id, child: Text(s.name)),
@@ -3063,12 +3348,12 @@ class _TransactionDialogState extends State<_TransactionDialog> {
                 validator: (v) => v == null ? 'Supplier required' : null,
               ),
               if (filteredSuppliers.isEmpty)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 8),
                   child: Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      'No suppliers match your search.',
+                      'admin.pages.suppliers.index.empty.hintFiltered'.tr(),
                       style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                     ),
                   ),
@@ -3077,7 +3362,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
             if (isCategory) ...[
               const SizedBox(height: 16),
               FormInput(
-                label: 'Category',
+                label: 'admin.pages.categories.index.table.category'.tr(),
                 controller: _category,
                 validator: (v) {
                   if (!isCategory) return null;
@@ -3088,12 +3373,17 @@ class _TransactionDialogState extends State<_TransactionDialog> {
             ],
             const SizedBox(height: 16),
             FormInput(
-              label: 'Reference',
+              label: 'admin.pages.purchases.detail.paymentModal.referenceLabel'
+                  .tr(),
               hint: 'Optional',
               controller: _reference,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'Note', hint: 'Optional', controller: _note),
+            FormInput(
+              label: 'admin.pages.purchases.detail.paymentModal.noteLabel'.tr(),
+              hint: 'Optional',
+              controller: _note,
+            ),
             const SizedBox(height: 6),
             Align(
               alignment: Alignment.centerLeft,
@@ -3118,7 +3408,7 @@ class _TransactionDialogState extends State<_TransactionDialog> {
             direction: _direction,
             amount: amount,
             currency: _currency.text.trim().isEmpty
-                ? 'DZD'
+                ? widget.initialCurrency
                 : _currency.text.trim(),
             method: _method,
             customerId: isCustomer ? _customerId : null,
@@ -3155,8 +3445,12 @@ class _TransferFormResult {
 
 class _TransferDialog extends StatefulWidget {
   final List<CashboxSummary> cashboxes;
+  final String initialCurrency;
 
-  const _TransferDialog({required this.cashboxes});
+  const _TransferDialog({
+    required this.cashboxes,
+    required this.initialCurrency,
+  });
 
   @override
   State<_TransferDialog> createState() => _TransferDialogState();
@@ -3167,9 +3461,15 @@ class _TransferDialogState extends State<_TransferDialog> {
   String? _from;
   String? _to;
   final _amount = TextEditingController();
-  final _currency = TextEditingController(text: 'DZD');
+  late final TextEditingController _currency;
   final _reference = TextEditingController();
   final _note = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    _currency = TextEditingController(text: widget.initialCurrency);
+  }
 
   @override
   void dispose() {
@@ -3183,8 +3483,8 @@ class _TransferDialogState extends State<_TransferDialog> {
   @override
   Widget build(BuildContext context) {
     return AppDialog(
-      title: 'Transfer between cashboxes',
-      description: 'Move funds between two open cashbox sessions.',
+      title: 'admin.pages.cash.transfer'.tr(),
+      description: 'app.move_funds_between_two_open_ca'.tr(),
       maxWidth: 700,
       content: Form(
         key: _formKey,
@@ -3192,7 +3492,7 @@ class _TransferDialogState extends State<_TransferDialog> {
           mainAxisSize: MainAxisSize.min,
           children: [
             FormSelect<String>(
-              label: 'From',
+              label: 'admin.pages.cash.modals.transfer.fromLabel'.tr(),
               value: _from,
               items: widget.cashboxes
                   .map(
@@ -3212,7 +3512,7 @@ class _TransferDialogState extends State<_TransferDialog> {
             ),
             const SizedBox(height: 16),
             FormSelect<String>(
-              label: 'To',
+              label: 'admin.pages.cash.modals.transfer.toLabel'.tr(),
               value: _to,
               items: widget.cashboxes
                   .map(
@@ -3241,7 +3541,7 @@ class _TransferDialogState extends State<_TransferDialog> {
               children: [
                 Expanded(
                   child: FormInput(
-                    label: 'Amount',
+                    label: 'superAdmin.paymentsPage.history.table.amount'.tr(),
                     controller: _amount,
                     keyboardType: TextInputType.number,
                     validator: (v) {
@@ -3256,23 +3556,31 @@ class _TransferDialogState extends State<_TransferDialog> {
                 const SizedBox(width: 16),
                 SizedBox(
                   width: 110,
-                  child: FormInput(label: 'Currency', controller: _currency),
+                  child: FormInput(
+                    label: 'admin.settingsHub.links.currency'.tr(),
+                    controller: _currency,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             FormInput(
-              label: 'Reference',
+              label: 'admin.pages.purchases.detail.paymentModal.referenceLabel'
+                  .tr(),
               hint: 'Optional',
               controller: _reference,
             ),
             const SizedBox(height: 16),
-            FormInput(label: 'Note', hint: 'Optional', controller: _note),
+            FormInput(
+              label: 'admin.pages.purchases.detail.paymentModal.noteLabel'.tr(),
+              hint: 'Optional',
+              controller: _note,
+            ),
             const SizedBox(height: 6),
-            const Align(
+            Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                'Note: both cashboxes must have an OPEN session.',
+                'app.note_both_cashboxes_must_have'.tr(),
                 style: TextStyle(fontSize: 12, color: Color(0xFF64748B)),
               ),
             ),
@@ -3285,9 +3593,7 @@ class _TransferDialogState extends State<_TransferDialog> {
       onPrimary: () {
         if (!_formKey.currentState!.validate()) return;
         if (_from == _to) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('From and To must differ')),
-          );
+          AppToasts.show(context, 'app.from_and_to_must_differ'.tr());
           return;
         }
         final amount = double.tryParse(_amount.text.trim()) ?? 0;
@@ -3297,7 +3603,7 @@ class _TransferDialogState extends State<_TransferDialog> {
             toCashboxId: _to!,
             amount: amount,
             currency: _currency.text.trim().isEmpty
-                ? 'DZD'
+                ? widget.initialCurrency
                 : _currency.text.trim(),
             reference: _reference.text.trim().isEmpty
                 ? null

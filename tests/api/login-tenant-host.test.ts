@@ -15,8 +15,8 @@ describe('Login on tenant host (custom domain / subdomain)', () => {
 
     beforeAll(async () => {
         const [tenantA, tenantB] = await Promise.all([
-            prisma.tenant.create({ data: { name: 'Login A', slug: slugA } }),
-            prisma.tenant.create({ data: { name: 'Login B', slug: slugB } })
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Login A', slug: slugA } }),
+            prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Login B', slug: slugB } })
         ])
         tenantAId = tenantA.id
         tenantBId = tenantB.id

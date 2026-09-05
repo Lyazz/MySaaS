@@ -1,90 +1,75 @@
 <template>
   <div class="space-y-6">
-      <!-- Header -->
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h1 class="text-2xl font-bold text-slate-800">{{ t('superAdmin.pendingPayments.title', 'Pending Payments') }}</h1>
-          <p class="text-slate-500 mt-1 text-sm">{{ t('superAdmin.pendingPayments.subtitle', 'Review and approve or reject payment proofs submitted by tenants.') }}</p>
-        </div>
-        <button
-          class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-700 text-sm transition-colors"
-          :disabled="loading"
-          @click="load"
-        >
-          <Icon name="lucide:refresh-cw" class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
-          {{ t('superAdmin.paymentsPage.actions.refresh', 'Refresh') }}
-        </button>
-      </div>
+      <SuperAdminPageHeader
+        :title="t('superAdmin.pendingPayments.title', 'Pending Payments')"
+        :subtitle="t('superAdmin.pendingPayments.subtitle', 'Review and approve or reject payment proofs submitted by tenants.')"
+      >
+        <template #actions>
+          <button
+            class="ui-btn ui-btn--secondary ui-btn--md"
+            :disabled="loading"
+            @click="load"
+          >
+            <Icon name="lucide:refresh-cw" class="h-4 w-4" :class="loading ? 'animate-spin' : ''" />
+            {{ t('superAdmin.paymentsPage.actions.refresh', 'Refresh') }}
+          </button>
+        </template>
+      </SuperAdminPageHeader>
 
       <!-- Error -->
-      <div v-if="error" class="p-4 bg-red-50 border border-red-100 rounded-xl text-red-700 text-sm flex items-center gap-2">
+      <div v-if="error" class="p-4 rounded-xl text-sm flex items-center gap-2" style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2); color: #f87171">
         <Icon name="lucide:alert-circle" class="h-4 w-4 shrink-0" />
         {{ error }}
       </div>
 
       <!-- Stats bar -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center gap-4">
-          <div class="w-10 h-10 rounded-lg bg-amber-50 flex items-center justify-center">
-            <Icon name="lucide:clock" class="h-5 w-5 text-amber-500" />
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-slate-900">{{ payments.length }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ t('superAdmin.pendingPayments.stats.pending', 'Pending proofs') }}</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center gap-4">
-          <div class="w-10 h-10 rounded-lg bg-teal-50 flex items-center justify-center">
-            <Icon name="lucide:building-2" class="h-5 w-5 text-teal-600" />
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-slate-900">{{ uniqueTenantCount }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ t('superAdmin.pendingPayments.stats.tenants', 'Tenants waiting') }}</div>
-          </div>
-        </div>
-
-        <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm flex items-center gap-4">
-          <div class="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-            <Icon name="lucide:banknote" class="h-5 w-5 text-slate-500" />
-          </div>
-          <div>
-            <div class="text-2xl font-bold text-slate-900">{{ formatMoney(totalAmount) }}</div>
-            <div class="text-xs text-slate-500 mt-0.5">{{ t('superAdmin.pendingPayments.stats.total', 'Total value') }}</div>
-          </div>
-        </div>
+        <StatsCard
+          icon="lucide:clock"
+          color="amber"
+          :label="t('superAdmin.pendingPayments.stats.pending', 'Pending proofs')"
+          :value="payments.length"
+        />
+        <StatsCard
+          icon="lucide:building-2"
+          color="lime"
+          :label="t('superAdmin.pendingPayments.stats.tenants', 'Tenants waiting')"
+          :value="uniqueTenantCount"
+        />
+        <StatsCard
+          icon="lucide:banknote"
+          color="slate"
+          :label="t('superAdmin.pendingPayments.stats.total', 'Total value')"
+          :value="formatMoney(totalAmount)"
+        />
       </div>
 
       <!-- Table -->
-      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/60 flex items-center justify-between">
-          <h2 class="font-semibold text-slate-800 text-sm">
+      <div class="ui-card overflow-hidden">
+        <div class="ui-card-header flex items-center justify-between">
+          <h2 class="font-semibold text-sm text-primary">
             {{ t('superAdmin.pendingPayments.table.title', 'Submitted proofs awaiting review') }}
           </h2>
-          <span v-if="payments.length > 0" class="text-xs bg-amber-100 text-amber-700 font-semibold px-2.5 py-1 rounded-full">
+          <span v-if="payments.length > 0" class="ui-badge ui-badge--amber">
             {{ payments.length }} {{ t('superAdmin.pendingPayments.pending', 'pending') }}
           </span>
         </div>
 
-        <!-- Loading -->
-        <div v-if="loading" class="p-12 text-center">
-          <Icon name="lucide:loader-2" class="h-8 w-8 text-teal-500 animate-spin mx-auto mb-3" />
-          <p class="text-slate-500 text-sm">{{ t('superAdmin.paymentsPage.history.loading', 'Loading…') }}</p>
-        </div>
-
-        <!-- Empty -->
-        <div v-else-if="payments.length === 0" class="p-12 text-center">
-          <div class="w-16 h-16 rounded-2xl bg-emerald-50 flex items-center justify-center mx-auto mb-4">
-            <Icon name="lucide:check-circle-2" class="h-8 w-8 text-emerald-500" />
-          </div>
-          <h3 class="text-slate-800 font-semibold mb-1">{{ t('superAdmin.pendingPayments.empty.title', 'All caught up!') }}</h3>
-          <p class="text-slate-500 text-sm">{{ t('superAdmin.pendingPayments.empty.subtitle', 'No pending payment proofs at the moment.') }}</p>
-        </div>
+        <SuperAdminLoadingState
+          v-if="loading"
+          :label="t('superAdmin.paymentsPage.history.loading', 'Loading…')"
+        />
+        <SuperAdminEmptyState
+          v-else-if="payments.length === 0"
+          icon="lucide:check-circle-2"
+          :title="t('superAdmin.pendingPayments.empty.title', 'All caught up!')"
+          :subtitle="t('superAdmin.pendingPayments.empty.subtitle', 'No pending payment proofs at the moment.')"
+        />
 
         <!-- Table -->
         <div v-else class="overflow-x-auto">
           <table class="ui-table">
-            <thead class="ui-thead border-b border-slate-200">
+            <thead class="ui-thead border-b border-line">
               <tr>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.tenant', 'Tenant') }}</th>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.plan', 'Plan') }}</th>
@@ -92,7 +77,7 @@
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.submitted', 'Submitted') }}</th>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.proof', 'Proof') }}</th>
                 <th class="ui-th">{{ t('superAdmin.pendingPayments.table.notes', 'Notes') }}</th>
-                <th class="ui-th text-right">{{ t('superAdmin.pendingPayments.table.actions', 'Actions') }}</th>
+                <th class="ui-th text-end">{{ t('superAdmin.pendingPayments.table.actions', 'Actions') }}</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
@@ -108,29 +93,29 @@
                     :to="`/super-admin/tenants/${p.tenant.id}/payments`"
                     class="group flex items-center gap-2"
                   >
-                    <div class="w-7 h-7 rounded-md bg-teal-100 flex items-center justify-center shrink-0">
-                      <span class="text-xs font-bold text-teal-700">{{ p.tenant.name?.charAt(0).toUpperCase() }}</span>
+                    <div class="w-7 h-7 rounded-lg bg-lime-100 flex items-center justify-center shrink-0">
+                      <span class="text-xs font-bold text-lime-700">{{ p.tenant.name?.charAt(0).toUpperCase() }}</span>
                     </div>
                     <div>
-                      <div class="font-semibold text-slate-800 text-sm group-hover:text-teal-700 transition-colors">{{ p.tenant.name }}</div>
-                      <div class="text-xs text-slate-400">{{ p.tenant.slug }}</div>
+                      <div class="font-semibold text-primary text-sm group-hover:text-lime-700 transition-colors">{{ p.tenant.name }}</div>
+                      <div class="text-xs text-tertiary">{{ p.tenant.slug }}</div>
                     </div>
                   </NuxtLink>
                 </td>
 
                 <!-- Plan -->
                 <td class="ui-td">
-                  <div class="font-semibold text-slate-700 text-sm capitalize">{{ p.planCode }}</div>
-                  <div class="text-xs text-slate-400">{{ p.interval }}</div>
+                  <div class="font-semibold text-secondary text-sm capitalize">{{ p.planCode }}</div>
+                  <div class="text-xs text-tertiary">{{ p.interval }}</div>
                 </td>
 
                 <!-- Amount -->
-                <td class="ui-td text-sm font-semibold text-slate-700 whitespace-nowrap">
+                <td class="ui-td text-sm font-semibold text-secondary whitespace-nowrap">
                   {{ formatMoney(p.amountDzd) }}
                 </td>
 
                 <!-- Date -->
-                <td class="ui-td text-sm text-slate-500 whitespace-nowrap">
+                <td class="ui-td text-sm text-secondary whitespace-nowrap">
                   {{ formatDateTime(p.createdAt) }}
                 </td>
 
@@ -141,7 +126,7 @@
                     :href="p.proofUrl"
                     target="_blank"
                     rel="noreferrer"
-                    class="inline-flex items-center gap-1 text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                    class="inline-flex items-center gap-1 text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                   >
                     <Icon name="lucide:external-link" class="h-3.5 w-3.5" />
                     {{ t('superAdmin.paymentsPage.history.proof.open', 'Open') }}
@@ -149,24 +134,24 @@
                   <button
                     v-else-if="p.proofUrl"
                     type="button"
-                    class="inline-flex items-center gap-1 text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                    class="inline-flex items-center gap-1 text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                     @click="openProof(p)"
                   >
                     <Icon name="lucide:external-link" class="h-3.5 w-3.5" />
                     {{ t('superAdmin.paymentsPage.history.proof.open', 'Open') }}
                   </button>
-                  <span v-else class="text-slate-300 text-xs italic">{{ t('superAdmin.pendingPayments.noProof', 'No file') }}</span>
+                  <span v-else class="text-tertiary text-xs italic">{{ t('superAdmin.pendingPayments.noProof', 'No file') }}</span>
                 </td>
 
                 <!-- Notes -->
-                <td class="ui-td text-sm text-slate-500 max-w-[160px]">
+                <td class="ui-td text-sm text-secondary max-w-[160px]">
                   <span v-if="p.notes" class="truncate block" :title="p.notes">{{ p.notes }}</span>
-                  <span v-else-if="p.externalReference" class="text-xs font-mono text-slate-400">{{ p.externalReference }}</span>
-                  <span v-else class="text-slate-300">—</span>
+                  <span v-else-if="p.externalReference" class="text-xs font-mono text-tertiary">{{ p.externalReference }}</span>
+                  <span v-else class="text-tertiary">—</span>
                 </td>
 
                 <!-- Actions -->
-                <td class="ui-td text-right">
+                <td class="ui-td text-end">
                   <div class="flex items-center justify-end gap-2">
                     <button
                       class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 rounded-lg text-xs font-semibold transition-colors"
@@ -196,6 +181,11 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
+import StatsCard from '~/components/StatsCard.vue'
+import SuperAdminPageHeader from '~/components/super-admin/SuperAdminPageHeader.vue'
+import SuperAdminEmptyState from '~/components/super-admin/SuperAdminEmptyState.vue'
+import SuperAdminLoadingState from '~/components/super-admin/SuperAdminLoadingState.vue'
 
 definePageMeta({
   middleware: 'super-admin',
@@ -224,7 +214,7 @@ const formatDateTime = (date: string) =>
     minute: '2-digit'
   })
 
-const formatMoney = (amount: number) => `${Number(amount || 0).toLocaleString(locale.value)} DA`
+const formatMoney = (amount: number) => `${formatPriceAmount(amount, { locale: locale.value })} DA`
 
 async function load() {
   error.value = ''

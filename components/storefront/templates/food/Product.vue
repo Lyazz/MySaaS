@@ -4,6 +4,7 @@ import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     product: any
@@ -34,9 +35,7 @@ const currentVariant = computed(() => {
     return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
-const currentPrice = computed(() => {
-    return currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
-})
+const currentPrice = computed(() => buildScopedProductPricing(props.product, currentVariant.value).effectivePrice)
 
 const currentStock = computed(() => {
     if (!currentVariant.value) return props.product?.stock
@@ -75,6 +74,16 @@ watch([() => props.product, selectedOptions], ([product]) => {
     }
 })
 
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
@@ -129,7 +138,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
             <!-- Recipe Card Container -->
             <div class="bg-white rounded-[2rem] p-8 md:p-10 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] border border-stone-100 relative">
                 <!-- Decorative Top Border -->
-                <div class="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-brand-400 via-orange-400 to-yellow-400 rounded-t-[2rem]"></div>
+                <div class="absolute top-0 start-0 end-0 h-2 bg-gradient-to-r from-brand-400 via-orange-400 to-yellow-400 rounded-t-[2rem]"></div>
                 
                 <h1 class="text-4xl md:text-5xl font-bold text-stone-900 mb-6 leading-tight">
                     {{ product?.title }}
@@ -162,7 +171,7 @@ watch([() => props.product, selectedOptions], ([product]) => {
                     <Icon name="lucide:file-text" class="w-5 h-5 text-brand-600" />
                     {{ storefrontContent.product.descriptionTitle }}
                 </h2>
-                <SafeRichText 
+                <CommonSafeRichText 
                 v-if="product?.description" 
                 class="prose prose-stone prose-sm text-stone-600 max-w-none leading-relaxed"
                 :html="product.description"

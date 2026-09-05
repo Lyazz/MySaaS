@@ -1,126 +1,105 @@
 <template>
-  <div>
-    <div class="mb-6">
-      <h2 class="text-2xl font-bold text-gray-800">
-        {{ t('superAdmin.dashboard.overview.title') }}
-      </h2>
-      <p class="text-gray-600 mt-1">
-        {{ t('superAdmin.dashboard.overview.subtitle') }}
-      </p>
-    </div>
+  <div class="space-y-6">
+    <SuperAdminPageHeader
+      :title="t('superAdmin.dashboard.overview.title')"
+      :subtitle="t('superAdmin.dashboard.overview.subtitle')"
+    />
 
     <!-- Stats Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
-      <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('superAdmin.dashboard.stats.tenants') }}
-            </p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">
-              {{ platformStats?.tenants || 0 }}
-            </p>
-          </div>
-          <div class="w-12 h-12 bg-teal-50 rounded-lg flex items-center justify-center">
-            <Icon name="lucide:building" class="w-6 h-6 text-teal-600" />
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('superAdmin.dashboard.stats.users') }}
-            </p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">
-              {{ platformStats?.users || 0 }}
-            </p>
-          </div>
-          <div class="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-            <Icon name="lucide:users" class="w-6 h-6 text-blue-600" />
-          </div>
-        </div>
-      </div>
-
-      <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('superAdmin.dashboard.stats.products') }}
-            </p>
-            <p class="text-3xl font-bold text-gray-800 mt-1">
-              {{ platformStats?.products || 0 }}
-            </p>
-          </div>
-          <div class="w-12 h-12 bg-indigo-50 rounded-lg flex items-center justify-center">
-             <Icon name="lucide:package" class="w-6 h-6 text-indigo-600" />
-          </div>
-        </div>
-      </div>
-
-       <div class="bg-white p-6 rounded-lg shadow border border-slate-100">
-        <div class="flex items-center justify-between">
-          <div>
-            <p class="text-sm font-medium text-gray-500">
-              {{ t('superAdmin.dashboard.stats.revenue') }}
-            </p>
-             <p class="text-2xl font-bold text-gray-800 mt-1"> <!-- Smaller text for currency -->
-              ${{ revenueStats?.totalRevenue?.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || '0' }}
-            </p>
-          </div>
-          <div class="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-            <Icon name="lucide:dollar-sign" class="w-6 h-6 text-green-600" />
-          </div>
-        </div>
-      </div>
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <StatsCard
+        icon="lucide:building"
+        color="lime"
+        :label="t('superAdmin.dashboard.stats.tenants')"
+        :value="platformStats?.tenants || 0"
+      />
+      <StatsCard
+        icon="lucide:users"
+        color="blue"
+        :label="t('superAdmin.dashboard.stats.users')"
+        :value="platformStats?.users || 0"
+      />
+      <StatsCard
+        icon="lucide:package"
+        color="indigo"
+        :label="t('superAdmin.dashboard.stats.products')"
+        :value="platformStats?.products || 0"
+      />
+      <StatsCard
+        icon="lucide:dollar-sign"
+        color="emerald"
+        :label="t('superAdmin.dashboard.stats.revenue')"
+        :value="formatMoney(revenueStats?.totalRevenue)"
+      />
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
       <!-- Recent Activity -->
-      <div class="bg-white rounded-lg shadow border border-slate-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50/50">
-          <h3 class="text-lg font-semibold text-gray-800">
+      <div class="ui-card overflow-hidden">
+        <div class="ui-card-header flex items-center justify-between">
+          <h3
+ class="text-base font-semibold text-primary"
+ 
+>
             {{ t('superAdmin.dashboard.recentActivity.title') }}
           </h3>
           <NuxtLink
-            to="/super-admin/audit-logs"
-            class="text-sm font-medium text-teal-600 hover:text-teal-700 hover:underline"
-          >
+ to="/super-admin/audit-logs"
+ class="text-sm font-medium hover:underline text-brand"
+ 
+>
             {{ t('superAdmin.dashboard.recentActivity.viewAll') }}
           </NuxtLink>
         </div>
-        
-        <div class="divide-y divide-slate-100">
+
+        <SuperAdminLoadingState
+          v-if="loading"
+          :label="t('admin.common.loading')"
+        />
+        <SuperAdminEmptyState
+          v-else-if="recentLogs.length === 0"
+          icon="lucide:history"
+          :title="t('superAdmin.dashboard.recentActivity.empty')"
+        />
+        <div
+ v-else
+ class="divide-y border-line"
+ 
+>
           <div
-            v-if="loading"
-            class="p-8 text-center text-gray-400"
-          >
-            {{ t('admin.common.loading') }}
-          </div>
-          <div
-            v-else-if="recentLogs.length === 0"
-            class="p-8 text-center text-gray-400"
-          >
-            {{ t('superAdmin.dashboard.recentActivity.empty') }}
-          </div>
-          <div
-            v-else
             v-for="log in recentLogs"
             :key="log.id"
-            class="p-4 hover:bg-slate-50 transition-colors flex items-start gap-4"
+            class="flex items-start gap-4 p-4 transition-colors"
+            style="--tw-bg-opacity: 1"
+            @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'var(--nav-hover-bg)' }"
+            @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.background = 'transparent' }"
           >
-            <div class="flex-shrink-0 w-10 h-10 bg-slate-100 rounded-full flex items-center justify-center text-lg">
-              {{ getActionIcon(log.action) }}
+            <div
+              class="ui-icon-tile h-10 w-10 shrink-0"
+              :class="`ui-icon-tile--${getAuditActionMeta(log.action).color}`"
+            >
+              <Icon
+                :name="getAuditActionMeta(log.action).icon"
+                class="h-4 w-4"
+              />
             </div>
-            <div class="flex-1 min-w-0">
-              <p class="text-sm font-medium text-gray-900">
+            <div class="min-w-0 flex-1">
+              <p
+ class="text-sm font-medium text-primary"
+ 
+>
                 {{ formatAction(log.action) }}
               </p>
-              <p class="text-sm text-gray-500 truncate">
+              <p
+ class="truncate text-sm text-secondary"
+ 
+>
                 {{ log.details }}
               </p>
-              <p class="text-xs text-gray-400 mt-1">
+              <p
+ class="mt-1 text-xs text-tertiary"
+ 
+>
                 {{ formatDate(log.createdAt) }}
               </p>
             </div>
@@ -129,49 +108,47 @@
       </div>
 
       <!-- Quick Actions -->
-      <div class="bg-white rounded-lg shadow border border-slate-100 overflow-hidden">
-        <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/50">
-          <h3 class="text-lg font-semibold text-gray-800">
+      <div class="ui-card overflow-hidden">
+        <div class="ui-card-header">
+          <h3
+ class="text-base font-semibold text-primary"
+ 
+>
             {{ t('superAdmin.dashboard.quickActions.title') }}
           </h3>
         </div>
-        <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2">
           <NuxtLink
-            to="/super-admin/tenants" 
-            class="flex items-center p-4 border rounded-lg hover:border-teal-500 hover:bg-teal-50 hover:shadow-sm transition-all group bg-white"
-          >
-            <div class="w-10 h-10 bg-teal-100 rounded-lg flex items-center justify-center group-hover:bg-teal-200 text-teal-600 transition-colors">
-              <Icon name="lucide:plus" class="w-6 h-6" />
+ v-for="action in quickActions"
+ :key="action.to"
+ :to="action.to"
+ class="group flex items-center gap-4 rounded-xl p-4 transition-all border border-line surface-2"
+ 
+ @mouseenter="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--surface-border-hover)' }"
+ @mouseleave="(e: MouseEvent) => { (e.currentTarget as HTMLElement).style.borderColor = 'var(--surface-border)' }"
+>
+            <div
+              class="ui-icon-tile"
+              :class="`ui-icon-tile--${action.color}`"
+            >
+              <Icon
+                :name="action.icon"
+                class="h-5 w-5"
+              />
             </div>
-            <div class="ml-4">
-              <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.createTenant.title') }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.createTenant.subtitle') }}</p>
-            </div>
-          </NuxtLink>
-
-          <NuxtLink
-            to="/super-admin/tenants" 
-            class="flex items-center p-4 border rounded-lg hover:border-blue-500 hover:bg-blue-50 hover:shadow-sm transition-all group bg-white"
-          >
-             <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 text-blue-600 transition-colors">
-              <Icon name="lucide:building" class="w-6 h-6" />
-            </div>
-            <div class="ml-4">
-              <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.manageTenants.title') }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.manageTenants.subtitle') }}</p>
-            </div>
-          </NuxtLink>
-
-          <NuxtLink
-            to="/super-admin/analytics" 
-            class="flex items-center p-4 border rounded-lg hover:border-indigo-500 hover:bg-indigo-50 hover:shadow-sm transition-all group bg-white"
-          >
-             <div class="w-10 h-10 bg-indigo-100 rounded-lg flex items-center justify-center group-hover:bg-indigo-200 text-indigo-600 transition-colors">
-              <Icon name="lucide:bar-chart-2" class="w-6 h-6" />
-            </div>
-            <div class="ml-4">
-              <p class="font-medium text-gray-900">{{ t('superAdmin.dashboard.quickActions.viewAnalytics.title') }}</p>
-              <p class="text-xs text-gray-500 mt-0.5">{{ t('superAdmin.dashboard.quickActions.viewAnalytics.subtitle') }}</p>
+            <div class="min-w-0">
+              <p
+ class="font-medium text-primary"
+ 
+>
+                {{ action.title }}
+              </p>
+              <p
+ class="mt-0.5 text-xs text-tertiary"
+ 
+>
+                {{ action.subtitle }}
+              </p>
             </div>
           </NuxtLink>
         </div>
@@ -182,6 +159,12 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
+import { getAuditActionMeta } from '~/composables/superAdminAuditAction'
+import StatsCard from '~/components/StatsCard.vue'
+import SuperAdminPageHeader from '~/components/super-admin/SuperAdminPageHeader.vue'
+import SuperAdminEmptyState from '~/components/super-admin/SuperAdminEmptyState.vue'
+import SuperAdminLoadingState from '~/components/super-admin/SuperAdminLoadingState.vue'
 
 const { t, locale } = useI18n({ useScope: 'global' })
 
@@ -197,6 +180,8 @@ const revenueStats = ref<any>(null)
 const recentLogs = ref<any[]>([])
 
 const authStore = useAuthStore()
+
+const formatMoney = (amount: number | null | undefined) => `${formatPriceAmount(amount ?? 0)} DA`
 
 onMounted(async () => {
   try {
@@ -224,35 +209,34 @@ onMounted(async () => {
   }
 })
 
-const getActionIcon = (action: string) => {
-  const icons: Record<string, string> = {
-    'CREATE_TENANT': '➕',
-    'UPDATE_TENANT': '✏️',
-    'DELETE_TENANT': '🗑️',
-    'SUSPEND_TENANT': '⏸️',
-    'UNSUSPEND_TENANT': '▶️',
-    'IMPERSONATE_USER': '👤'
+const quickActions = computed(() => [
+  {
+    to: '/super-admin/tenants',
+    icon: 'lucide:plus',
+    color: 'lime' as const,
+    title: t('superAdmin.dashboard.quickActions.createTenant.title'),
+    subtitle: t('superAdmin.dashboard.quickActions.createTenant.subtitle')
+  },
+  {
+    to: '/super-admin/tenants',
+    icon: 'lucide:building',
+    color: 'blue' as const,
+    title: t('superAdmin.dashboard.quickActions.manageTenants.title'),
+    subtitle: t('superAdmin.dashboard.quickActions.manageTenants.subtitle')
+  },
+  {
+    to: '/super-admin/analytics',
+    icon: 'lucide:bar-chart-2',
+    color: 'indigo' as const,
+    title: t('superAdmin.dashboard.quickActions.viewAnalytics.title'),
+    subtitle: t('superAdmin.dashboard.quickActions.viewAnalytics.subtitle')
   }
-  return icons[action] || '📝'
-}
+])
 
 const formatAction = (action: string) => {
-  switch (action) {
-    case 'CREATE_TENANT':
-      return t('superAdmin.audit.actions.createTenant')
-    case 'UPDATE_TENANT':
-      return t('superAdmin.audit.actions.updateTenant')
-    case 'DELETE_TENANT':
-      return t('superAdmin.audit.actions.deleteTenant')
-    case 'SUSPEND_TENANT':
-      return t('superAdmin.audit.actions.suspendTenant')
-    case 'UNSUSPEND_TENANT':
-      return t('superAdmin.audit.actions.unsuspendTenant')
-    case 'IMPERSONATE_USER':
-      return t('superAdmin.audit.actions.impersonateUser')
-    default:
-      return action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
-  }
+  const meta = getAuditActionMeta(action)
+  if (meta.labelKey) return t(meta.labelKey)
+  return action.split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
 }
 
 const formatDate = (date: string) => {

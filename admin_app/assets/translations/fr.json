@@ -1,5 +1,6 @@
 {
   "common": {
+    "delete": "Supprimer",
     "view": "Voir",
     "details": "Détails",
     "errorPage": {
@@ -34,24 +35,113 @@
   "saasLanding": {
     "seo": {
       "title": "Swekly — Vendez en ligne, simplement",
-      "description": "Créez votre boutique, recevez des commandes, et gérez paiements et livraison au même endroit."
+      "description": "Créez votre boutique, recevez des commandes, et gérez paiements et livraison depuis un seul tableau de bord."
     },
     "hero": {
+      "kicker": "Le SaaS pour marchands modernes",
       "title": {
         "buildSell": "Lancez. Pilotez.",
         "scale": "Grandissez."
       },
+      "italicWord": "sans effort",
       "subtitle": "Avec Swekly, lancez votre boutique en quelques minutes. Nous nous occupons du site, des paiements et de la livraison.",
       "ctaPrimary": "Essayer gratuitement",
-      "ctaSecondary": "Voir comment ça marche"
+      "ctaSecondary": "Découvrir les fonctionnalités",
+      "scrollHint": "Faites défiler",
+      "chips": {
+        "storefront": "Boutique",
+        "payments": "Paiements",
+        "shipping": "Livraison",
+        "analytics": "Analytique",
+        "ai": "Outils IA"
+      },
+      "pills": {
+        "mobile": "Boutiques pensées pour le mobile"
+      },
+      "orb": {
+        "newOrder": "Nouvelle commande",
+        "shipping": "Livraison",
+        "live": "en direct",
+        "payment": "Paiement",
+        "codAccepted": "Paiement à la livraison",
+        "today": "Aujourd'hui",
+        "metrics": {
+          "ordersPerHour": "Commandes / h",
+          "avgBasket": "Panier moyen · DA",
+          "conversion": "Conversion",
+          "activeWilayas": "Wilayas actives",
+          "deliveredToday": "Livrées aujourd'hui"
+        }
+      }
+    },
+    "storyteller": {
+      "eyebrow": "Comment ça marche",
+      "title": "Quatre étapes. Une boutique complète.",
+      "subtitle": "Du pixel au colis — chaque étape pensée pour accélérer vos ventes.",
+      "steps": {
+        "design": {
+          "number": "01",
+          "caption": "Design",
+          "title": "Choisissez un thème, faites-le vôtre.",
+          "description": "Des modèles mobile-first qui s'adaptent à votre marque en quelques minutes."
+        },
+        "sell": {
+          "number": "02",
+          "caption": "Vendez",
+          "title": "Les commandes arrivent. Automatiquement.",
+          "description": "Paiement, factures, stocks — tout est connecté dès le premier jour."
+        },
+        "ship": {
+          "number": "03",
+          "caption": "Expédiez",
+          "title": "Choisissez le transporteur. On expédie.",
+          "description": "Intégrations multi-transporteurs avec webhooks temps réel et options de livraison personnalisées."
+        },
+        "grow": {
+          "number": "04",
+          "caption": "Grandissez",
+          "title": "Voyez ce qui marche. Doublez la mise.",
+          "description": "Analytique en direct, pixels et IA — la stack de croissance incluse."
+        }
+      }
+    },
+    "carousel": {
+      "eyebrow": "Thèmes",
+      "title": "Des boutiques avec du caractère.",
+      "subtitle": "Douze thèmes. Tous les secteurs. À portée de clic.",
+      "cta": "Voir tous les thèmes"
+    },
+    "pricingSection": {
+      "eyebrow": "Tarifs",
+      "toggle": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel",
+        "discount": "Économisez 20%"
+      }
     },
     "features": {
       "title": {
-        "prefix": "Tout ce qu’il vous faut pour",
+        "prefix": "Tout ce qu'il vous faut pour",
         "accent": "vendre en ligne"
       },
-      "subtitle": "Des outils simples pour gérer votre boutique au quotidien.",
+      "subtitle": "Tout ce qu’il faut pour vendre en ligne, sans prise de tête.",
       "items": {
+        "aiTools": {
+          "title": "Aide IA",
+          "description": "Générez des fiches produits, des textes et du SEO en quelques secondes."
+        },
+        "competitivePricing": {
+          "title": "Tarifs clairs",
+          "description": "Des offres simples, sans surprise. Changez quand vous voulez."
+        },
+        "templates": {
+          "title": "Thèmes prêts à l’emploi",
+          "description": "Des modèles rapides, pensés mobile, faciles à personnaliser."
+        },
+        "fastSupport": {
+          "title": "Support réactif",
+          "description": "On vous répond vite quand vous avez besoin d’aide."
+        },
         "storeBuilder": {
           "title": "Créateur de boutique",
           "description": "Glisser‑déposer pour créer des pages propres, sans code."
@@ -71,9 +161,10 @@
       }
     },
     "stats": {
-      "activeMerchants": "Marchands actifs",
-      "revenueGenerated": "Revenus générés",
-      "uptime": "Disponibilité"
+      "activeMerchants": "Boutiques actives",
+      "revenueGenerated": "Ventes mensuelles",
+      "uptime": "Disponibilité",
+      "gmvDetail": "Ventes traitées par mois"
     },
     "faq": {
       "title": "Questions fréquentes",
@@ -94,45 +185,359 @@
       }
     },
     "testimonials": {
+      "eyebrow": "Témoignages",
       "heading": {
         "prefix": "Fait pour",
         "accent": "des gens",
         "suffix": "comme vous."
       },
-      "subtitle": "Des commerçants et des équipes qui veulent un site rapide et une gestion simple.",
+      "subtitle": "Des commerçants qui veulent un site rapide et une gestion simple.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "Avatar utilisateur",
-      "items": {
-        "sarah": {
-          "text": "J’ai migré ma boutique sans stress. Le site est rapide, et mes clients vont au paiement plus facilement.",
-          "role": "PDG, FashionNova"
+      "items": [
+        {
+          "quote": "On a mis nos produits en ligne rapidement. Les commandes arrivent, et tout est centralisé.",
+          "author": "Nassim",
+          "role": "Propriétaire"
         },
-        "karim": {
-          "text": "Tout est clair dans le tableau de bord. Je vois mes ventes et mes produits qui marchent en un coup d’œil.",
-          "role": "Fondateur, TechShop"
+        {
+          "quote": "La visibilité du tableau de bord et la gestion des stocks ont transformé notre opération. C'est impressionnant.",
+          "author": "Karim",
+          "role": "Fondateur"
         },
-        "emily": {
-          "text": "Le domaine personnalisé a été configuré facilement. Le support répond vite et ça fait la différence.",
-          "role": "CTO, GreenEarth"
+        {
+          "quote": "Les intégrations de livraison nous font gagner du temps chaque jour. Expédier devient un réflexe.",
+          "author": "Yanis",
+          "role": "Directeur"
         },
-        "michael": {
-          "text": "On a tout ce qu’il faut, sans se compliquer la vie. L’équipe support est vraiment réactive.",
-          "role": "COO, GearUp"
+        {
+          "quote": "L'intégration des méthodes de paiement locales a été fluide. Nos clients au Sénégal adorent les options.",
+          "author": "Fatou",
+          "role": "Propriétaire"
         },
-        "lisa": {
-          "text": "Quand les commandes ont augmenté, la plateforme a suivi. Aucun blocage, tout est resté stable.",
-          "role": "Propriétaire, Kicks"
+        {
+          "quote": "Le design mobile-first nous a aidés à rejoindre plus de clients. Le taux de conversion a augmenté remarquablement.",
+          "author": "Sophie",
+          "role": "Responsable Marketing"
         },
-        "david": {
-          "text": "J’ai créé ma page d’accueil avec le glisser‑déposer, sans appeler un développeur.",
-          "role": "Fondateur, ArtSpace"
+        {
+          "quote": "La mise en place a été simple, et l'équipe d'assistance très utile. Je recommande vivement.",
+          "author": "Carlos",
+          "role": "Propriétaire"
         }
-      }
+      ]
     },
     "finalCta": {
       "title": "Prêt à commencer ?",
       "subtitle": "Créez votre boutique et prenez vos premières commandes dès aujourd’hui.",
       "cta": "Créer ma boutique"
+    },
+    "trust": {
+      "secure": "Paiements sécurisés",
+      "ssl": "SSL inclus",
+      "cloud": "Hébergement fiable"
+    },
+    "integrations": {
+      "title": "Connecté à vos outils",
+      "subtitle": "Paiement, livraison et marketing : tout se branche facilement.",
+      "items": {
+        "checkout": "Commande",
+        "catalog": "Catalogue produits",
+        "ads": "Suivi publicitaire"
+      }
+    },
+    "themes": {
+      "title": {
+        "prefix": "Des vitrines",
+        "accent": "prêtes à vendre"
+      },
+      "subtitle": "Choisissez un modèle rapide, pensé mobile, et personnalisez‑le à votre goût.",
+      "viewAll": "Voir les thèmes"
+    },
+    "contact": {
+      "title": "Contactez-nous",
+      "subtitle": "Nous sommes là pour vous aider. N'hésitez pas à nous contacter si vous avez des questions.",
+      "cards": {
+        "sales": {
+          "title": "Parler aux ventes",
+          "description": "Intéressé par nos forfaits d'entreprise ? Appelez-nous pour discuter avec un conseiller.",
+          "contact": "+XX X XXX XXXX"
+        },
+        "support": {
+          "title": "Contacter le support",
+          "description": "Besoin d'aide ? Notre équipe de support est là pour vous accompagner.",
+          "contact": "support{'@'}swekly.com"
+        }
+      },
+      "form": {
+        "title": "Envoyez-nous un message",
+        "firstName": "Prénom",
+        "lastName": "Nom",
+        "email": "E-mail",
+        "subject": "Sujet",
+        "message": "Message",
+        "submit": "Envoyer le message"
+      },
+      "supportPill": "Aide au lancement et à la mise en place"
+    },
+    "visual": {
+      "storefrontLabel": "Votre boutique",
+      "live": "En ligne",
+      "orders": "Commandes",
+      "conversion": "Conversion",
+      "checkoutLabel": "Parcours de commande",
+      "checkoutTitle": "Validation de commande en 3 étapes",
+      "checkoutSteps": {
+        "phone": "Récupérez le téléphone et la wilaya",
+        "delivery": "Choisissez la livraison et confirmez la commande",
+        "dispatch": "Envoyez la commande au transporteur"
+      },
+      "today": "Aujourd’hui",
+      "operationsRail": "Ce qui tourne en arrière-plan",
+      "whatsapp": "Confirmations WhatsApp",
+      "carriers": "Synchronisation transporteur en temps réel via webhooks",
+      "analytics": "Suivi des ventes et des campagnes",
+      "readinessLabel": "Prêt à vendre",
+      "readinessText": "Tout reste simple pour votre équipe : votre boutique, vos commandes, vos options de livraison et votre suivi quotidien.",
+      "commandCenterEyebrow": "Suivi quotidien",
+      "commandCenterTitle": "Un seul endroit pour gérer votre boutique",
+      "commandCenterBadge": "Pour chaque étape",
+      "orderConfirmations": "Commandes confirmées",
+      "carrierSync": "Suivi livraison",
+      "realtime": "En direct",
+      "localFleet": "Votre propre livreur",
+      "weeklyPulse": "Rythme des ventes hebdomadaire",
+      "showcase": {
+        "title": "De belles boutiques pensées pour vos produits",
+        "body": "Choisissez un thème, ajoutez vos produits et offrez un achat fluide sur mobile.",
+        "preview": "Aperçu boutique",
+        "analyticsBody": "Voyez ce qui se vend, ce qui convertit et où pousser plus fort",
+        "logisticsBody": "Proposez les options de livraison qui correspondent à vos clients"
+      }
+    },
+    "pricingPreview": {
+      "storefront": "Votre boutique en ligne est incluse",
+      "delivery": "Les options de livraison sont prêtes dès le départ"
+    },
+    "cinematic": {
+      "hero": {
+        "eyebrow": "Conçu pour le commerce moderne",
+        "headlinePre": "Un seul moteur.",
+        "headlineAccent": "Tous",
+        "headlinePost": "les marchands.",
+        "subhead": "Boutique, paiement, livraison, analytics — tout réuni sur une plateforme qui démarre en minutes, pas en mois.",
+        "ctaPrimary": "Commencer gratuitement",
+        "ctaSecondary": "Voir la démo"
+      },
+      "heroCarousel": {
+        "ctaRegister": "Commencer à scaler gratuitement",
+        "ctaFeatures": "Découvrir les fonctionnalités",
+        "slides": {
+          "delivery": {
+            "eyebrow": "Réseau de livraison",
+            "headlinePre": "Livrez avec",
+            "headlineAccent": "tous",
+            "headlinePost": " vos transporteurs.",
+            "subhead": "",
+            "meta": [
+              "Intégrations multi-transporteurs",
+              "Statuts synchronisés en direct",
+              "Retours réconciliés automatiquement"
+            ],
+            "address": "swekly.com/admin/delivery"
+          },
+          "warehouse": {
+            "eyebrow": "Contrôle d'inventaire avancé",
+            "headlinePre": "Stock,",
+            "headlineAccent": "en direct",
+            "headlinePost": ".",
+            "subhead": "",
+            "meta": [
+              "Variantes, SKU, codes-barres & lots",
+              "Seuils de réassort & alertes stock bas",
+              "Achats, fournisseurs & inventaires"
+            ],
+            "address": "swekly.com/admin/inventory"
+          },
+          "themes": {
+            "eyebrow": "Templates de boutique",
+            "headlinePre": "Plusieurs thèmes.",
+            "headlineAccent": "Un seul",
+            "headlinePost": " clic.",
+            "subhead": "",
+            "meta": [
+              "Thèmes mobile-first",
+              "RTL & multilingue",
+              "Éditeur de thème en direct"
+            ],
+            "address": "swekly.com/admin/themes"
+          },
+          "conversion": {
+            "eyebrow": "Conversion & analytics",
+            "headlinePre": "Suivez",
+            "headlineAccent": "chaque",
+            "headlinePost": " conversion.",
+            "subhead": "",
+            "meta": [
+              "Funnel temps réel",
+              "Meta Pixel intégré",
+              "Dashboard commandes en direct"
+            ],
+            "address": "swekly.com/admin/analytics"
+          },
+          "pos": {
+            "eyebrow": "PDV multiplateforme",
+            "headlinePre": "Une seule caisse.",
+            "headlineAccent": "Tous",
+            "headlinePost": " vos appareils.",
+            "subhead": "",
+            "meta": [
+              "Apps natives · iOS · Android · Windows · macOS",
+              "Encaissement hors-ligne, resync cloud instantanée",
+              "Fidélité, promos & reçus en un seul tap"
+            ],
+            "address": "swekly.com/admin/pos"
+          }
+        }
+      },
+      "logoCloud": "Nos intégrations — transporteurs, pixels, outils",
+      "howItWorks": {
+        "titlePre": "De l'idée au",
+        "titleAccent": "revenu",
+        "titlePost": "en quatre étapes.",
+        "description": "Nous avons supprimé chaque détour entre le lancement et votre première commande."
+      },
+      "preview": {
+        "eyebrow": "Contrôle temps réel",
+        "titlePre": "Voyez les commandes",
+        "titleAccent": "arriver",
+        "titlePost": "en direct.",
+        "description": "Un pipeline unifié pour chaque commande, chaque statut, chaque livraison — sans rafraîchir, sans exporter.",
+        "point1": "Statuts en direct depuis chaque transporteur",
+        "point2": "Un clic pour confirmer, modifier ou rembourser",
+        "point3": "Signaux antifraude intégrés sur chaque commande"
+      },
+      "features": {
+        "eyebrow": "À l'intérieur",
+        "titlePre": "Tout ce qu'il faut.",
+        "titleAccent": "Rien",
+        "titlePost": "de superflu.",
+        "description": "Prêt pour le monde. Beau dans chaque langue. Conçu pour grandir avec votre métier."
+      },
+      "pricing": {
+        "eyebrow": "Tarifs",
+        "titlePre": "Pensé pour",
+        "titleAccent": "grandir",
+        "titlePost": "avec vous.",
+        "description": "Des formules adaptées à chaque étape — de la première vente à cinquante mille par mois.",
+        "viewAll": "Comparer toutes les formules"
+      },
+      "testimonials": {
+        "titlePre": "Des marchands qui ont",
+        "titleAccent": "lancé",
+        "titlePost": "avec Swekly."
+      },
+      "faq": {
+        "titlePre": "Vos questions,",
+        "titleAccent": "résolues",
+        "titlePost": "."
+      },
+      "cta": {
+        "eyebrow": "Quand vous voulez",
+        "headlinePre": "Ouvrez votre boutique",
+        "headlineAccent": "aujourd'hui",
+        "headlinePost": ".",
+        "subhead": "Gratuit pour commencer. Sans carte bancaire. Onboarding en moins de dix minutes.",
+        "button": "Créer ma boutique",
+        "secondary": "Parler aux ventes"
+      },
+      "footer": {
+        "languages": "Langue",
+        "madeFor": "Fait pour les marchands"
+      },
+      "templates": {
+        "eyebrow": "Thèmes boutique",
+        "titlePre": "Des boutiques superbes,",
+        "titleAccent": "prêtes à lancer",
+        "titlePost": "",
+        "description": "Choisissez un modèle conçu par des professionnels et personnalisez-le à votre marque. Chaque thème est mobile-first, RTL et ultra-rapide.",
+        "viewAll": "Voir tous les thèmes"
+      },
+      "integrations": {
+        "eyebrow": "Intégrations natives",
+        "titlePre": "Tous les outils",
+        "titleAccent": "des marchands",
+        "titlePost": "réunis",
+        "description": "Des livreurs locaux à l'automatisation WhatsApp, du pixel Meta aux outils IA — tout fonctionne dès le premier jour.",
+        "tools": {
+          "multicarrier": {
+            "name": "Support Multi-Transporteurs",
+            "description": "Connectez plusieurs transporteurs via webhooks en temps réel. Expédition automatique, suivi et mises à jour en un seul endroit."
+          },
+          "whatsapp": {
+            "name": "WhatsApp API",
+            "description": "Envoyez des confirmations de commande, mises à jour d'expédition et promotions directement à vos clients."
+          },
+          "telegram": {
+            "name": "Telegram",
+            "description": "Recevez des alertes instantanées pour les nouvelles commandes, stocks bas et confirmations de paiement."
+          },
+          "metapixel": {
+            "name": "Meta Pixel",
+            "description": "Suivez les conversions, optimisez vos dépenses publicitaires et reciblez avec Facebook & Instagram."
+          },
+          "googlesheets": {
+            "name": "Google Sheets",
+            "description": "Exportez commandes et inventaire vers Google Sheets automatiquement pour des rapports personnalisés."
+          },
+          "ai": {
+            "name": "Outils IA",
+            "description": "Descriptions de produits générées par IA, suggestions de prix intelligentes et prévisions de la demande."
+          },
+          "imagegen": {
+            "name": "Génération d'images",
+            "description": "Générez des photos produits professionnelles et des bannières avec l'IA — sans séance photo."
+          }
+        }
+      }
+    },
+    "extras": {
+      "heroProof": {
+        "rating": "4,9 / 5",
+        "ratingLabel": "par 800+ marchands",
+        "merchants": "500+",
+        "merchantsLabel": "boutiques actives",
+        "cod": "Paiement à la livraison",
+        "codLabel": "intégré",
+        "noCard": "Sans carte bancaire",
+        "noCardLabel": "essai gratuit 14 jours"
+      },
+      "trustStrip": {
+        "eyebrow": "Conçu pour les marchands",
+        "items": {
+          "cod": {
+            "title": "Paiement à la livraison",
+            "description": "COD intégré avec réconciliation automatique chez tous les transporteurs."
+          },
+          "wilayas": {
+            "title": "Intégrations de transporteurs",
+            "description": "Connectez-vous facilement aux transporteurs — activation en un clic."
+          },
+          "rtl": {
+            "title": "Support multilingue",
+            "description": "RTL complet, UI compatible Darija, AR/FR/EN en un clic."
+          },
+          "dzd": {
+            "title": "Gestion des stocks",
+            "description": "Suivi d'inventaire en temps réel et alertes de réappro automatisées."
+          }
+        }
+      },
+      "stickyCta": {
+        "label": "Ouvrir ma boutique",
+        "subtle": "Gratuit · Sans carte"
+      },
+      "demoStore": "Voir la boutique de démo"
     }
   },
   "marketing": {
@@ -151,43 +556,74 @@
       "hero": {
         "title": {
           "prefix": "Tout ce qu’il vous faut pour ",
-          "accent": "passer à l’échelle"
+          "accent": "scaler"
         },
-        "subtitle": "Swekly est bien plus qu’un créateur de boutique. C’est un véritable système d’exploitation pour votre activité e-commerce."
+        "subtitle": "Créez votre boutique, recevez des commandes, gérez la livraison et gardez le contrôle sans multiplier les outils."
       },
       "items": {
         "builder": {
-          "title": "Constructeur de boutique (drag & drop)",
-          "description": "Créez des vitrines professionnelles et responsive sans écrire une seule ligne de code. Personnalisez chaque détail en quelques minutes."
+          "title": "Mise en place rapide",
+          "description": "Lancez une boutique propre, pensée pour le mobile, et adaptez-la rapidement à vos produits."
+        },
+        "tenancy": {
+          "title": "Infrastructure évolutive",
+          "description": "Plateforme de niveau entreprise construite pour la performance et la fiabilité, peu importe à quel point vous scalez."
+        },
+        "localization": {
+          "title": "Prêt pour le monde",
+          "description": "Arabe, français et anglais avec support RTL complet et parcours de commande multilingues."
+        },
+        "mobile": {
+          "title": "Expérience mobile d'abord",
+          "description": "Boutique et back-office se manient comme une app native sur mobile, là où vos clients et équipes travaillent."
         },
         "payments": {
-          "title": "Paiements mondiaux",
-          "description": "Acceptez des paiements partout grâce à des passerelles intégrées comme Stripe, PayPal et des fournisseurs locaux."
+          "title": "Commande pensée pour vos clients",
+          "description": "Simplifiez la prise de commande avec un parcours fait pour le COD, la confiance et la confirmation rapide."
         },
         "analytics": {
-          "title": "Analytique avancée",
-          "description": "Suivez les ventes en temps réel, le comportement des visiteurs et les entonnoirs de conversion."
+          "title": "Lecture claire des ventes",
+          "description": "Voyez ce qui se vend, ce qui ralentit et où investir davantage."
         },
         "automation": {
-          "title": "Automatisation marketing",
-          "description": "Récupérez les paniers abandonnés et engagez vos clients avec des workflows SMS et e-mail."
+          "title": "Suivi simple",
+          "description": "Gardez le contact avec vos clients grâce à de meilleurs suivis de commande et rappels."
         },
         "logistics": {
-          "title": "Réseau logistique",
-          "description": "Dispatch automatique des commandes vers Yalidine, Eckoz et plus de 50 transporteurs."
+          "title": "Connexions livraison",
+          "description": "Intégrez-vous facilement à vos transporteurs pour un fulfillment rationalisé."
         },
         "domains": {
-          "title": "Domaines personnalisés",
-          "description": "Connectez votre propre nom de domaine pour une expérience entièrement personnalisée."
+          "title": "Votre domaine",
+          "description": "Gardez votre image avec un domaine personnalisé et une boutique qui vous ressemble."
         }
       },
+      "bullets": {
+        "checkout": "Formulaire de commande rapide",
+        "carriers": "Support multi-transporteurs",
+        "dispatch": "Suivi dispatch simplifié"
+      },
+      "visual": {
+        "setupLabel": "Mise en place",
+        "setupTitle": "Ouvrez votre boutique sans perdre des semaines",
+        "setupTheme": "Thème et image de marque",
+        "setupCheckout": "Parcours de commande prêt à l’emploi",
+        "setupDelivery": "Livraison configurée dès le départ",
+        "signalLabel": "Élan"
+      },
+      "outcomeLabel": "Ce que vous gagnez",
+      "outcomeTitle": "Lancez plus vite, restez organisé",
+      "outcomeBody": "Chaque étape vous aide à vendre plus tôt et à alléger le quotidien de votre équipe.",
+      "surfaceLabel": "Inclus",
+      "surfaceBody": "Boutique, commande, livraison et suivi des ventes fonctionnent ensemble sans outils en plus.",
       "cta": {
         "title": "Prêt à commencer ?",
         "button": "Démarrer l’essai gratuit"
       }
     },
     "footer": {
-      "tagline": "Donnez plus de puissance à votre entreprise avec des outils modernes et une expérience premium. Conçu pour évoluer, pensé pour vous.",
+      "tagline": "Créez une boutique professionnelle, recevez vos commandes et gardez la livraison sous contrôle depuis un espace simple.",
+      "bottomLine": "",
       "product": {
         "title": "Produit",
         "changelog": "Historique des changements"
@@ -199,11 +635,52 @@
         "contact": "Contact"
       },
       "copyright": "© {year} Plateforme Swekly. Tous droits réservés."
+    },
+    "aboutPage": {
+      "heroTitle": "Pensé pour la façon dont le commerce fonctionne vraiment",
+      "heroSubtitle": "Swekly aide les marchands à lancer plus vite, rester organisés et garder la livraison simple dès le premier jour.",
+      "storyTitle": "Pas un autre simple créateur de boutique",
+      "storyBody": "Nous avons conçu Swekly autour des réalités des marchands modernes : achat mobile-first, confirmation COD, réseaux de livraison locaux et équipes qui veulent un quotidien plus fluide.",
+      "context": {
+        "storyLabel": "Pourquoi les marchands changent",
+        "label": "Construit autour des vrais usages",
+        "mobile": "Les clients achètent d’abord sur mobile",
+        "delivery": "La livraison fait partie de chaque vente",
+        "cod": "La confiance compte avant la commande"
+      },
+      "principles": {
+        "title": "Ce qui guide le produit",
+        "subtitle": "Un système commerce doit réduire la friction opérationnelle, pas ajouter plus de tableaux de bord à gérer.",
+        "items": {
+          "platform": {
+            "title": "Une plateforme, une boucle d'exécution",
+            "body": "Vitrine, checkout, inventaire, commandes et analytique restent connectés pour que l'équipe travaille depuis la même source de vérité."
+          },
+          "tenancy": {
+            "title": "Votre image, votre espace",
+            "body": "Votre boutique garde son domaine, son style et sa façon de travailler pour que vos clients aient l’impression d’acheter chez vous."
+          },
+          "cod": {
+            "title": "Conçu pour convertir en COD",
+            "body": "Un checkout centré téléphone, des signaux de confiance clairs et des étapes adaptées à la livraison reflètent la façon dont les clients commandent réellement."
+          },
+          "ops": {
+            "title": "Pensé pour l'exécution quotidienne",
+            "body": "Swekly est fait pour les équipes qui doivent publier vite, confirmer rapidement et garder la livraison prévisible."
+          }
+        }
+      },
+      "final": {
+        "title": "Partez d'une meilleure base storefront",
+        "subtitle": "Lancez plus vite, gardez des opérations plus propres et évoluez sur une plateforme conçue pour le commerce moderne."
+      }
     }
   },
   "auth": {
     "login": {
       "hero": {
+        "title": "Votre boutique, sous contrôle total.",
+        "tagline": "Gérez commandes, produits, livraison et analyses depuis un seul tableau de bord puissant.",
         "welcomeBack": "Bon retour",
         "builder": "Builder",
         "builderSuffix": ".",
@@ -212,7 +689,39 @@
           "title": "Suivi du chiffre d’affaires",
           "description": "Des insights en temps réel sur les performances de votre boutique."
         },
-        "copyright": "© {year} Swekly Inc."
+        "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "Ops en direct",
+          "focusArea": "Axe prioritaire"
+        },
+        "side": {
+          "label": "Dans votre espace",
+          "orders": "Commandes, produits et livraison au même endroit",
+          "workspace": "Un espace clair pour votre équipe",
+          "performance": "Une vue rapide sur les résultats du jour"
+        },
+        "carousel": {
+          "revenue": {
+            "title": "Suivi du chiffre d'affaires",
+            "description": "Des informations en temps réel sur les performances de votre boutique."
+          },
+          "orders": {
+            "title": "Gestion des commandes",
+            "description": "Traitez, suivez et honorez les commandes clients en toute simplicité."
+          },
+          "catalog": {
+            "title": "Catalogue produits",
+            "description": "Gérez les variantes, le stock et les prix depuis un seul endroit."
+          },
+          "shipping": {
+            "title": "Expédition intelligente",
+            "description": "Expédition automatique vers plus de 50 transporteurs avec suivi en temps réel."
+          },
+          "analytics": {
+            "title": "Analyses approfondies",
+            "description": "Suivez les tunnels de vente, les taux de conversion et le comportement client."
+          }
+        }
       },
       "form": {
         "title": "Connectez-vous à votre compte",
@@ -236,6 +745,12 @@
       "errors": {
         "invalidCredentials": "E-mail ou mot de passe incorrect",
         "generic": "Une erreur est survenue. Veuillez réessayer."
+      },
+      "social": {
+        "divider": "ou continuer avec",
+        "google": "Continuer avec Google",
+        "facebook": "Continuer avec Facebook",
+        "apple": "Continuer avec Apple"
       }
     },
     "register": {
@@ -247,9 +762,29 @@
         "testimonial": {
           "quote": "Passer sur Swekly a été la meilleure décision. Notre chiffre d’affaires a doublé en 3 mois.",
           "name": "Yanis M.",
-          "role": "PDG, FashionNova"
+          "role": "Propriétaire, Dzair Fashion"
         },
-        "copyright": "© {year} Swekly Inc."
+        "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "Mode lancement",
+          "title": "Contrôle de lancement",
+          "ready": "Prêt",
+          "metrics": {
+            "goLive": "Mise en ligne",
+            "uptime": "Disponibilité",
+            "localCod": "COD local"
+          },
+          "pills": {
+            "orders": "Gestion des commandes",
+            "shipping": "Livraison intelligente",
+            "analytics": "Analytique avancée"
+          },
+          "tasks": {
+            "cod": "Checkout localisé et flux COD",
+            "performance": "Performance de boutique rapide dès le premier jour",
+            "analytics": "Analytique claire pour les décisions quotidiennes"
+          }
+        }
       },
       "form": {
         "title": "Créez votre compte",
@@ -267,15 +802,39 @@
           "label": "E-mail",
           "placeholder": "name{'@'}company.com"
         },
+        "phone": {
+          "label": "Téléphone",
+          "placeholder": "+XX X XXX XXXX"
+        },
+        "otp": {
+          "label": "Confirmation OTP",
+          "placeholder": "Entrez le code OTP",
+          "send": "Envoyer le code",
+          "verify": "Vérifier le code",
+          "placeholderNotice": "Code OTP envoyé.",
+          "verified": "Téléphone confirmé.",
+          "resend": "Renvoyer"
+        },
         "password": {
           "label": "Mot de passe"
         },
+        "confirmPassword": {
+          "label": "Confirmer le mot de passe"
+        },
         "submit": {
           "creating": "Création du compte...",
-          "register": "S’inscrire et créer la boutique"
+          "register": "S’inscrire et créer la boutique",
+          "verifyOtp": "Vérifiez l’OTP pour continuer"
         },
         "haveAccount": "Vous avez déjà un compte ?",
-        "logIn": "Se connecter"
+        "logIn": "Se connecter",
+        "forgotPassword": "Mot de passe oublié ?",
+        "passwordStrength": {
+          "weak": "Faible",
+          "fair": "Moyen",
+          "good": "Bon",
+          "strong": "Fort"
+        }
       },
       "success": {
         "title": "C’est bon !",
@@ -283,18 +842,79 @@
         "cta": "Aller au tableau de bord"
       },
       "errors": {
-        "generic": "Une erreur est survenue lors de l’inscription."
+        "generic": "Une erreur est survenue lors de l’inscription.",
+        "sessionMissing": "Votre compte a été créé, mais la connexion automatique a échoué. Connectez-vous pour continuer.",
+        "emailInvalid": "Entrez une adresse e-mail valide.",
+        "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères.",
+        "passwordMismatch": "Les mots de passe ne correspondent pas.",
+        "phoneRequired": "Le numéro de téléphone est requis.",
+        "phoneInvalid": "Entrez un numéro de téléphone valide.",
+        "phoneRestricted": "L’inscription est actuellement indisponible.",
+        "otpRequired": "Entrez le code OTP.",
+        "otpSendFirst": "Envoyez d’abord le code OTP.",
+        "otpVerifyFirst": "Vérifiez l’OTP avant de créer votre compte.",
+        "otpInvalid": "Saisissez le code à {length} chiffres."
+      },
+      "social": {
+        "divider": "ou continuer avec",
+        "google": "Continuer avec Google",
+        "facebook": "Continuer avec Facebook",
+        "apple": "Continuer avec Apple"
       }
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Entrez votre e-mail et nous enverrons les instructions de réinitialisation quand cette fonctionnalité sera activée.",
+      "placeholderNotice": "Cet écran est un placeholder pour le moment. Les e-mails de réinitialisation ne sont pas encore actifs.",
+      "email": {
+        "label": "Adresse e-mail",
+        "placeholder": "name{'@'}company.com"
+      },
+      "submit": {
+        "send": "Envoyer le lien de réinitialisation",
+        "sent": "Demande enregistrée (placeholder)"
+      },
+      "backToLogin": "Retour à la connexion"
+    },
+    "errors": {
+      "offlineMode": "Cet appareil fonctionne en mode local uniquement et ne peut pas joindre le serveur. Activez un espace de travail en ligne pour vous connecter.",
+      "cancelled": "La requête a été annulée. Veuillez réessayer.",
+      "noConnection": "Aucune connexion au serveur. Vérifiez votre connexion Internet et réessayez.",
+      "timeout": "Le serveur a mis trop de temps à répondre. Veuillez réessayer.",
+      "badCertificate": "Impossible d'établir une connexion sécurisée avec le serveur.",
+      "invalidRequest": "Certaines informations saisies ne sont pas valides.",
+      "forbidden": "Ce compte n'est pas autorisé à effectuer cette action.",
+      "notFound": "Le serveur n'a pas trouvé l'élément demandé.",
+      "conflict": "Ces informations sont déjà utilisées.",
+      "server": "Le serveur a rencontré un problème. Veuillez réessayer dans un instant.",
+      "unknown": "Une erreur s'est produite. Veuillez réessayer.",
+      "invalidResponse": "Le serveur a renvoyé une réponse inattendue.",
+      "superAdmin": "Les comptes super-admin doivent utiliser la console super-admin web.",
+      "sessionExpired": "Votre session a expiré. Veuillez vous reconnecter."
+    },
+    "validation": {
+      "emailRequired": "L'e-mail est obligatoire.",
+      "emailInvalid": "Saisissez une adresse e-mail valide.",
+      "passwordRequired": "Le mot de passe est obligatoire.",
+      "confirmPasswordRequired": "Confirmez votre mot de passe.",
+      "companyNameRequired": "Le nom de l'entreprise est obligatoire.",
+      "slugRequired": "L'URL de la boutique est obligatoire.",
+      "slugInvalid": "Utilisez uniquement des lettres minuscules, des chiffres et des tirets."
+    },
+    "common": {
+      "showPassword": "Afficher le mot de passe",
+      "hidePassword": "Masquer le mot de passe",
+      "switchToLight": "Passer en mode clair",
+      "switchToDark": "Passer en mode sombre"
+    },
+    "social": {
+      "comingSoon": "La connexion via les réseaux sociaux arrive bientôt."
     }
   },
   "pricing": {
     "seo": {
       "title": "Tarifs - Swekly",
       "description": "Choisissez l’offre adaptée à votre étape de croissance."
-    },
-    "page": {
-      "title": "Tarifs simples et transparents",
-      "subtitle": "Choisissez l’offre adaptée à votre croissance. Aucun frais caché."
     },
     "section": {
       "title": "Tarifs transparents",
@@ -310,30 +930,59 @@
       "recommended": "Recommandé"
     },
     "period": {
-      "perMonth": "/mois"
+      "perMonth": "/mois",
+      "perYear": "/an"
     },
     "features": {
-      "ordersPerMonth": "{count} commandes/mois"
+      "ordersPerMonth": "{count} commandes/mois",
+      "maxProducts": "Jusqu’à {count} produits",
+      "maxPixels": "{count} pixels marketing"
+    },
+    "page": {
+      "title": "Tarifs simples et transparents",
+      "subtitle": "Choisissez l’offre qui correspond à votre volume de commandes et au niveau d’accompagnement souhaité.",
+      "includedTitle": "Inclus dès le départ",
+      "includedCheckout": "Une boutique avec un parcours de commande simple",
+      "includedDelivery": "Des options de livraison prêtes pour vos commandes",
+      "includedSupport": "Une aide au lancement quand vous démarrez",
+      "growthLabel": "Grandir sereinement",
+      "growthTitle": "Plus de commandes, plus d’options, le même confort",
+      "growthBody": "Passez à l’offre supérieure quand votre boutique grandit. Vos produits, vos habitudes d’équipe et votre flux livraison restent les mêmes.",
+      "enterpriseLabel": "Besoin de plus ?",
+      "enterpriseTitle": "Une mise en place sur mesure pour les boutiques et équipes plus larges",
+      "enterpriseBody": "Parlez à Swekly si vous avez besoin d’aide à la migration, d’un volume mensuel plus élevé ou d’un accompagnement au déploiement.",
+      "enterpriseItems": {
+        "setup": "Aide à la mise en place et à la migration",
+        "ops": "Revue du flux commandes et livraison",
+        "guidance": "Dimensionnement de l’offre pour une marque en croissance"
+      },
+      "features": {
+        "store": "Boutique en ligne professionnelle incluse",
+        "delivery": "Options de livraison et suivi",
+        "upsell": "Outils marketing et vente additionnelle",
+        "analytics": "Suivi clair des ventes et conversions",
+        "team": "Accompagnement avancé pour les équipes plus larges"
+      }
     },
     "plans": {
       "basic": {
         "name": "Basique",
-        "description": "Idéal pour essayer",
+        "description": "Un départ gratuit pour tester vos premiers produits",
         "cta": "Commencer"
       },
       "beginner": {
         "name": "Débutant",
-        "description": "Un démarrage simple pour booster votre boutique",
+        "description": "Pour une petite boutique qui veut vendre sérieusement",
         "cta": "Commencer"
       },
       "merchant": {
         "name": "Marchand",
-        "description": "Le choix malin pour les entreprises en croissance",
+        "description": "Le meilleur choix pour une boutique qui reçoit déjà des commandes",
         "cta": "Commencer"
       },
       "professional": {
         "name": "Professionnel",
-        "description": "Conçu pour évoluer en toute confiance",
+        "description": "Pour les marques qui gèrent un plus gros volume chaque mois",
         "cta": "15 jours gratuits"
       }
     }
@@ -355,6 +1004,8 @@
       "adding": "Ajout…",
       "outOfStock": "Rupture de stock",
       "quickView": "Aperçu rapide",
+      "addToWishlist": "Ajouter aux favoris",
+      "removeFromWishlist": "Retirer des favoris",
       "viewCart": "Voir le panier",
       "checkout": "Paiement",
       "continueShopping": "Continuer vos achats",
@@ -364,6 +1015,10 @@
       "clearAll": "Tout effacer",
       "filters": "Filtres",
       "search": "Rechercher"
+    },
+    "cartTip": {
+      "message": "Astuce : vous pouvez ajouter plusieurs produits — ajoutez ce que vous voulez au panier avant de passer commande.",
+      "close": "Fermer"
     },
     "badges": {
       "new": "Nouveau"
@@ -551,7 +1206,20 @@
       "inStock": "En stock",
       "perUnit": "par unité",
       "descriptionFallback": "Découvrez le parfait équilibre entre style et fonctionnalité.",
-      "viewFullDetails": "Voir les détails"
+      "viewFullDetails": "Voir les détails",
+      "bestsellerBadge": "Meilleure vente",
+      "youMayAlsoLike": "Vous aimerez aussi",
+      "saleBanner": "VENTE PROLONGÉE BLACK FRIDAY - BIENTÔT FINI !",
+      "reviewsCount": "(+{count} Avis)",
+      "highDemandBadge": "Forte demande !",
+      "viewingRightNow": "{count} personnes consultent cet article.",
+      "savePercentage": "ÉCONOMISEZ {percent} %",
+      "whyChooseUs": "Pourquoi nous choisir ?",
+      "features": {
+        "delivery": "Livraison Rapide",
+        "support": "Service Client 24/7",
+        "securePayment": "Paiement Sécurisé"
+      }
     },
     "productForm": {
       "quantity": {
@@ -581,6 +1249,12 @@
       "addedToCart": {
         "title": "Ajouté au panier",
         "message": "Consultez votre panier pour finaliser votre achat."
+      },
+      "addedToWishlist": {
+        "message": "Ajouté aux favoris."
+      },
+      "removedFromWishlist": {
+        "message": "Retiré des favoris."
       },
       "outOfStock": {
         "message": "Veuillez sélectionner une option disponible."
@@ -643,6 +1317,11 @@
       "wishlistTitle": "Favoris",
       "accountTitle": "Compte"
     },
+    "wishlist": {
+      "title": "Favoris",
+      "emptyTitle": "Aucun favori pour le moment",
+      "emptySubtitle": "Appuyez sur le cœur d’un produit pour l’enregistrer ici."
+    },
     "footer": {
       "contact": "Contact",
       "contactUs": "Nous contacter",
@@ -668,7 +1347,9 @@
       "toggleSidebar": "Afficher/masquer le menu",
       "closeSidebar": "Fermer le menu",
       "viewStore": "Voir la boutique",
-      "logout": "Se déconnecter"
+      "logout": "Se déconnecter",
+      "logoutConfirmTitle": "Se déconnecter ?",
+      "logoutConfirmMessage": "Vous devrez vous reconnecter pour accéder au panneau d’administration."
     },
     "common": {
       "name": "Nom",
@@ -716,7 +1397,15 @@
       "error": "Une erreur s'est produite. Veuillez réessayer.",
       "saved": "Enregistré !",
       "filters": "Filtres",
-      "noDataAvailable": "Aucune donnée disponible"
+      "noDataAvailable": "Aucune donnée disponible",
+      "unsavedChanges": "Modifications non enregistrées",
+      "unsavedChangesHint": "N'oubliez pas d'enregistrer vos modifications.",
+      "discard": "Annuler",
+      "noResults": "Aucun résultat",
+      "replace": "Remplacer",
+      "soon": "Bientôt",
+      "moveUp": "Monter",
+      "moveDown": "Descendre"
     },
     "confirmModal": {
       "defaults": {
@@ -733,7 +1422,10 @@
           "pngOnly": "Veuillez téléverser une image PNG.",
           "squareOnly": "L’image doit être carrée (actuel : {w}x{h}px).",
           "uploadFailed": "Échec du téléversement",
-          "readDimensionsFailed": "Impossible de lire les dimensions de l’image."
+          "readDimensionsFailed": "Impossible de lire les dimensions de l’image.",
+          "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
+          "tooLarge": "L’image doit faire moins de {max}",
+          "cropFailed": "Impossible de rogner l’image"
         }
       },
       "richTextEditor": {
@@ -760,7 +1452,39 @@
         "actions": {
           "addSelected": "Ajouter la sélection"
         }
+      },
+      "imageUploader": {
+        "clickToUpload": "Cliquez pour téléverser une image",
+        "dragDrop": "PNG, JPEG ou WebP",
+        "errors": {
+          "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
+          "tooLarge": "L’image doit faire moins de {max}",
+          "cropFailed": "Impossible de rogner l’image",
+          "uploadFailed": "Échec du téléversement"
+        }
+      },
+      "imageCropper": {
+        "title": "Rogner l’image",
+        "confirm": "Utiliser l’image rognée",
+        "subtitleFree": "Ajustez librement la zone de recadrage.",
+        "subtitlePreset": "Recadrage au ratio {preset}.",
+        "presets": {
+          "free": "Libre"
+        },
+        "errors": {
+          "noFile": "Aucune image sélectionnée pour le recadrage.",
+          "unavailable": "Le module de recadrage est indisponible.",
+          "resultFailed": "Impossible de générer l’image recadrée.",
+          "loadFailed": "Impossible de charger l’image dans le recadreur."
+        }
       }
+    },
+    "help": {
+      "button": "Centre d'aide",
+      "title": "Support Swekly",
+      "subtitle": "Comment pouvons-nous vous aider aujourd'hui ?",
+      "greeting": "Bonjour ! Je suis l'assistant Swekly. Comment puis-je vous aider à gérer votre boutique aujourd'hui ?",
+      "inputPlaceholder": "Tapez votre message..."
     },
     "storeSettingsForm": {
       "title": "Apparence et paramètres de la boutique",
@@ -837,6 +1561,11 @@
         "noImage": "Aucune image",
         "uploadImage": "Téléverser une image",
         "addSlide": "Ajouter une diapositive",
+        "slide": "diapositive",
+        "slides": "diapositives",
+        "untitled": "Diapositive sans titre",
+        "noSlides": "Aucune diapositive",
+        "createFirst": "Créer la première diapositive",
         "defaults": {
           "title": "Nouvelle diapositive"
         }
@@ -850,7 +1579,9 @@
         "imageUrl": "URL de l’image",
         "imageUrlHint": "Ou collez une URL si vous en avez déjà une.",
         "eyebrow": "Sur-titre",
-        "limit": "Limite"
+        "limit": "Limite",
+        "sectionTitle": "Titre de la section",
+        "numberOfProducts": "Nombre de produits"
       },
       "sections": {
         "title": "Sections de la page d’accueil",
@@ -879,6 +1610,24 @@
       }
     },
     "functionalSettingsForm": {
+      "themeGroups": {
+        "sales": {
+          "title": "Vente & checkout",
+          "subtitle": "Commandes, panier et règles d’achat."
+        },
+        "invoices": {
+          "title": "Facturation",
+          "subtitle": "Documents générés depuis les ventes."
+        },
+        "marketing": {
+          "title": "Marketing & fidélité",
+          "subtitle": "Annonce de vitrine et points client."
+        },
+        "localization": {
+          "title": "Localisation",
+          "subtitle": "Devise et langue de la boutique."
+        }
+      },
       "features": {
         "title": "Fonctionnalités de la boutique",
         "subtitle": "Activez ou désactivez les fonctionnalités principales de votre vitrine.",
@@ -892,6 +1641,59 @@
           "subtitle": "Afficher un formulaire \"Acheter maintenant en COD\" sur les pages produit pour convertir plus vite.",
           "toggle": "Activer le formulaire COD"
         }
+      },
+      "checkoutRules": {
+        "title": "Règles de checkout",
+        "subtitle": "Conditions de commande et comportement du checkout.",
+        "minimumOrder": {
+          "title": "Montant minimum de commande",
+          "subtitle": "Bloquer le checkout si le sous-total panier est inférieur à ce montant.",
+          "unit": "DZD"
+        },
+        "orderIdPrefix": {
+          "title": "Préfixe de commande client",
+          "subtitle": "Préfixe utilisé dans la référence publique de commande affichée au client.",
+          "placeholder": "ORDR",
+          "hint": "4-5 caractères"
+        },
+        "hideOptionalAddress": {
+          "title": "Masquer le champ adresse optionnelle",
+          "subtitle": "Retirer le champ adresse optionnelle du checkout et des formulaires de commande rapide.",
+          "toggle": "Masquer l'adresse optionnelle"
+        }
+      },
+      "invoices": {
+        "title": "Factures de vente",
+        "subtitle": "Activez les factures PDF imprimables pour les ventes PDV et livrées.",
+        "enable": {
+          "title": "Activer la facturation",
+          "subtitle": "Permettre aux admins de générer et imprimer les factures depuis les ventes.",
+          "toggle": "Activer les factures de vente"
+        },
+        "prefix": {
+          "label": "Préfixe de facture",
+          "placeholder": "INV"
+        },
+        "logo": {
+          "label": "Marque",
+          "title": "Afficher le logo",
+          "subtitle": "Utilise le logo des paramètres d'apparence s'il est disponible.",
+          "toggle": "Afficher le logo sur les factures"
+        },
+        "footer": {
+          "label": "Note de bas de page",
+          "placeholder": "Merci pour votre achat."
+        }
+      },
+      "loyalty": {
+        "title": "Programme de points",
+        "subtitle": "Configurez le calcul et la redemption des points.",
+        "enable": "Activer les points",
+        "enableSubtitle": "Activer le calcul des points et leur redemption au checkout.",
+        "basePoints": "Points de base",
+        "marginFactor": "Facteur de marge",
+        "minRedeem": "Seuil minimum (points)",
+        "dzdPerPoint": "DZD par point"
       },
       "currency": {
         "title": "Devise de la boutique",
@@ -909,16 +1711,52 @@
           "subtitle": "Votre vitrine passera automatiquement en mode droite à gauche pour l’arabe."
         }
       },
+      "storefrontSearch": {
+        "title": "Barre de recherche (Storefront)",
+        "subtitle": "Afficher la barre de recherche sur la boutique (bientôt disponible)."
+      },
       "actions": {
         "discardChanges": "Annuler les modifications"
       },
       "messages": {
         "loadFailed": "Impossible de charger les paramètres.",
-        "saved": "Paramètres fonctionnels enregistrés !",
+        "saved": "Paramètres de vente enregistrés !",
         "saveFailed": "Impossible d’enregistrer les modifications. Veuillez réessayer."
       },
       "confirm": {
         "discard": "Voulez-vous vraiment annuler les modifications non enregistrées ?"
+      }
+    },
+    "domainSettingsForm": {
+      "customDomain": {
+        "title": "Domaine personnalisé",
+        "subtitle": "Ajoutez le nom exact que les clients visiteront, par exemple www.example.com."
+      },
+      "fields": {
+        "domain": "Nom de domaine"
+      },
+      "actions": {
+        "add": "Ajouter le domaine"
+      },
+      "dns": {
+        "title": "Enregistrement DNS",
+        "subtitle": "Créez cet enregistrement CNAME chez votre fournisseur DNS, puis gardez le domaine ajouté ici.",
+        "apexNote": "Pour un domaine racine comme example.com, utilisez ALIAS/ANAME si votre fournisseur DNS le permet, ou redirigez-le vers www.example.com."
+      },
+      "connected": {
+        "title": "Domaines connectés",
+        "subtitle": "Les domaines listés ici sont autorisés à afficher cette boutique.",
+        "empty": "Aucun domaine personnalisé connecté."
+      },
+      "messages": {
+        "loadFailed": "Impossible de charger les domaines.",
+        "saved": "Domaine connecté.",
+        "saveFailed": "Impossible d'ajouter le domaine.",
+        "deleted": "Domaine supprimé.",
+        "deleteFailed": "Impossible de supprimer le domaine."
+      },
+      "confirm": {
+        "delete": "Supprimer ce domaine ?"
       }
     },
     "contactInfosForm": {
@@ -976,7 +1814,7 @@
         },
         "whatsapp": {
           "label": "WhatsApp",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "Facebook",
@@ -1012,7 +1850,7 @@
         },
         "viber": {
           "label": "Viber",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "Pinterest",
@@ -1038,7 +1876,10 @@
         "body": "Glissez-déposez pour réordonner. Cliquez sur l’étoile pour définir l’image principale."
       },
       "errors": {
-        "uploadFailed": "Impossible de téléverser l’image"
+        "uploadFailed": "Impossible de téléverser l’image",
+        "invalidType": "Seules les images PNG, JPEG et WebP sont autorisées",
+        "tooLarge": "L’image doit faire moins de {max}",
+        "cropFailed": "Impossible de rogner l’image"
       }
     },
     "variantsTable": {
@@ -1056,7 +1897,8 @@
         "sku": "SKU",
         "barcode": "Code-barres",
         "active": "Actif",
-        "images": "Images"
+        "images": "Images",
+        "promotion": "Promotion"
       },
       "actions": {
         "manageImages": "Gérer ({count})",
@@ -1099,7 +1941,8 @@
         "suggestSkuFailed": "Impossible de suggérer un SKU",
         "suggestSkuUnavailable": "Le SKU suggéré n’est pas disponible",
         "saveImagesFailed": "Impossible d’enregistrer les images"
-      }
+      },
+      "promotionSimpleProduct": "Utilisez l’onglet promotions du produit pour la variante par défaut d’un produit simple."
     },
     "productOptionsEditor": {
       "title": "Options",
@@ -1170,11 +2013,22 @@
         "logo": {
           "label": "Logo de la marque",
           "upload": "Téléverser le logo",
-          "hint": "Carré (1:1), PNG recommandé."
+          "hint": "Carré (1:1), PNG recommandé.",
+          "magicIdentity": "Identité magique",
+          "magicHint": "Téléversez d'abord un logo pour générer une identité.",
+          "magicSuccess": "Identité magique appliquée."
+        },
+        "favicon": {
+          "label": "Favicon",
+          "upload": "Téléverser le favicon",
+          "hint": "Image carrée (ICO, PNG), taille recommandée 32x32px"
         },
         "primaryColor": {
           "label": "Couleur principale",
-          "hint": "Utilisée pour les boutons, liens et accents."
+          "hint": "Utilisée pour les boutons, liens et accents.",
+          "suggested": "Palettes suggérées",
+          "overrideLabel": "Appliquer la couleur de marque au modèle",
+          "overrideHint": "Désactivez pour garder la couleur d'origine du modèle sélectionné."
         }
       },
       "announcement": {
@@ -1192,35 +2046,68 @@
         "options": {
           "classic": {
             "label": "Classique",
-            "description": "Élégance intemporelle avec typographie serif."
+            "description": "Élégance intemporelle avec typographie serif.",
+            "storeTypes": "Vêtements, bijoux, déco d'intérieur"
           },
           "modern": {
             "label": "Minimal moderne",
-            "description": "Esthétique épurée avec accents marqués."
+            "description": "Esthétique épurée avec accents marqués.",
+            "storeTypes": "Mode, beauté, lifestyle"
           },
           "street": {
             "label": "Urbain",
-            "description": "Style énergique à fort contraste."
+            "description": "Style énergique à fort contraste.",
+            "storeTypes": "Sneakers, streetwear, éditions limitées"
           },
           "cozy": {
             "label": "Chaleureux",
-            "description": "Verts doux et formes arrondies."
+            "description": "Verts doux et formes arrondies.",
+            "storeTypes": "Bougies, cadeaux, bien-être"
           },
           "cyber": {
             "label": "Cyber futur",
-            "description": "Mode sombre avec accents néon."
+            "description": "Mode sombre avec accents néon.",
+            "storeTypes": "Tech, électronique, gaming"
           },
           "stationnery": {
             "label": "Papeterie",
-            "description": "Structure raffinée pour les professionnels."
+            "description": "Structure raffinée pour les professionnels.",
+            "storeTypes": "Livres, papeterie, bureau"
           },
           "food": {
             "label": "Marché food",
-            "description": "Vibrant et appétissant."
+            "description": "Vibrant et appétissant.",
+            "storeTypes": "Restaurants, boulangeries, épiceries"
           },
           "wellness": {
             "label": "Bien-être",
-            "description": "Organique, calme et naturel."
+            "description": "Organique, calme et naturel.",
+            "storeTypes": "Compléments, cosmétiques, bio"
+          },
+          "playful": {
+            "label": "Ludique",
+            "description": "Coloré et fun pour enfants & familles.",
+            "storeTypes": "Jouets, mode enfant, famille"
+          },
+          "activewear": {
+            "label": "Sport",
+            "description": "Dynamique et percutant pour le sport & la gym.",
+            "storeTypes": "Sport, fitness, plein air"
+          },
+          "arena": {
+            "label": "Arena",
+            "description": "Vitrine sombre et performante avec énergie e-sport et accents cyan.",
+            "storeTypes": "Gaming, périphériques, tech, e-sport"
+          },
+          "chrono": {
+            "label": "Chrono Luxe",
+            "description": "Thème sombre de luxe avec accents dorés pour accessoires premium.",
+            "storeTypes": "Montres, lunettes, bijoux, accessoires de luxe"
+          },
+          "maison": {
+            "label": "Pistachio",
+            "description": "Univers éditorial chaleureux et premium pour l'épicerie fine et le retail raffiné.",
+            "storeTypes": "Food premium, cadeaux, fruits secs, retail gourmet"
           }
         }
       },
@@ -1251,6 +2138,8 @@
       "delivery": "Livraison",
       "finance": "Finance",
       "cash": "Caisse",
+      "storeParameters": "Paramètres de la boutique",
+      "settingsHub": "Paramètres",
       "settings": "Administration",
       "dashboard": "Tableau de bord",
       "products": "Produits",
@@ -1261,14 +2150,80 @@
       "orders": "Commandes",
       "salesItem": "Ventes",
       "pos": "PDV",
+      "devices": "Appareils",
       "customers": "Clients",
       "deliveryItem": "Livraison",
       "billing": "Facturation",
       "appearance": "Apparence",
       "homepage": "Page d’accueil",
       "contactInfo": "Infos de contact",
-      "functional": "Fonctionnel",
-      "users": "Utilisateurs"
+      "legalPages": "Pages legales",
+      "functional": "Vente & checkout",
+      "domains": "Domaines",
+      "users": "Utilisateurs",
+      "storefront": "Boutique",
+      "account": "Compte",
+      "connections": "Connexions",
+      "apps": "Applications",
+      "integrations": "Intégrations",
+      "export": "Exporter"
+    },
+    "settingsHub": {
+      "empty": {
+        "title": "Aucun thème disponible",
+        "description": "Votre rôle ne donne pas accès aux paramètres de cette boutique."
+      },
+      "themes": {
+        "identity": {
+          "title": "Identité & apparence",
+          "description": "Nom, URL, logo, favicon, couleur et template."
+        },
+        "content": {
+          "title": "Page d’accueil & contenu",
+          "description": "Accueil, coordonnées et pages légales affichées sur la vitrine."
+        },
+        "checkout": {
+          "title": "Vente & checkout",
+          "description": "Panier, COD, montant minimum, préfixe commande et adresse."
+        },
+        "invoices": {
+          "title": "Facturation",
+          "description": "Factures de vente, préfixe, logo et note de bas de page."
+        },
+        "localization": {
+          "title": "Localisation",
+          "description": "Langue par défaut, devise et pays de référence."
+        },
+        "marketing": {
+          "title": "Marketing & fidélité",
+          "description": "Annonce de vitrine et programme de points."
+        },
+        "connections": {
+          "title": "Domaines & intégrations",
+          "description": "Domaine personnalisé et connexions externes."
+        },
+        "administration": {
+          "title": "Administration",
+          "description": "Utilisateurs et facturation de l’abonnement."
+        }
+      },
+      "links": {
+        "appearance": "Identité & apparence",
+        "homepage": "Page d’accueil",
+        "contact": "Infos de contact",
+        "legal": "Pages légales",
+        "salesFeatures": "Vente",
+        "checkoutRules": "Règles checkout",
+        "salesInvoices": "Factures de vente",
+        "currency": "Devise",
+        "language": "Langue",
+        "announcement": "Annonce",
+        "loyalty": "Fidélité",
+        "domains": "Domaines",
+        "integrations": "Intégrations",
+        "users": "Utilisateurs",
+        "billing": "Abonnement"
+      }
     },
     "roles": {
       "owner": "Propriétaire",
@@ -1300,6 +2255,11 @@
           "hint": "Courte description pour l’en-tête de la landing page (optionnel)",
           "placeholder": "Saisir un bref résumé…"
         },
+        "searchKeywords": {
+          "label": "Mots-clés de recherche",
+          "hint": "Mots-clés pour aider les clients à trouver ce produit dans la recherche de la boutique.",
+          "placeholder": "Tapez et appuyez sur Entrée..."
+        },
         "description": {
           "label": "Description",
           "placeholder": "Saisir la description du produit avec mise en forme…"
@@ -1324,6 +2284,15 @@
         },
         "isActive": {
           "label": "Le produit est actif et visible pour les clients"
+        },
+        "isPromotionActive": {
+          "label": "Promotion Active"
+        },
+        "promotionalPrice": {
+          "label": "Prix Promotionnel"
+        },
+        "showCountdown": {
+          "label": "Afficher le compte à rebours"
         }
       },
       "category": {
@@ -1385,6 +2354,10 @@
         "address": {
           "label": "Adresse",
           "placeholder": "Adresse du fournisseur"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Additional notes…"
         }
       }
     },
@@ -1406,7 +2379,7 @@
             "discount": "Remise",
             "reprint": "Réimprimer",
             "reprintLastOrder": "Réimprimer la dernière commande",
-            "quickCharge": "Encaissement rapide",
+            "customAmount": "Montant libre",
             "sort": "Trier",
             "columns": "Colonnes"
           },
@@ -1463,6 +2436,20 @@
           "actions": {
             "confirmPayment": "Confirmer le paiement"
           }
+        },
+        "alerts": {
+          "saleCreated": "Vente créée avec succès",
+          "saleFailed": "Échec de la vente : {message}",
+          "unknownError": "Une erreur inconnue est survenue",
+          "featureComingSoon": "La fonction {feature} arrive bientôt",
+          "reprintNotImplemented": "La réimpression de la dernière vente n'est pas encore disponible",
+          "printInvoicePrompt": "Imprimer la facture de cette vente ?",
+          "invoicePopupBlocked": "La fenêtre de facture a été bloquée par le navigateur.",
+          "invoiceFailed": "Échec de la facture : {message}",
+          "invoicesDisabled": "Les factures de vente sont désactivées dans les paramètres fonctionnels.",
+          "noLastSale": "Aucune vente récente à réimprimer.",
+          "noOpenSession": "Ouvrez une session de caisse avant d'enregistrer une vente.",
+          "ambiguousCashbox": "Plusieurs caisses ont une session ouverte. Affectez ce terminal à l'une d'elles avant de vendre."
         }
       },
       "cash": {
@@ -1886,17 +2873,62 @@
         "title": "Tableau de bord",
         "welcomeBack": "Bon retour, {tenant}",
         "snapshot": "Un aperçu rapide de votre boutique.",
+        "periodLabel": "Période : {from} au {to} ({days} jours)",
         "refresh": "Actualiser",
         "finishSetup": "Terminer la configuration",
         "loadErrorTitle": "Les données du tableau de bord n’ont pas pu être chargées.",
         "loadErrorHint": "Essayez d’actualiser. Si cela continue, vérifiez votre connexion ou votre session.",
+        "filters": {
+          "range": "Période",
+          "ranges": {
+            "today": "Aujourd’hui",
+            "7d": "7 derniers jours",
+            "30d": "30 derniers jours",
+            "90d": "90 derniers jours",
+            "custom": "Personnalisée"
+          }
+        },
         "stats": {
+          "totalRevenue": "CA total",
+          "ordersRevenue": "CA commandes",
+          "posRevenue": "CA point de vente",
+          "ordersCount": "Nombre de commandes",
           "activeSessions": "Sessions actives",
           "orders7d": "Commandes (7 jours)",
           "revenue7d": "Chiffre d’affaires (7 jours)",
           "products": "Produits",
           "lowStock": "Stock faible",
           "outOfStock": "{count} en rupture de stock"
+        },
+        "trends": {
+          "revenue": {
+            "title": "Tendance du chiffre d’affaires",
+            "hint": "Commandes + POS sur la période sélectionnée."
+          },
+          "orders": {
+            "title": "Tendance des commandes",
+            "hint": "Volume de commandes sur la période sélectionnée."
+          },
+          "empty": "Aucune donnée de tendance sur cette période."
+        },
+        "insights": {
+          "units": "{count} unités",
+          "topProducts": {
+            "title": "Produits les plus vendus",
+            "hint": "Produits les plus performants sur la période.",
+            "empty": "Aucune vente produit sur cette période."
+          },
+          "topCategories": {
+            "title": "Catégories les plus vendues",
+            "hint": "Catégories les plus performantes sur la période.",
+            "empty": "Aucune vente catégorie sur cette période."
+          },
+          "criticalStock": {
+            "title": "Stock critique",
+            "hint": "Produits au seuil bas ou en dessous.",
+            "empty": "Aucun produit en stock critique actuellement.",
+            "threshold": "Seuil {count}"
+          }
         },
         "recentOrders": {
           "title": "Commandes récentes",
@@ -1923,8 +2955,10 @@
         "quickLinks": {
           "title": "Actions rapides",
           "hint": "Les tâches admin les plus courantes.",
+          "orders": "Commandes",
           "addProduct": "Ajouter un produit",
           "manageProducts": "Gérer les produits",
+          "inventory": "Inventaire",
           "categories": "Catégories",
           "appearance": "Apparence",
           "pos": "Point de vente",
@@ -1939,6 +2973,17 @@
         "seePricing": "Voir les tarifs",
         "errors": {
           "loadFailed": "Impossible de charger les informations de facturation."
+        },
+        "status": {
+          "pending": {
+            "title": "Paiement en cours de vérification",
+            "desc": "Nous avons bien reçu votre justificatif de paiement. Notre équipe le vérifie en ce moment. Votre abonnement sera mis à jour dès validation.",
+            "badge": "en attente"
+          },
+          "approved": {
+            "title": "Paiement approuvé",
+            "desc": "Votre dernier paiement a été validé et votre abonnement est actif."
+          }
         },
         "currentPlan": {
           "title": "Forfait actuel",
@@ -1961,6 +3006,68 @@
           "title": "Forfaits disponibles",
           "ordersPerMonth": "{count} commandes / mois",
           "perMonth": "/mois"
+        },
+        "interval": {
+          "monthly": "Facturation mensuelle",
+          "yearly": "Facturation annuelle",
+          "annual": "Annuel",
+          "save": "Économisez {pct}%"
+        },
+        "mo": "mois",
+        "yr": "an",
+        "currentPlanBadge": "Votre forfait",
+        "unlimitedOrders": "Commandes illimitées",
+        "upToOrders": "Jusqu'à {count} commandes/mois",
+        "selectedBtn": "Sélectionné",
+        "selectBtn": "Choisir ce forfait",
+        "prioritySupport": "Support prioritaire",
+        "customBranding": "Marque personnalisée & SMS",
+        "payment": {
+          "methods": {
+            "myfin": "MyFin",
+            "paysera": "Paysera",
+            "baridimob": "BaridiMob",
+            "ccp": "CCP / Poste",
+            "chargily": "Chargily (CIB/Edahabia)"
+          },
+          "emptyTitle": "Caisse",
+          "emptyDesc": "Sélectionnez un forfait dans la liste pour commencer la mise à niveau.",
+          "instructions": {
+            "myfin": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte MyFin :\nIBAN : BG98MYFI123123123\nNom : MySaaS LLC",
+            "paysera": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte Paysera :\nEmail : payments{'@'}mysaas.com\nNom : MySaaS LLC",
+            "baridimob": "Veuillez envoyer {amount} DZD via BaridiMob à :\nRIP : 00799999000000000012\nTéléphone : +XX X XXX XXXX",
+            "ccp": "Veuillez déposer {amount} DZD sur notre compte CCP :\nCompte : 12345678 99\nNom : MySaaS LLC"
+          },
+          "title": "Finaliser votre abonnement",
+          "subtitle": "Sélectionnez un mode de paiement pour continuer.",
+          "totalLabel": "Total à payer",
+          "uploadProof": "Joindre le justificatif de paiement",
+          "uploadSuccess": "Justificatif joint avec succès",
+          "chargilyNote": "L'intégration automatique est actuellement indisponible. Veuillez choisir une autre méthode manuelle comme CCP ou BaridiMob.",
+          "submitBtn": "Confirmer et soumettre le paiement",
+          "submitting": "Envoi en cours…",
+          "success": "Paiement soumis ! Notre équipe va examiner votre justificatif et activer votre abonnement.",
+          "errors": {
+            "proofRequired": "Veuillez joindre un justificatif de paiement.",
+            "submitFailed": "L'envoi du paiement a échoué. Veuillez réessayer."
+          }
+        },
+        "history": {
+          "title": "Historique des paiements",
+          "entries": "entrées",
+          "col": {
+            "date": "Date",
+            "plan": "Forfait",
+            "amount": "Montant",
+            "method": "Méthode",
+            "status": "Statut",
+            "proof": "Justificatif"
+          },
+          "viewProof": "Voir"
+        },
+        "common": {
+          "uploading": "Téléversement…",
+          "clickToUpload": "Cliquez pour joindre le justificatif"
         }
       },
       "products": {
@@ -2017,7 +3124,8 @@
           "deleteModal": {
             "title": "Supprimer le produit",
             "message": "Voulez-vous vraiment supprimer « {title} » ? Cette action est irréversible.",
-            "error": "Impossible de supprimer le produit. Veuillez réessayer."
+            "error": "Impossible de supprimer le produit. Veuillez réessayer.",
+            "errorHasTransactions": "Impossible de supprimer ce produit car il est référencé par des ventes ou commandes fournisseur existantes."
           },
           "bulk": {
             "selected": "{count} sélectionné(s)",
@@ -2026,6 +3134,8 @@
             "update": "Modification en masse",
             "duplicate": "Dupliquer",
             "delete": "Supprimer",
+            "deleteTitle": "Supprimer des produits",
+            "deleteMessage": "Voulez-vous vraiment supprimer {count} produit(s) sélectionné(s) ? Cette action est irréversible.",
             "exportError": "Échec de l’export CSV. Veuillez réessayer.",
             "importTitle": "Importer des produits (CSV)",
             "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock (création uniquement), isActive, categoryId/categorySlug, description, miniDescription, images.",
@@ -2075,7 +3185,9 @@
             "general": "Général",
             "description": "Description de la landing page",
             "variants": "Variants / Stock",
-            "bundles": "Bundles"
+            "promotions": "Promotions",
+            "bundles": "Bundles",
+            "tracking": "Suivi"
           },
           "links": {
             "label": "Liens",
@@ -2092,7 +3204,24 @@
           "variantsTab": {
             "title": "Options / Variants / Stock",
             "showArchived": "Afficher les variants archivées",
-            "archivedCount": "Archivées : {count}"
+            "archivedCount": "Archivées : {count}",
+            "pricingHint": "Gérez ici les prix de vente, les coûts, le stock et les promotions par variante.",
+            "allocationTitle": "Allouez le stock avant d’utiliser ces variantes",
+            "allocationMessage": "Le stock existant est encore conservé sur la variante source masquée. Répartissez le stock total, le stock réservé et le stock de sécurité entre les variantes actives pour rendre l’inventaire vendable.",
+            "onHandShort": "en stock",
+            "reservedShort": "réservé",
+            "safetyShort": "sécurité",
+            "totalOnHand": "En stock alloué",
+            "totalReserved": "Réservé alloué",
+            "totalSafety": "Sécurité allouée",
+            "allocationBalanced": "La répartition est équilibrée",
+            "allocationUnbalanced": "La répartition doit correspondre exactement aux soldes cachés de la variante source",
+            "allocateAction": "Allouer le stock",
+            "allocationSaved": "Répartition du stock des variantes enregistrée",
+            "empty": "Aucun variant généré. Ajoutez des options pour générer des variants.",
+            "saveFirst": "Veuillez d’abord enregistrer le produit pour ajouter des variants.",
+            "noSku": "Aucun SKU",
+            "inStock": "{count} en stock"
           },
           "bundlesTab": {
             "title": "Offres en bundle",
@@ -2117,7 +3246,13 @@
             "updateFailed": "Impossible de mettre à jour le produit. Veuillez réessayer.",
             "bundlesLoadFailed": "Impossible de charger les offres bundle",
             "bundlesSaveFailed": "Impossible d’enregistrer l’offre bundle",
-            "bundlesDeleteFailed": "Impossible de supprimer l’offre bundle"
+            "bundlesDeleteFailed": "Impossible de supprimer l’offre bundle",
+            "imagePickFailed": "Échec de la sélection de l’image. Veuillez réessayer."
+          },
+          "generalTab": {
+            "imagesTitle": "Images du produit",
+            "imagesHint": "Téléversez et gérez les visuels du produit.",
+            "addImage": "Ajouter une image"
           }
         }
       },
@@ -2157,11 +3292,22 @@
           "pagination": {
             "showing": "Affichage de {from} à {to} sur {total} résultats"
           },
+          "workspace": {
+            "parentsTitle": "Catégories principales",
+            "parentsHint": "Sélectionnez une catégorie pour afficher ses sous-catégories à droite.",
+            "subcategoriesTitle": "Sous-catégories",
+            "subcategoriesHint": "Gérez les sous-catégories et ouvrez, copiez, modifiez ou supprimez-les rapidement.",
+            "subcategoriesCount": "{count} sous-catégories",
+            "noSubcategories": "Aucune sous-catégorie pour cette catégorie pour le moment.",
+            "selectCategory": "Sélectionnez une catégorie pour afficher ses sous-catégories."
+          },
           "deleteModal": {
             "title": "Supprimer la catégorie",
             "message": "Voulez-vous vraiment supprimer cette catégorie ? Les produits deviendront « sans catégorie ».",
             "messageWithTitle": "Voulez-vous vraiment supprimer « {title} » ? Les produits deviendront « sans catégorie ».",
-            "error": "Impossible de supprimer la catégorie. Veuillez réessayer."
+            "error": "Impossible de supprimer la catégorie. Veuillez réessayer.",
+            "errorHasProducts": "Impossible de supprimer cette catégorie car elle contient encore des produits. Déplacez ou supprimez-les d'abord.",
+            "errorHasChildren": "Impossible de supprimer cette catégorie car elle contient encore des sous-catégories. Déplacez-les ou supprimez-les d'abord."
           }
         },
         "create": {
@@ -2229,10 +3375,22 @@
           "subtitle": "Gérez les commandes clients",
           "addBtn": "Nouvelle commande",
           "filters": {
+            "rangeLabel": "Période",
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher par nom ou téléphone…",
             "statusLabel": "Filtre de statut",
             "allOrders": "Toutes les commandes"
+          },
+          "stats": {
+            "total": "Total",
+            "pending": "En attente",
+            "delivered": "Livré",
+            "cancelled": "Annulé"
+          },
+          "deliveryModes": {
+            "home": "Livraison à domicile",
+            "store": "Retrait en magasin",
+            "pickup": "Point de retrait"
           },
           "loading": "Chargement des commandes…",
           "empty": {
@@ -2247,6 +3405,7 @@
             "total": "Total",
             "status": "Statut",
             "date": "Date",
+            "delivery": "Livraison",
             "actions": "Actions"
           }
         },
@@ -2267,15 +3426,18 @@
             "customerName": "Nom",
             "customerPhone": "Téléphone",
             "deliveryAddress": "Adresse de livraison",
+            "calledCustomer": "Client appelé ?",
             "callStatus": "Statut d'appel",
             "callStatusValues": {
               "not_called": "Non appelé",
               "called": "Appelé",
-              "no_answer": "N'a pas répondu",
+              "no_answer": "Pas de réponse",
               "attempt_1": "1ère tentative",
               "attempt_2": "2ème tentative",
               "attempt_3": "3ème tentative",
-              "switched_off": "Éteint"
+              "switched_off": "Hors réseau",
+              "whatsapp_sms_sent": "SMS WhatsApp envoyé",
+              "whatsapp_link_confirmed": "Lien WhatsApp confirmé"
             },
             "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande..."
           },
@@ -2367,6 +3529,13 @@
             "totalSpent": "Total dépensé",
             "lastOrder": "Dernière commande",
             "actions": "Actions"
+          },
+          "deleteModal": {
+            "title": "Supprimer le client",
+            "message": "Êtes-vous sûr de vouloir supprimer ce client ? Cette action est irréversible.",
+            "messageWithName": "Êtes-vous sûr de vouloir supprimer \"{name}\" ? Cette action est irréversible.",
+            "error": "Impossible de supprimer le client. Veuillez réessayer.",
+            "errorHasTransactions": "Impossible de supprimer ce client car il a des ventes ou paiements existants."
           }
         },
         "create": {
@@ -2480,48 +3649,130 @@
         "subtitle": "Gérez les transporteurs et les tarifs par wilaya",
         "providers": {
           "toggleLabel": "Activer",
+          "noCredentials": "Sans identifiants",
+          "connected": "Connecté",
+          "notConnected": "Non connecté",
           "wilayasSupported": "{count} wilayas prises en charge",
           "managePricing": "Gérer les tarifs"
+        },
+        "credentials": {
+          "title": "Identifiants API — {provider}",
+          "hint": "Connectez le transporteur pour activer les devis en temps réel et la création d’envois.",
+          "enableLabel": "Activer l’intégration API",
+          "enableHint": "Nécessite des identifiants valides pour les appels au transporteur.",
+          "noCredentials": "Ce transporteur ne nécessite pas d’identifiants.",
+          "secretSet": "Configuré",
+          "secretNotSet": "Non configuré",
+          "secretPlaceholderSet": "Configuré (saisir pour remplacer)",
+          "secretPlaceholderNotSet": "Saisir le token",
+          "errors": {
+            "saveFailed": "Impossible d’enregistrer les identifiants"
+          }
         },
         "pricing": {
           "title": "Configuration des tarifs : {provider}",
           "hint": "Définissez les tarifs standard de livraison pour chaque wilaya. Ces tarifs s’appliquent à toutes les communes de la wilaya.",
           "loading": "Chargement des tarifs…",
+          "modes": {
+            "home": "Domicile",
+            "office": "Bureau"
+          },
+          "searchPlaceholder": "Rechercher une wilaya (code ou nom)…",
+          "overridePlaceholder": "Laisser vide pour utiliser le transporteur",
+          "filters": {
+            "all": "Toutes",
+            "overrides": "Overrides",
+            "noOverrides": "Sans override",
+            "missingCarrier": "Tarif transporteur manquant"
+          },
+          "showingCount": "Affichage {shown} sur {total}",
+          "pageOf": "Page {page} / {pages}",
+          "fetchCarrierRates": "Récupérer les tarifs du transporteur",
+          "fetchingCarrierRates": "Récupération…",
           "table": {
             "code": "Code",
             "wilaya": "Wilaya",
-            "price": "Prix (DZD)"
+            "price": "Prix (DZD)",
+            "carrierPrice": "Tarif transporteur",
+            "overridePrice": "Votre tarif"
           }
         },
         "errors": {
           "updateProviderFailed": "Impossible de mettre à jour le statut du transporteur",
-          "saveFailed": "Impossible d’enregistrer les tarifs"
+          "saveFailed": "Impossible d’enregistrer les tarifs",
+          "fetchCarrierRatesFailed": "Impossible de récupérer les tarifs du transporteur"
         }
       },
       "onboarding": {
         "metaTitle": "Configuration de la boutique",
         "title": "Configuration de la boutique",
-        "subtitle": "Choisissez votre couleur, votre template et votre langue.",
+        "subtitle": "Configurez votre boutique en quelques étapes.",
         "loadingSettings": "Chargement des paramètres…",
         "progress": {
           "stepOf": "Étape {current} sur {total}"
         },
         "steps": {
-          "brand": "Marque",
-          "template": "Template",
+          "storeInfo": "Infos boutique",
+          "template": "Choisir un template",
+          "brandColor": "Couleur de marque",
           "language": "Langue",
+          "firstProduct": "Premier produit",
+          "done": "C’est fait !",
+          "brand": "Marque",
           "summary": "Résumé"
         },
+        "storeInfo": {
+          "title": "Parlez-nous de votre boutique",
+          "nameLabel": "Nom de la boutique",
+          "namePlaceholder": "Ma Boutique",
+          "logoLabel": "Logo de la boutique",
+          "logoHint": "Recommandé : PNG ou SVG 200×200px",
+          "logoUpload": "Télécharger le logo",
+          "logoChange": "Changer le logo",
+          "descriptionLabel": "Courte description (optionnel)",
+          "descriptionPlaceholder": "Quelques mots sur votre boutique…"
+        },
         "brand": {
-          "title": "Couleur de marque",
+          "title": "Couleur principale",
           "pickColor": "Choisir une couleur",
-          "hexValue": "Valeur hex",
+          "hexValue": "Valeur hexadécimale",
           "example": "Exemple : {value}",
           "preview": "Aperçu",
           "primaryButton": "Bouton principal"
         },
         "template": {
           "title": "Template de boutique"
+        },
+        "language": {
+          "title": "Langue",
+          "label": "Langue",
+          "rtlHint": "L’arabe activera la mise en page de droite à gauche."
+        },
+        "firstProduct": {
+          "title": "Ajoutez votre premier produit",
+          "subtitle": "Vous pourrez en ajouter d’autres depuis la section Produits.",
+          "nameLabel": "Nom du produit",
+          "namePlaceholder": "ex. T-Shirt, Coque de téléphone…",
+          "priceLabel": "Prix (DZD)",
+          "imageLabel": "Image du produit (optionnel)",
+          "imageUpload": "Télécharger une image",
+          "imageChange": "Changer l’image",
+          "skipLink": "Passer pour l’instant",
+          "errorCreate": "Échec de la création du produit. Vous pouvez passer et l’ajouter plus tard."
+        },
+        "done": {
+          "title": "Votre boutique est prête !",
+          "subtitle": "Voici ce que vous avez configuré :",
+          "storeUrlLabel": "URL de votre boutique",
+          "offlineNote": "Votre boutique est actuellement hors ligne. Publiez-la depuis le tableau de bord quand vous serez prêt.",
+          "ctaDashboard": "Aller au tableau de bord",
+          "ctaProducts": "Ajouter des produits"
+        },
+        "saveFinish": "Terminer la configuration",
+        "errors": {
+          "loadFailed": "Impossible de charger les paramètres.",
+          "saveFailed": "Impossible de sauvegarder les paramètres.",
+          "summaryFailed": "Impossible de générer le résumé."
         },
         "templates": {
           "classic": {
@@ -2532,11 +3783,6 @@
             "label": "Moderne",
             "description": "Typographie plus marquée et plus d’espace visuel."
           }
-        },
-        "language": {
-          "title": "Langue",
-          "label": "Langue",
-          "rtlHint": "Si arabe, pensez à l’affichage RTL."
         },
         "summary": {
           "title": "Résumé",
@@ -2549,13 +3795,22 @@
           "generate": "Générer",
           "generating": "Génération…",
           "placeholder": "Cliquez sur Générer pour créer un brief pour votre agent frontend."
-        },
-        "saveFinish": "Enregistrer et terminer",
-        "errors": {
-          "loadFailed": "Impossible de charger les paramètres de la boutique.",
-          "saveFailed": "Impossible d’enregistrer les paramètres de la boutique.",
-          "summaryFailed": "Impossible de générer le résumé."
         }
+      },
+      "gettingStarted": {
+        "title": "Démarrage rapide",
+        "progress": "{done} sur {total} complétés",
+        "dismiss": "Ignorer",
+        "complete": "Configuration terminée",
+        "items": {
+          "logo": "Télécharger votre logo",
+          "product": "Ajouter un premier produit",
+          "category": "Créer une catégorie",
+          "delivery": "Configurer la livraison",
+          "publish": "Publier votre boutique"
+        },
+        "publishBtn": "Publier maintenant",
+        "publishing": "Publication…"
       },
       "purchases": {
         "index": {
@@ -2566,7 +3821,23 @@
             "supplierLabel": "Filtrer par fournisseur",
             "allSuppliers": "Tous les fournisseurs",
             "userLabel": "Filtrer par utilisateur",
-            "allUsers": "Tous les utilisateurs"
+            "allUsers": "Tous les utilisateurs",
+            "allStatuses": "Tous les statuts",
+            "statusLabel": "Statut",
+            "allPaymentStatuses": "Tous les statuts de paiement",
+            "paymentStatusLabel": "Statut de paiement",
+            "statusValues": {
+              "DRAFT": "Brouillon",
+              "ORDERED": "Commandé",
+              "PARTIALLY_RECEIVED": "Partiellement reçu",
+              "RECEIVED": "Reçu",
+              "CANCELLED": "Annulé"
+            },
+            "paymentStatusValues": {
+              "UNPAID": "Non payé",
+              "PARTIALLY_PAID": "Partiellement payé",
+              "PAID": "Payé"
+            }
           },
           "loading": "Chargement des achats…",
           "empty": {
@@ -2583,7 +3854,9 @@
             "date": "Date",
             "action": "Action",
             "itemsCount": "{count} articles",
-            "manage": "Gérer"
+            "manage": "Gérer",
+            "paymentStatus": "Statut de paiement",
+            "payment": "Paiement"
           },
           "pagination": {
             "showing": "Affichage de {from} à {to} sur {total} résultats"
@@ -2648,10 +3921,12 @@
               "removeItem": "Supprimer l’article",
               "totalOrderValue": "Valeur totale de la commande",
               "costMode": {
+                "label": "Mode de calcul prix d'achat",
                 "replace": "Dernier prix d'achat",
                 "weighted": "Coût moyen"
               },
               "salePriceMode": {
+                "label": "Mode de calcul prix de vente",
                 "replace": "Mettre à jour le prix de vente",
                 "weighted": "Moyenne pondérée"
               }
@@ -2714,6 +3989,33 @@
             "actions": "Actions"
           }
         },
+        "actions": {
+          "refund": "Rembourser",
+          "invoice": "Facture",
+          "printInvoice": "Imprimer la facture"
+        },
+        "refundModal": {
+          "title": "Rembourser la vente",
+          "subtitle": "Enregistrer une sortie de caisse et marquer cette vente comme remboursée.",
+          "cashboxLabel": "Caisse",
+          "cashboxPlaceholder": "Sélectionner une caisse",
+          "noOpenSession": "Aucune session ouverte",
+          "methodLabel": "Mode de paiement",
+          "referenceLabel": "Référence (optionnel)",
+          "referencePlaceholder": "Reçu ou référence bancaire",
+          "noteLabel": "Note (optionnel)",
+          "notePlaceholder": "Motif du remboursement"
+        },
+        "messages": {
+          "refundFromOrderFlow": "Les ventes liées aux commandes doivent être retournées depuis le flux commande.",
+          "alreadyRefunded": "Cette vente est déjà remboursée.",
+          "onlyCompletedPos": "Seules les ventes PDV terminées peuvent être remboursées.",
+          "noOpenCashbox": "Aucune caisse ouverte disponible. Ouvrez une session de caisse d’abord.",
+          "refundSuccess": "Vente remboursée avec succès.",
+          "refundFailed": "Échec du remboursement de la vente.",
+          "invoiceFailed": "Impossible de générer la facture.",
+          "invoicePopupBlocked": "La fenêtre de facture a été bloquée par le navigateur."
+        },
         "detail": {
           "metaTitle": "Vente",
           "breadcrumb": "Vente n°{id}",
@@ -2745,6 +4047,11 @@
         }
       },
       "settings": {
+        "index": {
+          "metaTitle": "Paramètres",
+          "title": "Paramètres par thème",
+          "subtitle": "Retrouvez chaque réglage selon l’intention métier : vitrine, vente, localisation, marketing, domaines et administration."
+        },
         "appearance": {
           "metaTitle": "Apparence",
           "title": "Paramètres d’apparence",
@@ -2761,9 +4068,14 @@
           "subtitle": "Gérez les informations de contact affichées dans le footer."
         },
         "functional": {
-          "metaTitle": "Fonctionnel",
-          "title": "Paramètres fonctionnels",
-          "subtitle": "Gérez les fonctionnalités et options principales de votre boutique."
+          "metaTitle": "Vente & checkout",
+          "title": "Vente, checkout et opérations",
+          "subtitle": "Réglez le checkout, les factures, la localisation, les annonces et la fidélité."
+        },
+        "domains": {
+          "metaTitle": "Domaines",
+          "title": "Paramètres des domaines",
+          "subtitle": "Connectez un domaine acheté à cette boutique avec un enregistrement CNAME."
         }
       },
       "suppliers": {
@@ -2801,7 +4113,8 @@
             "title": "Supprimer le fournisseur",
             "message": "Voulez-vous vraiment supprimer ce fournisseur ?",
             "messageWithName": "Voulez-vous vraiment supprimer le fournisseur « {name} » ?",
-            "error": "Impossible de supprimer le fournisseur. Veuillez réessayer."
+            "error": "Impossible de supprimer le fournisseur. Veuillez réessayer.",
+            "errorHasTransactions": "Impossible de supprimer ce fournisseur car il a des commandes fournisseur existantes."
           }
         },
         "create": {
@@ -2825,10 +4138,179 @@
             "updateFailed": "Impossible de mettre à jour le fournisseur. Veuillez réessayer."
           }
         }
+      },
+      "sale": {
+        "detail": {
+          "metaTitle": "Détails de la vente"
+        }
       }
     },
     "validation": {
-      "invalidNumber": "Entrez un nombre valide"
+      "invalidNumber": "Entrez un nombre valide",
+      "required": "Obligatoire"
+    },
+    "tours": {
+      "next": "Suivant",
+      "prev": "Retour",
+      "done": "Terminer",
+      "menuLabel": "Visites guidées",
+      "sidebar": {
+        "label": "Présentation de l'admin",
+        "steps": {
+          "logo": {
+            "title": "Votre boutique",
+            "desc": "Voici le nom et le logo de votre boutique. Modifiez-les dans les paramètres d'apparence."
+          },
+          "dashboard": {
+            "title": "Tableau de bord",
+            "desc": "Obtenez un aperçu rapide de vos ventes, commandes et chiffre d'affaires."
+          },
+          "products": {
+            "title": "Produits",
+            "desc": "Ajoutez et gérez tout ce que vous vendez — produits, prix, images et stock."
+          },
+          "orders": {
+            "title": "Commandes",
+            "desc": "Suivez chaque commande de la réception à la livraison. Mettez à jour les statuts et exportez des rapports."
+          },
+          "delivery": {
+            "title": "Livraison",
+            "desc": "Connectez plusieurs transporteurs via webhooks ou gérez votre propre livraison. Configurez les zones et tarifs ici."
+          },
+          "settings": {
+            "title": "Paramètres",
+            "desc": "Personnalisez l'apparence, les coordonnées, la langue de votre boutique et publiez-la quand vous êtes prêt."
+          },
+          "help": {
+            "title": "Visites guidées",
+            "desc": "Cliquez ici à tout moment pour relancer cette visite ou démarrer une visite d'une section spécifique."
+          }
+        }
+      },
+      "dashboard": {
+        "label": "Visite du tableau de bord",
+        "steps": {
+          "stats": {
+            "title": "Vos indicateurs",
+            "desc": "Consultez le total des commandes, le chiffre d'affaires et les nouveaux clients pour la période sélectionnée."
+          },
+          "checklist": {
+            "title": "Liste de lancement",
+            "desc": "Complétez ces étapes pour préparer votre boutique. Vous pouvez la masquer une fois terminé."
+          },
+          "chart": {
+            "title": "Tendance des ventes",
+            "desc": "Ce graphique montre l'évolution de vos ventes dans le temps."
+          }
+        }
+      },
+      "products": {
+        "label": "Visite des produits",
+        "steps": {
+          "create": {
+            "title": "Ajouter un produit",
+            "desc": "Cliquez ici pour créer un nouveau produit. Ajoutez un nom, un prix, des images et du stock."
+          },
+          "search": {
+            "title": "Trouver des produits",
+            "desc": "Recherchez par nom, filtrez par catégorie ou statut pour trouver rapidement un produit."
+          },
+          "table": {
+            "title": "Liste des produits",
+            "desc": "Tous vos produits sont listés ici. Cliquez sur une ligne pour la modifier."
+          }
+        }
+      },
+      "orders": {
+        "label": "Visite des commandes",
+        "steps": {
+          "tabs": {
+            "title": "Filtrer par statut",
+            "desc": "Basculez entre Toutes, En attente, Confirmées, Expédiées, Livrées et Annulées."
+          },
+          "export": {
+            "title": "Exporter les commandes",
+            "desc": "Exportez vos commandes vers Excel ou Google Sheets pour les rapports et la comptabilité."
+          },
+          "table": {
+            "title": "Liste des commandes",
+            "desc": "Chaque ligne est une commande client. Cliquez dessus pour voir les détails ou mettre à jour le statut."
+          }
+        }
+      },
+      "delivery": {
+        "label": "Visite de la livraison",
+        "steps": {
+          "providers": {
+            "title": "Partenaires de livraison",
+            "desc": "Choisissez parmi plusieurs transporteurs ou une livraison en propre. Activez les webhooks temps réel pour les mises à jour instantanées."
+          },
+          "config": {
+            "title": "Configuration du prestataire",
+            "desc": "Entrez vos identifiants API et configurez les frais, zones et options de ramassage."
+          }
+        }
+      },
+      "settings": {
+        "label": "Visite des paramètres",
+        "steps": {
+          "appearance": {
+            "title": "Apparence",
+            "desc": "Changez le template, la couleur de marque et le logo de votre boutique."
+          },
+          "template": {
+            "title": "Template de boutique",
+            "desc": "Choisissez parmi 10 thèmes de vitrine. Chacun a une mise en page unique adaptée à un type de produit."
+          },
+          "color": {
+            "title": "Couleur de marque",
+            "desc": "Votre couleur de marque est utilisée sur les boutons et les accents de toute votre vitrine."
+          }
+        }
+      }
+    },
+    "receipt": {
+      "editor": {
+        "title": "Modifier la mise en page du reçu",
+        "tabEditor": "Éditeur",
+        "tabPreview": "Aperçu",
+        "saveLayout": "Enregistrer",
+        "storeInformation": "Informations de la boutique",
+        "showLogo": "Afficher le logo",
+        "showStoreName": "Afficher le nom de la boutique",
+        "storeNameOverride": "Remplacer le nom de la boutique (Optionnel)",
+        "showStoreAddress": "Afficher l'adresse",
+        "storeAddressOverride": "Remplacer l'adresse (Optionnel)",
+        "showStorePhone": "Afficher le téléphone",
+        "storePhoneOverride": "Remplacer le téléphone (Optionnel)",
+        "showStoreEmail": "Afficher l'email",
+        "storeEmailOverride": "Remplacer l'email (Optionnel)",
+        "headerLegacy": "En-tête (Ancien)",
+        "showCustomHeader": "Afficher un texte d'en-tête personnalisé",
+        "headerText": "Texte d'en-tête",
+        "content": "Contenu",
+        "showOrderNumber": "Afficher le numéro de commande",
+        "showDate": "Afficher la date et l'heure",
+        "showCustomerInfo": "Afficher les informations du client",
+        "showTaxBreakdown": "Afficher les taxes",
+        "footer": "Pied de page",
+        "showFooterMessage": "Afficher le message de pied de page",
+        "footerText": "Texte de pied de page",
+        "printAsImage": "Imprimer comme image (Support Arabe)"
+      },
+      "print": {
+        "item": "Article",
+        "qty": "Qté",
+        "price": "Prix",
+        "total": "Total",
+        "discount": "Remise",
+        "grandTotal": "TOTAL",
+        "orderNum": "Commande n°{id}",
+        "customer": "Client : {name}",
+        "phone": "Téléphone : {phone}",
+        "tel": "Tél : {phone}",
+        "email": "Email : {email}"
+      }
     }
   },
   "superAdmin": {
@@ -2972,6 +4454,1211 @@
         "suspend": "Voulez-vous vraiment suspendre {name} ?",
         "delete": "Voulez-vous vraiment SUPPRIMER {name} ? Cette action est irréversible !"
       }
+    },
+    "paymentsPage": {
+      "title": "Paiements du tenant",
+      "subtitle": "Importer une preuve de paiement et consulter l’historique de facturation de ce tenant.",
+      "actions": {
+        "refresh": "Actualiser"
+      },
+      "import": {
+        "title": "Importer une preuve de paiement",
+        "fields": {
+          "plan": "Offre",
+          "interval": "Période",
+          "proofUrl": "URL de la preuve",
+          "proofUrlPlaceholder": "https://...",
+          "proofUrlHint": "Optionnel. Lien vers un reçu ou une capture d’écran.",
+          "externalReference": "Référence externe",
+          "externalReferencePlaceholder": "Référence du virement…",
+          "notes": "Notes",
+          "notesPlaceholder": "Ajouter des notes…"
+        },
+        "applySubscription": {
+          "label": "Appliquer l’abonnement",
+          "hint": "Si activé, l’abonnement du tenant sera mis à jour selon l’offre et la période sélectionnées."
+        },
+        "actions": {
+          "importing": "Importation…",
+          "importProof": "Importer"
+        }
+      },
+      "history": {
+        "title": "Historique des paiements",
+        "lastEntries": "{count} entrées",
+        "loading": "Chargement des paiements…",
+        "empty": "Aucun paiement",
+        "table": {
+          "date": "Date",
+          "plan": "Offre",
+          "amount": "Montant",
+          "method": "Méthode",
+          "status": "Statut",
+          "proof": "Preuve"
+        },
+        "proof": {
+          "open": "Ouvrir"
+        },
+        "actions": {
+          "approve": "Approuver",
+          "reject": "Rejeter"
+        }
+      },
+      "planOption": {
+        "ordersPerMonth": "{count} commandes/mois"
+      },
+      "interval": {
+        "monthly": "Mensuel",
+        "yearly": "Annuel"
+      },
+      "errors": {
+        "loadFailed": "Impossible de charger les paiements",
+        "importFailed": "Impossible d’importer le paiement",
+        "reviewFailed": "Impossible de traiter le paiement"
+      }
+    }
+  },
+  "app": {
+    "9100": "9100",
+    "offline_activation": "Activation hors ligne",
+    "generate_this_request_code_on": "Générez ce code de demande sur l'appareil, puis dans le panneau d'administration du locataire, ouvrez Appareils > Activation hors ligne et collez-le ici pour recevoir un code d'activation signé.",
+    "verify": "Vérifier",
+    "trusted_activation": "Activation fiable",
+    "activation_uses_defaultapibase": "L'activation utilise `$defaultApiBaseUrl` et stocke la liaison locataire/espace de travail à partir d'un jeton d'activation signé par le serveur. Aucun ID de locataire n'est saisi manuellement sur l'appareil.",
+    "paste_signed_activation_code_h": "Collez le code d'activation signé ici",
+    "activation_key": "Clé d'activation",
+    "paste_the_tenant_issued_key_fo": "Collez la clé émise par le locataire pour l'activation en ligne",
+    "start_offline_activation": "Démarrer l'activation hors ligne",
+    "billing_subscription": "Facturation et abonnement",
+    "usage_plans_and_payment_submis": "Utilisation, forfaits et soumission de paiement soutenus par les points de terminaison de facturation en direct.",
+    "pricefor_plan_billingstate_in": "${_priceFor(plan, billingState.interval)} ${plan.currency}/${billingState.interval ==",
+    "orders_mo_plan_orderspermonth": "Commandes/mois : ${plan.ordersPerMonth}",
+    "max_products_plan_maxproducts": "Nombre maximum de produits : ${plan.maxProducts}",
+    "max_pixels_plan_maxpixels": "Nombre maximum de pixels : ${plan.maxPixels}",
+    "submit_or_simulate_payment": "Soumettre ou simuler un paiement",
+    "recent_payments": "Paiements récents",
+    "payment_plancode_touppercase": "${payment.planCode.toUpperCase()} • ${payment.method}",
+    "payment_status_payment_amount": "${payment.status} • ${payment.amountDzd} ${payment.currency}",
+    "snapshot_subscription_status": "${snapshot.subscription.status} • ${snapshot.subscription.interval}",
+    "usage_snapshot_usage_ordersinp": "Utilisation : ${snapshot.usage.ordersInPeriod} / ${snapshot.usage.ordersLimit} commandes cette période",
+    "period_dateformat_ymmmd_format": "Période : ${DateFormat.yMMMd().format(snapshot.usage.periodStart)} - ​​${DateFormat.yMMMd().format(snapshot.usage.periodEnd)}",
+    "simulate_payment": "Simuler un paiement",
+    "submit_payment": "Soumettre le paiement",
+    "cashboxes_transactions_and_ses": "Caisses, transactions et historique des sessions.",
+    "new_customer_payment": "Paiement nouveau client",
+    "new_supplier_payment": "Paiement nouveau fournisseur",
+    "no_cashboxes_yet": "Pas encore de caisses",
+    "create_one_to_start_tracking_c": "Créez-en un pour commencer à suivre les sessions de trésorerie.",
+    "expected_closing_money_format": "Clôture prévue : ${money.format(expected.expectedClosing)}",
+    "opening": "Ouverture",
+    "money_format_expected_insum": "+${money.format(expected.inSum)}",
+    "money_format_expected_outsum": "-${money.format(expected.outSum)}",
+    "something_went_wrong": "Quelque chose s'est mal passé",
+    "sale_payment": "SALE_PAYMENT",
+    "customer_payment": "CUSTOMER_PAYMENT",
+    "supplier_payment": "FOURNISSEUR_PAYMENT",
+    "all_directions": "Toutes les directions",
+    "cashboxname_useremail": "$cashboxName · $userEmail",
+    "tx_direction": "${tx.direction ==",
+    "useremail_formatdate_session": "$userEmail · ${_formatDate(session.openedAt)}",
+    "closed_formatdate_session_clos": "Fermé : ${_formatDate(session.closedAt)}",
+    "ref_tx_reference": "Réf : ${tx.reference!}",
+    "admin_pages_cash_sessions_tabl": "admin.pages.cash.sessions.table.openedAt",
+    "admin_pages_cash_sessions_tabl2": "admin.pages.cash.sessions.table.closedAt",
+    "admin_pages_cash_sessions_tabl3": "admin.pages.cash.sessions.table.openingFloat",
+    "admin_pages_cash_sessions_tabl4": "admin.pages.cash.sessions.table.expectedClosing",
+    "admin_pages_cash_sessions_tabl5": "admin.pages.cash.sessions.table.closingCount",
+    "select_cashbox": "Sélectionnez la caisse",
+    "select_customer": "Sélectionner un client",
+    "c_name_c_phone": "${c.nom} • ${c.téléphone}",
+    "no_customers_match_your_search": "Aucun client ne correspond à votre recherche.",
+    "direction_is_enforced_by_backe": "La direction est appliquée par le backend pour chaque type ($_direction).",
+    "note_both_cashboxes_must_have": "Attention : les deux caisses doivent avoir une session OUVERTE.",
+    "from_and_to_must_differ": "De et À doivent être différents",
+    "new_action": "Nouvelle action",
+    "total_in_today": "Total entrant (aujourd'hui)",
+    "total_out_today": "Sortie totale (aujourd'hui)",
+    "net_today": "Net (aujourd'hui)",
+    "loading_transactions": "Chargement des transactions...",
+    "loading_sessions": "Chargement des sessions...",
+    "direction": "Direction",
+    "dateformat": "${FormatDate(",
+    "closing": "Clôture",
+    "diff": "Différence",
+    "opening_float_expected_opening": "Flotteur d'ouverture : ${expected.openingFloat.toStringAsFixed(2)}",
+    "in_expected_insum_tostringasfi": "Dans : +${expected.inSum.toStringAsFixed(2)}",
+    "out_expected_outsum_tostringas": "Sortie : -${expected.outSum.toStringAsFixed(2)}",
+    "opened_at": "OUVERT À",
+    "closed_at": "FERMÉ À",
+    "sessions": "Séances",
+    "error_state_error": "Erreur : ${state.error}",
+    "manage_your_product_categories": "Gérez vos catégories de produits",
+    "stats": "STATISTIQUES",
+    "category_link_copied_to_clipbo": "Lien de catégorie copié dans le presse-papiers",
+    "category_deleted_successfully": "Catégorie supprimée avec succès",
+    "cannot_delete_category": "Impossible de supprimer la catégorie",
+    "ok": "D'ACCORD",
+    "are_you_sure_you_want_to_delet": "Êtes-vous sûr de vouloir supprimer « ${_categoryToDelete?.title} » ? Cette action ne peut pas être annulée.",
+    "error_loading_category_e": "Erreur de chargement de la catégorie : $e",
+    "please_fix_the_errors_before_s": "Veuillez corriger les erreurs avant d'enregistrer",
+    "error_e": "Erreur : $e",
+    "none_top_level": "Aucun (niveau supérieur)",
+    "parent_category": "Catégorie parente",
+    "admin_nav_salesitem": "admin.nav.salesItem",
+    "shortid": "#$shortId",
+    "str_389": "—",
+    "admin_pages_customers_detail_e": "admin.pages.customers.detail.errors.loadFailed",
+    "admin_pages_customers_detail_n": "admin.pages.customers.detail.notFound.title",
+    "admin_pages_customers_detail_n2": "admin.pages.customers.detail.notFound.hint",
+    "admin_forms_customer_openingba": "admin.forms.customer.openingBalance.label",
+    "customer_orderscount": "${customer.ordersCount}",
+    "admin_pages_customers_index_fi": "admin.pages.customers.index.filters.searchLabel",
+    "admin_pages_customers_index_ad": "admin.pages.customers.index.addCustomer",
+    "snapshot": "INSTANTANÉ",
+    "welcome_back_storename": "Bon retour, $storeName",
+    "could_not_load_dashboard_data": "Impossible de charger les données du tableau de bord",
+    "latest_orders_for_this_tenant": "Dernières commandes pour ce locataire.",
+    "no_recent_orders": "Aucune commande récente",
+    "new_orders_will_appear_here": "De nouvelles commandes apparaîtront ici.",
+    "quick_overview_by_status": "Aperçu rapide par statut.",
+    "quick_links": "Liens rapides",
+    "common_actions_to_get_things_d": "Des actions communes pour faire avancer les choses.",
+    "upgrade_to_online": "Passer en ligne",
+    "delivery_settings": "Paramètres de livraison",
+    "manage_delivery_providers_and": "Gérer les prestataires de livraison et les tarifs",
+    "upgrade_to_an_online_tier_to_u": "Passez à un niveau en ligne pour débloquer les fonctionnalités de vitrine hébergée à partir de cette application.",
+    "back_to_settings": "Retour aux paramètres",
+    "connect_third_party_services_t": "Connectez des services tiers à votre boutique",
+    "widget_name_saved": "${widget.name} enregistré",
+    "conversion_api_token": "Jeton API de conversion",
+    "manage_your_inventory_and_stoc": "Gérez votre inventaire et vos niveaux de stock",
+    "no_inventory_found_matching_yo": "Aucun inventaire trouvé correspondant à vos critères.",
+    "on_hand": "À MAIN",
+    "sku_sku_isempty": "UGS : ${sku.isEmpty ?",
+    "stock": "$actions",
+    "reserved": "$réservé",
+    "safetystock": "$sécuritéStock",
+    "available": "$disponible",
+    "str_952": "∞",
+    "your_dashboard_is_ready_contin": "Votre tableau de bord est prêt. Continuez à gérer les commandes, les produits, la livraison et les analyses à partir d'un seul endroit.",
+    "real_time_insights_into_store": "Informations en temps réel sur les performances du magasin.",
+    "2026_swekly_inc": "© 2026 Swekly Inc.",
+    "don": "Enfiler\\",
+    "swekly": "Chaque semaine",
+    "google": "Google",
+    "apple": "Pomme",
+    "setup_checklist": "Liste de contrôle de configuration",
+    "failed_to_load_error": "Échec du chargement : $_error",
+    "retry": "Réessayer",
+    "progress": "Progrès:",
+    "done_total_steps_completed": "$ terminé / $ total d'étapes terminées",
+    "new_customer": "-- Nouveau client --",
+    "c_name_c_phone_isnotempty_c_p": "${c.name}${c.phone.isNotEmpty ? \" (${c.phone})\" : \"\"}",
+    "yalidine": "Yalidine",
+    "maystro": "Maystro",
+    "stop_desk": "Arrêter le bureau",
+    "select": "-- Sélectionner --",
+    "w_1_w_2": "${s.$1} - ${s.$2}",
+    "p_price_tostringasfixed_0_cur": "${p.price.toStringAsFixed(0)} $currencyCode",
+    "item_price_item_quantity_tost": "${(item.price * item.quantity).toStringAsFixed(0)} $currencyCode",
+    "item_quantity": "${article.quantité}",
+    "carttotal_tostringasfixed_0_c": "${_cartTotal.toStringAsFixed(0)} $currencyCode",
+    "select_existing_customer_optio": "Sélectionnez un client existant (facultatif)",
+    "customer_name": "Nom du client *",
+    "provider": "Fournisseur",
+    "str_712": "/",
+    "placed_dateformat_ymd_add_jm_f": "Placé ${DateFormat.yMd().add_jm().format(order.createdAt)}",
+    "copied_to_clipboard": "Copié dans le presse-papiers",
+    "copied_phone": "Téléphone copié",
+    "notes_are_only_visible_to_your": "Les notes ne sont visibles que par votre équipe.",
+    "order_items_length": "${order.items.length}",
+    "no_items": "Aucun article",
+    "qty": "×$qté",
+    "save_notes": "Enregistrer les notes",
+    "blacklist_ip": "IP sur liste noire",
+    "blacklist_phone": "Téléphone sur liste noire",
+    "loading_orders": "Chargement des commandes...",
+    "product_not_found_for_sku_code": "Produit introuvable pour le SKU : $code",
+    "added_1x_product_title_selecte": "Ajout de 1x ${product.title} • ${selected.title}",
+    "added_1x_label": "Ajout de 1x $étiquette",
+    "barcode_lookup_failed_e": "Échec de la recherche du code-barres : $e",
+    "could_not_create_customer_erro": "Impossible de créer le client : $erreur",
+    "scan_barcode": "Scanner le code-barres",
+    "add_products_before_applying_a": "Ajouter des produits avant d'appliquer une remise",
+    "currency_format_posstate_disc": "-${currency.format(posState.discountAmount)}",
+    "invalid_payment_amounts": "Montants de paiement invalides",
+    "remaining_currency_format_brea": "Restant : ${currency.format(breakdown.remaining)}",
+    "show_numpad": "Afficher le pavé numérique",
+    "charge_currency_format_total_t": "Facturer {currency.format(total)} $ sur la carte",
+    "waiting_for_terminal": "En attente du terminal...",
+    "reprinting_last_order": "Réimpression de la dernière commande…",
+    "return_refund_coming_soon": "Retour / Remboursement — à venir",
+    "name_a_to_z": "Nom (A à Z)",
+    "price_low_to_high": "Prix ​​(faible à élevé)",
+    "price_high_to_low": "Prix ​​(du haut au bas)",
+    "recently_added": "Récemment ajouté",
+    "3_columns": "3 colonnes",
+    "4_columns": "4 colonnes",
+    "5_columns": "5 colonnes",
+    "6_columns": "6 colonnes",
+    "posstate_crossaxiscount": "${posState.crossAxisCount}",
+    "error_loading_products": "Erreur lors du chargement des produits",
+    "posstate_products_where_p_p_c": "${posState.products.where((p) => p.categoryId == posState.browsingCategoryId || p.category?.id == posState.browsingCategoryId).length} produits",
+    "productcount_productcount_1": "$productCount ${productCount == 1 ?",
+    "admin_pages_pos_cart_actions_v": "admin.pages.pos.cart.actions.viewCart",
+    "admin_pages_pos_cart_itemscoun": "admin.pages.pos.cart.itemsCount",
+    "waitingcount": "$nombre d'attente",
+    "no_customer_found": "Aucun client trouvé",
+    "create_one_and_assign_this_sal": "Créez-en un et attribuez cette vente",
+    "tap_a_product_card_or_use_quic": "Appuyez sur une fiche produit ou utilisez la recharge rapide.",
+    "itemcount": "$itemCount",
+    "admin_pages_pos_actions_viewca": "admin.pages.pos.actions.viewCart",
+    "failed_to_load_product_variant": "Échec du chargement des variantes de produits",
+    "no_active_variants_for_this_pr": "Aucune variante active pour ce produit.",
+    "confirm_payment_enter": "Confirmer le paiement (Entrer)",
+    "admin_pages_pos_catalog_search": "admin.pages.pos.catalog.searchPlaceholder",
+    "more_actions": "Plus de propositions",
+    "apply_discount": "Appliquer la réduction",
+    "hold_order": "Conserver la commande",
+    "open_cash_drawer": "Tiroir-caisse ouvert",
+    "keyboard_shortcuts": "Raccourcis clavier",
+    "admin_pages_pos_cart_actions_c": "admin.pages.pos.cart.actions.clearCart",
+    "percent": "Pour cent",
+    "reason": "Raison",
+    "new_total": "Nouveau total",
+    "str_220": "${",
+    "label": "$étiquette :",
+    "admin_forms_product_isactive_l": "admin.forms.product.isActive.label",
+    "admin_forms_product_minidescri": "admin.forms.product.miniDescription.hint",
+    "admin_forms_product_stock_hint": "admin.forms.product.stock.hintSystemManaged",
+    "admin_forms_product_lowstockth": "admin.forms.product.lowStockThreshold.hint",
+    "admin_common_noneselected": "admin.common.noneSelected",
+    "admin_pages_products_edit_gene": "admin.pages.products.edit.generalTab.imagesTitle",
+    "admin_pages_products_edit_gene2": "admin.pages.products.edit.generalTab.imagesHint",
+    "admin_pages_products_edit_gene3": "admin.pages.products.edit.generalTab.addImage",
+    "admin_pages_products_edit_desc": "admin.pages.products.edit.descriptionTab.title",
+    "admin_variantstable_errors_upd": "admin.variantsTable.errors.updateStockFailed",
+    "admin_variantstable_imagepicke": "admin.variantsTable.imagePicker.title",
+    "admin_variantstable_imagepicke2": "admin.variantsTable.imagePicker.subtitle",
+    "admin_variantstable_imagepicke3": "admin.variantsTable.imagePicker.empty",
+    "admin_variantstable_imagepicke4": "admin.variantsTable.imagePicker.imageWithIndex",
+    "admin_variantstable_movements": "admin.variantsTable.movements.subtitle",
+    "admin_variantstable_movements2": "admin.variantsTable.movements.empty",
+    "admin_pages_products_edit_vari": "admin.pages.products.edit.variantsTab.allocationSaved",
+    "admin_pages_products_edit_vari2": "admin.pages.products.edit.variantsTab.saveFirst",
+    "admin_pages_products_edit_vari3": "admin.pages.products.edit.variantsTab.title",
+    "admin_pages_products_edit_vari4": "admin.pages.products.edit.variantsTab.pricingHint",
+    "admin_pages_products_edit_vari5": "admin.pages.products.edit.variantsTab.allocationTitle",
+    "admin_pages_products_edit_vari6": "admin.pages.products.edit.variantsTab.allocationMessage",
+    "widget_product_stockallocatio": "${widget.product!.stockAllocationSourceVariantTitle ??",
+    "admin_pages_products_edit_vari7": "admin.pages.products.edit.variantsTab.showArchived",
+    "admin_pages_products_edit_vari8": "admin.pages.products.edit.variantsTab.archivedCount",
+    "admin_pages_products_edit_vari9": "admin.pages.products.edit.variantsTab.empty",
+    "admin_forms_product_ispromotio": "admin.forms.product.isPromotionActive.label",
+    "admin_forms_product_showcountd": "admin.forms.product.showCountdown.label",
+    "admin_variantstable_promotions": "admin.variantsTable.promotionSimpleProduct",
+    "admin_variantstable_actions_sk": "admin.variantsTable.actions.skuLocked",
+    "admin_forms_product_minidescri2": "admin.forms.product.miniDescription.label",
+    "admin_forms_product_lowstockth2": "admin.forms.product.lowStockThreshold.label",
+    "admin_forms_product_promotiona": "admin.forms.product.promotionalPrice.label",
+    "yyyy_mm_ddthh_mm": "AAAA-MM-JJTHH : mm",
+    "admin_variantstable_actions_su": "admin.variantsTable.actions.suggestSku",
+    "admin_variantstable_actions_lo": "admin.variantsTable.actions.lockSku",
+    "admin_variantstable_actions_ma": "admin.variantsTable.actions.manageImages",
+    "admin_variantstable_actions_mo": "admin.variantsTable.actions.movements",
+    "admin_common_featurecomingsoon": "admin.common.featureComingSoon",
+    "admin_pages_products_index_sor": "admin.pages.products.index.sort.sortBy",
+    "admin_pages_products_index_fil": "admin.pages.products.index.filters.allCategories",
+    "admin_pages_products_index_fil2": "admin.pages.products.index.filters.allStatus",
+    "admin_pages_products_index_fil3": "admin.pages.products.index.filters.lowStock",
+    "admin_pages_products_index_add": "admin.pages.products.index.addProduct",
+    "product_stock": "${produit.stock}",
+    "admin_pages_products_index_lin": "admin.pages.products.index.links.openProduct",
+    "admin_pages_products_index_lin2": "admin.pages.products.index.links.copyProduct",
+    "admin_pages_products_index_lin3": "admin.pages.products.index.links.openLanding",
+    "admin_pages_products_index_lin4": "admin.pages.products.index.links.copyLanding",
+    "exp_dateformat": "exp. ${FormatDate(",
+    "admin_pages_products_index_fil4": "admin.pages.products.index.filters.searchLabel",
+    "admin_pages_products_index_emp": "admin.pages.products.index.empty.newProduct",
+    "admin_pages_products_index_tab": "admin.pages.products.index.table.outOfStock",
+    "are_you_sure_you_want_to_delet2": "Êtes-vous sûr de vouloir supprimer ce bon de commande ?",
+    "not_found": "Introuvable",
+    "purchase_order_not_found": "Bon de commande introuvable",
+    "purchase_purchase_id_length_8": "Achat #${purchase.id.length > 8 ? achat.id.substring(0, 8) : achat.id}",
+    "purchase_items_length_items": "${purchase.items.length} articles",
+    "no_notes_added": "Aucune note ajoutée",
+    "no_items_added_yet": "Aucun élément ajouté pour l'instant",
+    "add_products_to_this_purchase": "Ajouter des produits à ce bon de commande",
+    "sku_widget_item_sku": "UGS : ${widget.item.sku}",
+    "widget_item_quantityordered": "${widget.item.quantityOrdered}",
+    "widget_item_quantityreceived": "${widget.item.quantityReceived.toInt()} / ${widget.item.quantityOrdered.toInt()}",
+    "replace_price": "Remplacer le prix",
+    "product_variants_length_varia": "${product.variants.length} variantes",
+    "sku_variant_sku_isnotempty_var": "SKU : ${variant.sku.isNotEmpty ? variante.sku : \"-\"} |  Stock : ${variant.stock}",
+    "estimated_total": "Total estimé",
+    "qty_ordered": "Quantité commandée",
+    "receive": "Recevoir",
+    "mode": "Mode",
+    "add": "Ajouter",
+    "a_draft_purchase_order_will_be": "Un projet de bon de commande sera créé. Vous pouvez ajouter des produits et finaliser les détails à l'étape suivante.",
+    "manage_your_purchase_orders": "Gérez vos bons de commande",
+    "error_purchasesstate_error": "Erreur : ${purchasesState.error}",
+    "create_a_purchase_order_to_res": "Créez un bon de commande pour réapprovisionner votre inventaire",
+    "purchase_id_length_8_purchase": "#${purchase.id.length > 8 ? achat.id.substring(0, 8) : achat.id}",
+    "create_your_tenant_configure_y": "Créez votre locataire, configurez vos opérations et lancez-vous avec des flux de travail prêts pour COD et conçus pour l'Algérie.",
+    "everything_you_need_for_produc": "Tout ce dont vous avez besoin pour le catalogue de produits, les commandes, l'expédition et l'accès des équipes sur une seule plateforme.",
+    "set_up_your_tenant_and_start_s": "Configurez votre locataire et commencez à vendre dès aujourd'hui.",
+    "account_created_successfully": "Compte créé avec succès",
+    "welcome_to_swekly_tenantname_y": "Bienvenue sur Swekly, $tenantName. Votre espace de travail est prêt.",
+    "swekly_com": ".swekly.com",
+    "slugcontroller_text_trim_swek": "${_slugController.text.trim()}.swekly.com",
+    "otp_verification": "Vérification OTP",
+    "send": "Envoyer",
+    "sale_shortid": "Vente #$shortId",
+    "create_refund_cash_outflow_and": "Créez une sortie de fonds de remboursement et marquez cette vente comme REMBOURSÉE.",
+    "sale_refunded_successfully": "Vente remboursée avec succès",
+    "failed_to_refund_sale_e": "Échec du remboursement de la vente : $e",
+    "no_items_found": "Aucun article trouvé",
+    "loading_sale": "Chargement de la vente...",
+    "error_salesstate_error": "Erreur : ${salesState.error}",
+    "admin_pages_sales_index_filter": "admin.pages.sales.index.filters.searchLabel",
+    "contact_info_saved": "Coordonnées enregistrées",
+    "contact_information": "Coordonnées",
+    "custom_domains": "Domaines personnalisés",
+    "point_your_cname_record_to": "Pointez votre enregistrement CNAME vers :",
+    "tenant_subdomain_tenantsubdoma": "Sous-domaine du locataire : $_tenantSubdomain",
+    "new_domain": "Nouveau domaine",
+    "homepage_settings_saved": "Paramètres de la page d'accueil enregistrés",
+    "show_section": "Afficher la section",
+    "hero_image_url": "URL de l'image du héros",
+    "hero_title": "Titre de héros",
+    "hero_subtitle": "Sous-titre du héros",
+    "hero_button_text": "Texte du bouton Héros",
+    "hero_button_link": "Lien du bouton héros",
+    "eyebrow": "Sourcil",
+    "legal_pages_saved": "Pages juridiques enregistrées",
+    "publish_this_legal_page": "Publier cette page légale",
+    "page": "Page",
+    "printer_saved_successfully": "Imprimante enregistrée avec succès",
+    "printer_settings": "Paramètres de l'imprimante",
+    "manage_your_receipt_printers_a": "Gérez vos imprimantes de reçus et vos paramètres de mise en page.",
+    "no_printers_configured": "Aucune imprimante configurée",
+    "add_a_printer_to_start_printin": "Ajoutez une imprimante pour commencer à imprimer des reçus",
+    "saved_printers": "Imprimantes enregistrées",
+    "receipt_layout_configuration": "Configuration de la présentation du reçu",
+    "customize_your_receipt_header": "Personnalisez l'en-tête, le pied de page et le contenu de votre reçu",
+    "layout_saved": "Mise en page enregistrée",
+    "edit_config": "Modifier la configuration",
+    "set_as_default": "Définir par défaut",
+    "test_print": "Test d'impression",
+    "are_you_sure_you_want_to_delet3": "Êtes-vous sûr de vouloir supprimer ce profil ?",
+    "uses_system_default_print_dial": "Utilise la boîte de dialogue d'impression par défaut du système.",
+    "80mm_standard": "80 mm (standard)",
+    "58mm_narrow": "58 mm (étroit)",
+    "auto_cut_paper": "Papier découpé automatiquement",
+    "after_printing": "Après l'impression",
+    "print_as_image_arabic_support": "Imprimer en tant qu'image (support arabe)",
+    "rasterize_pdf_to_image_for_per": "Pixellisez le PDF en image pour un rendu arabe parfait (plus lent)",
+    "no_serial_ports_found": "Aucun port série trouvé",
+    "select_serial_port": "Sélectionnez le port série",
+    "test_print_sent": "Impression test envoyée",
+    "test_print_failed_e": "Échec du test d'impression : $e",
+    "no_devices_found": "Aucun appareil trouvé",
+    "result_rssi_dbm": "${result.rssi} dBm",
+    "add_printer": "Ajouter une imprimante",
+    "add_new": "Ajouter un nouveau",
+    "profile_name": "Nom du profil",
+    "transport_type": "Type de transport",
+    "ip_address": "Adresse IP",
+    "port": "Port",
+    "mac_address": "Adresse MAC",
+    "device_id_uuid": "ID de l'appareil (UUID)",
+    "scan_for_ble_devices": "Rechercher des appareils BLE",
+    "printer_name": "Nom de l'imprimante",
+    "serial_port": "Port série",
+    "scan_for_ports": "Rechercher des ports",
+    "paper_width": "Largeur du papier",
+    "save_profile": "Enregistrer le profil",
+    "admin_receipt_editor_title": "admin.receipt.editor.title",
+    "customize_your_receipt_layout": "Personnalisez la présentation de votre reçu",
+    "quick_presets": "Préréglages rapides",
+    "receipt_updates_instantly_as_y": "Recevez des mises à jour instantanées lorsque vous modifiez",
+    "receipt_printer": "IMPRIMANTE DE REÇUS",
+    "receipt_layout": "Disposition du reçu",
+    "minimal": "Minimal",
+    "full_detail": "Tous les détails",
+    "quick_print": "Impression rapide",
+    "admin_receipt_editor_savelayou": "admin.receipt.editor.saveLayout",
+    "admin_receipt_editor_showlogo": "admin.receipt.editor.showLogo",
+    "admin_receipt_editor_showstore": "admin.receipt.editor.showStoreName",
+    "admin_receipt_editor_storename": "admin.receipt.editor.storeNameOverride",
+    "admin_receipt_editor_showstore2": "admin.receipt.editor.showStoreAddress",
+    "admin_receipt_editor_storeaddr": "admin.receipt.editor.storeAddressOverride",
+    "admin_receipt_editor_showstore3": "admin.receipt.editor.showStorePhone",
+    "admin_receipt_editor_storephon": "admin.receipt.editor.storePhoneOverride",
+    "admin_receipt_editor_showstore4": "admin.receipt.editor.showStoreEmail",
+    "admin_receipt_editor_storeemai": "admin.receipt.editor.storeEmailOverride",
+    "admin_receipt_editor_showcusto": "admin.receipt.editor.showCustomHeader",
+    "admin_receipt_editor_headertex": "admin.receipt.editor.headerText",
+    "admin_receipt_editor_showorder": "admin.receipt.editor.showOrderNumber",
+    "admin_receipt_editor_showdate": "admin.receipt.editor.showDate",
+    "admin_receipt_editor_showcusto2": "admin.receipt.editor.showCustomerInfo",
+    "admin_receipt_editor_showtaxbr": "admin.receipt.editor.showTaxBreakdown",
+    "admin_receipt_editor_showfoote": "admin.receipt.editor.showFooterMessage",
+    "admin_receipt_editor_footertex": "admin.receipt.editor.footerText",
+    "off": "DÉSACTIVÉ",
+    "on": "SUR",
+    "save_layout": "Enregistrer la mise en page",
+    "appearance_settings_saved": "Paramètres d'apparence enregistrés",
+    "storefront_appearance": "Apparence de la vitrine",
+    "use_brand_color_on_the_storefr": "Utilisez la couleur de la marque sur la vitrine",
+    "scroll_announcement_bar": "Barre d'annonce de défilement",
+    "logo_url": "URL du logo",
+    "favicon_url": "URL de l'icône de favori",
+    "primary_brand_color": "Couleur principale de la marque",
+    "template": "Modèle",
+    "announcement_text": "Texte d'annonce",
+    "store_settings_saved": "Paramètres du magasin enregistrés",
+    "store_settings": "Paramètres du magasin",
+    "enable_cart": "Activer le panier",
+    "allow_storefront_visitors_to_b": "Permettez aux visiteurs de la boutique de créer un panier avant de passer à la caisse.",
+    "enable_cash_on_delivery": "Activer le paiement à la livraison",
+    "keep_cod_ordering_active_for_t": "Gardez les commandes COD actives pour la vitrine.",
+    "simplify_checkout_when_detaile": "Simplifiez le paiement lorsqu'une adresse détaillée n'est pas requise.",
+    "provisioning_and_workspace_bin": "Le provisionnement et la liaison de l’espace de travail sont gérés en dehors de cet écran. Les URL des espaces de travail ne sont plus modifiables à partir des paramètres normaux de l'application.",
+    "store_slug": "Limace de magasin",
+    "currency_code": "Code devise",
+    "currency_country": "Pays de la devise",
+    "order_id_prefix": "Préfixe de l'ID de commande",
+    "minimum_order_amount_dzd": "Montant minimum de commande (DZD)",
+    "manage_your_store_identity_bra": "Gérez l'identité de votre magasin, les actifs de votre marque et les paramètres de votre vitrine.",
+    "this_tenant_is_on_an_offline_o": "Ce locataire est sur un niveau d’abonnement hors ligne uniquement. La vitrine hébergée et les fonctionnalités cloud restent visibles ici mais restent verrouillées jusqu'à ce que le locataire passe à un niveau en ligne.",
+    "reprovision_workspace": "Espace de travail de reprovision",
+    "this_clears_local_tenant_data": "Cela efface les données des locataires locaux.",
+    "toggle_dark_mode": "Activer le mode sombre",
+    "printers": "Imprimantes",
+    "reprovision": "Révision",
+    "checklist": "Liste de contrôle",
+    "open_web_admin_tool": "Ouvrir l'outil d'administration Web",
+    "open_storefront": "Ouvrir la vitrine",
+    "name_a_z": "Nom A-Z",
+    "name_z_a": "Nom Z-A",
+    "admin_pages_suppliers_index_ad": "admin.pages.suppliers.index.addSupplier",
+    "admin_pages_suppliers_index_fi": "admin.pages.suppliers.index.filters.searchLabel",
+    "admin_pages_suppliers_index_em": "admin.pages.suppliers.index.empty.newSupplier",
+    "upgrade_to_online_tier": "Passer au niveau en ligne",
+    "create_your_online_account": "Créez votre compte en ligne",
+    "your_offline_data_will_automat": "Vos données hors ligne seront automatiquement synchronisées avec le cloud.",
+    "store_url_slug": "URL du magasin (Slug)",
+    "admin_email": "E-mail de l'administrateur",
+    "admin_phone": "Téléphone administrateur",
+    "admin_pages_users_includeinact": "admin.pages.users.includeInactive",
+    "count": "$compter ${",
+    "no_staff_role": "Aucun rôle de personnel",
+    "select_at_least_one_permission": "Sélectionnez au moins une autorisation",
+    "admin_pages_users_roles_action": "admin.pages.users.roles.actions.addRole",
+    "role_name": "Nom du rôle",
+    "failed_to_update_variant_e": "Échec de la mise à jour de la variante : $e",
+    "no_sku_suggestion": "Aucune suggestion de SKU",
+    "failed_to_suggest_sku_e": "Échec de la suggestion du SKU : $e",
+    "sku_locked": "SKU verrouillé",
+    "failed_to_lock_sku_e": "Échec du verrouillage du SKU : $e",
+    "sku_is_locked": "Le SKU est verrouillé",
+    "visible_to_customers": "Visible pour les clients",
+    "track_inventory": "Suivre l'inventaire",
+    "cost_purchase_price": "Coût (Prix d'achat)",
+    "suggest_sku": "Suggérer une référence",
+    "lock_sku": "Verrouiller le SKU",
+    "safety_stock": "Stock de sécurité",
+    "admin_receipt_print_tel": "admin.receipt.print.tel",
+    "admin_receipt_print_email": "admin.receipt.print.email",
+    "admin_receipt_print_ordernum": "admin.receipt.print.orderNum",
+    "admin_receipt_print_customer": "admin.receipt.print.customer",
+    "admin_receipt_print_phone": "admin.receipt.print.phone",
+    "item": "Article",
+    "admin_receipt_print_discount": "admin.receipt.print.discount",
+    "money_format_discountamount": "-${money.format(discountAmount)}",
+    "admin_receipt_print_grandtotal": "admin.receipt.print.grandTotal",
+    "view_details": "Afficher les détails",
+    "admin_actions_logoutconfirmtit": "admin.actions.logoutConfirmTitle",
+    "admin_actions_logoutconfirmmes": "admin.actions.logoutConfirmMessage",
+    "admin_actions_viewstore": "admin.actions.viewStore",
+    "sync_recovery": "Récupération de synchronisation",
+    "no_queued_failures": "Aucun échec en file d'attente.",
+    "issue_entitytype_issue_action": "${issue.entityType} • ${issue.action}",
+    "retry_failed": "La nouvelle tentative a échoué",
+    "sync_conflicted": "Synchronisation en conflit",
+    "modelabel_syncing": "Synchronisation $modeLabel",
+    "sync_failed": "La synchronisation a échoué",
+    "failed_to_update_e": "Échec de la mise à jour : $e",
+    "no_image_url": "Aucune URL d'image",
+    "failed_to_create_option_e": "Échec de la création de l'option : $e",
+    "are_you_sure_you_want_to_delet4": "Êtes-vous sûr de vouloir supprimer cette option ?",
+    "failed_to_delete_option_e": "Échec de la suppression de l'option : $e",
+    "failed_to_add_value_e": "Échec de l'ajout de valeur : $e",
+    "failed_to_delete_value_e": "Échec de la suppression de la valeur : $e",
+    "new_option": "Nouvelle option",
+    "add_option": "Ajouter une option",
+    "values": "Valeurs",
+    "add_value": "Ajouter de la valeur",
+    "admin_common_nodataavailable": "admin.common.noDataAvailable",
+    "admin_common_rowsperpage": "admin.common.rowsPerPage",
+    "storeslug_swekly_com": "$storeSlug.swekly.com",
+    "admin_nav_deliveryitem": "admin.nav.deliveryItem",
+    "create_cashbox": "Créer une caisse",
+    "no_transactions_found": "Aucune transaction trouvée",
+    "try_expanding_the_date_range_o": "Essayez d'élargir la plage de dates ou de supprimer les filtres.",
+    "no_sessions_found": "Aucune séance trouvée",
+    "record_a_transaction_expense_c": "Enregistrez une transaction (dépense, charge ou paiement client/fournisseur).",
+    "move_funds_between_two_open_ca": "Déplacez des fonds entre deux sessions de caisse ouvertes.",
+    "transactions_for_this_cashbox": "Transactions pour cette caisse (7 derniers jours).",
+    "no_categories_found": "Aucune catégorie trouvée",
+    "basic_information": "Informations de base",
+    "category_image": "Catégorie Image",
+    "admin_pages_customers_detail_s": "admin.pages.customers.detail.stats.totalSpent",
+    "admin_pages_customers_detail_s2": "admin.pages.customers.detail.stats.totalPaid",
+    "admin_pages_customers_detail_s3": "admin.pages.customers.detail.stats.currentBalance",
+    "str_273": "—",
+    "feature_locked": "Fonctionnalité verrouillée",
+    "this_feature_is_not_available": "Cette fonctionnalité n'est pas disponible pour l'abonnement actuel.",
+    "track_conversions_and_retarget": "Suivez les conversions et reciblez les clients via les publicités Facebook.",
+    "receive_new_order_alerts_direc": "Recevez des alertes de nouvelles commandes directement dans un chat Telegram.",
+    "welcome_back_n": "Bon retour,\\n",
+    "builder": "Constructeur.",
+    "add_a_customer_and_attach_this": "Ajoutez un client et attachez cette vente à son compte.",
+    "return_refund": "Retour / Remboursement",
+    "admin_pages_pos_catalog_noprod": "admin.pages.pos.catalog.noProducts",
+    "browse": "Parcourir →",
+    "apply_a_cart_wide_fixed_amount": "Appliquez un montant fixe ou un pourcentage de remise à l’échelle du panier.",
+    "style_textstyle_fontsize_12_c": ",\n          style : StyleTexte (\n            Taille de la police : 12,\n            couleur : Thème.de (\n              contexte,\n            ).colorScheme.onSurface.withValues(alpha : 0,6),\n          ),\n        ),\n        const SizedBox (largeur : 4),\n        IcôneBouton(\n          icône : icône const (LucideIcons.externalLink, taille : 16),\n          couleur : couleur constante (0xFF65A30D),\n          rayon d'éclaboussure : 16,\n          info-bulle : openTooltip,\n          onPressed : canUseLinks ? onOpen : nul,\n        ),\n        IcôneBouton(\n          icône : icône const (LucideIcons.copy, taille : 16),\n          couleur : couleur constante (0xFF94A3B8),\n          rayon d'éclaboussure : 16,\n          info-bulle : copyTooltip,\n          onPressed : canUseLinks ? onCopie : nul,\n        ),\n      ],\n    );\n  }\n}\n\nla classe _ErrorBanner étend StatelessWidget {\n  message de chaîne final ;\n\n  const _ErrorBanner({required this.message});\n\n  @override\n  Construction du widget (contexte BuildContext) {\n    final isDark = Theme.of(context).brightness == Brightness.dark;\n    conteneur de retour (\n      largeur : double.infini,\n      remplissage : const EdgeInsets.all(12),\n      décoration : BoîteDécoration(\n        couleur : isDark ? AppColors.redSurface : const Couleur(0xFFFEF2F2),\n        borderRadius : BorderRadius.circular(8),\n        frontière : Bordure.all(\n          couleur: estDark\n              ? AppColors.redText.withValues (alpha : 0,3)\n              : const Couleur(0xFFFECACA),\n        ),\n      ),\n      enfant : Texte (\n        message,\n        style : StyleTexte (\n          Taille de la police : 14,\n          couleur : isDark ? AppColors.redText : const Couleur(0xFFB91C1C),\n        ),\n      ),\n    );\n  }\n}\n\nla classe _LoadingCard étend StatelessWidget {\n  const _LoadingCard();\n\n  @override\n  Construction du widget (contexte BuildContext) {\n    conteneur de retour (\n      décoration : BoîteDécoration(\n        borderRadius : BorderRadius.circular(12),\n        frontière : Bordure.all(\n          couleur : Theme.of(context).colorScheme.outline.withValues(alpha : 0,25),\n        ),\n      ),\n      enfant : const Center (enfant : CircularProgressIndicator()),\n    );\n  }\n}\n\nla classe _ProductTabsCard étend StatelessWidget {\n  final GlobalKey<FormState> formKey ;\n  catégories finales de List<Category> ;\n  le booléen final estEditing ;\n  Le booléen final est Soumission ;\n  final TextEditingController titleController ;\n  TextEditingController final slugController ;\n  final TextEditingController miniDescriptionController ;\n  final TextEditingController landingDescriptionController ;\n  final TextEditingController priceController ;\n  TextEditingController final stockController ;\n  final TextEditingController lowStockThresholdController ;\n  Chaîne finale ? ID de catégorie sélectionnée ;\n  final ValueChanged<String?> onCategoryChanged ;\n  le booléen final estActive ;\n  final ValueChanged<bool> onActiveChanged ;\n  images finales List<String> ;\n  Le booléen final estTéléchargement ;\n  VoidCallback final surAddImage ;\n  final ValueChanged<int> onRemoveImage ;\n  Produit final ? produit;\n  Chaîne finale ? ID produit ;\n  final VoidCallback onVariantUpdated ;\n  final VoidCallback onCancel ;\n  final VoidCallback onSubmit ;\n\n  const _ProductTabsCard({\n    requis this.formKey,\n    requis this.categories,\n    requis this.isEditing,\n    requis this.isSubmitting,\n    requis this.titleController,\n    requis this.slugController,\n    requis this.miniDescriptionController,\n    requis this.landingDescriptionController,\n    requis this.priceController,\n    requis ce.stockController,\n    requis this.lowStockThresholdController,\n    requis this.selectedCategoryId,\n    requis this.onCategoryChanged,\n    requis this.isActive,\n    requis this.onActiveChanged,\n    requis this.images,\n    requis this.isUploading,\n    requis this.onAddImage,\n    requis ceci.onRemoveImage,\n    requis ce produit,\n    requis this.productId,\n    requis this.onVariantUpdated,\n    requis ceci.onCancel,\n    requis ceci.onSubmit,\n  });\n\n  @override\n  Construction du widget (contexte BuildContext) {\n    final isDark = Theme.of(context).brightness == Brightness.dark;\n\n    retourner DefaultTabController (\n      longueur: 3,\n      enfant : Conteneur (\n        décoration : BoîteDécoration(\n          couleur : isDark ? AppColors.surface1 : AppColors.lightSurface1,\n          borderRadius : BorderRadius.circular(12),\n          frontière : Bordure.all(\n            couleur: estDark\n                ? AppColors.surfaceBorder\n                : AppColors.lightSurfaceBorder,\n          ),\n        ),\n        enfant : Colonne (\n          enfants : [\n            TabBar(\n              isScrollable : vrai,\n              tabAlignment : TabAlignment.start,\n              couleurétiquette : couleur const (0xFF65A30D),\n              unselectedLabelColor : const Color (0xFF64748B),\n              couleur de l'indicateur : couleur const (0xFF65A30D),\n              indicateurTaille : TabBarIndicatorSize.tab,\n              onglets : [\n                Onglet(texte :",
+    "create_purchase_order": "Créer un bon de commande",
+    "select_a_supplier_to_start_a_n": "Sélectionnez un fournisseur pour démarrer une nouvelle commande d'achat. Vous pourrez ajouter des éléments plus tard.",
+    "start_your_n": "Démarrez votre\\n",
+    "e_commerce_empire": "empire du commerce électronique",
+    "primary_channels": "Canaux principaux",
+    "social_messaging": "Réseaux sociaux et messagerie",
+    "titles": "Titres",
+    "content": "Contenu",
+    "delete_printer": "Supprimer l'imprimante ?",
+    "connection_details": "Détails de connexion",
+    "capabilities": "Capacités",
+    "scanning_ble_devices": "Analyse des appareils BLE",
+    "store_name_items_total_only": "Nom du magasin, articles et total uniquement",
+    "everything_logo_contacts_tax_f": "Tout : logo, contacts, taxes, pied de page",
+    "welcome": "Accueillir!",
+    "thank_you_for_your_purchase": "Merci pour votre achat!",
+    "rtl_safe_no_logo_clean_layout": "Coffre-fort RTL, pas de logo, mise en page épurée",
+    "str_442": "شكراً لزيارتكم",
+    "items_only_kitchen_ticket_styl": "Articles uniquement – ​​style ticket de cuisine",
+    "editor": "Éditeur",
+    "operational_settings_used_acro": "Paramètres opérationnels utilisés dans les commandes et les flux administratifs.",
+    "configure_default_order_behavi": "Configurez le comportement de commande par défaut pour les flux d'administration locaux et en ligne.",
+    "manage_local_admin_preferences": "Gérez les préférences de l'administrateur local, les paramètres opérationnels et l'accès à la vitrine hébergée.",
+    "dark_mode": "Mode sombre",
+    "enable_the_dark_admin_theme": "Activez le thème d'administration sombre.",
+    "provisioned_workspace": "Espace de travail provisionné",
+    "clear_local_tenant_data_on_thi": "Effacez les données du locataire local sur cette installation et revenez à l’activation sécurisée.",
+    "this_clears_the_local_workspac": "Cela efface la base de données de l'espace de travail local, la file d'attente de synchronisation, les fichiers et le cache d'images pour cette liaison de locataire sur cet appareil.",
+    "clear_and_reprovision": "Effacer et réapprovisionner",
+    "manage_receipt_and_device_prin": "Gérez l’impression des reçus et des appareils.",
+    "order_prefixes_checkout_rules": "Préfixes de commande, règles de paiement et paramètres opérationnels par défaut.",
+    "manage_phone_email_address_and": "Gérez le téléphone, l'e-mail, l'adresse et les liens sociaux.",
+    "track_onboarding_progress_for": "Suivez la progression de l’intégration de ce locataire.",
+    "theme_logo_color_language_and": "Thème, logo, couleur, langue et barre d'annonce.",
+    "hero_carousel_and_storefront_h": "Sections du carrousel de héros et de la page d'accueil de la vitrine.",
+    "terms_privacy_returns_and_publ": "Conditions, confidentialité, retours et pages de contact public.",
+    "attach_a_custom_domain_to_the": "Attachez un domaine personnalisé à la vitrine hébergée.",
+    "storefront_preview": "Aperçu de la vitrine",
+    "open_the_existing_hosted_store": "Ouvrez l'aperçu de la vitrine hébergée existante.",
+    "template_builder": "Générateur de modèles",
+    "open_the_web_based_template_bu": "Ouvrez le générateur de modèles Web.",
+    "landing_page_builder": "Générateur de pages de destination",
+    "open_the_web_based_marketing_l": "Ouvrez le générateur de pages de destination marketing basé sur le Web.",
+    "cloud_connected_integrations_a": "Intégrations et notifications connectées au cloud.",
+    "usage_plans_and_payment_submis2": "Utilisation, forfaits et soumission des paiements.",
+    "admin_pages_suppliers_index_de": "admin.pages.suppliers.index.deleteModal.title",
+    "admin_pages_suppliers_index_de2": "admin.pages.suppliers.index.deleteModal.messageWithName",
+    "swekly_com2": "swekly.com/",
+    "admin_pages_users_hints_deacti": "admin.pages.users.hints.deactivateHint",
+    "admin_pages_users_roles_create": "admin.pages.users.roles.createTitle",
+    "admin_pages_users_roles_editti": "admin.pages.users.roles.editTitle",
+    "admin_confirmmodal_defaults_ti": "admin.confirmModal.defaults.titre",
+    "admin_confirmmodal_defaults_me": "admin.confirmModal.defaults.message",
+    "create_or_update_an_admin_staf": "Créez ou mettez à jour un utilisateur administrateur/personnel pour ce locataire.",
+    "define_a_role_and_its_permissi": "Définissez un rôle et ses autorisations.",
+    "general_information": "Informations générales",
+    "block_sync_if_the_remote_order": "Bloquez la synchronisation si le statut de la commande à distance a changé depuis la modification locale.",
+    "block_sync_if_remote_store_set": "Bloquez la synchronisation si les paramètres du magasin distant diffèrent de l'instantané de référence local.",
+    "block_sync_if_the_remote_conta": "Bloquez la synchronisation si les informations du contact distant ont changé ou ont été supprimées depuis la modification locale.",
+    "block_sync_if_the_remote_conta2": "Bloquez la synchronisation si les informations du contact distant ont changé avant la relecture de la suppression locale.",
+    "block_sync_if_remote_cashbox_m": "Bloquez la synchronisation si les métadonnées de la caisse distante divergent de l'instantané de référence local.",
+    "block_sync_if_remote_delivery": "Bloquer la synchronisation si l'activation du fournisseur de livraison à distance a changé depuis la modification locale.",
+    "billing_and_subscription_manag": "La gestion de la facturation et des abonnements est disponible uniquement sur les niveaux en ligne.",
+    "cloud_integrations": "Intégrations cloud",
+    "cloud_integrations_require_an": "Les intégrations cloud nécessitent un niveau en ligne avec des services à distance activés.",
+    "custom_domains_depend_on_the_h": "Les domaines personnalisés dépendent de la vitrine hébergée et nécessitent un niveau en ligne.",
+    "storefront_appearance_controls": "Les contrôles d’apparence de la vitrine s’appliquent à la vitrine hébergée et nécessitent un niveau en ligne.",
+    "homepage_sections_and_carousel": "Les sections de la page d'accueil et les paramètres du carrousel sont gérés depuis la vitrine et nécessitent un niveau en ligne.",
+    "public_legal_pages_belong_to_t": "Les pages juridiques publiques appartiennent à la vitrine hébergée et nécessitent un niveau en ligne.",
+    "previewing_the_hosted_storefro": "La prévisualisation de la vitrine hébergée nécessite une vitrine de niveau en ligne.",
+    "the_template_builder_is_part_o": "Le générateur de modèles fait partie de la gestion de la vitrine hébergée et nécessite un niveau en ligne.",
+    "the_landing_page_builder_is_av": "Le générateur de pages de destination est disponible uniquement sur les niveaux en ligne.",
+    "this_will_delete_all_variants": "Cela supprimera toutes les variantes associées à cette option.",
+    "admin_nav_storeparameters": "Paramètres",
+    "app_offline_activation": "app.offline_activation",
+    "app_generate_this_request_code": "app.generate_this_request_code_on",
+    "app_paste_signed_activation_co": "app.paste_signed_activation_code_h",
+    "app_verify": "app.verify",
+    "app_trusted_activation": "app.trusted_activation",
+    "app_activation_key": "app.activation_key",
+    "app_paste_the_tenant_issued_ke": "app.paste_the_tenant_issued_key_fo",
+    "app_start_offline_activation": "app.start_offline_activation",
+    "app_billing_subscription": "app.billing_subscription",
+    "app_usage_plans_and_payment_su": "app.usage_plans_and_payment_submis",
+    "superadmin_paymentspage_interv": "superAdmin.paymentsPage.interval.monthly",
+    "superadmin_paymentspage_interv2": "superAdmin.paymentsPage.interval.yearly",
+    "app_submit_or_simulate_payment": "app.submit_or_simulate_payment",
+    "superadmin_paymentspage_import": "superAdmin.paymentsPage.import.fields.notes",
+    "app_simulate_payment": "app.simulate_payment",
+    "app_submit_payment": "app.submit_payment",
+    "app_recent_payments": "app.recent_payments",
+    "admin_pages_cash_methods_cash": "admin.pages.cash.methods.CASH",
+    "app_cashboxes_transactions_and": "app.cashboxes_transactions_and_ses",
+    "app_new_customer_payment": "app.new_customer_payment",
+    "app_new_supplier_payment": "app.new_supplier_payment",
+    "admin_pages_cash_transactions": "admin.pages.cash.transactions.types.TRANSFER",
+    "app_new_action": "app.new_action",
+    "app_total_in_today": "app.total_in_today",
+    "app_total_out_today": "app.total_out_today",
+    "admin_pages_dashboard_stats_ac": "admin.pages.dashboard.stats.activeSessions",
+    "app_net_today": "app.net_today",
+    "superadmin_paymentspage_action": "superAdmin.paymentsPage.actions.refresh",
+    "app_no_cashboxes_yet": "app.no_cashboxes_yet",
+    "app_create_one_to_start_tracki": "app.create_one_to_start_tracking_c",
+    "app_create_cashbox": "app.create_cashbox",
+    "superadmin_tenants_table_name": "superAdmin.tenants.table.name",
+    "superadmin_tenants_status_acti": "superAdmin.tenants.status.active",
+    "admin_pages_sales_refundmodal": "admin.pages.sales.refundModal.noteLabel",
+    "app_opening": "app.ouverture",
+    "admin_pages_cash_closingcount": "admin.pages.cash.closingCount",
+    "app_something_went_wrong": "app.something_went_wrong",
+    "superadmin_paymentspage_histor": "superAdmin.paymentsPage.history.proof.open",
+    "admin_pages_cash_modals_closes": "admin.pages.cash.modals.closeSession.confirm",
+    "app_loading_transactions": "app.loading_transactions",
+    "app_no_transactions_found": "app.no_transactions_found",
+    "app_try_expanding_the_date_ran": "app.try_expanding_the_date_range_o",
+    "app_loading_sessions": "app.loading_sessions",
+    "app_no_sessions_found": "app.no_sessions_found",
+    "admin_pages_sales_refundmodal2": "admin.pages.sales.refundModal.cashboxLabel",
+    "admin_pages_cash_sessions_filt": "admin.pages.cash.sessions.filters.allCashboxes",
+    "admin_pages_cash_transactions2": "admin.pages.cash.transactions.filters.allTypes",
+    "app_sale_payment": "app.sale_payment",
+    "app_customer_payment": "app.customer_payment",
+    "app_supplier_payment": "app.supplier_payment",
+    "admin_pages_cash_transactions3": "admin.pages.cash.transactions.types.EXPENSE",
+    "admin_pages_cash_transactions4": "admin.pages.cash.transactions.types.CHARGE",
+    "app_direction": "application.direction",
+    "app_all_directions": "app.all_directions",
+    "superadmin_paymentspage_histor2": "superAdmin.paymentsPage.history.table.method",
+    "admin_pages_cash_transactions5": "admin.pages.cash.transactions.filters.allMethods",
+    "admin_pages_cash_methods_card": "admin.pages.cash.methods.CARD",
+    "admin_pages_cash_methods_other": "admin.pages.cash.methods.OTHER",
+    "admin_pages_sales_index_filter2": "admin.pages.sales.index.filters.allUsers",
+    "superadmin_paymentspage_histor3": "superAdmin.paymentsPage.history.table.status",
+    "admin_pages_purchases_index_fi": "admin.pages.purchases.index.filters.allStatuses",
+    "admin_pages_cash_status_closed": "admin.pages.cash.status.FERMÉ",
+    "app_closing": "application.closing",
+    "app_diff": "app.diff",
+    "app_admin_pages_cash_sessions": "app.admin_pages_cash_sessions_tabl",
+    "app_admin_pages_cash_sessions2": "app.admin_pages_cash_sessions_tabl2",
+    "app_admin_pages_cash_sessions3": "app.admin_pages_cash_sessions_tabl3",
+    "app_admin_pages_cash_sessions4": "app.admin_pages_cash_sessions_tabl4",
+    "app_admin_pages_cash_sessions5": "app.admin_pages_cash_sessions_tabl5",
+    "app_record_a_transaction_expen": "app.record_a_transaction_expense_c",
+    "app_select_cashbox": "app.select_cashbox",
+    "superadmin_paymentspage_histor4": "superAdmin.paymentsPage.history.table.amount",
+    "admin_settingshub_links_curren": "admin.settingsHub.links.currency",
+    "app_select_customer": "app.select_customer",
+    "app_no_customers_match_your_se": "app.no_customers_match_your_search",
+    "admin_pages_suppliers_index_em2": "admin.pages.suppliers.index.empty.hintFiltered",
+    "admin_pages_purchases_detail_p": "admin.pages.purchases.detail.paymentModal.referenceLabel",
+    "admin_pages_purchases_detail_p2": "admin.pages.purchases.detail.paymentModal.noteLabel",
+    "app_move_funds_between_two_ope": "app.move_funds_between_two_open_ca",
+    "admin_pages_cash_modals_transf": "admin.pages.cash.modals.transfer.fromLabel",
+    "admin_pages_cash_modals_transf2": "admin.pages.cash.modals.transfer.toLabel",
+    "app_note_both_cashboxes_must_h": "app.note_both_cashboxes_must_have",
+    "app_from_and_to_must_differ": "app.from_and_to_must_differ",
+    "admin_pages_cash_opensession": "admin.pages.cash.openSession",
+    "admin_pages_cash_closesession": "admin.pages.cash.closeSession",
+    "app_transactions_for_this_cash": "app.transactions_for_this_cashbox",
+    "superadmin_paymentspage_histor5": "superAdmin.paymentsPage.history.table.date",
+    "app_manage_your_product_catego": "app.manage_your_product_categories",
+    "admin_pages_categories_index_a": "admin.pages.categories.index.addCategory",
+    "superadmin_tenants_modal_field": "superAdmin.tenants.modal.fields.slug.slugFallback",
+    "superadmin_tenants_table_produ": "superAdmin.tenants.table.products",
+    "app_no_categories_found": "app.no_categories_found",
+    "superadmin_tenants_table_actio": "superAdmin.tenants.table.actions",
+    "admin_pages_categories_edit_li": "admin.pages.categories.edit.links.openCategory",
+    "admin_pages_categories_edit_li2": "admin.pages.categories.edit.links.copyCategory",
+    "app_category_link_copied_to_cl": "app.category_link_copied_to_clipbo",
+    "admin_pages_categories_edit_de": "admin.pages.categories.edit.deleteModal.title",
+    "app_basic_information": "app.basic_information",
+    "app_category_image": "app.category_image",
+    "app_admin_pages_customers_deta": "app.admin_pages_customers_detail_s",
+    "app_admin_pages_customers_deta2": "app.admin_pages_customers_detail_s2",
+    "app_admin_pages_customers_deta3": "app.admin_pages_customers_detail_s3",
+    "app_str_273": "app.str_273",
+    "app_admin_pages_customers_deta4": "app.admin_pages_customers_detail_e",
+    "app_admin_pages_customers_deta5": "app.admin_pages_customers_detail_n",
+    "app_admin_pages_customers_deta6": "app.admin_pages_customers_detail_n2",
+    "app_admin_forms_customer_openi": "app.admin_forms_customer_openingba",
+    "app_admin_pages_customers_inde": "app.admin_pages_customers_index_fi",
+    "app_admin_pages_customers_inde2": "app.admin_pages_customers_index_ad",
+    "admin_pages_onboarding_savefin": "admin.pages.onboarding.saveFinish",
+    "app_could_not_load_dashboard_d": "app.could_not_load_dashboard_data",
+    "admin_pages_products_index_tab2": "admin.pages.products.index.table.lowStock",
+    "admin_pages_dashboard_recentor": "admin.pages.dashboard.recentOrders.title",
+    "app_latest_orders_for_this_ten": "app.latest_orders_for_this_tenant",
+    "superadmin_dashboard_recentact": "superAdmin.dashboard.recentActivity.viewAll",
+    "app_no_recent_orders": "app.no_recent_orders",
+    "app_new_orders_will_appear_her": "app.new_orders_will_apparaître_here",
+    "admin_pages_billing_history_vi": "admin.pages.billing.history.viewProof",
+    "admin_orderstatus_confirmed": "admin.orderStatus.confirmed",
+    "admin_orderstatus_shipped": "admin.orderStatus.shipped",
+    "admin_orderstatus_delivered": "admin.orderStatus.delivered",
+    "admin_pages_purchases_index_fi2": "admin.pages.purchases.index.filters.statusValues.CANCELLED",
+    "admin_orderstatus_returned": "admin.orderStatus.returned",
+    "admin_pages_dashboard_ordersta": "admin.pages.dashboard.orderStatus.title",
+    "app_quick_overview_by_status": "app.quick_overview_by_status",
+    "admin_pages_dashboard_quicklin": "admin.pages.dashboard.quickLinks.manageProducts",
+    "app_upgrade_to_online": "app.upgrade_to_online",
+    "app_quick_links": "app.quick_links",
+    "app_common_actions_to_get_thin": "app.common_actions_to_get_things_d",
+    "app_delivery_settings": "app.delivery_settings",
+    "app_manage_delivery_providers": "app.manage_delivery_providers_and",
+    "app_feature_locked": "app.feature_locked",
+    "app_this_feature_is_not_availa": "app.this_feature_is_not_available",
+    "app_upgrade_to_an_online_tier": "app.upgrade_to_an_online_tier_to_u",
+    "app_back_to_settings": "app.back_to_settings",
+    "admin_settingshub_links_integr": "admin.settingsHub.links.integrations",
+    "app_connect_third_party_servic": "app.connect_third_party_services_t",
+    "app_track_conversions_and_reta": "app.track_conversions_and_retarget",
+    "admin_pages_integrations_metap": "admin.pages.integrations.metaPixels.table.pixelId",
+    "app_conversion_api_token": "app.conversion_api_token",
+    "app_receive_new_order_alerts_d": "app.receive_new_order_alerts_direc",
+    "admin_pages_integrations_teleg": "admin.pages.integrations.telegram.modal.fields.botToken.label",
+    "admin_pages_integrations_teleg2": "admin.pages.integrations.telegram.modal.fields.chatId.label",
+    "admin_pages_sales_detail_items": "admin.pages.sales.detail.itemsTable.product",
+    "app_welcome_back_n": "app.welcome_back_n",
+    "app_builder": "app.builder",
+    "app_your_dashboard_is_ready_co": "app.your_dashboard_is_ready_contin",
+    "app_real_time_insights_into_st": "app.real_time_insights_into_store",
+    "app_2026_swekly_inc": "app.2026_swekly_inc",
+    "app_google": "application.google",
+    "admin_contactinfosform_kinds_f": "admin.contactInfosForm.kinds.facebook.label",
+    "app_apple": "app.apple",
+    "superadmin_login_form_email_la": "superAdmin.login.form.email.label",
+    "superadmin_login_form_password": "superAdmin.login.form.password.label",
+    "app_dont_have_account": "app.dont_have_account",
+    "auth_login_form_startfree": "auth.login.form.startFree",
+    "app_swekly": "app.swekly",
+    "app_setup_checklist": "app.setup_checklist",
+    "app_retry": "app.retry",
+    "app_progress": "app.progress",
+    "admin_pages_orders_index_addbt": "admin.pages.orders.index.addBtn",
+    "app_select_existing_customer_o": "app.select_existing_customer_optio",
+    "app_new_customer": "app.new_customer",
+    "app_customer_name": "app.nom_client",
+    "admin_pages_sales_detail_field": "admin.pages.sales.detail.fields.customerPhone",
+    "app_provider": "app.provider",
+    "admin_pages_products_edit_bund": "admin.pages.products.edit.bundlesTab.tags.none",
+    "app_yalidine": "app.yalidine",
+    "app_maystro": "app.maystro",
+    "admin_pages_orders_create_deli": "admin.pages.orders.create.deliveryMode",
+    "app_stop_desk": "app.stop_desk",
+    "app_select": "app.select",
+    "admin_pages_orders_create_empt": "admin.pages.orders.create.emptyCart",
+    "admin_pages_sales_detail_items2": "admin.pages.sales.detail.itemsTable.total",
+    "admin_pages_orders_detail_back": "admin.pages.orders.detail.backToOrders",
+    "superadmin_tenants_table_creat": "superAdmin.tenants.table.created",
+    "app_no_items": "app.no_items",
+    "superadmin_tenants_table_order": "superAdmin.tenants.table.orders",
+    "admin_pages_orders_index_filte": "admin.pages.orders.index.filters.allOrders",
+    "app_loading_orders": "app.loading_orders",
+    "app_add_a_customer_and_attach": "app.add_a_customer_and_attach_this",
+    "app_scan_barcode": "app.scan_barcode",
+    "app_add_products_before_applyi": "app.add_products_before_applying_a",
+    "admin_pages_orders_detail_item": "admin.pages.orders.detail.itemsTable.subtotal",
+    "app_invalid_payment_amounts": "app.invalid_payment_amounts",
+    "admin_pages_billing_payment_em": "admin.pages.billing.payment.emptyTitle",
+    "admin_pages_billing_payment_to": "admin.pages.billing.payment.totalLabel",
+    "admin_pages_pos_paymentmodal_c": "admin.pages.pos.paymentModal.cashReceived",
+    "app_show_numpad": "app.show_numpad",
+    "app_waiting_for_terminal": "app.waiting_for_terminal",
+    "admin_pages_pos_paymentmodal_k": "admin.pages.pos.paymentModal.keypad",
+    "app_confirm_payment_enter": "app.confirm_payment_enter",
+    "app_reprinting_last_order": "app.reprinting_last_order",
+    "app_admin_pages_pos_catalog_se": "app.admin_pages_pos_catalog_search",
+    "app_name_a_to_z": "app.name_a_to_z",
+    "app_price_low_to_high": "app.price_low_to_high",
+    "app_price_high_to_low": "app.price_high_to_low",
+    "app_recently_added": "app.recently_added",
+    "app_3_columns": "app.3_colonnes",
+    "app_4_columns": "app.4_colonnes",
+    "app_5_columns": "app.5_colonnes",
+    "app_6_columns": "app.6_colonnes",
+    "app_more_actions": "app.more_actions",
+    "app_apply_discount": "app.apply_discount",
+    "admin_pages_pos_catalog_action": "admin.pages.pos.catalog.actions.reprintLastOrder",
+    "app_error_loading_products": "app.error_loading_products",
+    "app_admin_pages_pos_catalog_no": "app.admin_pages_pos_catalog_noprod",
+    "app_browse": "app.browse",
+    "app_admin_pages_pos_cart_actio": "app.admin_pages_pos_cart_actions_v",
+    "app_admin_pages_pos_cart_items": "app.admin_pages_pos_cart_itemscoun",
+    "app_admin_pages_pos_cart_actio2": "app.admin_pages_pos_cart_actions_c",
+    "app_no_customer_found": "app.no_customer_found",
+    "app_create_one_and_assign_this": "app.create_one_and_assign_this_sal",
+    "app_tap_a_product_card_or_use": "app.tap_a_product_card_or_use_quic",
+    "app_admin_pages_pos_actions_vi": "app.admin_pages_pos_actions_viewca",
+    "app_failed_to_load_product_var": "app.failed_to_load_product_variant",
+    "app_no_active_variants_for_thi": "app.no_active_variants_for_this_pr",
+    "app_apply_a_cart_wide_fixed_am": "app.apply_a_cart_wide_fixed_amount",
+    "app_percent": "app.pour cent",
+    "app_reason": "application.raison",
+    "app_new_total": "app.new_total",
+    "app_admin_pages_products_index": "app.admin_pages_products_index_add",
+    "app_admin_common_featurecoming": "app.admin_common_featurecomingsoon",
+    "app_admin_pages_products_index2": "app.admin_pages_products_index_sor",
+    "app_admin_pages_products_index3": "app.admin_pages_products_index_fil4",
+    "app_admin_pages_products_index4": "app.admin_pages_products_index_fil",
+    "app_admin_pages_products_index5": "app.admin_pages_products_index_fil2",
+    "app_admin_pages_products_index6": "app.admin_pages_products_index_fil3",
+    "app_admin_pages_products_index7": "app.admin_pages_products_index_emp",
+    "app_admin_pages_products_index8": "app.admin_pages_products_index_tab",
+    "app_admin_pages_products_index9": "app.admin_pages_products_index_lin",
+    "app_admin_pages_products_index10": "app.admin_pages_products_index_lin2",
+    "app_admin_pages_products_index11": "app.admin_pages_products_index_lin3",
+    "app_admin_pages_products_index12": "app.admin_pages_products_index_lin4",
+    "admin_pages_purchases_detail_d": "admin.pages.purchases.detail.deleteModal.title",
+    "app_are_you_sure_you_want_to_d": "app.are_you_sure_you_want_to_delet2",
+    "app_not_found": "app.not_found",
+    "app_purchase_order_not_found": "app.purchase_order_not_found",
+    "admin_pages_purchases_detail_a": "admin.pages.purchases.detail.addProducts",
+    "admin_pages_purchases_detail_d2": "admin.pages.purchases.detail.deleteModal.confirm",
+    "admin_pages_purchases_detail_c": "admin.pages.purchases.detail.cards.itemsOrdered",
+    "admin_pages_purchases_detail_c2": "admin.pages.purchases.detail.cards.itemsReceived",
+    "app_estimated_total": "app.estimated_total",
+    "app_no_notes_added": "app.no_notes_added",
+    "app_no_items_added_yet": "app.no_items_added_yet",
+    "app_add_products_to_this_purch": "app.add_products_to_this_purchase",
+    "admin_pages_purchases_detail_i": "admin.pages.purchases.detail.items.table.totalOrderValue",
+    "admin_pages_purchases_detail_i2": "admin.pages.purchases.detail.items.table.unitCost",
+    "admin_pages_purchases_detail_i3": "admin.pages.purchases.detail.items.table.receiveNow",
+    "app_qty_ordered": "app.qty_ordered",
+    "app_receive": "application.recevoir",
+    "app_mode": "app.mode",
+    "app_replace_price": "app.replace_price",
+    "admin_pages_purchases_detail_i4": "admin.pages.purchases.detail.items.table.salePriceMode.weighted",
+    "app_add": "app.ajouter",
+    "app_create_purchase_order": "app.create_purchase_order",
+    "app_select_a_supplier_to_start": "app.select_a_supplier_to_start_a_n",
+    "app_a_draft_purchase_order_wil": "app.a_draft_purchase_order_will_be",
+    "app_manage_your_purchase_order": "app.manage_your_purchase_orders",
+    "admin_pages_purchases_index_fi3": "admin.pages.purchases.index.filters.allSuppliers",
+    "app_start_your_n": "app.start_your_n",
+    "app_e_commerce_empire": "app.e_commerce_empire",
+    "app_create_your_tenant_configu": "app.create_your_tenant_configure_y",
+    "app_everything_you_need_for_pr": "app.everything_you_need_for_produc",
+    "app_set_up_your_tenant_and_sta": "app.set_up_your_tenant_and_start_s",
+    "auth_register_form_companyname": "auth.register.form.companyName.label",
+    "admin_pages_users_fields_confi": "admin.pages.users.fields.confirmPassword",
+    "auth_register_form_haveaccount": "auth.register.form.haveAccount",
+    "auth_register_form_login": "auth.register.form.logIn",
+    "app_account_created_successful": "app.account_created_successfully",
+    "admin_pages_onboarding_done_ct": "admin.pages.onboarding.done.ctaDashboard",
+    "admin_appearancesettingsform_i": "admin.apparenceSettingsForm.identity.slug.placeholder",
+    "app_swekly_com": "app.swekly_com",
+    "app_otp_verification": "app.otp_verification",
+    "app_send": "app.send",
+    "admin_pages_sales_messages_noo": "admin.pages.sales.messages.noOpenCashbox",
+    "admin_pages_sales_refundmodal3": "admin.pages.sales.refundModal.title",
+    "app_create_refund_cash_outflow": "app.create_refund_cash_outflow_and",
+    "admin_pages_sales_refundmodal4": "admin.pages.sales.refundModal.referenceLabel",
+    "app_sale_refunded_successfully": "app.sale_refunded_successfully",
+    "app_no_items_found": "app.no_items_found",
+    "app_loading_sale": "app.loading_sale",
+    "admin_pages_sales_detail_notfo": "admin.pages.sales.detail.notFound.title",
+    "admin_pages_sales_detail_notfo2": "admin.pages.sales.detail.notFound.hint",
+    "app_admin_pages_sales_index_fi": "app.admin_pages_sales_index_filter",
+    "app_contact_info_saved": "app.contact_info_saved",
+    "app_contact_information": "app.contact_information",
+    "app_primary_channels": "app.primary_channels",
+    "app_social_messaging": "app.social_messaging",
+    "admin_contactinfosform_kinds_w": "admin.contactInfosForm.kinds.whatsapp.label",
+    "admin_contactinfosform_kinds_i": "admin.contactInfosForm.kinds.instagram.label",
+    "admin_contactinfosform_kinds_t": "admin.contactInfosForm.kinds.tiktok.label",
+    "app_custom_domains": "app.custom_domains",
+    "app_point_your_cname_record_to": "app.point_your_cname_record_to",
+    "app_new_domain": "app.new_domain",
+    "app_homepage_settings_saved": "app.homepage_settings_saved",
+    "app_hero_image_url": "app.hero_image_url",
+    "app_hero_title": "app.hero_title",
+    "app_hero_subtitle": "app.hero_subtitle",
+    "app_hero_button_text": "app.hero_button_text",
+    "app_hero_button_link": "app.hero_button_link",
+    "admin_homepagesettingsform_sec": "admin.homepageSettingsForm.sections.browseByCategory.title",
+    "admin_homepagesettingsform_sec2": "admin.homepageSettingsForm.sections.newArrivals.title",
+    "admin_homepagesettingsform_sec3": "admin.homepageSettingsForm.sections.bestSellers.title",
+    "app_eyebrow": "app.eyebrow",
+    "admin_homepagesettingsform_fie": "admin.homepageSettingsForm.fields.limit",
+    "app_legal_pages_saved": "app.legal_pages_saved",
+    "admin_settingshub_links_legal": "admin.settingsHub.links.legal",
+    "app_page": "app.page",
+    "app_publish_this_legal_page": "app.publish_this_legal_page",
+    "app_titles": "app.titres",
+    "app_content": "app.content",
+    "app_9100": "application.9100",
+    "app_printer_saved_successfully": "app.printer_saved_successfully",
+    "app_printer_settings": "app.printer_settings",
+    "app_manage_your_receipt_printe": "app.manage_your_receipt_printers_a",
+    "app_no_printers_configured": "app.no_printers_configuré",
+    "app_add_a_printer_to_start_pri": "app.add_a_printer_to_start_printin",
+    "app_add_printer": "app.add_printer",
+    "app_saved_printers": "app.saved_printers",
+    "app_add_new": "app.add_new",
+    "app_receipt_layout_configurati": "app.receipt_layout_configuration",
+    "app_customize_your_receipt_hea": "app.customize_your_receipt_header",
+    "app_layout_saved": "app.layout_saved",
+    "admin_pages_sales_detail_items3": "admin.pages.sales.detail.itemsTable.defaultVariant",
+    "app_edit_config": "app.edit_config",
+    "app_set_as_default": "app.set_as_default",
+    "app_test_print": "app.test_print",
+    "app_delete_printer": "app.delete_printer",
+    "app_are_you_sure_you_want_to_d2": "app.are_you_sure_you_want_to_delet3",
+    "app_profile_name": "app.nom_profil",
+    "app_transport_type": "app.transport_type",
+    "app_connection_details": "app.connection_details",
+    "app_ip_address": "app.adresse_ip",
+    "app_port": "app.port",
+    "app_mac_address": "app.adresse_mac",
+    "app_device_id_uuid": "app.device_id_uuid",
+    "app_scan_for_ble_devices": "app.scan_for_ble_devices",
+    "app_printer_name": "app.nom_imprimante",
+    "app_serial_port": "app.serial_port",
+    "app_scan_for_ports": "app.scan_for_ports",
+    "app_uses_system_default_print": "app.uses_system_default_print_dial",
+    "app_capabilities": "app.capacités",
+    "app_paper_width": "app.paper_width",
+    "app_80mm_standard": "app.80mm_standard",
+    "app_58mm_narrow": "app.58mm_narrow",
+    "app_auto_cut_paper": "app.auto_cut_paper",
+    "app_open_cash_drawer": "app.open_cash_drawer",
+    "app_after_printing": "app.after_printing",
+    "app_print_as_image_arabic_supp": "app.print_as_image_arabic_support",
+    "app_rasterize_pdf_to_image_for": "app.rasterize_pdf_to_image_for_per",
+    "app_save_profile": "app.save_profile",
+    "app_no_serial_ports_found": "app.no_serial_ports_found",
+    "app_select_serial_port": "app.select_serial_port",
+    "app_test_print_sent": "app.test_print_sent",
+    "app_scanning_ble_devices": "app.scanning_ble_devices",
+    "app_no_devices_found": "app.no_devices_found",
+    "app_minimal": "app.minimal",
+    "app_store_name_items_total_onl": "app.store_name_items_total_only",
+    "app_full_detail": "app.full_detail",
+    "app_everything_logo_contacts_t": "app.everything_logo_contacts_tax_f",
+    "app_welcome": "app.bienvenue",
+    "app_thank_you_for_your_purchas": "app.thank_you_for_your_purchase",
+    "app_rtl_safe_no_logo_clean_lay": "app.rtl_safe_no_logo_clean_layout",
+    "app_str_442": "app.str_442",
+    "app_quick_print": "app.quick_print",
+    "app_items_only_kitchen_ticket": "app.items_only_kitchen_ticket_styl",
+    "app_admin_receipt_editor_title": "app.admin_receipt_editor_title",
+    "app_customize_your_receipt_lay": "app.customize_your_receipt_layout",
+    "app_admin_receipt_editor_savel": "app.admin_receipt_editor_savelayou",
+    "app_quick_presets": "app.quick_presets",
+    "app_admin_receipt_editor_showl": "app.admin_receipt_editor_showlogo",
+    "app_admin_receipt_editor_shows": "app.admin_receipt_editor_showstore",
+    "app_admin_receipt_editor_store": "app.admin_receipt_editor_storename",
+    "app_admin_receipt_editor_shows2": "app.admin_receipt_editor_showstore2",
+    "app_admin_receipt_editor_store2": "app.admin_receipt_editor_storeaddr",
+    "app_admin_receipt_editor_shows3": "app.admin_receipt_editor_showstore3",
+    "app_admin_receipt_editor_store3": "app.admin_receipt_editor_storephon",
+    "app_admin_receipt_editor_shows4": "app.admin_receipt_editor_showstore4",
+    "app_admin_receipt_editor_store4": "app.admin_receipt_editor_storeemai",
+    "app_admin_receipt_editor_showc": "app.admin_receipt_editor_showcusto",
+    "app_admin_receipt_editor_heade": "app.admin_receipt_editor_headertex",
+    "app_admin_receipt_editor_showo": "app.admin_receipt_editor_showorder",
+    "app_admin_receipt_editor_showd": "app.admin_receipt_editor_showdate",
+    "app_admin_receipt_editor_showc2": "app.admin_receipt_editor_showcusto2",
+    "app_admin_receipt_editor_showt": "app.admin_receipt_editor_showtaxbr",
+    "app_admin_receipt_editor_showf": "app.admin_receipt_editor_showfoote",
+    "app_admin_receipt_editor_foote": "app.admin_receipt_editor_footertex",
+    "admin_appearancesettingsform_p": "admin.apparenceSettingsForm.preview.title",
+    "app_receipt_updates_instantly": "app.receipt_updates_instantly_as_y",
+    "app_receipt_printer": "app.receipt_printer",
+    "app_off": "app.off",
+    "app_on": "app.on",
+    "app_receipt_layout": "app.receipt_layout",
+    "app_editor": "éditeur d'application",
+    "app_save_layout": "app.save_layout",
+    "app_appearance_settings_saved": "app.apparence_settings_saved",
+    "app_storefront_appearance": "app.storefront_apparence",
+    "app_logo_url": "app.logo_url",
+    "app_favicon_url": "app.favicon_url",
+    "app_primary_brand_color": "app.primary_brand_color",
+    "app_template": "app.template",
+    "admin_functionalsettingsform_l": "admin.functionSettingsForm.localization.defaultLanguage",
+    "app_announcement_text": "app.announcement_text",
+    "app_use_brand_color_on_the_sto": "app.use_brand_color_on_the_storefr",
+    "app_scroll_announcement_bar": "app.scroll_announcement_bar",
+    "app_store_settings_saved": "app.store_settings_saved",
+    "app_store_settings": "app.store_settings",
+    "admin_appearancesettingsform_i2": "admin.apparenceSettingsForm.identity.title",
+    "app_operational_settings_used": "app.opérational_settings_used_acro",
+    "admin_pages_onboarding_storein": "admin.pages.onboarding.storeInfo.nameLabel",
+    "app_store_slug": "app.store_slug",
+    "app_currency_code": "app.currency_code",
+    "app_currency_country": "app.currency_country",
+    "admin_settingshub_links_checko": "admin.settingsHub.links.checkoutRules",
+    "app_configure_default_order_be": "app.configure_default_order_behavi",
+    "app_order_id_prefix": "app.order_id_prefix",
+    "app_minimum_order_amount_dzd": "app.minimum_order_amount_dzd",
+    "app_enable_cart": "app.enable_cart",
+    "app_allow_storefront_visitors": "app.allow_storefront_visitors_to_b",
+    "app_enable_cash_on_delivery": "app.enable_cash_on_delivery",
+    "app_keep_cod_ordering_active_f": "app.keep_cod_ordering_active_for_t",
+    "admin_functionalsettingsform_c": "admin.functionSettingsForm.checkoutRules.hideOptionalAddress.title",
+    "app_simplify_checkout_when_det": "app.simplify_checkout_when_detaile",
+    "app_provisioning_and_workspace": "app.provisioning_and_workspace_bin",
+    "app_manage_local_admin_prefere": "app.manage_local_admin_preferences",
+    "app_dark_mode": "app.dark_mode",
+    "app_enable_the_dark_admin_them": "app.enable_the_dark_admin_theme",
+    "app_provisioned_workspace": "app.provisioned_workspace",
+    "app_reprovision_workspace": "app.reprovision_workspace",
+    "app_clear_local_tenant_data_on": "app.clear_local_tenant_data_on_thi",
+    "app_this_clears_the_local_work": "app.this_clears_the_local_workspac",
+    "app_clear_and_reprovision": "app.clear_and_reprovision",
+    "app_printers": "app.printers",
+    "app_manage_receipt_and_device": "app.manage_receipt_and_device_prin",
+    "app_order_prefixes_checkout_ru": "app.order_prefixes_checkout_rules",
+    "app_manage_phone_email_address": "app.manage_phone_email_address_and",
+    "app_track_onboarding_progress": "app.track_onboarding_progress_for",
+    "app_theme_logo_color_language": "app.theme_logo_color_langue_and",
+    "admin_pages_settings_homepage": "admin.pages.settings.homepage.metaTitle",
+    "app_hero_carousel_and_storefro": "app.hero_carousel_and_storefront_h",
+    "app_terms_privacy_returns_and": "app.terms_privacy_returns_and_publ",
+    "app_attach_a_custom_domain_to": "app.attach_a_custom_domain_to_the",
+    "app_storefront_preview": "app.storefront_preview",
+    "app_open_the_existing_hosted_s": "app.open_the_existing_hosted_store",
+    "app_template_builder": "app.template_builder",
+    "app_open_the_web_based_templat": "app.open_the_web_based_template_bu",
+    "app_landing_page_builder": "app.landing_page_builder",
+    "app_open_the_web_based_marketi": "app.open_the_web_based_marketing_l",
+    "app_cloud_connected_integratio": "app.cloud_connected_integrations_a",
+    "app_usage_plans_and_payment_su2": "app.usage_plans_and_payment_submis2",
+    "app_this_tenant_is_on_an_offli": "app.this_tenant_is_on_an_offline_o",
+    "app_open_web_admin_tool": "app.open_web_admin_tool",
+    "app_open_storefront": "app.open_storefront",
+    "app_admin_pages_suppliers_inde": "app.admin_pages_suppliers_index_ad",
+    "app_admin_pages_suppliers_inde2": "app.admin_pages_suppliers_index_fi",
+    "app_name_a_z": "app.name_a_z",
+    "app_name_z_a": "app.name_z_a",
+    "app_admin_pages_suppliers_inde3": "app.admin_pages_suppliers_index_de",
+    "app_admin_pages_suppliers_inde4": "app.admin_pages_suppliers_index_de2",
+    "app_upgrade_to_online_tier": "app.upgrade_to_online_tier",
+    "app_create_your_online_account": "app.create_your_online_account",
+    "app_your_offline_data_will_aut": "app.your_offline_data_will_automat",
+    "app_store_url_slug": "app.store_url_slug",
+    "app_swekly_com2": "app.swekly_com2",
+    "app_admin_email": "app.admin_email",
+    "app_admin_phone": "app.admin_phone",
+    "app_admin_pages_users_roles_ac": "app.admin_pages_users_roles_action",
+    "app_admin_pages_users_includei": "app.admin_pages_users_includeinact",
+    "app_admin_pages_users_hints_de": "app.admin_pages_users_hints_deacti",
+    "app_admin_pages_users_roles_cr": "app.admin_pages_users_roles_create",
+    "app_admin_pages_users_roles_ed": "app.admin_pages_users_roles_editti",
+    "app_admin_confirmmodal_default": "app.admin_confirmmodal_defaults_ti",
+    "app_admin_confirmmodal_default2": "app.admin_confirmmodal_defaults_me",
+    "app_create_or_update_an_admin": "app.create_or_update_an_admin_staf",
+    "admin_pages_users_fields_staff": "admin.pages.users.fields.staffRole",
+    "app_no_staff_role": "app.no_staff_role",
+    "app_define_a_role_and_its_perm": "app.define_a_role_and_its_permissi",
+    "app_role_name": "app.role_name",
+    "app_select_at_least_one_permis": "app.select_at_least_one_permission",
+    "app_general_information": "app.general_information",
+    "admin_pages_sales_detail_items4": "admin.pages.sales.detail.itemsTable.price",
+    "app_cost_purchase_price": "app.cost_purchase_price",
+    "app_suggest_sku": "app.suggest_sku",
+    "app_no_sku_suggestion": "app.no_sku_suggestion",
+    "admin_variantstable_columns_ba": "admin.variantsTable.columns.barcode",
+    "app_lock_sku": "app.lock_sku",
+    "app_sku_locked": "app.sku_locked",
+    "app_sku_is_locked": "app.sku_is_locked",
+    "app_visible_to_customers": "app.visible_to_customers",
+    "app_track_inventory": "app.track_inventory",
+    "app_safety_stock": "app.safety_stock",
+    "admin_common_savechanges": "admin.common.saveChanges",
+    "app_admin_receipt_print_tel": "app.admin_receipt_print_tel",
+    "app_admin_receipt_print_email": "app.admin_receipt_print_email",
+    "app_admin_receipt_print_ordern": "app.admin_receipt_print_ordernum",
+    "app_admin_receipt_print_custom": "app.admin_receipt_print_customer",
+    "app_admin_receipt_print_phone": "app.admin_receipt_print_phone",
+    "app_item": "app.item",
+    "admin_pages_sales_detail_items5": "admin.pages.sales.detail.itemsTable.qty",
+    "app_admin_receipt_print_discou": "app.admin_receipt_print_discount",
+    "app_admin_receipt_print_grandt": "app.admin_receipt_print_grandtotal",
+    "app_block_sync_if_the_remote_o": "app.block_sync_if_the_remote_order",
+    "app_block_sync_if_remote_store": "app.block_sync_if_remote_store_set",
+    "app_block_sync_if_the_remote_c": "app.block_sync_if_the_remote_conta",
+    "app_block_sync_if_the_remote_c2": "app.block_sync_if_the_remote_conta2",
+    "app_block_sync_if_remote_cashb": "app.block_sync_if_remote_cashbox_m",
+    "app_block_sync_if_remote_deliv": "app.block_sync_if_remote_delivery",
+    "app_billing_and_subscription_m": "app.billing_and_subscription_manag",
+    "app_cloud_integrations": "app.cloud_integrations",
+    "app_cloud_integrations_require": "app.cloud_integrations_require_an",
+    "app_custom_domains_depend_on_t": "app.custom_domains_depend_on_the_h",
+    "app_storefront_appearance_cont": "app.storefront_looking_controls",
+    "app_homepage_sections_and_caro": "app.homepage_sections_and_carousel",
+    "app_public_legal_pages_belong": "app.public_legal_pages_belong_to_t",
+    "app_previewing_the_hosted_stor": "app.previewing_the_hosted_storefro",
+    "app_the_template_builder_is_pa": "app.the_template_builder_is_part_o",
+    "app_the_landing_page_builder_i": "app.the_landing_page_builder_is_av",
+    "app_admin_actions_viewstore": "app.admin_actions_viewstore",
+    "app_admin_actions_logoutconfir": "app.admin_actions_logoutconfirmtit",
+    "app_admin_actions_logoutconfir2": "app.admin_actions_logoutconfirmmes",
+    "app_sync_recovery": "app.sync_recovery",
+    "app_no_queued_failures": "app.no_queued_failures",
+    "app_retry_failed": "app.retry_failed",
+    "app_sync_conflicted": "app.sync_conflicted",
+    "app_sync_failed": "app.sync_failed",
+    "admin_productoptionseditor_pre": "admin.productOptionsEditor.preview.title",
+    "app_no_image_url": "app.no_image_url",
+    "admin_productoptionseditor_del": "admin.productOptionsEditor.deleteModal.title",
+    "app_this_will_delete_all_varia": "app.this_will_delete_all_variants",
+    "app_are_you_sure_you_want_to_d3": "app.are_you_sure_you_want_to_delet4",
+    "admin_productoptionseditor_tit": "admin.productOptionsEditor.title",
+    "app_add_option": "app.add_option",
+    "app_new_option": "app.new_option",
+    "admin_productoptionseditor_fie": "admin.productOptionsEditor.fields.optionName",
+    "admin_productoptionseditor_fie2": "admin.productOptionsEditor.fields.displayType",
+    "admin_productoptionseditor_dis": "admin.productOptionsEditor.displayTypes.dropdown",
+    "admin_productoptionseditor_dis2": "admin.productOptionsEditor.displayTypes.button",
+    "admin_productoptionseditor_dis3": "admin.productOptionsEditor.displayTypes.radio",
+    "admin_productoptionseditor_dis4": "admin.productOptionsEditor.displayTypes.color",
+    "admin_productoptionseditor_dis5": "admin.productOptionsEditor.displayTypes.image",
+    "app_values": "app.valeurs",
+    "app_add_value": "app.add_value",
+    "app_admin_common_nodataavailab": "app.admin_common_nodataavailable",
+    "app_admin_common_rowsperpage": "app.admin_common_rowsperpage",
+    "app_admin_nav_deliveryitem": "app.admin_nav_deliveryitem",
+    "app_admin_nav_salesitem": "app.admin_nav_salesitem",
+    "app_admin_nav_storeparameters": "app.admin_nav_storeparameters",
+    "str_204": "—",
+    "str_378": "شكراً لزيارتكم"
+  },
+  "store": {
+    "countdown": {
+      "days": "Jours"
     }
   }
 }

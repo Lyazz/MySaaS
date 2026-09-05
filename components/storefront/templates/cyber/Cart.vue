@@ -71,7 +71,7 @@
                   </div>
                 </div>
 
-                <div class="ml-6 rtl:ml-0 rtl:mr-6 flex flex-1 flex-col relative z-10">
+                <div class="ms-6 flex flex-1 flex-col relative z-10">
                   <div class="flex justify-between">
                     <div class="min-w-0 flex-1">
                       <h3 class="text-lg font-medium text-white hover:text-pink-400 transition-colors">
@@ -83,7 +83,7 @@
                         {{ storefrontContent.cart.item.variant }}: {{ item.variantId.slice(0,8) }}
                       </p>
                     </div>
-                    <div class="ml-4 rtl:ml-0 rtl:mr-4 flow-root flex-shrink-0">
+                    <div class="ms-4 flow-root flex-shrink-0">
                       <button
                         type="button"
                         class="-m-2.5 flex items-center justify-center bg-transparent p-2.5 text-purple-400/60 hover:text-red-400 transition-colors"
@@ -148,6 +148,14 @@
                     {{ formatCurrency(cartStore.total) }}
                   </dd>
                 </div>
+                <div v-if="cartStore.clearanceDiscount > 0" class="flex items-center justify-between border-b border-purple-500/20 pb-4">
+                  <dt class="text-base text-amber-400">
+                    {{ t('storefront.clearance.discountLine') }}
+                  </dt>
+                  <dd class="text-base font-medium text-amber-400">
+                    -{{ formatCurrency(cartStore.clearanceDiscount) }}
+                  </dd>
+                </div>
                 <div class="flex items-center justify-between border-b border-purple-500/20 pb-4">
                   <dt class="flex text-base text-purple-200/70 items-center">
                     <span>{{ storefrontContent.cart.summary.shipping }}</span>
@@ -169,7 +177,7 @@
                     {{ storefrontContent.cart.summary.total }}
                   </dt>
                   <dd class="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-orange-400">
-                    {{ formatCurrency(cartStore.total) }}
+                    {{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}
                   </dd>
                 </div>
               </div>
@@ -204,6 +212,7 @@ const cartStore = useCartStore()
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
 const { currencyCode, format: formatCurrency } = useCurrency()
+const { t } = useI18n({ useScope: 'global' })
 </script>
 
 <style scoped>

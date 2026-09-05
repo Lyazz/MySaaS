@@ -6,11 +6,11 @@
       :subtitle="t('admin.pages.products.index.subtitle')"
       :stats="productStats"
     >
-      <Menu as="div" class="relative inline-block text-left">
+      <Menu as="div" class="relative inline-block text-start">
         <MenuButton class="ui-btn ui-btn--secondary ui-btn--md">
           <Icon name="lucide:arrow-down-up" class="w-5 h-5" />
           <span>Import/Export</span>
-          <Icon name="lucide:chevron-down" class="w-4 h-4 ml-1 -mr-1" style="color: var(--text-tertiary)" />
+          <Icon name="lucide:chevron-down" class="w-4 h-4 ms-1 -me-1 text-tertiary" />
         </MenuButton>
         <transition
           enter-active-class="transition ease-out duration-100"
@@ -20,8 +20,19 @@
           leave-from-class="transform opacity-100 scale-100"
           leave-to-class="transform opacity-0 scale-95"
         >
-          <MenuItems class="absolute right-0 z-10 mx-auto mt-2 w-48 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+          <MenuItems class="absolute end-0 z-10 mx-auto mt-2 w-56 origin-top-right rounded-lg shadow-lg focus:outline-none surface-2 border border-line">
             <div class="py-1">
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
+                  :disabled="loading"
+                  @click="scanOpen = true"
+                >
+                  <Icon name="lucide:scan-line" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
+                  {{ t('admin.pages.aiImport.entry.importFromDocument') }}
+                </button>
+              </MenuItem>
               <MenuItem v-slot="{ active }">
                 <button
                   :class="['group flex w-full items-center px-4 py-2 text-sm']"
@@ -29,7 +40,7 @@
                   :disabled="loading"
                   @click="openImportModal"
                 >
-                  <Icon name="lucide:download" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  <Icon name="lucide:download" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
                   {{ t('admin.pages.products.index.bulk.import') }}
                 </button>
               </MenuItem>
@@ -40,8 +51,19 @@
                   :disabled="loading"
                   @click="exportProductsCsv"
                 >
-                  <Icon name="lucide:upload" class="mr-3 h-5 w-5" style="color: var(--text-tertiary)" aria-hidden="true" />
+                  <Icon name="lucide:upload" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
                   {{ t('admin.pages.products.index.bulk.export') }}
+                </button>
+              </MenuItem>
+              <MenuItem v-slot="{ active }">
+                <button
+                  :class="['group flex w-full items-center px-4 py-2 text-sm']"
+                  :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
+                  :disabled="loading || exportingArchive"
+                  @click="exportProductsArchive"
+                >
+                  <Icon name="lucide:archive" class="me-3 h-5 w-5 text-tertiary" aria-hidden="true" />
+                  {{ t('admin.pages.products.index.bulk.exportArchive') }}
                 </button>
               </MenuItem>
             </div>
@@ -50,6 +72,7 @@
       </Menu>
 
       <NuxtLink
+        data-tour="products-create-btn"
         to="/admin/products/create"
         class="ui-btn ui-btn--primary ui-btn--md"
       >
@@ -62,53 +85,53 @@
     <AdminTabFilter v-model="activeTab" :tabs="productTabs" />
  
     <!-- Filters -->
-    <div class="ui-card p-4 mb-6">
-      <div class="flex flex-wrap items-end gap-4">
-        <div class="flex-1 min-w-[200px]">
-          <label class="ui-label mb-1">{{ t('admin.pages.products.index.filters.searchLabel') }}</label>
-          <BaseInput
-            v-model="searchQuery"
-            :placeholder="t('admin.pages.products.index.filters.searchPlaceholder')"
-          />
-        </div>
-        <div class="w-full sm:w-auto min-w-[200px]">
-          <BaseSelect
-            v-model="selectedCategory"
-            :label="t('admin.pages.products.index.filters.category')"
+    <AdminFilterBar
+      v-model:search="searchQuery"
+      :search-label="t('admin.pages.products.index.filters.searchLabel')"
+      :search-placeholder="t('admin.pages.products.index.filters.searchPlaceholder')"
+      :chips="filterChips"
+      :advanced-count="advancedFilterCount"
+      :clearable="hasActiveFilters"
+      data-tour="products-search"
+      testid="products-filters"
+      @clear="clearFilters"
+      @remove-chip="removeFilterChip"
+    >
+      <template #advanced>
+        <BaseSelect
+          v-model="selectedCategory"
+          :label="t('admin.pages.products.index.filters.category')"
+        >
+          <option value="">
+            {{ t('admin.pages.products.index.filters.allCategories') }}
+          </option>
+          <option
+            v-for="cat in orderedCategories"
+            :key="cat.id"
+            :value="cat.id"
           >
-            <option value="">
-              {{ t('admin.pages.products.index.filters.allCategories') }}
-            </option>
-            <option
-              v-for="cat in orderedCategories"
-              :key="cat.id"
-              :value="cat.id"
-            >
-              {{ categoryOptionLabel(cat) }}
-            </option>
-          </BaseSelect>
-        </div>
-        <div class="w-full sm:w-auto min-w-[200px]">
-          <BaseSelect
-            v-model="selectedStatus"
-            :label="t('admin.pages.products.index.filters.status')"
-          >
-            <option value="">
-              {{ t('admin.pages.products.index.filters.allStatus') }}
-            </option>
-            <option value="active">
-              {{ t('admin.common.active') }}
-            </option>
-            <option value="inactive">
-              {{ t('admin.common.inactive') }}
-            </option>
-            <option value="lowStock">
-              {{ t('admin.pages.products.index.filters.lowStock') }}
-            </option>
-          </BaseSelect>
-        </div>
-      </div>
-    </div>
+            {{ categoryOptionLabel(cat) }}
+          </option>
+        </BaseSelect>
+        <BaseSelect
+          v-model="selectedStatus"
+          :label="t('admin.pages.products.index.filters.status')"
+        >
+          <option value="">
+            {{ t('admin.pages.products.index.filters.allStatus') }}
+          </option>
+          <option value="active">
+            {{ t('admin.common.active') }}
+          </option>
+          <option value="inactive">
+            {{ t('admin.common.inactive') }}
+          </option>
+          <option value="lowStock">
+            {{ t('admin.pages.products.index.filters.lowStock') }}
+          </option>
+        </BaseSelect>
+      </template>
+    </AdminFilterBar>
  
     <!-- Loading State -->
     <div
@@ -116,7 +139,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.products.index.loading') }}
       </p>
     </div>
@@ -126,11 +149,11 @@
       v-else-if="filteredProducts.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:package" class="mx-auto h-12 w-12" style="color: var(--text-tertiary)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:package" class="mx-auto h-12 w-12 text-tertiary" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.products.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ t('admin.pages.products.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -138,7 +161,7 @@
           to="/admin/products/create"
           class="ui-btn ui-btn--primary ui-btn--md"
         >
-          <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
+          <Icon name="lucide:plus" class="w-5 h-5 me-2" />
           {{ t('admin.pages.products.index.empty.newProduct') }}
         </NuxtLink>
       </div>
@@ -147,10 +170,11 @@
     <!-- Products Table -->
     <div
       v-else
+      data-tour="products-table"
       class="ui-card overflow-hidden"
     >
-      <div v-if="selectedIds.length > 0" class="ui-card-header flex flex-wrap items-center gap-3 justify-between" style="background: var(--surface-2)">
-        <div class="text-sm font-medium" style="color: var(--text-secondary)">
+      <div v-if="selectedIds.length> 0" class="ui-card-header flex flex-wrap items-center gap-3 justify-between surface-2">
+        <div class="text-sm font-medium text-secondary">
           {{ t('admin.pages.products.index.bulk.selected', { count: selectedIds.length }) }}
         </div>
         <div class="flex flex-wrap items-center gap-2">
@@ -160,7 +184,7 @@
             :disabled="loading || selectedIds.length === 0"
             @click="openBulkUpdateModal"
           >
-            <Icon name="lucide:wand-2" class="w-4 h-4 mr-1" />
+            <Icon name="lucide:wand-2" class="w-4 h-4 me-1" />
             <span>{{ t('admin.pages.products.index.bulk.update') }}</span>
           </button>
 
@@ -170,7 +194,7 @@
             :disabled="loading || selectedIds.length !== 1"
             @click="duplicateSelectedProduct"
           >
-            <Icon name="lucide:copy" class="w-4 h-4 mr-1" />
+            <Icon name="lucide:copy" class="w-4 h-4 me-1" />
             <span>{{ t('admin.pages.products.index.bulk.duplicate') }}</span>
           </button>
 
@@ -180,7 +204,7 @@
             :disabled="loading || selectedIds.length === 0"
             @click="confirmBulkDelete"
           >
-            <Icon name="lucide:trash" class="w-4 h-4 mr-1" />
+            <Icon name="lucide:trash" class="w-4 h-4 me-1" />
             <span>{{ t('admin.pages.products.index.bulk.delete') || t('admin.common.delete') }}</span>
           </button>
         </div>
@@ -193,9 +217,9 @@
 	                <input
 	                  type="checkbox"
 	                  class="admin-checkbox"
-                 
+	                  :title="t('admin.pages.products.index.table.selectAllHint', 'Sélectionne tous les produits correspondant aux filtres actuels (toutes les pages)')"
 	                  :checked="allVisibleSelected"
-	                  :disabled="paginatedProducts.length === 0"
+	                  :disabled="filteredProducts.length === 0"
 	                  @change="toggleSelectAllVisible"
 	                >
 	              </th>
@@ -229,16 +253,22 @@
               <th class="ui-th text-center">
                 {{ t('admin.pages.products.index.table.links') }}
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.pages.products.index.table.actions') }}
               </th>
             </tr>
           </thead>
-          <tbody class="ui-tbody">
+          <tbody class="ui-tbody" @touchstart.passive="onRowTouchStart" @touchmove.passive="onRowTouchMove">
 	            <tr
 	              v-for="product in paginatedProducts"
 	              :key="product.id"
-	              class="ui-tr"
+	              class="ui-tr ui-tr--clickable"
+	              role="link"
+	              tabindex="0"
+	              :aria-label="`${t('admin.pages.products.index.table.product')}: ${product.title}`"
+	              @click="openProductRow($event, product.id)"
+	              @keydown.enter="openProductRow($event, product.id)"
+	              @keydown.space="openProductRow($event, product.id)"
 	            >
 	              <td class="ui-td whitespace-nowrap">
 	                <input
@@ -251,7 +281,7 @@
 	              </td>
 	              <td class="ui-td whitespace-nowrap">
 	                <div class="flex items-center">
-	                  <div class="flex-shrink-0 h-10 w-10 rounded-md flex items-center justify-center overflow-hidden" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+	                  <div class="flex-shrink-0 h-10 w-10 rounded-lg flex items-center justify-center overflow-hidden surface-2 border border-line">
                     <img 
                       v-if="getProductMainImage(product)" 
                       :src="getProductMainImage(product)" 
@@ -259,16 +289,21 @@
                       class="h-10 w-10 object-cover" 
                     >
                     <Icon
-                      v-else
-                      name="lucide:image"
-                      class="w-5 h-5" style="color: var(--text-tertiary)"
-                    />
+ v-else
+ name="lucide:image"
+ class="w-5 h-5 text-tertiary" 
+ />
                   </div>
-                  <div class="ml-4">
-                    <div class="font-medium" style="color: var(--text-primary)">
+                  <div class="ms-4">
+                    <div class="font-medium flex items-center gap-1.5 text-primary">
                       {{ product.title }}
+                      <span
+                        v-if="product.isClearance"
+                        class="ui-badge"
+                        style="background: color-mix(in srgb, #d97706 15%, transparent); color: #d97706"
+                      >{{ t('admin.pages.products.index.table.clearance', 'Destockage') }}</span>
                     </div>
-                    <div class="text-sm" style="color: var(--text-tertiary)">
+                    <div class="text-sm text-tertiary">
                       {{ product.slug }}
                     </div>
                   </div>
@@ -288,21 +323,21 @@
                   </span>
                 </div>
                 <span
-                  v-else
-                  class="text-sm" style="color: var(--text-tertiary)"
-                >{{ t('admin.pages.products.index.table.uncategorized') }}</span>
+ v-else
+ class="text-sm text-tertiary" 
+>{{ t('admin.pages.products.index.table.uncategorized') }}</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <template v-if="buildProductPricing(product).promotionApplied">
                   <div class="flex items-center gap-1.5">
-                    <span class="font-medium" style="color: var(--brand)">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
-                    <span class="text-xs line-through" style="color: var(--text-tertiary)">{{ formatCurrency(buildProductPricing(product).originalPrice) }}</span>
+                    <span class="font-medium text-brand">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
+                    <span class="text-xs line-through text-tertiary">{{ formatCurrency(buildProductPricing(product).originalPrice) }}</span>
                   </div>
-                  <div v-if="product.promotionEndDate" class="text-xs mt-0.5" style="color: var(--text-tertiary)">
+                  <div v-if="product.promotionEndDate" class="text-xs mt-0.5 text-tertiary">
                     exp. {{ new Date(product.promotionEndDate).toLocaleDateString() }}
                   </div>
                 </template>
-                <span v-else style="color: var(--text-primary)">{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
+                <span class="text-primary" v-else>{{ formatCurrency(buildProductPricing(product).effectivePrice) }}</span>
               </td>
               <td class="ui-td whitespace-nowrap">
                 <!-- Out of stock -->
@@ -321,19 +356,32 @@
                   {{ product.stock }} en stock
                 </span>
                 <!-- Normal stock -->
-                <span v-else style="color: var(--text-secondary)">{{ product.stock }} en stock</span>
+                <span class="text-secondary" v-else>{{ product.stock }} en stock</span>
               </td>
               <td class="ui-td whitespace-nowrap">
-                <span
-                  class="ui-badge"
-                  :class="product.isActive ? 'ui-badge--emerald' : 'ui-badge--slate'"
-                >
-                  {{ product.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
-                </span>
+                <div class="flex items-center gap-2">
+                  <BaseToggle
+                    :model-value="product.isActive"
+                    :disabled="loading || !!statusUpdating[product.id]"
+                    :sr-label="`${t('admin.forms.product.isActive.label')} ${product.title}`"
+                    @update:model-value="(nextValue) => toggleProductStatus(product, nextValue)"
+                  />
+                  <span class="text-xs text-secondary">
+                    {{ product.isActive ? t('admin.common.active') : t('admin.common.inactive') }}
+                  </span>
+                  <span
+                    v-if="product.visibility === 'UNLISTED'"
+                    class="ui-badge ui-badge--amber inline-flex items-center gap-1"
+                    :title="t('admin.forms.product.visibility.hint')"
+                  >
+                    <Icon name="lucide:eye-off" class="w-3 h-3" />
+                    {{ t('admin.forms.product.visibility.unlisted') }}
+                  </span>
+                </div>
               </td>
               <td class="ui-td whitespace-nowrap text-center">
-                <Menu as="div" class="relative inline-block text-left text-sm">
-                  <MenuButton class="p-1.5 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)">
+                <Menu as="div" class="relative inline-block text-start text-sm">
+                  <MenuButton class="ui-table-action">
                     <Icon name="lucide:globe" class="w-5 h-5" />
                   </MenuButton>
                   <transition
@@ -344,7 +392,7 @@
                     leave-from-class="transform opacity-100 scale-100"
                     leave-to-class="transform opacity-0 scale-95"
                   >
-                    <MenuItems class="absolute right-0 z-10 mt-2 w-56 origin-top-right rounded-md shadow-lg focus:outline-none" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
+                    <MenuItems class="absolute end-0 z-10 mt-2 w-56 origin-top-right rounded-lg shadow-lg focus:outline-none surface-2 border border-line">
                       <div class="py-1">
                         <!-- Product Links -->
                         <div class="flex items-center px-1">
@@ -352,17 +400,17 @@
                             <a
                               :href="getProductUrl(product.slug)"
                               target="_blank"
-                              :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :class="['group flex items-center px-3 py-2 text-sm rounded-lg transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4" style="color: var(--text-tertiary)" />
+                              <Icon name="lucide:external-link" class="me-3 h-4 w-4 text-tertiary" />
                               {{ t('admin.pages.products.index.links.openProduct') }}
                             </a>
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/product/${product.slug}`)"
-                              :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
+                              :class="['p-2 rounded-lg hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyProduct')"
                             >
@@ -371,7 +419,7 @@
                           </MenuItem>
                         </div>
 
-                        <div class="my-1" style="border-top: 1px solid var(--surface-border)"></div>
+                        <div class="my-1 border-t border-line"></div>
 
                         <!-- Landing Links -->
                         <div class="flex items-center px-1">
@@ -379,17 +427,17 @@
                             <a
                               :href="getLandingUrl(product.slug)"
                               target="_blank"
-                              :class="['group flex items-center px-3 py-2 text-sm rounded-md transition-colors']"
+                              :class="['group flex items-center px-3 py-2 text-sm rounded-lg transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                             >
-                              <Icon name="lucide:external-link" class="mr-3 h-4 w-4" style="color: var(--text-tertiary)" />
+                              <Icon name="lucide:external-link" class="me-3 h-4 w-4 text-tertiary" />
                               {{ t('admin.pages.products.index.links.openLanding') }}
                             </a>
                           </MenuItem>
                           <MenuItem v-slot="{ active }">
                             <button
                               @click="copyLink(`/product/${product.slug}?mode=landing`)"
-                              :class="['p-2 rounded-md hover:[color:var(--brand)] transition-colors']"
+                              :class="['p-2 rounded-lg hover:[color:var(--brand)] transition-colors']"
                               :style="active ? 'background: var(--surface-3); color: var(--text-primary)' : 'color: var(--text-secondary)'"
                               :title="t('admin.pages.products.index.links.copyLanding')"
                             >
@@ -402,17 +450,17 @@
                   </transition>
                 </Menu>
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
-                <div class="flex items-center justify-end space-x-1">
+              <td class="ui-td whitespace-nowrap text-end">
+                <div class="flex items-center justify-end space-x-1 rtl:space-x-reverse">
                   <NuxtLink
                     :to="`/admin/products/${product.id}`"
-                    class="p-2 hover:[color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="ui-table-action"
                     :title="t('admin.common.edit')"
                   >
                     <Icon name="lucide:pencil" class="w-4 h-4" />
                   </NuxtLink>
                   <button
-                    class="p-2 hover:text-red-600 hover:bg-red-50 rounded-md transition-colors" style="color: var(--text-tertiary)"
+                    class="ui-table-action ui-table-action--danger"
                     :title="t('admin.common.delete')"
                     @click="confirmDelete(product)"
                   >
@@ -426,7 +474,7 @@
       </div>
  
       <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6 border-t border-line">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -435,7 +483,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm" style="color: var(--text-secondary)">
+          <span class="text-sm text-secondary">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -448,7 +496,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm" style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.pages.products.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredProducts.length),
@@ -457,13 +505,13 @@
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
               <button
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage--"
-              >
+ :disabled="currentPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg border text-sm font-medium disabled:opacity-50 border-line surface-2 text-tertiary"
+ 
+ @click="currentPage--"
+>
                 {{ t('admin.common.previous') }}
               </button>
               <button
@@ -481,11 +529,11 @@
                 {{ page }}
               </button>
               <button
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md border text-sm font-medium disabled:opacity-50"
-                style="border-color: var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage++"
-              >
+ :disabled="currentPage === totalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg border text-sm font-medium disabled:opacity-50 border-line surface-2 text-tertiary"
+ 
+ @click="currentPage++"
+>
                 {{ t('admin.common.next') }}
               </button>
             </nav>
@@ -511,67 +559,88 @@
 	      v-if="showImportCsvModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh]" style="background: var(--surface-1)">
-	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
+	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh] surface-1">
+	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0 border-b border-line">
 	          <div class="min-w-0">
-	            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
+	            <h3 class="truncate text-lg font-semibold text-primary">
 	              {{ t('admin.pages.products.index.bulk.importTitle') }}
 	            </h3>
-	            <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+	            <p class="mt-1 text-sm text-secondary">
 	              {{ t('admin.pages.products.index.bulk.importHint') }}
 	            </p>
 	          </div>
 	          <button
-	            type="button"
-	            class="rounded-md p-2" style="color: var(--text-tertiary)"
-	            @click="closeImportModal"
-	          >
+	 v-if="!importingCsv"
+	 type="button"
+	 class="rounded-lg p-2 text-tertiary" 
+	 @click="closeImportModal"
+	>
 	            <Icon name="lucide:x" class="h-5 w-5" />
 	          </button>
 	        </div>
 	        <div class="px-6 py-5 space-y-4 overflow-y-auto">
 	          <input
-	            ref="importCsvInput"
-	            type="file"
-	            accept=".csv,text/csv"
-	            class="block w-full text-sm file:mr-4 file:rounded-md file:border-0 file:[background:rgba(var(--brand-rgb)/0.08)] file:px-4 file:py-2 file:text-sm file:font-semibold file:[color:var(--brand)] hover:file:[background:rgba(var(--brand-rgb)/0.12)]" style="color: var(--text-secondary)"
-	            :disabled="importingCsv"
-	            @change="onImportCsvFileChange"
-	          >
+	 ref="importCsvInput"
+	 type="file"
+	 accept=".csv,.zip,text/csv,application/zip,application/x-zip-compressed"
+	 class="block w-full text-sm file:mr-4 file:rounded-lg file:border-0 file:[background:rgba(var(--brand-rgb)/0.08)] file:px-4 file:py-2 file:text-sm file:font-semibold file:[color:var(--brand)] hover:file:[background:rgba(var(--brand-rgb)/0.12)] text-secondary" 
+	 :disabled="importingCsv"
+	 @change="onImportCsvFileChange"
+	>
 
-	          <div class="rounded-md p-4" style="border: 1px solid var(--surface-border); background: var(--surface-1)">
+	          <div
+	 v-if="importingCsv"
+	 class="rounded-lg p-4 space-y-2 border border-line surface-1" 
+	>
+	            <div class="flex items-center justify-between text-sm text-primary">
+	              <span>{{ importProgressLabel }}</span>
+	              <span v-if="importProgress.total > 0">{{ importProgress.processed }} / {{ importProgress.total }}</span>
+	            </div>
+	            <div class="h-2 w-full overflow-hidden rounded-full surface-3">
+	              <div
+	 class="h-full rounded-full transition-all duration-200 bg-brand"
+	 
+	 :style="{ width: importProgressPercent + '%' }"
+	 />
+	            </div>
+	            <p class="text-xs text-tertiary">
+	              {{ t('admin.pages.products.index.bulk.progressDoNotClose') }}
+	            </p>
+	          </div>
+
+	          <div v-if="!importingCsv" class="rounded-lg p-4 border border-line surface-1">
 	            <div class="flex items-start justify-between gap-3">
 	              <div class="min-w-0">
-	                <div class="text-sm font-semibold" style="color: var(--text-primary)">
+	                <div class="text-sm font-semibold text-primary">
 	                  {{ t('admin.pages.products.index.bulk.importTemplateTitle') }}
 	                </div>
-	                <div class="mt-1 text-xs" style="color: var(--text-secondary)">
+	                <div class="mt-1 text-xs text-secondary">
 	                  {{ t('admin.pages.products.index.bulk.importTemplateHint') }}
 	                </div>
 	              </div>
 	              <button
-	                type="button"
-	                class="shrink-0 rounded-md px-3 py-1.5 text-xs font-medium" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	                @click="downloadProductsImportTemplate"
-	              >
+	 type="button"
+	 class="shrink-0 rounded-lg px-3 py-1.5 text-xs font-medium border border-line surface-2 text-secondary" 
+	 @click="downloadProductsImportTemplate"
+	>
 	                {{ t('admin.pages.products.index.bulk.importTemplateDownload') }}
 	              </button>
 	            </div>
 
-	            <pre class="mt-3 overflow-auto rounded-md p-3 text-xs" style="background: var(--surface-2); color: var(--text-primary)"><code>{{ productsImportTemplateCsv }}</code></pre>
+	            <pre class="mt-3 overflow-auto rounded-lg p-3 text-xs surface-2 text-primary"><code>{{ productsImportTemplateCsv }}</code></pre>
 	          </div>
 
 	          <div
-	            v-if="importCsvResult"
-	            class="rounded-md p-3 text-sm" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	          >
+	 v-if="importCsvResult"
+	 class="rounded-lg p-3 text-sm border border-line surface-2 text-secondary" 
+	>
 	            <div>{{ t('admin.pages.products.index.bulk.importResult', importCsvResult) }}</div>
 	            <div v-if="importCsvResult.warnings?.length" class="mt-3">
-	              <details class="rounded-md border border-amber-200 bg-amber-50 p-3">
+	              <details class="rounded-lg border border-amber-200 bg-amber-50 p-3">
 	                <summary class="cursor-pointer text-xs font-semibold text-amber-900">
 	                  Warnings ({{ importCsvResult.warnings.length }})
 	                </summary>
-	                <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-amber-900">
+	                <ul class="mt-2 list-disc space-y-1 ps-5 text-xs text-amber-900">
 	                  <li v-for="(w, idx) in importCsvResult.warnings.slice(0, 20)" :key="idx">
 	                    Row {{ w.row }}: {{ w.message }}
 	                  </li>
@@ -583,14 +652,14 @@
 	            </div>
 
 	            <div v-if="importCsvResult.errors?.length" class="mt-3">
-	              <details open class="rounded-md border border-red-200 bg-red-50 p-3">
+	              <details open class="rounded-lg border border-red-200 bg-red-50 p-3">
 	                <summary class="cursor-pointer text-xs font-semibold text-red-900">
 	                  Errors ({{ importCsvResult.errors.length }})
 	                </summary>
 	                <div class="mt-1 text-xs text-red-800">
 	                  {{ t('admin.pages.products.index.bulk.importErrors', { count: importCsvResult.errors.length }) }}
 	                </div>
-	                <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-red-900">
+	                <ul class="mt-2 list-disc space-y-1 ps-5 text-xs text-red-900">
 	                  <li v-for="(e, idx) in importCsvResult.errors.slice(0, 50)" :key="idx">
 	                    Row {{ e.row }}: {{ e.message }}
 	                  </li>
@@ -602,12 +671,60 @@
 	            </div>
 	          </div>
 	        </div>
-	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
+	        <div class="flex justify-end gap-2 px-6 py-4 border-t border-line">
 	          <button
-	            type="button"
-	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	            @click="closeImportModal"
-	          >
+	 v-if="!importingCsv"
+	 type="button"
+	 class="px-4 py-2 rounded-lg border border-line surface-2 text-secondary" 
+	 @click="closeImportModal"
+	>
+	            {{ t('admin.common.close') }}
+	          </button>
+	        </div>
+	      </div>
+	    </div>
+	    </Teleport>
+
+	    <!-- Export archive progress modal -->
+	    <Teleport to="body">
+	    <div
+	      v-if="showExportArchiveModal"
+	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+	    >
+	      <div class="w-full max-w-md rounded-lg shadow-xl flex flex-col surface-1">
+	        <div class="px-6 py-4 shrink-0 border-b border-line">
+	          <h3 class="truncate text-lg font-semibold text-primary">
+	            {{ t('admin.pages.products.index.bulk.exportArchive') }}
+	          </h3>
+	        </div>
+	        <div class="px-6 py-5 space-y-3">
+	          <template v-if="exportArchiveStatus === 'failed'">
+	            <p class="text-sm text-red-700">{{ exportArchiveError }}</p>
+	          </template>
+	          <template v-else>
+	            <div class="flex items-center justify-between text-sm text-primary">
+	              <span>{{ exportArchiveStatus === 'completed' ? t('admin.pages.products.index.bulk.progressDone') : t('admin.pages.products.index.bulk.progressExporting') }}</span>
+	              <span v-if="exportArchiveProgress.total > 0">{{ exportArchiveProgress.processed }} / {{ exportArchiveProgress.total }}</span>
+	            </div>
+	            <div class="h-2 w-full overflow-hidden rounded-full surface-3">
+	              <div
+	 class="h-full rounded-full transition-all duration-200 bg-brand"
+	 
+	 :style="{ width: exportArchiveProgressPercent + '%' }"
+	 />
+	            </div>
+	            <p v-if="exportArchiveStatus === 'processing'" class="text-xs text-tertiary">
+	              {{ t('admin.pages.products.index.bulk.progressDoNotClose') }}
+	            </p>
+	          </template>
+	        </div>
+	        <div class="flex justify-end gap-2 px-6 py-4 border-t border-line">
+	          <button
+	 v-if="exportArchiveStatus !== 'processing'"
+	 type="button"
+	 class="px-4 py-2 rounded-lg border border-line surface-2 text-secondary" 
+	 @click="showExportArchiveModal = false"
+	>
 	            {{ t('admin.common.close') }}
 	          </button>
 	        </div>
@@ -621,21 +738,21 @@
 	      v-if="showBulkUpdateModal"
 	      class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
 	    >
-	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh]" style="background: var(--surface-1)">
-	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0" style="border-bottom: 1px solid var(--surface-border)">
+	      <div class="w-full max-w-lg rounded-lg shadow-xl flex flex-col max-h-[90vh] surface-1">
+	        <div class="flex items-start justify-between gap-4 px-6 py-4 shrink-0 border-b border-line">
 	          <div class="min-w-0">
-	            <h3 class="truncate text-lg font-semibold" style="color: var(--text-primary)">
+	            <h3 class="truncate text-lg font-semibold text-primary">
 	              {{ t('admin.pages.products.index.bulk.updateTitle') }}
 	            </h3>
-	            <p class="mt-1 text-sm" style="color: var(--text-secondary)">
+	            <p class="mt-1 text-sm text-secondary">
 	              {{ t('admin.pages.products.index.bulk.updateHint') }}
 	            </p>
 	          </div>
 	          <button
-	            type="button"
-	            class="rounded-md p-2" style="color: var(--text-tertiary)"
-	            @click="closeBulkUpdateModal"
-	          >
+	 type="button"
+	 class="rounded-lg p-2 text-tertiary" 
+	 @click="closeBulkUpdateModal"
+	>
 	            <Icon name="lucide:x" class="h-5 w-5" />
 	          </button>
 	        </div>
@@ -691,7 +808,7 @@
 	              </option>
 	          </BaseSelect>
 
-	          <label class="flex items-center gap-2 text-sm" style="color: var(--text-secondary)">
+	          <label class="flex items-center gap-2 text-sm text-secondary">
 	            <input
 	              v-model="bulkPropagatePriceToVariants"
 	              type="checkbox"
@@ -700,26 +817,49 @@
 	            {{ t('admin.pages.products.index.bulk.fields.propagatePrice') }}
 	          </label>
 
+	          <BaseSelect
+	            v-model="bulkIsClearance"
+	            :label="t('admin.pages.products.index.bulk.fields.clearance', 'Destockage')"
+	            :hint="t('admin.pages.products.index.bulk.fields.clearanceHint', 'Les produits avec une promotion active sont ignores.')"
+	          >
+	            <option value="">
+	              {{ t('admin.pages.products.index.bulk.fields.noChange') }}
+	            </option>
+	            <option value="true">
+	              {{ t('admin.pages.products.index.bulk.fields.clearanceOn', 'Marquer en destockage') }}
+	            </option>
+	            <option value="false">
+	              {{ t('admin.pages.products.index.bulk.fields.clearanceOff', 'Retirer du destockage') }}
+	            </option>
+	          </BaseSelect>
+
+	          <div
+	            v-if="bulkClearanceSkipped.length > 0"
+	            class="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+	          >
+	            {{ bulkClearanceSkipped.length }} {{ t('admin.pages.products.index.bulk.fields.clearanceSkippedSuffix', 'produit(s) ignore(s) car en promotion active.') }}
+	          </div>
+
 	          <div
 	            v-if="bulkError"
-	            class="rounded-md border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+	            class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800"
 	          >
 	            {{ bulkError }}
 	          </div>
 	        </div>
 
-	        <div class="flex justify-end gap-2 px-6 py-4" style="border-top: 1px solid var(--surface-border)">
+	        <div class="flex justify-end gap-2 px-6 py-4 border-t border-line">
 	          <button
-	            type="button"
-	            class="px-4 py-2 rounded-md" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-secondary)"
-	            :disabled="bulkSaving"
-	            @click="closeBulkUpdateModal"
-	          >
+	 type="button"
+	 class="px-4 py-2 rounded-lg border border-line surface-2 text-secondary" 
+	 :disabled="bulkSaving"
+	 @click="closeBulkUpdateModal"
+	>
 	            {{ t('admin.common.cancel') }}
 	          </button>
 	          <button
 	            type="button"
-	            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
+	            class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50"
 	            :disabled="bulkSaving"
 	            @click="submitBulkUpdate"
 	          >
@@ -729,6 +869,13 @@
 	      </div>
 	    </div>
 	    </Teleport>
+
+	    <AdminAiImportScanUploadModal
+	      :open="scanOpen"
+	      default-kind="PRODUCT_CATALOG"
+	      @close="scanOpen = false"
+	      @created="onScanCreated"
+	    />
 	  </div>
 	</template>
  
@@ -738,10 +885,14 @@ import { toTenantHost, useRequestOrigin } from '~/composables/host'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
+import BaseToggle from '~/components/ui/BaseToggle.vue'
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/vue'
 import { useToast } from '~/composables/useToast'
 import { buildProductPricing } from '~/shared/pricing/product-pricing'
+import { extractApiErrorMessage } from '~/shared/http/error-message'
+import AdminAiImportScanUploadModal from '~/components/admin/ai-import/ScanUploadModal.vue'
  
 definePageMeta({
   middleware: 'auth',
@@ -753,6 +904,15 @@ const authStore = useAuthStore()
 const { format: formatCurrency } = useCurrency()
 const { showToast } = useToast()
 const { t } = useI18n({ useScope: 'global' })
+const route = useRoute()
+const router = useRouter()
+
+/** Scanning a supplier catalogue or price list into products. */
+const scanOpen = ref(false)
+const onScanCreated = async (jobId: string) => {
+  scanOpen.value = false
+  await router.push(`/admin/ai-import/${jobId}`)
+}
  
 interface Product {
   id: string
@@ -766,11 +926,13 @@ interface Product {
   stock: number
   lowStockThreshold: number
   isActive: boolean
+  visibility?: 'LISTED' | 'UNLISTED'
   images?: string[]
   productImages?: Array<{ id: string; url: string; isMain: boolean; position: number }>
   category?: { id: string; title: string }
   categories?: Array<{ id: string; title: string; slug?: string }>
   categoryIds?: string[]
+  isClearance?: boolean
 }
  
 interface Category {
@@ -786,26 +948,108 @@ type CategoryOption = Category & { depth: number }
 const products = ref<Product[]>([])
 const categories = ref<Category[]>([])
 const loading = ref(true)
-const searchQuery = ref('')
-const selectedCategory = ref('')
-const selectedStatus = ref('')
-const activeTab = ref('all')
-const currentPage = ref(1)
+const searchQuery = ref(typeof route.query.search === 'string' ? route.query.search : '')
+const selectedCategory = ref(typeof route.query.categoryId === 'string' ? route.query.categoryId : '')
+const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
+const activeTab = ref(typeof route.query.tab === 'string' ? route.query.tab : 'all')
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 const showDeleteModal = ref(false)
 const productToDelete = ref<Product | null>(null)
 const deleteError = ref<string | null>(null)
 const selectedIds = ref<string[]>([])
+const statusUpdating = reactive<Record<string, boolean>>({})
 
 const showImportCsvModal = ref(false)
 const importingCsv = ref(false)
 const importCsvResult = ref<any | null>(null)
 const importCsvInput = ref<HTMLInputElement | null>(null)
+const importProgress = ref({ phase: 'rows' as 'rows' | 'images' | 'archive', processed: 0, total: 0 })
+
+const showExportArchiveModal = ref(false)
+const exportingArchive = ref(false)
+const exportArchiveStatus = ref<'processing' | 'completed' | 'failed'>('processing')
+const exportArchiveError = ref<string | null>(null)
+const exportArchiveProgress = ref({ processed: 0, total: 0 })
+
+const importProgressPercent = computed(() => {
+  const { processed, total } = importProgress.value
+  if (!total) return 0
+  return Math.min(100, Math.round((processed / total) * 100))
+})
+const importProgressLabel = computed(() => {
+  if (importProgress.value.phase === 'images') return t('admin.pages.products.index.bulk.progressUploadingImages')
+  if (importProgress.value.phase === 'archive') return t('admin.pages.products.index.bulk.progressExporting')
+  return t('admin.pages.products.index.bulk.progressImporting')
+})
+const exportArchiveProgressPercent = computed(() => {
+  const { processed, total } = exportArchiveProgress.value
+  if (!total) return exportArchiveStatus.value === 'completed' ? 100 : 0
+  return Math.min(100, Math.round((processed / total) * 100))
+})
+
+function preventUnload(event: BeforeUnloadEvent) {
+  event.preventDefault()
+  event.returnValue = ''
+}
+
+function guardNavigationWhileBusy() {
+  window.addEventListener('beforeunload', preventUnload)
+}
+
+function releaseNavigationGuard() {
+  window.removeEventListener('beforeunload', preventUnload)
+}
+
+/**
+ * Reads a fetch() response body as newline-delimited JSON, invoking onEvent for each parsed
+ * line as it arrives (rather than buffering the whole response) so long-running bulk product
+ * operations can report live progress instead of leaving the UI looking frozen.
+ */
+async function readNdjsonStream(response: Response, onEvent: (evt: any) => void) {
+  if (!response.body) throw new Error('Streaming is not supported by this browser')
+  const reader = response.body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) break
+    buffer += decoder.decode(value, { stream: true })
+    let newlineIndex = buffer.indexOf('\n')
+    while (newlineIndex >= 0) {
+      const line = buffer.slice(0, newlineIndex)
+      buffer = buffer.slice(newlineIndex + 1)
+      if (line.trim()) onEvent(JSON.parse(line))
+      newlineIndex = buffer.indexOf('\n')
+    }
+  }
+
+  if (buffer.trim()) onEvent(JSON.parse(buffer))
+}
+
+function base64ToBlob(base64: string, mimeType: string): Blob {
+  const byteChars = atob(base64)
+  const bytes = new Uint8Array(byteChars.length)
+  for (let i = 0; i < byteChars.length; i++) bytes[i] = byteChars.charCodeAt(i)
+  return new Blob([bytes], { type: mimeType })
+}
+
+function triggerBlobDownload(blob: Blob, filename: string) {
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
 
 const productsImportTemplateHeader =
-  'id,slug,title,price,stock,isActive,categoryId,categorySlug,categoryIds,categorySlugs,description,miniDescription,images'
+  'id,slug,title,price,stock,isActive,categoryId,categorySlug,categoryTitle,categoryIds,categorySlugs,categoryTitles,description,miniDescription,images'
 const productsImportTemplateExample =
-  ',my-product,My product,1990,10,true,,,,,,,"image1.jpg|https://example.com/image2.jpg"'
+  ',my-product,My product,1990,10,true,,,,,,,,,"image1.jpg|https://example.com/image2.jpg"'
 const productsImportTemplateCsv = `${productsImportTemplateHeader}\n${productsImportTemplateExample}\n`
 
 const showBulkUpdateModal = ref(false)
@@ -814,6 +1058,8 @@ const bulkStock = ref('')
 const bulkIsActive = ref('')
 const bulkCategoryId = ref('')
 const bulkPropagatePriceToVariants = ref(true)
+const bulkIsClearance = ref('')
+const bulkClearanceSkipped = ref<string[]>([])
 const bulkSaving = ref(false)
 const bulkError = ref<string | null>(null)
 
@@ -871,8 +1117,12 @@ const getProductMainImage = (product: Product): string | undefined => {
   }
   return undefined
 }
-const sortBy = ref<'createdAt' | 'title' | 'price' | 'stock' | 'isActive'>('createdAt')
-const sortOrder = ref<'asc' | 'desc'>('desc')
+const sortBy = ref<'createdAt' | 'title' | 'price' | 'stock' | 'isActive'>(
+  ['createdAt', 'title', 'price', 'stock', 'isActive'].includes(route.query.sortBy as string)
+    ? (route.query.sortBy as 'createdAt' | 'title' | 'price' | 'stock' | 'isActive')
+    : 'createdAt'
+)
+const sortOrder = ref<'asc' | 'desc'>(route.query.sortOrder === 'asc' ? 'asc' : 'desc')
 
 const sortOptions = [
   { key: 'createdAt', labelKey: 'admin.pages.products.index.sort.newest' },
@@ -919,6 +1169,8 @@ const filteredProducts = computed(() => {
     filtered = filtered.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5))
   } else if (activeTab.value === 'outOfStock') {
     filtered = filtered.filter(p => p.stock === 0)
+  } else if (activeTab.value === 'clearance') {
+    filtered = filtered.filter(p => p.isClearance === true)
   }
 
   // Status filter
@@ -956,7 +1208,50 @@ const productTabs = computed(() => [
   { key: 'draft', label: 'Draft', count: products.value.filter(p => !p.isActive).length },
   { key: 'lowStock', label: 'Low Stock', count: products.value.filter(p => p.stock > 0 && p.stock <= (p.lowStockThreshold ?? 5)).length },
   { key: 'outOfStock', label: 'Out of Stock', count: products.value.filter(p => p.stock === 0).length },
+  { key: 'clearance', label: t('admin.pages.products.index.filters.clearance', 'Destockage'), count: products.value.filter(p => p.isClearance === true).length },
 ])
+
+const statusFilterLabel = (value: string) => {
+  if (value === 'active') return t('admin.common.active')
+  if (value === 'inactive') return t('admin.common.inactive')
+  if (value === 'lowStock') return t('admin.pages.products.index.filters.lowStock')
+  return value
+}
+
+const advancedFilterCount = computed(() => [selectedCategory.value, selectedStatus.value].filter(Boolean).length)
+
+const hasActiveFilters = computed(() => Boolean(searchQuery.value) || advancedFilterCount.value > 0)
+
+const filterChips = computed(() => {
+  const chips: { key: string; label: string; value: string }[] = []
+  if (selectedCategory.value) {
+    const category = orderedCategories.value.find((c) => c.id === selectedCategory.value)
+    chips.push({
+      key: 'category',
+      label: t('admin.pages.products.index.filters.category'),
+      value: category ? category.title : selectedCategory.value
+    })
+  }
+  if (selectedStatus.value) {
+    chips.push({
+      key: 'status',
+      label: t('admin.pages.products.index.filters.status'),
+      value: statusFilterLabel(selectedStatus.value)
+    })
+  }
+  return chips
+})
+
+function removeFilterChip(key: string) {
+  if (key === 'category') selectedCategory.value = ''
+  if (key === 'status') selectedStatus.value = ''
+}
+
+function clearFilters() {
+  searchQuery.value = ''
+  selectedCategory.value = ''
+  selectedStatus.value = ''
+}
 
 const totalPages = computed(() => Math.ceil(filteredProducts.value.length / itemsPerPage))
 
@@ -967,7 +1262,7 @@ const paginatedProducts = computed(() => {
 })
 
 const allVisibleSelected = computed(() => {
-  const visible = paginatedProducts.value.map(p => p.id)
+  const visible = filteredProducts.value.map(p => p.id)
   return visible.length > 0 && visible.every(id => selectedIds.value.includes(id))
 })
  
@@ -986,10 +1281,43 @@ async function fetchProducts() {
       }
     })
     products.value = data
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to fetch products:', error)
+    showToast(
+      extractApiErrorMessage(
+        error,
+        t('admin.pages.products.index.loadingError', 'Failed to load products')
+      ),
+      'error'
+    )
   } finally {
     loading.value = false
+  }
+}
+
+async function toggleProductStatus(product: Product, nextValue: boolean) {
+  if (product.isActive === nextValue) return
+
+  const previousValue = product.isActive
+  product.isActive = nextValue
+  statusUpdating[product.id] = true
+
+  try {
+    await $fetch(`/api/admin/products/${product.id}`, {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${authStore.token}`
+      },
+      body: {
+        isActive: nextValue
+      }
+    })
+  } catch (error: any) {
+    product.isActive = previousValue
+    console.error('Failed to update product status:', error)
+    showToast(error?.data?.statusMessage || t('admin.pages.products.index.bulk.updateError'), 'error')
+  } finally {
+    delete statusUpdating[product.id]
   }
 }
  
@@ -1001,14 +1329,27 @@ async function fetchCategories() {
       }
     })
     categories.value = data
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Failed to fetch categories:', error)
+    showToast(
+      extractApiErrorMessage(
+        error,
+        t('admin.pages.products.index.categoriesLoadError', 'Failed to load categories')
+      ),
+      'error'
+    )
   }
 }
  
 function confirmDelete(product: Product) {
   productToDelete.value = product
   showDeleteModal.value = true
+}
+
+function openProductRow(event: Event, productId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/products/${productId}`)
 }
  
 async function handleDelete() {
@@ -1074,7 +1415,7 @@ async function submitBulkDelete() {
 }
 
 function toggleSelectAllVisible() {
-  const visible = paginatedProducts.value.map(p => p.id)
+  const visible = filteredProducts.value.map(p => p.id)
   if (visible.length === 0) return
 
   if (allVisibleSelected.value) {
@@ -1110,6 +1451,43 @@ async function exportProductsCsv() {
   }
 }
 
+async function exportProductsArchive() {
+  exportingArchive.value = true
+  exportArchiveStatus.value = 'processing'
+  exportArchiveError.value = null
+  exportArchiveProgress.value = { processed: 0, total: 0 }
+  showExportArchiveModal.value = true
+  guardNavigationWhileBusy()
+
+  try {
+    const query = selectedIds.value.length ? `?ids=${encodeURIComponent(selectedIds.value.join(','))}` : ''
+    const res = await fetch(`/api/admin/products/export.zip/stream${query}`, {
+      headers: { Authorization: `Bearer ${authStore.token}` }
+    })
+
+    if (!res.ok) throw new Error(`Export failed (${res.status})`)
+
+    await readNdjsonStream(res, (evt) => {
+      if (evt.type === 'progress') {
+        exportArchiveProgress.value = { processed: evt.processed, total: evt.total }
+      } else if (evt.type === 'done') {
+        exportArchiveProgress.value = { processed: evt.total ?? exportArchiveProgress.value.total, total: exportArchiveProgress.value.total }
+        triggerBlobDownload(base64ToBlob(evt.dataBase64, 'application/zip'), evt.filename || `products-archive-${new Date().toISOString().slice(0, 10)}.zip`)
+        exportArchiveStatus.value = 'completed'
+      } else if (evt.type === 'error') {
+        throw new Error(evt.message || 'Export failed')
+      }
+    })
+  } catch (error: any) {
+    console.error('Failed to export archive:', error)
+    exportArchiveStatus.value = 'failed'
+    exportArchiveError.value = error?.message || t('admin.pages.products.index.bulk.exportArchiveError')
+  } finally {
+    exportingArchive.value = false
+    releaseNavigationGuard()
+  }
+}
+
 function downloadProductsImportTemplate() {
   const blob = new Blob([productsImportTemplateCsv], { type: 'text/csv;charset=utf-8;' })
   const url = URL.createObjectURL(blob)
@@ -1140,23 +1518,43 @@ async function onImportCsvFileChange(event: Event) {
 
   importingCsv.value = true
   importCsvResult.value = null
+  importProgress.value = { phase: 'rows', processed: 0, total: 0 }
+  guardNavigationWhileBusy()
+
   try {
+    const isZip = file.name.toLowerCase().endsWith('.zip') || file.type === 'application/zip'
+    const endpoint = isZip ? '/api/admin/products/import.zip/stream' : '/api/admin/products/import.csv/stream'
+
     const form = new FormData()
     form.append('file', file)
 
-    const result = await $fetch('/api/admin/products/import.csv', {
+    const res = await fetch(endpoint, {
       method: 'POST',
-      headers: {
-        Authorization: `Bearer ${authStore.token}`
-      },
+      headers: { Authorization: `Bearer ${authStore.token}` },
       body: form
+    })
+
+    if (!res.ok) {
+      const body = await res.json().catch(() => null)
+      throw new Error(body?.statusMessage || body?.message || `Import failed (${res.status})`)
+    }
+
+    let result: any = null
+    await readNdjsonStream(res, (evt) => {
+      if (evt.type === 'progress') {
+        importProgress.value = { phase: evt.phase || 'rows', processed: evt.processed, total: evt.total }
+      } else if (evt.type === 'done') {
+        result = evt.summary
+      } else if (evt.type === 'error') {
+        throw new Error(evt.message || 'Import failed')
+      }
     })
 
     importCsvResult.value = result
     await fetchProducts()
     await fetchCategories()
   } catch (error) {
-    console.error('Failed to import CSV:', error)
+    console.error('Failed to import products:', error)
     const msg =
       (error as any)?.data?.statusMessage ||
       (error as any)?.data?.message ||
@@ -1172,6 +1570,7 @@ async function onImportCsvFileChange(event: Event) {
     }
   } finally {
     importingCsv.value = false
+    releaseNavigationGuard()
   }
 }
 
@@ -1182,6 +1581,8 @@ function openBulkUpdateModal() {
   bulkIsActive.value = ''
   bulkCategoryId.value = ''
   bulkPropagatePriceToVariants.value = true
+  bulkIsClearance.value = ''
+  bulkClearanceSkipped.value = []
   showBulkUpdateModal.value = true
 }
 
@@ -1189,6 +1590,7 @@ function closeBulkUpdateModal() {
   showBulkUpdateModal.value = false
   bulkSaving.value = false
   bulkError.value = null
+  bulkClearanceSkipped.value = []
 }
 
 async function submitBulkUpdate() {
@@ -1203,6 +1605,8 @@ async function submitBulkUpdate() {
 	    if (bulkIsActive.value === 'false') data.isActive = false
 	    if (bulkCategoryId.value === '__clear__') data.categoryId = null
 	    if (bulkCategoryId.value && bulkCategoryId.value !== '__clear__') data.categoryId = bulkCategoryId.value
+	    if (bulkIsClearance.value === 'true') data.isClearance = true
+	    if (bulkIsClearance.value === 'false') data.isClearance = false
 
     if (Object.keys(data).length === 0) {
       bulkError.value = t('admin.pages.products.index.bulk.noChanges')
@@ -1210,7 +1614,7 @@ async function submitBulkUpdate() {
       return
     }
 
-    await $fetch('/api/admin/products/bulk', {
+    const result = await $fetch<{ clearanceSkippedIds?: string[] }>('/api/admin/products/bulk', {
       method: 'PATCH',
       headers: {
         Authorization: `Bearer ${authStore.token}`
@@ -1222,8 +1626,16 @@ async function submitBulkUpdate() {
       }
     })
 
-    showBulkUpdateModal.value = false
     await fetchProducts()
+
+    const skipped = result?.clearanceSkippedIds || []
+    if (skipped.length > 0) {
+      bulkClearanceSkipped.value = skipped
+      bulkSaving.value = false
+      return
+    }
+
+    showBulkUpdateModal.value = false
   } catch (error: any) {
     console.error('Bulk update failed:', error)
     bulkError.value = error?.data?.statusMessage || t('admin.pages.products.index.bulk.updateError')
@@ -1292,19 +1704,42 @@ async function copyLink(path: string) {
 }
  
 // Lifecycle
+const { autoStartIfNeeded } = useTour()
 onMounted(() => {
   fetchProducts()
   fetchCategories()
+  autoStartIfNeeded('products')
 })
- 
+
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      search: searchQuery.value || undefined,
+      categoryId: selectedCategory.value || undefined,
+      status: selectedStatus.value || undefined,
+      tab: activeTab.value === 'all' ? undefined : activeTab.value,
+      sortBy: sortBy.value === 'createdAt' ? undefined : sortBy.value,
+      sortOrder: sortOrder.value === 'desc' ? undefined : sortOrder.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
 // Watch for filter changes to reset pagination
 watch([searchQuery, selectedCategory, selectedStatus, activeTab], () => {
   currentPage.value = 1
+  syncToUrl()
 })
 
 watch([sortBy, sortOrder, selectedCategory], () => {
   fetchProducts()
   currentPage.value = 1
+  syncToUrl()
+})
+
+watch(currentPage, () => {
+  syncToUrl()
 })
 
 function setSort(field: typeof sortOptions[number]['key']) {

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/printer_profile.dart';
@@ -75,14 +76,22 @@ class PrinterProfilesNotifier extends Notifier<PrinterProfilesState> {
           ? layouts.first
           : ReceiptLayout.standard();
 
+      // `build()` starts this load in a microtask, so it routinely outlives the
+      // provider: a screen closed while profiles are loading disposes the Ref
+      // out from under it, and writing `state` then throws rather than being a
+      // no-op. Every write after an await has to be guarded.
+      if (!ref.mounted) return;
       state = state.copyWith(
         profiles: profiles,
         defaultProfile: defaultProfile,
         receiptLayout: layout,
         isLoading: false,
       );
-    } catch (e) {
-      print('Error loading printer profiles: \$e');
+    } catch (error, stackTrace) {
+      // The message used to escape its own interpolation (`\$e`), so every
+      // report of this failure logged the literal text and threw the error away.
+      debugPrint('Error loading printer profiles: $error\n$stackTrace');
+      if (!ref.mounted) return;
       state = state.copyWith(isLoading: false);
     }
   }

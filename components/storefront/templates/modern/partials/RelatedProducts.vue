@@ -77,8 +77,11 @@ const getProductMainImage = (product: any) => {
   scrollbar-width: none;  /* Firefox */
 }
 
-.animate-fade-in-up {
-    animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* `forwards` from `opacity: 0` hides SSR content until the animation runs. */
+@media (prefers-reduced-motion: no-preference) {
+    .animate-fade-in-up {
+        animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 }
 
 @keyframes fadeInUp {

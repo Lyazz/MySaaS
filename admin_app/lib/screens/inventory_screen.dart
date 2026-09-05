@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
-import '../services/api_service.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../providers/products_provider.dart';
 import '../models/product.dart';
+import '../theme/app_theme.dart';
 import '../widgets/responsive_paginated_table.dart';
 import '../widgets/responsive_filter_bar.dart';
 import '../utils/debouncer.dart';
 import '../widgets/form/form_input.dart';
+import '../widgets/tenant_image_widget.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class InventoryScreen extends ConsumerStatefulWidget {
   const InventoryScreen({super.key});
@@ -67,7 +69,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget _buildHeader() {
     return ResponsiveFilterBar(
       searchField: FormInput(
-        label: 'Search',
+        label: 'admin.pages.suppliers.index.filters.searchLabel'.tr(),
         controller: _searchController,
         hint: 'Search products by name or SKU...',
         contentPadding: const EdgeInsets.symmetric(
@@ -89,34 +91,34 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     return ResponsivePaginatedTable<Product>(
       items: products,
       minWidth: 900,
-      header: const Row(
+      header: Row(
         children: [
           Expanded(
             flex: 3,
-            child: Text(
-              'Product',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            child: _headerText(
+              context,
+              'admin.pages.sales.detail.itemsTable.product'.tr(),
             ),
           ),
           Expanded(
             flex: 2,
-            child: Text(
-              'SKU',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            child: _headerText(
+              context,
+              'admin.pages.purchases.detail.items.sku'.tr(),
             ),
           ),
           Expanded(
             flex: 1,
-            child: Text(
-              'Stock',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            child: _headerText(
+              context,
+              'admin.pages.products.index.table.stock'.tr(),
             ),
           ),
           Expanded(
             flex: 1,
-            child: Text(
-              'Status',
-              style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+            child: _headerText(
+              context,
+              'superAdmin.paymentsPage.history.table.status'.tr(),
             ),
           ),
           SizedBox(width: 48), // Actions space
@@ -125,16 +127,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       rowBuilder: (context, product, index) {
         // Low-stock threshold (basic): < 10
         final isLowStock = product.stock < 10;
-        final rawImageUrl = product.mainImageUrl;
-        final imageUrl = rawImageUrl == null
-            ? null
-            : ref.read(apiProvider).resolvePublicUrl(rawImageUrl);
+        final imagePath = product.mainImageUrl?.trim();
 
         return Padding(
-          padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width < 800 ? 12 : 24,
-            vertical: MediaQuery.of(context).size.width < 800 ? 12 : 16,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -142,31 +138,35 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 40,
+                      width: 28,
+                      height: 28,
                       decoration: BoxDecoration(
-                        color: Colors.grey[100],
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
                         borderRadius: BorderRadius.circular(6),
-                        image: imageUrl != null
-                            ? DecorationImage(
-                                image: NetworkImage(imageUrl),
-                                fit: BoxFit.cover,
-                              )
-                            : null,
                       ),
-                      child: imageUrl == null
-                          ? const Icon(
+                      child: imagePath == null || imagePath.isEmpty
+                          ? Icon(
                               LucideIcons.image,
                               size: 20,
-                              color: Colors.grey,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.3),
                             )
-                          : null,
+                          : ClipRRect(
+                              borderRadius: BorderRadius.circular(6),
+                              child: TenantImageWidget(imagePath: imagePath),
+                            ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
                         product.title,
-                        style: const TextStyle(fontWeight: FontWeight.w500),
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 13,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -180,7 +180,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   product.variants.isNotEmpty
                       ? 'Multiple'
                       : (product.slug), // Using slug as dummy SKU if none
-                  style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
+                    fontSize: 13,
+                  ),
                 ),
               ),
               Expanded(
@@ -191,7 +196,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                       '${product.stock}',
                       style: TextStyle(
                         fontWeight: FontWeight.w600,
-                        color: isLowStock ? Colors.orange : Colors.black,
+                        fontSize: 13,
+                        color: isLowStock
+                            ? AppColors.amber
+                            : Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     if (isLowStock)
@@ -224,7 +232,11 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
-                      color: product.isActive ? Colors.green : Colors.grey[600],
+                      color: product.isActive
+                          ? AppColors.green
+                          : Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.5),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -235,12 +247,27 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
                   // Open quick edit dialog
                 },
                 icon: const Icon(LucideIcons.pencil, size: 16),
-                color: Colors.grey[600],
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
               ),
             ],
           ),
         );
       },
+    );
+  }
+
+  Widget _headerText(BuildContext context, String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Text(
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
+      ),
     );
   }
 }

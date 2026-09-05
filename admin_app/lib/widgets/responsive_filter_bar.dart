@@ -1,7 +1,8 @@
 import 'package:easy_localization/easy_localization.dart';
 import 'package:flutter/material.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'buttons/app_button.dart';
+import '../theme/app_theme.dart';
 
 class ResponsiveFilterBar extends StatelessWidget {
   final Widget searchField;
@@ -9,6 +10,9 @@ class ResponsiveFilterBar extends StatelessWidget {
   final List<Widget>? actions;
   final VoidCallback? onClearFilters;
   final double breakPoint;
+  final bool collapseDesktopFilters;
+  final int activeFilterCount;
+  final List<Widget> activeFilterChips;
 
   const ResponsiveFilterBar({
     super.key,
@@ -17,64 +21,64 @@ class ResponsiveFilterBar extends StatelessWidget {
     this.actions,
     this.onClearFilters,
     this.breakPoint = 800,
+    this.collapseDesktopFilters = false,
+    this.activeFilterCount = 0,
+    this.activeFilterChips = const [],
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surface1 = isDark ? AppColors.surface1 : AppColors.lightSurface1;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: surface1,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)), // Slate-200
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
-            blurRadius: 4,
-            offset: const Offset(0, 1),
-          ),
-        ],
+        border: Border.all(color: borderColor),
+        boxShadow: isDark
+            ? null
+            : [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.02),
+                  blurRadius: 4,
+                  offset: const Offset(0, 1),
+                ),
+              ],
       ),
       child: LayoutBuilder(
         builder: (context, constraints) {
           final isWide = constraints.maxWidth >= breakPoint;
-
-          if (isWide) {
-            return _buildDesktopLayout();
-          } else {
-            return _buildMobileLayout(context);
-          }
+          return isWide
+              ? _buildDesktopLayout(context)
+              : _buildMobileLayout(context);
         },
       ),
     );
   }
 
-  Widget _buildDesktopLayout() {
+  Widget _buildDesktopLayout(BuildContext context) {
+    if (collapseDesktopFilters) {
+      return _buildCompactDesktopLayout(context);
+    }
+
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Search takes avail space or fixed width?
-        // Usually search is main, filters are secondary.
-        // Let's make search expand a bit more.
         Expanded(flex: 2, child: searchField),
         if (filters.isNotEmpty) ...[
           const SizedBox(width: 16),
-          // Filters take rest of space
           Expanded(
             flex: 3,
             child: Wrap(
               spacing: 16,
               runSpacing: 16,
               alignment: WrapAlignment.start,
-              children: filters.map((filter) {
-                // Determine if we should wrap filters in specialized containers or just render them.
-                // Assuming filters are already sized widgets (like SizedBox(width: 200, child: Dropdown...))
-                // OR we can wrap them in flexible containers.
-                // For simplified usage, let's assume 'filters' are fully formed widgets.
-                // But typically in the previous code they were Expanded.
-                // We needs widgets that have intrinsic width or specific width.
-                return filter;
-              }).toList(),
+              children: filters,
             ),
           ),
         ],
@@ -94,32 +98,57 @@ class ResponsiveFilterBar extends StatelessWidget {
     );
   }
 
+  Widget _buildCompactDesktopLayout(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Expanded(flex: 3, child: searchField),
+        if (filters.isNotEmpty) ...[
+          const SizedBox(width: 12),
+          _FilterButton(
+            activeFilterCount: activeFilterCount,
+            onPressed: () => _showFilterModal(context),
+          ),
+        ],
+        if (activeFilterChips.isNotEmpty) ...[
+          const SizedBox(width: 12),
+          Flexible(
+            flex: 2,
+            child: Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: activeFilterChips,
+            ),
+          ),
+        ],
+        if (actions != null && actions!.isNotEmpty) ...[
+          const SizedBox(width: 12),
+          ...actions!,
+        ],
+      ],
+    );
+  }
+
   Widget _buildMobileLayout(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final iconColor = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+
     return Row(
       children: [
         Expanded(child: searchField),
         if (filters.isNotEmpty) ...[
           const SizedBox(width: 8),
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: const Color(0xFFE2E8F0)),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: IconButton(
-              onPressed: () => _showFilterModal(context),
-              icon: const Icon(
-                LucideIcons.listFilter,
-                size: 20,
-                color: Color(0xFF64748B),
-              ),
-              tooltip: 'admin.common.filters'.tr(),
-              style: IconButton.styleFrom(
-                padding: const EdgeInsets.all(12),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
+          _IconShellButton(
+            borderColor: borderColor,
+            onPressed: () => _showFilterModal(context),
+            icon: Icon(LucideIcons.listFilter, size: 20, color: iconColor),
+            tooltip: 'admin.common.filters'.tr(),
           ),
         ],
         if (actions != null && actions!.isNotEmpty) ...[
@@ -131,10 +160,19 @@ class ResponsiveFilterBar extends StatelessWidget {
   }
 
   void _showFilterModal(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final sheetBg = isDark ? AppColors.surface2 : AppColors.lightSurface2;
+    final handleColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: sheetBg,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
       ),
@@ -147,19 +185,16 @@ class ResponsiveFilterBar extends StatelessWidget {
           builder: (context, scrollController) {
             return Column(
               children: [
-                // Modal Handle
                 const SizedBox(height: 12),
                 Container(
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: handleColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
                 const SizedBox(height: 16),
-
-                // Title
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   child: Row(
@@ -170,6 +205,7 @@ class ResponsiveFilterBar extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
+                          color: textPrimary,
                         ),
                       ),
                       if (onClearFilters != null)
@@ -184,21 +220,15 @@ class ResponsiveFilterBar extends StatelessWidget {
                   ),
                 ),
                 const Divider(),
-
-                // Filter List
                 Expanded(
                   child: ListView.separated(
                     controller: scrollController,
                     padding: const EdgeInsets.all(20),
                     itemCount: filters.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 20),
-                    itemBuilder: (context, index) {
-                      return filters[index];
-                    },
+                    itemBuilder: (context, index) => filters[index],
                   ),
                 ),
-
-                // Close Button
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: SizedBox(
@@ -215,6 +245,99 @@ class ResponsiveFilterBar extends StatelessWidget {
           },
         );
       },
+    );
+  }
+}
+
+class _FilterButton extends StatelessWidget {
+  final int activeFilterCount;
+  final VoidCallback onPressed;
+
+  const _FilterButton({
+    required this.activeFilterCount,
+    required this.onPressed,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final textColor = isDark
+        ? AppColors.textSecondary
+        : AppColors.lightTextSecondary;
+    final badgeColor = Theme.of(context).colorScheme.primary;
+
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: const Icon(LucideIcons.listFilter, size: 16),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text('admin.common.filters'.tr()),
+          if (activeFilterCount > 0) ...[
+            const SizedBox(width: 8),
+            Container(
+              constraints: const BoxConstraints(minWidth: 20),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+              decoration: BoxDecoration(
+                color: badgeColor,
+                borderRadius: BorderRadius.circular(999),
+              ),
+              child: Text(
+                activeFilterCount.toString(),
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.onPrimary,
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: textColor,
+        side: BorderSide(color: borderColor),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+      ),
+    );
+  }
+}
+
+class _IconShellButton extends StatelessWidget {
+  final Color borderColor;
+  final VoidCallback onPressed;
+  final Widget icon;
+  final String tooltip;
+
+  const _IconShellButton({
+    required this.borderColor,
+    required this.onPressed,
+    required this.icon,
+    required this.tooltip,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: IconButton(
+        onPressed: onPressed,
+        icon: icon,
+        tooltip: tooltip,
+        style: IconButton.styleFrom(
+          padding: const EdgeInsets.all(12),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+        ),
+      ),
     );
   }
 }

@@ -3,6 +3,7 @@ const props = defineProps<{
     images: string[]
     title?: string
 }>()
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const activeImageIndex = ref(0)
 
@@ -26,13 +27,18 @@ watch(() => props.images, () => {
 <template>
     <div class="animate-fade-in-left">
         <!-- Main Image -->
-        <div class="aspect-[4/5] bg-slate-50 relative group cursor-zoom-in mb-4 overflow-hidden">
+        <div
+          class="aspect-[4/5] bg-slate-50 relative group cursor-zoom-in mb-4 overflow-hidden"
+          @mousemove="onPointerMove"
+          @mouseleave="onPointerLeave"
+        >
         <img 
             :src="currentImage" 
             :alt="title" 
-            class="w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-105"
+            class="w-full h-full object-contain object-center transition-transform duration-700 ease-out"
+            :style="zoomStyle"
         >
-        <div class="absolute top-4 left-4">
+        <div class="absolute top-4 start-4">
             <span class="bg-white text-slate-900 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 shadow-sm">
             New Arrival
             </span>
@@ -52,7 +58,7 @@ watch(() => props.images, () => {
             <img
             :src="img"
             class="w-full h-full object-cover"
-            alt="Thumbnail"
+            :alt="title"
             >
         </button>
         </div>

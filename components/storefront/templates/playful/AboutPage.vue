@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const tenant = useState<any>('tenant')
-const tenantName = computed(() => tenant.value?.name || 'Store')
+const { t } = useI18n({ useScope: 'global' })
+const storefrontContent = useStorefrontContent()
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
 
 useTenantSeo({
   title: `About - ${tenantName.value}`,
@@ -9,16 +11,44 @@ useTenantSeo({
 </script>
 
 <template>
-  <div class="bg-[#faf5ff] min-h-screen py-12">
-    <div class="max-w-5xl mx-auto px-4 bg-white p-8 md:p-12 rounded-[2rem] border-4 border-purple-100 shadow-sm">
-      <h1 class="text-4xl font-sans font-black text-[#4c1d95] mb-4">
-        About {{ tenantName }}
-      </h1>
-      <p class="text-slate-600 leading-relaxed font-medium">
-        Welcome to {{ tenantName }}. This page is part of your tenant storefront template and can be customized from the
-        onboarding wizard.
-      </p>
+  <div class="bg-[var(--kw-cream)] min-h-screen pb-20">
+    <section class="kw-band-pink kw-scallop pt-12 pb-16 md:pt-16 md:pb-20">
+      <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+        <span
+          class="kw-blob kw-float w-20 h-20 mx-auto mb-7 flex items-center justify-center"
+          style="background: linear-gradient(140deg, var(--kw-lemon), var(--kw-peach))"
+        >
+          <Icon
+            name="lucide:heart"
+            class="w-9 h-9 text-white"
+          />
+        </span>
+        <p class="kw-kicker mb-3">
+          {{ storefrontContent.home.welcomeTo(tenantName) }}
+        </p>
+        <h1 class="kw-display text-3xl md:text-[3rem]">
+          {{ tenantName }}
+        </h1>
+      </div>
+    </section>
+
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 -mt-6">
+      <div class="kw-card p-8 md:p-12 text-center">
+        <p class="kw-lede">
+          Welcome to {{ tenantName }}. This page is part of your tenant storefront template and can be customized from
+          the onboarding wizard.
+        </p>
+        <NuxtLink
+          to="/products"
+          class="kw-btn mt-9"
+        >
+          {{ storefrontContent.shop.allProducts }}
+          <Icon
+            name="lucide:arrow-right"
+            class="w-4 h-4 rtl:rotate-180"
+          />
+        </NuxtLink>
+      </div>
     </div>
   </div>
 </template>
-

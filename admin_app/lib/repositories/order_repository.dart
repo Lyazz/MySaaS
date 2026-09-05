@@ -1,10 +1,15 @@
 import 'dart:convert';
+
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:uuid/uuid.dart';
 
 import '../models/order.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
+import '../services/sync_conflict_policy.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class OrderRepository {
   final ApiService _apiService;
@@ -13,13 +18,10 @@ class OrderRepository {
 
   OrderRepository(this._apiService);
 
-  Future<({
-    List<Order> items,
-    int total,
-    int page,
-    int totalPages,
-    int limit,
-  })> getOrdersPage({
+  String get _tid => TenantModeService().activeTenantId;
+
+  Future<({List<Order> items, int total, int page, int totalPages, int limit})>
+  getOrdersPage({
     bool forceRefresh = false,
     String? search,
     String? status,
@@ -64,16 +66,20 @@ class OrderRepository {
           ? (data['totalPages'] as num).toInt()
           : 1;
 
-      // Update local cache (best-effort)
       try {
         final db = await _dbService.database;
         await db.transaction((txn) async {
           if (pageOut == 1) {
-            await txn.delete('orders', where: "syncStatus = 'synced'");
+            await txn.delete(
+              'orders',
+              where: "tenantId = ? AND syncStatus = 'synced'",
+              whereArgs: [_tid],
+            );
           }
           for (var o in orders) {
             await txn.insert('orders', {
               'id': o.id,
+              'tenantId': _tid,
               'status': o.status,
               'total': o.totalAmount,
               'createdAt': o.createdAt.toIso8601String(),
@@ -96,9 +102,13 @@ class OrderRepository {
       );
     }
 
-    // Offline/local
     final db = await _dbService.database;
-    final localData = await db.query('orders', orderBy: 'createdAt DESC');
+    final localData = await db.query(
+      'orders',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+      orderBy: 'createdAt DESC',
+    );
 
     DateTime? tryParse(String? raw) {
       if (raw == null || raw.trim().isEmpty) return null;
@@ -168,6 +178,8 @@ class OrderRepository {
     final db = await _dbService.database;
     final localData = await db.query(
       'orders',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
       limit: limit,
       offset: (page - 1) * limit,
     );
@@ -199,7 +211,11 @@ class OrderRepository {
 
         await db.transaction((txn) async {
           if (page == 1) {
-            await txn.delete('orders', where: "syncStatus = 'synced'");
+            await txn.delete(
+              'orders',
+              where: "tenantId = ? AND syncStatus = 'synced'",
+              whereArgs: [_tid],
+            );
           }
           for (var o in remoteOrders) {
             final itemsJsonList = o.items
@@ -214,6 +230,7 @@ class OrderRepository {
                 .toList();
             await txn.insert('orders', {
               'id': o.id,
+              'tenantId': _tid,
               'status': o.status,
               'total': o.totalAmount,
               'createdAt': o.createdAt.toIso8601String(),
@@ -226,60 +243,59 @@ class OrderRepository {
           }
         });
         return remoteOrders;
-      } catch (e) {
-        print('Background order fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localOrders;
   }
 
   Future<Order?> getOrder(String id) async {
-    if (await _syncService.isOnline) {
-      try {
-        final res = await _apiService.client.get('/admin/orders/$id');
-        final o = Order.fromJson(res.data);
+    final resolvedId = await _resolveOrderId(id);
+    try {
+      final res = await _apiService.client.get('/admin/orders/$resolvedId');
+      final o = Order.fromJson(res.data);
 
-        final db = await _dbService.database;
-        final itemsJsonList = o.items
-            .map(
-              (i) => {
-                'id': i.id,
-                'productId': i.productId,
-                'quantity': i.quantity,
-                'price': i.price,
-              },
-            )
-            .toList();
-        await db.insert('orders', {
-          'id': o.id,
-          'status': o.status,
-          'total': o.totalAmount,
-          'createdAt': o.createdAt.toIso8601String(),
-          'customerName': o.customerName,
-          'customerPhone': o.customerPhone,
-          'shippingAddress': o.customerAddress,
-          'itemsJson': jsonEncode(itemsJsonList),
-          'syncStatus': 'synced',
-        }, conflictAlgorithm: ConflictAlgorithm.replace);
+      final db = await _dbService.database;
+      final itemsJsonList = o.items
+          .map(
+            (i) => {
+              'id': i.id,
+              'productId': i.productId,
+              'quantity': i.quantity,
+              'price': i.price,
+              if (i.lineTotal != null) 'lineTotal': i.lineTotal,
+              if (i.productTitle != null) 'productTitle': i.productTitle,
+              if (i.variantLabel != null) 'variantLabel': i.variantLabel,
+            },
+          )
+          .toList();
+      await db.insert('orders', {
+        'id': o.id,
+        'tenantId': _tid,
+        'status': o.status,
+        'total': o.totalAmount,
+        'createdAt': o.createdAt.toIso8601String(),
+        'customerName': o.customerName,
+        'customerPhone': o.customerPhone,
+        'shippingAddress': o.customerAddress,
+        'itemsJson': jsonEncode(itemsJsonList),
+        'syncStatus': 'synced',
+      }, conflictAlgorithm: ConflictAlgorithm.replace);
 
-        return o;
-      } catch (e) {
-        print('Background single order fetch failed: \$e');
-      }
-    }
+      return o;
+    } catch (_) {}
 
     final db = await _dbService.database;
     final localData = await db.query(
       'orders',
-      where: 'id = ?',
-      whereArgs: [id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [resolvedId, _tid],
     );
     if (localData.isNotEmpty) {
       final e = localData.first;
       final itemsJson = e['itemsJson'] != null
           ? jsonDecode(e['itemsJson'].toString())
           : [];
-      return Order.fromJson({
+      final localOrder = Order.fromJson({
         'id': e['id'],
         'status': e['status'],
         'totalAmount': e['total'],
@@ -289,26 +305,255 @@ class OrderRepository {
         'customerAddress': e['shippingAddress'],
         'items': itemsJson,
       });
+      return _withLocalPreviousOrders(db, localOrder);
     }
 
     return null;
   }
 
+  Future<Order> _withLocalPreviousOrders(Database db, Order order) async {
+    final normalizedPhone = _normalizeAlgerianPhone(
+      order.customerPhoneNormalized ?? order.customerPhone,
+    );
+    if (normalizedPhone == null) {
+      return order.copyWith(
+        previousOrders: const [],
+        previousOrdersMatch: const PreviousOrdersMatch(type: 'none'),
+      );
+    }
+
+    final rows = await db.query(
+      'orders',
+      where: 'tenantId = ? AND id != ?',
+      whereArgs: [_tid, order.id],
+      orderBy: 'createdAt DESC',
+    );
+
+    final previousOrders = <Order>[];
+    for (final row in rows) {
+      final phone = row['customerPhone']?.toString() ?? '';
+      if (_normalizeAlgerianPhone(phone) != normalizedPhone) continue;
+      final itemsJson = row['itemsJson'] != null
+          ? jsonDecode(row['itemsJson'].toString())
+          : [];
+      previousOrders.add(
+        Order.fromJson({
+          'id': row['id'],
+          'status': row['status'],
+          'totalAmount': row['total'],
+          'createdAt': row['createdAt'],
+          'customerName': row['customerName'],
+          'customerPhone': row['customerPhone'],
+          'customerPhoneNormalized': normalizedPhone,
+          'customerAddress': row['shippingAddress'],
+          'items': itemsJson,
+        }),
+      );
+    }
+
+    return order.copyWith(
+      previousOrders: previousOrders,
+      previousOrdersMatch: PreviousOrdersMatch(
+        type: 'phone',
+        phoneNormalized: normalizedPhone,
+      ),
+    );
+  }
+
+  String? _normalizeAlgerianPhone(String? value) {
+    final digits = (value ?? '').replaceAll(RegExp(r'\D'), '');
+    if (RegExp(r'^0[567]\d{8}$').hasMatch(digits)) {
+      return '213${digits.substring(1)}';
+    }
+    if (RegExp(r'^[567]\d{8}$').hasMatch(digits)) {
+      return '213$digits';
+    }
+    if (RegExp(r'^213[567]\d{8}$').hasMatch(digits)) {
+      return digits;
+    }
+    if (RegExp(r'^00213[567]\d{8}$').hasMatch(digits)) {
+      return digits.substring(2);
+    }
+    return null;
+  }
+
+  Future<void> updateCallStatus(String id, String status) async {
+    final resolvedId = await _resolveOrderId(id);
+
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'order',
+        'updateCallStatus',
+        finishesOpenWork: await _orderExistsLocally(resolvedId),
+      ),
+    );
+
+    if (await _syncService.isOnline) {
+      try {
+        await _apiService.client.patch(
+          '/admin/orders/$resolvedId',
+          data: {'callStatus': status},
+        );
+      } catch (_) {}
+    }
+
+    await _syncService.enqueueOperation(
+      entityType: 'order',
+      action: 'updateCallStatus',
+      payload: {'id': resolvedId, 'callStatus': status},
+    );
+  }
+
+  Future<void> updateInternalNotes(String id, String notes) async {
+    final resolvedId = await _resolveOrderId(id);
+
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'order',
+        'updateInternalNotes',
+        finishesOpenWork: await _orderExistsLocally(resolvedId),
+      ),
+    );
+
+    if (await _syncService.isOnline) {
+      try {
+        await _apiService.client.patch(
+          '/admin/orders/$resolvedId',
+          data: {'internalNotes': notes},
+        );
+      } catch (_) {}
+    }
+
+    await _syncService.enqueueOperation(
+      entityType: 'order',
+      action: 'updateInternalNotes',
+      payload: {'id': resolvedId, 'internalNotes': notes},
+    );
+  }
+
   Future<void> updateStatus(String id, String status) async {
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
+    final resolvedId = await _resolveOrderId(id);
+    final currentRows = await db.query(
+      'orders',
+      columns: ['status'],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [resolvedId, _tid],
+      limit: 1,
+    );
+    final currentStatus = currentRows.isEmpty
+        ? 'PENDING'
+        : currentRows.first['status']?.toString() ?? 'PENDING';
+
+    // Moving an order that already exists locally to its final status counts as
+    // finishing open work; inventing one does not.
+    LicenseWritePolicy.ensureAllowed(
+      WriteIntent(
+        'order',
+        'updateStatus',
+        finishesOpenWork: currentRows.isNotEmpty,
+      ),
+    );
 
     await db.update(
       'orders',
-      {'status': status, 'syncStatus': online ? 'synced' : 'pending'},
-      where: 'id = ?',
-      whereArgs: [id],
+      {'status': status, 'syncStatus': SyncStatus.pending.name},
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [resolvedId, _tid],
     );
 
     await _syncService.enqueueOperation(
       entityType: 'order',
       action: 'updateStatus',
-      payload: {'id': id, 'status': status},
+      payload: {
+        'id': resolvedId,
+        'status': status,
+        'baseFingerprint': SyncConflictPolicies.fingerprintOrderStatus(
+          currentStatus,
+        ),
+      },
     );
+  }
+
+  Future<Map<String, dynamic>> createOrder(Map<String, dynamic> payload) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('order', 'create'));
+    final db = await _dbService.database;
+    final offlineId = const Uuid().v4();
+    final items = _normalizeItems(payload['items']);
+    final total = items.fold<double>(
+      0,
+      (sum, item) =>
+          sum +
+          (double.tryParse(item['price']?.toString() ?? '0') ?? 0) *
+              (int.tryParse(item['quantity']?.toString() ?? '0') ?? 0),
+    );
+
+    await db.insert('orders', {
+      'id': offlineId,
+      'tenantId': _tid,
+      'status': 'PENDING',
+      'total': total,
+      'createdAt': DateTime.now().toIso8601String(),
+      'customerName': payload['customerName']?.toString() ?? '',
+      'customerPhone': payload['customerPhone']?.toString() ?? '',
+      'shippingAddress':
+          payload['shippingAddressLine1']?.toString() ??
+          payload['customerAddress']?.toString() ??
+          '',
+      'itemsJson': jsonEncode(items),
+      'syncStatus': SyncStatus.pending.name,
+    }, conflictAlgorithm: ConflictAlgorithm.replace);
+
+    await _syncService.enqueueOperation(
+      entityType: 'order',
+      action: 'create',
+      payload: {...payload, 'offlineId': offlineId, 'items': items},
+    );
+
+    return {'success': true, 'orderId': offlineId, 'offline': true};
+  }
+
+  /// Cheap existence probe used by the licence guard: annotating an order that
+  /// already exists is finishing open work, creating one through the back door
+  /// is not.
+  Future<bool> _orderExistsLocally(String id) async {
+    if (id.trim().isEmpty) return false;
+    final db = await _dbService.database;
+    final rows = await db.query(
+      'orders',
+      columns: ['id'],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+      limit: 1,
+    );
+    return rows.isNotEmpty;
+  }
+
+  Future<String> _resolveOrderId(String id) async {
+    final trimmed = id.trim();
+    if (trimmed.isEmpty) return trimmed;
+    final db = await _dbService.database;
+    final aliasRows = await db.query(
+      'entity_aliases',
+      columns: ['remoteId'],
+      where: 'tenantId = ? AND entityType = ? AND localId = ?',
+      whereArgs: [_tid, 'order', trimmed],
+      limit: 1,
+    );
+    if (aliasRows.isEmpty) return trimmed;
+    return aliasRows.first['remoteId']?.toString() ?? trimmed;
+  }
+
+  List<Map<String, dynamic>> _normalizeItems(dynamic rawItems) {
+    if (rawItems is! List) return const [];
+    return rawItems.whereType<Map>().map((item) {
+      final map = Map<String, dynamic>.from(item);
+      return {
+        'productId': map['productId'],
+        'variantId': map['variantId'],
+        'quantity': map['quantity'],
+        'price': map['price'],
+      };
+    }).toList();
   }
 }

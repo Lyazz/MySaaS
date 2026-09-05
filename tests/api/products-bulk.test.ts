@@ -1,8 +1,22 @@
 import request from 'supertest'
+import AdmZip from 'adm-zip'
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
 import prisma from '../../backend/src/lib/prisma'
 import app from '../../backend/src/app'
 import { signAccessToken } from '../../backend/src/lib/jwt'
+
+// Minimal valid 1x1 PNG, reused to exercise the real image-upload pipeline (sharp optimizeImage).
+const createTestPng = () =>
+    Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+        0x00, 0x00, 0x00, 0x0d, 0x49, 0x48, 0x44, 0x52,
+        0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+        0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89,
+        0x00, 0x00, 0x00, 0x0a, 0x49, 0x44, 0x41, 0x54,
+        0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00, 0x05, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x00, 0x49, 0x45, 0x4e, 0x44,
+        0xae, 0x42, 0x60, 0x82
+    ])
 
 describe('Admin products bulk ops', () => {
     const slugA = `bulk-a-${Date.now()}`
@@ -21,7 +35,7 @@ describe('Admin products bulk ops', () => {
     let adminBToken: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Bulk A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Bulk A', slug: slugA } })
         tenantAId = tenantA.id
         const adminA = await prisma.user.create({
             data: { tenantId: tenantAId, email: `admin-${slugA}@example.com`, role: 'admin', passwordHash: 'x' }
@@ -94,7 +108,7 @@ describe('Admin products bulk ops', () => {
         })
         deleteAProduct2Id = toDelete2.id
 
-        const tenantB = await prisma.tenant.create({ data: { name: 'Bulk B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Bulk B', slug: slugB } })
         tenantBId = tenantB.id
         const adminB = await prisma.user.create({
             data: { tenantId: tenantBId, email: `admin-${slugB}@example.com`, role: 'admin', passwordHash: 'x' }
@@ -220,6 +234,107 @@ describe('Admin products bulk ops', () => {
         expect(links.map((row) => row.categoryId)).toEqual(expect.arrayContaining([categoryAId, categoryBId]))
     })
 
+    it('imports a categorized product into a different tenant by auto-creating the missing category', async () => {
+        // Simulates migrating a catalog: export from tenant A (product has a category), then
+        // import that same archive into tenant B, which has no category matching tenant A's id/slug.
+        // The destination tenant should get a new category (same slug/title) instead of erroring
+        // or silently dropping the category assignment.
+        const exportRes = await request(app)
+            .get(`/api/admin/products/export.zip?ids=${productAId}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .buffer(true)
+            .parse((response, callback) => {
+                const chunks: Buffer[] = []
+                response.on('data', (chunk: Buffer) => chunks.push(chunk))
+                response.on('end', () => callback(null, Buffer.concat(chunks)))
+            })
+        expect(exportRes.status).toBe(200)
+
+        const sourceProduct = await prisma.product.findFirst({ where: { tenantId: tenantAId, id: productAId } })
+        const sourceCategory = await prisma.category.findFirst({ where: { tenantId: tenantAId, id: categoryAId } })
+
+        const importRes = await request(app)
+            .post('/api/admin/products/import.zip')
+            .set('X-Forwarded-Host', hostB)
+            .set('Authorization', `Bearer ${adminBToken}`)
+            .attach('file', exportRes.body as Buffer, { filename: 'archive.zip', contentType: 'application/zip' })
+
+        expect(importRes.status).toBe(200)
+        expect(importRes.body.errors?.length || 0).toBe(0)
+        expect(importRes.body.created).toBe(1)
+        expect(
+            (importRes.body.warnings ?? []).some((w: any) => /Created new categor/i.test(w.message))
+        ).toBe(true)
+
+        const createdCategory = await prisma.category.findFirst({
+            where: { tenantId: tenantBId, slug: sourceCategory!.slug }
+        })
+        expect(createdCategory).toBeTruthy()
+        expect(createdCategory?.title).toBe(sourceCategory!.title)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantBId, slug: sourceProduct!.slug } })
+        expect(created).toBeTruthy()
+        expect(created?.categoryId).toBe(createdCategory!.id)
+    })
+
+    it('does not auto-create categories for a staff user without categories:create permission', async () => {
+        // Same cross-tenant scenario, but the importing user is a restricted staff member: the
+        // missing category must be skipped with a warning instead of silently being created.
+        const restrictedRole = await prisma.tenantStaffRole.create({
+            data: { tenantId: tenantBId, name: 'Products only' }
+        })
+        await prisma.tenantStaffRolePermission.createMany({
+            data: [
+                { tenantId: tenantBId, roleId: restrictedRole.id, resource: 'products', action: 'create' },
+                { tenantId: tenantBId, roleId: restrictedRole.id, resource: 'products', action: 'read' },
+                { tenantId: tenantBId, roleId: restrictedRole.id, resource: 'products', action: 'update' }
+            ]
+        })
+        const restrictedStaff = await prisma.user.create({
+            data: {
+                tenantId: tenantBId,
+                email: `staff-nocats-${slugB}@example.com`,
+                role: 'staff',
+                passwordHash: 'x',
+                staffRoleId: restrictedRole.id
+            }
+        })
+        const restrictedToken = signAccessToken({
+            userId: restrictedStaff.id,
+            email: restrictedStaff.email,
+            role: restrictedStaff.role,
+            tenantId: restrictedStaff.tenantId
+        })
+
+        const slug = `no-cat-perm-${Date.now()}`
+        const csv = [
+            'slug,title,price,categorySlugs,categoryTitles',
+            `${slug},No Category Perm Product,10,brand-new-category-${Date.now()},Brand New Category`
+        ].join('\n')
+
+        const importRes = await request(app)
+            .post('/api/admin/products/import.csv')
+            .set('X-Forwarded-Host', hostB)
+            .set('Authorization', `Bearer ${restrictedToken}`)
+            .attach('file', Buffer.from(csv, 'utf8'), { filename: 'products.csv', contentType: 'text/csv' })
+
+        expect(importRes.status).toBe(200)
+        expect(importRes.body.created).toBe(1)
+        expect(
+            (importRes.body.warnings ?? []).some((w: any) => /Category not found in this store/i.test(w.message))
+        ).toBe(true)
+        expect(
+            (importRes.body.warnings ?? []).some((w: any) => /Created new categor/i.test(w.message))
+        ).toBe(false)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantBId, slug } })
+        expect(created).toBeTruthy()
+        expect(created?.categoryId).toBeNull()
+
+        await prisma.tenantStaffRolePermission.deleteMany({ where: { tenantId: tenantBId, roleId: restrictedRole.id } })
+    })
+
     it('imports images and normalizes tenant-scoped upload links', async () => {
         const prevPublicUrl = process.env.S3_PUBLIC_URL
         const prevPublicBucket = process.env.S3_PUBLIC_BUCKET_NAME
@@ -292,6 +407,192 @@ describe('Admin products bulk ops', () => {
         expect(warningsText).toMatch(/Ignoring unsupported columns/i)
         expect(warningsText).toMatch(/name_i18n/i)
         expect(warningsText).toMatch(/description_i18n/i)
+    })
+
+    it('exports a ZIP archive containing products.csv', async () => {
+        const res = await request(app)
+            .get('/api/admin/products/export.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .buffer(true)
+            .parse((response, callback) => {
+                const chunks: Buffer[] = []
+                response.on('data', (chunk: Buffer) => chunks.push(chunk))
+                response.on('end', () => callback(null, Buffer.concat(chunks)))
+            })
+
+        expect(res.status).toBe(200)
+        expect(String(res.headers['content-type'])).toContain('application/zip')
+
+        const zip = new AdmZip(res.body as Buffer)
+        const csvEntry = zip.getEntries().find((e) => e.entryName === 'products.csv')
+        expect(csvEntry).toBeTruthy()
+
+        const csvText = csvEntry!.getData().toString('utf8')
+        expect(csvText).toContain('id,title,slug')
+        expect(csvText).toContain('Bulk Product Updated')
+    })
+
+    it('rejects cross-tenant admin token for archive export', async () => {
+        const res = await request(app)
+            .get('/api/admin/products/export.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminBToken}`)
+
+        expect(res.status).toBe(403)
+    })
+
+    it('imports a ZIP archive, uploading bundled images and creating the product', async () => {
+        const slug = `zip-import-${Date.now()}`
+        const csv = [
+            'slug,title,price,images',
+            `${slug},Zip Imported Product,49.99,images/${slug}.png`
+        ].join('\n')
+
+        const zip = new AdmZip()
+        zip.addFile('products.csv', Buffer.from(csv, 'utf8'))
+        zip.addFile(`images/${slug}.png`, createTestPng())
+
+        const res = await request(app)
+            .post('/api/admin/products/import.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', zip.toBuffer(), { filename: 'archive.zip', contentType: 'application/zip' })
+
+        expect(res.status).toBe(200)
+        expect(res.body.errors?.length || 0).toBe(0)
+        expect(res.body.created).toBe(1)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantAId, slug } })
+        expect(created).toBeTruthy()
+
+        const images = (created as any)?.images as string[]
+        expect(images?.length).toBe(1)
+        // The bundled zip-relative reference must have been replaced by a real, tenant-scoped upload URL.
+        expect(images[0]).not.toBe(`images/${slug}.png`)
+        expect(images[0]).toContain(tenantAId)
+    })
+
+    it('rejects non-ZIP uploads on the archive import endpoint', async () => {
+        const res = await request(app)
+            .post('/api/admin/products/import.zip')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', Buffer.from('id,title\n', 'utf8'), { filename: 'not-a-zip.csv', contentType: 'text/csv' })
+
+        expect(res.status).toBe(400)
+    })
+
+    const parseNdjson = (text: string): any[] =>
+        text
+            .split('\n')
+            .map((line) => line.trim())
+            .filter(Boolean)
+            .map((line) => JSON.parse(line))
+
+    it('streams export progress before the final archive payload', async () => {
+        const res = await request(app)
+            .get('/api/admin/products/export.zip/stream')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .buffer(true)
+            .parse((response, callback) => {
+                let text = ''
+                response.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
+                response.on('end', () => callback(null, text))
+            })
+
+        expect(res.status).toBe(200)
+        expect(String(res.headers['content-type'])).toContain('application/x-ndjson')
+
+        const events = parseNdjson(res.body as unknown as string)
+        expect(events.some((e) => e.type === 'progress')).toBe(true)
+        const done = events.find((e) => e.type === 'done')
+        expect(done).toBeTruthy()
+        expect(done.filename).toBe('products-archive.zip')
+
+        const zip = new AdmZip(Buffer.from(done.dataBase64, 'base64'))
+        expect(zip.getEntries().some((e) => e.entryName === 'products.csv')).toBe(true)
+    })
+
+    it('streams import progress and a final summary for a ZIP archive', async () => {
+        const slug = `zip-stream-import-${Date.now()}`
+        const csv = ['slug,title,price,images', `${slug},Zip Stream Product,29.99,images/${slug}.png`].join('\n')
+
+        const zip = new AdmZip()
+        zip.addFile('products.csv', Buffer.from(csv, 'utf8'))
+        zip.addFile(`images/${slug}.png`, createTestPng())
+
+        const res = await request(app)
+            .post('/api/admin/products/import.zip/stream')
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .attach('file', zip.toBuffer(), { filename: 'archive.zip', contentType: 'application/zip' })
+            .buffer(true)
+            .parse((response, callback) => {
+                let text = ''
+                response.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
+                response.on('end', () => callback(null, text))
+            })
+
+        expect(res.status).toBe(200)
+        const events = parseNdjson(res.body as unknown as string)
+        expect(events.some((e) => e.type === 'progress' && e.phase === 'images')).toBe(true)
+        expect(events.some((e) => e.type === 'progress' && e.phase === 'rows')).toBe(true)
+
+        const done = events.find((e) => e.type === 'done')
+        expect(done).toBeTruthy()
+        expect(done.summary.created).toBe(1)
+
+        const created = await prisma.product.findFirst({ where: { tenantId: tenantAId, slug } })
+        expect(created).toBeTruthy()
+    })
+
+    it('reports granular progress across many products so large catalogs do not look frozen', async () => {
+        const batchSlug = `scale-${Date.now()}`
+        const batchIds: string[] = []
+        for (let i = 0; i < 25; i++) {
+            const p = await prisma.product.create({
+                data: {
+                    tenantId: tenantAId,
+                    title: `Scale Product ${i}`,
+                    slug: `${batchSlug}-${i}`,
+                    price: 10,
+                    stock: 1,
+                    isActive: true
+                }
+            })
+            batchIds.push(p.id)
+        }
+
+        const res = await request(app)
+            .get(`/api/admin/products/export.zip/stream?ids=${batchIds.join(',')}`)
+            .set('X-Forwarded-Host', hostA)
+            .set('Authorization', `Bearer ${adminAToken}`)
+            .buffer(true)
+            .parse((response, callback) => {
+                let text = ''
+                response.on('data', (chunk: Buffer) => { text += chunk.toString('utf8') })
+                response.on('end', () => callback(null, text))
+            })
+
+        expect(res.status).toBe(200)
+        const events = parseNdjson(res.body as unknown as string)
+        const progressEvents = events.filter((e) => e.type === 'progress')
+
+        // More than a single jump straight to 100% — the UI needs several updates to render
+        // a moving progress bar instead of appearing stuck.
+        expect(progressEvents.length).toBeGreaterThan(5)
+        expect(progressEvents[progressEvents.length - 1].processed).toBe(25)
+        expect(progressEvents.every((e) => e.total === 25)).toBe(true)
+
+        const done = events.find((e) => e.type === 'done')
+        expect(done).toBeTruthy()
+        const zip = new AdmZip(Buffer.from(done.dataBase64, 'base64'))
+        const csvText = zip.getEntries().find((e) => e.entryName === 'products.csv')!.getData().toString('utf8')
+        expect((csvText.match(/Scale Product/g) || []).length).toBe(25)
+
+        await prisma.product.deleteMany({ where: { tenantId: tenantAId, id: { in: batchIds } } })
     })
 
     it('bulk patches products and duplicates selected product', async () => {

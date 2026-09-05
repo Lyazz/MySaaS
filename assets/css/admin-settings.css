@@ -1,0 +1,94 @@
+/*
+ * Settings-page layout.
+ *
+ * The look of fields, buttons, toggle rows, focus rings and touch targets now
+ * lives once in `main.css` alongside the rest of the `.ui-*` kit — the legacy
+ * `.field-*` / `.settings-btn` / `.toggle-row` spellings are listed there as
+ * extra selectors so this screen keeps working while its markup migrates.
+ *
+ * What remains here is what is genuinely settings-only: the save-bar clearance
+ * and the grid/adornment layout its forms are built on.
+ *
+ * Directional values use logical properties throughout — the admin ships in
+ * Arabic and every one of these rules mirrors under `dir="rtl"`.
+ */
+
+.settings-page {
+  /* Clearance for the fixed save bar, so no form has to remember to add it. */
+  padding-block-end: 132px;
+}
+
+/* ── Field layout ───────────────────────────────────────────── */
+
+.settings-page .field-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(260px, 100%), 1fr));
+  gap: 20px;
+}
+
+.settings-page .field-grid-single {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.settings-page .field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Input + suffix pairs (store slug, order prefixes, unit labels). */
+.settings-page .field-input-group {
+  display: flex;
+  min-width: 0;
+}
+
+.settings-page .field-input-group-main {
+  min-width: 0;
+  border-start-end-radius: 0;
+  border-end-end-radius: 0;
+  border-inline-end: none;
+}
+
+.settings-page .field-input-group-suffix {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px;
+  background: var(--surface-3);
+  border: 1px solid var(--surface-border);
+  /* Matches the 8px of `rounded-lg` on `.ui-input`. */
+  border-start-end-radius: 0.5rem;
+  border-end-end-radius: 0.5rem;
+  font-size: 13px;
+  color: var(--text-tertiary);
+  font-family: ui-monospace, monospace;
+  white-space: nowrap;
+}
+
+.settings-page .field-suffix-text {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+}
+
+.settings-page .field-input-narrow {
+  max-width: 160px;
+}
+
+/* ── Toggle row modifiers ─────────────────────────────────────── */
+
+.settings-page .toggle-row-flex {
+  flex-wrap: wrap;
+}
+
+/* "Coming soon" marker on a row that is present but not yet switchable. */
+.settings-page .toggle-row-soon {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: var(--surface-3);
+  color: var(--text-tertiary);
+}

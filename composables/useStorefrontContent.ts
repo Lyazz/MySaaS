@@ -43,7 +43,8 @@ export function useStorefrontContent() {
     nav: {
       home: i18n.t('storefront.nav.home'),
       shop: i18n.t('storefront.nav.shop'),
-      contact: i18n.t('storefront.nav.contact')
+      contact: i18n.t('storefront.nav.contact'),
+      categories: i18n.t('storefront.nav.categories')
     },
     cart: {
       label: i18n.t('storefront.cart.label'),
@@ -77,7 +78,6 @@ export function useStorefrontContent() {
     },
     checkout: {
       title: i18n.t('storefront.checkout.title'),
-      orderSummaryTitle: i18n.t('storefront.checkout.orderSummaryTitle'),
       disabled: i18n.t('storefront.checkout.disabled'),
       disabledShort: i18n.t('storefront.checkout.disabledShort'),
       required: i18n.t('storefront.checkout.required'),
@@ -87,7 +87,23 @@ export function useStorefrontContent() {
       coupon: {
         title: i18n.t('storefront.checkout.coupon.title'),
         badge: i18n.t('storefront.checkout.coupon.badge'),
-        placeholder: i18n.t('storefront.checkout.coupon.placeholder')
+        placeholder: i18n.t('storefront.checkout.coupon.placeholder'),
+        checking: i18n.t('storefront.checkout.coupon.checking'),
+        remove: i18n.t('storefront.checkout.coupon.remove'),
+        invalid: i18n.t('storefront.checkout.coupon.invalid'),
+        errors: {
+          PROMO_CODE_INVALID: i18n.t('storefront.checkout.coupon.invalid'),
+          PROMO_INACTIVE: i18n.t('storefront.checkout.coupon.invalid'),
+          PROMO_NOT_STARTED: i18n.t('storefront.checkout.coupon.errors.notStarted'),
+          PROMO_EXPIRED: i18n.t('storefront.checkout.coupon.errors.expired'),
+          PROMO_USAGE_LIMIT_REACHED: i18n.t('storefront.checkout.coupon.errors.usageLimit'),
+          PROMO_CUSTOMER_LIMIT_REACHED: i18n.t('storefront.checkout.coupon.errors.customerLimit'),
+          PROMO_NOT_APPLICABLE: i18n.t('storefront.checkout.coupon.errors.notApplicable'),
+          PROMO_MIN_ORDER_NOT_MET: (amount: string | number, currency: string) =>
+            i18n.t('storefront.checkout.coupon.errors.minOrder', { amount, currency })
+        },
+        freeShipping: i18n.t('storefront.checkout.coupon.freeShipping'),
+        applied: (code: string) => i18n.t('storefront.checkout.coupon.applied', { code })
       },
       summary: {
         deliveryOption: i18n.t('storefront.checkout.summary.deliveryOption'),
@@ -103,7 +119,8 @@ export function useStorefrontContent() {
         phoneRequired: i18n.t('storefront.checkout.errors.phoneRequired'),
         deliveryRequired: i18n.t('storefront.checkout.errors.deliveryRequired'),
         requiredFields: i18n.t('storefront.checkout.errors.requiredFields'),
-        submitFailed: i18n.t('storefront.checkout.errors.submitFailed')
+        submitFailed: i18n.t('storefront.checkout.errors.submitFailed'),
+        shippingUnavailable: i18n.t('storefront.checkout.errors.shippingUnavailable')
       },
       actions: {
         returnToCart: i18n.t('storefront.checkout.actions.returnToCart'),
@@ -151,6 +168,7 @@ export function useStorefrontContent() {
           pickupPoint: i18n.t('storefront.checkout.delivery.description.pickupPoint'),
           storePickup: i18n.t('storefront.checkout.delivery.description.storePickup')
         },
+        noPickupPoints: i18n.t('storefront.checkout.delivery.noPickupPoints'),
         provider: {
           self: i18n.t('storefront.checkout.delivery.provider.self'),
           storePickup: i18n.t('storefront.checkout.delivery.provider.storePickup'),
@@ -211,6 +229,7 @@ export function useStorefrontContent() {
     product: {
       addedToCart: (title: string) => i18n.t('storefront.product.addedToCart', { title }),
       inStock: i18n.t('storefront.product.inStock'),
+      lowStock: i18n.t('storefront.product.lowStock'),
       perUnit: i18n.t('storefront.product.perUnit'),
       detailsTitle: i18n.t('storefront.product.detailsTitle'),
       descriptionTitle: i18n.t('storefront.product.descriptionTitle'),
@@ -224,7 +243,8 @@ export function useStorefrontContent() {
       stock: {
         unavailable: i18n.t('storefront.productForm.stock.unavailable'),
         outOfStock: i18n.t('storefront.productForm.stock.outOfStock'),
-        lowStock: (count: number) => i18n.t('storefront.productForm.stock.lowStock', { count })
+        lowStock: (count: number) => i18n.t('storefront.productForm.stock.lowStock', { count }),
+        selectOptions: i18n.t('storefront.productForm.stock.selectOptions')
       },
       cod: {
         title: i18n.t('storefront.productForm.cod.title'),
@@ -233,8 +253,10 @@ export function useStorefrontContent() {
         submitting: i18n.t('storefront.productForm.cod.submitting')
       },
       totalPrice: i18n.t('storefront.productForm.totalPrice'),
+      chooseOptionsPrompt: i18n.t('storefront.productForm.chooseOptionsPrompt'),
       errors: {
-        outOfStockVariant: i18n.t('storefront.productForm.errors.outOfStockVariant')
+        outOfStockVariant: i18n.t('storefront.productForm.errors.outOfStockVariant'),
+        selectOptions: i18n.t('storefront.productForm.errors.selectOptions')
       }
     },
     toasts: {
@@ -263,7 +285,10 @@ export function useStorefrontContent() {
       }
     },
     search: {
-      placeholder: i18n.t('storefront.search.placeholder')
+      placeholder: i18n.t('storefront.search.placeholder'),
+      searching: i18n.t('storefront.search.searching'),
+      noResults: i18n.t('storefront.search.noResults'),
+      seeMore: i18n.t('storefront.search.seeMore')
     },
     wishlist: {
       title: i18n.t('storefront.wishlist.title'),

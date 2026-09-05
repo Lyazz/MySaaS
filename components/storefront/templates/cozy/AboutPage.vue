@@ -2,58 +2,46 @@
 const tenant = useState<any>('tenant')
 const storeSettings = useState<any>('storeSettings')
 const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
+
+useTenantSeo({
+  title: t('storefront.pages.about.seo.title', { tenant: tenantName.value }),
+  description: t('storefront.pages.about.seo.description', { tenant: tenantName.value })
+})
+
+const aboutBody = computed(() => storeSettings.value?.description || t('storefront.pages.about.placeholder'))
 </script>
 
 <template>
-  <div class="min-h-[80vh] px-4 py-12">
-    <div class="max-w-4xl mx-auto text-center">
-        
-        <div class="mb-12 relative inline-block">
-            <div class="absolute inset-0 bg-brand-100 rounded-full filter blur-xl opacity-50"></div>
-            <h1 class="relative font-cozy font-black text-6xl md:text-8xl text-slate-800 mb-4 tracking-tight">
-                {{ t('storefront.templates.cozy.about.title') }}
-            </h1>
+  <div class="ed-theme">
+    <div class="max-w-[1180px] mx-auto px-4 sm:px-6 lg:px-10 py-14 md:py-24">
+      <div class="grid lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+        <!-- Text -->
+        <div class="lg:col-span-7">
+          <p class="ed-kicker mb-6">{{ t('storefront.footer.aboutUs') }}</p>
+          <h1 class="ed-display text-4xl md:text-[3.5rem] leading-[1.06] text-[#262019]">
+            {{ t('storefront.pages.about.heading', { tenant: tenantName }) }}
+          </h1>
+          <span class="block h-px w-24 bg-[#B8532E] my-8" />
+          <p class="ed-dropcap text-[17px] leading-[1.75] text-[#4A4038] max-w-xl">
+            {{ aboutBody }}
+          </p>
+          <NuxtLink to="/products" class="ed-btn-solid mt-10">
+            {{ t('storefront.shop.allProducts') }}
+            <Icon name="lucide:arrow-right" class="w-4 h-4 rtl:rotate-180" />
+          </NuxtLink>
         </div>
 
-        <div class="bg-white p-8 md:p-16 rounded-[4rem] shadow-soft mb-16 relative overflow-hidden">
-            <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-brand-200 via-brand-100 to-brand-200"></div>
-            
-            <p class="font-medium text-lg md:text-xl text-slate-600 leading-loose mb-8">
-                {{ storeSettings?.description || t('storefront.templates.cozy.about.descriptionFallback') }}
-            </p>
-            
-            <div class="w-24 h-24 rounded-full bg-slate-100 mx-auto mb-4 overflow-hidden">
-                 <img src="/blank.svg?v=2" class="w-full h-full object-cover grayscale opacity-80" />
+        <!-- Marque plate -->
+        <div class="lg:col-span-5">
+          <div class="bg-[#FBF8F2] border border-[#DAD2C4] p-2">
+            <div class="aspect-[4/5] bg-[#EFE8DA] flex items-center justify-center relative overflow-hidden">
+              <span class="ed-display text-[6rem] md:text-[8rem] text-[#C4B8A4] leading-none select-none">{{ tenantName.charAt(0) }}</span>
+              <span class="absolute bottom-3 start-3 ed-ui text-[10px] uppercase tracking-[0.2em] text-[#8A7E6E]">Est. {{ new Date().getFullYear() }}</span>
             </div>
-            <p class="font-bold text-slate-400 text-sm uppercase tracking-widest">{{ t('storefront.templates.cozy.about.founders') }}</p>
+          </div>
         </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div class="bg-brand-50 p-8 rounded-[3rem] text-center hover:shadow-soft transition-all">
-                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-brand-500 shadow-sm">
-                    <Icon name="lucide:leaf" class="w-8 h-8" />
-                </div>
-                <h3 class="font-bold text-slate-700 mb-2">{{ t('storefront.templates.cozy.about.values.sustainable.title') }}</h3>
-                <p class="text-sm text-slate-500">{{ t('storefront.templates.cozy.about.values.sustainable.description') }}</p>
-            </div>
-            
-            <div class="bg-brand-50 p-8 rounded-[3rem] text-center hover:shadow-soft transition-all transform md:-translate-y-4">
-                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-brand-500 shadow-sm">
-                    <Icon name="lucide:heart" class="w-8 h-8" />
-                </div>
-                <h3 class="font-bold text-slate-700 mb-2">{{ t('storefront.templates.cozy.about.values.ethical.title') }}</h3>
-                <p class="text-sm text-slate-500">{{ t('storefront.templates.cozy.about.values.ethical.description') }}</p>
-            </div>
-
-            <div class="bg-brand-50 p-8 rounded-[3rem] text-center hover:shadow-soft transition-all">
-                <div class="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-brand-500 shadow-sm">
-                    <Icon name="lucide:smile" class="w-8 h-8" />
-                </div>
-                <h3 class="font-bold text-slate-700 mb-2">{{ t('storefront.templates.cozy.about.values.joyful.title') }}</h3>
-                <p class="text-sm text-slate-500">{{ t('storefront.templates.cozy.about.values.joyful.description') }}</p>
-            </div>
-        </div>
-
+      </div>
     </div>
   </div>
 </template>

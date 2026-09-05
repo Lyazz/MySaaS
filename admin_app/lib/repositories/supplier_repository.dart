@@ -2,9 +2,11 @@ import 'package:uuid/uuid.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../models/supplier.dart';
+import 'license_guard.dart';
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../services/sync_service.dart';
+import '../services/tenant_mode_service.dart';
 
 class SupplierRepository {
   final ApiService _apiService;
@@ -13,9 +15,15 @@ class SupplierRepository {
 
   SupplierRepository(this._apiService);
 
+  String get _tid => TenantModeService().activeTenantId;
+
   Future<List<Supplier>> getSuppliers({bool forceRefresh = false}) async {
     final db = await _dbService.database;
-    final localData = await db.query('suppliers');
+    final localData = await db.query(
+      'suppliers',
+      where: 'tenantId = ?',
+      whereArgs: [_tid],
+    );
 
     final localSuppliers = localData
         .map(
@@ -39,10 +47,15 @@ class SupplierRepository {
             .toList();
 
         await db.transaction((txn) async {
-          await txn.delete('suppliers', where: "syncStatus = 'synced'");
+          await txn.delete(
+            'suppliers',
+            where: "tenantId = ? AND syncStatus = 'synced'",
+            whereArgs: [_tid],
+          );
           for (var s in remoteSuppliers) {
             await txn.insert('suppliers', {
               'id': s.id,
+              'tenantId': _tid,
               'name': s.name,
               'phone': s.phone,
               'email': s.email,
@@ -53,16 +66,14 @@ class SupplierRepository {
           }
         });
         return remoteSuppliers;
-      } catch (e) {
-        print('Background supplier fetch failed: \$e');
-      }
+      } catch (_) {}
     }
     return localSuppliers;
   }
 
   Future<Supplier> createSupplier(Supplier supplier) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('supplier', 'create'));
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     final id = const Uuid().v4();
     final newSupplier = Supplier(
@@ -76,12 +87,13 @@ class SupplierRepository {
 
     await db.insert('suppliers', {
       'id': newSupplier.id,
+      'tenantId': _tid,
       'name': newSupplier.name,
       'phone': newSupplier.phone,
       'email': newSupplier.email,
       'address': newSupplier.address,
       'notes': newSupplier.notes,
-      'syncStatus': online ? 'synced' : 'pending',
+      'syncStatus': SyncStatus.pending.name,
     });
 
     await _syncService.enqueueOperation(
@@ -94,8 +106,8 @@ class SupplierRepository {
   }
 
   Future<void> updateSupplier(Supplier supplier) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('supplier', 'update'));
     final db = await _dbService.database;
-    final online = await _syncService.isOnline;
 
     await db.update(
       'suppliers',
@@ -105,10 +117,10 @@ class SupplierRepository {
         'email': supplier.email,
         'address': supplier.address,
         'notes': supplier.notes,
-        'syncStatus': online ? 'synced' : 'pending',
+        'syncStatus': SyncStatus.pending.name,
       },
-      where: 'id = ?',
-      whereArgs: [supplier.id],
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [supplier.id, _tid],
     );
 
     await _syncService.enqueueOperation(
@@ -119,8 +131,14 @@ class SupplierRepository {
   }
 
   Future<void> deleteSupplier(String id) async {
+    LicenseWritePolicy.ensureAllowed(const WriteIntent('supplier', 'delete'));
     final db = await _dbService.database;
-    await db.delete('suppliers', where: 'id = ?', whereArgs: [id]);
+    await db.update(
+      'suppliers',
+      {'syncStatus': SyncStatus.pending.name},
+      where: 'id = ? AND tenantId = ?',
+      whereArgs: [id, _tid],
+    );
 
     await _syncService.enqueueOperation(
       entityType: 'supplier',

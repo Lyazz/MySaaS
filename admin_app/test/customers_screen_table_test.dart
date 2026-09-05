@@ -46,9 +46,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          customersProvider.overrideWith(
-            () => CustomersNotifier(initialState),
-          ),
+          customersProvider.overrideWith(() => CustomersNotifier(initialState)),
         ],
         child: buildLocalizedTestApp(
           home: const CustomersScreen(autoFetch: false),
@@ -69,6 +67,6 @@ void main() {
     expect(state.customers.first.name, 'Ada Lovelace');
 
     expect(find.text('Ada Lovelace'), findsOneWidget);
-    expect(find.widgetWithText(AppButton, 'View'), findsOneWidget);
+    expect(find.byTooltip('View'), findsOneWidget);
   });
 }

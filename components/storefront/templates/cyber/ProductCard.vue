@@ -30,6 +30,10 @@ const displayPrice = computed(() => {
     return originalPrice.value
 })
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const { format: formatPrice } = useCurrency()
@@ -73,11 +77,15 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: Number(props.product.price),
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: primaryImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Added to cart', 'Product added to your cart')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -134,6 +142,10 @@ async function handleAddToCart() {
         >
           Out of Stock
         </span>
+        <span
+          v-if="isClearanceEligible"
+          class="text-xs font-bold text-amber-300 bg-amber-500/20 px-2 py-1 rounded-full border border-amber-500/30"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
     </div>
 
@@ -149,7 +161,7 @@ async function handleAddToCart() {
       <button
         type="button"
         class="p-3 rounded-full bg-purple-900/50 border border-purple-500/30 hover:bg-pink-500/20 hover:border-pink-500/50 transition-all"
-        title="Quick View"
+        :title="storefrontContent.actions.quickView"
         @click.prevent="emit('quick-view', product)"
       >
         <Icon name="lucide:eye" class="w-5 h-5 text-purple-300" />
@@ -182,23 +194,29 @@ async function handleAddToCart() {
       <!-- Quick View Button -->
       <StorefrontSharedFavoriteButton
         :product-id="product.id"
-        button-class="absolute bottom-4 left-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+        button-class="absolute bottom-4 start-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
         icon-class="w-5 h-5"
         inactive-class="text-white"
         active-class="text-pink-400"
       />
       <button
         type="button"
-        class="absolute bottom-4 right-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
-        title="Quick View"
+        class="absolute bottom-4 end-4 p-3 rounded-full bg-white/10 backdrop-blur-md border border-white/20 hover:bg-pink-500/30 hover:border-pink-500/50 transition-all opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0"
+        :title="storefrontContent.actions.quickView"
         @click.prevent="emit('quick-view', product)"
       >
         <Icon name="lucide:eye" class="w-5 h-5 text-white" />
       </button>
 
       <!-- Stock Badge -->
-      <div v-if="!isInStock" class="absolute top-3 left-3 px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
-        Out of Stock
+      <div class="absolute top-3 start-3 flex flex-col gap-2 items-start z-10">
+        <div v-if="!isInStock" class="px-3 py-1 bg-red-500/90 text-white text-xs font-bold rounded-full">
+          Out of Stock
+        </div>
+        <span
+          v-if="isClearanceEligible"
+          class="px-3 py-1 bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold rounded-full"
+        >{{ t('storefront.clearance.badge') }}</span>
       </div>
     </NuxtLink>
 

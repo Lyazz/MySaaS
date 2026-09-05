@@ -4,7 +4,7 @@
 1) Given Tenant A and Tenant B,
    - Tenant A cannot read/write any Tenant B products/orders/users.
 2) Host resolution:
-   - tenantA.platform.com resolves tenant A
+   - tenantA.swekly.com resolves tenant A
    - customdomainA.com resolves tenant A
 
 ## Storefront

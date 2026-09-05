@@ -16,6 +16,7 @@ export type StaffCrudAction = 'create' | 'read' | 'update' | 'delete'
 
 export const STAFF_RESOURCES = [
     'dashboard',
+    'statistics',
     'products',
     'categories',
     'variants',
@@ -33,6 +34,7 @@ export const STAFF_RESOURCES = [
     'contactInfos',
     'integrations',
     'metaPixels',
+    'promoCodes',
     'pos'
 ] as const
 

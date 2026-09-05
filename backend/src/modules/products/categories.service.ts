@@ -32,6 +32,12 @@ const normalizeImageUrl = (value: unknown): string | null | undefined => {
     return trimmed
 }
 
+const normalizeVisibility = (value: unknown): 'LISTED' | 'UNLISTED' | undefined => {
+    if (value === undefined) return undefined
+    if (value === 'LISTED' || value === 'UNLISTED') return value
+    throw new Error('Invalid visibility')
+}
+
 export class CategoriesService {
     private orderCategoriesByHierarchy(categories: any[]): any[] {
         const byParent = new Map<string | null, any[]>()
@@ -164,7 +170,7 @@ export class CategoriesService {
 
     async listPublic(tenantId: string) {
         const categories = await prisma.category.findMany({
-            where: { tenantId },
+            where: { tenantId, visibility: 'LISTED' },
             include: {
                 parent: { select: { id: true, title: true, slug: true } },
                 _count: { select: { products: true, productLinks: true, children: true } }
@@ -174,6 +180,20 @@ export class CategoriesService {
 
         const mapped = categories.map((category) => this.mapCategory(category))
         return this.orderCategoriesByHierarchy(mapped)
+    }
+
+    /// Single category for its own storefront page. Returns the category even when
+    /// it is UNLISTED, so a direct link keeps working.
+    async getPublicBySlug(tenantId: string, slug: string) {
+        const category = await prisma.category.findFirst({
+            where: { tenantId, slug },
+            include: {
+                parent: { select: { id: true, title: true, slug: true } },
+                _count: { select: { products: true, productLinks: true, children: true } }
+            }
+        })
+
+        return category ? this.mapCategory(category) : null
     }
 
     async isSlugAvailable(tenantId: string, slug: string, excludeCategoryId?: string) {
@@ -191,10 +211,24 @@ export class CategoriesService {
 
     async createCategory(
         tenantId: string,
-        data: { title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown }
+        data: { id?: unknown; title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown; visibility?: unknown }
     ) {
         if (!data.title || !data.slug) {
             throw new Error('Title and Slug are required')
+        }
+        const visibility = normalizeVisibility(data.visibility)
+
+        const clientId = typeof data.id === 'string' ? data.id.trim() : ''
+        if (data.id !== undefined && (!clientId || clientId.length > 100)) {
+            throw new Error('Invalid id')
+        }
+        if (clientId) {
+            const existingById = await prisma.category.findUnique({
+                where: { id: clientId },
+                select: { tenantId: true }
+            })
+            if (existingById?.tenantId === tenantId) return await this.getCategory(tenantId, clientId)
+            if (existingById) throw new Error('Invalid id')
         }
 
         const existing = await prisma.category.findFirst({
@@ -209,11 +243,13 @@ export class CategoriesService {
 
         const created = await prisma.category.create({
             data: {
+                ...(clientId ? { id: clientId } : {}),
                 tenantId,
                 title: data.title,
                 slug: data.slug,
                 imageUrl: imageUrl ?? null,
-                parentId: parentId ?? null
+                parentId: parentId ?? null,
+                visibility: visibility ?? 'LISTED'
             },
             include: {
                 parent: { select: { id: true, title: true, slug: true } },
@@ -227,7 +263,7 @@ export class CategoriesService {
     async updateCategory(
         tenantId: string,
         categoryId: string,
-        data: { title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown }
+        data: { title?: string; slug?: string; imageUrl?: unknown; parentId?: unknown; visibility?: unknown }
     ) {
         const category = await prisma.category.findFirst({
             where: { id: categoryId, tenantId }
@@ -235,6 +271,7 @@ export class CategoriesService {
         if (!category) {
             throw new Error('Category not found')
         }
+        const visibility = normalizeVisibility(data.visibility)
 
         if (data.slug && data.slug !== category.slug) {
             const slugExists = await prisma.category.findFirst({
@@ -254,7 +291,8 @@ export class CategoriesService {
                 title: data.title ?? category.title,
                 slug: data.slug ?? category.slug,
                 imageUrl: imageUrl,
-                parentId
+                parentId,
+                visibility: visibility ?? undefined
             }
         })
 

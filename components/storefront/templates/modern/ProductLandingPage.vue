@@ -82,6 +82,16 @@ const images = computed(() => {
 const cartImage = computed(() => images.value[0]);
 
 // Price Formatting handled by useCurrency
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
@@ -90,7 +100,7 @@ const cartImage = computed(() => images.value[0]);
   >
     <!-- Description Section (Raw & Full Width & No Margins) -->
     <div class="w-full mb-8 animate-fade-in-up">
-      <SafeRichText
+      <CommonSafeRichText
         v-if="product?.description"
         class="prose prose-lg md:prose-xl prose-img:rounded-xl prose-img:w-full prose-img:shadow-sm max-w-none text-slate-800"
         :html="product.description"
@@ -159,8 +169,11 @@ const cartImage = computed(() => images.value[0]);
 </template>
 
 <style scoped>
-.animate-fade-in-up {
-  animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+/* `forwards` from `opacity: 0` hides SSR content until the animation runs. */
+@media (prefers-reduced-motion: no-preference) {
+    .animate-fade-in-up {
+        animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
 }
 
 @keyframes fadeInUp {

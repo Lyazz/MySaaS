@@ -1,121 +1,54 @@
 <template>
-  <div class="rounded-2xl overflow-hidden" style="background: var(--surface-1); border: 1px solid var(--surface-border)">
-    <div class="p-6" style="border-bottom: 1px solid var(--surface-border); background: var(--surface-2)">
-      <div class="flex items-center justify-between">
-        <div>
-           <h3 class="text-lg font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.title') }}</h3>
-           <p class="mt-1 text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.subtitle') }}</p>
+  <div class="feature-list">
+    <div
+      v-for="entry in entries"
+      :key="entry.key"
+      class="feature-card"
+      :class="{ 'is-enabled': modelValue[entry.key].enabled }"
+    >
+      <button
+        type="button"
+        class="feature-head"
+        @click="toggle(entry.key)"
+      >
+        <div class="feature-head-left">
+          <div class="feature-icon" :class="{ 'is-active': modelValue[entry.key].enabled }">
+            <Icon :name="entry.icon" class="w-4 h-4" />
+          </div>
+          <div class="feature-titles">
+            <p class="feature-title">{{ t(entry.titleKey) }}</p>
+            <p class="feature-subtitle">{{ t(entry.subtitleKey) }}</p>
+          </div>
         </div>
-      </div>
-    </div>
+        <div class="feature-head-right" @click.stop>
+          <BaseToggle
+            v-model="modelValue[entry.key].enabled"
+            :sr-label="t(entry.toggleKey)"
+          />
+        </div>
+      </button>
 
-    <div class="p-6 space-y-6">
-      
-      <!-- Browse by category -->
-      <div class="rounded-xl transition-all duration-300" :style="modelValue.browseByCategory.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
-        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.browseByCategory.enabled = !modelValue.browseByCategory.enabled" :style="modelValue.browseByCategory.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.browseByCategory.enabled ? '[background:rgba(var(--brand-rgb)/0.15)] [color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="!modelValue.browseByCategory.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
-               <Icon name="lucide:layout-grid" class="w-5 h-5" />
-            </div>
-            <div>
-              <p class="text-base font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.browseByCategory.title') }}</p>
-              <p class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.browseByCategory.subtitle') }}</p>
-            </div>
-          </div>
-          <BaseToggle v-model="modelValue.browseByCategory.enabled" :sr-label="t('admin.homepageSettingsForm.sections.browseByCategory.toggle')" @click.stop/>
-        </div>
-        
-        <!-- Expanded Settings -->
-        <div v-show="modelValue.browseByCategory.enabled" class="p-5 rounded-b-xl animate-fadeIn" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-             <BaseInput 
-                v-model="modelValue.browseByCategory.eyebrow" 
-                label="Eyebrow Text" 
-                placeholder="e.g. Collections" 
-             />
-             <BaseInput 
-                v-model="modelValue.browseByCategory.title" 
-                label="Section Title" 
-                placeholder="e.g. Browse by Category" 
-             />
-          </div>
-        </div>
-      </div>
-
-      <!-- New arrivals -->
-      <div class="rounded-xl transition-all duration-300" :style="modelValue.newArrivals.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
-        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.newArrivals.enabled = !modelValue.newArrivals.enabled" :style="modelValue.newArrivals.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.newArrivals.enabled ? '[background:rgba(var(--brand-rgb)/0.15)] [color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="!modelValue.newArrivals.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
-               <Icon name="lucide:sparkles" class="w-5 h-5" />
-            </div>
-            <div>
-              <p class="text-base font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.newArrivals.title') }}</p>
-              <p class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.newArrivals.subtitle') }}</p>
-            </div>
-          </div>
-          <BaseToggle v-model="modelValue.newArrivals.enabled" :sr-label="t('admin.homepageSettingsForm.sections.newArrivals.toggle')" @click.stop/>
-        </div>
-
-        <!-- Expanded Settings -->
-        <div v-show="modelValue.newArrivals.enabled" class="p-5 rounded-b-xl animate-fadeIn" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <BaseInput 
-                v-model="modelValue.newArrivals.eyebrow" 
-                label="Eyebrow Text" 
-                placeholder="e.g. New Arrivals" 
-             />
-             <BaseInput 
-                v-model="modelValue.newArrivals.title" 
-                label="Section Title" 
-                placeholder="e.g. Trending Now" 
-             />
-             <BaseInput 
-                v-model.number="modelValue.newArrivals.limit" 
-                type="number"
-                label="Number of Products" 
-                min="2" max="12"
-             />
-          </div>
-        </div>
-      </div>
-
-      <!-- Best sellers -->
-      <div class="rounded-xl transition-all duration-300" :style="modelValue.bestSellers.enabled ? 'border: 1px solid rgba(var(--brand-rgb) / 0.4); background: var(--surface-1)' : 'border: 1px solid var(--surface-border); background: var(--surface-2)'">
-        <div class="p-5 flex items-center justify-between gap-4 cursor-pointer select-none" @click="modelValue.bestSellers.enabled = !modelValue.bestSellers.enabled" :style="modelValue.bestSellers.enabled ? 'background: rgba(var(--brand-rgb) / 0.08); border-bottom: 1px solid rgba(var(--brand-rgb) / 0.2); border-radius: 0.75rem 0.75rem 0 0' : ''">
-          <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-lg flex items-center justify-center" :class="modelValue.bestSellers.enabled ? '[background:rgba(var(--brand-rgb)/0.15)] [color:rgba(var(--brand-rgb)/0.85)]' : ''" :style="!modelValue.bestSellers.enabled ? 'background: var(--surface-3); color: var(--text-muted)' : ''">
-               <Icon name="lucide:award" class="w-5 h-5" />
-            </div>
-            <div>
-              <p class="text-base font-bold" style="color: var(--text-primary)">{{ t('admin.homepageSettingsForm.sections.bestSellers.title') }}</p>
-              <p class="text-sm" style="color: var(--text-tertiary)">{{ t('admin.homepageSettingsForm.sections.bestSellers.subtitle') }}</p>
-            </div>
-          </div>
-          <BaseToggle v-model="modelValue.bestSellers.enabled" :sr-label="t('admin.homepageSettingsForm.sections.bestSellers.toggle')" @click.stop/>
-        </div>
-
-        <!-- Expanded Settings -->
-        <div v-show="modelValue.bestSellers.enabled" class="p-5 rounded-b-xl animate-fadeIn" style="background: var(--surface-1); border-top: 1px solid var(--surface-border)">
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-             <BaseInput 
-                v-model="modelValue.bestSellers.eyebrow" 
-                label="Eyebrow Text" 
-                placeholder="e.g. Best Sellers" 
-             />
-             <BaseInput 
-                v-model="modelValue.bestSellers.title" 
-                label="Section Title" 
-                placeholder="e.g. Most Popular" 
-             />
-             <BaseInput 
-                v-model.number="modelValue.bestSellers.limit" 
-                type="number"
-                label="Number of Products" 
-                min="2" max="12"
-             />
-          </div>
+      <div v-show="modelValue[entry.key].enabled" class="feature-body">
+        <div :class="entry.fields === 3 ? 'feature-grid-3' : 'feature-grid-2'">
+          <BaseInput
+            v-model="modelValue[entry.key].eyebrow"
+            :label="t('admin.homepageSettingsForm.fields.eyebrow') || 'Eyebrow text'"
+            :placeholder="entry.eyebrowPlaceholder"
+          />
+          <BaseInput
+            v-model="modelValue[entry.key].title"
+            :label="t('admin.homepageSettingsForm.fields.sectionTitle') || 'Section title'"
+            :placeholder="entry.titlePlaceholder"
+          />
+          <BaseInput
+            v-if="entry.fields === 3"
+            :model-value="getLimit(entry.key)"
+            type="number"
+            :label="t('admin.homepageSettingsForm.fields.numberOfProducts') || 'Number of products'"
+            min="2"
+            max="12"
+            @update:model-value="(v) => setLimit(entry.key, v)"
+          />
         </div>
       </div>
     </div>
@@ -123,7 +56,6 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseToggle from '~/components/ui/BaseToggle.vue'
 import type { StorefrontHomeConfig } from '~/shared/storefront/homepage'
@@ -137,15 +69,188 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n({ useScope: 'global' })
+
+type SectionKey = keyof StorefrontHomeConfig['sections']
+
+interface Entry {
+  key: SectionKey
+  icon: string
+  titleKey: string
+  subtitleKey: string
+  toggleKey: string
+  eyebrowPlaceholder: string
+  titlePlaceholder: string
+  fields: 2 | 3
+}
+
+const entries: Entry[] = [
+  {
+    key: 'browseByCategory',
+    icon: 'lucide:layout-grid',
+    titleKey: 'admin.homepageSettingsForm.sections.browseByCategory.title',
+    subtitleKey: 'admin.homepageSettingsForm.sections.browseByCategory.subtitle',
+    toggleKey: 'admin.homepageSettingsForm.sections.browseByCategory.toggle',
+    eyebrowPlaceholder: 'Collections',
+    titlePlaceholder: 'Browse by Category',
+    fields: 2
+  },
+  {
+    key: 'newArrivals',
+    icon: 'lucide:sparkles',
+    titleKey: 'admin.homepageSettingsForm.sections.newArrivals.title',
+    subtitleKey: 'admin.homepageSettingsForm.sections.newArrivals.subtitle',
+    toggleKey: 'admin.homepageSettingsForm.sections.newArrivals.toggle',
+    eyebrowPlaceholder: 'New Arrivals',
+    titlePlaceholder: 'Trending Now',
+    fields: 3
+  },
+  {
+    key: 'bestSellers',
+    icon: 'lucide:award',
+    titleKey: 'admin.homepageSettingsForm.sections.bestSellers.title',
+    subtitleKey: 'admin.homepageSettingsForm.sections.bestSellers.subtitle',
+    toggleKey: 'admin.homepageSettingsForm.sections.bestSellers.toggle',
+    eyebrowPlaceholder: 'Best Sellers',
+    titlePlaceholder: 'Most Popular',
+    fields: 3
+  }
+]
+
+function toggle(key: SectionKey) {
+  const next = { ...props.modelValue, [key]: { ...props.modelValue[key], enabled: !props.modelValue[key].enabled } }
+  emit('update:modelValue', next)
+}
+
+function getLimit(key: SectionKey): number {
+  const section = props.modelValue[key] as { limit?: number }
+  return section.limit ?? 6
+}
+
+function setLimit(key: SectionKey, value: unknown) {
+  const num = typeof value === 'number' ? value : Number(value)
+  if (Number.isNaN(num)) return
+  const target = props.modelValue[key] as { limit?: number }
+  target.limit = num
+}
 </script>
 
 <style scoped>
-.animate-fadeIn {
-  animation: fadeIn 0.3s ease-out forwards;
+.feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(-5px); }
+.feature-card {
+  background: var(--surface-1);
+  border: 1px solid var(--surface-border);
+  border-radius: 12px;
+  overflow: hidden;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.feature-card.is-enabled {
+  border-color: color-mix(in srgb, var(--surface-border) 30%, var(--text-secondary));
+}
+
+.feature-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 14px 16px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  gap: 14px;
+  transition: background 0.15s ease;
+}
+
+.feature-head:hover {
+  background: var(--nav-hover-bg);
+}
+
+.feature-card.is-enabled .feature-head {
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.feature-head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.feature-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+}
+
+.feature-icon.is-active {
+  background: color-mix(in srgb, var(--brand) 18%, transparent);
+  color: var(--brand);
+}
+
+.feature-titles {
+  min-width: 0;
+}
+
+.feature-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-primary);
+  letter-spacing: -0.01em;
+}
+
+.feature-subtitle {
+  margin-top: 2px;
+  font-size: 11.5px;
+  color: var(--text-tertiary);
+}
+
+.feature-head-right {
+  flex-shrink: 0;
+}
+
+.feature-body {
+  padding: 16px;
+  background: var(--surface-2);
+  animation: fadeSlide 0.18s ease-out forwards;
+}
+
+.feature-grid-2,
+.feature-grid-3 {
+  display: grid;
+  gap: 12px;
+}
+
+.feature-grid-2 {
+  grid-template-columns: 1fr 1fr;
+}
+
+.feature-grid-3 {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+@media (max-width: 720px) {
+  .feature-grid-2,
+  .feature-grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(-4px); }
   to { opacity: 1; transform: translateY(0); }
 }
 </style>

@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const emit = defineEmits(['update:selectedOptions']);
 const { format: formatPrice } = useCurrency();
+const storefrontContent = useStorefrontContent();
 
 const setOption = (optionId: string, valueId: string) => {
   emit('update:selectedOptions', {
@@ -49,6 +50,20 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   if (!isOptionValueUnavailable(optionId, valueId))
     setOption(optionId, valueId);
 };
+
+const { inviteTick } = useVariantSelectionInvite()
+const optionNudge = ref(false)
+const hasUnselectedOptions = computed(() =>
+  Array.isArray(props.product?.options) &&
+  props.product.options.some((o: any) => !props.selectedOptions?.[o.id])
+)
+watch(inviteTick, () => {
+  optionNudge.value = false
+  setTimeout(() => {
+    optionNudge.value = true
+    setTimeout(() => { optionNudge.value = false }, 700)
+  }, 20)
+})
 </script>
 
 <template>
@@ -56,7 +71,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <!-- Title block -->
     <div class="details__head">
       <span class="at-label">{{
-        product?.category?.title || 'Maison & Déco'
+        product?.category?.title || storefrontContent.common.collection
       }}</span>
       <h1 class="details__title">{{ product?.title }}</h1>
 
@@ -80,7 +95,15 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <div
       v-if="product?.options && product.options.length > 0"
       class="details__options"
+      :class="{ 'vux-invite': hasUnselectedOptions, 'vux-invite-nudge': optionNudge }"
     >
+      <p
+        v-if="hasUnselectedOptions"
+        class="vux-invite-hint inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600"
+      >
+        <Icon name="lucide:arrow-down" class="w-3.5 h-3.5" />
+        {{ $t('storefront.productForm.chooseOptionsPrompt') }}
+      </p>
       <div
         v-for="option in product.options"
         :key="option.id"
@@ -232,8 +255,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 .details__title {
   font-family: var(--at-f-display);
   font-size: clamp(1.8rem, 3vw, 2.8rem);
-  font-weight: 300;
-  letter-spacing: -0.01em;
+  font-weight: 600;
+  letter-spacing: -0.028em;
   line-height: 1.1;
   color: var(--at-cream);
   margin: 8px 0 16px;
@@ -248,16 +271,22 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 }
 .details__price {
   font-family: var(--at-f-display);
-  font-size: 2rem;
-  font-weight: 400;
-  color: var(--at-gold);
+  font-size: 2.15rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  font-variant-numeric: tabular-nums;
+  color: var(--at-cream);
 }
+/* A price that came down is stated in the skin rose, not in the house green. */
+.details__price-row:has(.details__price-compare) .details__price { color: var(--at-skin); }
 .details__price-compare {
   font-family: var(--at-f-mono);
   font-size: 13px;
   font-weight: 300;
+  font-variant-numeric: tabular-nums;
   color: var(--at-muted);
   text-decoration: line-through;
+  text-decoration-color: var(--at-skin-soft);
 }
 
 /* Options */
@@ -276,8 +305,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 .details__option-label {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--at-sub);
 }
@@ -303,7 +332,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 .details__color-swatch {
   width: 32px;
   height: 32px;
-  border: 2px solid transparent;
+  border-radius: var(--at-r-pill);
+  border: 2px solid var(--at-border);
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -314,7 +344,8 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     transform 0.15s;
 }
 .details__color-swatch.is-selected {
-  border-color: var(--at-gold);
+  border-color: var(--at-cream);
+  box-shadow: var(--at-ring);
   transform: scale(1.1);
 }
 .details__color-swatch.is-unavailable {
@@ -331,6 +362,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   width: 56px;
   height: 56px;
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
   overflow: hidden;
   cursor: pointer;
   position: relative;
@@ -345,6 +377,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
 }
 .details__img-swatch.is-selected {
   border-color: var(--at-gold);
+  box-shadow: var(--at-ring);
 }
 .details__img-swatch.is-unavailable {
   opacity: 0.35;
@@ -368,29 +401,33 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   gap: 6px;
 }
 .details__option-btn {
-  padding: 8px 14px;
+  padding: 9px 16px;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.12em;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  border: 1px solid var(--at-border-2);
-  background: transparent;
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-pill);
+  background: var(--at-surface);
   color: var(--at-sub);
   cursor: pointer;
   transition:
     border-color 0.15s,
     color 0.15s,
-    background 0.15s;
+    background 0.15s,
+    box-shadow 0.15s;
 }
 .details__option-btn:hover {
   border-color: var(--at-gold);
-  color: var(--at-gold);
+  color: var(--at-gold-700);
+  background: var(--at-surface-2);
 }
 .details__option-btn.is-selected {
-  border-color: var(--at-cream);
-  background: var(--at-cream);
-  color: var(--at-bg);
+  border-color: transparent;
+  background: var(--at-grad-green);
+  color: #FFFBF0;
+  box-shadow: var(--at-shadow-green);
 }
 .details__option-btn.is-unavailable {
   opacity: 0.25;
@@ -398,8 +435,9 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   text-decoration: line-through;
 }
 .details__option-btn.is-oos {
-  color: #c0392b;
-  border-color: rgba(192, 57, 43, 0.3);
+  color: var(--at-skin);
+  border-color: var(--at-skin-soft);
+  background: var(--at-skin-dim);
 }
 
 /* Mini desc */

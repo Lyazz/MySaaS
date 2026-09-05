@@ -1,8 +1,13 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 
+interface Product {
+  isClearance?: boolean
+  [key: string]: any
+}
+
 const props = defineProps<{
-  product: any
+  product: Product
   viewMode?: 'grid' | 'list'
 }>()
 
@@ -20,7 +25,12 @@ const displayPrice = computed(() => {
   return originalPrice.value
 })
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
+const storefrontContent = useStorefrontContent()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const { format: formatPrice } = useCurrency()
 
@@ -49,11 +59,15 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: Number(props.product.price),
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('Ajouté au panier', 'Consulter votre panier pour finaliser')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -65,8 +79,11 @@ async function handleAddToCart() {
         <img :src="mainImage" :alt="product.title" class="pc__img">
       </NuxtLink>
 
-      <!-- Promo badge -->
-      <div v-if="isPromoValid" class="pc__badge">— {{ Math.round((1 - displayPrice / originalPrice) * 100) }}%</div>
+      <!-- Badges -->
+      <div class="pc__badge-stack">
+        <div v-if="isPromoValid" class="pc__badge">— {{ Math.round((1 - displayPrice / originalPrice) * 100) }}%</div>
+        <div v-if="isClearanceEligible" class="pc__badge pc__badge--clearance">{{ t('storefront.clearance.badge') }}</div>
+      </div>
 
       <!-- Favorite -->
       <StorefrontSharedFavoriteButton
@@ -83,14 +100,14 @@ async function handleAddToCart() {
             <circle cx="7" cy="13" r="1" fill="currentColor"/>
             <circle cx="12" cy="13" r="1" fill="currentColor"/>
           </svg>
-          <span>Ajouter</span>
+          <span>{{ storefrontContent.actions.addToCart }}</span>
         </button>
         <NuxtLink :to="`/product/${product.slug}`" class="pc__hover-btn pc__hover-btn--outline">
           <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
             <circle cx="8" cy="8" r="3" stroke="currentColor" stroke-width="0.85"/>
             <path d="M1 8c1.5-4 10-4 14 0-4 4-12.5 4-14 0z" stroke="currentColor" stroke-width="0.85"/>
           </svg>
-          <span>Voir</span>
+          <span>{{ storefrontContent.actions.quickView }}</span>
         </NuxtLink>
       </div>
 
@@ -104,12 +121,12 @@ async function handleAddToCart() {
 
     <!-- Info -->
     <div class="pc__info">
-      <span class="pc__cat">{{ product.category?.title || 'Maison & Déco' }}</span>
+      <span class="pc__cat">{{ product.category?.title || storefrontContent.common.collection }}</span>
       <h3 class="pc__title">
         <NuxtLink :to="`/product/${product.slug}`" class="pc__title-link">{{ product.title }}</NuxtLink>
       </h3>
       <div class="pc__price-row">
-        <span class="pc__price">{{ formatPrice(displayPrice) }}</span>
+        <span class="pc__price" :class="isPromoValid && originalPrice !== displayPrice && 'pc__price--cut'">{{ formatPrice(displayPrice) }}</span>
         <span v-if="isPromoValid && originalPrice !== displayPrice" class="pc__price-orig">{{ formatPrice(originalPrice) }}</span>
       </div>
     </div>
@@ -136,21 +153,34 @@ async function handleAddToCart() {
   position: relative;
   display: flex;
   flex-direction: column;
-  background: var(--at-surface);
+  background: var(--at-grad-paper);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-leaf);
+  box-shadow: var(--at-shadow-sm);
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.pc:hover {
+  transform: translateY(-5px);
+  border-color: var(--at-border-2);
+  box-shadow: var(--at-shadow-lg);
 }
 .pc--list {
   flex-direction: row;
   gap: 16px;
   align-items: flex-start;
   padding: 12px;
+  border-radius: var(--at-r-md);
 }
+.pc--list .pc__img-wrap { border-radius: var(--at-r-sm); }
 
 /* Image */
 .pc__img-wrap {
   position: relative;
   overflow: hidden;
-  background: var(--at-surface-2);
+  background: var(--at-grad-shell);
   aspect-ratio: 3/4;
+  border-radius: var(--at-r-leaf);
 }
 .pc--list .pc__img-wrap {
   width: 100px;
@@ -163,23 +193,36 @@ async function handleAddToCart() {
   height: 100%;
   object-fit: cover;
   transition: transform 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94), filter 0.4s;
-  filter: brightness(0.92);
+  filter: brightness(0.95) saturate(0.96);
 }
-.pc:hover .pc__img { transform: scale(1.05); filter: brightness(1); }
+.pc:hover .pc__img { transform: scale(1.06); filter: brightness(1.02) saturate(1); }
 
 /* Promo badge */
-.pc__badge {
+.pc__badge-stack {
   position: absolute;
   top: 10px;
   left: 10px;
-  background: var(--at-gold);
-  color: var(--at-bg);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  z-index: 2;
+}
+.pc__badge {
+  background: var(--at-grad-gold-ink);
+  color: #FFFBF0;
   font-family: var(--at-f-mono);
   font-size: 8px;
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  padding: 4px 8px;
-  z-index: 2;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+  padding: 5px 10px;
+  border-radius: var(--at-r-pill);
+  box-shadow: var(--at-shadow-xs);
+}
+.pc__badge--clearance {
+  background: var(--at-skin);
+  color: #FFFBF0;
 }
 
 /* Favorite */
@@ -187,20 +230,22 @@ async function handleAddToCart() {
   position: absolute;
   top: 10px;
   right: 10px;
-  width: 30px;
-  height: 30px;
-  background: rgba(14,13,12,0.7);
-  backdrop-filter: blur(4px);
+  width: 32px;
+  height: 32px;
+  background: rgba(255,251,240,0.9);
+  backdrop-filter: blur(6px);
+  border-radius: var(--at-r-pill);
+  box-shadow: var(--at-shadow-xs);
   display: flex;
   align-items: center;
   justify-content: center;
   color: var(--at-sub);
   border: none;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.2s, background 0.2s, transform 0.2s;
   z-index: 2;
 }
-:deep(.pc__fav-btn:hover) { color: var(--at-gold); }
+:deep(.pc__fav-btn:hover) { color: var(--at-skin); background: #FFFBF0; transform: scale(1.06); }
 :deep(.pc__fav-icon) { width: 12px; height: 12px; }
 
 /* Hover bar */
@@ -222,27 +267,28 @@ async function handleAddToCart() {
   align-items: center;
   justify-content: center;
   gap: 7px;
-  padding: 11px 0;
-  background: var(--at-cream);
-  color: var(--at-bg);
+  padding: 12px 0;
+  background: var(--at-grad-green);
+  color: #FFFBF0;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  font-weight: 400;
-  letter-spacing: 0.15em;
+  font-weight: 600;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
   border: none;
   cursor: pointer;
   text-decoration: none;
-  transition: background 0.2s;
+  transition: background 0.25s, color 0.25s;
 }
-.pc__hover-btn:hover { background: var(--at-gold); }
+.pc__hover-btn:hover { background: var(--at-grad-gold-ink); }
 .pc__hover-btn--outline {
-  background: rgba(14,13,12,0.85);
+  background: rgba(255,251,240,0.94);
+  backdrop-filter: blur(6px);
   color: var(--at-text);
-  border-left: 1px solid var(--at-border);
+  border-inline-start: 1px solid var(--at-border);
   flex: 0.7;
 }
-.pc__hover-btn--outline:hover { background: var(--at-surface); color: var(--at-gold); }
+.pc__hover-btn--outline:hover { background: #FFFBF0; color: var(--at-gold-700); }
 
 /* Countdown */
 .pc__countdown {
@@ -258,7 +304,7 @@ async function handleAddToCart() {
 
 /* Info */
 .pc__info {
-  padding: 14px 14px 16px;
+  padding: 16px 14px 18px;
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -268,8 +314,8 @@ async function handleAddToCart() {
 .pc__cat {
   font-family: var(--at-f-mono);
   font-size: 8px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--at-muted);
 }
@@ -277,30 +323,35 @@ async function handleAddToCart() {
 .pc__title {
   font-family: var(--at-f-display);
   font-size: 1rem;
-  font-weight: 400;
+  font-weight: 600;
+  letter-spacing: -0.012em;
   line-height: 1.3;
   margin: 2px 0 4px;
 }
 .pc__title-link {
-  color: var(--at-text);
+  color: var(--at-cream);
   text-decoration: none;
   transition: color 0.2s;
 }
-.pc__title-link:hover { color: var(--at-gold); }
+.pc__title-link:hover { color: var(--at-gold-700); }
 
 .pc__price-row { display: flex; align-items: baseline; gap: 8px; margin-top: auto; }
 .pc__price {
   font-family: var(--at-f-mono);
-  font-size: 12px;
-  font-weight: 400;
-  color: var(--at-gold);
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--at-cream);
 }
+.pc__price--cut { color: var(--at-skin); }
 .pc__price-orig {
   font-family: var(--at-f-mono);
   font-size: 10px;
   font-weight: 300;
+  font-variant-numeric: tabular-nums;
   color: var(--at-muted);
   text-decoration: line-through;
+  text-decoration-color: var(--at-skin-soft);
 }
 
 /* Toast */
@@ -309,28 +360,31 @@ async function handleAddToCart() {
   bottom: 20px;
   right: 20px;
   z-index: 100;
-  background: var(--at-surface);
-  border: 1px solid var(--at-border-2);
+  background: var(--at-grad-paper);
+  border: 1px solid var(--at-border);
   padding: 14px 18px;
   display: flex;
   align-items: center;
   gap: 12px;
+  border-radius: var(--at-r-md);
+  box-shadow: var(--at-shadow-lg);
 }
 .pc-toast__icon {
   width: 28px;
   height: 28px;
-  background: var(--at-gold-dim);
+  background: var(--at-grad-green);
+  border-radius: var(--at-r-pill);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--at-gold);
+  color: #FFFBF0;
   flex-shrink: 0;
 }
 .pc-toast__title {
   font-family: var(--at-f-mono);
   font-size: 11px;
-  font-weight: 400;
-  color: var(--at-text);
+  font-weight: 600;
+  color: var(--at-cream);
 }
 .pc-toast__msg {
   font-family: var(--at-f-mono);

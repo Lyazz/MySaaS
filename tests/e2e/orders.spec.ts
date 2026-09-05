@@ -42,6 +42,7 @@ test.describe('Orders Dashboard - Tenant Isolation', () => {
         // Create Tenant A in database
         const tenantA = await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Tenant A Store',
                 slug: tenantASlug
             }
@@ -52,6 +53,7 @@ test.describe('Orders Dashboard - Tenant Isolation', () => {
         // Create Tenant B in database
         const tenantB = await prisma.tenant.create({
             data: {
+                publishedAt: new Date(),
                 name: 'Tenant B Shop',
                 slug: tenantBSlug
             }

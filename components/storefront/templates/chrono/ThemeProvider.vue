@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('chrono')
 
 const storeStyle = computed(() => {
-  const primaryColor = '#A67C52' // Warm Copper-Bronze
+  const primaryColor = brandColor.value.color
   
   const hexToRgb = (hex: string) => {
     if (!hex || typeof hex !== 'string') return '166 124 82'
@@ -20,7 +21,15 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Cormorant Garamond', 'Playfair Display', ui-serif, Georgia, Cambria, serif"
+    fontFamily: "'Cormorant Garamond', 'Playfair Display', ui-serif, Georgia, Cambria, serif",
+    // Shared LocaleSwitcher — warm dark chrome for the chrono storefront
+    '--ls-surface': '#161b22',
+    '--ls-border': 'rgba(232,224,213,0.14)',
+    '--ls-shadow': '0 20px 46px -16px rgba(0,0,0,0.7)',
+    '--ls-radius': '4px',
+    '--ls-text': '#a7a094',
+    '--ls-text-strong': '#e8e0d5',
+    '--ls-hover-bg': 'rgba(232,224,213,0.07)'
   } as Record<string, string>
 
   return result

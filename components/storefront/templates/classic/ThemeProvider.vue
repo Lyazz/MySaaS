@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('classic')
 
 const storeStyle = computed(() => {
-  const primaryColor = '#0f172a' // Navy 900
+  const primaryColor = brandColor.value.color
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {
@@ -28,7 +29,17 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Alice', serif"
+    fontFamily: "'Alice', serif",
+    // Shared LocaleSwitcher — match the slate serif chrome
+    '--ls-surface': '#ffffff',
+    '--ls-border': 'rgba(15,23,42,0.12)',
+    '--ls-shadow': '0 14px 34px -14px rgba(15,23,42,0.22)',
+    '--ls-radius': '8px',
+    '--ls-text': '#475569',
+    '--ls-text-strong': '#0f172a',
+    '--ls-hover-bg': 'rgba(15,23,42,0.05)',
+    // Darken the brand toward ink so the selected row stays legible on white
+    '--ls-accent': 'color-mix(in srgb, var(--brand) 58%, #0f172a)'
   } as Record<string, string>
 
   return result

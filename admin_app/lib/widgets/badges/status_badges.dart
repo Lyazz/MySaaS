@@ -15,7 +15,7 @@ class OrderStatusBadge extends StatelessWidget {
       case 'CONFIRMED':
         return UiBadgeTone.indigo;
       case 'SHIPPED':
-        return UiBadgeTone.teal;
+        return UiBadgeTone.lime;
       case 'DELIVERED':
         return UiBadgeTone.emerald;
       case 'CANCELLED':
@@ -40,11 +40,7 @@ class OrderStatusBadge extends StatelessWidget {
       'RETURNED' => 'admin.orderStatus.returned'.tr(),
       _ => normalized,
     };
-    return UiBadge(
-      label: label,
-      tone: toneFor(normalized),
-      uppercase: true,
-    );
+    return UiBadge(label: label, tone: toneFor(normalized), uppercase: true);
   }
 }
 
@@ -87,7 +83,9 @@ class ActiveBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return UiBadge(
-      label: isActive ? 'admin.common.active'.tr() : 'admin.common.inactive'.tr(),
+      label: isActive
+          ? 'admin.common.active'.tr()
+          : 'admin.common.inactive'.tr(),
       tone: isActive ? UiBadgeTone.emerald : UiBadgeTone.slate,
     );
   }
@@ -103,7 +101,7 @@ class SaleTypeBadge extends StatelessWidget {
       case 'ORDER':
         return UiBadgeTone.indigo;
       case 'POS':
-        return UiBadgeTone.teal;
+        return UiBadgeTone.lime;
       default:
         return UiBadgeTone.slate;
     }
@@ -132,7 +130,7 @@ class SaleStatusBadge extends StatelessWidget {
       case 'CONFIRMED':
         return UiBadgeTone.indigo;
       case 'SHIPPED':
-        return UiBadgeTone.teal;
+        return UiBadgeTone.lime;
       case 'DELIVERED':
       case 'COMPLETED':
         return UiBadgeTone.emerald;
@@ -159,10 +157,6 @@ class SaleStatusBadge extends StatelessWidget {
       'RETURNED' => 'admin.orderStatus.returned'.tr(),
       _ => normalized,
     };
-    return UiBadge(
-      label: label,
-      tone: toneFor(normalized),
-      uppercase: true,
-    );
+    return UiBadge(label: label, tone: toneFor(normalized), uppercase: true);
   }
 }

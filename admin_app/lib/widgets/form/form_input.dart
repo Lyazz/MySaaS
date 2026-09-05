@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../../theme/app_theme.dart';
 
 class FormInput extends StatelessWidget {
   final String label;
@@ -20,7 +21,7 @@ class FormInput extends StatelessWidget {
   final Widget? prefixIcon;
   final Widget? suffixIcon;
   final String? prefixText;
-  final Color fillColor;
+  final Color? fillColor;
   final bool filled;
   final bool borderless;
   final double borderRadius;
@@ -53,7 +54,7 @@ class FormInput extends StatelessWidget {
     this.prefixIcon,
     this.suffixIcon,
     this.prefixText,
-    this.fillColor = Colors.white,
+    this.fillColor,
     this.filled = true,
     this.borderless = false,
     this.borderRadius = 6,
@@ -72,60 +73,63 @@ class FormInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final defaultLabelStyle =
-        Theme.of(context).textTheme.bodyMedium?.copyWith(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: const Color(0xFF374151), // Gray-700
-        ) ??
-        const TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w500,
-          color: Color(0xFF374151), // Gray-700
-        );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final textPrimary = isDark
+        ? AppColors.textPrimary
+        : AppColors.lightTextPrimary;
+    final textTertiary = isDark
+        ? AppColors.textTertiary
+        : AppColors.lightTextTertiary;
+    final borderColor = isDark
+        ? AppColors.surfaceBorder
+        : AppColors.lightSurfaceBorder;
+    final surface2 = isDark ? AppColors.surface2 : AppColors.lightSurface2;
+
+    final resolvedFillColor = fillColor ?? surface2;
+
+    final defaultLabelStyle = TextStyle(
+      fontSize: 12,
+      fontWeight: FontWeight.w600,
+      color: textTertiary,
+      letterSpacing: 0.05,
+    );
 
     final outlineBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: const BorderSide(
-        color: Color(0xFFD1D5DB), // Gray-300
+      borderSide: BorderSide(color: borderColor),
+    );
+    final focusedBorder = OutlineInputBorder(
+      borderRadius: BorderRadius.circular(borderRadius),
+      borderSide: BorderSide(
+        color: Theme.of(context).colorScheme.primary,
+        width: 1.5,
       ),
     );
-
-    final focusedOutlineBorder = OutlineInputBorder(
+    final errorBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: const BorderSide(
-        color: Color(0xFF14B8A6), // Teal-500
-        width: 2,
-      ),
+      borderSide: const BorderSide(color: AppColors.red),
     );
-
-    final errorOutlineBorder = OutlineInputBorder(
+    final focusedErrorBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: const BorderSide(
-        color: Color(0xFFFCA5A5), // Red-300
-      ),
-    );
-
-    final focusedErrorOutlineBorder = OutlineInputBorder(
-      borderRadius: BorderRadius.circular(borderRadius),
-      borderSide: const BorderSide(
-        color: Color(0xFFEF4444), // Red-500
-        width: 2,
-      ),
+      borderSide: const BorderSide(color: AppColors.red, width: 1.5),
     );
 
     final border = borderless ? InputBorder.none : outlineBorder;
     final enabledBorder = borderless ? InputBorder.none : outlineBorder;
-    final focusedBorder = borderless ? InputBorder.none : focusedOutlineBorder;
-    final errorBorder = borderless ? InputBorder.none : errorOutlineBorder;
-    final focusedErrorBorder = borderless
+    final resolvedFocusedBorder = borderless ? InputBorder.none : focusedBorder;
+    final resolvedErrorBorder = borderless ? InputBorder.none : errorBorder;
+    final resolvedFocusedErrorBorder = borderless
         ? InputBorder.none
-        : focusedErrorOutlineBorder;
+        : focusedErrorBorder;
+
+    final isMobile = MediaQuery.of(context).size.width < 800;
+    final effectiveShowLabel = showLabel && !isMobile;
+    final inlineLabel = (showLabel && isMobile) ? label : null;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        if (showLabel) ...[
+        if (effectiveShowLabel) ...[
           Text(label, style: labelStyle ?? defaultLabelStyle),
           const SizedBox(height: 4),
         ],
@@ -147,31 +151,23 @@ class FormInput extends StatelessWidget {
           autofillHints: autofillHints,
           inputFormatters: inputFormatters,
           textAlignVertical: TextAlignVertical.center,
-          style:
-              textStyle ??
-              const TextStyle(
-                fontSize: 14,
-                color: Color(0xFF111827), // Gray-900
-              ),
+          style: textStyle ?? TextStyle(fontSize: 14, color: textPrimary),
           decoration: InputDecoration(
+            labelText: inlineLabel,
             hintText: hint,
             hintStyle:
-                hintStyle ??
-                const TextStyle(
-                  color: Color(0xFF9CA3AF), // Gray-400
-                  fontSize: 14,
-                ),
+                hintStyle ?? TextStyle(color: textTertiary, fontSize: 14),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
             prefixText: prefixText,
             contentPadding: contentPadding,
             border: border,
             enabledBorder: enabledBorder,
-            focusedBorder: focusedBorder,
-            errorBorder: errorBorder,
-            focusedErrorBorder: focusedErrorBorder,
+            focusedBorder: resolvedFocusedBorder,
+            errorBorder: resolvedErrorBorder,
+            focusedErrorBorder: resolvedFocusedErrorBorder,
             filled: filled,
-            fillColor: fillColor,
+            fillColor: resolvedFillColor,
           ),
         ),
       ],

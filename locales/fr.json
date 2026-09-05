@@ -11,10 +11,21 @@
         "title": "Une erreur s'est produite",
         "message": "Quelque chose s'est mal passé. Veuillez réessayer plus tard."
       },
+      "maintenance": {
+        "title": "Boutique en maintenance",
+        "message": "Cette boutique est temporairement fermée pour maintenance. Merci de revenir bientôt."
+      },
       "actions": {
         "backHome": "Retour à l'accueil"
       },
       "details": "Détails de l'erreur"
+    },
+    "siteClosed": {
+      "badge": "Site en pause",
+      "title": "La plateforme est temporairement fermée",
+      "message": "",
+      "haveAccount": "Vous avez déjà une boutique ?",
+      "logIn": "Se connecter"
     }
   },
   "i18n": {
@@ -42,7 +53,7 @@
       "description": "Créez votre boutique, recevez des commandes, et gérez paiements et livraison depuis un seul tableau de bord."
     },
     "hero": {
-      "kicker": "Le SaaS pour marchands algériens",
+      "kicker": "Le SaaS pour marchands modernes",
       "title": {
         "buildSell": "Lancez. Pilotez.",
         "scale": "Grandissez."
@@ -87,7 +98,7 @@
           "number": "01",
           "caption": "Design",
           "title": "Choisissez un thème, faites-le vôtre.",
-          "description": "Des modèles mobile-first qui s'adaptent à votre marque en quelques minutes."
+          "description": "Des thèmes mobile-first qui s'adaptent à votre marque en quelques minutes."
         },
         "sell": {
           "number": "02",
@@ -99,7 +110,7 @@
           "number": "03",
           "caption": "Expédiez",
           "title": "Choisissez le transporteur. On expédie.",
-          "description": "Intégrations natives avec Maystro, Yalidine et vos livreurs internes."
+          "description": "Intégrations multi-transporteurs avec webhooks temps réel et options de livraison personnalisées."
         },
         "grow": {
           "number": "04",
@@ -140,7 +151,7 @@
         },
         "templates": {
           "title": "Thèmes prêts à l’emploi",
-          "description": "Des modèles rapides, pensés mobile, faciles à personnaliser."
+          "description": "Des thèmes rapides, pensés mobile, faciles à personnaliser."
         },
         "fastSupport": {
           "title": "Support réactif",
@@ -150,9 +161,9 @@
     },
     "stats": {
       "activeMerchants": "Boutiques actives",
-      "revenueGenerated": "Ventes traitées",
+      "revenueGenerated": "Ventes mensuelles",
       "uptime": "Disponibilité",
-      "gmvDetail": "Volume de ventes mensuel"
+      "gmvDetail": "Ventes traitées par mois"
     },
     "faq": {
       "title": "Questions fréquentes",
@@ -170,7 +181,8 @@
           "question": "Qu’est-ce qui change entre les offres pour le moment ?",
           "answer": "Pour l’instant, le principal changement est le nombre de commandes incluses par mois."
         }
-      }
+      },
+      "eyebrow": "FAQ"
     },
     "testimonials": {
       "eyebrow": "Témoignages",
@@ -179,39 +191,39 @@
         "accent": "des gens",
         "suffix": "comme vous."
       },
-      "subtitle": "Des commerçants en Algérie qui veulent un site rapide et une gestion simple.",
+      "subtitle": "Des commerçants qui veulent un site rapide et une gestion simple.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "Avatar utilisateur",
       "items": [
         {
           "quote": "On a mis nos produits en ligne rapidement. Les commandes arrivent, et tout est centralisé.",
           "author": "Nassim",
-          "role": "Propriétaire, Nokhba Store"
+          "role": "Propriétaire"
         },
         {
-          "quote": "Le domaine personnalisé a été simple à configurer, et je vois mes ventes clairement.",
-          "author": "Amina",
-          "role": "Fondatrice, Dzair Cosmetics"
+          "quote": "La visibilité du tableau de bord et la gestion des stocks ont transformé notre opération. C'est impressionnant.",
+          "author": "Karim",
+          "role": "Fondateur"
         },
         {
           "quote": "Les intégrations de livraison nous font gagner du temps chaque jour. Expédier devient un réflexe.",
           "author": "Yanis",
-          "role": "Directeur, TechAlgeria"
+          "role": "Directeur"
         },
         {
-          "quote": "Même quand il y a beaucoup de trafic, la boutique reste rapide. On peut se concentrer sur la vente.",
-          "author": "Lyes",
-          "role": "Propriétaire, Oran Fashion"
+          "quote": "L'intégration des méthodes de paiement locales a été fluide. Nos clients au Sénégal adorent les options.",
+          "author": "Fatou",
+          "role": "Propriétaire"
         },
         {
-          "quote": "Fini les commandes perdues sur les réseaux. Les clients commandent et paient facilement.",
-          "author": "Meriem",
-          "role": "PDG, BioAtlas"
+          "quote": "Le design mobile-first nous a aidés à rejoindre plus de clients. Le taux de conversion a augmenté remarquablement.",
+          "author": "Sophie",
+          "role": "Responsable Marketing"
         },
         {
-          "quote": "On a lancé la boutique en une après‑midi. Simple, propre, et prêt à vendre.",
-          "author": "Sofiane",
-          "role": "Gérant, Casbah Gifts"
+          "quote": "La mise en place a été simple, et l'équipe d'assistance très utile. Je recommande vivement.",
+          "author": "Carlos",
+          "role": "Propriétaire"
         }
       ]
     },
@@ -239,7 +251,7 @@
         "prefix": "Des vitrines",
         "accent": "prêtes à vendre"
       },
-      "subtitle": "Choisissez un modèle rapide, pensé mobile, et personnalisez‑le à votre goût.",
+      "subtitle": "Choisissez un thème rapide, pensé mobile, et personnalisez‑le à votre goût.",
       "viewAll": "Voir les thèmes"
     },
     "contact": {
@@ -249,7 +261,7 @@
         "sales": {
           "title": "Parler aux ventes",
           "description": "Intéressé par nos forfaits d'entreprise ? Appelez-nous pour discuter avec un conseiller.",
-          "contact": "+213 550 00 00 00"
+          "contact": "+XX X XXX XXXX"
         },
         "support": {
           "title": "Contacter le support",
@@ -283,7 +295,7 @@
       "today": "Aujourd’hui",
       "operationsRail": "Ce qui tourne en arrière-plan",
       "whatsapp": "Confirmations WhatsApp",
-      "carriers": "Livraison envoyée vers Maystro ou Yalidine",
+      "carriers": "Synchronisation transporteur en temps réel via webhooks",
       "analytics": "Suivi des ventes et des campagnes",
       "readinessLabel": "Prêt à vendre",
       "readinessText": "Tout reste simple pour votre équipe : votre boutique, vos commandes, vos options de livraison et votre suivi quotidien.",
@@ -309,15 +321,86 @@
     },
     "cinematic": {
       "hero": {
-        "eyebrow": "Conçu pour le commerce algérien",
+        "eyebrow": "Conçu pour le commerce moderne",
         "headlinePre": "Un seul moteur.",
         "headlineAccent": "Tous",
-        "headlinePost": "les marchands algériens.",
+        "headlinePost": "les marchands.",
         "subhead": "Boutique, paiement, livraison, analytics — tout réuni sur une plateforme qui démarre en minutes, pas en mois.",
         "ctaPrimary": "Commencer gratuitement",
         "ctaSecondary": "Voir la démo"
       },
-      "logoCloud": "Nos intégrations +50",
+      "heroCarousel": {
+        "ctaRegister": "Commencer à scaler gratuitement",
+        "ctaFeatures": "Découvrir les fonctionnalités",
+        "slides": {
+          "delivery": {
+            "eyebrow": "Réseau de livraison",
+            "headlinePre": "Livrez avec",
+            "headlineAccent": "tous",
+            "headlinePost": " vos transporteurs.",
+            "subhead": "",
+            "meta": [
+              "Intégrations multi-transporteurs",
+              "Statuts synchronisés en direct",
+              "Retours réconciliés automatiquement"
+            ],
+            "address": "swekly.com/admin/delivery"
+          },
+          "warehouse": {
+            "eyebrow": "Contrôle d'inventaire avancé",
+            "headlinePre": "Stock,",
+            "headlineAccent": "en direct",
+            "headlinePost": ".",
+            "subhead": "",
+            "meta": [
+              "Variantes, SKU, codes-barres & lots",
+              "Seuils de réassort & alertes stock bas",
+              "Achats, fournisseurs & inventaires"
+            ],
+            "address": "swekly.com/admin/inventory"
+          },
+          "themes": {
+            "eyebrow": "Templates de boutique",
+            "headlinePre": "Plusieurs thèmes.",
+            "headlineAccent": "Un seul",
+            "headlinePost": " clic.",
+            "subhead": "",
+            "meta": [
+              "Thèmes mobile-first",
+              "RTL & multilingue",
+              "Éditeur de thème en direct"
+            ],
+            "address": "swekly.com/admin/themes"
+          },
+          "conversion": {
+            "eyebrow": "Conversion & analytics",
+            "headlinePre": "Suivez",
+            "headlineAccent": "chaque",
+            "headlinePost": " conversion.",
+            "subhead": "",
+            "meta": [
+              "Funnel temps réel",
+              "Meta Pixel intégré",
+              "Dashboard commandes en direct"
+            ],
+            "address": "swekly.com/admin/analytics"
+          },
+          "pos": {
+            "eyebrow": "PDV multiplateforme",
+            "headlinePre": "Une seule caisse.",
+            "headlineAccent": "Tous",
+            "headlinePost": " vos appareils.",
+            "subhead": "",
+            "meta": [
+              "Apps natives · iOS · Android · Windows · macOS",
+              "Encaissement hors-ligne, resync cloud instantanée",
+              "Fidélité, promos & reçus en un seul tap"
+            ],
+            "address": "swekly.com/admin/pos"
+          }
+        }
+      },
+      "logoCloud": "Nos intégrations — transporteurs, pixels, outils",
       "howItWorks": {
         "titlePre": "De l'idée au",
         "titleAccent": "revenu",
@@ -339,7 +422,7 @@
         "titlePre": "Tout ce qu'il faut.",
         "titleAccent": "Rien",
         "titlePost": "de superflu.",
-        "description": "Multi-tenant par conception. Localisé pour l'Algérie. Conçu pour scaler sans refondre votre stack."
+        "description": "Prêt pour le monde. Beau dans chaque langue. Conçu pour grandir avec votre métier."
       },
       "pricing": {
         "eyebrow": "Tarifs",
@@ -370,14 +453,14 @@
       },
       "footer": {
         "languages": "Langue",
-        "madeFor": "Fait pour l'Algérie"
+        "madeFor": "Fait pour les marchands"
       },
       "templates": {
         "eyebrow": "Thèmes boutique",
         "titlePre": "Des boutiques superbes,",
         "titleAccent": "prêtes à lancer",
         "titlePost": "",
-        "description": "Choisissez un modèle conçu par des professionnels et personnalisez-le à votre marque. Chaque thème est mobile-first, RTL et ultra-rapide.",
+        "description": "Choisissez un thème conçu par des professionnels et personnalisez-le à votre marque. Chaque thème est mobile-first, RTL et ultra-rapide.",
         "viewAll": "Voir tous les thèmes",
         "items": {
           "minimal": { "name": "Minimal", "category": "Mode", "tagline": "Typographie sobre, espaces généreux. Le produit parle de lui-même." },
@@ -461,17 +544,13 @@
       "integrations": {
         "eyebrow": "Intégrations natives",
         "titlePre": "Tous les outils",
-        "titleAccent": "des marchands algériens",
+        "titleAccent": "des marchands",
         "titlePost": "réunis",
         "description": "Des livreurs locaux à l'automatisation WhatsApp, du pixel Meta aux outils IA — tout fonctionne dès le premier jour.",
         "tools": {
-          "maystro": {
-            "name": "Maystro",
-            "description": "Le réseau de livraison n°1 en Algérie. Créez et suivez vos expéditions sans quitter votre tableau de bord."
-          },
-          "yalidine": {
-            "name": "Yalidine",
-            "description": "Livraison express nationale avec suivi en temps réel et mises à jour automatiques."
+          "multicarrier": {
+            "name": "Support Multi-Transporteurs",
+            "description": "Connectez plusieurs transporteurs via webhooks en temps réel. Expédition automatique, suivi et mises à jour en un seul endroit."
           },
           "whatsapp": {
             "name": "WhatsApp API",
@@ -504,20 +583,32 @@
       "heroProof": {
         "rating": "4,9 / 5",
         "ratingLabel": "par 800+ marchands",
-        "merchants": "1 200+",
-        "merchantsLabel": "boutiques actives en DZ",
+        "merchants": "500+",
+        "merchantsLabel": "boutiques actives",
         "cod": "Paiement à la livraison",
         "codLabel": "intégré",
         "noCard": "Sans carte bancaire",
         "noCardLabel": "essai gratuit 14 jours"
       },
       "trustStrip": {
-        "eyebrow": "Conçu pour l'Algérie",
+        "eyebrow": "Conçu pour les marchands",
         "items": {
-          "cod": { "title": "Paiement à la livraison", "description": "COD intégré avec réconciliation auto sur toutes les wilayas." },
-          "wilayas": { "title": "58 wilayas couvertes", "description": "Yalidine, Maystro, ZR & Noest — activation en un clic." },
-          "rtl": { "title": "Boutique en arabe", "description": "RTL complet, UI compatible Darija, AR/FR/EN en un clic." },
-          "dzd": { "title": "Tarification en DZD", "description": "Devise locale, taxes et factures — sans surprise de change." }
+          "cod": {
+            "title": "Paiement à la livraison",
+            "description": "COD intégré avec réconciliation automatique chez tous les transporteurs."
+          },
+          "wilayas": {
+            "title": "Intégrations de transporteurs",
+            "description": "Connectez-vous facilement aux transporteurs — activation en un clic."
+          },
+          "rtl": {
+            "title": "Support multilingue",
+            "description": "RTL complet, UI compatible Darija, AR/FR/EN en un clic."
+          },
+          "dzd": {
+            "title": "Gestion des stocks",
+            "description": "Suivi d'inventaire en temps réel et alertes de réappro automatisées."
+          }
         }
       },
       "stickyCta": {
@@ -531,7 +622,30 @@
     "nav": {
       "features": "Fonctionnalités",
       "pricing": "Tarifs",
+      "templates": "Thèmes",
       "about": "À propos"
+    },
+    "templatesPage": {
+      "hero": {
+        "pill": "Thèmes de boutique",
+        "title": {
+          "prefix": "Un design fait pour ",
+          "accent": "vendre"
+        },
+        "subtitle": "Choisissez parmi {count} thèmes conçus par des professionnels. Chaque thème est mobile-first, RTL, ultra-rapide et entièrement personnalisable à votre marque."
+      },
+      "card": {
+        "viewDemo": "Voir la boutique de démo",
+        "accent": "Couleur",
+        "shotAlt": "Boutique de démo {name}"
+      },
+      "cta": {
+        "eyebrow": "Prêt à lancer ?",
+        "headlinePre": "Choisissez un thème,",
+        "headlineAccent": "ouvrez",
+        "headlinePost": "votre boutique aujourd'hui",
+        "button": "Commencer gratuitement"
+      }
     },
     "actions": {
       "dashboard": "Tableau de bord",
@@ -543,7 +657,7 @@
       "hero": {
         "title": {
           "prefix": "Tout ce qu’il vous faut pour ",
-          "accent": "passer à l’échelle"
+          "accent": "scaler"
         },
         "subtitle": "Créez votre boutique, recevez des commandes, gérez la livraison et gardez le contrôle sans multiplier les outils."
       },
@@ -553,12 +667,12 @@
           "description": "Lancez une boutique propre, pensée pour le mobile, et adaptez-la rapidement à vos produits."
         },
         "tenancy": {
-          "title": "Multi-boutique par conception",
-          "description": "Chaque boutique a ses propres données, son domaine et son image — isolée et sécurisée dès le départ."
+          "title": "Infrastructure évolutive",
+          "description": "Plateforme de niveau entreprise construite pour la performance et la fiabilité, peu importe à quel point vous scalez."
         },
         "localization": {
-          "title": "Pensé pour l'Algérie",
-          "description": "Arabe, français et anglais avec support RTL complet, devise locale et parcours livraison adaptés."
+          "title": "Prêt pour le monde",
+          "description": "Arabe, français et anglais avec support RTL complet et parcours de commande multilingues."
         },
         "mobile": {
           "title": "Expérience mobile d'abord",
@@ -578,7 +692,7 @@
         },
         "logistics": {
           "title": "Connexions livraison",
-          "description": "Envoyez vos commandes vers Maystro, Yalidine ou votre propre organisation sans copier-coller."
+          "description": "Intégrez-vous facilement à vos transporteurs pour un fulfillment rationalisé."
         },
         "domains": {
           "title": "Votre domaine",
@@ -587,7 +701,7 @@
       },
       "bullets": {
         "checkout": "Formulaire de commande rapide",
-        "carriers": "Maystro et Yalidine",
+        "carriers": "Support multi-transporteurs",
         "dispatch": "Suivi dispatch simplifié"
       },
       "visual": {
@@ -624,10 +738,10 @@
       "copyright": "© {year} Plateforme Swekly. Tous droits réservés."
     },
     "aboutPage": {
-      "heroTitle": "Pensé pour la façon dont le commerce algérien fonctionne vraiment",
+      "heroTitle": "Pensé pour la façon dont le commerce fonctionne vraiment",
       "heroSubtitle": "Swekly aide les marchands à lancer plus vite, rester organisés et garder la livraison simple dès le premier jour.",
       "storyTitle": "Pas un autre simple créateur de boutique",
-      "storyBody": "Nous avons conçu Swekly autour des réalités des marchands algériens : achat mobile-first, confirmation COD, réseaux de livraison locaux et équipes qui veulent un quotidien plus fluide.",
+      "storyBody": "Nous avons conçu Swekly autour des réalités des marchands modernes : achat mobile-first, confirmation COD, réseaux de livraison locaux et équipes qui veulent un quotidien plus fluide.",
       "context": {
         "storyLabel": "Pourquoi les marchands changent",
         "label": "Construit autour des vrais usages",
@@ -649,7 +763,7 @@
           },
           "cod": {
             "title": "Conçu pour convertir en COD",
-            "body": "Un checkout centré téléphone, des signaux de confiance clairs et des étapes adaptées à la livraison reflètent la façon dont les clients commandent en Algérie."
+            "body": "Un checkout centré téléphone, des signaux de confiance clairs et des étapes adaptées à la livraison reflètent la façon dont les clients commandent réellement."
           },
           "ops": {
             "title": "Pensé pour l'exécution quotidienne",
@@ -659,7 +773,7 @@
       },
       "final": {
         "title": "Partez d'une meilleure base storefront",
-        "subtitle": "Lancez plus vite, gardez des opérations plus propres et évoluez sur une plateforme conçue pour le commerce algérien."
+        "subtitle": "Lancez plus vite, gardez des opérations plus propres et évoluez sur une plateforme conçue pour le commerce moderne."
       }
     }
   },
@@ -686,6 +800,28 @@
           "orders": "Commandes, produits et livraison au même endroit",
           "workspace": "Un espace clair pour votre équipe",
           "performance": "Une vue rapide sur les résultats du jour"
+        },
+        "carousel": {
+          "analytics": {
+            "title": "Analyses avancées",
+            "description": "Suivez vos tunnels de vente, vos taux de conversion et le comportement de vos clients."
+          },
+          "orders": {
+            "title": "Gestion des commandes",
+            "description": "Traitez, suivez et expédiez les commandes de vos clients en toute simplicité."
+          },
+          "revenue": {
+            "title": "Suivi du chiffre d'affaires",
+            "description": "Une vision en temps réel des performances de votre boutique, d'un coup d'œil."
+          },
+          "shipping": {
+            "title": "Expédition intelligente",
+            "description": "Envoi automatique vers plus de 50 transporteurs, avec webhooks en temps réel et suivi automatique."
+          },
+          "catalog": {
+            "title": "Catalogue produits",
+            "description": "Gérez les variantes, le stock et les prix depuis un seul endroit."
+          }
         }
       },
       "form": {
@@ -719,6 +855,13 @@
       }
     },
     "register": {
+      "closed": {
+        "badge": "Inscriptions en pause",
+        "title": "Les inscriptions sont temporairement fermées",
+        "message": "La création de nouvelles boutiques est suspendue pour le moment. Nous la rouvrirons bientôt — merci de votre patience.",
+        "haveAccount": "Vous avez déjà un compte ?",
+        "logIn": "Se connecter"
+      },
       "hero": {
         "launchYour": "Lancez votre",
         "empire": "Empire",
@@ -767,15 +910,36 @@
           "label": "E-mail",
           "placeholder": "name{'@'}company.com"
         },
+        "phone": {
+          "label": "Téléphone",
+          "placeholder": "+XX X XXX XXXX"
+        },
+        "otp": {
+          "label": "Confirmation OTP",
+          "placeholder": "Entrez le code OTP",
+          "send": "Envoyer le code",
+          "verify": "Vérifier le code",
+          "verified": "Contact confirmé.",
+          "channelPrompt": "Où souhaitez-vous recevoir votre code ?",
+          "sentTo": "Code envoyé à {destination}. Il expire dans {minutes} minutes.",
+          "sending": "Envoi…",
+          "verifying": "Vérification…",
+          "resendIn": "Renvoyer dans {seconds}s"
+        },
         "password": {
           "label": "Mot de passe"
         },
+        "confirmPassword": {
+          "label": "Confirmer le mot de passe"
+        },
         "submit": {
           "creating": "Création du compte...",
-          "register": "S’inscrire et créer la boutique"
+          "register": "S’inscrire et créer la boutique",
+          "verifyOtp": "Vérifiez l’OTP pour continuer"
         },
         "haveAccount": "Vous avez déjà un compte ?",
-        "logIn": "Se connecter"
+        "logIn": "Se connecter",
+        "forgotPassword": "Mot de passe oublié ?"
       },
       "success": {
         "title": "C’est bon !",
@@ -783,7 +947,17 @@
         "cta": "Aller au tableau de bord"
       },
       "errors": {
-        "generic": "Une erreur est survenue lors de l’inscription."
+        "generic": "Une erreur est survenue lors de l’inscription.",
+        "sessionMissing": "Votre compte a été créé, mais la connexion automatique a échoué. Connectez-vous pour continuer.",
+        "emailInvalid": "Entrez une adresse e-mail valide.",
+        "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères.",
+        "passwordMismatch": "Les mots de passe ne correspondent pas.",
+        "phoneRequired": "Le numéro de téléphone est requis.",
+        "phoneInvalid": "Entrez un numéro de téléphone valide.",
+        "phoneRestricted": "L’inscription est actuellement indisponible.",
+        "otpRequired": "Entrez le code OTP.",
+        "otpSendFirst": "Envoyez d’abord le code OTP.",
+        "otpVerifyFirst": "Vérifiez l’OTP avant de créer votre compte."
       },
       "social": {
         "divider": "ou continuer avec",
@@ -791,6 +965,62 @@
         "facebook": "Continuer avec Facebook",
         "apple": "Continuer avec Apple"
       }
+    },
+    "forgotPassword": {
+      "title": "Mot de passe oublié",
+      "subtitle": "Nous vous envoyons un code à usage unique pour confirmer votre identité, puis vous choisissez un nouveau mot de passe.",
+      "backToLogin": "Retour à la connexion",
+      "email": {
+        "label": "Adresse e-mail",
+        "placeholder": "nom{'@'}entreprise.com"
+      },
+      "phone": {
+        "label": "Numéro de téléphone",
+        "placeholder": "05 55 55 55 55"
+      },
+      "password": {
+        "label": "Nouveau mot de passe",
+        "placeholder": "Au moins 8 caractères"
+      },
+      "confirmPassword": {
+        "label": "Confirmer le nouveau mot de passe",
+        "placeholder": "Répétez votre nouveau mot de passe"
+      },
+      "otp": {
+        "channelLabel": "Envoyer mon code par",
+        "label": "Code de vérification",
+        "placeholder": "000000",
+        "sentTo": "Si un compte correspond, un code part vers {destination}. Il expire dans {minutes} minutes.",
+        "resend": "Renvoyer le code",
+        "resendIn": "Renvoyer dans {seconds}s",
+        "changeDestination": "Utiliser une autre adresse"
+      },
+      "submit": {
+        "send": "Envoyer le code",
+        "sending": "Envoi…",
+        "verify": "Vérifier le code",
+        "verifying": "Vérification…",
+        "save": "Enregistrer le mot de passe",
+        "saving": "Enregistrement…"
+      },
+      "done": {
+        "title": "Mot de passe mis à jour",
+        "subtitle": "Vous avez été déconnecté partout. Connectez-vous avec votre nouveau mot de passe.",
+        "logIn": "Aller à la connexion"
+      },
+      "errors": {
+        "emailInvalid": "Saisissez une adresse e-mail valide.",
+        "phoneRequired": "Saisissez votre numéro de téléphone.",
+        "codeRequired": "Saisissez le code reçu.",
+        "passwordTooShort": "Le mot de passe doit contenir au moins {min} caractères.",
+        "passwordMismatch": "Les mots de passe ne correspondent pas.",
+        "generic": "Votre mot de passe n'a pas pu être mis à jour. Réessayez."
+      }
+    },
+    "channels": {
+      "email": "E-mail",
+      "sms": "SMS",
+      "whatsapp": "WhatsApp"
     }
   },
   "pricing": {
@@ -816,7 +1046,10 @@
       "perYear": "/an"
     },
     "features": {
-      "ordersPerMonth": "{count} commandes/mois"
+      "ordersPerMonth": "{count} commandes/mois",
+      "maxProducts": "Jusqu’à {count} produits",
+      "maxPixels": "{count} pixels marketing",
+      "aiScansPerMonth": "{count} scans de documents par IA par mois"
     },
     "page": {
       "title": "Tarifs simples et transparents",
@@ -865,6 +1098,11 @@
         "description": "Pour les marques qui gèrent un plus gros volume chaque mois",
         "cta": "15 jours gratuits"
       }
+    },
+    "billing": {
+      "monthly": "Facturé chaque mois",
+      "yearly": "Facturé {total} une fois par an",
+      "free": "Gratuit, aucun paiement"
     }
   },
   "storefront": {
@@ -877,7 +1115,8 @@
     "common": {
       "productsCount": "{count} produits",
       "selectPlaceholder": "Sélectionner…",
-      "storeFallback": "Boutique"
+      "storeFallback": "Boutique",
+      "collection": "Collection"
     },
     "actions": {
       "addToCart": "Ajouter au panier",
@@ -908,7 +1147,28 @@
       "buy": "Acheter {qty}",
       "save": "Économisez {amount}"
     },
+    "clearance": {
+      "badge": "Destockage",
+      "progressHint": "Ajoutez encore {remaining} article(s) destockage pour débloquer une remise",
+      "unlockedHint": "Vous avez débloqué une remise destockage !",
+      "discountLine": "Remise destockage",
+      "bannerFallback": "Grand destockage — achetez plus, économisez plus !",
+      "dialogTitle": "Grand destockage en cours !",
+      "dialogBody": "Achetez {multiple} articles destockage, et les {free} moins chers parmi eux vous sont offerts. Et ça se cumule : {multiple2} articles = {free2} offerts, {multiple4} articles = {free4} offerts.",
+      "dialogCta": "J'ai compris",
+      "dialogDismissAria": "Fermer la fenêtre destockage",
+      "dialogBuyLabel": "achetés",
+      "dialogFreeLabel": "offerts"
+    },
     "pages": {
+      "about": {
+        "seo": {
+          "title": "À propos - {tenant}",
+          "description": "En savoir plus sur {tenant}."
+        },
+        "heading": "À propos de {tenant}",
+        "placeholder": "Ceci est la page « À propos » de la boutique. Remplacez ce texte depuis l'assistant de configuration pour présenter votre boutique."
+      },
       "contact": {
         "seo": {
           "title": "Contact - {tenant}",
@@ -924,7 +1184,42 @@
           "emailUs": "Écrivez-nous",
           "visitUs": "Rendez-nous visite"
         },
-        "addressPlaceholder": "123 rue du Magasin, Ville, Pays"
+        "addressPlaceholder": "123 rue du Magasin, Ville, Pays",
+        "intro": "Une question sur un produit, une commande, ou envie de nous dire bonjour ? Nous sommes là pour vous.",
+        "form": {
+          "name": {
+            "label": "Nom complet",
+            "placeholder": "Votre nom"
+          },
+          "email": {
+            "label": "E-mail",
+            "placeholder": "vous{'@'}email.com"
+          },
+          "message": {
+            "label": "Message",
+            "placeholder": "Votre message…"
+          },
+          "send": "Envoyer le message"
+        },
+        "mailSubject": "Message de {name}"
+      },
+      "categories": {
+        "title": "Catégories",
+        "subtitle": "Parcourez toutes les collections de la boutique.",
+        "card": {
+          "viewCollection": "Voir la collection"
+        },
+        "empty": {
+          "title": "Aucune catégorie",
+          "subtitle": "Les catégories apparaîtront ici dès leur ajout."
+        },
+        "errors": {
+          "loadFailed": "Impossible de charger les catégories. Actualisez la page pour réessayer."
+        },
+        "seo": {
+          "title": "Catégories",
+          "description": "Parcourez toutes les collections de la boutique."
+        }
       }
     },
     "home": {
@@ -967,7 +1262,12 @@
     "nav": {
       "home": "Accueil",
       "shop": "Boutique",
-      "contact": "Contact"
+      "contact": "Contact",
+      "categories": "Catégories",
+      "menu": "Menu",
+      "closeMenu": "Fermer le menu",
+      "previous": "Précédent",
+      "next": "Suivant"
     },
     "cart": {
       "label": "Panier",
@@ -1010,7 +1310,20 @@
       "coupon": {
         "title": "Code promo",
         "badge": "Remise",
-        "placeholder": "Entrez le code (ex : BIENVENUE10)"
+        "placeholder": "Entrez le code (ex : BIENVENUE10)",
+        "checking": "Vérification…",
+        "remove": "Retirer",
+        "invalid": "Ce code promo n'est pas valide",
+        "freeShipping": "Livraison offerte",
+        "applied": "Code {code} appliqué",
+        "errors": {
+          "notStarted": "Ce code promo n'est pas encore actif",
+          "expired": "Ce code promo a expiré",
+          "usageLimit": "Ce code promo a atteint sa limite d'utilisation",
+          "customerLimit": "Vous avez déjà utilisé ce code promo",
+          "notApplicable": "Ce code promo ne s'applique pas aux articles de votre panier",
+          "minOrder": "Ce code promo exige une commande minimum de {amount} {currency}"
+        }
       },
       "summary": {
         "deliveryOption": "Option de livraison",
@@ -1025,7 +1338,8 @@
         "phoneRequired": "Le numéro de téléphone est requis pour passer la commande.",
         "deliveryRequired": "Veuillez sélectionner une option de livraison.",
         "requiredFields": "Veuillez remplir tous les champs requis.",
-        "submitFailed": "Impossible de passer la commande. Veuillez réessayer."
+        "submitFailed": "Impossible de passer la commande. Veuillez réessayer.",
+        "shippingUnavailable": "La livraison n'est pas disponible pour la commune choisie. Veuillez sélectionner une autre option."
       },
       "actions": {
         "returnToCart": "Retour au panier",
@@ -1077,13 +1391,30 @@
           "self": "Livraison par le commerçant",
           "storePickup": "Retrait en magasin",
           "homeDelivery": "Livraison à domicile"
-        }
+        },
+        "noPickupPoints": "Aucun point de retrait ne dessert cette commune. Choisissez une autre commune, ou la livraison à domicile."
       }
+    },
+    "orderSuccess": {
+      "title": "Commande passée avec succès !",
+      "subtitle": "Merci pour votre commande. Nous vous contacterons bientôt pour la confirmer.",
+      "orderId": "Numéro de commande",
+      "whatsNext": "Et maintenant ?",
+      "callTitle": "Nous vous appellerons bientôt",
+      "callDescription": "Notre équipe vous contactera pour confirmer votre commande et les détails de livraison.",
+      "prepareTitle": "Nous préparerons votre commande",
+      "prepareDescription": "Une fois confirmée, nous préparerons vos articles pour la livraison.",
+      "deliveryTitle": "Livraison en cours",
+      "deliveryDescription": "Votre commande sera livrée à votre adresse. Payez en espèces à la réception.",
+      "paymentInfo": "Paiement : Paiement à la livraison - Payez à la réception de votre commande",
+      "continueShopping": "Continuer mes achats",
+      "backToHome": "Retour à l'accueil"
     },
     "product": {
       "detailsTitle": "Détails du produit",
       "addedToCart": "{title} ajouté au panier !",
       "inStock": "En stock",
+      "lowStock": "Stock faible",
       "perUnit": "par unité",
       "descriptionFallback": "Découvrez le parfait équilibre entre style et fonctionnalité.",
       "viewFullDetails": "Voir les détails",
@@ -1108,7 +1439,8 @@
       "stock": {
         "unavailable": "Indisponible",
         "outOfStock": "Rupture de stock",
-        "lowStock": "Stock faible : {count} restants"
+        "lowStock": "Stock faible : {count} restants",
+        "selectOptions": "Choisissez une option pour voir la disponibilité"
       },
       "cod": {
         "title": "Commander maintenant",
@@ -1116,9 +1448,11 @@
         "submit": "Confirmer la commande",
         "submitting": "Envoi…"
       },
+      "chooseOptionsPrompt": "Sélectionnez vos options pour continuer",
       "totalPrice": "Prix total :",
       "errors": {
-        "outOfStockVariant": "Cette variante est en rupture de stock."
+        "outOfStockVariant": "Cette variante est en rupture de stock.",
+        "selectOptions": "Veuillez d'abord choisir vos options"
       }
     },
     "toasts": {
@@ -1191,7 +1525,11 @@
       "emptyHint": "Essayez une autre catégorie ou parcourez tous les produits."
     },
     "search": {
-      "placeholder": "Rechercher des produits..."
+      "placeholder": "Rechercher des produits...",
+      "keywords": "Mots-clés associés",
+      "searching": "Recherche…",
+      "noResults": "Aucun produit trouvé.",
+      "seeMore": "Voir plus"
     },
     "header": {
       "wishlistTitle": "Favoris",
@@ -1217,6 +1555,124 @@
     },
     "announcement": {
       "dismissAria": "Fermer l’annonce"
+    },
+    "templates": {
+      "maison": {
+        "about": {
+          "kicker": "Notre histoire",
+          "body": "Nous croyons que chaque espace de vie mérite d'être beau, fonctionnel et inspirant. C'est pourquoi nous sélectionnons avec soin chaque produit pour vous offrir le meilleur de la décoration et des accessoires maison.",
+          "lead": "Une boutique dédiée à l'art de vivre, à la décoration intérieure et aux accessoires maison soigneusement sélectionnés.",
+          "valuesTitle": "Nos valeurs",
+          "values": {
+            "quality": {
+              "title": "Qualité",
+              "text": "Des produits sélectionnés pour leur qualité de fabrication et leur durabilité."
+            },
+            "living": {
+              "title": "Art de vivre",
+              "text": "Chaque pièce est pensée pour embellir et améliorer votre quotidien."
+            },
+            "passion": {
+              "title": "Passion",
+              "text": "Une équipe passionnée par la décoration intérieure et le design."
+            }
+          },
+          "ctaTitle": "Découvrir",
+          "ctaAccent": "notre boutique",
+          "ctaAction": "Explorer les produits"
+        },
+        "home": {
+          "trust": {
+            "delivery": "Livraison partout en Algérie",
+            "curation": "Sélection rigoureuse",
+            "returns": "Retours facilités"
+          },
+          "manifestoKicker": "Notre Univers",
+          "manifestoTitle": "L'art de décorer",
+          "manifestoAccent": "votre espace",
+          "manifestoBody": "Des pièces pensées pour embellir chaque coin de votre maison. Du salon à la chambre, de la cuisine au bureau.",
+          "manifestoCta": "Découvrir la boutique"
+        }
+      },
+      "food": {
+        "badges": {
+          "organic": "Bio",
+          "fastDelivery": "Livraison rapide",
+          "premium": "Qualité premium"
+        }
+      },
+      "street": {
+        "about": {
+          "since": "Depuis {year}",
+          "titlePrefix": "Fait pour",
+          "titleAccent": "la rue",
+          "descriptionFallback": "Nous créons des pièces qui tiennent à l’usage réel. Pas de remplissage, pas de bruit saisonnier — juste des vêtements qui méritent leur place dans votre dressing.",
+          "missionPrefix": "Notre mission est simple :",
+          "missionAccent": "une qualité qui se sent, à un prix sans surcoût.",
+          "values": {
+            "quality": {
+              "title": "Qualité",
+              "description": "Des matières choisies pour durer, contrôlées pièce par pièce."
+            },
+            "design": {
+              "title": "Design",
+              "description": "Des coupes dessinées en interne, pensées pour tous les jours."
+            },
+            "culture": {
+              "title": "Culture",
+              "description": "Ancrés dans la scène d’où nous venons, et faits avec elle."
+            }
+          },
+          "heroText": "Street"
+        },
+        "contact": {
+          "titlePrefix": "Écrivez-",
+          "titleAccent": "nous",
+          "sections": {
+            "hqLocation": "Où nous trouver",
+            "directLine": "Nous appeler",
+            "emailProtocol": "Nous écrire"
+          },
+          "form": {
+            "name": {
+              "label": "Nom",
+              "placeholder": "Votre nom"
+            },
+            "email": {
+              "label": "E-mail",
+              "placeholder": "vous{'@'}email.com"
+            },
+            "message": {
+              "label": "Message",
+              "placeholder": "Comment pouvons-nous vous aider ?"
+            },
+            "send": "Envoyer"
+          },
+          "alert": {
+            "sent": "Merci — votre message part vers nous. Nous vous répondrons rapidement."
+          }
+        }
+      },
+      "wellness": {
+        "home": {
+          "curatedSelection": "Notre sélection",
+          "shopCollection": "Voir la collection"
+        }
+      },
+      "embellir": {
+        "controls": {
+          "previous": "Précédent",
+          "next": "Suivant"
+        },
+        "search": {
+          "showMore": "Afficher plus"
+        }
+      }
+    },
+    "draftBar": {
+      "title": "Boutique en brouillon",
+      "hint": "Vous seul pouvez la voir. Les visiteurs reçoivent une erreur 404.",
+      "cta": "Publier"
     }
   },
   "admin": {
@@ -1240,6 +1696,8 @@
       "search": "Rechercher",
       "searchAction": "Rechercher",
       "clear": "Effacer",
+      "filters": "Filtres",
+      "clearFilters": "Effacer les filtres",
       "reset": "Réinitialiser",
       "startDate": "Date de début",
       "endDate": "Date de fin",
@@ -1276,8 +1734,37 @@
       "processing": "Traitement en cours…",
       "error": "Une erreur s'est produite. Veuillez réessayer.",
       "saved": "Enregistré !",
-      "filters": "Filtres",
-      "noDataAvailable": "Aucune donnée disponible"
+      "noDataAvailable": "Aucune donnée disponible",
+      "unsavedChanges": "Modifications non enregistrées",
+      "unsavedChangesHint": "N'oubliez pas d'enregistrer vos modifications.",
+      "discard": "Annuler",
+      "noResults": "Aucun résultat",
+      "replace": "Remplacer",
+      "soon": "Bientôt",
+      "moveUp": "Monter",
+      "moveDown": "Descendre",
+      "amount": "Montant",
+      "paid": "Payé",
+      "remaining": "Reste à payer",
+      "discardChangesTitle": "Annuler les modifications ?",
+      "discardChangesMessage": "Vos modifications non enregistrées sur cette page seront perdues.",
+      "keepEditing": "Continuer à modifier",
+      "leaveTitle": "Quitter sans enregistrer ?",
+      "leaveMessage": "Vous avez des modifications non enregistrées. Elles seront perdues si vous quittez cette page.",
+      "leaveConfirm": "Quitter la page",
+      "clickToUpload": "Cliquez pour téléverser votre reçu",
+      "confirmDelete": "Voulez-vous vraiment supprimer cet élément ?",
+      "done": "Terminé",
+      "remove": "Retirer",
+      "retry": "Réessayer",
+      "receive": "Réceptionner",
+      "receiveAll": "Tout réceptionner",
+      "recordPayment": "Enregistrer un paiement",
+      "invalid": "est invalide",
+      "moreActions": "Plus d'actions",
+      "errors": {
+        "amountTooHigh": "Le montant ne peut pas dépasser le solde restant."
+      }
     },
     "confirmModal": {
       "defaults": {
@@ -1351,13 +1838,6 @@
         }
       }
     },
-    "help": {
-      "button": "Centre d'aide",
-      "title": "Support Swekly",
-      "subtitle": "Comment pouvons-nous vous aider aujourd'hui ?",
-      "greeting": "Bonjour ! Je suis l'assistant Swekly. Comment puis-je vous aider à gérer votre boutique aujourd'hui ?",
-      "inputPlaceholder": "Tapez votre message..."
-    },
     "storeSettingsForm": {
       "title": "Apparence et paramètres de la boutique",
       "subtitle": "Personnalisez l’apparence de votre boutique et ses fonctionnalités e-commerce principales.",
@@ -1393,7 +1873,7 @@
         "inputLabel": "Devise"
       },
       "template": {
-        "title": "Modèle de boutique",
+        "title": "Thème de boutique",
         "subtitle": "Sélectionnez la structure de mise en page de votre vitrine.",
         "select": "Sélectionner",
         "selected": "Sélectionné",
@@ -1433,6 +1913,11 @@
         "noImage": "Aucune image",
         "uploadImage": "Téléverser une image",
         "addSlide": "Ajouter une diapositive",
+        "slide": "diapositive",
+        "slides": "diapositives",
+        "untitled": "Diapositive sans titre",
+        "noSlides": "Aucune diapositive",
+        "createFirst": "Créer la première diapositive",
         "defaults": {
           "title": "Nouvelle diapositive"
         }
@@ -1446,7 +1931,9 @@
         "imageUrl": "URL de l’image",
         "imageUrlHint": "Ou collez une URL si vous en avez déjà une.",
         "eyebrow": "Sur-titre",
-        "limit": "Limite"
+        "limit": "Limite",
+        "sectionTitle": "Titre de la section",
+        "numberOfProducts": "Nombre de produits"
       },
       "sections": {
         "title": "Sections de la page d’accueil",
@@ -1475,6 +1962,28 @@
       }
     },
     "functionalSettingsForm": {
+      "themeGroups": {
+        "sales": {
+          "title": "Vente & checkout",
+          "subtitle": "Commandes, panier et règles d’achat."
+        },
+        "invoices": {
+          "title": "Facturation",
+          "subtitle": "Documents générés depuis les ventes."
+        },
+        "marketing": {
+          "title": "Marketing & fidélité",
+          "subtitle": "Annonce de vitrine et points client."
+        },
+        "localization": {
+          "title": "Localisation",
+          "subtitle": "Devise et langue de la boutique."
+        },
+        "security": {
+          "title": "Sécurité",
+          "subtitle": "Réduisez les fausses commandes et les doublons."
+        }
+      },
       "features": {
         "title": "Fonctionnalités de la boutique",
         "subtitle": "Activez ou désactivez les fonctionnalités principales de votre vitrine.",
@@ -1490,15 +1999,87 @@
         }
       },
       "checkoutRules": {
+        "title": "Règles de checkout",
+        "subtitle": "Conditions de commande et comportement du checkout.",
         "minimumOrder": {
           "title": "Montant minimum de commande",
           "subtitle": "Bloquer le checkout si le sous-total panier est inférieur à ce montant.",
           "unit": "DZD"
         },
+        "orderIdPrefix": {
+          "title": "Préfixe de commande client",
+          "subtitle": "Préfixe utilisé dans la référence publique de commande affichée au client.",
+          "placeholder": "ORDR",
+          "hint": "4-5 caractères"
+        },
         "hideOptionalAddress": {
           "title": "Masquer le champ adresse optionnelle",
           "subtitle": "Retirer le champ adresse optionnelle du checkout et des formulaires de commande rapide.",
           "toggle": "Masquer l'adresse optionnelle"
+        }
+      },
+      "invoices": {
+        "title": "Factures de vente",
+        "subtitle": "Activez les factures PDF imprimables pour les ventes PDV et livrées.",
+        "enable": {
+          "title": "Activer la facturation",
+          "subtitle": "Permettre aux admins de générer et imprimer les factures depuis les ventes.",
+          "toggle": "Activer les factures de vente"
+        },
+        "prefix": {
+          "label": "Préfixe de facture",
+          "placeholder": "INV"
+        },
+        "logo": {
+          "label": "Marque",
+          "title": "Afficher le logo",
+          "subtitle": "Utilise le logo des paramètres d'apparence s'il est disponible.",
+          "toggle": "Afficher le logo sur les factures"
+        },
+        "footer": {
+          "label": "Note de bas de page",
+          "placeholder": "Merci pour votre achat."
+        }
+      },
+      "loyalty": {
+        "title": "Programme de points",
+        "subtitle": "Configurez le calcul et la redemption des points.",
+        "enable": "Activer les points",
+        "enableSubtitle": "Activer le calcul des points et leur redemption au checkout.",
+        "basePoints": "Points de base",
+        "marginFactor": "Facteur de marge",
+        "minRedeem": "Seuil minimum (points)",
+        "dzdPerPoint": "DZD par point"
+      },
+      "clearance": {
+        "title": "Destockage",
+        "subtitle": "Récompensez les clients qui achètent en grande quantité vos produits en destockage.",
+        "enable": "Activer le module destockage",
+        "enableSubtitle": "Offrez une remise égale aux articles les moins chers une fois un seuil de quantité atteint.",
+        "multiple": "Seuil de quantité",
+        "multipleHint": "Atteint tous les N articles destockage achetés (ex: 6).",
+        "divisor": "Diviseur",
+        "divisorHint": "Les quantité/diviseur articles les moins chers deviennent gratuits (ex: 6/3 = 2 gratuits).",
+        "scopeHint": "Taguez les produits éligibles depuis leur fiche produit. Si aucun produit n'est tagué, l'offre s'applique à tout le catalogue.",
+        "banner": "Afficher la bannière d'accueil",
+        "bannerSubtitle": "Affiche une bannière annonçant l'offre destockage.",
+        "bannerText": "Texte de la bannière",
+        "bannerTextPlaceholder": "Grand destockage — achetez plus, économisez plus !"
+      },
+      "fraud": {
+        "title": "Prévention de la fraude",
+        "subtitle": "Bloquez les fausses commandes des contacts sur liste noire et limitez les commandes en double.",
+        "blacklist": {
+          "title": "Activer la liste noire",
+          "subtitle": "Bloquer le checkout pour les numéros, IPs et clients sur liste noire.",
+          "manageLink": "Gérer les entrées de la liste noire"
+        },
+        "duplicate": {
+          "title": "Limiter les commandes en double",
+          "subtitle": "Bloquer le checkout quand un numéro de téléphone a passé trop de commandes en peu de temps.",
+          "limit": "Nombre max. de commandes",
+          "window": "Fenêtre de temps (heures)",
+          "hint": "Une fois ce nombre de commandes atteint pour un numéro dans la fenêtre de temps, les commandes suivantes sont bloquées."
         }
       },
       "currency": {
@@ -1526,11 +2107,76 @@
       },
       "messages": {
         "loadFailed": "Impossible de charger les paramètres.",
-        "saved": "Paramètres fonctionnels enregistrés !",
+        "saved": "Paramètres de vente enregistrés !",
         "saveFailed": "Impossible d’enregistrer les modifications. Veuillez réessayer."
       },
       "confirm": {
         "discard": "Voulez-vous vraiment annuler les modifications non enregistrées ?"
+      },
+      "messaging": {
+        "title": "Messagerie",
+        "subtitle": "Personnalisez les modèles de communication envoyés à vos clients.",
+        "whatsappTemplate": {
+          "label": "Modèle de confirmation WhatsApp",
+          "hint": "Personnalisez le message envoyé lorsque vous cliquez sur 'Envoyer WhatsApp' dans les détails de la commande.",
+          "keywordsLabel": "Mots-clés disponibles :",
+          "keywords": {
+            "customerName": "Nom du client",
+            "productsRecap": "Liste des produits commandés",
+            "total": "Montant total avec livraison",
+            "address": "Adresse de livraison complète (y compris wilaya/commune)",
+            "confirmLink": "Le lien de confirmation sécurisé",
+            "payment": "Paiement",
+            "remaining": "Restant"
+          },
+          "preview": "Aperçu"
+        }
+      },
+      "maintenance": {
+        "title": "Mode maintenance",
+        "subtitle": "Fermez temporairement votre boutique aux clients.",
+        "enable": {
+          "title": "Fermer la boutique pour maintenance",
+          "subtitle": "Les clients verront une page de maintenance à la place de votre boutique. Le panneau d'administration reste accessible.",
+          "toggle": "Activer le mode maintenance"
+        },
+        "warning": "Votre boutique est inaccessible aux clients tant que ceci est activé. N'oubliez pas de le désactiver ensuite.",
+        "message": {
+          "label": "Message affiché aux clients (optionnel)",
+          "placeholder": "Nous effectuons une maintenance planifiée et serons de retour bientôt."
+        }
+      }
+    },
+    "domainSettingsForm": {
+      "customDomain": {
+        "title": "Domaine personnalisé",
+        "subtitle": "Ajoutez le nom exact que les clients visiteront, par exemple www.example.com."
+      },
+      "fields": {
+        "domain": "Nom de domaine"
+      },
+      "actions": {
+        "add": "Ajouter le domaine"
+      },
+      "dns": {
+        "title": "Enregistrement DNS",
+        "subtitle": "Créez cet enregistrement CNAME chez votre fournisseur DNS, puis gardez le domaine ajouté ici.",
+        "apexNote": "Pour un domaine racine comme example.com, utilisez ALIAS/ANAME si votre fournisseur DNS le permet, ou redirigez-le vers www.example.com."
+      },
+      "connected": {
+        "title": "Domaines connectés",
+        "subtitle": "Les domaines listés ici sont autorisés à afficher cette boutique.",
+        "empty": "Aucun domaine personnalisé connecté."
+      },
+      "messages": {
+        "loadFailed": "Impossible de charger les domaines.",
+        "saved": "Domaine connecté.",
+        "saveFailed": "Impossible d'ajouter le domaine.",
+        "deleted": "Domaine supprimé.",
+        "deleteFailed": "Impossible de supprimer le domaine."
+      },
+      "confirm": {
+        "delete": "Supprimer ce domaine ?"
       }
     },
     "contactInfosForm": {
@@ -1588,7 +2234,7 @@
         },
         "whatsapp": {
           "label": "WhatsApp",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "Facebook",
@@ -1624,7 +2270,7 @@
         },
         "viber": {
           "label": "Viber",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "Pinterest",
@@ -1671,7 +2317,8 @@
         "sku": "SKU",
         "barcode": "Code-barres",
         "active": "Actif",
-        "images": "Images"
+        "images": "Images",
+        "promotion": "Promotion"
       },
       "actions": {
         "manageImages": "Gérer ({count})",
@@ -1714,7 +2361,8 @@
         "suggestSkuFailed": "Impossible de suggérer un SKU",
         "suggestSkuUnavailable": "Le SKU suggéré n’est pas disponible",
         "saveImagesFailed": "Impossible d’enregistrer les images"
-      }
+      },
+      "promotionSimpleProduct": "Utilisez l'onglet Promotions du produit pour la variante par défaut d'un produit simple."
     },
     "productOptionsEditor": {
       "title": "Options",
@@ -1785,7 +2433,10 @@
         "logo": {
           "label": "Logo de la marque",
           "upload": "Téléverser le logo",
-          "hint": "Carré (1:1), PNG recommandé."
+          "hint": "Carré (1:1), PNG recommandé.",
+          "magicIdentity": "Identité magique",
+          "magicHint": "Téléversez d'abord un logo pour générer une identité.",
+          "magicSuccess": "Identité magique appliquée."
         },
         "favicon": {
           "label": "Favicon",
@@ -1794,7 +2445,10 @@
         },
         "primaryColor": {
           "label": "Couleur principale",
-          "hint": "Utilisée pour les boutons, liens et accents."
+          "hint": "Utilisée pour les boutons, liens et accents.",
+          "suggested": "Palettes suggérées",
+          "overrideLabel": "Appliquer la couleur de marque au thème",
+          "overrideHint": "Désactivez pour garder la couleur d'origine du thème sélectionné."
         }
       },
       "announcement": {
@@ -1807,8 +2461,38 @@
         }
       },
       "templates": {
-        "title": "Modèle de boutique",
-        "subtitle": "Choisissez la mise en page qui correspond le mieux à votre marque.",
+        "title": "Thème de boutique",
+        "subtitle": "Chaque thème définit la typographie, les couleurs et les formes de votre boutique. Testez-en un sur votre propre boutique avant de changer.",
+        "quickView": "Aperçu",
+        "searchPlaceholder": "Rechercher un thème",
+        "previewStore": "Voir la boutique",
+        "previewNeedsSlug": "Enregistrez d'abord l'adresse de votre boutique pour voir un aperçu.",
+        "liveNow": "En ligne",
+        "selected": "Sélectionné",
+        "pending": "Passera à {name} à l'enregistrement",
+        "bestFor": "Idéal pour",
+        "sampleBrand": "Votre boutique",
+        "sampleTagline": "Nouveautés",
+        "emptyTitle": "Aucun thème ne correspond à cette recherche.",
+        "emptyAction": "Réinitialiser les filtres",
+        "categories": {
+          "all": "Tous",
+          "classic": "Classique",
+          "minimalist": "Minimal",
+          "bold": "Audacieux",
+          "tech": "Tech",
+          "luxury": "Luxe",
+          "elegant": "Élégant"
+        },
+        "moods": {
+          "dark": "Sombre",
+          "light": "Clair"
+        },
+        "voices": {
+          "serif": "Serif",
+          "sans": "Sans serif",
+          "display": "Display"
+        },
         "options": {
           "classic": {
             "label": "Classique",
@@ -1860,10 +2544,40 @@
             "description": "Dynamique et percutant pour le sport & la gym.",
             "storeTypes": "Sport, fitness, plein air"
           },
+          "arena": {
+            "label": "Arena",
+            "description": "Vitrine sombre et performante avec énergie e-sport et accents cyan.",
+            "storeTypes": "Gaming, périphériques, tech, e-sport"
+          },
           "chrono": {
             "label": "Chrono Luxe",
             "description": "Thème sombre de luxe avec accents dorés pour accessoires premium.",
             "storeTypes": "Montres, lunettes, bijoux, accessoires de luxe"
+          },
+          "maison": {
+            "label": "Pistachio",
+            "description": "Univers éditorial chaleureux et premium pour l'épicerie fine et le retail raffiné.",
+            "storeTypes": "Food premium, cadeaux, fruits secs, retail gourmet"
+          },
+          "nour": {
+            "label": "Nour Élégance",
+            "description": "Élégance drapée et douce pour la mode modeste.",
+            "storeTypes": "Abayas, hijabs, kaftans, mode modeste"
+          },
+          "embellir": {
+            "label": "Embellir",
+            "description": "Zellige émaillé profond, plâtre chaud et titrage à fort contraste.",
+            "storeTypes": "Soins de la peau, cosmétiques, bain et corps, bien-être"
+          },
+          "interior": {
+            "label": "Interior",
+            "description": "Des mises en page calmes et aérées, qui laissent respirer.",
+            "storeTypes": "Mobilier, décoration, luminaires"
+          },
+          "minimal": {
+            "label": "Minimal",
+            "description": "Épuré, centré sur le produit lui-même.",
+            "storeTypes": "Accessoires, papeterie, tech"
           }
         }
       },
@@ -1895,8 +2609,10 @@
       "finance": "Finance",
       "cash": "Caisse",
       "storeParameters": "Paramètres de la boutique",
+      "settingsHub": "Paramètres",
       "settings": "Administration",
       "dashboard": "Tableau de bord",
+      "statistics": "Statistiques",
       "products": "Produits",
       "inventory": "Stock",
       "categories": "Catégories",
@@ -1905,14 +2621,56 @@
       "orders": "Commandes",
       "salesItem": "Ventes",
       "pos": "PDV",
+      "devices": "Appareils",
       "customers": "Clients",
       "deliveryItem": "Livraison",
       "billing": "Facturation",
       "appearance": "Apparence",
       "homepage": "Page d’accueil",
       "contactInfo": "Infos de contact",
-      "functional": "Fonctionnel",
-      "users": "Utilisateurs"
+      "legalPages": "Pages legales",
+      "functional": "Vente & checkout",
+      "domains": "Domaines",
+      "integrations": "Intégrations",
+      "users": "Utilisateurs",
+      "storefront": "Boutique",
+      "account": "Compte",
+      "connections": "Connexions",
+      "promoCodes": "Codes promo"
+    },
+    "settingsNav": {
+      "ariaLabel": "Paramètres",
+      "groups": {
+        "store": "Boutique",
+        "commerce": "Commerce",
+        "content": "Contenu & marketing",
+        "localization": "Localisation",
+        "connections": "Connexions",
+        "administration": "Administration"
+      },
+      "items": {
+        "identity": "Identité & marque",
+        "theme": "Thème de la vitrine",
+        "homepage": "Page d’accueil",
+        "checkout": "Panier & checkout",
+        "fraud": "Prévention de la fraude",
+        "loyalty": "Programme de fidélité",
+        "clearance": "Ventes de déstockage",
+        "invoices": "Factures",
+        "contact": "Infos de contact",
+        "legal": "Pages légales",
+        "announcement": "Bandeau d’annonce",
+        "messaging": "Messagerie",
+        "localization": "Devise & langue",
+        "domains": "Domaines",
+        "integrations": "Intégrations",
+        "team": "Équipe & rôles",
+        "billing": "Abonnement",
+        "maintenance": "Mode maintenance"
+      },
+      "searchPlaceholder": "Rechercher un paramètre",
+      "noResults": "Aucun paramètre ne correspond à « {query} »",
+      "browse": "Parcourir les paramètres"
     },
     "roles": {
       "owner": "Propriétaire",
@@ -1925,7 +2683,24 @@
       "shipped": "Expédiée",
       "delivered": "Livrée",
       "cancelled": "Annulée",
-      "returned": "Retournée"
+      "returned": "Retournée",
+      "providerDetail": {
+        "created": "Créée",
+        "pick_up_requested": "Ramassage demandé",
+        "in_process": "En cours de traitement",
+        "waiting_transit": "En attente de transit",
+        "in_transit_to_be_shipped": "En transit vers expédition",
+        "in_transit_to_be_returned": "En transit vers retour",
+        "out_of_stock": "Rupture de stock",
+        "ready_to_ship": "Prête à expédier",
+        "assigned": "Assignée au livreur",
+        "alerted": "Alerte livreur",
+        "postponed": "Reportée",
+        "aborted": "Annulée (transporteur)",
+        "ready_to_return": "Prête pour retour",
+        "taken_by_store": "Récupérée par le magasin",
+        "not_received": "Non reçue"
+      }
     },
     "forms": {
       "product": {
@@ -1943,6 +2718,11 @@
           "label": "Mini description",
           "hint": "Courte description pour l’en-tête de la landing page (optionnel)",
           "placeholder": "Saisir un bref résumé…"
+        },
+        "searchKeywords": {
+          "label": "Mots-clés de recherche",
+          "hint": "Mots-clés pour aider les clients à trouver ce produit dans la recherche de la boutique.",
+          "placeholder": "Tapez et appuyez sur Entrée..."
         },
         "description": {
           "label": "Description",
@@ -1964,10 +2744,38 @@
         },
         "category": {
           "label": "Catégorie",
-          "placeholder": "Sélectionner une catégorie (optionnel)"
+          "placeholder": "Sélectionner une catégorie (optionnel)",
+          "hintMulti": "Sélectionnez une ou plusieurs catégories ou sous-catégories."
         },
         "isActive": {
           "label": "Le produit est actif et visible pour les clients"
+        },
+        "visibility": {
+          "label": "Visibilité",
+          "hint": "Les produits non répertoriés sont masqués de la grille boutique, de la recherche et des produits associés, mais restent accessibles via leur lien direct.",
+          "listed": "Répertorié — affiché dans la grille boutique, la recherche et les produits associés",
+          "unlisted": "Non répertorié — accessible uniquement via le lien direct"
+        },
+        "isClearance": {
+          "label": "Produit en déstockage",
+          "hint": "Ce produit bénéficie de la remise déstockage configurée dans Réglages > Fonctionnel. Un produit ne peut pas être à la fois en déstockage et en promotion.",
+          "blockedByPromotion": "Désactivez la promotion pour pouvoir activer le déstockage."
+        },
+        "isPromotionActive": {
+          "label": "Activer la promotion"
+        },
+        "promotionalPrice": {
+          "label": "Prix promotionnel",
+          "placeholder": "Nouveau prix"
+        },
+        "promotionStartDate": {
+          "label": "Date de début (facultatif)"
+        },
+        "promotionEndDate": {
+          "label": "Date de fin (requise pour le compte à rebours)"
+        },
+        "showCountdown": {
+          "label": "Afficher le compte à rebours"
         }
       },
       "category": {
@@ -1984,6 +2792,18 @@
         "image": {
           "label": "Image de la catégorie (optionnel)",
           "hint": "Affichée sur les tuiles de catégories dans la boutique"
+        },
+        "visibility": {
+          "label": "Visibilité",
+          "hint": "Les catégories non répertoriées sont masquées de la navigation et des listes de la boutique, mais restent accessibles via leur lien direct.",
+          "listed": "Répertoriée — affichée dans la navigation et les listes",
+          "unlisted": "Non répertoriée — accessible uniquement via le lien direct",
+          "unlistedNotice": "Cette catégorie est masquée de la navigation et des listes de la boutique. Ses produits sont également masqués de la grille boutique sauf s'ils appartiennent à une autre catégorie répertoriée. La page de la catégorie reste accessible via son lien direct."
+        },
+        "parent": {
+          "label": "Catégorie parente",
+          "hint": "Facultatif — choisissez une catégorie parente pour créer une sous-catégorie.",
+          "none": "Aucune (catégorie principale)"
         }
       },
       "customer": {
@@ -2029,6 +2849,10 @@
         "address": {
           "label": "Adresse",
           "placeholder": "Adresse du fournisseur"
+        },
+        "notes": {
+          "label": "Notes",
+          "placeholder": "Notes complémentaires…"
         }
       }
     },
@@ -2050,7 +2874,7 @@
             "discount": "Remise",
             "reprint": "Réimprimer",
             "reprintLastOrder": "Réimprimer la dernière commande",
-            "quickCharge": "Encaissement rapide",
+            "customAmount": "Montant libre",
             "sort": "Trier",
             "columns": "Colonnes"
           },
@@ -2107,6 +2931,18 @@
           "actions": {
             "confirmPayment": "Confirmer le paiement"
           }
+        },
+        "alerts": {
+          "saleCreated": "Vente créée avec succès",
+          "saleFailed": "Échec de la vente : {message}",
+          "unknownError": "Une erreur inconnue est survenue",
+          "featureComingSoon": "La fonction {feature} arrive bientôt",
+          "reprintNotImplemented": "La réimpression de la dernière vente n'est pas encore disponible",
+          "printInvoicePrompt": "Imprimer la facture de cette vente ?",
+          "invoicePopupBlocked": "La fenêtre de facture a été bloquée par le navigateur.",
+          "invoiceFailed": "Échec de la facture : {message}",
+          "invoicesDisabled": "Les factures de vente sont désactivées dans les paramètres fonctionnels.",
+          "noLastSale": "Aucune vente récente à réimprimer."
         }
       },
       "cash": {
@@ -2333,7 +3169,11 @@
             "openingFloat": "Fond de caisse",
             "expectedClosing": "Attendu",
             "closingCount": "Réel",
-            "difference": "Écart"
+            "difference": "Écart",
+            "opened": "Ouverte le",
+            "closed": "Fermée le",
+            "opening": "Fonds d'ouverture",
+            "closing": "Comptage de clôture"
           },
           "expected": {
             "loading": "Calcul du montant attendu…",
@@ -2434,6 +3274,47 @@
               "addPixel": "Ajouter le Pixel"
             }
           }
+        },
+        "whatsapp": {
+          "title": "WhatsApp Business",
+          "description": "Confirmez les commandes depuis votre propre numéro WhatsApp, avec des boutons Confirmer et Annuler.",
+          "modal": {
+            "title": "WhatsApp Business",
+            "intro": "Connectez votre compte WhatsApp Business pour envoyer les confirmations de commande automatiquement depuis votre numéro. Le client confirme ou annule d'un bouton, et les commandes sans réponse sont relancées après 6 heures puis après 24 heures.",
+            "unavailable": "L'inscription WhatsApp n'est pas encore configurée sur la plateforme. Contactez le support Swekly.",
+            "connect": "Connecter WhatsApp",
+            "connecting": "Connexion...",
+            "reconnect": "Connecter un autre numéro",
+            "number": "Numéro connecté",
+            "businessName": "Nom de l'entreprise",
+            "autoSend": {
+              "label": "Envoyer automatiquement aux nouvelles commandes",
+              "hint": "Commandes de la boutique uniquement. Les commandes que vous créez vous-même passent par le bouton de la fiche commande."
+            },
+            "reminders": {
+              "label": "Relancer les commandes sans réponse",
+              "hint": "Une relance après 6 heures, une seconde après 24 heures."
+            },
+            "templates": {
+              "title": "Modèles de message",
+              "hint": "Meta valide chaque modèle avant qu’il puisse être envoyé. Cela prend généralement quelques minutes.",
+              "confirmation": "Confirmation de commande",
+              "reminder": "Relance",
+              "refresh": "Actualiser les statuts",
+              "resubmit": "Renvoyer les modèles"
+            },
+            "templateStatus": {
+              "APPROVED": "Approuvé",
+              "PENDING": "En validation",
+              "REJECTED": "Refusé",
+              "PAUSED": "En pause",
+              "DISABLED": "Désactivé",
+              "MISSING": "Non soumis"
+            },
+            "disconnect": "Déconnecter",
+            "disconnectConfirm": "Déconnecter ce compte WhatsApp ? Les commandes repasseront par le lien WhatsApp manuel.",
+            "error": "Une erreur s’est produite. Réessayez."
+          }
         }
       },
       "users": {
@@ -2515,7 +3396,8 @@
           },
           "resources": {
             "variants": "Variants",
-            "metaPixels": "Pixels Meta"
+            "metaPixels": "Pixels Meta",
+            "promoCodes": "Codes promo"
           },
           "validation": {
             "invalidName": "Nom invalide (min 2 caractères).",
@@ -2538,6 +3420,7 @@
         "filters": {
           "range": "Période",
           "ranges": {
+            "today": "Aujourd’hui",
             "7d": "7 derniers jours",
             "30d": "30 derniers jours",
             "90d": "90 derniers jours",
@@ -2622,108 +3505,326 @@
           "newLandingPage": "Nouvelle landing page"
         }
       },
-      "billing": {
-        "metaTitle": "Facturation",
-        "title": "Facturation",
-        "subtitle": "Consultez votre forfait actuel, ses limites et votre utilisation.",
-        "seePricing": "Voir les tarifs",
-        "errors": {
-          "loadFailed": "Impossible de charger les informations de facturation."
-        },
-        "status": {
-          "pending": {
-            "title": "Paiement en cours de vérification",
-            "desc": "Nous avons bien reçu votre justificatif de paiement. Notre équipe le vérifie en ce moment. Votre abonnement sera mis à jour dès validation.",
-            "badge": "en attente"
+      "statistics": {
+        "title": "Statistiques",
+        "subtitle": "Analysez les performances de votre boutique en détail.",
+        "loadErrorTitle": "Les statistiques n’ont pas pu être chargées.",
+        "loadErrorHint": "Essayez d’actualiser. Si cela continue, vérifiez votre connexion ou votre session.",
+        "refresh": "Actualiser",
+        "export": "Exporter CSV",
+        "compareLabel": "vs période précédente",
+        "noCostData": "Coût d’achat inconnu pour {pct}% des ventes — la marge est estimée.",
+        "filters": {
+          "range": "Période",
+          "channel": "Canal",
+          "channels": {
+            "all": "Tous",
+            "online": "En ligne",
+            "pos": "Point de vente"
           },
-          "approved": {
-            "title": "Paiement approuvé",
-            "desc": "Votre dernier paiement a été validé et votre abonnement est actif."
+          "category": "Catégorie",
+          "allCategories": "Toutes les catégories",
+          "wilaya": "Wilaya",
+          "allWilayas": "Toutes les wilayas",
+          "provider": "Transporteur",
+          "allProviders": "Tous les transporteurs"
+        },
+        "tabs": {
+          "sales": "Ventes",
+          "delivery": "Livraison",
+          "products": "Produits & Stock",
+          "customers": "Clients",
+          "profitability": "Rentabilité"
+        },
+        "sales": {
+          "kpis": {
+            "revenue": "Chiffre d’affaires",
+            "onlineRevenue": "CA en ligne",
+            "posRevenue": "CA point de vente",
+            "ordersCount": "Commandes",
+            "avgBasket": "Panier moyen"
+          },
+          "trend": {
+            "title": "Évolution du chiffre d’affaires",
+            "hint": "Cliquez sur un point pour filtrer la période ci-dessous."
+          },
+          "byCategory": {
+            "title": "CA par catégorie",
+            "empty": "Aucune vente sur cette période."
           }
         },
-        "currentPlan": {
-          "title": "Forfait actuel",
-          "hint": "Vous pouvez changer de forfait pour tester (mensuel uniquement).",
-          "changePlan": "Changer de forfait",
-          "paySimulate": "Payer (simulation) et appliquer",
-          "cards": {
-            "plan": "Forfait",
-            "interval": "Période de facturation",
-            "source": "Source : {source}",
-            "ordersThisPeriod": "Commandes sur la période"
+        "delivery": {
+          "kpis": {
+            "totalShipments": "Expéditions",
+            "deliveredRate": "Taux de livraison",
+            "returnedRate": "Taux de retour",
+            "cancelledRate": "Taux d’annulation",
+            "avgDeliveryDays": "Délai moyen (jours)"
           },
-          "limitsTitle": "Limites du forfait"
+          "byProvider": {
+            "title": "Performance par transporteur",
+            "empty": "Aucune expédition sur cette période."
+          },
+          "byWilaya": {
+            "title": "Performance par wilaya",
+            "empty": "Aucune donnée de livraison sur cette période."
+          },
+          "selfProvider": "Livraison propre",
+          "table": {
+            "provider": "Transporteur",
+            "total": "Total",
+            "delivered": "Livrées",
+            "returned": "Retournées",
+            "cancelled": "Annulées",
+            "rate": "Taux de livraison",
+            "wilaya": "Wilaya"
+          }
         },
-        "limits": {
-          "ordersPerMonth": "Commandes / mois"
+        "products": {
+          "kpis": {
+            "activeProducts": "Produits actifs",
+            "lowStockProducts": "Stock faible",
+            "outOfStockProducts": "Rupture de stock",
+            "neverSoldProducts": "Jamais vendus",
+            "clearanceDiscountTotal": "Remises déstockage"
+          },
+          "top": {
+            "title": "Meilleures ventes",
+            "empty": "Aucune vente sur cette période."
+          },
+          "flop": {
+            "title": "Ventes les plus faibles",
+            "empty": "Aucune vente sur cette période."
+          },
+          "rotation": {
+            "title": "Rotation des stocks",
+            "hint": "Quantité vendue rapportée au stock actuel.",
+            "empty": "Aucune donnée de stock."
+          },
+          "criticalStock": {
+            "title": "Stock critique",
+            "empty": "Aucun produit en stock critique actuellement."
+          },
+          "table": {
+            "product": "Produit",
+            "quantity": "Quantité",
+            "revenue": "CA",
+            "stock": "Stock",
+            "rotation": "Rotation",
+            "threshold": "Seuil"
+          }
         },
-        "planOption": "{name} ({orders} commandes/mois)",
-        "availablePlans": {
-          "title": "Forfaits disponibles",
-          "ordersPerMonth": "{count} commandes / mois",
-          "perMonth": "/mois"
+        "customers": {
+          "kpis": {
+            "newCustomers": "Nouveaux clients",
+            "returningCustomers": "Clients récurrents",
+            "repeatPurchaseRate": "Taux de rachat",
+            "avgOrdersPerCustomer": "Commandes / client"
+          },
+          "top": {
+            "title": "Meilleurs clients",
+            "empty": "Aucun client sur cette période."
+          },
+          "byWilaya": {
+            "title": "Clients par wilaya",
+            "empty": "Aucune donnée client sur cette période."
+          },
+          "table": {
+            "customer": "Client",
+            "phone": "Téléphone",
+            "orders": "Commandes",
+            "revenue": "CA",
+            "wilaya": "Wilaya",
+            "customers": "Clients"
+          }
+        },
+        "profitability": {
+          "kpis": {
+            "revenue": "Chiffre d’affaires",
+            "cogs": "Coût des ventes",
+            "grossMargin": "Marge brute",
+            "grossMarginPct": "Marge brute %",
+            "shippingCost": "Frais de livraison",
+            "netMargin": "Marge nette",
+            "netMarginPct": "Marge nette %",
+            "costDataCoverage": "Couverture des coûts"
+          },
+          "byProduct": {
+            "title": "Marge par produit",
+            "empty": "Aucune donnée de marge sur cette période."
+          },
+          "table": {
+            "product": "Produit",
+            "quantity": "Quantité",
+            "revenue": "CA",
+            "cogs": "Coût",
+            "margin": "Marge",
+            "marginPct": "Marge %"
+          }
+        }
+      },
+      "billing": {
+        "metaTitle": "Facturation",
+        "title": "Facturation et abonnement",
+        "subtitle": "Votre forfait, son prix, sa date de renouvellement et ce que vous en consommez.",
+        "seePricing": "Voir les tarifs publics",
+        "perMonth": "/ mois",
+        "errors": {
+          "loadFailed": "Impossible de charger vos informations de facturation.",
+          "updateFailed": "Impossible de mettre à jour votre abonnement. Réessayez."
+        },
+        "status": {
+          "active": "Actif",
+          "trialing": "Essai gratuit",
+          "pastDue": "Expiré",
+          "canceling": "Se termine à l'échéance"
+        },
+        "state": {
+          "pastDue": {
+            "title": "Votre abonnement a expiré",
+            "desc": "Votre période s'est terminée le {date}. Votre boutique et votre admin restent limités tant qu'un nouveau paiement n'est pas validé.",
+            "action": "Renouveler"
+          },
+          "pending": {
+            "title": "Paiement en cours de vérification",
+            "desc": "Nous avons reçu {amount} DA par {method} le {date}. Votre forfait sera mis à jour dès validation par notre équipe.",
+            "action": "Voir"
+          },
+          "rejected": {
+            "title": "Votre dernier paiement a été refusé",
+            "desc": "Le reçu envoyé le {date} n'a pas pu être validé. Vérifiez le montant et les coordonnées, puis renvoyez-le.",
+            "action": "Réessayer"
+          },
+          "canceling": {
+            "title": "Le renouvellement automatique est désactivé",
+            "desc": "Vous gardez l'accès complet jusqu'au {date}. Ensuite, votre boutique repasse aux limites gratuites.",
+            "action": "Réactiver le renouvellement"
+          },
+          "trial": {
+            "title": "Il vous reste {days} jours d'essai gratuit",
+            "desc": "Votre essai se termine le {date}. Choisissez un forfait avant cette date pour éviter toute interruption.",
+            "action": "Choisir un forfait"
+          }
+        },
+        "current": {
+          "eyebrow": "Forfait actuel",
+          "billedAs": "Facturation",
+          "renewsOn": "Renouvellement le",
+          "trialEnds": "Fin de l'essai",
+          "accessEnds": "Fin de l'accès",
+          "nextCharge": "Prochain paiement",
+          "daysLeft": "dans {days} jours",
+          "today": "aujourd'hui",
+          "expiredAgo": "il y a {days} jours",
+          "savingPerYear": "économise {amount} DA vs mensuel",
+          "stopRenewal": "Désactiver le renouvellement automatique",
+          "resumeRenewal": "Réactiver le renouvellement"
+        },
+        "usage": {
+          "title": "Utilisation",
+          "window": "Ce mois-ci · {range}",
+          "orders": "Commandes",
+          "products": "Produits",
+          "pixels": "Pixels Meta",
+          "unlimited": "Illimité",
+          "ordersBlocked": "Limite atteinte — les nouvelles commandes sont refusées jusqu'à la prochaine période ou une montée en gamme."
         },
         "interval": {
-          "monthly": "Facturation mensuelle",
-          "yearly": "Facturation annuelle",
+          "monthly": "Mensuel",
+          "yearly": "Annuel",
           "annual": "Annuel",
-          "save": "Économisez {pct}%"
+          "save": "-{pct}%"
         },
-        "mo": "mois",
-        "yr": "an",
-        "currentPlanBadge": "Votre forfait",
-        "unlimitedOrders": "Commandes illimitées",
-        "upToOrders": "Jusqu'à {count} commandes/mois",
-        "selectedBtn": "Sélectionné",
-        "selectBtn": "Choisir ce forfait",
-        "prioritySupport": "Support prioritaire",
-        "customBranding": "Marque personnalisée & SMS",
+        "plans": {
+          "title": "Changer de forfait",
+          "subtitle": "Les prix sont mensuels. Les forfaits annuels sont payés en une fois pour douze mois.",
+          "currentBadge": "Votre forfait",
+          "freeForever": "Gratuit, aucun paiement",
+          "billedMonthly": "Facturé chaque mois",
+          "billedYearly": "Facturé {total} une fois par an",
+          "ordersLine": "{count} commandes / mois",
+          "productsLine": "{count} produits",
+          "pixelsLine": "{count} pixels Meta",
+          "cta": {
+            "current": "Forfait actuel",
+            "upgrade": "Monter en gamme",
+            "downgrade": "Passer à ce forfait",
+            "switchToYearly": "Passer à l'annuel",
+            "switchToMonthly": "Passer au mensuel"
+          }
+        },
+        "checkout": {
+          "eyebrow": "Récapitulatif",
+          "emptyTitle": "Aucun forfait sélectionné",
+          "emptyDesc": "Choisissez un forfait pour voir son prix et comment le régler.",
+          "monthlyTerm": "Période mensuelle",
+          "yearlyTerm": "Période annuelle, payée d'avance",
+          "unitLine": "{price} DA × {months} mois",
+          "listLine": "Au lieu de {price} DA mois par mois",
+          "total": "Total à transférer",
+          "termNote": "Couvre du {start} au {end}. Les jours restants de votre période actuelle sont conservés.",
+          "methodLabel": "Comment payez-vous ?",
+          "soon": "Bientôt",
+          "copy": "Copier",
+          "eurNote": "Conversion indicative à 1 EUR = {rate} DA. Le montant dû est le total en DZD ci-dessus.",
+          "instructions": {
+            "dzd": "Transférez exactement {amount} sur le compte ci-dessous, puis téléversez le reçu.",
+            "eur": "Transférez environ {amount} sur le compte ci-dessous, puis téléversez le reçu."
+          },
+          "fileHint": "PNG, JPG, WEBP ou PDF, 10 Mo maximum",
+          "submit": "Envoyer {amount} pour vérification",
+          "submitSuccess": "Paiement envoyé. Notre équipe vérifie les reçus sous un jour ouvré et votre forfait se met à jour automatiquement.",
+          "blocked": {
+            "pending": "Un paiement est déjà en attente de vérification.",
+            "noMethod": "Choisissez un moyen de paiement pour continuer.",
+            "noProof": "Joignez votre reçu de transfert pour continuer."
+          },
+          "downgradeToFree": "Le forfait gratuit ne demande aucun paiement. Votre période payée court jusqu'au {date} — désactivez le renouvellement automatique et votre boutique passera alors aux limites gratuites.",
+          "turnOffRenewal": "Désactiver le renouvellement automatique",
+          "renewalAlreadyOff": "Le renouvellement automatique est déjà désactivé"
+        },
         "payment": {
           "methods": {
             "myfin": "MyFin",
             "paysera": "Paysera",
             "baridimob": "BaridiMob",
             "ccp": "CCP / Poste",
-            "chargily": "Chargily (CIB/Edahabia)"
+            "chargily": "Chargily"
           },
-          "emptyTitle": "Caisse",
-          "emptyDesc": "Sélectionnez un forfait dans la liste pour commencer la mise à niveau.",
-          "instructions": {
-            "myfin": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte MyFin :\nIBAN : BG98MYFI123123123\nNom : MySaaS LLC",
-            "paysera": "Veuillez envoyer {eurAmount} EUR (Taux : 1€ = {rate} DA) sur notre compte Paysera :\nEmail : payments{'@'}mysaas.com\nNom : MySaaS LLC",
-            "baridimob": "Veuillez envoyer {amount} DZD via BaridiMob à :\nRIP : 00799999000000000012\nTéléphone : +213 555 55 55 55",
-            "ccp": "Veuillez déposer {amount} DZD sur notre compte CCP :\nCompte : 12345678 99\nNom : MySaaS LLC"
+          "account": {
+            "rip": "RIP",
+            "ccp": "Compte CCP",
+            "iban": "IBAN",
+            "email": "E-mail",
+            "holder": "Titulaire"
           },
-          "title": "Finaliser votre abonnement",
-          "subtitle": "Sélectionnez un mode de paiement pour continuer.",
-          "totalLabel": "Total à payer",
-          "uploadProof": "Joindre le justificatif de paiement",
-          "uploadSuccess": "Justificatif joint avec succès",
-          "chargilyNote": "L'intégration automatique est actuellement indisponible. Veuillez choisir une autre méthode manuelle comme CCP ou BaridiMob.",
-          "submitBtn": "Confirmer et soumettre le paiement",
-          "submitting": "Envoi en cours…",
-          "success": "Paiement soumis ! Notre équipe va examiner votre justificatif et activer votre abonnement.",
+          "uploadProof": "Reçu de transfert",
+          "uploadSuccess": "Reçu joint",
           "errors": {
-            "proofRequired": "Veuillez joindre un justificatif de paiement.",
-            "submitFailed": "L'envoi du paiement a échoué. Veuillez réessayer."
+            "uploadFailed": "Échec du téléversement. Essayez un autre fichier.",
+            "submitFailed": "Impossible d'envoyer votre paiement. Réessayez."
           }
         },
         "history": {
           "title": "Historique des paiements",
-          "entries": "entrées",
+          "count": "{count} paiement(s)",
+          "empty": "Aucun paiement enregistré.",
+          "viewProof": "Voir",
+          "status": {
+            "pending": "En attente",
+            "paid": "Payé",
+            "rejected": "Refusé",
+            "imported": "Importé"
+          },
           "col": {
             "date": "Date",
             "plan": "Forfait",
+            "period": "Période",
             "amount": "Montant",
-            "method": "Méthode",
+            "method": "Moyen",
             "status": "Statut",
-            "proof": "Justificatif"
-          },
-          "viewProof": "Voir"
-        },
-        "common": {
-          "uploading": "Téléversement…",
-          "clickToUpload": "Cliquez pour joindre le justificatif"
+            "proof": "Reçu"
+          }
         }
       },
       "products": {
@@ -2738,7 +3839,8 @@
             "allCategories": "Toutes les catégories",
             "status": "Statut",
             "allStatus": "Tous les statuts",
-            "lowStock": "Stock bas"
+            "lowStock": "Stock bas",
+            "clearance": "Déstockage"
           },
           "loading": "Chargement des produits…",
           "empty": {
@@ -2764,7 +3866,9 @@
             "actions": "Actions",
             "uncategorized": "Sans catégorie",
             "lowStock": "Stock bas",
-            "outOfStock": "Rupture de stock"
+            "outOfStock": "Rupture de stock",
+            "clearance": "Déstockage",
+            "selectAllHint": "Sélectionne tous les produits correspondant aux filtres actuels (toutes les pages)"
           },
           "links": {
             "product": "Produit",
@@ -2786,19 +3890,26 @@
           "bulk": {
             "selected": "{count} sélectionné(s)",
             "export": "Exporter CSV",
-            "import": "Importer CSV",
+            "import": "Importer CSV / Archive",
+            "exportArchive": "Exporter l’archive (ZIP avec images)",
             "update": "Modification en masse",
             "duplicate": "Dupliquer",
             "delete": "Supprimer",
             "deleteTitle": "Supprimer des produits",
             "deleteMessage": "Voulez-vous vraiment supprimer {count} produit(s) sélectionné(s) ? Cette action est irréversible.",
             "exportError": "Échec de l’export CSV. Veuillez réessayer.",
-            "importTitle": "Importer des produits (CSV)",
-            "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock (création uniquement), isActive, categoryId/categorySlug, description, miniDescription, images.",
+            "exportArchiveError": "Échec de l’export de l’archive ZIP. Veuillez réessayer.",
+            "progressDoNotClose": "Cela peut prendre du temps pour de grands catalogues. Merci de ne pas fermer cette fenêtre.",
+            "progressExporting": "Export des produits en cours…",
+            "progressUploadingImages": "Téléversement des images…",
+            "progressImporting": "Import des produits en cours…",
+            "progressDone": "Terminé",
+            "importTitle": "Importer des produits",
+            "importHint": "Téléversez un CSV avec les colonnes : id (optionnel), slug, title, price, stock (création uniquement), isActive, categoryId/categorySlug, description, miniDescription, images. Ou téléversez une archive ZIP (produite par « Exporter l’archive ») pour restaurer les produits avec leurs fichiers image réels.",
             "importTemplateTitle": "Modèle CSV",
             "importTemplateHint": "Utilisez “|” pour séparer plusieurs images. Les images peuvent être des noms de fichiers (téléversés dans votre boutique), des chemins /uploads, ou des URLs https complètes.",
             "importTemplateDownload": "Télécharger le modèle",
-            "importError": "Échec de l’import CSV. Vérifiez le fichier et réessayez.",
+            "importError": "Échec de l’import. Vérifiez le fichier et réessayez.",
             "importResult": "Créés {created}, mis à jour {updated}, ignorés {skipped}.",
             "importErrors": "{count} lignes contiennent des erreurs.",
             "updateTitle": "Mise à jour en masse",
@@ -2815,9 +3926,16 @@
               "category": "Catégorie",
               "noChange": "Aucun changement",
               "clearCategory": "Supprimer la catégorie",
-              "propagatePrice": "Mettre à jour aussi les prix des variants"
+              "propagatePrice": "Mettre à jour aussi les prix des variants",
+              "clearance": "Déstockage",
+              "clearanceHint": "Les produits avec une promotion active sont ignorés.",
+              "clearanceOn": "Marquer en déstockage",
+              "clearanceOff": "Retirer du déstockage",
+              "clearanceSkippedSuffix": "produit(s) ignoré(s) car en promotion active."
             }
-          }
+          },
+          "loadingError": "Échec du chargement des produits",
+          "categoriesLoadError": "Échec du chargement des catégories"
         },
         "create": {
           "metaTitle": "Créer un produit",
@@ -2826,7 +3944,8 @@
           "subtitle": "Ajoutez un nouveau produit à votre catalogue",
           "submit": "Créer le produit",
           "errors": {
-            "createFailed": "Impossible de créer le produit. Veuillez réessayer."
+            "createFailed": "Impossible de créer le produit. Veuillez réessayer.",
+            "title": "Impossible de créer le produit brouillon"
           }
         },
         "edit": {
@@ -2837,11 +3956,17 @@
           "title": "Modifier le produit",
           "subtitle": "Mettre à jour les informations du produit",
           "submit": "Mettre à jour le produit",
+          "notListed": {
+            "title": "Non répertorié dans votre boutique",
+            "reasonProduct": "La visibilité de ce produit est définie sur « Non répertorié ». Il est masqué de la grille boutique, de la recherche et des produits associés, mais les clients peuvent toujours y accéder via son lien direct.",
+            "reasonCategory": "Toutes les catégories auxquelles ce produit appartient sont non répertoriées, il est donc masqué de la grille boutique. Il reste accessible via son lien direct et sur ses pages de catégorie."
+          },
           "tabs": {
             "general": "Général",
             "description": "Description de la landing page",
             "variants": "Variants / Stock",
-            "bundles": "Bundles"
+            "bundles": "Bundles",
+            "promotions": "Promotions"
           },
           "links": {
             "label": "Liens",
@@ -2858,7 +3983,20 @@
           "variantsTab": {
             "title": "Options / Variants / Stock",
             "showArchived": "Afficher les variants archivées",
-            "archivedCount": "Archivées : {count}"
+            "archivedCount": "Archivées : {count}",
+            "pricingHint": "Gérez ici les prix de vente, les coûts, le stock et les promotions par variante.",
+            "allocationTitle": "Répartissez le stock avant d'utiliser ces variantes",
+            "allocationMessage": "Le stock existant est encore rattaché à la variante source masquée. Répartissez le stock total, le stock réservé et le stock de sécurité entre les variantes actives pour le rendre à nouveau vendable.",
+            "allocateAction": "Répartir le stock",
+            "allocationSaved": "Répartition du stock enregistrée",
+            "allocationBalanced": "La répartition est équilibrée",
+            "allocationUnbalanced": "La répartition doit correspondre exactement aux soldes de la source masquée",
+            "onHandShort": "en stock",
+            "reservedShort": "réservé",
+            "safetyShort": "sécurité",
+            "totalOnHand": "Stock réparti",
+            "totalReserved": "Réservé réparti",
+            "totalSafety": "Sécurité répartie"
           },
           "bundlesTab": {
             "title": "Offres en bundle",
@@ -2884,6 +4022,19 @@
             "bundlesLoadFailed": "Impossible de charger les offres bundle",
             "bundlesSaveFailed": "Impossible d’enregistrer l’offre bundle",
             "bundlesDeleteFailed": "Impossible de supprimer l’offre bundle"
+          },
+          "noCategories": "Aucune catégorie disponible",
+          "generalTab": {
+            "variantPricingTitle": "Le prix de vente se gère dans l'onglet Variantes",
+            "variantPricingMessage": "Définissez le prix de vente de ce produit dans l'onglet Variantes. Les produits simples utilisent leur variante par défaut, et les produits à options utilisent chaque variante sélectionnable."
+          },
+          "promotions": {
+            "variantPromotionTitle": "Utilisez les promotions par variante pour ce produit",
+            "variantPromotionMessage": "Ce produit possède des variantes sélectionnables. Les promotions au niveau du produit sont désactivées : chaque variante gère désormais son propre prix promotionnel, sa période et son compte à rebours."
+          },
+          "metaPixels": {
+            "title": "Pixels Meta",
+            "subtitle": "Choisissez les pixels déclenchés sur la page de ce produit."
           }
         }
       },
@@ -2999,12 +4150,23 @@
           "itemsSection": "Articles de la commande",
           "emptyCart": "Le panier est vide",
           "itemsTotal": "Total des articles",
-          "submit": "Créer la commande"
+          "inStock": "en stock",
+          "submit": "Créer la commande",
+          "pickupPoint": "Stop desk",
+          "selfDelivery": "Livraison par mes soins"
+        },
+        "badges": {
+          "destockage": "Déstockage"
         },
         "index": {
           "title": "Commandes",
           "subtitle": "Gérez les commandes clients",
           "addBtn": "Nouvelle commande",
+          "deliveryModes": {
+            "home": "Livraison à domicile",
+            "pickup": "Point relais",
+            "store": "Retrait en boutique"
+          },
           "filters": {
             "searchLabel": "Rechercher",
             "searchPlaceholder": "Rechercher par nom ou téléphone…",
@@ -3024,19 +4186,59 @@
             "total": "Total",
             "status": "Statut",
             "date": "Date",
+            "actions": "Actions",
+            "delivery": "Livraison",
+            "paymentStatus": "Paiement"
+          },
+          "bulkDeleteBtn": "Supprimer la sélection",
+          "selectedCount": "{count} sélectionnée(s)",
+          "deleteOneConfirm": "Supprimer cette commande ? Seules les commandes non confirmées (en attente) peuvent être supprimées.",
+          "deleteManyConfirm": "Supprimer {count} commandes ? Seules les commandes non confirmées (en attente) peuvent être supprimées."
+        },
+        "blacklist": {
+          "title": "Liste noire des commandes",
+          "subtitle": "Numéros de téléphone, adresses IP et clients bloqués au moment du paiement.",
+          "backToOrders": "Retour aux commandes",
+          "form": {
+            "type": "Type",
+            "value": "Valeur",
+            "reason": "Raison (optionnel)",
+            "reasonPlaceholder": "ex. commandes fictives répétées",
+            "submit": "Ajouter à la liste noire"
+          },
+          "types": {
+            "PHONE": "Téléphone",
+            "IP": "Adresse IP",
+            "CUSTOMER": "Client"
+          },
+          "empty": {
+            "title": "Aucune entrée sur liste noire",
+            "hint": "Les numéros, IPs et clients que vous bloquez apparaîtront ici."
+          },
+          "table": {
+            "type": "Type",
+            "value": "Valeur",
+            "reason": "Raison",
+            "createdAt": "Ajouté le",
             "actions": "Actions"
-          }
+          },
+          "deleteConfirm": "Retirer cette entrée de la liste noire ?"
         },
         "detail": {
           "metaTitle": "Détail de la commande",
           "breadcrumb": "Commande n°{id}",
           "loading": "Chargement de la commande…",
+          "printBordereau": "Imprimer le bordereau",
           "sections": {
             "orderInfo": "Informations de commande",
             "customerInfo": "Informations client",
             "orderItems": "Articles de la commande",
             "internalNotes": "Notes internes",
-            "securityAndFraud": "Sécurité & Fraude"
+            "securityAndFraud": "Sécurité & Fraude",
+            "previousOrders": "Commandes précédentes",
+            "remainingAmount": "Reste à payer",
+            "callPanel": "Panneau d'appel",
+            "deliveryAndCustomer": "Livraison et client"
           },
           "fields": {
             "orderId": "ID commande",
@@ -3053,29 +4255,80 @@
               "attempt_1": "1ère tentative",
               "attempt_2": "2ème tentative",
               "attempt_3": "3ème tentative",
-              "switched_off": "Hors réseau"
+              "switched_off": "Hors réseau",
+              "whatsapp_sms_sent": "SMS WhatsApp envoyé",
+              "whatsapp_link_confirmed": "Lien WhatsApp confirmé",
+              "whatsapp_declined": "Refusé sur WhatsApp"
             },
-            "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande..."
+            "internalNotesPlaceholder": "Ajouter des remarques privées sur cette commande...",
+            "currency": "Devise",
+            "deliveryCompany": "Transporteur",
+            "deliveryMode": "Mode de livraison",
+            "pickupPoint": "Point de retrait",
+            "shippingFee": "Frais de livraison",
+            "totalWithDelivery": "Total (livraison incluse)",
+            "wilayaCommune": "Wilaya / Commune"
           },
           "actions": {
             "blacklistCustomer": "Mettre le client sur liste noire",
             "blacklistIp": "Mettre l'IP sur liste noire",
             "blacklistPhone": "Mettre le téléphone sur liste noire"
           },
+          "blacklist": {
+            "confirm": {
+              "customer": "Mettre ce client sur liste noire ? Ses prochaines commandes seront automatiquement bloquées.",
+              "phone": "Mettre ce numéro de téléphone sur liste noire ? Les prochaines commandes utilisant ce numéro seront automatiquement bloquées.",
+              "ip": "Mettre cette adresse IP sur liste noire ? Les prochaines commandes provenant de cette IP seront automatiquement bloquées."
+            },
+            "confirmBtn": "Mettre sur liste noire",
+            "success": "Ajouté à la liste noire"
+          },
           "securityHelp": "Actions avancées pour gérer les comportements à risque.",
+          "deleteConfirm": "Supprimer cette commande ? Cette action est irréversible. Si la commande est confirmée auprès d'un transporteur, elle sera également annulée chez lui.",
+          "cancelConfirm": "Annuler cette commande ? Cette action est irréversible.",
+          "editHint": "Enregistrez depuis la section articles pour appliquer les modifications.",
+          "internalNotesHelp": "Les notes ne sont visibles que par votre équipe.",
+          "sendWhatsapp": "Envoyer sur WhatsApp",
+          "variantSelect": "Sélectionner une variante",
+          "paymentRecorded": "Paiement enregistré",
+          "nba": {
+            "confirm": "Confirmer la commande",
+            "callCustomer": "Appeler le client",
+            "callAgain": "Rappeler",
+            "cancelOrder": "Annuler la commande",
+            "pushTo": "Envoyer vers {provider}",
+            "pushToMaystro": "Envoyer vers Maystro",
+            "markShipped": "Marquer comme expédiée",
+            "markDelivered": "Marquer comme livrée",
+            "reopen": "Réouvrir la commande",
+            "lockedNote": "Le statut est géré par le transporteur."
+          },
+          "previousOrders": {
+            "matchCustomer": "Correspondance par fiche client liée.",
+            "matchPhone": "Correspondance par numéro de téléphone normalisé.",
+            "matchNone": "Le téléphone n'a pas pu être normalisé.",
+            "emptyCustomer": "Aucune commande précédente pour ce client.",
+            "emptyPhone": "Aucune commande précédente pour ce téléphone.",
+            "emptyNone": "Le téléphone n'a pas pu être normalisé.",
+            "noItems": "Aucun article",
+            "moreItems": "+ {count} autre(s)"
+          },
           "itemsTable": {
             "product": "Produit",
             "price": "Prix",
             "quantity": "Quantité",
             "subtotal": "Sous-total",
             "total": "Total",
-            "fallbackProduct": "Produit"
+            "fallbackProduct": "Produit",
+            "clearance": "Destockage : {count} unité(s) offerte(s)",
+            "promoCode": "Code promo {code}"
           },
           "statusUpdate": {
             "title": "Mettre à jour le statut",
             "statusLabel": "Statut",
             "submit": "Mettre à jour",
             "success": "Statut de la commande mis à jour !",
+            "lockedByCarrier": "Le statut est géré par le transporteur. Vous ne pouvez pas le modifier manuellement.",
             "errors": {
               "loadCashboxesFailed": "Impossible de charger les caisses. Ouvrez d’abord une session de caisse.",
               "updateFailed": "Impossible de mettre à jour le statut"
@@ -3101,6 +4354,13 @@
           "notFound": {
             "title": "Commande introuvable",
             "hint": "Cette commande n’existe peut-être pas ou vous n’avez pas l’autorisation de la voir."
+          }
+        },
+        "modals": {
+          "payment": {
+            "title": "Enregistrer le paiement",
+            "subtitle": "Enregistrer un nouveau paiement pour cette commande.",
+            "confirm": "Enregistrer le paiement"
           }
         }
       },
@@ -3262,14 +4522,12 @@
       "delivery": {
         "metaTitle": "Entreprises de livraison",
         "title": "Entreprises de livraison",
-        "subtitle": "Gérez les transporteurs et les tarifs par wilaya",
+        "subtitle": "Choisissez les transporteurs proposés au paiement et le tarif de chaque wilaya",
         "providers": {
           "toggleLabel": "Activer",
           "noCredentials": "Sans identifiants",
           "connected": "Connecté",
-          "notConnected": "Non connecté",
-          "wilayasSupported": "{count} wilayas prises en charge",
-          "managePricing": "Gérer les tarifs"
+          "notConnected": "Non connecté"
         },
         "credentials": {
           "title": "Identifiants API — {provider}",
@@ -3283,7 +4541,8 @@
           "secretPlaceholderNotSet": "Saisir le token",
           "errors": {
             "saveFailed": "Impossible d’enregistrer les identifiants"
-          }
+          },
+          "save": "Enregistrer la connexion"
         },
         "pricing": {
           "title": "Configuration des tarifs : {provider}",
@@ -3294,7 +4553,7 @@
             "office": "Bureau"
           },
           "searchPlaceholder": "Rechercher une wilaya (code ou nom)…",
-          "overridePlaceholder": "Laisser vide pour utiliser le transporteur",
+          "overridePlaceholder": "Tarif transporteur",
           "filters": {
             "all": "Toutes",
             "overrides": "Overrides",
@@ -3302,7 +4561,6 @@
             "missingCarrier": "Tarif transporteur manquant"
           },
           "showingCount": "Affichage {shown} sur {total}",
-          "pageOf": "Page {page} / {pages}",
           "fetchCarrierRates": "Récupérer les tarifs du transporteur",
           "fetchingCarrierRates": "Récupération…",
           "table": {
@@ -3310,73 +4568,270 @@
             "wilaya": "Wilaya",
             "price": "Prix (DZD)",
             "carrierPrice": "Tarif transporteur",
-            "overridePrice": "Votre tarif"
-          }
+            "overridePrice": "Votre tarif",
+            "margin": "Marge"
+          },
+          "save": "Enregistrer les tarifs",
+          "discard": "Annuler",
+          "unsaved": "tarif non enregistré | tarifs non enregistrés",
+          "noMatches": "Aucune wilaya ne correspond à cette recherche.",
+          "clearFilters": "Effacer les filtres",
+          "loadFailed": "Chargement des tarifs impossible. Rechargez la page.",
+          "carrierSource": {
+            "title": "Tarifs transporteur",
+            "empty": "Pas encore récupérés — récupérez-les pour les comparer à vos prix.",
+            "loaded": "{count} tarifs récupérés chez le transporteur.",
+            "needsConnection": "Connectez d’abord ce transporteur.",
+            "cached": "{count} tarifs, dernière vérification {age}.",
+            "ageJustNow": "il y a moins d’une heure",
+            "ageHours": "il y a {hours} h",
+            "ageDays": "il y a {days} j"
+          },
+          "margin": {
+            "prefix": "Fixer chaque tarif visible à transporteur +",
+            "unit": "Unité de marge",
+            "apply": "Appliquer à {count} tarifs",
+            "hint": "Remplit les champs ci-dessous. Rien n’est enregistré avant d’appuyer sur Enregistrer les tarifs.",
+            "needsCarrierRates": "Récupérez d’abord les tarifs transporteur."
+          },
+          "refreshCarrierRates": "Actualiser depuis le transporteur"
         },
         "errors": {
           "updateProviderFailed": "Impossible de mettre à jour le statut du transporteur",
           "saveFailed": "Impossible d’enregistrer les tarifs",
           "fetchCarrierRatesFailed": "Impossible de récupérer les tarifs du transporteur"
+        },
+        "section": "Livraison",
+        "stats": {
+          "offered": "au paiement",
+          "connected": "connectés",
+          "wilayas": "wilayas"
+        },
+        "rail": {
+          "carriers": "Transporteurs",
+          "alsoAtCheckout": "Aussi au paiement",
+          "offerToggle": "Proposer {provider} au paiement"
+        },
+        "tabs": {
+          "connection": "Connexion",
+          "pricing": "Tarifs par wilaya"
+        },
+        "workspace": {
+          "offered": "Les clients peuvent choisir ce transporteur au paiement",
+          "notOffered": "Masqué au paiement",
+          "emptyTitle": "Choisissez un transporteur",
+          "emptyHint": "Sélectionnez un transporteur à gauche pour le connecter et définir ses tarifs par wilaya."
+        },
+        "storePickup": {
+          "title": "Retrait en magasin",
+          "hint": "Les clients qui choisissent cette option viennent récupérer leur commande eux-mêmes.",
+          "on": "Proposé au paiement",
+          "off": "Masqué au paiement",
+          "toggleLabel": "Proposer le retrait en magasin"
+        },
+        "maystro": {
+          "resync": {
+            "title": "Resynchroniser les produits Maystro",
+            "hint": "Répare les produits acceptés par Maystro sans identifiant produit — la cause habituelle des erreurs « produits manquants » lors de l’envoi d’une commande. Sans risque.",
+            "action": "Resynchroniser",
+            "running": "Resynchronisation…",
+            "done": "{fixed} produit(s) corrigé(s), {skipped} ignoré(s).",
+            "failed": "Échec de la resynchronisation. Réessayez.",
+            "needsConnection": "Connectez d’abord Maystro."
+          }
+        },
+        "yalidine": {
+          "title": "Configuration du webhook Yalidine",
+          "hint": "Ajoutez cette URL dans le tableau de bord Webhooks de Yalidine pour que les statuts de livraison se mettent à jour automatiquement.",
+          "urlLabel": "URL du webhook à donner à Yalidine",
+          "urlHint": "Doit être un domaine HTTPS public. Remplacez le domaine si votre boutique en utilise un personnalisé.",
+          "localhostNotice": "Localhost ne peut pas recevoir les webhooks Yalidine : l’URL de production est affichée.",
+          "copy": "Copier l’URL",
+          "copied": "Copié",
+          "copyFailed": "Copie impossible. Sélectionnez l’URL et copiez-la manuellement.",
+          "stepsTitle": "Dans le tableau de bord Yalidine",
+          "steps": {
+            "open": "Ouvrez le tableau de bord Webhooks.",
+            "paste": "Ajoutez un webhook et collez l’URL ci-dessus.",
+            "secret": "Définissez le même secret là-bas et dans le champ Webhook Secret ici.",
+            "activate": "Testez le webhook, puis activez-le."
+          },
+          "eventsTitle": "Sélectionnez ces événements"
+        },
+        "probe": {
+          "title": "Vérifier le prix exact d’une commune",
+          "hint": "Les tarifs transporteur du tableau sont échantillonnés par wilaya. Vérifiez une commune pour le prix exact du transporteur.",
+          "commune": "Commune",
+          "selectCommune": "Choisir une commune",
+          "loadingCommunes": "Chargement des communes…",
+          "noCommunes": "Aucune commune",
+          "action": "Vérifier le prix",
+          "checking": "Vérification…",
+          "communesFailed": "Chargement des communes impossible. Vérifiez les identifiants de ce transporteur.",
+          "pricesFailed": "Récupération des prix impossible chez ce transporteur. Réessayez."
         }
       },
       "onboarding": {
         "metaTitle": "Configuration de la boutique",
         "title": "Configuration de la boutique",
-        "subtitle": "Choisissez votre couleur, votre template et votre langue.",
-        "loadingSettings": "Chargement des paramètres…",
+        "subtitle": "Configurez votre boutique en quelques étapes.",
+        "loadingSettings": "Chargement de vos paramètres…",
+        "finishLater": "Terminer plus tard",
         "progress": {
           "stepOf": "Étape {current} sur {total}"
         },
         "steps": {
-          "brand": "Marque",
-          "template": "Template",
-          "language": "Langue",
-          "summary": "Résumé"
+          "storeInfo": "Votre boutique",
+          "template": "Thème",
+          "brandColor": "Couleur",
+          "firstProduct": "Premier produit",
+          "delivery": "Livraison",
+          "publish": "Mise en ligne"
         },
-        "brand": {
-          "title": "Couleur de marque",
-          "pickColor": "Choisir une couleur",
-          "hexValue": "Valeur hex",
-          "example": "Exemple : {value}",
-          "preview": "Aperçu",
-          "primaryButton": "Bouton principal"
+        "preview": {
+          "eyebrow": "Aperçu en direct",
+          "desktop": "Ordinateur",
+          "mobile": "Mobile"
+        },
+        "storeInfo": {
+          "title": "Parlez-nous de votre boutique",
+          "subtitle": "Le nom et le logo que vos clients verront sur chaque page.",
+          "nameLabel": "Nom de la boutique",
+          "namePlaceholder": "Ma boutique",
+          "logoLabel": "Logo",
+          "logoHint": "Recommandé : PNG ou SVG de 200×200 px",
+          "logoUpload": "Téléverser un logo",
+          "logoChange": "Changer le logo",
+          "logoRemove": "Retirer",
+          "descriptionLabel": "Courte description",
+          "descriptionHint": "Utilisée comme description de votre boutique dans les résultats de recherche.",
+          "descriptionPlaceholder": "Quelques mots sur votre boutique…"
         },
         "template": {
-          "title": "Template de boutique"
-        },
-        "templates": {
-          "classic": {
-            "label": "Classique",
-            "description": "Mise en page propre, idéale pour la plupart des boutiques."
+          "title": "Choisissez un thème",
+          "subtitle": "Chaque thème est une boutique complète. Vous pourrez en changer plus tard.",
+          "searchPlaceholder": "Rechercher un thème…",
+          "buy": "ACHETER",
+          "audiences": {
+            "fashion": "Mode",
+            "beauty": "Beauté",
+            "food": "Alimentation",
+            "tech": "Tech",
+            "home": "Maison",
+            "kids": "Enfants"
           },
-          "modern": {
-            "label": "Moderne",
-            "description": "Typographie plus marquée et plus d’espace visuel."
+          "specimens": {
+            "classic": "Élégant & intemporel",
+            "modern": "Minimaliste & moderne",
+            "interior": "Maison & décoration",
+            "minimal": "Essentiel & épuré",
+            "street": "Drop limité",
+            "cozy": "Doux & chaleureux",
+            "cyber": "Tech nouvelle génération",
+            "stationnery": "Élégance papeterie",
+            "food": "Saveurs artisanales",
+            "wellness": "Bio & naturel",
+            "playful": "Candy kawaii",
+            "activewear": "Haute performance",
+            "chrono": "Accessoires de luxe",
+            "maison": "Pistache luxe",
+            "arena": "Performance esport",
+            "nour": "Élégance drapée",
+            "embellir": "Beauté & bien-être"
           }
         },
-        "language": {
-          "title": "Langue",
-          "label": "Langue",
-          "rtlHint": "Si arabe, pensez à l’affichage RTL."
+        "brand": {
+          "title": "Votre couleur de marque",
+          "subtitle": "Boutons, liens et accents de toute votre boutique.",
+          "suggested": "Suggestions",
+          "pickColor": "Choisir une couleur",
+          "hexValue": "Valeur hexadécimale",
+          "hexInvalid": "Saisissez une couleur hexadécimale à six chiffres, comme #0D9488.",
+          "contrastWarning": "Cette couleur est très claire. Le texte de vos boutons risque d’être illisible."
         },
-        "summary": {
-          "title": "Résumé",
-          "cards": {
-            "template": "Template",
-            "primaryColor": "Couleur principale",
-            "language": "Langue"
-          },
-          "aiTitle": "Résumé IA du frontend",
-          "generate": "Générer",
-          "generating": "Génération…",
-          "placeholder": "Cliquez sur Générer pour créer un brief pour votre agent frontend."
+        "firstProduct": {
+          "title": "Ajoutez votre premier produit",
+          "subtitle": "Une boutique a besoin d’un produit avant d’ouvrir. Vous en ajouterez d’autres ensuite.",
+          "created": "Produit créé. Vous pouvez le modifier à tout moment depuis Produits.",
+          "nameLabel": "Nom du produit",
+          "namePlaceholder": "ex. T-shirt, coque de téléphone…",
+          "priceLabel": "Prix (DZD)",
+          "imageLabel": "Image du produit",
+          "imageUpload": "Téléverser une image",
+          "imageChange": "Changer l’image"
         },
-        "saveFinish": "Enregistrer et terminer",
+        "delivery": {
+          "title": "Comment allez-vous livrer ?",
+          "subtitle": "Choisissez au moins une option. Modifiable à tout moment.",
+          "required": "Choisissez au moins un mode de livraison pour ouvrir votre boutique.",
+          "carrierNote": "Connectez l’API du transporteur plus tard dans",
+          "options": {
+            "SELF": {
+              "label": "Je livre moi-même",
+              "hint": "Vos propres livreurs, ou vous."
+            },
+            "PICKUP": {
+              "label": "Retrait en boutique",
+              "hint": "Le client vient chercher sa commande."
+            },
+            "MAYSTRO": {
+              "label": "Maystro Delivery",
+              "hint": "Transporteur national."
+            },
+            "YALIDINE": {
+              "label": "Yalidine",
+              "hint": "Transporteur national."
+            }
+          }
+        },
+        "publish": {
+          "title": "Prêt à ouvrir ?",
+          "subtitle": "Votre boutique reste privée tant que vous ne l’avez pas publiée.",
+          "liveTitle": "Votre boutique est en ligne",
+          "liveSubtitle": "Toute personne disposant du lien peut désormais commander.",
+          "cta": "Publier ma boutique",
+          "statusDraft": "Brouillon — vous seul pouvez la voir.",
+          "statusLive": "En ligne — ouverte aux clients.",
+          "blockedTitle": "Avant l’ouverture :",
+          "noProduct": "Aucun pour l’instant",
+          "noDelivery": "Aucun pour l’instant",
+          "missing": {
+            "product": "Ajoutez au moins un produit",
+            "delivery": "Choisissez au moins un mode de livraison"
+          }
+        },
+        "done": {
+          "storeUrlLabel": "L’adresse de votre boutique",
+          "ctaDashboard": "Aller au tableau de bord"
+        },
         "errors": {
-          "loadFailed": "Impossible de charger les paramètres de la boutique.",
-          "saveFailed": "Impossible d’enregistrer les paramètres de la boutique.",
-          "summaryFailed": "Impossible de générer le résumé."
+          "loadFailed": "Échec du chargement des paramètres.",
+          "saveFailed": "Échec de l’enregistrement des paramètres.",
+          "publishFailed": "Échec de la publication de votre boutique.",
+          "uploadFailed": "Échec du téléversement. Réessayez.",
+          "nameRequired": "Votre boutique a besoin d’un nom."
+        },
+        "language": {
+          "label": "Langue de la boutique",
+          "rtlHint": "L'arabe affiche votre boutique de droite à gauche."
         }
+      },
+      "gettingStarted": {
+        "title": "Démarrage rapide",
+        "progress": "{done} sur {total} complétés",
+        "dismiss": "Ignorer",
+        "complete": "Configuration terminée",
+        "items": {
+          "logo": "Télécharger votre logo",
+          "product": "Ajouter un premier produit",
+          "category": "Créer une catégorie",
+          "delivery": "Configurer la livraison",
+          "publish": "Publier votre boutique"
+        },
+        "publishBtn": "Publier maintenant",
+        "publishing": "Publication…",
+        "publishBlocked": "Ajoutez d’abord un produit et un mode de livraison.",
+        "publishMissing": "Encore nécessaire : {items}"
       },
       "purchases": {
         "index": {
@@ -3457,7 +4912,9 @@
             "itemsOrdered": "Articles commandés",
             "itemsReceived": "Articles reçus",
             "estimatedTotal": "Coût total estimé",
-            "notesPlaceholder": "Notes et pièces jointes bientôt disponibles"
+            "notesPlaceholder": "Notes et pièces jointes bientôt disponibles",
+            "paidAmount": "Montant payé",
+            "balance": "Solde"
           },
           "items": {
             "title": "Articles de la commande",
@@ -3556,7 +5013,9 @@
           }
         },
         "actions": {
-          "refund": "Rembourser"
+          "refund": "Rembourser",
+          "invoice": "Facture",
+          "printInvoice": "Imprimer la facture"
         },
         "refundModal": {
           "title": "Rembourser la vente",
@@ -3576,7 +5035,9 @@
           "onlyCompletedPos": "Seules les ventes PDV terminées peuvent être remboursées.",
           "noOpenCashbox": "Aucune caisse ouverte disponible. Ouvrez une session de caisse d’abord.",
           "refundSuccess": "Vente remboursée avec succès.",
-          "refundFailed": "Échec du remboursement de la vente."
+          "refundFailed": "Échec du remboursement de la vente.",
+          "invoiceFailed": "Impossible de générer la facture.",
+          "invoicePopupBlocked": "La fenêtre de facture a été bloquée par le navigateur."
         },
         "detail": {
           "metaTitle": "Vente",
@@ -3609,6 +5070,11 @@
         }
       },
       "settings": {
+        "index": {
+          "metaTitle": "Paramètres",
+          "title": "Paramètres par thème",
+          "subtitle": "Retrouvez chaque réglage selon l’intention métier : vitrine, vente, localisation, marketing, domaines et administration."
+        },
         "appearance": {
           "metaTitle": "Apparence",
           "title": "Paramètres d’apparence",
@@ -3625,9 +5091,14 @@
           "subtitle": "Gérez les informations de contact affichées dans le footer."
         },
         "functional": {
-          "metaTitle": "Fonctionnel",
-          "title": "Paramètres fonctionnels",
-          "subtitle": "Gérez les fonctionnalités et options principales de votre boutique."
+          "metaTitle": "Vente & checkout",
+          "title": "Vente, checkout et opérations",
+          "subtitle": "Réglez le checkout, les factures, la localisation, les annonces et la fidélité."
+        },
+        "domains": {
+          "metaTitle": "Domaines",
+          "title": "Paramètres des domaines",
+          "subtitle": "Connectez un domaine acheté à cette boutique avec un enregistrement CNAME."
         }
       },
       "suppliers": {
@@ -3690,10 +5161,335 @@
             "updateFailed": "Impossible de mettre à jour le fournisseur. Veuillez réessayer."
           }
         }
+      },
+      "promoCodes": {
+        "title": "Codes promo",
+        "subtitle": "Codes de reduction saisis par les clients au paiement.",
+        "actions": {
+          "create": "Nouveau code promo"
+        },
+        "filters": {
+          "search": "Rechercher",
+          "searchPlaceholder": "Code ou description",
+          "status": "Statut",
+          "all": "Tous"
+        },
+        "status": {
+          "active": "Actif",
+          "inactive": "Inactif",
+          "scheduled": "Programme",
+          "expired": "Expire",
+          "exhausted": "Limite atteinte"
+        },
+        "types": {
+          "PERCENTAGE": "Pourcentage",
+          "FIXED": "Montant fixe",
+          "FREE_SHIPPING": "Livraison offerte"
+        },
+        "stats": {
+          "total": "codes",
+          "active": "actifs",
+          "redemptions": "utilisations"
+        },
+        "empty": {
+          "title": "Aucun code promo",
+          "description": "Creez un code et vos clients pourront le saisir au paiement."
+        },
+        "table": {
+          "code": "Code",
+          "discount": "Reduction",
+          "conditions": "Conditions",
+          "usage": "Utilise",
+          "window": "Periode",
+          "status": "Statut",
+          "cappedAt": "Plafonne a {amount}",
+          "minOrder": "Commande min. {amount}",
+          "perCustomer": "{count} par client",
+          "noStart": "Pas de date de debut",
+          "noEnd": "Pas de date de fin",
+          "wholeCatalog": "Tout le catalogue",
+          "categoriesCount": "{count} categories",
+          "productsCount": "{count} produits"
+        },
+        "form": {
+          "createTitle": "Nouveau code promo",
+          "editTitle": "Modifier le code promo",
+          "description": "Definissez ce que le code retire et quand il peut etre utilise.",
+          "code": "Code",
+          "codeHint": "Lettres, chiffres, points, tirets. La casse n'a pas d'importance.",
+          "descriptionPlaceholder": "Note interne, ex. campagne Ramadan",
+          "discountType": "Type de reduction",
+          "percentValue": "Reduction (%)",
+          "fixedValue": "Montant retire ({currency})",
+          "maxDiscount": "Reduction maximale ({currency})",
+          "maxDiscountHint": "Plafonne une reduction en pourcentage. Laissez vide pour aucun plafond.",
+          "minOrder": "Commande minimum ({currency})",
+          "minOrderHint": "Sous-total requis avant que le code s'applique.",
+          "startsAt": "Debut",
+          "startsAtHint": "Laissez vide pour demarrer immediatement.",
+          "endsAt": "Fin",
+          "endsAtHint": "Laissez vide pour aucune expiration.",
+          "usageLimit": "Utilisations totales",
+          "usageLimitHint": "Laissez vide pour illimite.",
+          "usageLimitPerCustomer": "Utilisations par client",
+          "usageLimitPerCustomerHint": "Comptees par numero de telephone. Laissez vide pour illimite.",
+          "scope": "Ou il s'applique",
+          "scopeHint": "Ne selectionnez rien pour reduire tout le panier. Sinon seuls les produits et categories choisis sont reduits.",
+          "categories": "Categories",
+          "products": "Produits",
+          "noCategories": "Aucune categorie",
+          "noProducts": "Aucun produit",
+          "active": "Actif",
+          "activeHint": "Les codes inactifs sont refuses au paiement."
+        },
+        "delete": {
+          "title": "Supprimer ce code promo ?",
+          "message": "{code} ne fonctionnera plus au paiement. Les commandes passees gardent le code utilise."
+        }
+      },
+      "aiImport": {
+        "title": "Import de documents par IA",
+        "kicker": "Import IA",
+        "entry": {
+          "scan": "Scanner un document",
+          "importFromDocument": "Importer depuis un document"
+        },
+        "kinds": {
+          "invoice": "Facture fournisseur",
+          "invoiceHint": "Devient un bon d'achat brouillon",
+          "deliveryNote": "Bon de livraison",
+          "deliveryNoteHint": "BL du fournisseur",
+          "catalog": "Catalogue ou liste de prix",
+          "catalogHint": "Crée uniquement des produits",
+          "invoiceTrait": "Comporte des quantités, des prix unitaires et un total à payer.",
+          "deliveryNoteTrait": "Comporte des quantités, généralement sans les prix.",
+          "catalogTrait": "Comporte des prix, sans quantités commandées."
+        },
+        "upload": {
+          "title": "Scanner un document",
+          "intro": "Photographiez ou importez un document fournisseur. L'IA le lit, et vous vérifiez chaque ligne avant tout enregistrement.",
+          "kindLabel": "De quel document s'agit-il ?",
+          "dropHint": "Déposez le fichier ici",
+          "formats": "JPEG, PNG, WebP ou PDF · 10 Mo maximum · 10 pages",
+          "choose": "Choisir un fichier",
+          "uploading": "Envoi en cours…",
+          "submit": "Lire le document",
+          "tips": {
+            "title": "Pour une lecture la plus fiable possible",
+            "frame": "Cadrez la page entière, y compris la ligne des totaux.",
+            "flat": "Posez le document à plat et photographiez-le bien de face, sans angle.",
+            "light": "Lumière uniforme — évitez l'ombre de votre main ou du téléphone.",
+            "focus": "Vérifiez que les quantités manuscrites sont nettes avant d'envoyer.",
+            "pages": "Plusieurs pages ? Envoyez un PDF plutôt que plusieurs photos."
+          }
+        },
+        "review": {
+          "subtitle": "Vérifiez chaque ligne, puis importez. Rien n'est enregistré avant votre confirmation.",
+          "reading": "Lecture de votre document…",
+          "readingHint": "Cela prend jusqu'à une minute pour un document de plusieurs pages. Vous pouvez quitter cette page et revenir.",
+          "originalTitle": "Document original",
+          "openOriginal": "Ouvrir l'original dans un nouvel onglet",
+          "zoomIn": "Agrandir",
+          "zoomOut": "Réduire",
+          "noPreview": "Aperçu indisponible",
+          "noPreviewHint": "Les valeurs extraites restent affichées à droite.",
+          "detailsTitle": "Détails du document",
+          "reference": "N° du document",
+          "issuedAt": "Date d'émission",
+          "modelNotes": "Remarque de l'IA : {notes}",
+          "needsReview": "{count} valeur(s) à vérifier",
+          "needsReviewHint": "Les cases surlignées sont celles dont l'IA n'était pas sûre. Vérifiez-les, puis importez.",
+          "totalsMismatch": "Le total des lignes est de {computed} alors que le document indique {printed}. Vérifiez les quantités.",
+          "failedTitle": "Ce document n'a pas pu être lu",
+          "failedHint": "Essayez une photo plus nette et mieux éclairée de la facture elle-même.",
+          "tryAgain": "Essayer un autre document",
+          "alreadyImported": "Déjà importé",
+          "alreadyImportedHint": "Ce document a déjà été transformé en bon d'achat.",
+          "openPurchase": "Ouvrir le bon d'achat"
+        },
+        "supplier": {
+          "title": "Fournisseur",
+          "selectLabel": "Fournisseur",
+          "createOption": "Créer « {name} »",
+          "noneOption": "Aucun fournisseur",
+          "nameLabel": "Nom du fournisseur",
+          "nameHint": "C'est ce que l'IA a lu sur le document.",
+          "phoneLabel": "Téléphone",
+          "addressLabel": "Adresse",
+          "matchedNote": "Correspond à {percent} % à un fournisseur existant."
+        },
+        "margin": {
+          "label": "Marge %",
+          "hint": "Appliquée au prix d'achat",
+          "apply": "Recalculer les prix de vente",
+          "pinnedNote": "{count} prix saisi(s) à la main sont conservés."
+        },
+        "table": {
+          "title": "Lignes ({count})",
+          "total": "Total {total}",
+          "label": "Sur le document",
+          "product": "Votre produit",
+          "quantity": "Qté",
+          "unitCost": "Prix d'achat",
+          "salePrice": "Prix de vente",
+          "margin": "Marge",
+          "actions": "Actions",
+          "skip": "Ignorer cette ligne",
+          "include": "Remettre cette ligne",
+          "unpin": "Suivre à nouveau la marge",
+          "emptyTitle": "Aucune ligne trouvée",
+          "emptyHint": "L'IA n'a trouvé aucune ligne de produit dans ce document."
+        },
+        "match": {
+          "createNew": "Créer un nouveau produit",
+          "willCreate": "sera créé",
+          "source": {
+            "barcode": "Code-barres",
+            "sku": "Référence",
+            "alias": "Mémorisé",
+            "fuzzy": "Nom similaire",
+            "none": "Non associé"
+          }
+        },
+        "confirm": {
+          "lines": "lignes",
+          "units": "unités",
+          "discard": "Abandonner ce scan",
+          "submit": "Importer",
+          "done": "Document importé."
+        },
+        "errors": {
+          "tooLarge": "Le document doit faire moins de 10 Mo.",
+          "uploadFailed": "Le document n'a pas pu être envoyé."
+        }
+      },
+      "devices": {
+        "title": "Gestion des appareils",
+        "subtitle": "Consultez les appareils et la capacité d'activation, et générez des codes d'activation hors ligne."
       }
     },
     "validation": {
       "invalidNumber": "Entrez un nombre valide"
+    },
+    "tours": {
+      "next": "Suivant",
+      "prev": "Retour",
+      "done": "Terminer",
+      "menuLabel": "Visites guidées",
+      "sidebar": {
+        "label": "Présentation de l'admin",
+        "steps": {
+          "logo": {
+            "title": "Votre boutique",
+            "desc": "Voici le nom et le logo de votre boutique. Modifiez-les dans les paramètres d'apparence."
+          },
+          "dashboard": {
+            "title": "Tableau de bord",
+            "desc": "Obtenez un aperçu rapide de vos ventes, commandes et chiffre d'affaires."
+          },
+          "products": {
+            "title": "Produits",
+            "desc": "Ajoutez et gérez tout ce que vous vendez — produits, prix, images et stock."
+          },
+          "orders": {
+            "title": "Commandes",
+            "desc": "Suivez chaque commande de la réception à la livraison. Mettez à jour les statuts et exportez des rapports."
+          },
+          "delivery": {
+            "title": "Livraison",
+            "desc": "Connectez plusieurs transporteurs via webhooks ou gérez votre propre livraison. Configurez les zones et tarifs ici."
+          },
+          "settings": {
+            "title": "Paramètres",
+            "desc": "Personnalisez l'apparence, les coordonnées, la langue de votre boutique et publiez-la quand vous êtes prêt."
+          },
+          "help": {
+            "title": "Visites guidées",
+            "desc": "Cliquez ici à tout moment pour relancer cette visite ou démarrer une visite d'une section spécifique."
+          }
+        }
+      },
+      "dashboard": {
+        "label": "Visite du tableau de bord",
+        "steps": {
+          "stats": {
+            "title": "Vos indicateurs",
+            "desc": "Consultez le total des commandes, le chiffre d'affaires et les nouveaux clients pour la période sélectionnée."
+          },
+          "checklist": {
+            "title": "Liste de lancement",
+            "desc": "Complétez ces étapes pour préparer votre boutique. Vous pouvez la masquer une fois terminé."
+          },
+          "chart": {
+            "title": "Tendance des ventes",
+            "desc": "Ce graphique montre l'évolution de vos ventes dans le temps."
+          }
+        }
+      },
+      "products": {
+        "label": "Visite des produits",
+        "steps": {
+          "create": {
+            "title": "Ajouter un produit",
+            "desc": "Cliquez ici pour créer un nouveau produit. Ajoutez un nom, un prix, des images et du stock."
+          },
+          "search": {
+            "title": "Trouver des produits",
+            "desc": "Recherchez par nom, filtrez par catégorie ou statut pour trouver rapidement un produit."
+          },
+          "table": {
+            "title": "Liste des produits",
+            "desc": "Tous vos produits sont listés ici. Cliquez sur une ligne pour la modifier."
+          }
+        }
+      },
+      "orders": {
+        "label": "Visite des commandes",
+        "steps": {
+          "tabs": {
+            "title": "Filtrer par statut",
+            "desc": "Basculez entre Toutes, En attente, Confirmées, Expédiées, Livrées et Annulées."
+          },
+          "export": {
+            "title": "Exporter les commandes",
+            "desc": "Exportez vos commandes vers Excel ou Google Sheets pour les rapports et la comptabilité."
+          },
+          "table": {
+            "title": "Liste des commandes",
+            "desc": "Chaque ligne est une commande client. Cliquez dessus pour voir les détails ou mettre à jour le statut."
+          }
+        }
+      },
+      "delivery": {
+        "label": "Visite de la livraison",
+        "steps": {
+          "providers": {
+            "title": "Partenaires de livraison",
+            "desc": "Choisissez parmi plusieurs transporteurs ou une livraison en propre. Activez les webhooks temps réel pour les mises à jour instantanées."
+          },
+          "config": {
+            "title": "Configuration du prestataire",
+            "desc": "Entrez vos identifiants API et configurez les frais, zones et options de ramassage."
+          }
+        }
+      },
+      "settings": {
+        "label": "Visite des paramètres",
+        "steps": {
+          "appearance": {
+            "title": "Apparence",
+            "desc": "Changez le template, la couleur de marque et le logo de votre boutique."
+          },
+          "template": {
+            "title": "Template de boutique",
+            "desc": "Choisissez parmi 10 thèmes de vitrine. Chacun a une mise en page unique adaptée à un type de produit."
+          },
+          "color": {
+            "title": "Couleur de marque",
+            "desc": "Votre couleur de marque est utilisée sur les boutons et les accents de toute votre vitrine."
+          }
+        }
+      }
     }
   },
   "superAdmin": {
@@ -3710,8 +5506,11 @@
     "nav": {
       "dashboard": "Tableau de bord",
       "tenants": "Tenants",
+      "ai": "IA",
       "analytics": "Analytique",
-      "auditLogs": "Journal d’audit"
+      "auditLogs": "Journal d’audit",
+      "payments": "Paiements",
+      "devices": "Appareils"
     },
     "login": {
       "title": "Super Admin",
@@ -3774,7 +5573,14 @@
         "deleteTenant": "Supprimer le tenant",
         "suspendTenant": "Suspendre le tenant",
         "unsuspendTenant": "Activer le tenant",
-        "impersonateUser": "Usurper un utilisateur"
+        "impersonateUser": "Usurper un utilisateur",
+        "archiveTenant": "Archiver le tenant",
+        "restoreTenant": "Restaurer le tenant",
+        "setTenantPlan": "Changer l’offre",
+        "importPaymentProof": "Importer une preuve de paiement",
+        "reviewPayment": "Examiner le paiement",
+        "viewPaymentProof": "Voir la preuve de paiement",
+        "listTenantPayments": "Lister les paiements du tenant"
       }
     },
     "tenants": {
@@ -3783,7 +5589,12 @@
         "createTenant": "Créer un tenant",
         "payments": "Paiements",
         "suspend": "Suspendre",
-        "activate": "Activer"
+        "activate": "Activer",
+        "showArchived": "Afficher les archivés",
+        "viewDetails": "Voir les détails",
+        "archive": "Archiver",
+        "restore": "Restaurer",
+        "deletePermanently": "Supprimer définitivement"
       },
       "search": {
         "placeholder": "Rechercher des tenants..."
@@ -3802,7 +5613,8 @@
       },
       "status": {
         "active": "Actif",
-        "suspended": "Suspendu"
+        "suspended": "Suspendu",
+        "archived": "Archivé"
       },
       "modal": {
         "createTitle": "Créer un nouveau tenant",
@@ -3816,7 +5628,7 @@
             "label": "Slug (sous-domaine)",
             "placeholder": "votre-boutique",
             "slugFallback": "slug",
-            "hint": "Accessible à l’adresse {slug}.localhost:3000"
+            "hint": "Accessible à l’adresse {domain}"
           },
           "ownerEmail": {
             "label": "E-mail du propriétaire",
@@ -3831,11 +5643,77 @@
         "generic": "Une erreur est survenue",
         "suspendFailed": "Impossible de suspendre le tenant",
         "activateFailed": "Impossible d’activer le tenant",
-        "deleteFailed": "Impossible de supprimer le tenant"
+        "deleteFailed": "Impossible de supprimer le tenant",
+        "archiveFailed": "Impossible d’archiver le tenant",
+        "restoreFailed": "Impossible de restaurer le tenant"
       },
       "confirm": {
         "suspend": "Voulez-vous vraiment suspendre {name} ?",
-        "delete": "Voulez-vous vraiment SUPPRIMER {name} ? Cette action est irréversible !"
+        "archive": "Archiver {name} ? Sa boutique et la connexion admin seront désactivées. Vous pourrez le restaurer plus tard.",
+        "restore": "Restaurer {name} ? Cela réactivera sa boutique et la connexion admin.",
+        "deletePermanently": "Supprimer définitivement {name} ? Cette action est irréversible."
+      },
+      "detail": {
+        "breadcrumb": "Détails",
+        "loading": "Chargement du tenant...",
+        "notFound": "Tenant introuvable",
+        "storefrontLink": "Ouvrir la boutique",
+        "overview": {
+          "title": "Aperçu",
+          "createdAt": "Créé le",
+          "slug": "Slug"
+        },
+        "plan": {
+          "title": "Offre et utilisation",
+          "currentPlan": "Offre actuelle",
+          "interval": "Intervalle de facturation",
+          "status": "Statut de l’abonnement",
+          "currentPeriod": "Période en cours",
+          "trialEnds": "Fin de l’essai",
+          "noSubscription": "Aucun abonnement enregistré",
+          "changePlan": "Changer d’offre",
+          "changePlanCta": "Appliquer l’offre",
+          "updating": "Application..."
+        },
+        "usage": {
+          "title": "Utilisation sur la période",
+          "products": "Produits",
+          "orders": "Commandes",
+          "users": "Utilisateurs"
+        },
+        "users": {
+          "title": "Utilisateurs",
+          "empty": "Aucun utilisateur",
+          "table": {
+            "email": "E-mail",
+            "role": "Rôle",
+            "status": "Statut",
+            "created": "Créé le"
+          }
+        },
+        "integrations": {
+          "title": "Intégrations sociales",
+          "empty": "Aucune intégration connectée",
+          "deliveryTitle": "Comptes de livraison",
+          "deliveryEmpty": "Aucun compte de livraison connecté",
+          "table": {
+            "provider": "Fournisseur",
+            "status": "Statut",
+            "updated": "Mis à jour"
+          }
+        },
+        "domains": {
+          "title": "Domaines personnalisés",
+          "empty": "Aucun domaine personnalisé",
+          "table": {
+            "domain": "Domaine",
+            "created": "Ajouté le"
+          }
+        },
+        "errors": {
+          "loadFailed": "Impossible de charger les détails du tenant",
+          "planUpdateFailed": "Impossible de mettre à jour l’offre"
+        }
       }
     },
     "paymentsPage": {
@@ -3898,6 +5776,93 @@
         "loadFailed": "Impossible de charger les paiements",
         "importFailed": "Impossible d’importer le paiement",
         "reviewFailed": "Impossible de traiter le paiement"
+      }
+    },
+    "analytics": {
+      "title": "Analyses de la plateforme",
+      "revenue": {
+        "title": "Revenu total de la plateforme",
+        "subtitle": "Commandes confirmées, expédiées et livrées"
+      },
+      "stats": {
+        "tenants": "Tenants actifs",
+        "users": "Utilisateurs totaux",
+        "products": "Produits totaux",
+        "orders": "Commandes totales"
+      },
+      "byTenant": {
+        "title": "Revenu par tenant",
+        "loading": "Chargement...",
+        "empty": "Aucune donnée de revenu disponible",
+        "unknownTenant": "Tenant inconnu"
+      },
+      "topTenants": {
+        "title": "Tenants les plus performants",
+        "table": {
+          "rank": "Rang",
+          "tenant": "Tenant",
+          "revenue": "Revenu",
+          "orders": "Commandes",
+          "products": "Produits"
+        }
+      }
+    },
+    "auditLogs": {
+      "title": "Journal d’audit",
+      "actions": {
+        "refresh": "Actualiser"
+      },
+      "filters": {
+        "search": {
+          "label": "Rechercher",
+          "placeholder": "Rechercher par action, détails ou ID utilisateur..."
+        },
+        "actionType": "Type d’action",
+        "allActions": "Toutes les actions",
+        "sortBy": "Trier par",
+        "sort": {
+          "newestFirst": "Plus récent d’abord",
+          "oldestFirst": "Plus ancien d’abord"
+        }
+      },
+      "loading": "Chargement du journal d’audit...",
+      "empty": "Aucune entrée trouvée",
+      "table": {
+        "timestamp": "Horodatage",
+        "action": "Action",
+        "details": "Détails",
+        "userId": "ID utilisateur",
+        "target": "Cible"
+      },
+      "pagination": {
+        "showing": "Affichage de {from} à {to} sur {total}",
+        "previous": "Précédent",
+        "next": "Suivant"
+      }
+    },
+    "pendingPayments": {
+      "title": "Paiements en attente",
+      "subtitle": "Examinez, approuvez ou rejetez les preuves de paiement soumises par les tenants.",
+      "pending": "en attente",
+      "noProof": "Aucun fichier",
+      "stats": {
+        "pending": "Preuves en attente",
+        "tenants": "Tenants en attente",
+        "total": "Valeur totale"
+      },
+      "table": {
+        "title": "Preuves soumises en attente d’examen",
+        "tenant": "Tenant",
+        "plan": "Offre",
+        "amount": "Montant",
+        "submitted": "Soumis le",
+        "proof": "Preuve",
+        "notes": "Notes",
+        "actions": "Actions"
+      },
+      "empty": {
+        "title": "Tout est à jour !",
+        "subtitle": "Aucune preuve de paiement en attente pour le moment."
       }
     }
   }

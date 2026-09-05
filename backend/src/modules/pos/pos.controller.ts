@@ -30,11 +30,17 @@ export class PosController {
         try {
             const tenant = req.tenant!
             const user = req.user
+            const idempotencyKey = req.get('Idempotency-Key')?.trim()
+            const offlineId = typeof req.body?.offlineId === 'string' ? req.body.offlineId.trim() : ''
+            const clientRequestId = idempotencyKey || offlineId || null
 
             const sale = await service.createSale(
                 tenant.id,
                 {
                     customerId: req.body?.customerId,
+                    clientRequestId,
+                    cashboxId: req.body?.cashboxId ?? null,
+                    payment: req.body?.payment ?? null,
                     items: req.body?.items ?? []
                 },
                 req.subscription
@@ -53,7 +59,17 @@ export class PosController {
             if (error instanceof PosValidationError) {
                 return res.status(error.statusCode).json({
                     statusCode: error.statusCode,
-                    statusMessage: error.statusMessage
+                    statusMessage: error.statusMessage,
+                    code: error.code,
+                    meta: error.meta
+                })
+            }
+            if (typeof error?.statusCode === 'number' && typeof error?.statusMessage === 'string') {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    code: typeof error?.code === 'string' ? error.code : undefined,
+                    meta: error?.meta
                 })
             }
 

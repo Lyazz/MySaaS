@@ -5,16 +5,16 @@ void main() {
   group('normalizeApiBaseUrl', () {
     test('adds /api and keeps https', () {
       expect(
-        normalizeApiBaseUrl('https://tenant.platform.com'),
-        'https://tenant.platform.com/api',
+        normalizeApiBaseUrl('https://tenant.swekly.com'),
+        'https://tenant.swekly.com/api',
       );
       expect(
-        normalizeApiBaseUrl('https://tenant.platform.com/api'),
-        'https://tenant.platform.com/api',
+        normalizeApiBaseUrl('https://tenant.swekly.com/api'),
+        'https://tenant.swekly.com/api',
       );
       expect(
-        normalizeApiBaseUrl('tenant.platform.com'),
-        'https://tenant.platform.com/api',
+        normalizeApiBaseUrl('tenant.swekly.com'),
+        'https://tenant.swekly.com/api',
       );
     });
 

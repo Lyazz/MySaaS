@@ -2,9 +2,10 @@
 import { useCartStore } from '~/stores/cart'
 
 const cartStore = useCartStore()
+const brandColor = useStorefrontTemplateBrandColor('stationnery')
 
 const storeStyle = computed(() => {
-  const primaryColor = '#334155' // Slate 700
+  const primaryColor = brandColor.value.color
   
   // Helper to convert hex to rgb
   const hexToRgb = (hex: string) => {
@@ -28,7 +29,16 @@ const storeStyle = computed(() => {
   const result = {
     '--brand': primaryColor,
     '--brand-rgb': hexToRgb(primaryColor),
-    fontFamily: "'Merriweather', 'Playfair Display', serif"
+    fontFamily: "'Merriweather', 'Playfair Display', serif",
+    // Shared LocaleSwitcher — paper-warm, tight corners
+    '--ls-surface': '#fdfbf7',
+    '--ls-border': 'rgba(30,41,59,0.14)',
+    '--ls-shadow': '0 14px 32px -14px rgba(30,41,59,0.20)',
+    '--ls-radius': '6px',
+    '--ls-text': '#475569',
+    '--ls-text-strong': '#1e293b',
+    '--ls-hover-bg': 'rgba(30,41,59,0.05)',
+    '--ls-accent': 'color-mix(in srgb, var(--brand) 58%, #1e293b)'
   } as Record<string, string>
 
   return result

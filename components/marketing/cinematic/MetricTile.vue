@@ -1,6 +1,6 @@
 <template>
   <div class="relative">
-    <div v-motion-slide-visible-once-bottom class="text-left">
+    <div v-motion-slide-visible-once-bottom class="text-start">
       <div class="cinematic-eyebrow mb-3">{{ label }}</div>
       <div class="cinematic-stat-num">{{ value }}</div>
       <div class="mt-3 h-px w-12 bg-lime-neon/70" />

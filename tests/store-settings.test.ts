@@ -3,6 +3,7 @@ import request from 'supertest'
 import prisma from '../backend/src/lib/prisma'
 import app from '../backend/src/app'
 import { signAccessToken } from '../backend/src/lib/jwt'
+import { buildDefaultStoreLegalPagesConfig } from '../shared/storefront/legal-pages'
 
 describe('Store Settings API', () => {
     let tenantId: string
@@ -37,8 +38,10 @@ describe('Store Settings API', () => {
                 faviconUrl,
                 name: 'Updated Name',
                 slug: slug,
-                primaryColor: '#0F766E',
-                templateKey: 'modern'
+                primaryColor: '#4D7C0F',
+                useBrandColor: true,
+                templateKey: 'modern',
+                orderIdPrefix: 'shop1'
             })
 
         if (res.status !== 200) {
@@ -47,6 +50,7 @@ describe('Store Settings API', () => {
         expect(res.status).toBe(200)
         expect(res.body.logoUrl).toBe(logoUrl)
         expect(res.body.faviconUrl).toBe(faviconUrl)
+        expect(res.body.orderIdPrefix).toBe('SHOP1')
 
         // Verify in DB
         const settings = await prisma.storeSettings.findUnique({
@@ -54,6 +58,26 @@ describe('Store Settings API', () => {
         })
         expect(settings?.logoUrl).toBe(logoUrl)
         expect(settings?.faviconUrl).toBe(faviconUrl)
+        expect(settings?.orderIdPrefix).toBe('SHOP1')
+        expect(settings?.useBrandColor).toBe(true)
+    })
+
+    it('updates template key to arena successfully', async () => {
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                templateKey: 'arena'
+            })
+
+        expect(res.status).toBe(200)
+        expect(res.body.templateKey).toBe('arena')
+
+        const settings = await prisma.storeSettings.findUnique({
+            where: { tenantId }
+        })
+        expect(settings?.templateKey).toBe('arena')
     })
 
     it('fails with invalid faviconUrl type', async () => {
@@ -64,6 +88,85 @@ describe('Store Settings API', () => {
             .send({
                 faviconUrl: 123 // Should be string
             })
+
+        expect(res.status).toBe(400)
+    })
+
+    it('updates legal pages config in 3 languages and stores tenant-scoped payload', async () => {
+        const legalPages = buildDefaultStoreLegalPagesConfig()
+        legalPages.terms.enabled = true
+        legalPages.privacy.enabled = true
+        legalPages.contact.enabled = true
+        legalPages.terms.content.fr = `${legalPages.terms.content.fr}\n\nClause FR test.`
+        legalPages.privacy.content.en = `${legalPages.privacy.content.en}\n\nEN policy test.`
+        legalPages.contact.title.ar = 'تواصل معنا الآن'
+
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ legalPages })
+
+        expect(res.status).toBe(200)
+        expect(res.body.legalPages.terms.enabled).toBe(true)
+        expect(res.body.legalPages.privacy.content.en).toContain('EN policy test.')
+
+        const settings = await prisma.storeSettings.findUnique({ where: { tenantId } })
+        const stored = settings?.legalPages as any
+        expect(stored?.contact?.title?.ar).toBe('تواصل معنا الآن')
+    })
+
+    it('rejects malformed legal pages payload', async () => {
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                legalPages: {
+                    terms: { enabled: true }
+                }
+            })
+
+        expect(res.status).toBe(400)
+        expect(String(res.body?.statusMessage || '')).toContain('legalPages')
+    })
+
+    it('toggles maintenance mode and stores an optional message', async () => {
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({
+                maintenanceMode: true,
+                maintenanceMessage: 'Back soon, upgrading the shop.'
+            })
+
+        expect(res.status).toBe(200)
+        expect(res.body.maintenanceMode).toBe(true)
+        expect(res.body.maintenanceMessage).toBe('Back soon, upgrading the shop.')
+
+        const tenant = await prisma.tenant.findUnique({ where: { id: tenantId } })
+        expect(tenant?.maintenanceMode).toBe(true)
+
+        const settings = await prisma.storeSettings.findUnique({ where: { tenantId } })
+        expect(settings?.maintenanceMessage).toBe('Back soon, upgrading the shop.')
+
+        const off = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ maintenanceMode: false })
+
+        expect(off.status).toBe(200)
+        expect(off.body.maintenanceMode).toBe(false)
+    })
+
+    it('rejects a non-boolean maintenanceMode', async () => {
+        const res = await request(app)
+            .patch('/api/admin/store-settings')
+            .set('host', `${slug}.localhost`)
+            .set('Authorization', `Bearer ${token}`)
+            .send({ maintenanceMode: 'yes' })
 
         expect(res.status).toBe(400)
     })

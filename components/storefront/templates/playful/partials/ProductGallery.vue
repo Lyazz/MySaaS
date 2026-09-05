@@ -3,16 +3,12 @@ const props = defineProps<{
     images: string[]
     title?: string
 }>()
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
 const activeImageIndex = ref(0)
 const autoplayTimer = ref<ReturnType<typeof setInterval> | null>(null)
 const touchStartX = ref(0)
 const touchEndX = ref(0)
-
-const currentImage = computed(() => {
-    if (props.images && props.images.length > 0) return props.images[activeImageIndex.value]
-    return '/blank.svg?v=2'
-})
 
 const setActiveImage = (index: number) => {
     activeImageIndex.value = index
@@ -54,87 +50,95 @@ watch(() => props.images, () => { activeImageIndex.value = 0; resetAutoplay() })
 </script>
 
 <template>
-  <div class="mb-8 lg:mb-0 lg:sticky lg:top-8 animate-fade-in-left">
-    <!-- Main image — polaroid style -->
+  <div class="lg:sticky lg:top-[9.5rem]">
+    <!-- Candy frame: the photo sits on a pastel ground, never on bare white -->
     <div
-      class="relative bg-white rounded-3xl border-3 border-violet-100 shadow-[0_6px_0_0_#ddd6fe] overflow-hidden group cursor-zoom-in mb-5 aspect-[4/5]"
+      class="relative rounded-[var(--kw-r-xl)] overflow-hidden group cursor-zoom-in mb-5 aspect-[4/5]"
+      style="background: linear-gradient(150deg, var(--kw-pink-soft), var(--kw-lilac-soft))"
       @touchstart="handleTouchStart"
       @touchend="handleTouchEnd"
+      @mousemove="onPointerMove"
       @mouseenter="stopAutoplay"
-      @mouseleave="startAutoplay"
+      @mouseleave="startAutoplay(); onPointerLeave()"
     >
-      <!-- Tape detail -->
-      <div class="absolute -top-3 left-1/2 -translate-x-1/2 w-20 h-5 bg-amber-200/70 border border-amber-200 z-20 rotate-[-1deg] rounded-sm shadow-sm pointer-events-none" />
-
-      <!-- Images -->
-      <transition-group name="fade" tag="div" class="w-full h-full relative">
+      <transition-group
+        name="kw-gallery"
+        tag="div"
+        class="w-full h-full relative"
+      >
         <img
           v-for="(img, idx) in images"
           v-show="activeImageIndex === idx"
           :key="img || idx"
           :src="img"
           :alt="title"
-          class="absolute inset-0 w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-700"
+          class="absolute inset-0 w-full h-full object-contain object-center transition-transform duration-700"
+          :style="zoomStyle"
         >
       </transition-group>
 
-      <!-- Mobile dots -->
-      <div v-if="images?.length > 1" class="absolute bottom-3 left-0 right-0 flex justify-center gap-2 z-10 md:hidden">
+      <div
+        v-if="images?.length > 1"
+        class="absolute bottom-4 start-0 end-0 flex justify-center gap-2 z-10 md:hidden"
+      >
         <button
           v-for="(_, idx) in images"
-          :key="'dot-'+idx"
-          class="w-2.5 h-2.5 rounded-full transition-all border-2 border-white/60"
-          :class="activeImageIndex === idx ? 'bg-violet-700 scale-110 shadow-sm' : 'bg-black/20'"
+          :key="'dot-' + idx"
+          class="h-2.5 rounded-full transition-all duration-300"
+          :class="activeImageIndex === idx ? 'w-6 bg-[var(--kw-pink-deep)]' : 'w-2.5 bg-white/70'"
           @click="setActiveImage(idx)"
         />
       </div>
 
-      <!-- Desktop arrows -->
       <button
         v-if="images?.length > 1"
-        class="hidden md:flex absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white rounded-full items-center justify-center text-violet-700 border-3 border-violet-100 shadow-[0_3px_0_0_#ddd6fe] opacity-0 group-hover:opacity-100 hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all z-10"
+        class="!hidden md:!flex kw-icon-btn absolute start-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
         @click.stop="prevImage"
       >
-        <Icon name="lucide:arrow-left" class="w-5 h-5 stroke-[2.5]" />
+        <Icon
+          name="lucide:chevron-left"
+          class="w-5 h-5 rtl:rotate-180"
+        />
       </button>
       <button
         v-if="images?.length > 1"
-        class="hidden md:flex absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 bg-white rounded-full items-center justify-center text-violet-700 border-3 border-violet-100 shadow-[0_3px_0_0_#ddd6fe] opacity-0 group-hover:opacity-100 hover:-translate-y-1 active:translate-y-0 active:shadow-none transition-all z-10"
+        class="!hidden md:!flex kw-icon-btn absolute end-4 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity z-10"
         @click.stop="nextImage"
       >
-        <Icon name="lucide:arrow-right" class="w-5 h-5 stroke-[2.5]" />
+        <Icon
+          name="lucide:chevron-right"
+          class="w-5 h-5 rtl:rotate-180"
+        />
       </button>
     </div>
 
-    <!-- Thumbnails -->
-    <div v-if="images?.length > 1" class="flex flex-wrap gap-3 justify-center">
+    <!-- Thumbnails as pebbles -->
+    <div
+      v-if="images?.length > 1"
+      class="flex flex-wrap gap-3 justify-center"
+    >
       <button
         v-for="(img, idx) in images"
         :key="idx"
-        class="w-16 h-16 rounded-2xl overflow-hidden border-3 transition-all duration-200 relative flex-shrink-0"
-        :class="[
-          activeImageIndex === idx
-            ? 'border-violet-700 shadow-[0_3px_0_0_#4c1d95] -translate-y-1'
-            : 'border-violet-100 hover:border-violet-300 hover:-translate-y-0.5',
-          idx % 3 === 1 ? 'rotate-[1.5deg]' : idx % 3 === 2 ? 'rotate-[-1deg]' : ''
-        ]"
+        class="w-16 h-16 kw-blob kw-blob-hover overflow-hidden transition-transform duration-300 flex-shrink-0"
+        :style="{
+          background: 'var(--kw-pink-soft)',
+          boxShadow: activeImageIndex === idx ? '0 0 0 3px var(--kw-pink-deep)' : '0 0 0 2px var(--kw-line)'
+        }"
+        :class="activeImageIndex === idx ? '-translate-y-1' : 'hover:-translate-y-0.5'"
         @click="setActiveImage(idx)"
       >
-        <img :src="img" class="w-full h-full object-cover" alt="Thumbnail">
+        <img
+          :src="img"
+          class="w-full h-full object-cover"
+          :alt="title"
+        >
       </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-.animate-fade-in-left {
-  animation: fadeInLeft 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards;
-  opacity: 0;
-}
-@keyframes fadeInLeft {
-  from { opacity: 0; transform: translateX(-20px); }
-  to { opacity: 1; transform: translateX(0); }
-}
-.fade-enter-active, .fade-leave-active { transition: opacity 0.4s ease; }
-.fade-enter-from, .fade-leave-to { opacity: 0; }
+.kw-gallery-enter-active, .kw-gallery-leave-active { transition: opacity .4s ease; }
+.kw-gallery-enter-from, .kw-gallery-leave-to { opacity: 0; }
 </style>

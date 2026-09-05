@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/products_provider.dart';
 import 'form/form_input.dart';
 import 'dialogs/app_dialog.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class OptionMetadataDialog extends ConsumerStatefulWidget {
   final String productId;
@@ -61,9 +63,7 @@ class _OptionMetadataDialogState extends ConsumerState<OptionMetadataDialog> {
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(
-          context,
-        ).showSnackBar(SnackBar(content: Text('Failed to update: $e')));
+        AppToasts.show(context, 'Failed to update: $e');
       }
     } finally {
       if (mounted) {
@@ -91,7 +91,10 @@ class _OptionMetadataDialogState extends ConsumerState<OptionMetadataDialog> {
             onChanged: (_) => setState(() {}), // Refresh preview
           ),
           const SizedBox(height: 16),
-          const Text('Preview:', style: TextStyle(fontWeight: FontWeight.w600)),
+          Text(
+            'admin.productOptionsEditor.preview.title'.tr(),
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
           const SizedBox(height: 8),
           if (isColor)
             Container(
@@ -118,7 +121,7 @@ class _OptionMetadataDialogState extends ConsumerState<OptionMetadataDialog> {
               ),
             )
           else
-            const Text('No image URL', style: TextStyle(color: Colors.grey)),
+            Text('app.no_image_url'.tr(), style: TextStyle(color: Colors.grey)),
         ],
       ),
       secondaryLabel: 'Cancel',

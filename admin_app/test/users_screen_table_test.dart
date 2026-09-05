@@ -2,6 +2,7 @@ import 'package:admin_app/models/admin_user.dart';
 import 'package:admin_app/models/staff_role.dart';
 import 'package:admin_app/providers/admin_users_provider.dart';
 import 'package:admin_app/providers/staff_roles_provider.dart';
+import 'package:admin_app/providers/cash_provider.dart';
 import 'package:admin_app/screens/users_screen.dart';
 import 'package:admin_app/widgets/buttons/app_button.dart';
 import 'package:admin_app/widgets/responsive_paginated_table.dart';
@@ -11,6 +12,28 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'helpers/pump_localized_app.dart';
+
+class MockStaffRolesNotifier extends StaffRolesNotifier {
+  final StaffRolesState _mockState;
+  MockStaffRolesNotifier(this._mockState) : super(_mockState);
+
+  @override
+  StaffRolesState build() => _mockState;
+
+  @override
+  Future<void> fetchRoles({bool forceRefresh = false}) async {}
+}
+
+class MockCashNotifier extends CashNotifier {
+  final CashState _mockState;
+  MockCashNotifier(this._mockState) : super(_mockState);
+
+  @override
+  CashState build() => _mockState;
+
+  @override
+  Future<void> fetchCashboxes({bool forceRefresh = false}) async {}
+}
 
 void main() {
   setUpAll(() async {
@@ -60,8 +83,13 @@ void main() {
             ),
           ),
           staffRolesProvider.overrideWith(
-            () => StaffRolesNotifier(
+            () => MockStaffRolesNotifier(
               StaffRolesState(roles: roles, isLoading: false, error: null),
+            ),
+          ),
+          cashProvider.overrideWith(
+            () => MockCashNotifier(
+              CashState(cashboxes: [], isLoadingCashboxes: false, error: null),
             ),
           ),
         ],
@@ -74,8 +102,16 @@ void main() {
       find.byWidgetPredicate((w) => w is ResponsivePaginatedTable),
       findsOneWidget,
     );
-    expect(find.text('Email'), findsOneWidget);
-    expect(find.widgetWithText(AppButton, 'Edit'), findsNWidgets(2));
+    // Matched on the whole label, case-insensitively: the header is styled
+    // uppercase, which this test has no stake in, but a substring match
+    // would also catch the 'Email' inside search placeholders and cells.
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && w.data?.toLowerCase() == 'email',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byTooltip('Edit'), findsNWidgets(2));
 
     await tester.tap(find.text('Roles (staff)'));
     await tester.pumpAndSettle();
@@ -84,8 +120,13 @@ void main() {
       find.byWidgetPredicate((w) => w is ResponsivePaginatedTable),
       findsOneWidget,
     );
-    expect(find.text('Name'), findsOneWidget);
-    expect(find.widgetWithText(AppButton, 'Edit'), findsOneWidget);
-    expect(find.widgetWithText(AppButton, 'Delete'), findsOneWidget);
+    expect(
+      find.byWidgetPredicate(
+        (w) => w is Text && w.data?.toLowerCase() == 'name',
+      ),
+      findsOneWidget,
+    );
+    expect(find.byTooltip('Edit'), findsOneWidget);
+    expect(find.byTooltip('Delete'), findsOneWidget);
   });
 }

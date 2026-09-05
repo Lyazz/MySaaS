@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import ProductCard from '~/components/storefront/templates/wellness/ProductCard.vue'
-
+import { normalizeSearchText } from '~/shared/text/normalize-search'
 const props = defineProps<{
     products: any[]
 }>()
@@ -28,7 +28,14 @@ const filters = computed(() => ({
 
 // Filtering Logic
 const selectedCategories = ref<string[]>([])
-const searchQuery = ref('')
+const route = useRoute()
+const searchQuery = ref((route.query.q as string) || '')
+
+watch(() => route.query.q, (newQ) => {
+    if (newQ !== undefined) {
+        searchQuery.value = newQ as string
+    }
+})
 const sortOption = ref<'relevance' | 'priceAsc' | 'priceDesc'>('relevance')
 const viewMode = ref<'grid' | 'list'>('grid')
 
@@ -66,8 +73,8 @@ const filteredProducts = computed(() => {
 
     // Filter by Search
     if (searchQuery.value) {
-        const q = searchQuery.value.toLowerCase()
-        result = result.filter(p => p.title.toLowerCase().includes(q))
+        const q = normalizeSearchText(searchQuery.value)
+        result = result.filter(p => normalizeSearchText(p.title).includes(q) || (p.searchKeywords && normalizeSearchText(p.searchKeywords).includes(q)))
     }
 
     // Filter by Price
@@ -148,7 +155,7 @@ const closeQuickView = () => {
 </script>
 
 <template>
-  <div class="min-h-screen bg-stone-50 py-8 lg:py-12 font-wellness relative text-stone-700">
+  <div class="min-h-screen bg-wl-paper py-8 lg:py-12 font-wellness relative text-wl-ink">
     <!-- Mobile Filter Drawer Overlay -->
     <Transition
       enter-active-class="transition-opacity duration-300 ease-in-out"
@@ -160,7 +167,7 @@ const closeQuickView = () => {
     >
       <div
         v-if="isFilterDrawerOpen"
-        class="fixed inset-0 bg-stone-900/40 backdrop-blur-sm z-40 lg:hidden"
+        class="fixed inset-0 bg-wl-zelligeDeep/50 z-40 lg:hidden"
         @click="isFilterDrawerOpen = false"
       />
     </Transition>
@@ -176,46 +183,44 @@ const closeQuickView = () => {
     >
       <aside
         v-if="isFilterDrawerOpen"
-        class="fixed inset-y-0 right-0 w-[320px] bg-stone-50 z-50 shadow-2xl p-8 overflow-y-auto lg:hidden border-l border-stone-100"
+        class="fixed inset-y-0 end-0 w-[320px] bg-wl-paper z-50 shadow-wl-lg overflow-y-auto lg:hidden border-s border-wl-rule"
       >
-        <div class="flex items-center justify-between mb-8">
-          <h3 class="font-bold text-stone-900 text-xl font-wellness">
+        <div class="flex items-center justify-between px-6 h-20 bg-wl-card border-b-2 border-wl-olive">
+          <h3 class="wl-label text-wl-ink">
             {{ storefrontContent.actions.filters }}
           </h3>
           <button
-            class="p-2 -mr-2 text-stone-400 hover:text-stone-900 transition-colors"
+            class="p-2 -me-2 text-wl-muted hover:text-wl-ink transition-colors"
             @click="isFilterDrawerOpen = false"
           >
-            <Icon name="lucide:x" class="w-6 h-6" />
+            <Icon name="lucide:x" class="w-5 h-5" />
           </button>
         </div>
-            
-        <div class="space-y-10">
+
+        <div class="p-6 space-y-8">
           <!-- Categories -->
           <div>
-            <h4 class="font-bold text-stone-900 mb-5 text-sm uppercase tracking-widest font-wellness">
-              Categories
+            <h4 class="wl-label text-wl-muted pb-3 mb-4 border-b border-wl-rule">
+              {{ storefrontContent.shop.categories }}
             </h4>
-            <div class="space-y-4">
+            <div class="space-y-3">
               <label
                 v-for="cat in filters.categories"
                 :key="cat.id"
-                class="flex items-center gap-4 cursor-pointer group select-none"
+                class="flex items-center gap-3 cursor-pointer group select-none"
               >
-                <div class="relative flex items-center">
-                  <input 
-                    v-model="selectedCategories" 
-                    type="checkbox"
-                    :value="cat.id"
-                    class="peer h-5 w-5 rounded-md border-stone-300 text-stone-800 focus:ring-stone-500 transition-all checked:bg-stone-800 checked:border-transparent bg-white" 
-                  >
-                </div>
-                <span class="text-base text-stone-600 group-hover:text-stone-900 transition-colors font-medium">{{ categoryDisplayTitle(cat) }}</span>
+                <input
+                  v-model="selectedCategories"
+                  type="checkbox"
+                  :value="cat.id"
+                  class="h-4 w-4 rounded-none border-wl-ruleStrong text-wl-oliveDeep focus:ring-0 focus:ring-offset-0 bg-wl-card transition-colors"
+                >
+                <span class="text-sm text-wl-muted group-hover:text-wl-oliveDeep transition-colors">{{ categoryDisplayTitle(cat) }}</span>
               </label>
             </div>
           </div>
 
-          <div class="mb-6">
+          <div class="wl-pricefilter">
             <StorefrontPriceRangeFilter
               v-model:min-price="minPriceInput"
               v-model:max-price="maxPriceInput"
@@ -226,9 +231,9 @@ const closeQuickView = () => {
           </div>
 
           <!-- Apply Button Mobile -->
-          <div class="pt-8 mt-4 sticky bottom-0 pb-safe">
+          <div class="pt-4 sticky bottom-0 pb-safe bg-wl-paper">
             <button
-              class="w-full py-4 bg-stone-900 text-white font-bold rounded-full shadow-lg hover:bg-stone-800 active:scale-95 transition-all text-base"
+              class="w-full py-4 wl-cta wl-label"
               @click="isFilterDrawerOpen = false"
             >
               {{ storefrontContent.shop.showResults(filteredProducts.length) }}
@@ -241,17 +246,18 @@ const closeQuickView = () => {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <!-- Header / Title Section -->
       <div class="mb-8 lg:mb-12">
-        <h1 class="text-4xl lg:text-5xl font-bold text-stone-900 font-wellness mb-4 tracking-tight">
-          Shop Collection
-        </h1>
-        <p class="text-lg text-stone-500 max-w-2xl font-light">
+        <div class="wl-ruled wl-ruled--start wl-ruled--olive mb-4">
+          <h1 class="wl-display text-3xl lg:text-[2.75rem] text-wl-ink leading-none">
+            Shop Collection
+          </h1>
+        </div>
+        <p class="text-wl-muted max-w-xl leading-relaxed">
           Curated essentials for your daily rituals and wellbeing.
         </p>
 
-        <!-- Specials Pills -->
-        <div class="flex flex-wrap gap-3 mt-8 overflow-x-auto pb-2 scrollbar-hide -mx-4 px-4 lg:mx-0 lg:px-0">
+        <div class="flex flex-wrap gap-2 mt-7">
           <button
-            class="px-6 py-2.5 rounded-full bg-stone-900 text-white text-sm font-medium hover:bg-stone-800 transition-colors shadow-sm whitespace-nowrap"
+            class="px-6 py-2.5 wl-cta wl-label whitespace-nowrap"
             @click="resetFilters"
           >
             {{ storefrontContent.shop.allProducts }}
@@ -259,88 +265,88 @@ const closeQuickView = () => {
         </div>
       </div>
 
-      <div class="flex flex-col lg:flex-row gap-12">
+      <div class="flex flex-col lg:flex-row gap-10">
         <!-- Tablet/Desktop Sidebar Filters -->
-        <aside class="hidden lg:block w-72 flex-shrink-0 space-y-10 sticky top-32 max-h-[calc(100vh-9rem)] overflow-y-auto pr-2 custom-scrollbar">
-          <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
+        <aside class="hidden lg:block w-64 flex-shrink-0 space-y-6 sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pe-1 custom-scrollbar">
+          <div class="wl-plate p-6">
             <!-- Filter Header -->
-            <div class="flex items-center justify-between mb-8 border-b border-stone-100 pb-6">
-              <h3 class="font-bold text-stone-900 text-xl font-wellness">
+            <div class="flex items-center justify-between gap-3 mb-6 border-b border-wl-rule pb-4">
+              <h3 class="wl-label text-wl-ink">
                 {{ storefrontContent.actions.filters }}
               </h3>
               <button
-                class="text-xs font-bold text-stone-500 hover:text-stone-900 uppercase tracking-widest transition-colors"
+                class="wl-label text-wl-muted hover:text-wl-ink transition-colors"
                 @click="resetFilters"
               >
                 {{ storefrontContent.actions.reset }}
               </button>
             </div>
 
-            <div class="space-y-10">
+            <div class="space-y-8">
               <!-- Categories -->
               <div>
-                <h4 class="font-bold text-stone-900 mb-5 text-xs uppercase tracking-widest font-wellness">
-                  Categories
+                <h4 class="wl-label text-wl-muted mb-4">
+                  {{ storefrontContent.shop.categories }}
                 </h4>
-                <div class="space-y-3.5">
+                <div class="space-y-3">
                   <label
                     v-for="cat in filters.categories"
                     :key="cat.id"
                     class="flex items-center gap-3 cursor-pointer group select-none"
                   >
-                    <div class="relative flex items-center">
-                      <input 
-                        v-model="selectedCategories" 
-                        type="checkbox"
-                        :value="cat.id"
-                        class="peer h-4 w-4 rounded border-stone-300 text-stone-800 focus:ring-stone-500 transition-all checked:bg-stone-800 checked:border-transparent bg-stone-50" 
-                      >
-                    </div>
-                    <span class="text-sm text-stone-600 group-hover:text-stone-900 transition-colors font-medium">{{ categoryDisplayTitle(cat) }}</span>
+                    <input
+                      v-model="selectedCategories"
+                      type="checkbox"
+                      :value="cat.id"
+                      class="h-4 w-4 rounded-none border-wl-ruleStrong text-wl-oliveDeep focus:ring-0 focus:ring-offset-0 bg-wl-paper transition-colors"
+                    >
+                    <span class="text-sm text-wl-muted group-hover:text-wl-oliveDeep transition-colors">{{ categoryDisplayTitle(cat) }}</span>
                   </label>
                 </div>
               </div>
 
               <!-- Price Filter -->
               <div>
-                <h4 class="font-bold text-stone-900 mb-5 text-xs uppercase tracking-widest font-wellness">
+                <h4 class="wl-label text-wl-muted mb-4">
                   {{ storefrontContent.shop.priceRange.label }}
                 </h4>
+                <div class="wl-pricefilter">
                 <StorefrontPriceRangeFilter
-              v-model:min-price="minPriceInput"
-              v-model:max-price="maxPriceInput"
-              :min-bound="priceRange.min"
-              :max-bound="priceRange.max"
-              :step="1"
-            />
+                  v-model:min-price="minPriceInput"
+                  v-model:max-price="maxPriceInput"
+                  :min-bound="priceRange.min"
+                  :max-bound="priceRange.max"
+                  :step="1"
+                />
+                </div>
               </div>
             </div>
           </div>
 
           <!-- Best Sellers Widget -->
-          <div class="bg-white p-8 rounded-[2.5rem] border border-stone-100 shadow-sm">
-             <h4 class="font-bold text-stone-900 mb-6 text-xs uppercase tracking-widest font-wellness">
+          <div class="wl-plate p-6">
+             <h4 class="wl-label text-wl-muted pb-4 mb-4 border-b border-wl-rule">
                {{ storefrontContent.shop.sidebar.bestSellers }}
              </h4>
-             <div class="space-y-6">
+             <div class="space-y-4">
                 <NuxtLink
                   v-for="p in sidebarProducts"
                   :key="p.id"
                   :to="`/product/${p.slug}`"
-                  class="flex gap-4 group"
+                  class="flex gap-3 group"
                 >
-                  <div class="w-16 h-16 bg-stone-100 rounded-2xl overflow-hidden flex-shrink-0 border border-stone-50">
+                  <div class="w-14 h-14 bg-wl-paper border border-wl-rule overflow-hidden flex-shrink-0">
                     <img
                       :src="p.images && p.images[0] ? p.images[0] : '/blank.svg?v=2'"
-                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      class="w-full h-full object-cover"
                       :alt="p.title"
                     >
                   </div>
-                  <div class="py-1">
-                    <h5 class="text-sm font-bold text-stone-900 line-clamp-2 group-hover:text-amber-700 transition-colors font-wellness leading-snug mb-1">
-                      {{ p.title }}
+                  <div class="min-w-0">
+                    <h5 class="wl-display-sm text-sm text-wl-ink line-clamp-2 leading-snug mb-1">
+                      <span class="wl-underline">{{ p.title }}</span>
                     </h5>
-                    <span class="text-xs font-semibold text-stone-500">{{ formatCurrency(p.price) }}</span>
+                    <span class="wl-num text-xs text-wl-muted">{{ formatCurrency(p.price) }}</span>
                   </div>
                 </NuxtLink>
              </div>
@@ -348,28 +354,29 @@ const closeQuickView = () => {
         </aside>
 
         <!-- Main Content -->
-        <div class="flex-1">
+        <div class="flex-1 min-w-0">
           <!-- Active Filters Chips -->
-          <div v-if="selectedCategories.length > 0" class="flex flex-wrap gap-2 mb-8">
-              <div 
-                v-for="catId in selectedCategories" 
+          <div v-if="selectedCategories.length > 0" class="flex flex-wrap items-center gap-2 mb-6">
+              <div
+                v-for="catId in selectedCategories"
                 :key="catId"
-                class="flex items-center gap-2 px-4 py-2 bg-stone-900 text-white rounded-full text-sm font-medium shadow-sm transition-all hover:-translate-y-0.5"
+                class="wl-chip wl-chip--olive wl-label px-3 py-1.5"
               >
                   <span>{{ categoryDisplayTitle(filters.categories.find(c => c.id === catId)) || storefrontContent.shop.categoryFallback }}</span>
-                  <button @click="removeCategory(catId)" class="hover:text-stone-300 transition-colors">
-                      <Icon name="lucide:x" class="w-3.5 h-3.5" />
+                  <button @click="removeCategory(catId)" class="hover:opacity-70 transition-opacity">
+                      <Icon name="lucide:x" class="w-3 h-3" />
                   </button>
               </div>
-              <button @click="resetFilters" class="px-3 py-2 text-sm text-stone-500 hover:text-stone-900 transition-colors underline-offset-4 hover:underline font-medium">
+              <button @click="resetFilters" class="px-2 py-1.5 wl-label text-wl-muted hover:text-wl-ink transition-colors">
                   {{ storefrontContent.actions.clearAll }}
               </button>
           </div>
+
           <!-- Toolbar -->
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+          <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mb-8 pb-6 border-b border-wl-rule">
             <!-- Mobile Filter Toggle -->
             <button
-              class="w-full sm:hidden flex items-center justify-center gap-2 px-6 py-4 bg-white border border-stone-200 rounded-[2rem] text-stone-900 font-bold shadow-sm active:scale-95 transition-all text-sm uppercase tracking-wide"
+              class="wl-cta-ghost w-full sm:hidden flex items-center justify-center gap-2 px-6 py-3.5 bg-wl-card wl-label"
               @click="isFilterDrawerOpen = true"
             >
               <Icon name="lucide:sliders-horizontal" class="w-4 h-4" />
@@ -377,73 +384,73 @@ const closeQuickView = () => {
             </button>
 
             <!-- Search in results -->
-            <div class="relative max-w-md w-full">
-              <input 
-                v-model="searchQuery" 
+            <div class="relative max-w-sm w-full">
+              <input
+                v-model="searchQuery"
                 type="text"
-                :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder" 
-                class="w-full bg-white border border-stone-200 text-stone-900 text-sm rounded-full focus:ring-2 focus:ring-stone-100 focus:border-stone-400 block pl-12 rtl:pl-6 rtl:pr-12 pr-6 py-3.5 shadow-sm transition-all hover:bg-stone-50 placeholder:text-stone-400" 
+                :placeholder="storefrontContent.shop.searchWithinResultsPlaceholder"
+                class="wl-field w-full text-sm block ps-11 pe-4 py-3 placeholder:text-wl-muted/60"
               >
-              <div class="absolute inset-y-0 left-0 rtl:left-auto rtl:right-0 flex items-center pl-4 rtl:pl-0 rtl:pr-4 pointer-events-none">
-                <Icon name="lucide:search" class="w-5 h-5 text-stone-400" />
+              <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
+                <Icon name="lucide:search" class="w-4 h-4 text-wl-muted" />
               </div>
             </div>
 
-            <!-- Sort Dropdown -->
-            <div class="hidden sm:flex items-center gap-4 w-full sm:w-auto">
-              <span class="text-sm text-stone-500 whitespace-nowrap font-medium">{{ storefrontContent.shop.sortBy }}</span>
-              <div class="relative w-full sm:w-56">
+            <div class="hidden sm:flex items-center gap-3 flex-shrink-0">
+              <!-- Sort Dropdown -->
+              <span class="wl-label text-wl-muted whitespace-nowrap">{{ storefrontContent.shop.sortBy }}</span>
+              <div class="relative w-48">
                 <select
                   v-model="sortOption"
-                  class="w-full appearance-none bg-white rounded-full border border-stone-200 text-sm py-3.5 pl-6 pr-12 focus:border-stone-400 focus:ring-stone-100 shadow-sm cursor-pointer hover:bg-stone-50 transition-colors text-stone-800 font-medium outline-none"
+                  class="wl-field w-full appearance-none text-sm py-3 ps-4 pe-10 cursor-pointer"
                 >
                   <option value="relevance">{{ storefrontContent.shop.sort.relevance }}</option>
                   <option value="priceAsc">{{ storefrontContent.shop.sort.priceLowToHigh }}</option>
                   <option value="priceDesc">{{ storefrontContent.shop.sort.priceHighToLow }}</option>
                 </select>
-                <div class="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                  <Icon name="lucide:chevron-down" class="w-4 h-4 text-stone-400" />
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
+                  <Icon name="lucide:chevron-down" class="w-4 h-4 text-wl-muted" />
                 </div>
               </div>
-            </div>
 
-             <!-- View Toggle -->
-            <div class="hidden sm:flex items-center bg-white rounded-full border border-stone-200 p-1.5 shadow-sm gap-1">
-                <button 
-                    class="p-2.5 rounded-full transition-all duration-300"
-                    :class="viewMode === 'grid' ? 'bg-stone-100 text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'"
-                    @click="viewMode = 'grid'"
-                    :title="storefrontContent.shop.view.gridTitle"
-                >
-                    <Icon name="lucide:layout-grid" class="w-4 h-4" />
-                </button>
-                <button 
-                    class="p-2.5 rounded-full transition-all duration-300"
-                    :class="viewMode === 'list' ? 'bg-stone-100 text-stone-900 shadow-sm' : 'text-stone-400 hover:text-stone-600 hover:bg-stone-50'"
-                    @click="viewMode = 'list'"
-                    :title="storefrontContent.shop.view.listTitle"
-                >
-                    <Icon name="lucide:list" class="w-4 h-4" />
-                </button>
+              <!-- View Toggle -->
+              <div class="flex items-center border border-wl-rule">
+                  <button
+                      class="p-3 transition-colors"
+                      :class="viewMode === 'grid' ? 'bg-wl-ink text-wl-paper shadow-[inset_0_-3px_0_0_theme(colors.wl.olive)]' : 'bg-wl-card text-wl-muted hover:text-wl-oliveDeep hover:bg-wl-oliveWash'"
+                      @click="viewMode = 'grid'"
+                      :title="storefrontContent.shop.view.gridTitle"
+                  >
+                      <Icon name="lucide:layout-grid" class="w-4 h-4" />
+                  </button>
+                  <button
+                      class="p-3 border-s border-wl-rule transition-colors"
+                      :class="viewMode === 'list' ? 'bg-wl-ink text-wl-paper shadow-[inset_0_-3px_0_0_theme(colors.wl.olive)]' : 'bg-wl-card text-wl-muted hover:text-wl-oliveDeep hover:bg-wl-oliveWash'"
+                      @click="viewMode = 'list'"
+                      :title="storefrontContent.shop.view.listTitle"
+                  >
+                      <Icon name="lucide:list" class="w-4 h-4" />
+                  </button>
+              </div>
             </div>
           </div>
 
           <!-- Grid -->
           <div
             v-if="filteredProducts.length === 0"
-            class="bg-white rounded-[2.5rem] border border-stone-100 shadow-sm p-16 text-center"
+            class="wl-plate p-16 text-center"
           >
-            <div class="w-20 h-20 bg-stone-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <Icon name="lucide:package-open" class="w-8 h-8 text-stone-300" />
+            <div class="w-14 h-14 bg-wl-oliveWash border border-wl-oliveSoft flex items-center justify-center mx-auto mb-6">
+              <Icon name="lucide:package-open" class="w-6 h-6 text-wl-oliveDeep" />
             </div>
-            <h3 class="text-xl font-bold text-stone-900 font-wellness mb-2">
+            <h3 class="wl-display text-2xl text-wl-ink mb-3">
               {{ storefrontContent.shop.results.noResults }}
             </h3>
-            <p class="text-stone-500 max-w-sm mx-auto">
+            <p class="text-wl-muted max-w-sm mx-auto leading-relaxed">
               {{ storefrontContent.shop.results.noResultsHint }}
             </p>
             <button
-              class="mt-8 px-8 py-3 bg-stone-900 text-white rounded-full hover:bg-stone-800 transition-colors font-medium shadow-md hover:-translate-y-0.5 duration-300"
+              class="mt-8 px-8 py-3.5 wl-cta wl-label"
               @click="resetFilters"
             >
               {{ storefrontContent.actions.clearAll }}
@@ -453,9 +460,9 @@ const closeQuickView = () => {
           <div
             v-else
             :class="[
-                viewMode === 'list' 
-                    ? 'flex flex-col gap-6' 
-                    : 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 lg:gap-y-12'
+                viewMode === 'list'
+                    ? 'flex flex-col'
+                    : 'grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 sm:gap-6 lg:gap-y-10'
             ]"
           >
             <ProductCard
@@ -486,44 +493,45 @@ const closeQuickView = () => {
 
   <!-- Quick View Modal -->
   <Transition
-      enter-active-class="transition duration-300 cubic-bezier(0.16, 1, 0.3, 1)"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
-      leave-active-class="transition duration-200 ease-in"
-      leave-from-class="opacity-100 scale-100"
-      leave-to-class="opacity-0 scale-95"
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
   >
-      <div v-if="isQuickViewOpen && quickViewProduct" class="fixed inset-0 z-[60] flex items-center justify-center p-4">
-          <div class="absolute inset-0 bg-stone-900/40 backdrop-blur-md" @click="closeQuickView"></div>
-          <div class="bg-white rounded-[2.5rem] shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto relative z-10 flex flex-col md:flex-row overflow-hidden border border-stone-100">
-              <button @click="closeQuickView" class="absolute top-6 right-6 z-20 p-2 bg-white/80 backdrop-blur rounded-full hover:bg-white transition-colors shadow-sm text-stone-500 hover:text-stone-900">
-                  <Icon name="lucide:x" class="w-5 h-5" />
+      <div v-if="isQuickViewOpen && quickViewProduct" class="wl-root fixed inset-0 z-[60] flex items-center justify-center p-4 font-wellness">
+          <div class="absolute inset-0 bg-wl-zelligeDeep/60" @click="closeQuickView"></div>
+          <div class="wl-plate wl-plate-lg max-w-4xl w-full max-h-[90vh] relative z-10 flex flex-col md:flex-row overflow-hidden">
+              <button @click="closeQuickView" class="absolute top-4 end-4 z-20 p-2 bg-wl-card border border-wl-rule hover:bg-wl-oliveWash transition-colors text-wl-muted hover:text-wl-oliveDeep">
+                  <Icon name="lucide:x" class="w-4 h-4" />
               </button>
-              
-              <div class="w-full md:w-1/2 aspect-square md:aspect-auto bg-stone-50 relative">
-                  <img 
-                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'" 
+
+              <div class="wl-specimen w-full md:w-1/2 aspect-square md:aspect-auto bg-wl-paper relative flex-shrink-0 overflow-hidden">
+                  <img
+                    :src="quickViewProduct.images && quickViewProduct.images[0] ? quickViewProduct.images[0] : '/blank.svg?v=2'"
+                    :alt="quickViewProduct.title"
                     class="w-full h-full object-cover"
                   >
               </div>
-              <div class="w-full md:w-1/2 p-10 md:p-14 flex flex-col">
+              <div class="w-full md:w-1/2 p-8 md:p-10 flex flex-col overflow-y-auto">
                   <div>
-                    <span class="inline-block px-4 py-1.5 bg-brand-50 text-brand-700 rounded-full text-xs font-bold uppercase tracking-widest mb-6 border border-brand-100">{{ storefrontContent.product.inStock }}</span>
-                    <h2 class="text-3xl md:text-4xl font-bold text-stone-900 mb-3 font-wellness">{{ quickViewProduct.title }}</h2>
-                    <div class="text-2xl font-medium text-stone-600 mb-8 flex items-center gap-3 font-wellness">
+                    <span class="wl-eyebrow wl-label mb-5">{{ storefrontContent.product.inStock }}</span>
+                    <h2 class="wl-display text-3xl md:text-4xl text-wl-ink mb-4 leading-tight">{{ quickViewProduct.title }}</h2>
+                    <div class="wl-num text-xl font-medium text-wl-ink mb-6 pb-6 border-b border-wl-rule">
                         {{ formatCurrency(quickViewProduct.price) }}
                     </div>
-                    <p class="text-stone-600 leading-relaxed mb-10 font-light text-lg">
+                    <p class="text-wl-muted leading-relaxed mb-8">
                         {{ quickViewProduct.description || storefrontContent.product.descriptionFallback }}
                     </p>
                   </div>
 
-                  <div class="mt-auto space-y-4">
-                      <button class="w-full py-5 bg-stone-900 text-white font-bold rounded-full hover:bg-stone-800 transition-colors shadow-xl shadow-stone-200 active:scale-95 flex items-center justify-center gap-3 text-lg">
-                        <Icon name="lucide:shopping-bag" class="w-5 h-5" />
+                  <div class="mt-auto space-y-2">
+                      <button class="wl-cta w-full py-4 wl-label flex items-center justify-center gap-3">
+                        <Icon name="lucide:shopping-bag" class="w-4 h-4" />
                         {{ storefrontContent.actions.addToCart }}
                       </button>
-                      <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="block w-full py-5 border border-stone-200 text-stone-700 font-bold rounded-full hover:bg-stone-50 transition-colors text-center" @click="closeQuickView">
+                      <NuxtLink :to="`/product/${quickViewProduct.slug}`" class="wl-cta-ghost block w-full py-4 wl-label text-center" @click="closeQuickView">
                         {{ storefrontContent.product.viewFullDetails }}
                       </NuxtLink>
                   </div>

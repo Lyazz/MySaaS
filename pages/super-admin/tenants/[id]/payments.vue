@@ -2,21 +2,21 @@
   <div class="space-y-6">
       <div class="flex items-start justify-between gap-4">
         <div>
-          <div class="flex items-center gap-2 text-sm text-slate-500">
-            <NuxtLink to="/super-admin/tenants" class="hover:text-teal-700 hover:underline">{{ t('superAdmin.nav.tenants') }}</NuxtLink>
+          <div class="flex items-center gap-2 text-sm text-secondary">
+            <NuxtLink to="/super-admin/tenants" class="hover:text-lime-700 hover:underline">{{ t('superAdmin.nav.tenants') }}</NuxtLink>
             <span>/</span>
-            <span class="text-slate-700 font-semibold">{{ tenantLabel }}</span>
+            <span class="text-secondary font-semibold">{{ tenantLabel }}</span>
             <span>/</span>
-            <span class="text-slate-700 font-semibold">{{ t('superAdmin.tenants.actions.payments') }}</span>
+            <span class="text-secondary font-semibold">{{ t('superAdmin.tenants.actions.payments') }}</span>
           </div>
-          <h1 class="text-2xl font-bold text-slate-800 mt-2">{{ t('superAdmin.paymentsPage.title') }}</h1>
-          <p class="text-slate-600 mt-1">{{ t('superAdmin.paymentsPage.subtitle') }}</p>
+          <h1 class="text-2xl font-bold text-primary mt-2">{{ t('superAdmin.paymentsPage.title') }}</h1>
+          <p class="text-secondary mt-1">{{ t('superAdmin.paymentsPage.subtitle') }}</p>
         </div>
         <button
-          class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-700 transition-colors"
+          class="px-4 py-2 surface-2 hover:bg-hover border border-line rounded-lg text-secondary transition-colors"
           @click="refreshAll"
         >
-          <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block mr-2" />
+          <Icon name="lucide:refresh-cw" class="h-5 w-5 inline-block me-2" />
           {{ t('superAdmin.paymentsPage.actions.refresh') }}
         </button>
       </div>
@@ -27,82 +27,82 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Import form -->
-        <div class="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-          <h2 class="text-lg font-bold text-slate-900 mb-4">{{ t('superAdmin.paymentsPage.import.title') }}</h2>
+        <div class="surface-1 border border-line rounded-xl p-6 shadow-sm">
+          <h2 class="text-lg font-bold text-primary mb-4">{{ t('superAdmin.paymentsPage.import.title') }}</h2>
 
           <form class="space-y-4" @submit.prevent="submitImport">
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.plan') }}</label>
+              <label class="block text-sm font-medium text-secondary mb-2">{{ t('superAdmin.paymentsPage.import.fields.plan') }}</label>
               <BaseSelect v-model="form.planCode" :options="planOptions" required />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.interval') }}</label>
+              <label class="block text-sm font-medium text-secondary mb-2">{{ t('superAdmin.paymentsPage.import.fields.interval') }}</label>
               <BaseSelect v-model="form.interval" :options="intervalOptions" />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.proofUrl') }}</label>
+              <label class="block text-sm font-medium text-secondary mb-2">{{ t('superAdmin.paymentsPage.import.fields.proofUrl') }}</label>
               <input
                 v-model="form.proofUrl"
                 type="url"
                 :placeholder="t('superAdmin.paymentsPage.import.fields.proofUrlPlaceholder')"
-                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                class="w-full px-3 py-2 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 surface-1"
               />
-              <p class="text-xs text-slate-500 mt-1">{{ t('superAdmin.paymentsPage.import.fields.proofUrlHint') }}</p>
+              <p class="text-xs text-secondary mt-1">{{ t('superAdmin.paymentsPage.import.fields.proofUrlHint') }}</p>
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.externalReference') }}</label>
+              <label class="block text-sm font-medium text-secondary mb-2">{{ t('superAdmin.paymentsPage.import.fields.externalReference') }}</label>
               <input
                 v-model="form.externalReference"
                 type="text"
                 :placeholder="t('superAdmin.paymentsPage.import.fields.externalReferencePlaceholder')"
-                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                class="w-full px-3 py-2 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 surface-1"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-2">{{ t('superAdmin.paymentsPage.import.fields.notes') }}</label>
+              <label class="block text-sm font-medium text-secondary mb-2">{{ t('superAdmin.paymentsPage.import.fields.notes') }}</label>
               <textarea
                 v-model="form.notes"
                 rows="3"
                 :placeholder="t('superAdmin.paymentsPage.import.fields.notesPlaceholder')"
-                class="w-full px-3 py-2 border border-slate-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+                class="w-full px-3 py-2 border border-line rounded-lg focus:outline-none focus:ring-2 focus:ring-lime-500 surface-1"
               />
             </div>
 
-            <label class="flex items-start gap-3 text-sm text-slate-700">
-              <input v-model="form.applySubscription" type="checkbox" class="mt-1 h-4 w-4 accent-teal-600" />
+            <label class="flex items-start gap-3 text-sm text-secondary">
+              <input v-model="form.applySubscription" type="checkbox" class="mt-1 h-4 w-4 accent-lime-600" />
               <span>
                 {{ t('superAdmin.paymentsPage.import.applySubscription.label') }}
-                <span class="block text-xs text-slate-500 mt-1">{{ t('superAdmin.paymentsPage.import.applySubscription.hint') }}</span>
+                <span class="block text-xs text-secondary mt-1">{{ t('superAdmin.paymentsPage.import.applySubscription.hint') }}</span>
               </span>
             </label>
 
             <button
               type="submit"
               :disabled="submitting"
-              class="w-full px-4 py-2 bg-teal-600 hover:bg-teal-700 rounded-lg text-white font-semibold transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+              class="ui-btn ui-btn--primary ui-btn--md w-full font-semibold"
             >
-              <Icon v-if="submitting" name="lucide:loader-2" class="h-4 w-4 inline-block mr-2 animate-spin" />
+              <Icon v-if="submitting" name="lucide:loader-2" class="h-4 w-4 inline-block me-2 animate-spin" />
               {{ submitting ? t('superAdmin.paymentsPage.import.actions.importing') : t('superAdmin.paymentsPage.import.actions.importProof') }}
             </button>
           </form>
         </div>
 
         <!-- History -->
-        <div class="lg:col-span-2 bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-          <div class="px-6 py-4 border-b border-slate-200 bg-slate-50/50 flex items-center justify-between">
-            <h2 class="text-lg font-bold text-slate-900">{{ t('superAdmin.paymentsPage.history.title') }}</h2>
-            <div class="text-xs text-slate-500">{{ t('superAdmin.paymentsPage.history.lastEntries', { count: payments.length }) }}</div>
+        <div class="lg:col-span-2 surface-1 border border-line rounded-xl overflow-hidden shadow-sm">
+          <div class="px-6 py-4 border-b border-line surface-2 flex items-center justify-between">
+            <h2 class="text-lg font-bold text-primary">{{ t('superAdmin.paymentsPage.history.title') }}</h2>
+            <div class="text-xs text-secondary">{{ t('superAdmin.paymentsPage.history.lastEntries', { count: payments.length }) }}</div>
           </div>
 
-          <div v-if="loading" class="p-8 text-center text-slate-500">{{ t('superAdmin.paymentsPage.history.loading') }}</div>
-          <div v-else-if="payments.length === 0" class="p-8 text-center text-slate-500">{{ t('superAdmin.paymentsPage.history.empty') }}</div>
+          <div v-if="loading" class="p-8 text-center text-secondary">{{ t('superAdmin.paymentsPage.history.loading') }}</div>
+          <div v-else-if="payments.length === 0" class="p-8 text-center text-secondary">{{ t('superAdmin.paymentsPage.history.empty') }}</div>
           <div v-else class="overflow-x-auto">
             <table class="ui-table">
-              <thead class="ui-thead border-b border-slate-200">
+              <thead class="ui-thead border-b border-line">
                 <tr>
                   <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.date') }}</th>
                   <th class="ui-th">{{ t('superAdmin.paymentsPage.history.table.plan') }}</th>
@@ -114,15 +114,15 @@
               </thead>
               <tbody class="ui-tbody">
                 <tr v-for="p in payments" :key="p.id" class="ui-tr transition-colors">
-                  <td class="ui-td text-sm text-slate-700 whitespace-nowrap">{{ formatDateTime(p.createdAt) }}</td>
-                  <td class="ui-td text-sm text-slate-700">
+                  <td class="ui-td text-sm text-secondary whitespace-nowrap">{{ formatDateTime(p.createdAt) }}</td>
+                  <td class="ui-td text-sm text-secondary">
                     <div class="font-semibold">{{ p.planCode }}</div>
-                    <div class="text-xs text-slate-500">{{ p.interval }}</div>
+                    <div class="text-xs text-secondary">{{ p.interval }}</div>
                   </td>
-                  <td class="ui-td text-sm text-slate-700 whitespace-nowrap">
+                  <td class="ui-td text-sm text-secondary whitespace-nowrap">
                     {{ formatMoney(p.amountDzd, p.currency) }}
                   </td>
-                  <td class="ui-td text-xs font-semibold text-slate-700">{{ p.method }}</td>
+                  <td class="ui-td text-xs font-semibold text-secondary">{{ p.method }}</td>
                   <td class="ui-td">
                     <span class="ui-badge" :class="p.status === 'PAID' ? 'ui-badge--emerald' : 'ui-badge--slate'">
                       {{ p.status }}
@@ -134,21 +134,21 @@
                       :href="p.proofUrl"
                       target="_blank"
                       rel="noreferrer"
-                      class="text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                      class="text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                     >
                       {{ t('superAdmin.paymentsPage.history.proof.open') }}
                     </a>
                     <button
                       v-else-if="p.proofUrl"
                       type="button"
-                      class="text-teal-700 hover:text-teal-800 hover:underline font-semibold"
+                      class="text-lime-700 hover:text-lime-800 hover:underline font-semibold"
                       @click="openProof(p)"
                     >
                       {{ t('superAdmin.paymentsPage.history.proof.open') }}
                     </button>
-                    <span v-else class="text-slate-400">—</span>
+                    <span v-else class="text-tertiary">—</span>
                   </td>
-                  <td class="ui-td text-right">
+                  <td class="ui-td text-end">
                     <div v-if="p.status === 'PENDING'" class="flex items-center justify-end gap-2">
                       <button
                         class="px-3 py-1 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 rounded-lg text-xs font-semibold"
@@ -179,6 +179,7 @@
 import BaseSelect from '~/components/ui/BaseSelect.vue'
 import { PRICING_PLANS } from '~/shared/pricing/plans'
 import { useAuthStore } from '~/stores/auth'
+import { formatPriceAmount } from '~/shared/pricing/money-format'
 
 definePageMeta({
   middleware: 'super-admin',
@@ -225,7 +226,8 @@ const form = ref({
 const formatDateTime = (date: string) =>
   new Date(date).toLocaleString(locale.value, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })
 
-const formatMoney = (amount: number, currency: string) => `${Number(amount || 0).toLocaleString(locale.value)} ${currency || 'DA'}`
+const formatMoney = (amount: number, currency: string) =>
+  `${formatPriceAmount(amount, { locale: locale.value })} ${currency || 'DA'}`
 
 async function loadTenants() {
   const res = await $fetch<any[]>('/api/super-admin/tenants', {

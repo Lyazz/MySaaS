@@ -108,7 +108,7 @@ watch(() => props.images, () => {
             </transition-group>
 
             <!-- Badges -->
-            <div class="absolute top-4 left-4 z-10">
+            <div class="absolute top-4 start-4 z-10">
                 <span class="bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3 py-1.5 rounded-full shadow-sm ring-1 ring-slate-900/5 flex items-center gap-1">
                     <Icon name="lucide:star" class="w-3 h-3 text-amber-500 fill-amber-500" />
                     {{ $t('storefront.product.bestsellerBadge') }}
@@ -116,7 +116,7 @@ watch(() => props.images, () => {
             </div>
 
             <!-- Mobile Navigation Dots -->
-            <div v-if="images?.length > 1" class="absolute bottom-4 left-0 right-0 flex justify-center gap-2 z-10 md:hidden">
+            <div v-if="images?.length > 1" class="absolute bottom-4 start-0 end-0 flex justify-center gap-2 z-10 md:hidden">
                 <button
                     v-for="(_, idx) in images"
                     :key="'dot-'+idx"
@@ -130,14 +130,14 @@ watch(() => props.images, () => {
             <button 
                 v-if="images?.length > 1" 
                 @click.stop="prevImage" 
-                class="hidden md:flex absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105"
+                class="hidden md:flex absolute start-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105"
             >
                 <Icon name="lucide:chevron-left" class="w-6 h-6" />
             </button>
             <button 
                 v-if="images?.length > 1" 
                 @click.stop="nextImage" 
-                class="hidden md:flex absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105"
+                class="hidden md:flex absolute end-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/80 backdrop-blur-sm rounded-full items-center justify-center text-slate-800 shadow-md opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white z-10 hover:scale-105"
             >
                 <Icon name="lucide:chevron-right" class="w-6 h-6" />
             </button>
@@ -156,7 +156,7 @@ watch(() => props.images, () => {
                 <img
                 :src="img"
                 class="w-full h-full object-cover"
-                alt="Thumbnail"
+                :alt="title"
                 >
             </button>
         </div>

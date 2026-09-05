@@ -4,56 +4,96 @@ const props = defineProps<{
   title: string
 }>()
 
-const selectedImage = ref(0)
+const { onPointerMove, onPointerLeave, zoomStyle } = useImageHoverZoom()
 
-const handleImageClick = (index: number) => {
-  selectedImage.value = index
+/*
+ * Desktop stacks every plate down the page — no thumbnail strip, no switcher.
+ * The zoom composable holds one shared transform, so it is only bound to the
+ * plate actually under the pointer.
+ */
+const hoveredIndex = ref<number | null>(null)
+const enterPlate = (event: MouseEvent, index: number) => {
+  hoveredIndex.value = index
+  onPointerMove(event)
+}
+const leavePlate = () => {
+  hoveredIndex.value = null
+  onPointerLeave()
 }
 
-// Reset selected index if images change
+/* Mobile swipes through them instead, with a folio that follows the scroll. */
+const strip = ref<HTMLElement | null>(null)
+const mobileIndex = ref(0)
+const onStripScroll = () => {
+  const el = strip.value
+  if (!el || el.clientWidth === 0) return
+  mobileIndex.value = Math.round(el.scrollLeft / el.clientWidth)
+}
+
 watch(() => props.images, () => {
-  selectedImage.value = 0
+  hoveredIndex.value = null
+  mobileIndex.value = 0
+  if (strip.value) strip.value.scrollLeft = 0
 }, { deep: true })
+
+const hasImages = computed(() => Array.isArray(props.images) && props.images.length > 0)
 </script>
 
 <template>
-  <div class="space-y-4">
-    <!-- Main Image -->
-    <div class="relative w-full aspect-[4/5] bg-slate-50 rounded-[2rem] overflow-hidden shadow-soft">
-      <img
-        v-if="images && images.length > 0"
-        :src="images[selectedImage]"
-        :alt="title"
-        class="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
-      />
-      <div v-else class="w-full h-full flex items-center justify-center text-slate-300">
-        <Icon name="lucide:image" class="w-16 h-16" />
-      </div>
-      
-      <!-- Image Counter -->
-      <div 
-        v-if="images && images.length > 1"
-        class="absolute bottom-4 right-4 bg-white/80 backdrop-blur-sm px-3 py-1 rounded-full text-sm text-slate-600 font-medium"
+  <div>
+    <!-- Mobile: one plate at a time, swiped -->
+    <div class="md:hidden relative">
+      <div
+        v-if="hasImages"
+        ref="strip"
+        class="flex overflow-x-auto snap-x snap-mandatory scrollbar-hide border border-[#DAD2C4] bg-[#FBF8F2]"
+        @scroll.passive="onStripScroll"
       >
-        {{ selectedImage + 1 }} / {{ images.length }}
+        <div
+          v-for="(image, index) in images"
+          :key="index"
+          class="snap-start shrink-0 w-full aspect-[4/5]"
+        >
+          <img :src="image" :alt="`${title} — ${index + 1}`" class="w-full h-full object-cover">
+        </div>
+      </div>
+      <div v-else class="aspect-[4/5] border border-[#DAD2C4] bg-[#FBF8F2] flex items-center justify-center text-[#C4B8A4]">
+        <Icon name="lucide:image" class="w-12 h-12" />
+      </div>
+
+      <div
+        v-if="hasImages && images.length > 1"
+        class="absolute bottom-3 end-3 ed-ui text-[11px] tabular-nums bg-[#F4EFE6]/90 border border-[#C4B8A4] text-[#4A4038] px-2.5 py-1"
+      >
+        {{ String(mobileIndex + 1).padStart(2, '0') }} / {{ String(images.length).padStart(2, '0') }}
       </div>
     </div>
 
-    <!-- Thumbnails -->
-    <div v-if="images && images.length > 1" class="flex gap-3 overflow-x-auto pb-2">
-      <button
-        v-for="(image, index) in images"
-        :key="index"
-        @click="handleImageClick(index)"
-        class="relative w-20 h-20 flex-shrink-0 rounded-xl overflow-hidden transition-all hover:opacity-90"
-        :class="selectedImage === index ? 'ring-2 ring-brand-400 ring-offset-2 shadow-lg' : 'opacity-70'"
-      >
-        <img
-          :src="image"
-          :alt="`${title} - Image ${index + 1}`"
-          class="w-full h-full object-cover"
-        />
-      </button>
+    <!-- Desktop: the plates run down the page -->
+    <div class="hidden md:flex flex-col gap-5">
+      <template v-if="hasImages">
+        <figure
+          v-for="(image, index) in images"
+          :key="index"
+          class="relative border border-[#DAD2C4] bg-[#FBF8F2] overflow-hidden cursor-zoom-in"
+          @mousemove="enterPlate($event, index)"
+          @mouseleave="leavePlate"
+        >
+          <img
+            :src="image"
+            :alt="`${title} — ${index + 1}`"
+            class="w-full h-auto object-cover transition-transform duration-500"
+            :style="hoveredIndex === index ? zoomStyle : undefined"
+          >
+          <figcaption
+            v-if="images.length > 1"
+            class="absolute top-3 start-3 ed-ui text-[11px] tabular-nums bg-[#F4EFE6]/90 border border-[#C4B8A4] text-[#4A4038] px-2.5 py-1"
+          >{{ String(index + 1).padStart(2, '0') }}</figcaption>
+        </figure>
+      </template>
+      <div v-else class="aspect-[4/5] border border-[#DAD2C4] bg-[#FBF8F2] flex items-center justify-center text-[#C4B8A4]">
+        <Icon name="lucide:image" class="w-16 h-16" />
+      </div>
     </div>
   </div>
 </template>

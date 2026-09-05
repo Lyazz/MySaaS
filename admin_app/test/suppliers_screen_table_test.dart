@@ -41,7 +41,9 @@ void main() {
             ),
           ),
         ],
-        child: buildLocalizedTestApp(home: const SuppliersScreen(autoFetch: false)),
+        child: buildLocalizedTestApp(
+          home: const SuppliersScreen(autoFetch: false),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -50,7 +52,7 @@ void main() {
       find.byWidgetPredicate((w) => w is ResponsivePaginatedTable),
       findsOneWidget,
     );
-    expect(find.widgetWithText(AppButton, 'Edit'), findsOneWidget);
-    expect(find.widgetWithText(AppButton, 'Delete'), findsOneWidget);
+    expect(find.byTooltip('Edit'), findsOneWidget);
+    expect(find.byTooltip('Delete'), findsOneWidget);
   });
 }

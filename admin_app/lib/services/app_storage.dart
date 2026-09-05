@@ -1,56 +1,104 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../models/app_mode.dart';
 import '../models/bootstrap_config.dart';
+import '../models/subscription_tier.dart';
+import '../utils/api_base_url.dart';
 
 class AppStorage {
+  static const _secureStorage = FlutterSecureStorage();
+
   static const _keyApiBaseUrl = 'api_base_url';
+  static const _keyAppMode = 'app_mode';
+  static const _keySubscriptionTier = 'subscription_tier';
+  static const _keyTenantId = 'tenant_id';
+  static const _keyWorkspaceId = 'workspace_id';
   static const _keyAuthToken = 'auth_token';
   static const _keyAuthUserJson = 'auth_user_json';
   static const _keyAuthStaffRoleJson = 'auth_staff_role_json';
   static const _keyAuthStaffPermissions = 'auth_staff_permissions';
+  static const _keyThemeMode = 'theme_mode';
 
   static Future<BootstrapConfig> loadBootstrap({
     required String defaultApiBaseUrl,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    final storedBaseUrl = prefs.getString(_keyApiBaseUrl);
-    final apiBaseUrl =
-        (storedBaseUrl != null && storedBaseUrl.trim().isNotEmpty)
-        ? storedBaseUrl.trim()
-        : defaultApiBaseUrl;
-
-    final authToken = prefs.getString(_keyAuthToken);
-    final userJsonRaw = prefs.getString(_keyAuthUserJson);
-    final staffRoleJsonRaw = prefs.getString(_keyAuthStaffRoleJson);
-    final staffPermissions =
-        prefs.getStringList(_keyAuthStaffPermissions) ?? const [];
-
-    Map<String, dynamic>? tryDecodeObject(String? raw) {
-      final trimmed = raw?.trim() ?? '';
-      if (trimmed.isEmpty) return null;
-      try {
-        final decoded = jsonDecode(trimmed);
-        if (decoded is Map<String, dynamic>) return decoded;
-      } catch (_) {}
-      return null;
+    final secureValues = await _secureStorage.readAll();
+    final storedBaseUrl = secureValues[_keyApiBaseUrl]?.trim() ?? '';
+    final normalizedStoredBaseUrl = normalizeApiBaseUrl(storedBaseUrl);
+    final apiBaseUrl = normalizedStoredBaseUrl.isNotEmpty
+        ? normalizedStoredBaseUrl
+        : defaultApiBaseUrl.trim();
+    if (storedBaseUrl != apiBaseUrl) {
+      await _secureStorage.write(key: _keyApiBaseUrl, value: apiBaseUrl);
     }
+
+    final modeRaw = secureValues[_keyAppMode];
+    final mode = _modeFromString(modeRaw) ?? AppMode.online;
+    final subscriptionTier =
+        _subscriptionTierFromString(secureValues[_keySubscriptionTier]) ??
+        (mode == AppMode.offlineOnly
+            ? SubscriptionTier.offlineOnly
+            : SubscriptionTier.online);
+
+    final tenantId = secureValues[_keyTenantId] ?? '';
+    final workspaceId = secureValues[_keyWorkspaceId];
+
+    final authToken = secureValues[_keyAuthToken];
+    final userJsonRaw = secureValues[_keyAuthUserJson];
+    final staffRoleJsonRaw = secureValues[_keyAuthStaffRoleJson];
+    final staffPermissions = _tryDecodeStringList(
+      secureValues[_keyAuthStaffPermissions],
+    );
 
     return BootstrapConfig(
       apiBaseUrl: apiBaseUrl,
+      mode: mode,
+      subscriptionTier: subscriptionTier,
+      tenantId: tenantId,
+      workspaceId: workspaceId,
       authToken: authToken?.trim().isNotEmpty == true
           ? authToken!.trim()
           : null,
-      userJson: tryDecodeObject(userJsonRaw),
-      staffRoleJson: tryDecodeObject(staffRoleJsonRaw),
+      userJson: _tryDecodeObject(userJsonRaw),
+      staffRoleJson: _tryDecodeObject(staffRoleJsonRaw),
       staffPermissions: staffPermissions,
     );
   }
 
   static Future<void> saveApiBaseUrl(String apiBaseUrl) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyApiBaseUrl, apiBaseUrl.trim());
+    await _secureStorage.write(key: _keyApiBaseUrl, value: apiBaseUrl.trim());
+  }
+
+  static Future<void> saveProvisioningState({
+    required AppMode mode,
+    required SubscriptionTier subscriptionTier,
+    required String tenantId,
+    String? workspaceId,
+  }) async {
+    await _secureStorage.write(key: _keyAppMode, value: mode.name);
+    await _secureStorage.write(
+      key: _keySubscriptionTier,
+      value: subscriptionTier.name,
+    );
+    await _secureStorage.write(key: _keyTenantId, value: tenantId);
+    if (workspaceId != null) {
+      await _secureStorage.write(key: _keyWorkspaceId, value: workspaceId);
+    } else {
+      await _secureStorage.delete(key: _keyWorkspaceId);
+    }
+  }
+
+  static Future<void> clearProvisioningState() async {
+    await _secureStorage.delete(key: _keyAppMode);
+    await _secureStorage.delete(key: _keySubscriptionTier);
+    await _secureStorage.delete(key: _keyTenantId);
+    await _secureStorage.delete(key: _keyWorkspaceId);
+    await _secureStorage.delete(key: _keyApiBaseUrl);
+    await _secureStorage.delete(key: _keyActivationToken);
   }
 
   static Future<void> saveAuthSession({
@@ -59,31 +107,185 @@ class AppStorage {
     Map<String, dynamic>? staffRoleJson,
     List<String>? staffPermissions,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyAuthToken, token.trim());
-
+    await _secureStorage.write(key: _keyAuthToken, value: token.trim());
     if (userJson != null) {
-      await prefs.setString(_keyAuthUserJson, jsonEncode(userJson));
+      await _secureStorage.write(
+        key: _keyAuthUserJson,
+        value: jsonEncode(userJson),
+      );
     } else {
-      await prefs.remove(_keyAuthUserJson);
+      await _secureStorage.delete(key: _keyAuthUserJson);
     }
-
     if (staffRoleJson != null) {
-      await prefs.setString(_keyAuthStaffRoleJson, jsonEncode(staffRoleJson));
+      await _secureStorage.write(
+        key: _keyAuthStaffRoleJson,
+        value: jsonEncode(staffRoleJson),
+      );
     } else {
-      await prefs.remove(_keyAuthStaffRoleJson);
+      await _secureStorage.delete(key: _keyAuthStaffRoleJson);
     }
-
     if (staffPermissions != null) {
-      await prefs.setStringList(_keyAuthStaffPermissions, staffPermissions);
+      await _secureStorage.write(
+        key: _keyAuthStaffPermissions,
+        value: jsonEncode(staffPermissions),
+      );
+    } else {
+      await _secureStorage.delete(key: _keyAuthStaffPermissions);
     }
   }
 
+  static const _keyActivationToken = 'activation_token';
+
   static Future<void> clearAuthSession() async {
+    await _secureStorage.delete(key: _keyAuthToken);
+    await _secureStorage.delete(key: _keyAuthUserJson);
+    await _secureStorage.delete(key: _keyAuthStaffRoleJson);
+    await _secureStorage.delete(key: _keyAuthStaffPermissions);
+  }
+
+  static Future<void> saveActivationToken(String token) async {
+    await _secureStorage.write(key: _keyActivationToken, value: token.trim());
+  }
+
+  static Future<String?> getActivationToken() async {
+    return await _secureStorage.read(key: _keyActivationToken);
+  }
+
+  static Future<void> clearActivationToken() async {
+    await _secureStorage.delete(key: _keyActivationToken);
+  }
+
+  static const _keyLicenseSnapshotJson = 'license_snapshot_json';
+  static const _keyLicenseTimeHwm = 'license_time_hwm';
+  static const _keyLastHeartbeatAt = 'last_heartbeat_at';
+
+  /// Cached evaluation of the licence, so the very first frame after a cold
+  /// start already knows whether this device may write. Re-derived from the
+  /// activation token, never trusted over it.
+  static Future<void> saveLicenseSnapshot(Map<String, dynamic> snapshot) async {
+    await _secureStorage.write(
+      key: _keyLicenseSnapshotJson,
+      value: jsonEncode(snapshot),
+    );
+  }
+
+  static Future<Map<String, dynamic>?> getLicenseSnapshot() async {
+    final raw = await _secureStorage.read(key: _keyLicenseSnapshotJson);
+    if (raw == null || raw.trim().isEmpty) return null;
+    try {
+      final decoded = jsonDecode(raw);
+      return decoded is Map<String, dynamic> ? decoded : null;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Latest instant ever observed. See [MonotonicClock]: this is what stops a
+  /// rolled-back device clock from un-expiring a licence.
+  static Future<void> saveLicenseTimeHighWaterMark(DateTime value) async {
+    await _secureStorage.write(
+      key: _keyLicenseTimeHwm,
+      value: value.toUtc().toIso8601String(),
+    );
+  }
+
+  static Future<DateTime?> getLicenseTimeHighWaterMark() async {
+    final raw = await _secureStorage.read(key: _keyLicenseTimeHwm);
+    if (raw == null || raw.trim().isEmpty) return null;
+    return DateTime.tryParse(raw)?.toUtc();
+  }
+
+  static Future<void> saveLastHeartbeatAt(DateTime value) async {
+    await _secureStorage.write(
+      key: _keyLastHeartbeatAt,
+      value: value.toUtc().toIso8601String(),
+    );
+  }
+
+  static Future<DateTime?> getLastHeartbeatAt() async {
+    final raw = await _secureStorage.read(key: _keyLastHeartbeatAt);
+    if (raw == null || raw.trim().isEmpty) return null;
+    return DateTime.tryParse(raw)?.toUtc();
+  }
+
+  static Future<void> clearLicenseState() async {
+    await _secureStorage.delete(key: _keyLicenseSnapshotJson);
+    await _secureStorage.delete(key: _keyLastHeartbeatAt);
+    // The high-water mark deliberately survives: clearing it would hand an
+    // attacker a clock reset for the price of a logout.
+  }
+
+  static ThemeMode? parseThemeMode(String? raw) {
+    switch (raw) {
+      case 'light':
+        return ThemeMode.light;
+      case 'dark':
+        return ThemeMode.dark;
+      case 'system':
+        return ThemeMode.system;
+      default:
+        return null;
+    }
+  }
+
+  static String encodeThemeMode(ThemeMode mode) {
+    switch (mode) {
+      case ThemeMode.light:
+        return 'light';
+      case ThemeMode.dark:
+        return 'dark';
+      case ThemeMode.system:
+        return 'system';
+    }
+  }
+
+  static Future<ThemeMode?> loadThemeMode() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_keyAuthToken);
-    await prefs.remove(_keyAuthUserJson);
-    await prefs.remove(_keyAuthStaffRoleJson);
-    await prefs.remove(_keyAuthStaffPermissions);
+    return parseThemeMode(prefs.getString(_keyThemeMode));
+  }
+
+  static Future<void> saveThemeMode(ThemeMode mode) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_keyThemeMode, encodeThemeMode(mode));
+  }
+
+  static AppMode? _modeFromString(String? raw) {
+    if (raw == null) return null;
+    try {
+      return AppMode.values.firstWhere((e) => e.name == raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static SubscriptionTier? _subscriptionTierFromString(String? raw) {
+    if (raw == null) return null;
+    try {
+      return SubscriptionTier.values.firstWhere((e) => e.name == raw);
+    } catch (_) {
+      return null;
+    }
+  }
+
+  static Map<String, dynamic>? _tryDecodeObject(String? raw) {
+    final trimmed = raw?.trim() ?? '';
+    if (trimmed.isEmpty) return null;
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is Map<String, dynamic>) return decoded;
+    } catch (_) {}
+    return null;
+  }
+
+  static List<String> _tryDecodeStringList(String? raw) {
+    final trimmed = raw?.trim() ?? '';
+    if (trimmed.isEmpty) return const [];
+    try {
+      final decoded = jsonDecode(trimmed);
+      if (decoded is List) {
+        return decoded.map((e) => e.toString()).toList();
+      }
+    } catch (_) {}
+    return const [];
   }
 }

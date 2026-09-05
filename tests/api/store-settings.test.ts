@@ -2,6 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { setup, fetch } from '@nuxt/test-utils'
 import prisma from '../../backend/src/lib/prisma'
 import jwt from 'jsonwebtoken'
+import { buildDefaultStoreLegalPagesConfig } from '../../shared/storefront/legal-pages'
 
 describe('Store Settings (Tenant Admin)', async () => {
     await setup({ setupTimeout: 900_000, teardownTimeout: 900_000 })
@@ -53,6 +54,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(getBody.isCompleted).toBe(false)
         expect(getBody).toHaveProperty('cartEnabled')
         expect(getBody).toHaveProperty('codEnabled')
+        expect(getBody).toHaveProperty('orderIdPrefix')
         expect(getBody).toHaveProperty('minimumOrderAmountDzd')
         expect(getBody).toHaveProperty('hideOptionalAddress')
         expect(getBody).toHaveProperty('currencyCode')
@@ -66,10 +68,12 @@ describe('Store Settings (Tenant Admin)', async () => {
             },
             body: JSON.stringify({
                 primaryColor: '#112233',
+                useBrandColor: true,
                 templateKey: 'modern',
                 language: 'ar',
                 cartEnabled: false,
                 codEnabled: false,
+                orderIdPrefix: 'shop1',
                 minimumOrderAmountDzd: 2500,
                 hideOptionalAddress: false,
                 currencyCode: 'EUR',
@@ -80,10 +84,12 @@ describe('Store Settings (Tenant Admin)', async () => {
         const patchBody = await patchRes.json()
         expect(patchRes.status).toBe(200)
         expect(patchBody.primaryColor).toBe('#112233'.toUpperCase())
+        expect(patchBody.useBrandColor).toBe(true)
         expect(patchBody.templateKey).toBe('modern')
         expect(patchBody.language).toBe('ar')
         expect(patchBody.cartEnabled).toBe(false)
         expect(patchBody.codEnabled).toBe(false)
+        expect(patchBody.orderIdPrefix).toBe('SHOP1')
         expect(patchBody.minimumOrderAmountDzd).toBe(2500)
         expect(patchBody.hideOptionalAddress).toBe(false)
         expect(patchBody.currencyCode).toBe('EUR')
@@ -106,6 +112,93 @@ describe('Store Settings (Tenant Admin)', async () => {
         const patchBody = await patchRes.json()
         expect(patchRes.status).toBe(200)
         expect(patchBody.templateKey).toBe('maison')
+    })
+
+    it('allows selecting the "arena" template', async () => {
+        const patchRes = await fetch('/api/admin/store-settings', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokenA}`
+            },
+            body: JSON.stringify({
+                templateKey: 'arena'
+            })
+        })
+        const patchBody = await patchRes.json()
+        expect(patchRes.status).toBe(200)
+        expect(patchBody.templateKey).toBe('arena')
+    })
+
+    it('updates tenant legal pages config in FR/EN/AR and exposes it publicly', async () => {
+        const legalPages = buildDefaultStoreLegalPagesConfig()
+        legalPages.terms.enabled = true
+        legalPages.privacy.enabled = true
+        legalPages.contact.enabled = true
+        legalPages.terms.content.fr = `${legalPages.terms.content.fr}\n\nClause FR test.`
+        legalPages.privacy.content.en = `${legalPages.privacy.content.en}\n\nEN policy test.`
+        legalPages.contact.title.ar = 'تواصل معنا الآن'
+
+        const patchRes = await fetch('/api/admin/store-settings', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokenA}`
+            },
+            body: JSON.stringify({ legalPages })
+        })
+        const patchBody = await patchRes.json()
+        expect(patchRes.status).toBe(200)
+        expect(patchBody.legalPages?.terms?.enabled).toBe(true)
+        expect(patchBody.legalPages?.privacy?.enabled).toBe(true)
+        expect(patchBody.legalPages?.returns?.enabled).toBe(false)
+        expect(patchBody.legalPages?.contact?.title?.ar).toBe('تواصل معنا الآن')
+
+        const publicRes = await fetch('/api/store/settings', {
+            headers: {
+                'X-Forwarded-Host': `${slugA}.localhost:3000`
+            }
+        })
+        const publicBody = await publicRes.json()
+        expect(publicRes.status).toBe(200)
+        expect(publicBody.storeSettings?.legalPages?.terms?.enabled).toBe(true)
+        expect(publicBody.storeSettings?.legalPages?.privacy?.content?.en).toContain('EN policy test.')
+    })
+
+    it('rejects invalid order id prefixes', async () => {
+        const patchRes = await fetch('/api/admin/store-settings', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokenA}`
+            },
+            body: JSON.stringify({
+                orderIdPrefix: 'ab'
+            })
+        })
+
+        const patchBody = await patchRes.json()
+        expect(patchRes.status).toBe(400)
+        expect(String(patchBody.statusMessage || '')).toContain('orderIdPrefix')
+    })
+
+    it('rejects malformed legal pages payloads', async () => {
+        const patchRes = await fetch('/api/admin/store-settings', {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${tokenA}`
+            },
+            body: JSON.stringify({
+                legalPages: {
+                    terms: { enabled: true }
+                }
+            })
+        })
+
+        const patchBody = await patchRes.json()
+        expect(patchRes.status).toBe(400)
+        expect(String(patchBody.statusMessage || '')).toContain('legalPages')
     })
 
     it('denies cross-tenant access when host tenant mismatches token tenant', async () => {
@@ -162,6 +255,7 @@ describe('Store Settings (Tenant Admin)', async () => {
         expect(res.status).toBe(200)
         expect(body.tenant.slug).toBe(slugA)
         expect(body.storeSettings).toHaveProperty('templateKey')
+        expect(body.storeSettings.orderIdPrefix).toBe('SHOP1')
         expect(body.storeSettings.minimumOrderAmountDzd).toBeTypeOf('number')
         expect(body.storeSettings).toHaveProperty('hideOptionalAddress')
     })

@@ -4,6 +4,7 @@ import { useCartStore } from '~/stores/cart'
 const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 const { format: formatCurrency } = useCurrency()
+const { t } = useI18n({ useScope: 'global' })
 </script>
 
 <template>
@@ -11,7 +12,7 @@ const { format: formatCurrency } = useCurrency()
     <div class="cart__inner">
       <!-- Header -->
       <div class="cart__head">
-        <span class="at-label">Votre sélection</span>
+        <span class="at-label">{{ storefrontContent.cart.sections.items }}</span>
         <h1 class="cart__title">{{ storefrontContent.cart.title }}</h1>
       </div>
 
@@ -22,7 +23,7 @@ const { format: formatCurrency } = useCurrency()
           <circle cx="21" cy="39" r="3" stroke="currentColor" stroke-width="0.75"/>
           <circle cx="36" cy="39" r="3" stroke="currentColor" stroke-width="0.75"/>
         </svg>
-        <p class="cart__empty-title">Votre panier est vide</p>
+        <p class="cart__empty-title">{{ storefrontContent.cart.empty.title }}</p>
         <p class="cart__empty-sub">{{ storefrontContent.cart.empty.subtitle }}</p>
         <NuxtLink to="/products" class="at-btn-primary">
           <span>{{ storefrontContent.cart.empty.cta }}</span>
@@ -99,6 +100,10 @@ const { format: formatCurrency } = useCurrency()
                 <dt>{{ storefrontContent.cart.summary.subtotal }}</dt>
                 <dd>{{ formatCurrency(cartStore.total) }}</dd>
               </div>
+              <div v-if="cartStore.clearanceDiscount > 0" class="cart__summary-row cart__summary-row--clearance">
+                <dt>{{ t('storefront.clearance.discountLine') }}</dt>
+                <dd>-{{ formatCurrency(cartStore.clearanceDiscount) }}</dd>
+              </div>
               <div class="cart__summary-row">
                 <dt>{{ storefrontContent.cart.summary.shipping }}</dt>
                 <dd class="cart__summary-hint">{{ storefrontContent.cart.summary.shippingHint }}</dd>
@@ -107,7 +112,7 @@ const { format: formatCurrency } = useCurrency()
 
             <div class="cart__summary-total">
               <span>{{ storefrontContent.cart.summary.total }}</span>
-              <span class="cart__summary-total-price">{{ formatCurrency(cartStore.total) }}</span>
+              <span class="cart__summary-total-price">{{ formatCurrency(cartStore.total - cartStore.clearanceDiscount) }}</span>
             </div>
 
             <NuxtLink to="/checkout" class="at-btn-solid cart__checkout-btn">
@@ -135,8 +140,8 @@ const { format: formatCurrency } = useCurrency()
 .cart__title {
   font-family: var(--at-f-display);
   font-size: clamp(3rem, 6vw, 5rem);
-  font-weight: 300;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.03em;
   color: var(--at-cream);
   line-height: 1.0;
   margin-top: 10px;
@@ -145,6 +150,9 @@ const { format: formatCurrency } = useCurrency()
 /* Empty */
 .cart__empty {
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  background: var(--at-grad-paper);
+  box-shadow: var(--at-shadow-sm);
   padding: 80px 24px;
   display: flex;
   flex-direction: column;
@@ -156,8 +164,9 @@ const { format: formatCurrency } = useCurrency()
 .cart__empty-title {
   font-family: var(--at-f-display);
   font-size: 1.8rem;
-  font-weight: 300;
-  color: var(--at-text);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--at-cream);
 }
 .cart__empty-sub {
   font-family: var(--at-f-mono);
@@ -190,7 +199,9 @@ const { format: formatCurrency } = useCurrency()
   width: 80px;
   height: 80px;
   flex-shrink: 0;
-  background: var(--at-surface-2);
+  background: var(--at-grad-shell);
+  border: 1px solid var(--at-border);
+  border-radius: var(--at-r-sm);
   overflow: hidden;
   display: flex;
   align-items: center;
@@ -204,17 +215,18 @@ const { format: formatCurrency } = useCurrency()
 .cart__item-name {
   font-family: var(--at-f-display);
   font-size: 1.1rem;
-  font-weight: 400;
-  color: var(--at-text);
+  font-weight: 600;
+  letter-spacing: -0.012em;
+  color: var(--at-cream);
   text-decoration: none;
   display: block;
   transition: color 0.2s;
 }
-.cart__item-name:hover { color: var(--at-gold); }
+.cart__item-name:hover { color: var(--at-gold-700); }
 .cart__item-ref {
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.12em;
+  letter-spacing: 0;
   color: var(--at-muted);
   margin-top: 3px;
 }
@@ -227,13 +239,16 @@ const { format: formatCurrency } = useCurrency()
   flex-shrink: 0;
   transition: color 0.2s;
 }
-.cart__item-remove:hover { color: var(--at-gold); }
+.cart__item-remove:hover { color: var(--at-skin); }
 
 .cart__item-bottom { display: flex; align-items: center; justify-content: space-between; }
 .cart__qty {
   display: flex;
   align-items: center;
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-pill);
+  background: var(--at-surface);
+  overflow: hidden;
 }
 .cart__qty-btn {
   width: 32px;
@@ -247,7 +262,7 @@ const { format: formatCurrency } = useCurrency()
   justify-content: center;
   transition: color 0.2s;
 }
-.cart__qty-btn:hover { color: var(--at-gold); }
+.cart__qty-btn:hover { color: var(--at-gold-700); background: var(--at-gold-dim); }
 .cart__qty-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 .cart__qty-val {
   width: 36px;
@@ -262,14 +277,17 @@ const { format: formatCurrency } = useCurrency()
 .cart__item-price {
   font-family: var(--at-f-mono);
   font-size: 13px;
-  font-weight: 400;
-  color: var(--at-gold);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--at-cream);
 }
 
 /* Summary */
 .cart__summary-card {
-  background: var(--at-surface);
+  background: var(--at-grad-paper);
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-lg);
+  box-shadow: var(--at-shadow-md);
   padding: 28px;
   position: sticky;
   top: 80px;
@@ -277,7 +295,8 @@ const { format: formatCurrency } = useCurrency()
 .cart__summary-title {
   font-family: var(--at-f-display);
   font-size: 1.4rem;
-  font-weight: 300;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--at-cream);
   margin-bottom: 24px;
   padding-bottom: 16px;
@@ -293,11 +312,13 @@ const { format: formatCurrency } = useCurrency()
   color: var(--at-sub);
 }
 .cart__summary-row dd {
-  font-weight: 400;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
   color: var(--at-text);
   margin: 0;
 }
 .cart__summary-hint { font-size: 10px; color: var(--at-muted) !important; }
+.cart__summary-row--clearance dt, .cart__summary-row--clearance dd { color: var(--at-skin) !important; }
 
 .cart__summary-total {
   display: flex;
@@ -308,16 +329,17 @@ const { format: formatCurrency } = useCurrency()
   margin-bottom: 24px;
   font-family: var(--at-f-mono);
   font-size: 10px;
-  letter-spacing: 0.15em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-sub);
 }
 .cart__summary-total-price {
   font-family: var(--at-f-display);
-  font-size: 1.6rem;
-  font-weight: 400;
-  color: var(--at-gold);
-  letter-spacing: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--at-cream);
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
   text-transform: none;
 }
 
@@ -327,14 +349,14 @@ const { format: formatCurrency } = useCurrency()
   text-align: center;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  letter-spacing: 0.18em;
+  letter-spacing: 0;
   text-transform: uppercase;
   color: var(--at-muted);
   text-decoration: none;
   padding: 12px;
   transition: color 0.2s;
 }
-.cart__continue-link:hover { color: var(--at-gold); }
+.cart__continue-link:hover { color: var(--at-gold-700); }
 
 /* Transitions */
 .cart-item-move, .cart-item-enter-active, .cart-item-leave-active { transition: all 0.3s ease; }

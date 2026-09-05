@@ -5,19 +5,19 @@
       class="flex mb-6"
       aria-label="Breadcrumb"
     >
-      <ol class="inline-flex items-center space-x-1 md:space-x-3">
+      <ol class="inline-flex items-center space-x-1 md:space-x-3 rtl:space-x-reverse">
         <li class="inline-flex items-center">
           <NuxtLink
-            to="/admin/categories"
-            class="hover:[color:var(--brand)]" style="color: var(--text-secondary)"
-          >
+ to="/admin/categories"
+ class="hover:[color:var(--brand)] text-secondary" 
+>
             {{ t('admin.nav.categories') }}
           </NuxtLink>
         </li>
         <li aria-current="page">
           <div class="flex items-center">
-            <Icon name="lucide:chevron-right" class="w-6 h-6" style="color: var(--text-tertiary)" />
-            <span class="ml-1" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
+            <Icon name="lucide:chevron-right" class="w-6 h-6 text-tertiary" />
+            <span class="ms-1 text-tertiary">{{ t('admin.pages.categories.edit.breadcrumb') }}</span>
           </div>
         </li>
       </ol>
@@ -29,7 +29,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.categories.edit.loading') }}
       </p>
     </div>
@@ -38,44 +38,44 @@
       <!-- Header -->
       <div class="mb-6 flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
         <div>
-          <h2 class="text-2xl font-bold" style="color: var(--text-primary)">
+          <h2 class="text-2xl font-bold text-primary">
             {{ t('admin.pages.categories.edit.title') }}
           </h2>
-          <p class="mt-1" style="color: var(--text-secondary)">
+          <p class="mt-1 text-secondary">
             {{ t('admin.pages.categories.edit.subtitle') }}
           </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
-          <div class="flex items-center space-x-2 p-1.5 rounded-lg" style="background: var(--surface-2); border: 1px solid var(--surface-border)">
-            <span class="text-xs font-medium px-2" style="color: var(--text-tertiary)">{{ t('admin.pages.categories.edit.links.label') }}:</span>
+          <div class="flex items-center space-x-2 p-1.5 rounded-lg rtl:space-x-reverse surface-2 border border-line">
+            <span class="text-xs font-medium px-2 text-tertiary">{{ t('admin.pages.categories.edit.links.label') }}:</span>
             <a
               :href="categoryUrl"
               target="_blank"
-              class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded"
+              class="p-1 [color:var(--brand)] hover:[background:rgba(var(--brand-rgb)/0.08)] rounded-lg"
               :title="t('admin.pages.categories.edit.links.openCategory')"
             >
               <Icon name="lucide:external-link" class="w-4 h-4" />
             </a>
             <button
-              class="p-1 rounded" style="color: var(--text-tertiary)"
-              :title="t('admin.pages.categories.edit.links.copyCategory')"
-              @click="copyUrl(categoryUrl)"
-            >
+ class="p-1 rounded-lg text-tertiary" 
+ :title="t('admin.pages.categories.edit.links.copyCategory')"
+ @click="copyUrl(categoryUrl)"
+>
               <Icon name="lucide:copy" class="w-4 h-4" />
             </button>
           </div>
 
           <NuxtLink
-            to="/admin/categories"
-            class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
-          >
+ to="/admin/categories"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary surface-1" 
+>
             {{ t('admin.common.cancel') }}
           </NuxtLink>
           <button
             form="category-edit-form"
             type="submit"
             :disabled="submitting || loading"
-            class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+            class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
           >
             <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
             {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}
@@ -105,7 +105,6 @@
           @change="handleSlugChange"
           @blur="handleSlugChange"
           required
-          pattern="[a-z0-9-]+"
         />
 
         <BaseSelect
@@ -132,16 +131,38 @@
           :hint="t('admin.forms.category.image.hint')"
         />
 
+        <BaseSelect
+          v-model="form.visibility"
+          :label="t('admin.forms.category.visibility.label')"
+          :hint="t('admin.forms.category.visibility.hint')"
+        >
+          <option value="LISTED">
+            {{ t('admin.forms.category.visibility.listed') }}
+          </option>
+          <option value="UNLISTED">
+            {{ t('admin.forms.category.visibility.unlisted') }}
+          </option>
+        </BaseSelect>
+
+        <div
+          v-if="form.visibility === 'UNLISTED'"
+          class="flex items-start gap-2 rounded-lg p-3 text-sm"
+          style="background: color-mix(in srgb, var(--warning, #d97706) 12%, transparent); color: var(--text-primary)"
+        >
+          <Icon name="lucide:eye-off" class="w-4 h-4 mt-0.5 shrink-0" />
+          <span>{{ t('admin.forms.category.visibility.unlistedNotice') }}</span>
+        </div>
+
         <div
           v-if="errorMessage"
-          class="p-4 bg-red-50 border border-red-200 rounded-md"
+          class="p-4 bg-red-50 border border-red-200 rounded-lg"
         >
           <p class="text-sm text-red-800">
             {{ errorMessage }}
           </p>
         </div>
 
-        <div class="flex justify-between items-center pt-4" style="border-top: 1px solid var(--surface-border)">
+        <div class="flex justify-between items-center pt-4 border-t border-line">
           <button
             type="button"
             class="text-red-600 hover:text-red-700 text-sm font-medium"
@@ -149,17 +170,17 @@
           >
             {{ t('admin.pages.categories.edit.deleteLink') }}
           </button>
-          <div class="space-x-3">
+          <div class="space-x-3 rtl:space-x-reverse">
             <NuxtLink
-              to="/admin/categories"
-              class="px-4 py-2 rounded-md text-sm font-medium" style="border: 1px solid var(--surface-border); color: var(--text-secondary); background: var(--surface-1)"
-            >
+ to="/admin/categories"
+ class="px-4 py-2 rounded-lg text-sm font-medium border border-line text-secondary surface-1" 
+>
               {{ t('admin.common.cancel') }}
             </NuxtLink>
             <button
               type="submit"
               :disabled="submitting"
-              class="px-4 py-2 [background:var(--brand)] text-white rounded-md hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
+              class="px-4 py-2 [background:var(--brand)] text-brand-contrast rounded-lg hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)] disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 justify-center"
             >
               <Icon v-if="submitting" name="lucide:loader-2" class="w-4 h-4 animate-spin" />
               {{ submitting ? t('admin.common.updating') : t('admin.pages.categories.edit.submit') }}
@@ -187,6 +208,7 @@ import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
 import SingleImageUploader from '~/components/admin/SingleImageUploader.vue'
 import BaseInput from '~/components/ui/BaseInput.vue'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
+import { CONTENT_SLUG_PATTERN, CONTENT_SLUG_RULE_HINT, normalizeContentSlug } from '~/shared/content-slug'
 
 definePageMeta({
   middleware: 'auth',
@@ -203,7 +225,8 @@ const form = ref({
   title: '',
   slug: '',
   parentId: '',
-  imageUrl: null as string | null
+  imageUrl: null as string | null,
+  visibility: 'LISTED' as 'LISTED' | 'UNLISTED'
 })
 
 type Category = {
@@ -222,7 +245,7 @@ const submitting = ref(false)
 const loading = ref(true)
 const showDeleteModal = ref(false)
 const lastAutoSlug = ref('')
-const slugPattern = /^[a-z0-9-]+$/
+const slugPattern = CONTENT_SLUG_PATTERN
 const slugSuggestionSeq = ref(0)
 
 const tenantSlug = computed(() => authStore.user?.tenant?.slug as string | undefined)
@@ -282,10 +305,7 @@ watch(() => form.value.title, (newTitle) => {
 })
 
 function slugify(text: string): string {
-  return text
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-+|-+$/g, '')
+  return normalizeContentSlug(text)
 }
 
 function normalizeSlugInput(): string {
@@ -359,7 +379,7 @@ async function checkSlugAvailability(): Promise<boolean> {
     return false
   }
   if (!slugPattern.test(slug)) {
-    errors.value.slug = 'Slug must contain only lowercase letters, numbers, and hyphens'
+    errors.value.slug = CONTENT_SLUG_RULE_HINT
     return false
   }
 
@@ -401,6 +421,7 @@ async function fetchCategory() {
     form.value.slug = data.slug
     form.value.parentId = data.parentId || ''
     form.value.imageUrl = data.imageUrl ?? null
+    form.value.visibility = data.visibility === 'UNLISTED' ? 'UNLISTED' : 'LISTED'
     lastAutoSlug.value = slugify(data.slug || data.title)
   } catch (error: any) {
     console.error('Failed to load category:', error)
@@ -428,7 +449,8 @@ async function handleSubmit() {
         title: form.value.title,
         slug: form.value.slug,
         parentId: form.value.parentId || null,
-        imageUrl: form.value.imageUrl
+        imageUrl: form.value.imageUrl,
+        visibility: form.value.visibility
       }
     })
   } catch (error: any) {

@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import { StoreSettingsService, StoreSettingsValidationError } from './store-settings.service'
+import { StorePublishBlockedError, StoreSettingsService, StoreSettingsValidationError } from './store-settings.service'
 
 const service = new StoreSettingsService()
 
@@ -9,7 +9,14 @@ export class StoreSettingsController {
             const tenant = req.tenant!
             const settings = await service.getOrCreate(tenant.id)
             res.setHeader('Content-Type', 'application/json')
-            res.end(JSON.stringify({ ...settings, name: tenant.name, slug: tenant.slug }))
+            res.end(JSON.stringify({
+                ...settings,
+                name: tenant.name,
+                slug: tenant.slug,
+                maintenanceMode: tenant.maintenanceMode,
+                publishedAt: tenant.publishedAt,
+                isPublished: tenant.publishedAt != null
+            }))
         } catch (error) {
             console.error('Get store settings error:', error)
             res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
@@ -47,12 +54,14 @@ export class StoreSettingsController {
                     logoUrl: settings.logoUrl,
                     faviconUrl: settings.faviconUrl,
                     primaryColor: settings.primaryColor,
+                    useBrandColor: (settings as any).useBrandColor ?? false,
                     templateKey: settings.templateKey,
                     announcementText: settings.announcementText,
                     announcementScrolling: settings.announcementScrolling,
                     language: settings.language,
                     cartEnabled: settings.cartEnabled,
                     codEnabled: settings.codEnabled,
+                    orderIdPrefix: settings.orderIdPrefix,
                     minimumOrderAmountDzd: settings.minimumOrderAmountDzd,
                     hideOptionalAddress: settings.hideOptionalAddress,
                     currencyCode: settings.currencyCode,
@@ -67,6 +76,35 @@ export class StoreSettingsController {
         }
     }
 
+    async getChecklist(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const checklist = await service.getOnboardingChecklist(tenant.id)
+            res.json(checklist)
+        } catch (error) {
+            console.error('Get onboarding checklist error:', error)
+            res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
+    async publish(req: Request, res: Response) {
+        try {
+            const tenant = req.tenant!
+            const { publishedAt } = await service.publishStore(tenant.id)
+            res.json({ success: true, publishedAt, isPublished: true })
+        } catch (error) {
+            if (error instanceof StorePublishBlockedError) {
+                return res.status(error.statusCode).json({
+                    statusCode: error.statusCode,
+                    statusMessage: error.statusMessage,
+                    missing: error.missing
+                })
+            }
+            console.error('Publish store error:', error)
+            res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
     async getPublic(req: Request, res: Response) {
         try {
             const tenant = req.tenant
@@ -75,18 +113,22 @@ export class StoreSettingsController {
             }
 
             const settings = await service.getOrCreate(tenant.id)
+            const clearanceAppliesToAllProducts = await service.clearanceAppliesToAllProducts(tenant.id)
             res.json({
                 tenant: { id: tenant.id, slug: tenant.slug, name: tenant.name },
                 storeSettings: {
                     logoUrl: settings.logoUrl,
                     faviconUrl: settings.faviconUrl,
+                    description: settings.description,
                     primaryColor: settings.primaryColor,
+                    useBrandColor: (settings as any).useBrandColor ?? false,
                     templateKey: settings.templateKey,
                     announcementText: settings.announcementText,
                     announcementScrolling: settings.announcementScrolling,
                     language: settings.language,
                     cartEnabled: settings.cartEnabled,
                     codEnabled: settings.codEnabled,
+                    orderIdPrefix: settings.orderIdPrefix,
                     minimumOrderAmountDzd: settings.minimumOrderAmountDzd,
                     hideOptionalAddress: settings.hideOptionalAddress,
                     currencyCode: settings.currencyCode,
@@ -96,7 +138,14 @@ export class StoreSettingsController {
                     loyaltyEnabled: settings.loyaltyEnabled,
                     loyaltyMinRedeemPoints: settings.loyaltyMinRedeemPoints,
                     loyaltyRedeemRateDzdPerPoint: settings.loyaltyRedeemRateDzdPerPoint,
-                    loyaltyPublicFormulaMode: settings.loyaltyPublicFormulaMode
+                    loyaltyPublicFormulaMode: settings.loyaltyPublicFormulaMode,
+                    legalPages: settings.legalPages,
+                    clearanceEnabled: (settings as any).clearanceEnabled,
+                    clearanceMultiple: (settings as any).clearanceMultiple,
+                    clearanceDivisor: (settings as any).clearanceDivisor,
+                    clearanceBannerEnabled: (settings as any).clearanceBannerEnabled,
+                    clearanceBannerText: (settings as any).clearanceBannerText,
+                    clearanceAppliesToAllProducts
                 }
             })
         } catch (error) {

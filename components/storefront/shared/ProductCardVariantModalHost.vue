@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import type { ProductCardVariantModalItem } from '~/composables/useProductCardVariantGuard'
 import { useCartStore } from '~/stores/cart'
-import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
 type TemplateKey =
   | 'classic'
@@ -18,10 +17,14 @@ type TemplateKey =
   | 'activewear'
   | 'chrono'
   | 'maison'
+  | 'arena'
+  | 'nour'
+  | 'embellir'
 
 type ThemeTokens = {
   overlay: string
   panel: string
+  font: string
   title: string
   subtitle: string
   row: string
@@ -45,8 +48,7 @@ const {
   bundleDeals,
   metaPixelIds,
   templateKey,
-  variants,
-  pricingContext
+  variants
 } = modal
 
 onMounted(() => {
@@ -60,6 +62,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   modern: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-brand-300 hover:bg-brand-50/30',
@@ -73,6 +76,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   interior: {
     overlay: 'bg-slate-900/65',
     panel: 'bg-white border border-slate-200 rounded-3xl',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-emerald-300 hover:bg-emerald-50/40',
@@ -86,6 +90,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   minimal: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-slate-400',
@@ -99,6 +104,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   classic: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-serif',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-brand-300 hover:bg-brand-50/30',
@@ -112,6 +118,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   food: {
     overlay: 'bg-stone-900/55',
     panel: 'bg-white border border-stone-200 rounded-[2rem]',
+    font: 'font-sans',
     title: 'text-stone-900',
     subtitle: 'text-stone-500',
     row: 'border-stone-200 hover:border-emerald-300 hover:bg-emerald-50/30',
@@ -123,21 +130,23 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
     unavailable: 'text-red-600'
   },
   cozy: {
-    overlay: 'bg-amber-900/35',
-    panel: 'bg-white border border-amber-100 rounded-[2rem]',
-    title: 'text-amber-900',
-    subtitle: 'text-amber-700/80',
-    row: 'border-amber-200 hover:border-brand-300 hover:bg-amber-50/60',
-    rowLabel: 'text-amber-900',
-    rowMeta: 'text-amber-700/80',
-    price: 'text-brand-700',
-    addBtn: 'bg-brand-600 text-white hover:bg-brand-700',
-    closeBtn: 'text-amber-700 hover:text-amber-900',
-    unavailable: 'text-red-600'
+    overlay: 'bg-[#1E1912]/55',
+    panel: 'bg-[#F4EFE6] border border-[#262019] rounded-none',
+    font: 'font-cozy-ui',
+    title: 'text-[#262019]',
+    subtitle: 'text-[#8A7E6E]',
+    row: 'border-[#DAD2C4] hover:border-[#262019] hover:bg-[#FBF8F2]',
+    rowLabel: 'text-[#262019]',
+    rowMeta: 'text-[#8A7E6E]',
+    price: 'text-[#B8532E]',
+    addBtn: 'bg-[#262019] text-[#F4EFE6] hover:bg-[#97401F] rounded-none',
+    closeBtn: 'text-[#8A7E6E] hover:text-[#262019]',
+    unavailable: 'text-[#B8532E]'
   },
   cyber: {
     overlay: 'bg-black/80',
     panel: 'bg-[#140b24] border border-pink-500/40',
+    font: '',
     title: 'text-pink-200',
     subtitle: 'text-purple-300/80',
     row: 'border-purple-500/30 hover:border-pink-400/60 hover:bg-pink-500/10',
@@ -148,9 +157,24 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
     closeBtn: 'text-purple-200 hover:text-white',
     unavailable: 'text-red-300'
   },
+  arena: {
+    overlay: 'bg-black/80',
+    panel: 'bg-[#0b0f14] border border-brand-500/30',
+    font: 'font-sans',
+    title: 'text-white',
+    subtitle: 'text-slate-300',
+    row: 'border-white/10 hover:border-brand-500/50 hover:bg-brand-500/10',
+    rowLabel: 'text-white font-bold uppercase tracking-[0.08em]',
+    rowMeta: 'text-slate-400',
+    price: 'text-brand-500',
+    addBtn: 'bg-brand-500 text-[#02060a] hover:bg-brand-400',
+    closeBtn: 'text-slate-300 hover:text-white',
+    unavailable: 'text-red-300'
+  },
   stationnery: {
     overlay: 'bg-stone-900/60',
     panel: 'bg-white border border-stone-200',
+    font: 'font-stationery',
     title: 'text-stone-900',
     subtitle: 'text-stone-500',
     row: 'border-stone-200 hover:border-red-300 hover:bg-red-50/20',
@@ -164,6 +188,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   street: {
     overlay: 'bg-black/70',
     panel: 'bg-[#fffdf6] border-2 border-black',
+    font: 'font-street',
     title: 'text-black',
     subtitle: 'text-black/65',
     row: 'border-2 border-black/20 hover:border-black hover:bg-[#ffe9d2]',
@@ -177,6 +202,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   wellness: {
     overlay: 'bg-stone-900/55',
     panel: 'bg-white border border-stone-200 rounded-3xl',
+    font: 'font-wellness',
     title: 'text-stone-900',
     subtitle: 'text-stone-500',
     row: 'border-stone-200 hover:border-emerald-300 hover:bg-emerald-50/40',
@@ -190,6 +216,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   playful: {
     overlay: 'bg-violet-900/55',
     panel: 'bg-white border-2 border-violet-200 rounded-3xl',
+    font: 'font-sans',
     title: 'text-violet-800',
     subtitle: 'text-violet-500',
     row: 'border-violet-200 hover:border-pink-300 hover:bg-pink-50/40',
@@ -203,6 +230,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   activewear: {
     overlay: 'bg-black/75',
     panel: 'bg-[#101010] border-2 border-[#333]',
+    font: 'font-activewear',
     title: 'text-white',
     subtitle: 'text-zinc-400',
     row: 'border-2 border-[#333] hover:border-brand-500 hover:bg-zinc-900',
@@ -216,6 +244,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   chrono: {
     overlay: 'bg-[#06080f]/85',
     panel: 'bg-[#111827] border border-[#3d4b63]',
+    font: 'font-serif',
     title: 'text-[#E8E0D5]',
     subtitle: 'text-[#A6A19A]',
     row: 'border-[#3d4b63] hover:border-[#A67C52] hover:bg-[#1a2538]',
@@ -229,6 +258,7 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
   maison: {
     overlay: 'bg-stone-900/60',
     panel: 'bg-[#f8f5ef] border border-[#d8d0c0]',
+    font: '',
     title: 'text-[#3c3428]',
     subtitle: 'text-[#6f6659]',
     row: 'border-[#d8d0c0] hover:border-[#a58d6a] hover:bg-[#f2ece1]',
@@ -239,9 +269,38 @@ const themeTokens: Record<TemplateKey | 'default', ThemeTokens> = {
     closeBtn: 'text-[#6f6659] hover:text-[#3c3428]',
     unavailable: 'text-red-700'
   },
+  nour: {
+    overlay: 'bg-[#2E1E20]/55',
+    panel: 'bg-[#FFFDF9] border border-[#C9A24B]/40 rounded-[20px]',
+    font: '',
+    title: 'text-[#2E1E20]',
+    subtitle: 'text-[#6B5850]',
+    row: 'border-[#C9A24B]/35 hover:border-brand-300 hover:bg-[#FAF3EA]',
+    rowLabel: 'text-[#2E1E20]',
+    rowMeta: 'text-[#6B5850]',
+    price: 'text-brand-700',
+    addBtn: 'bg-[#2E1E20] text-white hover:bg-brand-700',
+    closeBtn: 'text-[#9C8B82] hover:text-[#2E1E20]',
+    unavailable: 'text-rose-700'
+  },
+  embellir: {
+    overlay: 'bg-[#062622]/70',
+    panel: 'bg-[#FDFAF4] border border-[#CBBDAB] !rounded-[2px]',
+    font: '',
+    title: 'text-[#16211E]',
+    subtitle: 'text-[#5A6763]',
+    row: '!rounded-[2px] border-[#CBBDAB] hover:border-[#DFA254] hover:bg-[#F2ECE1]',
+    rowLabel: 'text-[#16211E]',
+    rowMeta: 'text-[#5A6763]',
+    price: 'text-brand-700',
+    addBtn: '!rounded-[2px] bg-brand-600 text-[#FDFAF4] hover:bg-[#DFA254] hover:text-[#062622]',
+    closeBtn: '!rounded-[2px] text-[#5A6763] hover:text-[#16211E]',
+    unavailable: 'text-[#B4593F]'
+  },
   default: {
     overlay: 'bg-slate-900/60',
     panel: 'bg-white border border-slate-200',
+    font: 'font-sans',
     title: 'text-slate-900',
     subtitle: 'text-slate-500',
     row: 'border-slate-200 hover:border-brand-300 hover:bg-brand-50/30',
@@ -269,14 +328,12 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
   if (!variant || isOutOfStock(variant)) return
   if (!productId.value || !productSlug.value) return
 
-  const pricing = buildActiveProductPricing(pricingContext.value, variant.price)
-
   cartStore.addItem({
     productId: productId.value,
     variantId: variant.id,
     title: `${productTitle.value} (${variant.label})`,
     slug: productSlug.value,
-    price: Number(pricing.effectivePrice || 0),
+    price: Number(variant.price || 0),
     stock: variant.trackInventory ? variant.stock : 9999,
     image: variant.imageUrl || fallbackImage.value || undefined,
     bundleDeals: bundleDeals.value || [],
@@ -292,29 +349,28 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
 </script>
 
 <template>
-  <Teleport to="body">
-    <Transition
-      enter-active-class="transition-opacity duration-150"
-      enter-from-class="opacity-0"
-      enter-to-class="opacity-100"
-      leave-active-class="transition-opacity duration-150"
-      leave-from-class="opacity-100"
-      leave-to-class="opacity-0"
+  <Transition
+    enter-active-class="transition-opacity duration-150"
+    enter-from-class="opacity-0"
+    enter-to-class="opacity-100"
+    leave-active-class="transition-opacity duration-150"
+    leave-from-class="opacity-100"
+    leave-to-class="opacity-0"
+  >
+    <div
+      v-if="open"
+      class="fixed inset-0 z-[120] flex items-center justify-center p-4"
     >
       <div
-        v-if="open"
-        class="fixed inset-0 z-[90] flex items-center justify-center p-4"
-      >
-        <div
-          class="absolute inset-0"
-          :class="tokens.overlay"
-          @click="handleClose"
-        />
+        class="absolute inset-0"
+        :class="tokens.overlay"
+        @click="handleClose"
+      />
 
-        <div
-          class="relative z-10 w-full max-w-xl rounded-2xl p-5 sm:p-6 shadow-2xl"
-          :class="tokens.panel"
-        >
+      <div
+        class="relative z-10 w-full max-w-xl rounded-2xl p-5 sm:p-6 shadow-2xl"
+        :class="[tokens.panel, tokens.font]"
+      >
           <div class="flex items-start justify-between gap-3">
             <div>
               <h3 class="text-xl font-semibold leading-tight" :class="tokens.title">
@@ -345,7 +401,7 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
             <p class="text-sm font-medium text-red-600">{{ error }}</p>
           </div>
 
-          <div v-else class="mt-4 max-h-[55vh] space-y-3 overflow-y-auto pr-1">
+          <div v-else class="mt-4 max-h-[55vh] space-y-3 overflow-y-auto pe-1">
             <div
               v-for="variant in variants"
               :key="variant.id"
@@ -362,7 +418,7 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
                     <span v-else>{{ storefrontContent.product.inStock }}</span>
                   </p>
                 </div>
-                <div class="shrink-0 text-right">
+                <div class="shrink-0 text-end">
                   <p class="text-sm font-semibold sm:text-base" :class="tokens.price">
                     {{ formatCurrency(variant.price) }}
                   </p>
@@ -382,8 +438,7 @@ const handleVariantSelect = (variant: ProductCardVariantModalItem) => {
               </div>
             </div>
           </div>
-        </div>
       </div>
-    </Transition>
-  </Teleport>
+    </div>
+  </Transition>
 </template>

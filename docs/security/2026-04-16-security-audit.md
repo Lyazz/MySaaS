@@ -383,7 +383,7 @@ const trustProxy = process.env.TRUST_PROXY === 'true'
 const host = (trustProxy ? req.get('x-forwarded-host') : null) || req.get('host') || ''
 ```
 
-**Impact**: If `TRUST_PROXY=true` is set in an environment where the reverse proxy does not sanitize `X-Forwarded-Host`, an attacker can set `X-Forwarded-Host: victim-tenant.platform.com` to access a different tenant's context in unauthenticated public routes (storefront, delivery options, pixel endpoints). This would not bypass authentication but could leak tenant configuration metadata.
+**Impact**: If `TRUST_PROXY=true` is set in an environment where the reverse proxy does not sanitize `X-Forwarded-Host`, an attacker can set `X-Forwarded-Host: victim-tenant.swekly.com` to access a different tenant's context in unauthenticated public routes (storefront, delivery options, pixel endpoints). This would not bypass authentication but could leak tenant configuration metadata.
 
 **Recommendation**: Document the strict requirement that `TRUST_PROXY=true` must only be used with a reverse proxy that validates and overwrites `X-Forwarded-Host`. Consider validating the parsed tenant slug against an allowlist of known tenants at the middleware level, or log a startup warning when `TRUST_PROXY=true`.
 

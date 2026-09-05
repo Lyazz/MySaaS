@@ -14,7 +14,7 @@ describe('Product bundle deal tags', () => {
 
     beforeAll(async () => {
         const tenant = await prisma.tenant.create({
-            data: { name: 'Bundle Tags Tenant', slug }
+            data: { publishedAt: new Date(), name: 'Bundle Tags Tenant', slug }
         })
         tenantId = tenant.id
 

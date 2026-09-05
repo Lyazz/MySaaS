@@ -2,6 +2,7 @@
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
+import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
 const cartStore = useCartStore()
 const favorites = useFavorites()
@@ -9,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -30,7 +32,7 @@ const socialContactInfosWithHref = computed(() =>
 const kindDef = (kind: ContactInfoKind) => CONTACT_INFO_DEF_BY_KIND[kind]
 const hrefFor = (info: ContactInfoRow) => buildContactInfoHref(info.kind, info.value)
 const isExternalHref = (href: string) => /^https?:\/\//i.test(href)
-const { currencyCode } = useCurrency()
+const { format: formatCurrency } = useCurrency()
 
 const categoriesUrl = useTenantApiUrl('/api/categories')
 const { data: tenantCategories } = await useFetch<any[]>(categoriesUrl, {
@@ -43,6 +45,59 @@ const mobileMenuOpen = ref(false)
 const mobileCategoriesDropdownOpen = ref(false)
 watch(mobileMenuOpen, (open) => {
     if (!open) mobileCategoriesDropdownOpen.value = false
+})
+
+// Drawer search — mirrors the other templates' StoreShell search.
+const searchQuery = ref('')
+const searchResults = ref<any[]>([])
+const searchLoading = ref(false)
+const isSearchDropdownOpen = ref(false)
+// Suggestions must price like the rest of the storefront: promo first, raw price only as a fallback.
+const applySearchResultPricing = (products: any) => (Array.isArray(products) ? products : []).map((product: any) => {
+    const pricing = buildActiveProductPricing(product)
+    return {
+        ...product,
+        effectivePrice: pricing.effectivePrice,
+        promotionDiscountPercent: pricing.promotionDiscountPercent
+    }
+})
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
+let searchTimeout: any
+
+watch(searchQuery, (newVal) => {
+    if ((newVal?.length ?? 0) >= 3) {
+        searchLoading.value = true
+        isSearchDropdownOpen.value = true
+        clearTimeout(searchTimeout)
+        searchTimeout = setTimeout(async () => {
+            try {
+                const data = await $fetch<any[]>(useTenantApiUrl('/api/products'), {
+                    headers: useTenantApiHeaders(),
+                    query: { q: newVal },
+                })
+                searchResults.value = applySearchResultPricing(data)
+            } catch (e) {
+                console.error('Search error:', e)
+                searchResults.value = []
+            } finally {
+                searchLoading.value = false
+            }
+        }, 500)
+    } else {
+        clearTimeout(searchTimeout)
+        searchResults.value = []
+        searchLoading.value = false
+        isSearchDropdownOpen.value = false
+    }
 })
 // Build dynamic menu
 const categories = computed(() => {
@@ -66,11 +121,13 @@ const currentYear = new Date().getFullYear()
     <div class="min-h-screen flex flex-col border-x-4 border-black max-w-[1920px] mx-auto bg-white shadow-[8px_0_0_0_#000,-8px_0_0_0_#000]">
       <!-- Top Announcement Bar -->
       <!-- Top Announcement Bar -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
         background-color="bg-brand border-b-4 border-black"
         text-color="text-black font-mono uppercase"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
       <header v-if="!hideNavigation" :class="['sticky top-0 z-50 bg-white border-b-4 border-black', { 'hidden md:block': mobileHeaderHidden }]">
@@ -102,7 +159,7 @@ const currentYear = new Date().getFullYear()
                   {{ storefrontContent.nav.categories || 'Categories' }}
                   <Icon name="lucide:chevron-down" class="w-4 h-4" />
                 </button>
-                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
+                <div class="absolute top-[80%] start-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
                   <NuxtLink
                     v-for="cat in tenantCategories"
                     :key="cat.id"
@@ -127,12 +184,10 @@ const currentYear = new Date().getFullYear()
               @click="navigateTo('/wishlist')"
             >
               <Icon name="lucide:heart" class="w-5 h-5" />
-              <ClientOnly>
-                <span
-                  v-if="favorites.count.value > 0"
-                  class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white absolute -top-1 -right-1 border-2 border-black"
-                >{{ favorites.count.value }}</span>
-              </ClientOnly>
+              <span
+                v-if="favorites.count.value > 0"
+                class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-black text-[10px] font-bold text-white absolute -top-1 -end-1 border-2 border-black"
+              >{{ favorites.count.value }}</span>
             </button>
             <!-- Cart -->
             <NuxtLink
@@ -140,9 +195,9 @@ const currentYear = new Date().getFullYear()
               to="/cart"
               class="relative group"
             >
-              <div class="h-12 px-6 flex items-center gap-2 bg-black text-brand border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,222,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
+              <div class="h-12 px-3 lg:px-6 flex items-center gap-2 bg-black text-brand border-2 border-black shadow-[4px_4px_0px_0px_rgba(255,222,0,1)] hover:shadow-none hover:translate-x-1 hover:translate-y-1 transition-all">
                 <Icon name="lucide:handbag" class="w-5 h-5" />
-                <span class="font-street text-xl">{{ storefrontContent.cart.label }}</span>
+                <span class="font-street text-xl hidden lg:inline">{{ storefrontContent.cart.label }}</span>
                 <div class="bg-brand text-black font-bold h-6 w-6 flex items-center justify-center border border-black text-xs">
                   {{ cartStore.itemCount }}
                 </div>
@@ -163,46 +218,49 @@ const currentYear = new Date().getFullYear()
           <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
         </Transition>
         <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
+          <div v-if="mobileMenuOpen" class="fixed top-0 start-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] border-e-4 border-black shadow-[8px_0_0_0_rgba(0,0,0,0.15)] flex flex-col overflow-y-auto">
             <!-- Drawer header -->
-            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <span class="text-lg font-bold text-slate-900">{{ tenantName }}</span>
-              <button @click="mobileMenuOpen = false" class="p-1 text-slate-500 hover:text-slate-900">
+            <div class="flex items-center justify-between px-5 py-4 border-b-4 border-black">
+              <span class="font-street text-2xl uppercase leading-none">{{ tenantName }}</span>
+              <button @click="mobileMenuOpen = false" class="p-1 border-2 border-black hover:bg-brand transition-colors">
                 <Icon name="lucide:x" class="w-5 h-5" />
               </button>
             </div>
 
             <!-- Search -->
-            <div class="px-5 py-3">
+            <div class="px-5 py-4">
               <div class="relative">
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  :placeholder="storefrontContent.search.placeholder"
+                  class="w-full border-2 border-black bg-gray-100 py-2.5 ps-4 pe-10 font-mono text-sm uppercase placeholder:text-gray-400 text-black outline-none focus:shadow-[4px_4px_0_0_var(--brand)] transition-all"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Icon name="lucide:search" class="w-4 h-4 text-black absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none" />
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
+                  class="absolute top-[100%] start-0 end-0 mt-1 bg-white border-2 border-black shadow-[4px_4px_0_0_#000] z-50 overflow-hidden pointer-events-auto"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
+                  <div v-if="searchLoading" class="px-4 py-3 font-mono text-xs uppercase text-gray-500">{{ storefrontContent.search.searching }}</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 font-mono text-xs uppercase text-gray-500">{{ storefrontContent.search.noResults }}</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
                       v-for="product in searchResults"
                       :key="product.id"
                       :to="'/product/' + product.slug"
-                      class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+                      class="flex items-center gap-3 px-4 py-3 hover:bg-brand transition-colors border-b-2 border-black last:border-0"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
-                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
+                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover border-2 border-black" />
                       <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ product.price }} {{ currencyCode }}</div>
+                        <div class="font-street text-base uppercase leading-none truncate">{{ product.title }}</div>
+                        <div class="font-mono text-xs font-bold mt-1">
+                          {{ formatCurrency(product.effectivePrice ?? product.price) }}
+                          <span v-if="product.promotionDiscountPercent" class="ms-1 text-[10px] text-red-600">-{{ product.promotionDiscountPercent }}%</span>
+                        </div>
                       </div>
                     </NuxtLink>
                   </div>
@@ -211,34 +269,38 @@ const currentYear = new Date().getFullYear()
             </div>
 
             <!-- Nav links -->
-            <nav class="flex flex-col px-5 py-2 gap-1">
-              <NuxtLink to="/" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
-              <NuxtLink to="/contact" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
+            <nav class="flex flex-col px-5">
+              <NuxtLink to="/" class="py-3 font-street text-2xl uppercase border-b-2 border-black hover:bg-brand hover:text-black px-2 -mx-2 transition-colors" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="py-3 font-street text-2xl uppercase border-b-2 border-black hover:bg-brand hover:text-black px-2 -mx-2 transition-colors" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
+              <NuxtLink to="/contact" class="py-3 font-street text-2xl uppercase border-b-2 border-black hover:bg-brand hover:text-black px-2 -mx-2 transition-colors" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
-            <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
+            <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-4">
   <button
     type="button"
-    class="w-full flex items-center justify-between text-left"
+    class="w-full flex items-center justify-between text-start mb-2"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
-    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+    <h4 class="font-street text-lg uppercase">
       {{ storefrontContent.nav.categories || 'Categories' }}
     </h4>
     <Icon
       name="lucide:chevron-down"
-      class="w-4 h-4 text-slate-400 transition-transform"
+      class="w-4 h-4 text-black transition-transform"
       :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
     />
   </button>
-  <div v-show="mobileCategoriesDropdownOpen" class="flex flex-col gap-1">
+  <div v-show="mobileCategoriesDropdownOpen" class="flex flex-col">
     <NuxtLink
       v-for="cat in tenantCategories"
       :key="cat.id"
       :to="'/category/' + cat.slug"
-      class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
+      class="py-2 font-mono text-sm uppercase text-gray-600 hover:text-black hover:bg-brand px-2 -mx-2 transition-colors"
       @click="mobileMenuOpen = false"
     >
       {{ categoryDisplayTitle(cat) }}
@@ -257,7 +319,7 @@ const currentYear = new Date().getFullYear()
       <!-- Footer -->
       <footer class="border-t-4 border-black bg-black text-white pt-16 pb-8">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <!-- Brand Column -->
             <div class="col-span-1 md:col-span-1">
               <h3 class="font-street text-4xl mb-6 bg-white text-black inline-block px-2 border-2 border-brand shadow-[4px_4px_0px_0px_var(--brand)]">
@@ -293,66 +355,29 @@ const currentYear = new Date().getFullYear()
             </div>
 
             <!-- Links Column -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="font-street text-2xl text-brand mb-6 uppercase">
                 {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 font-mono text-sm uppercase text-gray-400">
                 <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand hover:bg-brand/10 px-1 transition-colors"
-                  >{{ storefrontContent.footer.contactUs }}</a>
+                  <NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="hover:text-brand hover:bg-brand/10 px-1 transition-colors">{{ storefrontContent.footer.contactUs }}</NuxtLink>
                 </li>
-                <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand hover:bg-brand/10 px-1 transition-colors"
-                  >{{ storefrontContent.footer.aboutUs }}</a>
-                </li>
-              </ul>
+</ul>
             </div>
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="font-street text-2xl text-brand mb-6 uppercase">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 font-mono text-sm uppercase text-gray-400">
                 <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand hover:bg-brand/10 px-1 transition-colors"
-                  >{{ storefrontContent.footer.termsOfService }}</a>
+                  <NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="hover:text-brand hover:bg-brand/10 px-1 transition-colors">{{ storefrontContent.footer.termsOfService }}</NuxtLink>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand hover:bg-brand/10 px-1 transition-colors"
-                  >{{ storefrontContent.footer.privacyPolicy }}</a>
+                  <NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="hover:text-brand hover:bg-brand/10 px-1 transition-colors">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink>
                 </li>
                 <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand hover:bg-brand/10 px-1 transition-colors"
-                  >{{ storefrontContent.footer.returnPolicy }}</a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="font-street text-2xl text-brand mb-6 uppercase">
-                {{ storefrontContent.footer.help }}
-              </h4>
-              <ul class="space-y-3 font-mono text-sm uppercase text-gray-400">
-                <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand hover:bg-brand/10 px-1 transition-colors"
-                  >{{ storefrontContent.footer.faq }}</a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand hover:bg-brand/10 px-1 transition-colors"
-                  >{{ storefrontContent.footer.shippingInfo }}</a>
+                  <NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="hover:text-brand hover:bg-brand/10 px-1 transition-colors">{{ storefrontContent.footer.returnPolicy }}</NuxtLink>
                 </li>
               </ul>
             </div>
@@ -360,6 +385,7 @@ const currentYear = new Date().getFullYear()
 
           <div class="pt-8 border-t-2 border-gray-800 text-center font-mono text-xs text-gray-500 uppercase">
             {{ storefrontContent.footer.copyright(tenantName) }}
+            <div class="mt-2 normal-case"><StorefrontSharedPoweredBy /></div>
           </div>
         </div>
       </footer>
@@ -372,4 +398,5 @@ const currentYear = new Date().getFullYear()
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 </style>

@@ -89,7 +89,7 @@ export class TelegramService {
         return { bot: { id: String(bot.id), username: bot.username ?? null, name: bot.first_name }, chats }
     }
 
-    async sendOrderNotification(tenantId: string, order: any) {
+    async sendOrderNotification(tenantId: string, order: any, isWhatsAppConfirmation: boolean = false) {
         const integration = await this.integrationsService.getIntegration(tenantId, 'TELEGRAM')
 
         if (!integration || !integration.isActive || !integration.config) {
@@ -125,10 +125,80 @@ export class TelegramService {
                 customDomain: tenant.domains[0]?.domain ?? null,
                 orderId: order.id
             })
-            const message = this.formatOrderMessage(order, adminUrl)
+            const message = this.formatOrderMessage(order, adminUrl, isWhatsAppConfirmation)
             await bot.telegram.sendMessage(chatId, message, { parse_mode: 'Markdown' })
         } catch (error) {
             console.error(`[TelegramService] Failed to send notification for tenant ${tenantId}:`, error)
+        }
+    }
+
+    /**
+     * The seller hearing that a customer declined an order from WhatsApp.
+     *
+     * Separate from `sendOrderNotification` because the one thing the seller
+     * must not miss is a parcel the carrier would not cancel: that order is
+     * dead on Swekly's side but still moving on theirs.
+     */
+    async sendOrderCancelledNotification(
+        tenantId: string,
+        order: any,
+        carrier?: { attempted: boolean; ok: boolean; provider: string; message: string | null }
+    ) {
+        const integration = await this.integrationsService.getIntegration(tenantId, 'TELEGRAM')
+
+        if (!integration || !integration.isActive || !integration.config) {
+            return
+        }
+
+        const { botToken, chatId } = integration.config as any
+        if (!botToken || !chatId) {
+            console.warn(`[TelegramService] Missing config for tenant ${tenantId}`)
+            return
+        }
+
+        try {
+            const tenant = await prisma.tenant.findUnique({
+                where: { id: tenantId },
+                select: {
+                    slug: true,
+                    domains: {
+                        take: 1,
+                        orderBy: { createdAt: 'asc' },
+                        select: { domain: true }
+                    }
+                }
+            })
+            if (!tenant) return
+
+            const adminUrl = this.buildOrderAdminUrl({
+                slug: tenant.slug,
+                customDomain: tenant.domains[0]?.domain ?? null,
+                orderId: order.id
+            })
+            const orderReference =
+                typeof order.publicId === 'string' && order.publicId.trim().length > 0
+                    ? order.publicId.trim()
+                    : String(order.id).slice(0, 8)
+
+            const lines = [
+                `❌ *Commande #${orderReference} annulée par le client via WhatsApp*`,
+                `👤 ${order.customerName ?? ''} (${order.customerPhone ?? ''})`
+            ]
+
+            if (carrier?.attempted && !carrier.ok) {
+                lines.push(
+                    `⚠️ *Le colis ${carrier.provider} n\u2019a PAS pu être annulé* (${carrier.message ?? 'erreur'}). Annulez-le manuellement.`
+                )
+            } else if (carrier?.attempted && carrier.ok) {
+                lines.push(`📦 Colis ${carrier.provider} annulé chez le transporteur.`)
+            }
+
+            lines.push(`🔗 [Voir la commande](${adminUrl})`)
+
+            const bot = new Telegraf(botToken)
+            await bot.telegram.sendMessage(chatId, lines.join('\n'), { parse_mode: 'Markdown' })
+        } catch (error) {
+            console.error(`[TelegramService] Failed to send cancellation for tenant ${tenantId}:`, error)
         }
     }
 
@@ -143,10 +213,18 @@ export class TelegramService {
         }
     }
 
-    private formatOrderMessage(order: any, adminUrl: string): string {
+    private formatOrderMessage(order: any, adminUrl: string, isWhatsAppConfirmation: boolean = false): string {
+        const orderReference = typeof order.publicId === 'string' && order.publicId.trim().length > 0
+            ? order.publicId.trim()
+            : order.id.slice(0, 8)
+
+        if (isWhatsAppConfirmation) {
+            return `✅ *Commande #${orderReference} confirmée via WhatsApp*\n🔗 [Voir la commande](${adminUrl})`
+        }
+
         const lines = [
             `📦 *Nouvelle Commande Reçue !*`,
-            `Commande #${order.id.slice(0, 8)}`,
+            `Commande #${orderReference}`,
             ``,
             `👤 *Client :* ${order.customerName} (${order.customerPhone})`,
             `💰 *Total :* ${order.totalAmount} DZD`,

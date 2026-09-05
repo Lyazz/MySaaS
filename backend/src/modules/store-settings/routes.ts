@@ -12,5 +12,7 @@ router.use(requireStaffCrud('storeSettings'))
 router.get('/', controller.getAdmin.bind(controller))
 router.patch('/', controller.patchAdmin.bind(controller))
 router.get('/agent-summary', controller.agentSummary.bind(controller))
+router.get('/onboarding-checklist', controller.getChecklist.bind(controller))
+router.patch('/publish', controller.publish.bind(controller))
 
 export default router

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:easy_localization/easy_localization.dart';
 
 import '../models/customer.dart';
@@ -9,9 +9,13 @@ import '../models/customer_detail.dart';
 import '../models/customer_payment.dart';
 import '../models/customer_sale.dart';
 import '../providers/customers_provider.dart';
+import '../providers/store_settings_provider.dart';
+import '../theme/app_theme.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/badges/status_badges.dart';
 import '../widgets/badges/ui_badge.dart';
 import '../widgets/buttons/app_button.dart';
+import '../widgets/buttons/table_action_button.dart';
 import '../widgets/responsive_server_paginated_table.dart';
 import '../widgets/stat_card.dart';
 
@@ -58,7 +62,6 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
     final locale = context.locale.toLanguageTag();
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB), // Gray-50
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -84,10 +87,8 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
 
                   final sales = detail.sales;
                   final payments = detail.payments;
-                  final money = NumberFormat.currency(
-                    locale: locale,
-                    symbol: 'DA',
-                    decimalDigits: 2,
+                  final money = tenantCurrencyFormatter(
+                    ref.watch(storeSettingsProvider).settings,
                   );
 
                   final totalSpent = sales.fold<double>(
@@ -174,16 +175,20 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             padding: EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                const Icon(
+                Icon(
                   LucideIcons.arrowLeft,
                   size: 16,
-                  color: Color(0xFF64748B),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
                 ),
                 const SizedBox(width: 6),
                 Text(
                   'admin.pages.customers.index.title'.tr(),
-                  style: const TextStyle(
-                    color: Color(0xFF64748B), // Slate-500
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -214,10 +219,10 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 summary.name.trim().isEmpty
                     ? 'admin.pages.customers.detail.fallbackTitle'.tr()
                     : summary.name.trim(),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w700,
-                  color: Color(0xFF0F172A), // Slate-900
+                  color: Theme.of(context).colorScheme.onSurface,
                   letterSpacing: -0.5,
                 ),
               ),
@@ -234,8 +239,10 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         const SizedBox(height: 6),
         Text(
           subtitle,
-          style: const TextStyle(
-            color: Color(0xFF64748B), // Slate-500
+          style: TextStyle(
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.5),
             fontSize: 14,
           ),
         ),
@@ -264,15 +271,15 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             showIcon: false,
           ),
           StatCard(
-            label: 'admin.pages.customers.detail.stats.totalSpent'.tr(),
+            label: 'app.admin_pages_customers_detail_s'.tr().tr(),
             value: totalSpent,
             icon: LucideIcons.dollarSign,
-            moodColor: const Color(0xFF0F766E), // Teal-700
+            moodColor: const Color(0xFF4D7C0F), // Lime-700
             dense: true,
             showIcon: false,
           ),
           StatCard(
-            label: 'admin.pages.customers.detail.stats.totalPaid'.tr(),
+            label: 'app.admin_pages_customers_detail_s2'.tr().tr(),
             value: totalPaid,
             icon: LucideIcons.wallet,
             moodColor: const Color(0xFF047857), // Emerald-700
@@ -280,7 +287,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             showIcon: false,
           ),
           StatCard(
-            label: 'admin.pages.customers.detail.stats.currentBalance'.tr(),
+            label: 'app.admin_pages_customers_detail_s3'.tr().tr(),
             value: currentBalance,
             icon: LucideIcons.scale,
             moodColor: balanceColor,
@@ -335,10 +342,22 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
       showFooter: false,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.customers.detail.table.order'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.table.total'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.table.status'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.table.date'.tr(), flex: 3),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.order'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.total'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.status'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.date'.tr(),
+            flex: 3,
+          ),
           Expanded(
             flex: 2,
             child: Align(
@@ -355,17 +374,17 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         final date = s.createdAt ?? s.updatedAt;
 
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
                 flex: 2,
                 child: Text(
                   '#$shortId',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF0F172A),
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -373,10 +392,10 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 flex: 2,
                 child: Text(
                   money.format(s.totalAmount),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF0F172A),
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -393,8 +412,10 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   date != null
                       ? DateFormat.yMMMd(locale).add_jm().format(date)
                       : '—',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B), // Slate-500
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
@@ -403,10 +424,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 flex: 2,
                 child: Align(
                   alignment: Alignment.centerRight,
-                  child: AppButton.secondary(
-                    label: 'admin.common.view'.tr(),
+                  child: TableActionButton(
+                    tooltip: 'admin.common.view'.tr(),
                     icon: LucideIcons.eye,
-                    size: AppButtonSize.sm,
                     onPressed: () => context.push('/sales/${s.id}'),
                   ),
                 ),
@@ -420,9 +440,9 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
 
   Widget _buildPaymentsTable(
     List<CustomerPayment> payments,
-    NumberFormat money,
-    {required String locale}
-  ) {
+    NumberFormat money, {
+    required String locale,
+  }) {
     return ResponsiveServerPaginatedTable<CustomerPayment>(
       items: payments,
       title: Text('admin.pages.customers.detail.stats.payments'.tr()),
@@ -435,10 +455,22 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
       showFooter: false,
       header: Row(
         children: [
-          _buildHeaderCell('admin.pages.customers.detail.table.date'.tr(), flex: 3),
-          _buildHeaderCell('admin.pages.customers.detail.table.total'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.stats.method'.tr(), flex: 2),
-          _buildHeaderCell('admin.pages.customers.detail.stats.reference'.tr(), flex: 3),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.date'.tr(),
+            flex: 3,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.table.total'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.stats.method'.tr(),
+            flex: 2,
+          ),
+          _buildHeaderCell(
+            'admin.pages.customers.detail.stats.reference'.tr(),
+            flex: 3,
+          ),
           Expanded(
             flex: 2,
             child: Align(
@@ -465,8 +497,10 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   date != null
                       ? DateFormat.yMMMd(locale).add_jm().format(date)
                       : '—',
-                  style: const TextStyle(
-                    color: Color(0xFF64748B), // Slate-500
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                   ),
                 ),
@@ -475,10 +509,10 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 flex: 2,
                 child: Text(
                   money.format(p.amount),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                    color: Color(0xFF0F172A),
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -501,8 +535,12 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                   style: TextStyle(
                     fontSize: 13,
                     color: reference.isEmpty
-                        ? const Color(0xFF94A3B8) // Slate-400
-                        : const Color(0xFF475569), // Slate-600
+                        ? Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.3)
+                        : Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                 ),
               ),
@@ -511,14 +549,17 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                 child: Align(
                   alignment: Alignment.centerRight,
                   child: p.saleId == null || p.saleId!.trim().isEmpty
-                      ? const Text(
-                          '—',
-                          style: TextStyle(color: Color(0xFF94A3B8)),
+                      ? Text(
+                          'app.str_204'.tr(),
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.3),
+                          ),
                         )
-                      : AppButton.secondary(
-                          label: 'admin.common.view'.tr(),
+                      : TableActionButton(
+                          tooltip: 'admin.common.view'.tr(),
                           icon: LucideIcons.eye,
-                          size: AppButtonSize.sm,
                           onPressed: () =>
                               context.push('/sales/${p.saleId!.trim()}'),
                         ),
@@ -532,12 +573,14 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
   }
 
   Widget _headerText(String text) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Text(
-      text,
-      style: const TextStyle(
-        color: Color(0xFF64748B), // Slate-500
-        fontSize: 12,
+      text.toUpperCase(),
+      style: TextStyle(
+        color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+        fontSize: 11,
         fontWeight: FontWeight.w600,
+        letterSpacing: 0.5,
       ),
     );
   }
@@ -560,7 +603,11 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.detail.loading'.tr(),
-              style: const TextStyle(color: Color(0xFF64748B)),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -577,7 +624,7 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             const Icon(LucideIcons.alertCircle, size: 28),
             const SizedBox(height: 12),
             Text(
-              'admin.pages.customers.detail.errors.loadFailed'.tr(),
+              'app.admin_pages_customers_detail_e'.tr().tr(),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 16),
@@ -598,21 +645,32 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.users, size: 48, color: Colors.grey[400]),
+            Icon(
+              LucideIcons.users,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 12),
             Text(
-              'admin.pages.customers.detail.notFound.title'.tr(),
-              style: const TextStyle(
+              'app.admin_pages_customers_detail_n'.tr().tr(),
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
-              'admin.pages.customers.detail.notFound.hint'.tr(),
+              'app.admin_pages_customers_detail_n2'.tr().tr(),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
             const SizedBox(height: 16),
             AppButton.secondary(
@@ -635,22 +693,29 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
             Icon(
               LucideIcons.clipboardList,
               size: 48,
-              color: Colors.grey[400],
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 12),
             Text(
               'admin.pages.customers.detail.empty.title'.tr(),
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
             Text(
               'admin.pages.customers.detail.empty.hint'.tr(),
               textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -659,12 +724,17 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
   }
 
   Widget _card({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),

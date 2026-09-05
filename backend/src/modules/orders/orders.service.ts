@@ -1,23 +1,35 @@
 import prisma from '../../lib/prisma'
-import { Prisma } from '@prisma/client'
+import { RETRY_CONFLICT } from '../../lib/conflict-codes'
+import { Prisma, type ShipmentProvider } from '@prisma/client'
 import { getPlanByCode } from '../../../../shared/pricing/plans'
+import { currentUsageWindow } from '../../../../shared/pricing/billing-period'
 import { computeBestBundleTotal, moneyToCents, centsToMoney } from '../../../../shared/pricing/bundle-pricing'
-import { buildProductPricing } from '../../../../shared/pricing/product-pricing'
+import { computeClearanceDiscount, type ClearanceDiscountResult } from '../../../../shared/pricing/clearance-pricing'
+import { buildScopedProductPricing } from '../../../../shared/pricing/product-pricing'
 import { TelegramService } from '../integrations/telegram.service'
 import { syncProductStockForProducts } from '../inventory/product-stock.service'
-import { mirrorCashTransactionToPayments } from '../payments/payment-mirror'
 import { suggestSkuFromProduct } from '../../lib/variant-identifiers'
-import { ensureActiveCashboxAndOpenSession } from '../cash/cashbox-resolver'
+import { CashService, CashValidationError } from '../cash/cash.service'
 import { renderGenericBordereauPdf } from './bordereau-pdf'
 import { getMaystroCredentials } from '../delivery/maystro/maystro.credentials'
+import { DeliveryService } from '../delivery/delivery.service'
+import { maystroOrderStatusToString } from '../delivery/maystro/maystro-status'
 import { MaystroBordereauService } from '../delivery/maystro/maystro-bordereau.service'
 import { MaystroPickupPointService } from '../delivery/maystro/maystro-pickup-point.service'
+import { MaystroOrderService } from '../delivery/maystro/maystro-order.service'
 import { LoyaltyCheckoutError, LoyaltyCheckoutService } from '../loyalty/loyalty-checkout.service'
 import { LoyaltyFormulaService } from '../loyalty/loyalty-formula.service'
 import { LoyaltyLedgerService } from '../loyalty/loyalty-ledger.service'
-import { PhoneNormalizationError } from '../loyalty/phone-normalization.service'
+import { PhoneNormalizationError, PhoneNormalizationService } from '../loyalty/phone-normalization.service'
+import { generatePublicOrderId, normalizeOrderIdPrefix } from '../../lib/order-public-id'
+import { notificationsService } from '../notifications/notifications.service'
+import { BlacklistService } from '../blacklist/blacklist.service'
+import { PromoCodeError, PromoCodesService } from '../promo-codes/promo-codes.service'
+import { whatsappService } from '../whatsapp/whatsapp.service'
 
 const telegramService = new TelegramService()
+const cashService = new CashService()
+const phoneNormalization = new PhoneNormalizationService()
 
 export class OrderValidationError extends Error {
     statusCode: number
@@ -34,10 +46,72 @@ export class OrderValidationError extends Error {
     }
 }
 
+/** What became of the carrier's parcel when a customer declined their order. */
+export type CarrierCancellation = {
+    /** False when there was nothing at the carrier to cancel. */
+    attempted: boolean
+    ok: boolean
+    provider: string
+    message: string | null
+}
+
+type ShipmentDetailEvent = { code: string | null; description: string | null; details: Prisma.JsonValue | null }
+type ShipmentForDetail = { provider: string; events?: ShipmentDetailEvent[] }
+
+const providerStatusShipmentSelect = {
+    provider: true,
+    events: {
+        orderBy: { eventTime: 'desc' as const },
+        take: 1,
+        select: { code: true, description: true, details: true }
+    }
+} satisfies Prisma.ShipmentSelect
+
+// Surfaces the raw carrier-side status (e.g. Maystro's "ALERTED"/"POSTPONED") behind the
+// generic local order status, so admins can see why an order is stuck without leaving the list.
+function deriveProviderStatusDetail(shipment: ShipmentForDetail | null | undefined): string | null {
+    const event = shipment?.events?.[0]
+    if (!event) return null
+
+    if (shipment!.provider === 'MAYSTRO') {
+        return event.code ? maystroOrderStatusToString(event.code) : null
+    }
+
+    if (shipment!.provider === 'YALIDINE') {
+        const details = event.details as Record<string, unknown> | null
+        const rawStatus = details && typeof details.status === 'string' ? details.status : null
+        return rawStatus || event.description || null
+    }
+
+    return event.description || null
+}
+
 type PublicOrderItemInput = {
     productId: string
     variantId?: string | null
     quantity: number
+}
+
+type NormalizedPublicOrderItem = {
+    productId: string
+    variantId?: string
+    quantity: number
+}
+
+type PreparedPublicOrderItem = {
+    productId: string
+    variantId: string
+    quantity: number
+    price: number
+    referencePrice: number
+    variantCost: number
+    lineTotal: number
+    pricingBreakdown: ReturnType<typeof computeBestBundleTotal>
+    trackInventory: boolean
+    reserved: number
+    safetyStock: number
+    isDefaultVariant: boolean
+    promotionApplied: boolean
 }
 
 export type PublicOrderInput = {
@@ -56,6 +130,8 @@ export type PublicOrderInput = {
     shippingProvider?: string | null
     shippingPickupPoint?: number | string | null
     redeemPointsRequested?: number | null
+    promoCode?: string | null
+    clientIp?: string | null
     items: PublicOrderItemInput[]
 }
 
@@ -112,6 +188,27 @@ const normalizeDeliveryMode = (value: unknown): 'home' | 'pickup' | 'store' => {
     return 'home'
 }
 
+/**
+ * What the shopper actually chose, kept whole. A single numeric id cannot describe it:
+ * a Maystro stop desk has no carrier id, and a relay may sit in a different commune from
+ * the shopper - both facts are needed later to build a payload the carrier accepts.
+ */
+type ResolvedShippingPickupPoint = {
+    /** The carrier's own id, or null when the carrier addresses the point another way. */
+    pointId: number | null
+    kind: 'desk' | 'relay' | null
+    /** The commune the point sits in, which is not always the shopper's. */
+    communeCode: string | null
+    name: string | null
+}
+
+const EMPTY_PICKUP_POINT: ResolvedShippingPickupPoint = {
+    pointId: null,
+    kind: null,
+    communeCode: null,
+    name: null
+}
+
 const toOptionalPickupPoint = (value: unknown): number | null => {
     if (value === undefined || value === null) return null
     const n = typeof value === 'number' ? value : Number(String(value).trim())
@@ -126,18 +223,241 @@ const computeTotalWithShipping = (itemsTotal: number, shippingAmount: number | n
     return centsToMoney(itemsCents + shippingCents)
 }
 
-const addUtcMonths = (date: Date, months: number) =>
-    new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() + months, date.getUTCDate(), 0, 0, 0, 0))
+const normalizeCustomerPhoneForOrder = (phone: unknown) =>
+    phoneNormalization.tryNormalizeAlgerianPhone(phone)?.normalized ?? null
 
-const addUtcYears = (date: Date, years: number) =>
-    new Date(Date.UTC(date.getUTCFullYear() + years, date.getUTCMonth(), date.getUTCDate(), 0, 0, 0, 0))
+
+import { ensureOrderConfirmationToken } from './order-confirmation-token'
 
 export class OrdersService {
+  async generateConfirmationToken(tenantId: string, orderId: string): Promise<string> {
+    return ensureOrderConfirmationToken(tenantId, orderId)
+  }
+
+  async getOrderByToken(token: string): Promise<any> {
+    const order = await prisma.order.findUnique({
+      where: { confirmationToken: token }
+    })
+    if (!order || order.confirmationTokenUsed) {
+      throw new Error('INVALID_TOKEN')
+    }
+    return order
+  }
+
+  async confirmOrderByToken(token: string, opts?: { via?: 'link' | 'whatsapp' }): Promise<any> {
+    const order = await prisma.order.findUnique({
+      where: { confirmationToken: token }
+    })
+    if (!order || order.confirmationTokenUsed) {
+      throw new Error('INVALID_TOKEN')
+    }
+
+    const via = opts?.via === 'whatsapp' ? 'via the WhatsApp button' : 'via secure link'
+    const newNote = `\n[${new Date().toISOString()}] ✅ Order confirmed by customer ${via}`
+    const updatedNotes = (order.internalNotes || '') + newNote
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: order.id },
+      data: {
+        status: 'CONFIRMED',
+        callStatus: 'whatsapp_link_confirmed',
+        confirmationTokenUsed: true,
+        internalNotes: updatedNotes
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+            variant: true
+          }
+        }
+      }
+    })
+
+    telegramService.sendOrderNotification(updatedOrder.tenantId, updatedOrder, true).catch(console.error)
+
+    return updatedOrder
+  }
+
+  /**
+   * Fire-and-forget WhatsApp confirmation for a freshly created order.
+   *
+   * Storefront orders only: an order the seller keys in themselves usually means
+   * the customer is already on the phone, so that one waits for the button. Only
+   * the tenant's auto-send toggle decides here; the button sends regardless. Nothing about it can fail an order: a missing
+   * WABA, a template still under review or a dead token all resolve to a
+   * logged result, never a rejected checkout.
+   */
+  private sendWhatsAppConfirmation(tenantId: string, orderId: string) {
+    whatsappService
+      .getConfig(tenantId)
+      .then((config) => (config?.autoSendEnabled ? whatsappService.sendOrderConfirmation(tenantId, orderId) : null))
+      .catch((error) => console.error('[Orders] WhatsApp confirmation failed:', error))
+  }
+
+  /**
+   * Everything that happens when the customer themselves confirms an order.
+   *
+   * The secure link and the WhatsApp button both land here, so the parcel is
+   * pushed to the carrier before the token is spent — a carrier that refuses the
+   * shipment leaves the order confirmable again rather than half-confirmed.
+   */
+  async confirmOrderFromCustomer(token: string, opts?: { via?: 'link' | 'whatsapp' }): Promise<any> {
+    const order = await this.getOrderByToken(token)
+
+    if (['MAYSTRO', 'YALIDINE'].includes(String(order.shippingProvider))) {
+      const provider = String(order.shippingProvider) as 'MAYSTRO' | 'YALIDINE'
+      try {
+        await this.delivery.createShipment({
+          tenantId: order.tenantId,
+          provider,
+          orderId: order.id,
+          contactName: order.customerName ?? '',
+          contactPhone: order.customerPhone ?? '',
+          wilayaCode: order.shippingWilayaCode ?? '',
+          communeCode: order.shippingCommuneCode ?? undefined,
+          addressLine1: order.shippingAddressLine1 ?? order.customerAddress ?? '',
+          addressLine2: undefined,
+          notes: order.shippingNotes ?? undefined,
+          deliveryMode: order.deliveryMode === 'pickup' ? 'office' : 'home',
+          // The delivery type is derived from the recorded pickup point kind
+          // in DeliveryService — hardcoding 3 here pushed every stop desk
+          // order as a relay and the carrier refused it.
+          metadata: order.shippingPickupPoint
+            ? { pickupPoint: order.shippingPickupPoint }
+            : undefined
+        })
+      } catch (shipmentErr: any) {
+        console.error('Auto shipment failed after customer confirmation:', shipmentErr)
+        throw new OrderValidationError(400, 'Delivery integration failed. Order not confirmed.')
+      }
+    }
+
+    const confirmedOrder = await this.confirmOrderByToken(token, opts)
+
+    try {
+      await notificationsService.emitOrderConfirmed(confirmedOrder.tenantId, confirmedOrder.id)
+    } catch (notifyErr) {
+      console.error('Failed to emit order confirmed notification:', notifyErr)
+    }
+
+    return confirmedOrder
+  }
+
+  /**
+   * The customer declining the order from WhatsApp.
+   *
+   * Only a PENDING order can be declined this way, and the carrier is told
+   * first: a parcel already handed over is the one case the seller has to fix
+   * by hand, so it is written into the notes and pushed to Telegram rather than
+   * swallowed. The token is spent either way, so a second tap changes nothing.
+   */
+  async cancelOrderFromCustomer(token: string): Promise<{ order: any; carrier: CarrierCancellation }> {
+    const order = await this.getOrderByToken(token)
+    if (order.status !== 'PENDING') {
+      throw new OrderValidationError(409, 'Order can no longer be cancelled by the customer')
+    }
+
+    const carrier = await this.cancelCarrierShipmentQuietly(order)
+
+    const stamp = new Date().toISOString()
+    let notes = (order.internalNotes || '') + `\n[${stamp}] ❌ Order cancelled by customer via WhatsApp`
+    if (carrier.attempted) {
+      notes += carrier.ok
+        ? `\n[${stamp}] 📦 ${carrier.provider} shipment cancelled`
+        : `\n[${stamp}] ⚠️ ${carrier.provider} shipment NOT cancelled (${carrier.message}) — cancel it manually`
+    }
+
+    const cancelled = await this.updateStatus(
+      order.tenantId,
+      order.id,
+      'CANCELLED',
+      { userId: null },
+      { callStatus: 'whatsapp_declined', internalNotes: notes }
+    )
+
+    await prisma.order.update({
+      where: { id: order.id },
+      data: { confirmationTokenUsed: true }
+    })
+
+    telegramService.sendOrderCancelledNotification(order.tenantId, cancelled ?? order, carrier).catch(console.error)
+
+    return { order: cancelled, carrier }
+  }
+
+  /**
+   * Best-effort cancellation on the carrier's side. Never throws: the local
+   * cancellation must happen even when the carrier refuses, and what happened
+   * is reported back so the seller can be told.
+   */
+  private async cancelCarrierShipmentQuietly(order: any): Promise<CarrierCancellation> {
+    const provider = String(order.shippingProvider || '').toUpperCase()
+
+    if (provider === 'MAYSTRO') {
+      const mapping = await prisma.maystroOrderMapping.findUnique({
+        where: { tenantId_localOrderId: { tenantId: order.tenantId, localOrderId: order.id } }
+      })
+      if (!mapping?.maystroOrderId) {
+        return { attempted: false, ok: true, provider, message: null }
+      }
+
+      try {
+        const creds = await getMaystroCredentials(order.tenantId)
+        await new MaystroOrderService().cancelMaystroOrder({
+          tenantId: order.tenantId,
+          apiToken: creds.apiToken,
+          localOrderId: order.id
+        })
+        return { attempted: true, ok: true, provider, message: null }
+      } catch (error: any) {
+        const message = error?.statusMessage || error?.message || 'Maystro cancellation failed'
+        console.error('Maystro cancellation failed after customer decline:', message)
+        return { attempted: true, ok: false, provider, message }
+      }
+    }
+
+    if (provider === 'YALIDINE') {
+      const shipment = await prisma.shipment.findFirst({
+        where: { tenantId: order.tenantId, orderId: order.id },
+        select: { id: true }
+      })
+      if (!shipment) {
+        return { attempted: false, ok: true, provider, message: null }
+      }
+      // Yalidine exposes no cancellation endpoint through the integration, so
+      // the parcel has to be pulled from their dashboard by hand.
+      return { attempted: true, ok: false, provider, message: 'no cancellation API' }
+    }
+
+    return { attempted: false, ok: true, provider: provider || 'SELF', message: null }
+  }
     private maystroBordereau = new MaystroBordereauService()
     private maystroPickupPoints = new MaystroPickupPointService()
+    private delivery = new DeliveryService()
     private loyaltyFormula = new LoyaltyFormulaService()
     private loyaltyLedger = new LoyaltyLedgerService()
     private loyaltyCheckout = new LoyaltyCheckoutService()
+    private blacklist = new BlacklistService()
+    private promoCodes = new PromoCodesService()
+
+    private async generateUniquePublicId(tx: Prisma.TransactionClient, tenantId: string, configuredPrefix: unknown) {
+        const prefix = normalizeOrderIdPrefix(configuredPrefix)
+
+        for (let attempt = 0; attempt < 12; attempt += 1) {
+            const candidate = generatePublicOrderId(prefix)
+            const existing = await tx.order.findFirst({
+                where: { tenantId, publicId: candidate },
+                select: { id: true }
+            })
+
+            if (!existing) {
+                return candidate
+            }
+        }
+
+        throw new OrderValidationError(503, 'Unable to generate a unique order reference')
+    }
 
     private static normalizePickupPointLabel(value: string) {
         return value.trim().toLowerCase().replace(/\s+/g, ' ')
@@ -146,64 +466,387 @@ export class OrdersService {
     private buildLoyaltyResponse(args: {
         availablePoints: number
         pendingRedeemPoints?: number
-        earnedPoints: number
+        basePointsToEarn: number
+        productPointsToEarn: number
+        totalPointsToEarn: number
         redeemedPoints: number
         redeemedAmount: number
+        redeemError?: string | null
     }) {
         return {
             availablePoints: args.availablePoints,
             pendingRedeemPoints: args.pendingRedeemPoints ?? 0,
-            pointsToEarn: args.earnedPoints,
+            basePointsToEarn: args.basePointsToEarn,
+            productPointsToEarn: args.productPointsToEarn,
+            totalPointsToEarn: args.totalPointsToEarn,
+            pointsToEarn: args.totalPointsToEarn,
             redeemedPoints: args.redeemedPoints,
-            redeemedAmount: args.redeemedAmount
+            redeemedAmount: args.redeemedAmount,
+            redeemError: args.redeemError ?? null
         }
+    }
+
+    private normalizePublicOrderItems(items: PublicOrderItemInput[]) {
+        if (!Array.isArray(items) || items.length === 0) {
+            throw new OrderValidationError(400, 'At least one item is required')
+        }
+
+        const normalizedItems: NormalizedPublicOrderItem[] = items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId || undefined,
+            quantity: Number(item.quantity || 0)
+        }))
+
+        normalizedItems.forEach((item) => {
+            if (!item.productId) {
+                throw new OrderValidationError(400, 'Product ID is required for each item')
+            }
+            if (!Number.isFinite(item.quantity) || item.quantity < 1) {
+                throw new OrderValidationError(400, 'Quantity must be at least 1')
+            }
+        })
+
+        return normalizedItems
+    }
+
+    private async preparePublicOrderItems(tenantId: string, items: NormalizedPublicOrderItem[]) {
+        const storeSettings = await prisma.storeSettings.upsert({
+            where: { tenantId },
+            create: { tenantId },
+            update: {}
+        })
+
+        const productIds = Array.from(new Set(items.map((item) => item.productId)))
+        const variantIds = Array.from(
+            new Set(
+                items
+                    .map((item) => item.variantId)
+                    .filter((variantId): variantId is string => typeof variantId === 'string' && variantId.length > 0)
+            )
+        )
+        const productIdsWithoutVariant = Array.from(
+            new Set(items.filter((item) => !item.variantId).map((item) => item.productId))
+        )
+
+        const products = await prisma.product.findMany({
+            where: { id: { in: productIds }, tenantId, isActive: true },
+            select: {
+                id: true,
+                slug: true,
+                price: true,
+                title: true,
+                stock: true,
+                isPromotionActive: true,
+                promotionalPrice: true,
+                promotionStartDate: true,
+                promotionEndDate: true,
+                isClearance: true,
+                _count: {
+                    select: { options: true }
+                }
+            }
+        })
+
+        if (products.length !== productIds.length) {
+            throw new OrderValidationError(400, 'Some products are invalid or unavailable')
+        }
+
+        const productMap = new Map(products.map((product) => [product.id, { ...product, hasVariants: (product as any)._count?.options > 0 }]))
+
+        const variantsById = variantIds.length
+            ? await prisma.productVariant.findMany({
+                where: { id: { in: variantIds }, tenantId, isActive: true },
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
+            })
+            : []
+
+        if (variantsById.length !== variantIds.length) {
+            throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
+        }
+
+        const defaultVariants = productIdsWithoutVariant.length
+            ? await prisma.productVariant.findMany({
+                where: {
+                    tenantId,
+                    productId: { in: productIdsWithoutVariant },
+                    isActive: true,
+                    optionValues: { none: {} }
+                },
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
+            })
+            : []
+
+        const variantMap = new Map(variantsById.map((variant) => [variant.id, variant]))
+        const defaultVariantByProductId = new Map(defaultVariants.map((variant) => [variant.productId, variant]))
+
+        if (productIdsWithoutVariant.length > 0) {
+            const optionRows = await prisma.productOption.findMany({
+                where: { tenantId, productId: { in: productIdsWithoutVariant } },
+                select: { productId: true },
+                distinct: ['productId']
+            })
+            const productsWithOptions = new Set(optionRows.map((row) => row.productId))
+
+            for (const productId of productIdsWithoutVariant) {
+                if (defaultVariantByProductId.has(productId)) continue
+                if (productsWithOptions.has(productId)) continue
+
+                const product = productMap.get(productId)
+                if (!product) continue
+
+                const created = await prisma.productVariant.create({
+                    data: {
+                        tenantId,
+                        productId,
+                        sku: suggestSkuFromProduct(product.slug, ''),
+                        price: product.price,
+                        stock: product.stock,
+                        reserved: 0,
+                        safetyStock: 0,
+                        trackInventory: true,
+                        isActive: true
+                    }
+                })
+                defaultVariantByProductId.set(productId, created as any)
+            }
+        }
+
+        const now = new Date()
+        const activeBundleDeals = await prisma.productBundleDeal.findMany({
+            where: {
+                tenantId,
+                productId: { in: productIds },
+                isActive: true,
+                AND: [
+                    { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
+                    { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }
+                ]
+            },
+            select: { productId: true, bundleQty: true, bundlePrice: true }
+        })
+
+        const bundleDealsByProductId = new Map<string, { bundleQty: number; bundlePrice: number }[]>()
+        for (const deal of activeBundleDeals) {
+            const rows = bundleDealsByProductId.get(deal.productId) ?? []
+            rows.push({ bundleQty: deal.bundleQty, bundlePrice: Number(deal.bundlePrice) })
+            bundleDealsByProductId.set(deal.productId, rows)
+        }
+
+        let totalCents = 0
+        const validatedItems: PreparedPublicOrderItem[] = items.map((item) => {
+            const product = productMap.get(item.productId)!
+            const variant = item.variantId ? variantMap.get(item.variantId) : defaultVariantByProductId.get(product.id)
+
+            if (!variant || variant.productId !== product.id) {
+                throw new OrderValidationError(400, 'Variant selection is required for this product')
+            }
+
+            const scopedPricing = buildScopedProductPricing(product as any, variant as any)
+            const price = scopedPricing.effectivePrice
+            const availableStock = variant.trackInventory
+                ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
+                : Number.POSITIVE_INFINITY
+            const trackInventory = variant.trackInventory
+
+            if (trackInventory && item.quantity > availableStock) {
+                throw new OrderValidationError(400, `Insufficient stock for ${product.title}`)
+            }
+
+            const unitPriceCents = moneyToCents(price)
+            const bundleDeals = bundleDealsByProductId.get(product.id) ?? []
+            const pricing = computeBestBundleTotal({
+                quantity: item.quantity,
+                unitPriceCents,
+                bundleDeals: bundleDeals.map((deal) => ({
+                    bundleQty: deal.bundleQty,
+                    bundlePriceCents: moneyToCents(deal.bundlePrice)
+                }))
+            })
+            totalCents += pricing.bestTotalCents
+
+            return {
+                productId: product.id,
+                variantId: variant.id,
+                quantity: item.quantity,
+                price,
+                referencePrice: Number(variant.price ?? product.price ?? 0),
+                variantCost: Number(variant.cost ?? 0),
+                lineTotal: centsToMoney(pricing.bestTotalCents),
+                pricingBreakdown: pricing,
+                trackInventory,
+                reserved: variant.reserved,
+                safetyStock: variant.safetyStock,
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id,
+                promotionApplied: scopedPricing.promotionApplied
+            }
+        })
+
+        const clearance = await this.computeClearanceForItems(
+            tenantId,
+            storeSettings as any,
+            validatedItems,
+            productMap as any,
+            bundleDealsByProductId
+        )
+        totalCents -= clearance.discountCents
+
+        return {
+            storeSettings,
+            validatedItems,
+            clearanceDiscountAmount: centsToMoney(clearance.discountCents),
+            clearanceBreakdown: clearance.freeCount > 0 ? clearance : null,
+            totalAmount: centsToMoney(totalCents)
+        }
+    }
+
+    private async computeClearanceForItems(
+        tenantId: string,
+        storeSettings: { clearanceEnabled?: boolean; clearanceMultiple?: number; clearanceDivisor?: number },
+        items: { productId: string; variantId: string; quantity: number; price: number; promotionApplied: boolean }[],
+        productMap: Map<string, { isClearance?: boolean }>,
+        bundleDealsByProductId: Map<string, unknown[]>
+    ): Promise<ClearanceDiscountResult> {
+        if (!storeSettings?.clearanceEnabled) {
+            return { eligibleQuantity: 0, freeCount: 0, discountCents: 0, freeUnits: [] }
+        }
+
+        const taggedCount = await prisma.product.count({ where: { tenantId, isClearance: true } })
+        const anyTaggedInTenant = taggedCount > 0
+
+        const lines = items
+            .filter((item) => {
+                const product = productMap.get(item.productId)
+                const isEligibleProduct = anyTaggedInTenant ? Boolean(product?.isClearance) : true
+                const hasBundleDeal = (bundleDealsByProductId.get(item.productId) ?? []).length > 0
+                return isEligibleProduct && !item.promotionApplied && !hasBundleDeal
+            })
+            .map((item) => ({
+                key: `${item.productId}:${item.variantId}`,
+                unitPriceCents: moneyToCents(item.price),
+                quantity: item.quantity
+            }))
+
+        return computeClearanceDiscount({
+            lines,
+            multiple: storeSettings.clearanceMultiple ?? 6,
+            divisor: storeSettings.clearanceDivisor ?? 3
+        })
     }
 
     private async resolveShippingPickupPoint(input: {
         tenantId: string
         shippingProvider: unknown
         deliveryMode: 'home' | 'pickup' | 'store'
+        shippingWilayaCode?: string | null
         shippingCommuneCode?: string | null
         rawPickupPoint: unknown
-    }): Promise<number | null> {
+    }): Promise<ResolvedShippingPickupPoint> {
         const numeric = toOptionalPickupPoint(input.rawPickupPoint)
-        if (numeric) return numeric
+        // A value that parses as a number is an id, never a label — looking it up by name
+        // would only ever miss.
+        const rawLabel = numeric ? '' : typeof input.rawPickupPoint === 'string' ? input.rawPickupPoint.trim() : ''
+        if (!numeric && !rawLabel) return EMPTY_PICKUP_POINT
 
-        const rawLabel = typeof input.rawPickupPoint === 'string' ? input.rawPickupPoint.trim() : ''
-        if (!rawLabel) return null
+        // A bare id is self-sufficient: it predates any carrier lookup and must keep
+        // working when the carrier is unreachable or not configured at all. The lookup
+        // below only enriches it with the kind and commune it could not carry.
+        const bareId = (): ResolvedShippingPickupPoint => ({
+            pointId: numeric,
+            kind: null,
+            communeCode: null,
+            name: null
+        })
 
+        // The storefront sends the point's name, because that is what the shopper picked
+        // from a list. Resolving it to the carrier's id belongs here, for whichever
+        // carrier is on the order — this used to accept Maystro relays only, so every
+        // Yalidine agency and every Maystro stop desk was rejected outright.
         const provider = typeof input.shippingProvider === 'string' ? input.shippingProvider.toUpperCase() : ''
-        if (provider !== 'MAYSTRO' || input.deliveryMode !== 'pickup') {
-            throw new OrderValidationError(400, 'shippingPickupPoint must be a numeric id')
+        if (!provider || input.deliveryMode !== 'pickup') {
+            throw new OrderValidationError(400, 'shippingPickupPoint is only valid on a carrier pickup order')
         }
 
-        const commune = typeof input.shippingCommuneCode === 'string' ? input.shippingCommuneCode.trim() : ''
-        if (!commune) {
-            throw new OrderValidationError(400, 'shippingCommuneCode is required when shippingPickupPoint is provided')
+        const wilaya = typeof input.shippingWilayaCode === 'string' ? input.shippingWilayaCode.trim() : ''
+        if (!wilaya) {
+            // Taken at face value when there is no wilaya to look it up against, exactly
+            // as it always was.
+            if (numeric) return bareId()
+            throw new OrderValidationError(400, 'shippingWilayaCode is required when shippingPickupPoint is provided')
         }
 
         try {
-            const creds = await getMaystroCredentials(input.tenantId)
-            const points = await this.maystroPickupPoints.listActivePickupPoints({
-                apiToken: creds.apiToken,
-                commune,
-                deliveryType: 3
+            const points = await this.delivery.listProviderPickupPoints({
+                tenantId: input.tenantId,
+                provider: provider as ShipmentProvider,
+                wilayaCode: wilaya,
+                communeCode:
+                    typeof input.shippingCommuneCode === 'string' && input.shippingCommuneCode.trim().length > 0
+                        ? input.shippingCommuneCode.trim()
+                        : undefined
             })
+
             const wanted = OrdersService.normalizePickupPointLabel(rawLabel)
-            const match = points.find((point) => {
-                if (!Number.isFinite(point.pickup_point) || point.pickup_point <= 0) return false
-                const names = [point.name, point.name_lt, point.name_ar].filter(
-                    (name): name is string => typeof name === 'string' && name.trim().length > 0
-                )
-                return names.some((name) => OrdersService.normalizePickupPointLabel(name) === wanted)
-            })
+            const match = rawLabel
+                ? points.find((point) => OrdersService.normalizePickupPointLabel(point.name) === wanted)
+                : points.find((point) => String(point.carrierPointId ?? point.id) === String(numeric))
+
             if (!match) {
-                throw new OrderValidationError(400, 'Invalid Maystro pickup point for commune')
+                // An id we cannot place stays as it is; only a name we cannot place is an
+                // error, because a name is only ever produced by the list just re-read.
+                if (numeric) return bareId()
+                throw new OrderValidationError(400, 'Unknown pickup point for this carrier and wilaya')
             }
-            return Math.trunc(match.pickup_point)
+
+            // A Maystro stop desk has no carrier id at all: the wilaya has exactly one desk
+            // and the carrier routes to it by commune. Storing the synthetic key - or the
+            // commune id that used to stand in for it - is what the carrier then rejected
+            // as "Invalid pickup_point for commune", so a desk keeps a null id on purpose.
+            const carrierPointId = match.carrierPointId ?? null
+            const parsed = carrierPointId == null ? NaN : Number.parseInt(String(carrierPointId), 10)
+            const pointId = Number.isFinite(parsed) && parsed > 0 ? parsed : null
+            if (carrierPointId != null && pointId == null) {
+                throw new OrderValidationError(400, 'Carrier returned an unusable pickup point id')
+            }
+
+            return {
+                pointId,
+                kind: match.kind ?? null,
+                communeCode: match.communeName?.trim() || match.communeId?.trim() || null,
+                name: match.name?.trim() || null
+            }
         } catch (error) {
             if (error instanceof OrderValidationError) throw error
-            throw new OrderValidationError(400, 'Invalid Maystro pickup point for commune')
+            // Only a name genuinely needs the carrier to be reachable; an id does not.
+            if (numeric) return bareId()
+            throw new OrderValidationError(400, 'Could not resolve the pickup point with the carrier')
         }
     }
 
@@ -212,6 +855,7 @@ export class OrdersService {
             where: { tenantId, id: orderId },
             select: {
                 id: true,
+                publicId: true,
                 createdAt: true,
                 customerName: true,
                 customerPhone: true,
@@ -278,7 +922,7 @@ export class OrdersService {
         const pdf = await renderGenericBordereauPdf({
             tenantName,
             order: {
-                id: order.id,
+                id: order.publicId || order.id,
                 createdAt: order.createdAt,
                 customerName: order.customerName,
                 customerPhone: order.customerPhone,
@@ -306,6 +950,160 @@ export class OrdersService {
         })
 
         return { filename: `bordereau-${order.id}.pdf`, pdf }
+    }
+
+    async getPublicLoyaltySummary(input: {
+        tenantId: string
+        customerPhone?: string | null
+        redeemPointsRequested?: number | null
+        items: PublicOrderItemInput[]
+    }) {
+        const normalizedItems = this.normalizePublicOrderItems(input.items)
+        const { storeSettings, validatedItems, totalAmount } = await this.preparePublicOrderItems(input.tenantId, normalizedItems)
+        const customerPhone = (input.customerPhone || '').trim()
+
+        const pointsPreview = this.loyaltyFormula.computeTotal(
+            storeSettings,
+            validatedItems.map((item) => ({
+                quantity: item.quantity,
+                referencePrice: item.referencePrice,
+                cost: item.variantCost
+            }))
+        )
+
+        if (!customerPhone) {
+            return this.buildLoyaltyResponse({
+                availablePoints: 0,
+                pendingRedeemPoints: 0,
+                basePointsToEarn: pointsPreview.basePointsTotal,
+                productPointsToEarn: pointsPreview.productPointsTotal,
+                totalPointsToEarn: pointsPreview.totalPoints,
+                redeemedPoints: 0,
+                redeemedAmount: 0,
+                redeemError: null
+            })
+        }
+
+        try {
+            const customer = await this.loyaltyLedger.findCustomerByPhone(prisma, input.tenantId, customerPhone)
+            const summary = customer
+                ? await this.loyaltyLedger.getCustomerPointsSummary(prisma, input.tenantId, customer.id)
+                : { availablePoints: 0, pendingRedeemPoints: 0, earnedPointsTotal: 0, redeemedPointsTotal: 0 }
+            const requestedPoints = Math.max(0, Math.trunc(Number(input.redeemPointsRequested || 0) || 0))
+
+            if (requestedPoints <= 0) {
+                return this.buildLoyaltyResponse({
+                    availablePoints: summary.availablePoints,
+                    pendingRedeemPoints: summary.pendingRedeemPoints,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
+                    redeemedPoints: 0,
+                    redeemedAmount: 0,
+                    redeemError: null
+                })
+            }
+
+            try {
+                const redemption = await this.loyaltyCheckout.evaluateRedemption(prisma, {
+                    tenantId: input.tenantId,
+                    customerId: customer?.id ?? null,
+                    requestedPoints,
+                    itemsSubtotal: totalAmount,
+                    settings: storeSettings
+                })
+
+                return this.buildLoyaltyResponse({
+                    availablePoints: redemption.availablePoints - redemption.pointsReserved,
+                    pendingRedeemPoints: redemption.pendingRedeemPoints + redemption.pointsReserved,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
+                    redeemedPoints: redemption.pointsReserved,
+                    redeemedAmount: redemption.redeemedAmount,
+                    redeemError: null
+                })
+            } catch (error) {
+                if (!(error instanceof LoyaltyCheckoutError)) throw error
+
+                return this.buildLoyaltyResponse({
+                    availablePoints: summary.availablePoints,
+                    pendingRedeemPoints: summary.pendingRedeemPoints,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
+                    redeemedPoints: 0,
+                    redeemedAmount: 0,
+                    redeemError: error.statusMessage
+                })
+            }
+        } catch (error) {
+            if (error instanceof PhoneNormalizationError) {
+                throw new OrderValidationError(error.statusCode, error.statusMessage)
+            }
+            throw error
+        }
+    }
+
+    /**
+     * Prices a promo code against a cart without placing an order — what the
+     * "Apply" button next to the code field calls. Never throws for a bad code:
+     * the shopper gets `valid: false` and a reason to read.
+     */
+    async previewPromoCode(input: {
+        tenantId: string
+        code?: string | null
+        customerPhone?: string | null
+        shippingAmount?: number | null
+        items: PublicOrderItemInput[]
+    }) {
+        const code = String(input.code ?? '').trim()
+        if (!code) {
+            return { valid: false, code: '', discountAmount: 0, shippingDiscount: 0, message: null, reason: null }
+        }
+
+        const normalizedItems = this.normalizePublicOrderItems(input.items)
+        const { validatedItems, totalAmount } = await this.preparePublicOrderItems(input.tenantId, normalizedItems)
+        const customerPhoneNormalized = normalizeCustomerPhoneForOrder(input.customerPhone)
+
+        try {
+            const promo = await this.promoCodes.evaluateForCheckout(prisma, {
+                tenantId: input.tenantId,
+                code,
+                lines: validatedItems.map((item) => ({ productId: item.productId, lineTotal: item.lineTotal })),
+                cartSubtotal: totalAmount,
+                shippingAmount: input.shippingAmount ?? 0,
+                customerPhoneNormalized
+            })
+
+            if (!promo) {
+                return { valid: false, code: '', discountAmount: 0, shippingDiscount: 0, message: null, reason: null }
+            }
+
+            return {
+                valid: true,
+                code: promo.code,
+                discountType: promo.discountType,
+                discountAmount: promo.discountAmount,
+                shippingDiscount: promo.shippingDiscount,
+                cartSubtotal: totalAmount,
+                message: null,
+                reason: null
+            }
+        } catch (error) {
+            if (error instanceof PromoCodeError) {
+                return {
+                    valid: false,
+                    code: code.toUpperCase(),
+                    discountAmount: 0,
+                    shippingDiscount: 0,
+                    message: error.statusMessage,
+                    reason: error.code ?? null,
+                    meta: error.meta ?? null
+                }
+            }
+            throw error
+        }
     }
 
     private async ensureDeliveredOrderSale(
@@ -377,6 +1175,7 @@ export class OrdersService {
 
         if (filters.search) {
             where.OR = [
+                { publicId: { contains: filters.search, mode: 'insensitive' } },
                 { customerName: { contains: filters.search, mode: 'insensitive' } },
                 { customerPhone: { contains: filters.search } }
             ]
@@ -404,6 +1203,7 @@ export class OrdersService {
             customerName: 'customerName',
             totalAmount: 'totalAmount',
             status: 'status',
+            paymentStatus: 'paymentStatus',
             createdAt: 'createdAt'
         }
 
@@ -414,11 +1214,15 @@ export class OrdersService {
             orderBy.createdAt = 'desc'
         }
 
-        const [items, total] = await Promise.all([
+        const whereWithoutStatus = { ...where }
+        delete whereWithoutStatus.status
+
+        const [items, total, statusGroups] = await Promise.all([
             prisma.order.findMany({
                 where,
                 select: {
                     id: true,
+                    publicId: true,
                     status: true,
                     callStatus: true,
                     totalAmount: true,
@@ -431,26 +1235,98 @@ export class OrdersService {
                     customerName: true,
                     customerPhone: true,
                     customerId: true,
+                    paymentStatus: true,
+                    paidAmount: true,
+                    clearanceDiscountAmount: true,
+                    clearanceBreakdown: true,
                     createdAt: true,
-                    updatedAt: true
+                    updatedAt: true,
+                    shipments: {
+                        orderBy: { createdAt: 'desc' },
+                        take: 1,
+                        select: providerStatusShipmentSelect
+                    }
                 },
                 orderBy,
                 skip,
                 take: limit
             }),
-            prisma.order.count({ where })
+            prisma.order.count({ where }),
+            prisma.order.groupBy({
+                by: ['status'],
+                where: whereWithoutStatus,
+                _count: {
+                    id: true
+                }
+            })
         ])
 
+        const stats: Record<string, number> = {}
+        let globalTotal = 0
+        for (const group of statusGroups) {
+            stats[group.status] = group._count.id
+            globalTotal += group._count.id
+        }
+
+        const itemsWithDetail = items.map(({ shipments, ...item }) => ({
+            ...item,
+            providerStatusDetail: deriveProviderStatusDetail(shipments?.[0])
+        }))
+
         return {
-            items,
+            items: itemsWithDetail,
             total,
             page,
-            totalPages: Math.max(1, Math.ceil(total / limit))
+            totalPages: Math.max(1, Math.ceil(total / limit)),
+            stats,
+            globalTotal
+        }
+    }
+
+    async getUnreadCount(tenantId: string) {
+        return prisma.order.count({
+            where: {
+                tenantId,
+                readAt: null
+            }
+        })
+    }
+
+    async markAsRead(tenantId: string, id: string) {
+        const existing = await prisma.order.findFirst({
+            where: { tenantId, id },
+            select: { id: true, readAt: true }
+        })
+
+        if (!existing) {
+            throw new OrderValidationError(404, 'Order not found')
+        }
+
+        if (existing.readAt) {
+            return {
+                id: existing.id,
+                readAt: existing.readAt
+            }
+        }
+
+        const readAt = new Date()
+        await prisma.order.updateMany({
+            where: {
+                tenantId,
+                id,
+                readAt: null
+            },
+            data: { readAt }
+        })
+
+        return {
+            id,
+            readAt
         }
     }
 
     async findById(tenantId: string, id: string) {
-        return prisma.order.findFirst({
+        const order = await prisma.order.findFirst({
             where: { id, tenantId },
             include: {
                 items: {
@@ -478,11 +1354,143 @@ export class OrdersService {
                         labelUrl: true,
                         trackingUrl: true,
                         createdAt: true,
-                        updatedAt: true
+                        updatedAt: true,
+                        events: {
+                            orderBy: { eventTime: 'desc' },
+                            take: 1,
+                            select: { code: true, description: true, details: true }
+                        }
                     }
                 }
             }
         })
+
+        if (!order) return null
+
+        const previousOrderItemSelect = {
+            id: true,
+            productId: true,
+            variantId: true,
+            quantity: true,
+            price: true,
+            lineTotal: true,
+            product: {
+                select: { title: true }
+            },
+            variant: {
+                select: {
+                    optionValues: {
+                        select: {
+                            optionValue: {
+                                select: { label: true }
+                            }
+                        }
+                    }
+                }
+            }
+        } satisfies Prisma.OrderItemSelect
+
+        let previousOrdersMatch:
+            | { type: 'customer'; customerId: string; phoneNormalized?: string | null }
+            | { type: 'phone'; customerId?: null; phoneNormalized: string }
+            | { type: 'none'; customerId?: string | null; phoneNormalized?: string | null }
+
+        let previousOrders: any[] = []
+
+        if (order.customerId) {
+            previousOrdersMatch = {
+                type: 'customer',
+                customerId: order.customerId,
+                phoneNormalized: (order as any).customerPhoneNormalized ?? normalizeCustomerPhoneForOrder(order.customerPhone)
+            }
+            previousOrders = await prisma.order.findMany({
+                where: {
+                    tenantId,
+                    customerId: order.customerId,
+                    id: { not: order.id }
+                },
+                orderBy: { createdAt: 'desc' },
+                take: 100,
+                select: {
+                    id: true,
+                    publicId: true,
+                    status: true,
+                    callStatus: true,
+                    customerName: true,
+                    customerPhone: true,
+                    totalAmount: true,
+                    totalWithShippingAmount: true,
+                    shippingAmount: true,
+                    shippingProvider: true,
+                    deliveryMode: true,
+                    createdAt: true,
+                    updatedAt: true,
+                    items: { select: previousOrderItemSelect },
+                    shipments: {
+                        orderBy: { createdAt: 'desc' },
+                        take: 1,
+                        select: providerStatusShipmentSelect
+                    }
+                }
+            })
+        } else {
+            const phoneNormalized = (order as any).customerPhoneNormalized ?? normalizeCustomerPhoneForOrder(order.customerPhone)
+            if (phoneNormalized) {
+                previousOrdersMatch = {
+                    type: 'phone',
+                    customerId: null,
+                    phoneNormalized
+                }
+                previousOrders = await prisma.order.findMany({
+                    where: {
+                        tenantId,
+                        customerPhoneNormalized: phoneNormalized,
+                        id: { not: order.id }
+                    },
+                    orderBy: { createdAt: 'desc' },
+                    take: 100,
+                    select: {
+                        id: true,
+                        publicId: true,
+                        status: true,
+                        callStatus: true,
+                        customerName: true,
+                        customerPhone: true,
+                        totalAmount: true,
+                        totalWithShippingAmount: true,
+                        shippingAmount: true,
+                        shippingProvider: true,
+                        deliveryMode: true,
+                        createdAt: true,
+                        updatedAt: true,
+                        items: { select: previousOrderItemSelect },
+                        shipments: {
+                            orderBy: { createdAt: 'desc' },
+                            take: 1,
+                            select: providerStatusShipmentSelect
+                        }
+                    }
+                })
+            } else {
+                previousOrdersMatch = {
+                    type: 'none',
+                    customerId: null,
+                    phoneNormalized: null
+                }
+            }
+        }
+
+        const previousOrdersWithDetail = previousOrders.map(({ shipments, ...previousOrder }) => ({
+            ...previousOrder,
+            providerStatusDetail: deriveProviderStatusDetail(shipments?.[0])
+        }))
+
+        return {
+            ...order,
+            providerStatusDetail: deriveProviderStatusDetail(order.shipments?.[0]),
+            previousOrders: previousOrdersWithDetail,
+            previousOrdersMatch
+        }
     }
 
     async deleteUnconfirmed(tenantId: string, id: string) {
@@ -492,6 +1500,7 @@ export class OrdersService {
                 select: {
                     id: true,
                     status: true,
+                    items: { select: { variantId: true, quantity: true } },
                     sale: { select: { id: true } },
                     _count: {
                         select: {
@@ -504,30 +1513,72 @@ export class OrdersService {
             })
 
             if (!existing) throw new OrderValidationError(404, 'Order not found')
-            if (existing.status !== 'PENDING') {
-                throw new OrderValidationError(409, 'Only unconfirmed (PENDING) orders can be deleted', {
+            if (existing.status !== 'PENDING' && existing.status !== 'CONFIRMED') {
+                throw new OrderValidationError(409, 'Only PENDING or just-CONFIRMED orders can be deleted', {
                     code: 'ORDER_DELETE_STATUS_NOT_ALLOWED'
                 })
             }
 
             if (
                 existing.sale ||
-                existing._count.shipments > 0 ||
-                existing._count.cashTransactions > 0 ||
-                existing._count.inventoryMovements > 0
+                existing._count.cashTransactions > 0
             ) {
                 throw new OrderValidationError(409, 'Order cannot be deleted because it has linked records', {
                     code: 'ORDER_DELETE_HAS_LINKED_RECORDS',
                     meta: {
                         hasSale: Boolean(existing.sale),
-                        shipmentsCount: existing._count.shipments,
-                        cashTransactionsCount: existing._count.cashTransactions,
-                        inventoryMovementsCount: existing._count.inventoryMovements
+                        cashTransactionsCount: existing._count.cashTransactions
                     }
                 })
             }
 
+            // Release reserved inventory for CONFIRMED orders
+            if (existing.status === 'CONFIRMED') {
+                for (const item of existing.items) {
+                    if (!item.variantId) continue
+                    const variant = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { id: true, productId: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    })
+                    if (!variant || variant.trackInventory === false) continue
+                    if (variant.reserved < item.quantity) continue
+
+                    await tx.productVariant.updateMany({
+                        where: { tenantId, id: item.variantId },
+                        data: { reserved: { decrement: item.quantity } }
+                    })
+
+                    const after = await tx.productVariant.findFirst({
+                        where: { tenantId, id: item.variantId },
+                        select: { stock: true, reserved: true, safetyStock: true }
+                    })
+
+                    await tx.inventoryMovement.create({
+                        data: {
+                            tenantId,
+                            variantId: item.variantId,
+                            type: 'RESERVED_ADJUSTMENT',
+                            delta: 0,
+                            reservedDelta: -item.quantity,
+                            safetyStockDelta: 0,
+                            reason: 'order_cancel',
+                            note: 'delete_confirmed_order',
+                            orderId: id,
+                            stockAfter: after?.stock ?? null,
+                            reservedAfter: after?.reserved ?? null,
+                            safetyStockAfter: after?.safetyStock ?? null,
+                            createdByUserId: null
+                        }
+                    })
+                }
+
+                // Remove Maystro mapping so it doesn't cause orphan issues
+                await tx.maystroOrderMapping.deleteMany({ where: { tenantId, localOrderId: id } })
+            }
+
             await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, id)
+            // Hands the code back before the cascade takes the redemption row with the order.
+            await this.promoCodes.releaseOrderRedemption(tx, tenantId, id)
             await tx.orderItem.deleteMany({ where: { tenantId, orderId: id } })
             const deleted = await tx.order.deleteMany({ where: { tenantId, id } })
             if (deleted.count !== 1) throw new OrderValidationError(404, 'Order not found')
@@ -578,6 +1629,7 @@ export class OrdersService {
 
             for (const orderId of deletableIds) {
                 await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, orderId)
+                await this.promoCodes.releaseOrderRedemption(tx, tenantId, orderId)
             }
             await tx.orderItem.deleteMany({ where: { tenantId, orderId: { in: deletableIds } } })
             const deleted = await tx.order.deleteMany({ where: { tenantId, id: { in: deletableIds }, status: 'PENDING' } })
@@ -591,6 +1643,7 @@ export class OrdersService {
             where: { tenantId, id: orderId },
             select: {
                 id: true,
+                publicId: true,
                 totalAmount: true,
                 items: {
                     select: {
@@ -630,6 +1683,7 @@ export class OrdersService {
 
         return {
             orderId: order.id,
+            publicOrderId: order.publicId,
             value: order.totalAmount,
             currency,
             numItems,
@@ -667,6 +1721,11 @@ export class OrdersService {
                 totalWithShippingAmount: true,
                 redeemedPointsTotal: true,
                 redeemedAmount: true,
+                promoCodeId: true,
+                promoCode: true,
+                promoDiscountAmount: true,
+                promoShippingDiscount: true,
+                customerPhoneNormalized: true,
                 customerId: true,
                 customerName: true,
                 customerPhone: true,
@@ -681,6 +1740,9 @@ export class OrdersService {
                 shippingAddressLine1: true,
                 shippingNotes: true,
                 shippingPickupPoint: true,
+                shippingPickupPointKind: true,
+                shippingPickupPointCommune: true,
+                shippingPickupPointName: true,
                 sale: { select: { id: true } },
                 _count: {
                     select: {
@@ -794,16 +1856,24 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingCurrency is too long')
         }
 
-        let nextShippingPickupPoint: number | null
-        if (nextShippingProvider !== 'MAYSTRO' || nextDeliveryMode !== 'pickup') {
-            nextShippingPickupPoint = null
+        // Yalidine agencies are pickup points too; gating this on MAYSTRO silently dropped
+        // the chosen agency from every Yalidine order that went through an admin edit.
+        let nextPickupPoint: ResolvedShippingPickupPoint
+        if (!nextShippingProvider || nextDeliveryMode !== 'pickup') {
+            nextPickupPoint = EMPTY_PICKUP_POINT
         } else if (input.shippingPickupPoint === undefined) {
-            nextShippingPickupPoint = existing.shippingPickupPoint ?? null
+            nextPickupPoint = {
+                pointId: existing.shippingPickupPoint ?? null,
+                kind: (existing.shippingPickupPointKind as 'desk' | 'relay' | null) ?? null,
+                communeCode: existing.shippingPickupPointCommune ?? null,
+                name: existing.shippingPickupPointName ?? null
+            }
         } else {
-            nextShippingPickupPoint = await this.resolveShippingPickupPoint({
+            nextPickupPoint = await this.resolveShippingPickupPoint({
                 tenantId,
                 shippingProvider: nextShippingProvider,
                 deliveryMode: nextDeliveryMode,
+                shippingWilayaCode: nextShippingWilayaCode,
                 shippingCommuneCode: nextShippingCommuneCode,
                 rawPickupPoint: input.shippingPickupPoint
             })
@@ -829,8 +1899,11 @@ export class OrdersService {
             lineTotal: number
             pricingBreakdown: any
             trackInventory: boolean
+            promotionApplied: boolean
         }> = []
         let totalCents = 0
+        let clearanceDiscountAmount = 0
+        let clearanceBreakdown: ClearanceDiscountResult | null = null
 
         if (shouldUpdateItems) {
             if (!Array.isArray(itemsInput) || itemsInput.length === 0) {
@@ -873,16 +1946,33 @@ export class OrdersService {
                     isPromotionActive: true,
                     promotionalPrice: true,
                     promotionStartDate: true,
-                    promotionEndDate: true
+                    promotionEndDate: true,
+                    isClearance: true,
+                    _count: {
+                        select: { options: true }
+                    }
                 }
             })
             if (products.length !== productIds.length) throw new OrderValidationError(400, 'Some products are invalid or unavailable')
-            const productMap = new Map(products.map((p) => [p.id, p]))
+            const productMap = new Map(products.map((p) => [p.id, { ...p, hasVariants: (p as any)._count?.options > 0 }]))
 
             const variantsById = variantIds.length
                 ? await prisma.productVariant.findMany({
                     where: { id: { in: variantIds }, tenantId, isActive: true },
-                    select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    select: {
+                        id: true,
+                        productId: true,
+                        price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
+                        stock: true,
+                        reserved: true,
+                        safetyStock: true,
+                        trackInventory: true
+                    }
                 })
                 : []
             if (variantsById.length !== variantIds.length) throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
@@ -890,7 +1980,20 @@ export class OrdersService {
             const defaultVariants = productIdsWithoutVariant.length
                 ? await prisma.productVariant.findMany({
                     where: { tenantId, productId: { in: productIdsWithoutVariant }, isActive: true, optionValues: { none: {} } },
-                    select: { id: true, productId: true, price: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                    select: {
+                        id: true,
+                        productId: true,
+                        price: true,
+                        promotionalPrice: true,
+                        isPromotionActive: true,
+                        promotionStartDate: true,
+                        promotionEndDate: true,
+                        showCountdown: true,
+                        stock: true,
+                        reserved: true,
+                        safetyStock: true,
+                        trackInventory: true
+                    }
                 })
                 : []
 
@@ -961,7 +2064,8 @@ export class OrdersService {
                     throw new OrderValidationError(400, 'Variant selection is required for this product')
                 }
 
-                const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
+                const scopedPricing = buildScopedProductPricing(product as any, variant as any)
+                const price = scopedPricing.effectivePrice
 
                 const availableStock = variant.trackInventory
                     ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
@@ -990,9 +2094,26 @@ export class OrdersService {
                     price,
                     lineTotal: centsToMoney(pricing.bestTotalCents),
                     pricingBreakdown: pricing,
-                    trackInventory
+                    trackInventory,
+                    promotionApplied: scopedPricing.promotionApplied
                 }
             })
+
+            const orderStoreSettings = await prisma.storeSettings.upsert({
+                where: { tenantId },
+                create: { tenantId },
+                update: {}
+            })
+            const clearance = await this.computeClearanceForItems(
+                tenantId,
+                orderStoreSettings as any,
+                validatedItems as any,
+                productMap as any,
+                bundleDealsByProductId
+            )
+            totalCents -= clearance.discountCents
+            clearanceDiscountAmount = centsToMoney(clearance.discountCents)
+            clearanceBreakdown = clearance.freeCount > 0 ? clearance : null
         }
 
         await prisma.$transaction(async (tx) => {
@@ -1052,13 +2173,17 @@ export class OrdersService {
                 customerId: resolvedNextCustomerId,
                 customerName: nextCustomerName,
                 customerPhone: nextCustomerPhone,
+                customerPhoneNormalized: normalizeCustomerPhoneForOrder(nextCustomerPhone),
                 customerAddress: nextCustomerAddress,
                 deliveryMode: nextDeliveryMode,
                 shippingProvider: nextShippingProvider,
                 shippingServiceLevel: nextShippingServiceLevel || null,
                 shippingAmount: nextShippingAmount,
                 shippingCurrency: nextShippingCurrency || null,
-                shippingPickupPoint: nextShippingPickupPoint,
+                shippingPickupPoint: nextPickupPoint.pointId,
+                shippingPickupPointKind: nextPickupPoint.kind,
+                shippingPickupPointCommune: nextPickupPoint.communeCode,
+                shippingPickupPointName: nextPickupPoint.name,
                 shippingWilayaCode: nextShippingWilayaCode,
                 shippingCommuneCode: nextShippingCommuneCode,
                 shippingAddressLine1: nextShippingAddressLine1,
@@ -1066,8 +2191,73 @@ export class OrdersService {
             }
             const nextTotalAmount = shouldUpdateItems ? centsToMoney(totalCents) : existing.totalAmount
             updateData.totalAmount = nextTotalAmount
+            if (shouldUpdateItems) {
+                updateData.clearanceDiscountAmount = clearanceDiscountAmount
+                updateData.clearanceBreakdown = clearanceBreakdown as any
+            }
 
-            updateData.totalWithShippingAmount = computeTotalWithShipping(nextTotalAmount, nextShippingAmount)
+            // A promo code was priced against the cart as it stood. Editing the
+            // order re-prices it, and a code the edited cart no longer earns is
+            // dropped and handed back rather than left over-discounting.
+            let nextPromoDiscount = Number(existing.promoDiscountAmount || 0)
+            let nextPromoShippingDiscount = Number(existing.promoShippingDiscount || 0)
+
+            if (existing.promoCodeId && existing.promoCode) {
+                const promoLines = shouldUpdateItems
+                    ? validatedItems.map((item) => ({ productId: item.productId, lineTotal: item.lineTotal }))
+                    : (await tx.orderItem.findMany({
+                        where: { tenantId, orderId: id },
+                        select: { productId: true, lineTotal: true, price: true, quantity: true }
+                    })).map((item) => ({
+                        productId: item.productId,
+                        lineTotal: Number(item.lineTotal ?? Number(item.price) * item.quantity)
+                    }))
+
+                let repriced = null
+                try {
+                    repriced = await this.promoCodes.evaluateForCheckout(tx, {
+                        tenantId,
+                        code: existing.promoCode,
+                        lines: promoLines,
+                        cartSubtotal: nextTotalAmount,
+                        shippingAmount: nextShippingAmount,
+                        customerPhoneNormalized:
+                            normalizeCustomerPhoneForOrder(nextCustomerPhone) ?? existing.customerPhoneNormalized,
+                        ignoreOrderId: id
+                    })
+                } catch (error) {
+                    if (!(error instanceof PromoCodeError)) throw error
+                    repriced = null
+                }
+
+                if (repriced) {
+                    nextPromoDiscount = repriced.discountAmount
+                    nextPromoShippingDiscount = repriced.shippingDiscount
+                    await tx.promoCodeRedemption.updateMany({
+                        where: { tenantId, orderId: id, status: 'ACTIVE' },
+                        data: {
+                            discountAmount: repriced.discountAmount,
+                            shippingDiscount: repriced.shippingDiscount
+                        }
+                    })
+                } else {
+                    nextPromoDiscount = 0
+                    nextPromoShippingDiscount = 0
+                    updateData.promoCodeId = null
+                    updateData.promoCode = null
+                    await this.promoCodes.releaseOrderRedemption(tx, tenantId, id)
+                }
+
+                updateData.promoDiscountAmount = nextPromoDiscount
+                updateData.promoShippingDiscount = nextPromoShippingDiscount
+            }
+
+            const payableItemsTotal = Math.max(0, Number((nextTotalAmount - nextPromoDiscount).toFixed(2)))
+            const payableShipping = Math.max(
+                0,
+                Number((Number(nextShippingAmount || 0) - nextPromoShippingDiscount).toFixed(2))
+            )
+            updateData.totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, payableShipping)
 
             const updated = await tx.order.updateMany({ where: { tenantId, id, status: 'PENDING' }, data: updateData })
             if (updated.count !== 1) throw new OrderValidationError(409, 'Order can no longer be edited')
@@ -1186,7 +2376,7 @@ export class OrdersService {
                         },
                         data: { reserved: { increment: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -1243,7 +2433,7 @@ export class OrdersService {
                         },
                         data: { stock: { decrement: qty }, reserved: { decrement: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -1284,7 +2474,7 @@ export class OrdersService {
                         },
                         data: { reserved: { decrement: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -1318,7 +2508,7 @@ export class OrdersService {
                             where: { tenantId, id: item.variantId, reserved: variantBefore.reserved },
                             data: { reserved: { decrement: qty } }
                         })
-                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                         touchedProductIds.add(variantBefore.productId)
 
                         const after = await tx.productVariant.findFirst({
@@ -1350,7 +2540,7 @@ export class OrdersService {
                             where: { tenantId, id: item.variantId, stock: variantBefore.stock },
                             data: { stock: { increment: qty } }
                         })
-                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                        if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                         touchedProductIds.add(variantBefore.productId)
 
                         const after = await tx.productVariant.findFirst({
@@ -1384,7 +2574,7 @@ export class OrdersService {
                         where: { tenantId, id: item.variantId, stock: variantBefore.stock },
                         data: { stock: { increment: qty } }
                     })
-                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                    if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                     touchedProductIds.add(variantBefore.productId)
 
                     const after = await tx.productVariant.findFirst({
@@ -1416,6 +2606,7 @@ export class OrdersService {
 
             if (toStatus === 'CANCELLED' || toStatus === 'RETURNED') {
                 await this.loyaltyLedger.cancelPendingOrderRedemption(tx, tenantId, id)
+                await this.promoCodes.releaseOrderRedemption(tx, tenantId, id)
             }
 
             if (fromStatus === 'SHIPPED' && toStatus === 'DELIVERED') {
@@ -1539,16 +2730,6 @@ export class OrdersService {
                     }
                 }
 
-                let cashboxId: string
-                let sessionId: string
-                try {
-                    const ensured = await ensureActiveCashboxAndOpenSession(tx, tenantId, opts?.cashboxId, actor?.userId ?? null)
-                    cashboxId = ensured.cashboxId
-                    sessionId = ensured.sessionId
-                } catch {
-                    throw new OrderValidationError(400, 'Invalid cashboxId')
-                }
-
                 const storeSettings = await tx.storeSettings.findUnique({
                     where: { tenantId },
                     select: { currencyCode: true }
@@ -1566,26 +2747,34 @@ export class OrdersService {
                 const amount = new Prisma.Decimal(String(amountNumber || 0))
                 if (!amount.isFinite() || amount.lte(0)) throw new OrderValidationError(400, 'Order total must be > 0')
 
-                const cashTx = await tx.cashTransaction.create({
-                    data: {
+                try {
+                    await cashService.createTransactionInTx(
+                        tx,
                         tenantId,
-                        cashboxId,
-                        sessionId,
-                        direction: 'IN',
-                        type: 'SALE_PAYMENT',
-                        amount,
-                        currency,
-                        method,
-                        customerId: resolvedCustomerId,
-                        saleId: sale.id,
-                        orderId: existing.id,
-                        reference,
-                        note,
-                        createdByUserId: actor?.userId ?? null
+                        {
+                            cashboxId: opts?.cashboxId ?? null,
+                            type: 'SALE_PAYMENT',
+                            direction: 'IN',
+                            amount: amount.toString(),
+                            currency,
+                            method,
+                            customerId: resolvedCustomerId,
+                            saleId: sale.id,
+                            orderId: existing.id,
+                            reference,
+                            note
+                        },
+                        actor
+                    )
+                } catch (error) {
+                    if (error instanceof CashValidationError) {
+                        throw new OrderValidationError(error.statusCode, error.statusMessage, {
+                            code: error.code,
+                            meta: error.meta
+                        })
                     }
-                })
-
-                await mirrorCashTransactionToPayments(tx, tenantId, cashTx)
+                    throw error
+                }
             }
 
             const updateData: any = { status: toStatus }
@@ -1643,7 +2832,7 @@ export class OrdersService {
                     },
                     data: { reserved: { decrement: qty } }
                 })
-                if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry')
+                if (result.count !== 1) throw new OrderValidationError(409, 'Inventory conflict, please retry', { code: RETRY_CONFLICT })
                 touchedProductIds.add(variantBefore.productId)
 
                 const after = await tx.productVariant.findFirst({
@@ -1676,7 +2865,7 @@ export class OrdersService {
                 where: { tenantId, id, status: 'CONFIRMED' },
                 data: { status: 'PENDING' }
             })
-            if (updated.count !== 1) throw new OrderValidationError(409, 'Order rollback conflict, please retry')
+            if (updated.count !== 1) throw new OrderValidationError(409, 'Order rollback conflict, please retry', { code: RETRY_CONFLICT })
         })
 
         return prisma.order.findFirst({ where: { id, tenantId } })
@@ -1725,15 +2914,15 @@ export class OrdersService {
             const plan = getPlanByCode(subscription.planCode as any) ?? getPlanByCode('basic')
             const limit = plan?.ordersPerMonth ?? 0
 
-            const periodStart = subscription.currentPeriodStart
-            const periodEnd =
-                subscription.currentPeriodEnd ??
-                (subscription.interval === 'year' ? addUtcYears(periodStart, 1) : addUtcMonths(periodStart, 1))
+            // The allowance is quoted per month, so it is counted per month. This
+            // used to span the whole billing period, which handed an annual
+            // tenant one month's worth of orders to last twelve months.
+            const quota = currentUsageWindow(subscription.currentPeriodStart)
 
             const ordersInPeriod = await prisma.order.count({
                 where: {
                     tenantId: input.tenantId,
-                    createdAt: { gte: periodStart, lt: periodEnd }
+                    createdAt: { gte: quota.start, lt: quota.end }
                 }
             })
 
@@ -1757,24 +2946,64 @@ export class OrdersService {
             throw new OrderValidationError(400, 'Customer name is required')
         }
 
-        if (!Array.isArray(input.items) || input.items.length === 0) {
-            throw new OrderValidationError(400, 'At least one item is required')
-        }
+        const customerPhoneNormalized = normalizeCustomerPhoneForOrder(customerPhone)
+        const clientIp = (input.clientIp || '').trim() || null
 
-        const normalizedItems = input.items.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId || undefined,
-            quantity: Number(item.quantity || 0)
-        }))
-
-        normalizedItems.forEach((item) => {
-            if (!item.productId) {
-                throw new OrderValidationError(400, 'Product ID is required for each item')
-            }
-            if (!Number.isFinite(item.quantity) || item.quantity < 1) {
-                throw new OrderValidationError(400, 'Quantity must be at least 1')
+        const fraudSettings = await prisma.storeSettings.findUnique({
+            where: { tenantId: input.tenantId },
+            select: {
+                blacklistEnabled: true,
+                duplicateOrderLimitEnabled: true,
+                duplicateOrderLimit: true,
+                duplicateOrderWindowHours: true
             }
         })
+        const blacklistEnabled = fraudSettings?.blacklistEnabled ?? true
+        const duplicateOrderLimitEnabled = fraudSettings?.duplicateOrderLimitEnabled ?? false
+
+        if (blacklistEnabled) {
+            const existingCustomerForBlacklist = customerPhoneNormalized
+                ? await prisma.customer.findUnique({
+                    where: { tenantId_phoneNormalized: { tenantId: input.tenantId, phoneNormalized: customerPhoneNormalized } },
+                    select: { id: true }
+                })
+                : null
+
+            const blacklistHit = await this.blacklist.checkForCheckout(input.tenantId, {
+                phoneNormalized: customerPhoneNormalized,
+                ip: clientIp,
+                customerId: existingCustomerForBlacklist?.id ?? null
+            })
+            if (blacklistHit) {
+                throw new OrderValidationError(403, 'This order could not be placed. Please contact the store.', {
+                    code: 'BLACKLISTED'
+                })
+            }
+        }
+
+        if (duplicateOrderLimitEnabled && customerPhoneNormalized) {
+            const duplicateOrderLimit = fraudSettings?.duplicateOrderLimit ?? 3
+            const windowHours = fraudSettings?.duplicateOrderWindowHours ?? 24
+            const windowStart = new Date(Date.now() - windowHours * 60 * 60 * 1000)
+
+            const recentOrderCount = await prisma.order.count({
+                where: {
+                    tenantId: input.tenantId,
+                    customerPhoneNormalized,
+                    status: { not: 'CANCELLED' },
+                    createdAt: { gte: windowStart }
+                }
+            })
+            if (recentOrderCount >= duplicateOrderLimit) {
+                throw new OrderValidationError(
+                    429,
+                    'Too many recent orders from this phone number. Please contact the store.',
+                    { code: 'DUPLICATE_ORDER_LIMIT' }
+                )
+            }
+        }
+
+        const normalizedItems = this.normalizePublicOrderItems(input.items)
 
         const shippingServiceLevel =
             input.shippingServiceLevel == null ? null : String(input.shippingServiceLevel || '').trim()
@@ -1794,11 +3023,8 @@ export class OrdersService {
             throw new OrderValidationError(400, 'shippingAmount must be a positive number')
         }
 
-        const storeSettings = await prisma.storeSettings.upsert({
-            where: { tenantId: input.tenantId },
-            create: { tenantId: input.tenantId },
-            update: {}
-        })
+        const { storeSettings, validatedItems, totalAmount, clearanceDiscountAmount, clearanceBreakdown } =
+            await this.preparePublicOrderItems(input.tenantId, normalizedItems)
 
         if (storeSettings.cartEnabled === false) {
             throw new OrderValidationError(403, 'Checkout is disabled for this store')
@@ -1819,160 +3045,6 @@ export class OrdersService {
                 : 1000
         const hideOptionalAddress = (storeSettings as any).hideOptionalAddress !== false
 
-        const productIds = Array.from(new Set(normalizedItems.map((item) => item.productId)))
-        const variantIds = Array.from(
-            new Set(
-                normalizedItems
-                    .map((item) => item.variantId)
-                    .filter((v): v is string => typeof v === 'string' && v.length > 0)
-            )
-        )
-        const productIdsWithoutVariant = Array.from(
-            new Set(normalizedItems.filter((item) => !item.variantId).map((item) => item.productId))
-        )
-
-        const products = await prisma.product.findMany({
-            where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true, isPromotionActive: true, promotionalPrice: true, promotionStartDate: true, promotionEndDate: true }
-        })
-
-        if (products.length !== productIds.length) {
-            throw new OrderValidationError(400, 'Some products are invalid or unavailable')
-        }
-
-        const productMap = new Map(products.map((p) => [p.id, p]))
-
-        const variantsById = variantIds.length
-            ? await prisma.productVariant.findMany({
-                where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
-            })
-            : []
-
-        if (variantsById.length !== variantIds.length) {
-            throw new OrderValidationError(400, 'Some variants are invalid or unavailable')
-        }
-
-        const defaultVariants = productIdsWithoutVariant.length
-            ? await prisma.productVariant.findMany({
-                where: {
-                    tenantId: input.tenantId,
-                    productId: { in: productIdsWithoutVariant },
-                    isActive: true,
-                    optionValues: { none: {} }
-                },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
-            })
-            : []
-
-        const variantMap = new Map(variantsById.map((v) => [v.id, v]))
-        const defaultVariantByProductId = new Map(defaultVariants.map((v) => [v.productId, v]))
-
-        // Back-compat / safety: if a product has no variantId but also has no default variant,
-        // create one on-the-fly only when the product has no options.
-        if (productIdsWithoutVariant.length > 0) {
-            const optionRows = await prisma.productOption.findMany({
-                where: { tenantId: input.tenantId, productId: { in: productIdsWithoutVariant } },
-                select: { productId: true },
-                distinct: ['productId']
-            })
-            const productsWithOptions = new Set(optionRows.map((r) => r.productId))
-
-            for (const pid of productIdsWithoutVariant) {
-                if (defaultVariantByProductId.has(pid)) continue
-                if (productsWithOptions.has(pid)) continue
-
-                const product = productMap.get(pid)
-                if (!product) continue
-
-                const created = await prisma.productVariant.create({
-                    data: {
-                        tenantId: input.tenantId,
-                        productId: pid,
-                        sku: suggestSkuFromProduct(product.slug, ''),
-                        price: product.price,
-                        stock: product.stock,
-                        reserved: 0,
-                        safetyStock: 0,
-                        trackInventory: true,
-                        isActive: true
-                    }
-                })
-                defaultVariantByProductId.set(pid, created as any)
-            }
-        }
-
-        const now = new Date()
-        const activeBundleDeals = await prisma.productBundleDeal.findMany({
-            where: {
-                tenantId: input.tenantId,
-                productId: { in: productIds },
-                isActive: true,
-                AND: [
-                    { OR: [{ startsAt: null }, { startsAt: { lte: now } }] },
-                    { OR: [{ endsAt: null }, { endsAt: { gt: now } }] }
-                ]
-            },
-            select: { productId: true, bundleQty: true, bundlePrice: true }
-        })
-
-        const bundleDealsByProductId = new Map<string, { bundleQty: number; bundlePrice: number }[]>()
-        for (const d of activeBundleDeals) {
-            const arr = bundleDealsByProductId.get(d.productId) ?? []
-            arr.push({ bundleQty: d.bundleQty, bundlePrice: Number(d.bundlePrice) })
-            bundleDealsByProductId.set(d.productId, arr)
-        }
-
-        let totalCents = 0
-        const validatedItems = normalizedItems.map((item) => {
-            const product = productMap.get(item.productId)!
-            const variant =
-                item.variantId
-                    ? variantMap.get(item.variantId)
-                    : defaultVariantByProductId.get(product.id)
-
-            if (!variant || variant.productId !== product.id) {
-                throw new OrderValidationError(400, 'Variant selection is required for this product')
-            }
-
-            const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
-            const availableStock = variant.trackInventory
-                ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
-                : Number.POSITIVE_INFINITY
-            const trackInventory = variant.trackInventory
-
-            if (trackInventory && item.quantity > availableStock) {
-                throw new OrderValidationError(400, `Insufficient stock for ${product.title}`)
-            }
-
-            const unitPriceCents = moneyToCents(price)
-            const bundleDeals = bundleDealsByProductId.get(product.id) ?? []
-            const pricing = computeBestBundleTotal({
-                quantity: item.quantity,
-                unitPriceCents,
-                bundleDeals: bundleDeals.map((d) => ({
-                    bundleQty: d.bundleQty,
-                    bundlePriceCents: moneyToCents(d.bundlePrice)
-                }))
-            })
-            totalCents += pricing.bestTotalCents
-
-            return {
-                productId: product.id,
-                variantId: variant.id,
-                quantity: item.quantity,
-                price,
-                referencePrice: Number(variant.price ?? product.price ?? 0),
-                variantCost: Number(variant.cost ?? 0),
-                lineTotal: centsToMoney(pricing.bestTotalCents),
-                pricingBreakdown: pricing,
-                trackInventory,
-                reserved: variant.reserved,
-                safetyStock: variant.safetyStock,
-                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
-            }
-        })
-
         // Validate and normalize shippingProvider
         let shippingProvider = null
         if (input.shippingProvider) {
@@ -1991,12 +3063,12 @@ export class OrdersService {
             tenantId: input.tenantId,
             shippingProvider,
             deliveryMode,
+            shippingWilayaCode: input.shippingWilayaCode,
             shippingCommuneCode: input.shippingCommuneCode,
             rawPickupPoint: input.shippingPickupPoint
         })
 
         const effectiveShippingAmount = deliveryMode === 'store' ? 0 : shippingAmount
-        const totalAmount = centsToMoney(totalCents)
         if (minimumOrderAmountDzd > 0 && totalAmount < minimumOrderAmountDzd) {
             throw new OrderValidationError(
                 400,
@@ -2021,6 +3093,7 @@ export class OrdersService {
                 cost: item.variantCost
             }))
         )
+        const orderIdPrefix = normalizeOrderIdPrefix((storeSettings as any).orderIdPrefix)
 
         const orderResult = await prisma.$transaction(async (tx) => {
             let resolvedCustomer
@@ -2038,13 +3111,40 @@ export class OrdersService {
                 throw error
             }
 
+            // The promo code is priced before the points: it discounts the cart,
+            // and the points then eat what is left of it.
+            let promo
+            try {
+                promo = await this.promoCodes.evaluateForCheckout(tx, {
+                    tenantId: input.tenantId,
+                    code: input.promoCode,
+                    lines: validatedItems.map((item) => ({ productId: item.productId, lineTotal: item.lineTotal })),
+                    cartSubtotal: totalAmount,
+                    shippingAmount: effectiveShippingAmount,
+                    customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? customerPhoneNormalized,
+                    // This is the one call site that books the code, so it is the
+                    // one that has to hold the per-customer limit rather than
+                    // just read it.
+                    lockPromo: true
+                })
+            } catch (error) {
+                if (error instanceof PromoCodeError) {
+                    throw new OrderValidationError(error.statusCode, error.statusMessage, { code: error.code })
+                }
+                throw error
+            }
+
+            const promoDiscountAmount = promo?.discountAmount ?? 0
+            const promoShippingDiscount = promo?.shippingDiscount ?? 0
+            const itemsTotalAfterPromo = Math.max(0, Number((totalAmount - promoDiscountAmount).toFixed(2)))
+
             let redemption
             try {
                 redemption = await this.loyaltyCheckout.evaluateRedemption(tx, {
                     tenantId: input.tenantId,
                     customerId: resolvedCustomer?.id ?? null,
                     requestedPoints: input.redeemPointsRequested,
-                    itemsSubtotal: totalAmount,
+                    itemsSubtotal: itemsTotalAfterPromo,
                     settings: storeSettings
                 })
             } catch (error) {
@@ -2054,15 +3154,23 @@ export class OrdersService {
                 throw error
             }
 
-            const payableItemsTotal = Math.max(0, Number((totalAmount - redemption.redeemedAmount).toFixed(2)))
-            const totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, effectiveShippingAmount)
+            const payableItemsTotal = Math.max(0, Number((itemsTotalAfterPromo - redemption.redeemedAmount).toFixed(2)))
+            const payableShipping = Math.max(
+                0,
+                Number((Number(effectiveShippingAmount || 0) - promoShippingDiscount).toFixed(2))
+            )
+            const totalWithShippingAmount = computeTotalWithShipping(payableItemsTotal, payableShipping)
+            const publicId = await this.generateUniquePublicId(tx, input.tenantId, orderIdPrefix)
             const createdOrder = await tx.order.create({
                 data: {
                     tenantId: input.tenantId,
+                    publicId,
                     customerId: resolvedCustomer?.id ?? null,
                     customerName,
                     customerPhone,
+                    customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? customerPhoneNormalized,
                     customerAddress: normalizedCustomerAddress,
+                    customerIp: clientIp,
                     deliveryMode,
                     shippingProvider,
                     shippingWilayaCode: input.shippingWilayaCode || null,
@@ -2072,13 +3180,23 @@ export class OrdersService {
                     shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: normalizedShippingAddressLine1,
                     shippingNotes: input.shippingNotes || null,
-                    shippingPickupPoint: shippingPickupPoint ?? undefined,
+                    shippingPickupPoint: shippingPickupPoint.pointId ?? undefined,
+                    shippingPickupPointKind: shippingPickupPoint.kind ?? undefined,
+                    shippingPickupPointCommune: shippingPickupPoint.communeCode ?? undefined,
+                    shippingPickupPointName: shippingPickupPoint.name ?? undefined,
                     totalAmount,
                     totalWithShippingAmount,
                     earnedPointsTotal: pointsPreview.totalPoints,
                     redeemedPointsTotal: redemption.pointsReserved,
                     redeemedAmount: redemption.redeemedAmount,
-                    status: 'PENDING'
+                    clearanceDiscountAmount,
+                    clearanceBreakdown: clearanceBreakdown as any,
+                    promoCodeId: promo?.promoId ?? null,
+                    promoCode: promo?.code ?? null,
+                    promoDiscountAmount,
+                    promoShippingDiscount,
+                    status: 'PENDING',
+                    readAt: null
                 }
             })
 
@@ -2115,6 +3233,29 @@ export class OrdersService {
                 }
             }
 
+            if (promo) {
+                // Claims the slot, and refuses if a concurrent checkout took the
+                // last one between the pricing above and here. Losing that race
+                // rolls the order back rather than overselling the code.
+                try {
+                    await this.promoCodes.recordRedemption(tx, {
+                        tenantId: input.tenantId,
+                        promoCodeId: promo.promoId,
+                        code: promo.code,
+                        orderId: createdOrder.id,
+                        customerId: resolvedCustomer?.id ?? null,
+                        customerPhoneNormalized: resolvedCustomer?.phoneNormalized ?? customerPhoneNormalized,
+                        discountAmount: promo.discountAmount,
+                        shippingDiscount: promo.shippingDiscount
+                    })
+                } catch (error) {
+                    if (error instanceof PromoCodeError) {
+                        throw new OrderValidationError(error.statusCode, error.statusMessage, { code: error.code })
+                    }
+                    throw error
+                }
+            }
+
             if (redemption.pointsReserved > 0 && resolvedCustomer?.id) {
                 await this.loyaltyCheckout.createPendingOrderRedemption(tx, {
                     tenantId: input.tenantId,
@@ -2128,10 +3269,20 @@ export class OrdersService {
 
             return {
                 createdOrder,
+                promoSummary: promo
+                    ? {
+                        code: promo.code,
+                        discountType: promo.discountType,
+                        discountAmount: promo.discountAmount,
+                        shippingDiscount: promo.shippingDiscount
+                    }
+                    : null,
                 loyaltySummary: this.buildLoyaltyResponse({
                     availablePoints: redemption.availablePoints - redemption.pointsReserved,
                     pendingRedeemPoints: redemption.pendingRedeemPoints + redemption.pointsReserved,
-                    earnedPoints: pointsPreview.totalPoints,
+                    basePointsToEarn: pointsPreview.basePointsTotal,
+                    productPointsToEarn: pointsPreview.productPointsTotal,
+                    totalPointsToEarn: pointsPreview.totalPoints,
                     redeemedPoints: redemption.pointsReserved,
                     redeemedAmount: redemption.redeemedAmount
                 })
@@ -2150,11 +3301,14 @@ export class OrdersService {
 
         if (finalOrder) {
             telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
+            notificationsService.emitOrderCreated(input.tenantId, finalOrder.id).catch(console.error)
+            this.sendWhatsAppConfirmation(input.tenantId, finalOrder.id)
         }
 
         return {
             order: finalOrder,
-            loyaltySummary: orderResult.loyaltySummary
+            loyaltySummary: orderResult.loyaltySummary,
+            promoSummary: orderResult.promoSummary
         }
     }
 
@@ -2235,19 +3389,47 @@ export class OrdersService {
 
         const products = await prisma.product.findMany({
             where: { id: { in: productIds }, tenantId: input.tenantId, isActive: true },
-            select: { id: true, slug: true, price: true, title: true, stock: true, isPromotionActive: true, promotionalPrice: true, promotionStartDate: true, promotionEndDate: true }
+            select: {
+                id: true,
+                slug: true,
+                price: true,
+                title: true,
+                stock: true,
+                isPromotionActive: true,
+                promotionalPrice: true,
+                promotionStartDate: true,
+                promotionEndDate: true,
+                isClearance: true,
+                _count: {
+                    select: { options: true }
+                }
+            }
         })
 
         if (products.length !== productIds.length) {
             throw new OrderValidationError(400, 'Some products are invalid or unavailable')
         }
 
-        const productMap = new Map(products.map((p) => [p.id, p]))
+        const productMap = new Map(products.map((p) => [p.id, { ...p, hasVariants: (p as any)._count?.options > 0 }]))
 
         const variantsById = variantIds.length
             ? await prisma.productVariant.findMany({
                 where: { id: { in: variantIds }, tenantId: input.tenantId, isActive: true },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -2263,7 +3445,21 @@ export class OrdersService {
                     isActive: true,
                     optionValues: { none: {} }
                 },
-                select: { id: true, productId: true, price: true, cost: true, stock: true, reserved: true, safetyStock: true, trackInventory: true }
+                select: {
+                    id: true,
+                    productId: true,
+                    price: true,
+                    promotionalPrice: true,
+                    isPromotionActive: true,
+                    promotionStartDate: true,
+                    promotionEndDate: true,
+                    showCountdown: true,
+                    cost: true,
+                    stock: true,
+                    reserved: true,
+                    safetyStock: true,
+                    trackInventory: true
+                }
             })
             : []
 
@@ -2335,7 +3531,8 @@ export class OrdersService {
                 throw new OrderValidationError(400, 'Variant selection is required for this product')
             }
 
-            const price = buildProductPricing(product, variant.price ?? product.price).effectivePrice
+            const scopedPricing = buildScopedProductPricing(product as any, variant as any)
+            const price = scopedPricing.effectivePrice
             const availableStock = variant.trackInventory
                 ? Math.max(variant.stock - variant.reserved - variant.safetyStock, 0)
                 : Number.POSITIVE_INFINITY
@@ -2371,9 +3568,21 @@ export class OrdersService {
                 trackInventory,
                 reserved: variant.reserved,
                 safetyStock: variant.safetyStock,
-                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id
+                isDefaultVariant: !item.variantId && defaultVariantByProductId.get(product.id)?.id === variant.id,
+                promotionApplied: scopedPricing.promotionApplied
             }
         })
+
+        const clearance = await this.computeClearanceForItems(
+            tenantId,
+            storeSettings as any,
+            validatedItems,
+            productMap as any,
+            bundleDealsByProductId
+        )
+        totalCents -= clearance.discountCents
+        const clearanceDiscountAmount = centsToMoney(clearance.discountCents)
+        const clearanceBreakdown = clearance.freeCount > 0 ? clearance : null
 
         let shippingProvider = null
         if (input.shippingProvider) {
@@ -2392,6 +3601,7 @@ export class OrdersService {
             tenantId: input.tenantId,
             shippingProvider,
             deliveryMode,
+            shippingWilayaCode: input.shippingWilayaCode,
             shippingCommuneCode: input.shippingCommuneCode,
             rawPickupPoint: input.shippingPickupPoint
         })
@@ -2412,6 +3622,7 @@ export class OrdersService {
                 cost: item.variantCost
             }))
         )
+        const orderIdPrefix = normalizeOrderIdPrefix((storeSettings as any).orderIdPrefix)
 
         let actualCustomerName = customerName
         let actualCustomerPhone = customerPhone
@@ -2446,12 +3657,15 @@ export class OrdersService {
                 }
             }
 
+            const publicId = await this.generateUniquePublicId(tx, input.tenantId, orderIdPrefix)
             const createdOrder = await tx.order.create({
                 data: {
                     tenantId: input.tenantId,
+                    publicId,
                     customerId: actualCustomerId,
                     customerName: actualCustomerName,
                     customerPhone: actualCustomerPhone,
+                    customerPhoneNormalized: normalizeCustomerPhoneForOrder(actualCustomerPhone),
                     customerAddress: normalizedCustomerAddress,
                     deliveryMode,
                     shippingProvider,
@@ -2462,11 +3676,17 @@ export class OrdersService {
                     shippingCurrency: shippingCurrency || undefined,
                     shippingAddressLine1: normalizedShippingAddressLine1,
                     shippingNotes: input.shippingNotes || null,
-                    shippingPickupPoint: shippingPickupPoint ?? undefined,
+                    shippingPickupPoint: shippingPickupPoint.pointId ?? undefined,
+                    shippingPickupPointKind: shippingPickupPoint.kind ?? undefined,
+                    shippingPickupPointCommune: shippingPickupPoint.communeCode ?? undefined,
+                    shippingPickupPointName: shippingPickupPoint.name ?? undefined,
                     totalAmount,
                     totalWithShippingAmount,
                     earnedPointsTotal: pointsPreview.totalPoints,
-                    status: 'PENDING'
+                    clearanceDiscountAmount,
+                    clearanceBreakdown: clearanceBreakdown as any,
+                    status: 'PENDING',
+                    readAt: new Date()
                 }
             })
 
@@ -2516,8 +3736,31 @@ export class OrdersService {
 
         if (finalOrder) {
             telegramService.sendOrderNotification(input.tenantId, finalOrder).catch(console.error)
+            notificationsService.emitOrderCreated(input.tenantId, finalOrder.id).catch(console.error)
         }
 
         return finalOrder
+    }
+
+    async recordPayment(tenantId: string, userId: string, orderId: string, data: { amount: number, method: string, cashboxId: string, reference?: string | null, note?: string | null }) {
+        const order = await prisma.order.findUnique({
+            where: { tenantId, id: orderId }
+        })
+
+        if (!order) {
+            throw new OrderValidationError(404, 'Order not found')
+        }
+
+        return await cashService.createTransaction(tenantId, {
+            cashboxId: data.cashboxId,
+            direction: 'IN',
+            type: 'ORDER_PAYMENT',
+            amount: data.amount,
+            method: data.method || 'CASH',
+            orderId: order.id,
+            customerId: order.customerId,
+            reference: data.reference,
+            note: data.note
+        }, { userId })
     }
 }

@@ -1,4 +1,4 @@
-export type MarketingTone = 'cobalt' | 'teal' | 'orange' | 'neutral'
+export type MarketingTone = 'cobalt' | 'lime' | 'orange' | 'neutral'
 
 export interface MarketingStat {
   label: string

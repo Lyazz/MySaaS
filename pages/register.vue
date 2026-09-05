@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { usePlatformBaseDomain } from '~/composables/platformBaseDomain'
+import { useOtpFlow, type OtpChannel } from '~/composables/useOtpFlow'
 import SaaSLogo from '~/components/branding/SaaSLogo.vue'
+import { useAuthStore } from '~/stores/auth'
 
 const { t } = useI18n({ useScope: 'global' })
 const year = new Date().getFullYear()
+const authStore = useAuthStore()
+const registrationsOpen = computed(() => useRuntimeConfig().public.registrationsOpen !== false)
 
 definePageMeta({
   middleware: 'saas-only',
@@ -12,17 +16,83 @@ definePageMeta({
   title: 'Register - Swekly'
 })
 
+const MIN_PASSWORD_LENGTH = 8
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
 const form = ref({
   name: '',
   slug: '',
   email: '',
-  password: ''
+  phone: '',
+  otp: '',
+  password: '',
+  confirmPassword: ''
 })
 
 const loading = ref(false)
 const error = ref('')
 const successData = ref<any>(null)
 const platformBaseDomain = usePlatformBaseDomain()
+
+const otp = useOtpFlow('REGISTRATION')
+
+const CHANNEL_ICONS: Record<OtpChannel, string> = {
+  EMAIL: 'lucide:mail',
+  SMS: 'lucide:message-square',
+  WHATSAPP: 'lucide:message-circle'
+}
+
+onMounted(() => {
+  void otp.loadChannels()
+})
+
+/**
+ * Verification is only demanded when the deployment can actually deliver a
+ * code. With no provider configured the block hides itself rather than parking
+ * the visitor in front of a button that cannot work; the server makes the real
+ * decision and says so if it disagrees.
+ */
+const otpRequired = computed(() => otp.availableChannels.value.length > 0)
+
+const otpDestination = computed(() =>
+  otp.channel.value === 'EMAIL'
+    ? { email: form.value.email.trim().toLowerCase() }
+    : { phone: form.value.phone.trim() }
+)
+
+const otpFeedback = computed(() => {
+  if (otp.error.value) return otp.error.value
+  if (otp.verified.value) return t('auth.register.form.otp.verified')
+  if (otp.sent.value) {
+    return t('auth.register.form.otp.sentTo', {
+      destination: otp.maskedDestination.value,
+      minutes: otp.expiresInMinutes.value
+    })
+  }
+  return ''
+})
+
+const otpFeedbackTone = computed<'info' | 'success' | 'error'>(() => {
+  if (otp.error.value) return 'error'
+  if (otp.verified.value) return 'success'
+  return 'info'
+})
+
+const resendLabel = computed(() =>
+  otp.cooldown.value > 0
+    ? t('auth.register.form.otp.resendIn', { seconds: otp.cooldown.value })
+    : t('auth.register.form.otp.send')
+)
+
+type RegisterResponse = {
+  success: boolean
+  token?: string
+  user?: any
+  tenant?: any
+  staffRole?: { id: string; name: string } | null
+  staffPermissions?: string[] | null
+  onboarding?: { required: boolean }
+}
 
 const launchHighlights = [
   { icon: 'lucide:package', labelKey: 'auth.register.hero.panel.pills.orders' },
@@ -56,6 +126,19 @@ const storePreview = computed(() => {
   return `${form.value.slug || fallbackSlug}${subdomainSuffix.value}`
 })
 
+const normalizeAlgerianPhone = (input: string): string | null => {
+  const digits = input.replace(/\D/g, '')
+
+  if (/^0[567]\d{8}$/.test(digits)) return `213${digits.slice(1)}`
+  if (/^[567]\d{8}$/.test(digits)) return `213${digits}`
+  if (/^213[567]\d{8}$/.test(digits)) return digits
+  if (/^00213[567]\d{8}$/.test(digits)) return digits.slice(2)
+
+  return null
+}
+
+const normalizedPhone = computed(() => normalizeAlgerianPhone(form.value.phone))
+
 watch(() => form.value.name, (newName) => {
   if (!successData.value) {
     form.value.slug = newName
@@ -65,16 +148,106 @@ watch(() => form.value.name, (newName) => {
   }
 })
 
+// Any change to what the code was sent to invalidates the code that was sent.
+watch([() => form.value.phone, () => form.value.email, otp.channel], () => {
+  form.value.otp = ''
+  otp.reset()
+})
+
+async function sendOtp() {
+  error.value = ''
+
+  if (otp.channel.value === 'EMAIL') {
+    if (!EMAIL_REGEX.test(form.value.email.trim())) {
+      error.value = t('auth.register.errors.emailInvalid')
+      return
+    }
+  } else {
+    if (!form.value.phone.trim()) {
+      error.value = t('auth.register.errors.phoneRequired')
+      return
+    }
+
+    if (!normalizedPhone.value) {
+      error.value = t('auth.register.errors.phoneInvalid')
+      return
+    }
+  }
+
+  await otp.send(otpDestination.value)
+}
+
+async function verifyOtp() {
+  error.value = ''
+
+  if (!otp.sent.value) {
+    error.value = t('auth.register.errors.otpSendFirst')
+    return
+  }
+
+  if (!form.value.otp.trim()) {
+    error.value = t('auth.register.errors.otpRequired')
+    return
+  }
+
+  await otp.verify({ code: form.value.otp, ...otpDestination.value })
+}
+
 async function register() {
-  loading.value = true
   error.value = ''
   successData.value = null
 
+  if (!EMAIL_REGEX.test(form.value.email.trim())) {
+    error.value = t('auth.register.errors.emailInvalid')
+    return
+  }
+
+  if (form.value.password.length < MIN_PASSWORD_LENGTH) {
+    error.value = t('auth.register.errors.passwordTooShort', { min: MIN_PASSWORD_LENGTH })
+    return
+  }
+
+  if (form.value.password !== form.value.confirmPassword) {
+    error.value = t('auth.register.errors.passwordMismatch')
+    return
+  }
+
+  if (!form.value.phone.trim()) {
+    error.value = t('auth.register.errors.phoneRequired')
+    return
+  }
+
+  if (!normalizedPhone.value) {
+    error.value = t('auth.register.errors.phoneInvalid')
+    return
+  }
+
+  if (otpRequired.value && !otp.verified.value) {
+    error.value = t('auth.register.errors.otpVerifyFirst')
+    return
+  }
+
+  loading.value = true
+
   try {
-    const data = await $fetch('/api/register', {
+    const data = await $fetch<RegisterResponse>('/api/register', {
       method: 'POST',
-      body: form.value
+      body: {
+        name: form.value.name,
+        slug: form.value.slug,
+        email: form.value.email,
+        password: form.value.password,
+        phone: form.value.phone,
+        verificationToken: otp.verificationToken.value || undefined
+      }
     })
+
+    if (!data?.token || !data.user || !data.tenant) {
+      error.value = t('auth.register.errors.sessionMissing')
+      return
+    }
+
+    authStore.setAuth(data.token, data.user, data.tenant, data.staffRole ?? null, data.staffPermissions ?? null)
     successData.value = data
   } catch (e: any) {
     error.value = e.data?.statusMessage || t('auth.register.errors.generic')
@@ -86,7 +259,35 @@ async function register() {
 
 <template>
   <div class="min-h-screen pt-20 pb-12 md:pt-28">
-    <div class="cinematic-container !max-w-[80rem]">
+    <!-- ─── Registration temporarily closed ─── -->
+    <div v-if="!registrationsOpen" class="cinematic-container !max-w-2xl">
+      <div class="cinematic-card relative overflow-hidden p-8 md:p-12 text-center">
+        <div class="absolute inset-0 cinematic-grid-bg opacity-40" />
+        <div class="relative">
+          <span class="cinematic-pill mx-auto">
+            <span class="cinematic-pill__dot" />
+            {{ t('auth.register.closed.badge') }}
+          </span>
+          <div class="mx-auto mt-6 flex h-14 w-14 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.03]">
+            <Icon name="lucide:lock" class="h-6 w-6 text-lime-neon" />
+          </div>
+          <h1 class="cinematic-headline mt-6 !text-3xl md:!text-4xl">
+            {{ t('auth.register.closed.title') }}
+          </h1>
+          <p class="cinematic-subhead mx-auto mt-4 max-w-md">
+            {{ t('auth.register.closed.message') }}
+          </p>
+          <div class="mt-8 text-sm text-[color:var(--m-text-dim)]">
+            {{ t('auth.register.closed.haveAccount') }}
+            <NuxtLink to="/login" class="font-medium text-lime-neon hover:underline">
+              {{ t('auth.register.closed.logIn') }}
+            </NuxtLink>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else class="cinematic-container !max-w-[80rem]">
       <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
 
         <!-- ─── Left: Brand panel (desktop only) ─── -->
@@ -232,10 +433,10 @@ async function register() {
                   <p class="mt-3 text-sm leading-7 text-emerald-100/90">
                     {{ t('auth.register.success.message', { name: successData.tenant.name }) }}
                   </p>
-                  <a :href="successData.tenant.url" class="register-submit-btn mt-5 inline-flex">
+                  <NuxtLink to="/admin" data-testid="register-go-dashboard" class="register-submit-btn mt-5 inline-flex">
                     {{ t('auth.register.success.cta') }}
                     <Icon name="lucide:arrow-right" class="h-4 w-4" />
-                  </a>
+                  </NuxtLink>
                 </div>
               </div>
             </div>
@@ -293,6 +494,88 @@ async function register() {
               </div>
 
               <div>
+                <label for="phone-number" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.phone.label') }}</label>
+                <input
+                  id="phone-number"
+                  v-model="form.phone"
+                  data-testid="register-phone"
+                  name="phone"
+                  type="tel"
+                  autocomplete="tel"
+                  required
+                  class="cinematic-input"
+                  :placeholder="t('auth.register.form.phone.placeholder')"
+                >
+              </div>
+
+              <div v-if="otpRequired">
+                <label for="otp-code" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.otp.label') }}</label>
+
+                <p class="mb-2 text-xs text-[color:var(--m-text-dim)]">
+                  {{ t('auth.register.form.otp.channelPrompt') }}
+                </p>
+                <div class="mb-3 flex flex-wrap gap-2">
+                  <button
+                    v-for="option in otp.availableChannels.value"
+                    :key="option"
+                    type="button"
+                    :data-testid="`register-channel-${option.toLowerCase()}`"
+                    class="otp-channel-btn"
+                    :class="{ 'otp-channel-btn--active': otp.channel.value === option }"
+                    :aria-pressed="otp.channel.value === option"
+                    @click="otp.channel.value = option"
+                  >
+                    <Icon :name="CHANNEL_ICONS[option]" class="h-3.5 w-3.5" />
+                    {{ t(`auth.channels.${option.toLowerCase()}`) }}
+                  </button>
+                </div>
+
+                <div class="grid gap-2 sm:grid-cols-[1fr_auto_auto]">
+                  <input
+                    id="otp-code"
+                    v-model="form.otp"
+                    data-testid="register-otp"
+                    name="otp"
+                    type="text"
+                    inputmode="numeric"
+                    autocomplete="one-time-code"
+                    maxlength="6"
+                    class="cinematic-input"
+                    :placeholder="t('auth.register.form.otp.placeholder')"
+                  >
+                  <button
+                    type="button"
+                    data-testid="register-send-otp"
+                    class="register-submit-btn !py-2.5 !text-xs"
+                    :disabled="!otp.canResend.value"
+                    @click="sendOtp"
+                  >
+                    {{ otp.sending.value ? t('auth.register.form.otp.sending') : resendLabel }}
+                  </button>
+                  <button
+                    type="button"
+                    data-testid="register-verify-otp"
+                    class="register-submit-btn !py-2.5 !text-xs"
+                    :disabled="!otp.sent.value || otp.verifying.value || otp.verified.value"
+                    @click="verifyOtp"
+                  >
+                    {{ otp.verifying.value ? t('auth.register.form.otp.verifying') : t('auth.register.form.otp.verify') }}
+                  </button>
+                </div>
+                <p
+                  v-if="otpFeedback"
+                  class="mt-2 text-xs"
+                  :class="{
+                    'text-emerald-300': otpFeedbackTone === 'success',
+                    'text-red-300': otpFeedbackTone === 'error',
+                    'text-amber-200': otpFeedbackTone === 'info'
+                  }"
+                >
+                  {{ otpFeedback }}
+                </p>
+              </div>
+
+              <div>
                 <label for="password" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.password.label') }}</label>
                 <input
                   id="password"
@@ -307,15 +590,30 @@ async function register() {
                 >
               </div>
 
+              <div>
+                <label for="confirm-password" class="cinematic-eyebrow mb-2 block">{{ t('auth.register.form.confirmPassword.label') }}</label>
+                <input
+                  id="confirm-password"
+                  v-model="form.confirmPassword"
+                  data-testid="register-confirm-password"
+                  name="confirmPassword"
+                  type="password"
+                  autocomplete="new-password"
+                  required
+                  class="cinematic-input"
+                  placeholder="••••••••"
+                >
+              </div>
+
               <div v-if="error" class="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm font-medium text-red-300">
                 {{ error }}
               </div>
 
-              <button type="submit" :disabled="loading" class="register-submit-btn w-full">
+              <button type="submit" :disabled="loading || (otpRequired && !otp.verified.value)" class="register-submit-btn w-full">
                 <span class="relative z-10 flex items-center justify-center gap-2">
                   <Icon v-if="loading" name="lucide:loader-2" class="h-4 w-4 animate-spin" />
-                  <span>{{ loading ? t('auth.register.form.submit.creating') : t('auth.register.form.submit.register') }}</span>
-                  <Icon v-if="!loading" name="lucide:arrow-right" class="h-4 w-4" />
+                  <span>{{ loading ? t('auth.register.form.submit.creating') : (!otpRequired || otp.verified.value ? t('auth.register.form.submit.register') : t('auth.register.form.submit.verifyOtp')) }}</span>
+                  <Icon v-if="!loading && (!otpRequired || otp.verified.value)" name="lucide:arrow-right" class="h-4 w-4" />
                 </span>
               </button>
 
@@ -323,6 +621,10 @@ async function register() {
                 {{ t('auth.register.form.haveAccount') }}
                 <NuxtLink to="/login" class="font-medium text-lime-neon hover:underline">
                   {{ t('auth.register.form.logIn') }}
+                </NuxtLink>
+                <span class="mx-2 text-white/20">·</span>
+                <NuxtLink to="/forgot-password" class="font-medium text-lime-neon hover:underline">
+                  {{ t('auth.register.form.forgotPassword') }}
                 </NuxtLink>
               </div>
             </form>
@@ -334,6 +636,35 @@ async function register() {
 </template>
 
 <style scoped>
+/* Channel picker: a segmented control, not a <select>, so all three options are
+   visible at once — the visitor is choosing where a code will arrive, and a
+   collapsed dropdown hides the fact that WhatsApp is even on offer. */
+.otp-channel-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.8rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.025);
+  color: var(--m-text-dim);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.otp-channel-btn:hover {
+  border-color: rgba(198, 244, 50, 0.3);
+  color: var(--m-text);
+}
+
+.otp-channel-btn--active {
+  border-color: rgba(198, 244, 50, 0.5);
+  background: rgba(198, 244, 50, 0.12);
+  color: #c6f432;
+}
+
 .register-slug-wrap {
   display: flex;
   border: 1px solid rgba(255, 255, 255, 0.08);

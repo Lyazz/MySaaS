@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/app_theme.dart';
 
 class StatCard extends StatelessWidget {
   final String label;
@@ -29,12 +30,17 @@ class StatCard extends StatelessWidget {
     final iconPadding = dense ? 6.0 : 8.0;
     final iconSize = dense ? 18.0 : 20.0;
 
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: EdgeInsets.all(padding),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(radius),
-        border: Border.all(color: Colors.grey[200]!),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -55,7 +61,9 @@ class StatCard extends StatelessWidget {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
-                    color: Colors.grey[500],
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: labelFontSize,
                     fontWeight: FontWeight.w500,
                   ),
@@ -82,7 +90,7 @@ class StatCard extends StatelessWidget {
             style: TextStyle(
               fontSize: valueFontSize,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0F172A), // Slate-900
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
           if (hint != null) ...[

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import '../models/product.dart';
 import '../providers/products_provider.dart';
 import 'form/form_input.dart';
@@ -8,6 +8,9 @@ import 'form/form_select.dart';
 import 'buttons/app_button.dart';
 import 'dialogs/app_dialog.dart';
 import 'option_metadata_dialog.dart';
+import '../theme/app_theme.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class ProductOptionsList extends ConsumerStatefulWidget {
   final String productId;
@@ -67,9 +70,8 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
         _newOptionType = 'dropdown';
       });
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to create option: $e')));
+      if (!mounted) return;
+      AppToasts.show(context, 'Failed to create option: $e');
     }
   }
 
@@ -77,10 +79,9 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AppDialog(
-        title: 'Delete Option',
-        description:
-            'This will delete all variants associated with this option.',
-        content: const Text('Are you sure you want to delete this option?'),
+        title: 'admin.productOptionsEditor.deleteModal.title'.tr(),
+        description: 'app.this_will_delete_all_variants'.tr(),
+        content: Text('app.are_you_sure_you_want_to_delet4'.tr()),
         secondaryLabel: 'Cancel',
         onSecondary: () => Navigator.pop(context, false),
         primaryLabel: 'Delete',
@@ -96,9 +97,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             .deleteOption(widget.productId, optionId);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to delete option: $e')),
-          );
+          AppToasts.show(context, 'Failed to delete option: $e');
         }
       }
     }
@@ -118,9 +117,8 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
           .addOptionValue(widget.productId, optionId, label);
       controller.clear();
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to add value: $e')));
+      if (!mounted) return;
+      AppToasts.show(context, 'Failed to add value: $e');
     }
   }
 
@@ -130,22 +128,22 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
           .read(productsProvider.notifier)
           .deleteOptionValue(widget.productId, optionId, valueId);
     } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Failed to delete value: $e')));
+      if (!mounted) return;
+      AppToasts.show(context, 'Failed to delete value: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
-              'Options',
+            Text(
+              'admin.productOptionsEditor.title'.tr(),
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 fontSize: 16,
@@ -154,7 +152,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
             ),
             if (widget.options.length < 3 && !_isCreatingOption)
               AppButton.secondary(
-                label: 'Add Option',
+                label: 'app.add_option'.tr(),
                 icon: LucideIcons.plus,
                 size: AppButtonSize.sm,
                 onPressed: () => setState(() => _isCreatingOption = true),
@@ -171,29 +169,35 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
               borderRadius: BorderRadius.circular(8),
               border: Border.all(
-                color: const Color(0xFF0D9488).withOpacity(0.3),
+                color: Theme.of(
+                  context,
+                ).colorScheme.primary.withValues(alpha: 0.3),
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF0D9488).withOpacity(0.05),
-                  blurRadius: 4,
-                  offset: const Offset(0, 2),
-                ),
-              ],
+              boxShadow: isDark
+                  ? null
+                  : [
+                      BoxShadow(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.primary.withValues(alpha: 0.05),
+                        blurRadius: 4,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'New Option',
+                Text(
+                  'app.new_option'.tr(),
                   style: TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Option Name',
+                  label: 'admin.productOptionsEditor.fields.optionName'.tr(),
                   controller: _newOptionNameController,
                   hint: 'e.g. Size, Color',
                   contentPadding: const EdgeInsets.symmetric(
@@ -201,30 +205,40 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                     vertical: 10,
                   ),
                 ),
-                const SizedBox(height: 12),
+                SizedBox(height: 12),
                 FormSelect<String>(
-                  label: 'Display Type',
+                  label: 'admin.productOptionsEditor.fields.displayType'.tr(),
                   value: _newOptionType,
-                  items: const [
+                  items: [
                     DropdownMenuItem(
                       value: 'dropdown',
-                      child: Text('Dropdown'),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.dropdown'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'button',
-                      child: Text('Buttons / Tags'),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.button'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'radio',
-                      child: Text('Radio Buttons'),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.radio'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'color',
-                      child: Text('Color Swatch'),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.color'.tr(),
+                      ),
                     ),
                     DropdownMenuItem(
                       value: 'image',
-                      child: Text('Image with Text'),
+                      child: Text(
+                        'admin.productOptionsEditor.displayTypes.image'.tr(),
+                      ),
                     ),
                   ],
                   onChanged: (v) =>
@@ -232,7 +246,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                 ),
                 const SizedBox(height: 12),
                 FormInput(
-                  label: 'Values',
+                  label: 'app.values'.tr(),
                   controller: _newOptionValuesController,
                   hint: 'Separate with comma (e.g. S, M, L)',
                   contentPadding: const EdgeInsets.symmetric(
@@ -245,14 +259,14 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     AppButton.secondary(
-                      label: 'Cancel',
+                      label: 'admin.common.cancel'.tr(),
                       size: AppButtonSize.sm,
                       onPressed: () =>
                           setState(() => _isCreatingOption = false),
                     ),
                     const SizedBox(width: 8),
                     AppButton.primary(
-                      label: 'Add',
+                      label: 'app.add'.tr(),
                       size: AppButtonSize.sm,
                       onPressed: _createOption,
                     ),
@@ -270,14 +284,19 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
       option.id,
       () => TextEditingController(),
     );
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? AppColors.surface1 : AppColors.lightSurface1,
         borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -297,7 +316,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
                 onPressed: () => _deleteOption(option.id),
                 icon: const Icon(LucideIcons.trash2, size: 16),
                 color: const Color(0xFF94A3B8),
-                hoverColor: Colors.red.withOpacity(0.1),
+                hoverColor: Colors.red.withValues(alpha: 0.1),
                 splashRadius: 20,
               ),
             ],
@@ -311,7 +330,7 @@ class _ProductOptionsListState extends ConsumerState<ProductOptionsList> {
               SizedBox(
                 width: 120,
                 child: FormInput(
-                  label: 'Add value',
+                  label: 'app.add_value'.tr(),
                   showLabel: false,
                   controller: valueController,
                   hint: 'Add value',

@@ -26,6 +26,10 @@ const displayPrice = computed(() => {
     return originalPrice.value
 })
 
+const { t } = useI18n({ useScope: 'global' })
+const clearance = useClearanceDiscount()
+const isClearanceEligible = computed(() => clearance.isProductEligible(props.product))
+
 const cartStore = useCartStore()
 const requireVariantSelectionBeforeQuickAdd = useProductCardVariantGuard()
 const { format: formatPrice } = useCurrency()
@@ -60,11 +64,15 @@ async function handleAddToCart() {
     slug: props.product.slug,
     price: Number(props.product.price),
     bundleDeals: props.product.bundleDeals || [],
+    isClearance: Boolean(props.product?.isClearance),
     stock: props.product.stock,
     image: mainImage.value,
     metaPixelIds: (props.product as any)?.metaPixelIds
   })
-  triggerSuccessToast('ADDED!', 'Item in your cart')
+  triggerSuccessToast(
+    storefrontContent.value.toasts.addedToCart.title,
+    storefrontContent.value.toasts.addedToCart.message
+  )
 }
 </script>
 
@@ -79,8 +87,13 @@ async function handleAddToCart() {
         @mouseleave="isHovered = false"
     >
         <!-- Badge -->
-        <div v-if="product.isNew" class="absolute top-2 left-2 z-10 bg-brand text-black px-3 py-1 border-2 border-black font-street uppercase transform -rotate-2 group-hover:rotate-0 transition-transform">
-            NEW DROP
+        <div class="absolute top-2 start-2 z-10 flex flex-col gap-1 items-start">
+            <span v-if="product.isNew" class="bg-brand text-black px-3 py-1 border-2 border-black font-street uppercase transform -rotate-2 group-hover:rotate-0 transition-transform">
+                NEW DROP
+            </span>
+            <span v-if="isClearanceEligible" class="bg-amber-500 text-black px-3 py-1 border-2 border-black font-street uppercase transform -rotate-2 group-hover:rotate-0 transition-transform">
+                {{ t('storefront.clearance.badge') }}
+            </span>
         </div>
 
         <!-- Image -->
@@ -92,28 +105,28 @@ async function handleAddToCart() {
                  <img 
                     :src="mainImage" 
                     :alt="product.title" 
-                    class="w-full h-full object-cover grayscale contrast-125 group-hover:grayscale-0 transition-all duration-300"
+                    class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                 >
             </NuxtLink>
 
             <StorefrontSharedFavoriteButton
                 :product-id="product.id"
-                button-class="absolute top-2 right-2 w-10 h-10 bg-white border-2 border-black flex items-center justify-center hover:bg-red-50 transition-colors"
+                button-class="absolute top-2 end-2 w-10 h-10 bg-white border-2 border-black flex items-center justify-center hover:bg-red-50 transition-colors"
                 icon-class="w-5 h-5"
                 inactive-class="text-black"
                 active-class="text-red-600"
             />
            
             <!-- Quick Add Overlay (Street Style) -->
-            <button 
+            <button
                 @click.prevent="handleAddToCart"
-                class="absolute bottom-0 left-0 w-full bg-black text-white py-3 font-street text-xl uppercase tracking-widest translate-y-full group-hover:translate-y-0 transition-transform duration-200 hover:bg-brand hover:text-black border-t-2 border-black"
+                class="absolute bottom-0 start-0 w-full bg-black text-white py-2 lg:py-3 px-2 font-street text-xs lg:text-xl uppercase tracking-wide lg:tracking-widest whitespace-nowrap overflow-hidden text-ellipsis translate-y-0 lg:translate-y-full lg:group-hover:translate-y-0 transition-transform duration-200 hover:bg-brand hover:text-black border-t-2 border-black"
             >
                 {{ storefrontContent.actions.addToCart }}
             </button>
         
       <!-- Countdown Overlay -->
-      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
+      <div v-if="product.showCountdown && product.promotionEndDate && isPromoValid" class="absolute bottom-9 lg:bottom-0 inset-x-0 z-20 flex justify-center bg-gradient-to-t from-black/60 via-black/20 to-transparent pt-8 pb-3 pointer-events-none">
         <div class="scale-[0.85] sm:scale-90 origin-bottom">
           <StorefrontSharedCountdownTimer
             :end-date="product.promotionEndDate"
@@ -133,12 +146,12 @@ async function handleAddToCart() {
                 </NuxtLink>
             </h3>
             
-            <div class="flex items-center justify-between mt-auto">
-                <span class="font-mono font-bold text-lg bg-black text-white px-2 py-0.5">
+            <div class="flex items-center justify-between gap-2 mt-auto">
+                <span class="font-mono font-bold text-lg bg-black text-white px-2 py-0.5 shrink-0">
                     {{ formatPrice(product.price) }}
                 </span>
-                
-                <div class="font-mono text-xs text-gray-500 uppercase">
+
+                <div class="font-mono text-xs text-gray-500 uppercase truncate min-w-0 text-end">
                     {{ product.category?.title || 'Collection' }}
                 </div>
             </div>

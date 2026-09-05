@@ -1,6 +1,5 @@
 import type { PrismaClient } from '@prisma/client'
-
-export const PRODUCT_INFINITE_STOCK = 999999
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '../../../../shared/inventory/variant-availability'
 
 type TxLike = Pick<PrismaClient, 'productVariant' | 'product'>
 
@@ -23,7 +22,7 @@ export async function syncProductStockForProducts(tx: TxLike, tenantId: string, 
         if (v.trackInventory === false) {
             entry.infinite = true
         } else {
-            const available = clampNonNegativeInt(v.stock - v.reserved - v.safetyStock)
+            const available = clampNonNegativeInt(getVariantAvailableStock(v))
             entry.available += available
         }
         perProduct.set(v.productId, entry)
@@ -37,4 +36,3 @@ export async function syncProductStockForProducts(tx: TxLike, tenantId: string, 
         })
     }
 }
-

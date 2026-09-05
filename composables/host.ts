@@ -37,7 +37,7 @@ export const toSaasHost = (
   hostWithPort: string,
   opts?: { platformBaseDomain?: string }
 ): string | null => {
-  const platformBaseDomain = (opts?.platformBaseDomain ?? 'platform.com').toLowerCase()
+  const platformBaseDomain = (opts?.platformBaseDomain ?? 'swekly.com').toLowerCase()
   const { hostname, port } = splitHost(hostWithPort)
   const lower = hostname.toLowerCase()
 
@@ -54,7 +54,7 @@ export const toTenantHost = (
   tenantSlug: string,
   opts?: { platformBaseDomain?: string }
 ): string => {
-  const platformBaseDomain = (opts?.platformBaseDomain ?? 'platform.com').toLowerCase()
+  const platformBaseDomain = (opts?.platformBaseDomain ?? 'swekly.com').toLowerCase()
   const { hostname, port } = splitHost(saasHostWithPort)
   const lower = hostname.toLowerCase()
 

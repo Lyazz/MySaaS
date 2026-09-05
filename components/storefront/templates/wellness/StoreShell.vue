@@ -10,6 +10,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -46,6 +47,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -98,162 +109,170 @@ const mobileCategoriesDropdownOpen = ref(false)
 watch(mobileMenuOpen, (open) => {
     if (!open) mobileCategoriesDropdownOpen.value = false
 })
-// Build dynamic menu
-const categories = computed(() => {
-    return [
-        { name: storefrontContent.value.nav.home, href: '/' },
-        { name: storefrontContent.value.nav.shop, href: '/products' }
-    ]
-})
-const props = defineProps<{
+defineProps<{
     hideNavigation?: boolean
     mobileHeaderHidden?: boolean
     hideAnnouncementBar?: boolean
 }>()
-
-const questions = computed(() => []) // ... unused in displayed snippet but preserving structural integrity if needed
-// Actually, looking at previous file view, no props were defined.
-// Adding props definition.
-
 </script>
 
 <template>
   <StoreThemeProvider>
-    <div class="min-h-screen flex flex-col font-wellness text-stone-600 bg-stone-50">
+    <div class="min-h-screen flex flex-col font-wellness text-wl-ink bg-wl-paper">
       <!-- Top Announcement Bar -->
-      <!-- Top Announcement Bar -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
-        background-color="bg-brand-600"
-        text-color="text-white"
+        background-color="bg-wl-ink"
+        text-color="text-wl-paper"
       />
+      <div v-if="!hideNavigation && !hideAnnouncementBar" class="wl-shared-banner">
+        <StorefrontSharedClearanceBanner />
+      </div>
+      <StorefrontSharedClearanceAnnouncementDialog root-class="cl-wellness" />
 
-      <!-- Header -->
-      <!-- Header (Wellness Redesign) -->
-      <header v-if="!hideNavigation" :class="['bg-stone-50/80 backdrop-blur-md sticky top-0 z-50 transition-all duration-300', { 'hidden md:block': mobileHeaderHidden }]">
+      <!-- Header — label stock, held down by a single strong rule -->
+      <header v-if="!hideNavigation" :class="['bg-wl-card text-wl-ink border-b border-wl-ruleStrong shadow-wl sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="h-24 flex items-center justify-between gap-8">
-            <!-- Left: Logo -->
-            <div class="flex-shrink-0 flex items-center">
-              <NuxtLink to="/" class="group">
-                <template v-if="storeSettings?.logoUrl">
-                  <img 
-                    :src="storeSettings.logoUrl" 
-                    :alt="tenantName" 
-                    class="h-10 md:h-12 max-w-[180px] object-contain transition-transform duration-500 group-hover:scale-105"
-                  >
-                </template>
-                <template v-else>
-                  <div class="flex items-center gap-2">
-                    <div class="h-10 w-10 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center">
-                       <Icon name="lucide:flower-2" class="w-6 h-6" />
-                    </div>
-                    <span class="text-2xl font-wellness font-bold text-stone-800 tracking-tight ml-2">{{ tenantName }}</span>
-                  </div>
-                </template>
+          <div class="h-20 flex items-center justify-between gap-8">
+            <!-- Left: mark + wordmark. The name is always set, logo or not. -->
+            <div class="min-w-0 flex items-center">
+              <NuxtLink to="/" class="group flex items-center gap-3 min-w-0">
+                <!--
+                  Decorative alt: the store name sits beside it as real text, so
+                  captioning the image would announce the name twice.
+                -->
+                <img
+                  v-if="storeSettings?.logoUrl"
+                  :src="storeSettings.logoUrl"
+                  alt=""
+                  class="h-9 md:h-10 max-w-[110px] object-contain flex-shrink-0"
+                >
+                <span v-else class="h-9 w-9 border border-wl-oliveSoft bg-wl-oliveWash flex items-center justify-center flex-shrink-0">
+                   <Icon name="lucide:flower-2" class="w-4 h-4 text-wl-oliveDeep" />
+                </span>
+
+                <span
+                  v-if="storeSettings?.logoUrl"
+                  class="h-6 w-px bg-wl-rule flex-shrink-0 hidden sm:block"
+                  aria-hidden="true"
+                />
+
+                <span class="wl-display-sm text-lg sm:text-xl text-wl-ink truncate">{{ tenantName }}</span>
               </NuxtLink>
             </div>
 
-            <!-- Center: Navigation (Pill Style) -->
-            <nav class="hidden lg:flex items-center justify-center gap-2 flex-1">
-              <NuxtLink to="/" class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out" active-class="bg-white text-brand-800 shadow-sm ring-1 ring-stone-200">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out" active-class="bg-white text-brand-800 shadow-sm ring-1 ring-stone-200">{{ storefrontContent.nav.shop }}</NuxtLink>
+            <!-- Center: Navigation -->
+            <nav class="hidden lg:flex items-center justify-center gap-8 flex-1">
+              <NuxtLink to="/" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b-2 border-wl-olive">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b-2 border-wl-olive">{{ storefrontContent.nav.shop }}</NuxtLink>
 
               <!-- Categories Dropdown -->
-              <div class="relative group flex items-center h-full">
-                <button class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out flex items-center gap-1 cursor-pointer">
+              <div class="relative group flex items-center">
+                <button class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1 flex items-center gap-1.5 cursor-pointer">
                   {{ storefrontContent.nav.categories || 'Categories' }}
-                  <Icon name="lucide:chevron-down" class="w-4 h-4" />
+                  <Icon name="lucide:chevron-down" class="w-3 h-3" />
                 </button>
-                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
-                  <NuxtLink
-                    v-for="cat in tenantCategories"
-                    :key="cat.id"
-                    :to="`/category/${cat.slug}`"
-                    class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
-                  >
-                    {{ categoryDisplayTitle(cat) }}
-                  </NuxtLink>
+                <div class="absolute top-full start-0 pt-4 w-56 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-opacity duration-200 z-50">
+                  <div class="wl-plate wl-plate-lg py-1">
+                    <NuxtLink
+                      v-for="cat in tenantCategories"
+                      :key="cat.id"
+                      :to="`/category/${cat.slug}`"
+                      class="block px-4 py-2.5 text-sm text-wl-muted hover:text-wl-oliveDeep hover:bg-wl-oliveWash transition-colors"
+                    >
+                      {{ categoryDisplayTitle(cat) }}
+                    </NuxtLink>
+                  </div>
                 </div>
               </div>
 
-              <NuxtLink to="/contact" class="px-5 py-2 rounded-full text-sm font-medium text-stone-600 hover:bg-white hover:text-brand-700 hover:shadow-sm transition-all duration-300 ease-out" active-class="bg-white text-brand-800 shadow-sm ring-1 ring-stone-200">{{ storefrontContent.nav.contact }}</NuxtLink>
+              <NuxtLink to="/contact" class="wl-label text-wl-muted hover:text-wl-ink transition-colors py-1" active-class="!text-wl-ink border-b-2 border-wl-olive">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
 
             <!-- Right: Actions & Search -->
-            <div class="flex items-center justify-end gap-4 flex-shrink-0">
-               <!-- Search Box with Live Feed -->
+            <div class="flex items-center justify-end gap-1 sm:gap-3 flex-shrink-0">
+               <!-- Search: a ruled field, not a pill -->
                <div class="relative group hidden lg:flex items-center">
                   <input
                     type="text"
                     v-model="searchQuery"
-                    :placeholder="storefrontContent.search?.placeholder || 'Search...'"
-                    class="w-[120px] sm:w-[160px] p-2 pl-4 pr-10 text-sm text-stone-800 bg-white/60 focus:bg-white border border-stone-200 focus:border-brand-500 rounded-full outline-none transition-all placeholder:text-stone-400"
-                    @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                    @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                    :placeholder="storefrontContent.search.placeholder"
+                    class="w-[150px] focus:w-[210px] py-1.5 pe-6 text-sm text-wl-ink bg-transparent border-b border-wl-rule focus:border-wl-olive outline-none transition-all duration-300 placeholder:text-wl-muted/60"
+                    @focus="openSearchDropdown"
+                    @blur="closeSearchDropdownSoon"
                   >
-                  <Icon name="lucide:search" class="w-4 h-4 text-stone-400 absolute right-3 pointer-events-none" />
+                  <Icon name="lucide:search" class="w-3.5 h-3.5 text-wl-muted absolute end-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
 
                   <!-- Search Dropdown -->
                   <div
                     v-show="isSearchDropdownOpen"
-                    class="absolute top-[100%] right-0 mt-2 w-64 bg-white border border-stone-100 shadow-xl z-50 rounded-[1.5rem] p-2 overflow-hidden text-left pointer-events-auto"
+                    class="absolute top-full end-0 mt-3 w-72 wl-plate wl-plate-lg z-50 overflow-hidden text-start pointer-events-auto"
                   >
-                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-stone-500">Searching...</div>
-                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-stone-500">No products found.</div>
-                    <div v-else class="flex flex-col gap-1">
+                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.searching }}</div>
+                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.noResults }}</div>
+                    <div v-else class="flex flex-col">
                       <NuxtLink
                         v-for="product in visibleSearchResults"
                         :key="product.id"
                         :to="`/product/${product.slug}`"
-                        class="flex items-center gap-3 px-3 py-2 hover:bg-stone-50 rounded-[1.2rem] transition-colors"
+                        class="flex items-center gap-3 px-3 py-2.5 hover:bg-wl-oliveWash transition-colors border-b border-wl-rule/50 last:border-0"
                         @click="isSearchDropdownOpen = false"
                       >
-                        <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded-[1rem] shadow-sm" />
+                        <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-11 h-11 object-cover border border-wl-rule" />
                         <div class="flex-1 min-w-0">
-                          <div class="text-sm font-bold text-stone-900 truncate">{{ product.title }}</div>
-                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                          <div class="text-sm font-medium text-wl-ink truncate">{{ product.title }}</div>
+                          <div class="wl-num text-xs text-wl-muted mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1.5 wl-label !text-[10px] text-wl-henna">-{{ product.promotionDiscountPercent }}%</span></div>
                         </div>
                       </NuxtLink>
                     <button
                       v-if="hasMoreSearchResults"
                       type="button"
-                      class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                      class="w-full px-4 py-3 text-start wl-label text-wl-ink hover:bg-wl-paper transition-colors border-t border-wl-rule"
                       @mousedown.prevent
                       @click="showMoreSearchResults"
                     >
-                      See more
+                      {{ storefrontContent.search.seeMore }}
                     </button>
                     </div>
                   </div>
                </div>
 
-               <div class="h-6 w-px bg-stone-200 hidden lg:block" />
+               <div class="h-5 w-px bg-wl-rule hidden lg:block" />
 
-               <div class="flex items-center gap-2">
+               <div class="flex items-center gap-1 sm:gap-2">
                  <LocaleSwitcher class="hidden lg:inline-flex" />
                   <button
-                    class="relative p-3 text-stone-500 hover:text-brand-700 hover:bg-white rounded-full transition-all"
+                    class="relative p-2.5 text-wl-muted hover:text-wl-henna transition-colors"
                     :title="storefrontContent.header.wishlistTitle"
                     @click="navigateTo('/wishlist')"
                   >
                     <Icon name="lucide:heart" class="w-5 h-5" />
-                    <ClientOnly>
-                      <span
-                        v-if="favorites.count.value > 0"
-                        class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-stone-900 text-[10px] font-bold text-white absolute -top-1 -right-1"
-                      >{{ favorites.count.value }}</span>
-                    </ClientOnly>
+                    <span
+                      v-if="favorites.count.value > 0"
+                      class="wl-num flex h-4 min-w-4 px-1 items-center justify-center bg-wl-ink text-[10px] font-semibold text-wl-paper absolute top-0.5 end-0.5"
+                    >{{ favorites.count.value }}</span>
                   </button>
-                  <!-- Cart (Organic Pill) -->
+                  <!-- Cart: ink that greens on hover, like every other primary action -->
                   <NuxtLink
                     v-if="storeSettings?.cartEnabled !== false"
                     to="/cart"
-                    class="group relative flex items-center gap-2 px-4 py-2 rounded-full bg-brand-700 text-white shadow-md hover:bg-brand-800 transition-all hover:shadow-lg hover:-translate-y-0.5"
+                    class="wl-cta group relative flex items-center gap-2 px-4 py-2"
                   >
                     <Icon name="lucide:shopping-bag" class="w-4 h-4" />
-                    <span v-if="cartStore.itemCount > 0" class="text-xs font-bold">{{ cartStore.itemCount }}</span>
+                    <span v-if="cartStore.itemCount > 0" class="wl-num text-xs font-semibold">{{ cartStore.itemCount }}</span>
                   </NuxtLink>
+
+                  <!-- Mobile menu -->
+                  <button
+                    type="button"
+                    class="lg:hidden p-2.5 text-wl-muted hover:text-wl-ink transition-colors"
+                    :aria-expanded="mobileMenuOpen"
+                    aria-controls="wellness-mobile-drawer"
+                    :aria-label="storefrontContent.nav.categories || 'Categories'"
+                    @click="mobileMenuOpen = true"
+                  >
+                    <Icon name="lucide:menu" class="w-5 h-5" />
+                  </button>
                </div>
             </div>
 
@@ -267,56 +286,56 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
           <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
         </Transition>
         <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
+          <div v-if="mobileMenuOpen" id="wellness-mobile-drawer" class="wl-root fixed top-0 start-0 bottom-0 w-[85%] max-w-xs bg-wl-paper z-[61] shadow-2xl flex flex-col overflow-y-auto font-wellness">
             <!-- Drawer header -->
-            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <span class="text-lg font-bold text-slate-900">{{ tenantName }}</span>
-              <button @click="mobileMenuOpen = false" class="p-1 text-slate-500 hover:text-slate-900">
+            <div class="flex items-center justify-between px-5 h-20 bg-wl-card border-b-2 border-wl-olive text-wl-ink">
+              <span class="wl-display-sm text-xl">{{ tenantName }}</span>
+              <button @click="mobileMenuOpen = false" class="p-1 text-wl-muted hover:text-wl-ink transition-colors">
                 <Icon name="lucide:x" class="w-5 h-5" />
               </button>
             </div>
 
             <!-- Search -->
-            <div class="px-5 py-3">
+            <div class="px-5 py-5">
               <div class="relative">
                 <input
                   type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  :placeholder="storefrontContent.search.placeholder"
+                  class="w-full border-b border-wl-ruleStrong bg-transparent py-2.5 pe-8 text-sm placeholder:text-wl-muted/60 text-wl-ink outline-none focus:border-wl-olive transition-colors"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Icon name="lucide:search" class="w-4 h-4 text-wl-muted absolute end-1.5 top-1/2 -translate-y-1/2 pointer-events-none" />
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
+                  class="absolute top-full start-0 end-0 mt-1 wl-plate wl-plate-lg z-50 overflow-hidden pointer-events-auto"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
+                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.searching }}</div>
+                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-wl-muted">{{ storefrontContent.search.noResults }}</div>
                   <div v-else class="flex flex-col">
                     <NuxtLink
                       v-for="product in visibleSearchResults"
                       :key="product.id"
                       :to="'/product/' + product.slug"
-                      class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
+                      class="flex items-center gap-3 px-4 py-3 hover:bg-wl-oliveWash transition-colors border-b border-wl-rule/50 last:border-0"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
-                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
+                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover border border-wl-rule" />
                       <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-sm font-medium text-wl-ink truncate">{{ product.title }}</div>
+                                                <div class="wl-num text-xs text-wl-muted mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ms-1.5 wl-label !text-[10px] text-wl-henna">-{{ product.promotionDiscountPercent }}%</span></div>
                       </div>
                     </NuxtLink>
                   <button
                     v-if="hasMoreSearchResults"
                     type="button"
-                    class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                    class="w-full px-4 py-3 text-start wl-label text-wl-ink hover:bg-wl-paper transition-colors border-t border-wl-rule"
                     @mousedown.prevent
                     @click="showMoreSearchResults"
                   >
-                    See more
+                    {{ storefrontContent.search.seeMore }}
                   </button>
                   </div>
                 </div>
@@ -324,40 +343,44 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             </div>
 
             <!-- Nav links -->
-            <nav class="flex flex-col px-5 py-2 gap-1">
-              <NuxtLink to="/" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
-              <NuxtLink to="/contact" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
+            <nav class="flex flex-col px-5">
+              <NuxtLink to="/" class="py-4 wl-label text-wl-ink border-t border-wl-rule" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
+              <NuxtLink to="/products" class="py-4 wl-label text-wl-ink border-t border-wl-rule" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
+              <NuxtLink to="/contact" class="py-4 wl-label text-wl-ink border-t border-wl-rule" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
-            <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
-  <button
-    type="button"
-    class="w-full flex items-center justify-between text-left"
-    @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
-  >
-    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-      {{ storefrontContent.nav.categories || 'Categories' }}
-    </h4>
-    <Icon
-      name="lucide:chevron-down"
-      class="w-4 h-4 text-slate-400 transition-transform"
-      :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
-    />
-  </button>
-  <div v-show="mobileCategoriesDropdownOpen" class="flex flex-col gap-1">
-    <NuxtLink
-      v-for="cat in tenantCategories"
-      :key="cat.id"
-      :to="'/category/' + cat.slug"
-      class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
-      @click="mobileMenuOpen = false"
-    >
-      {{ categoryDisplayTitle(cat) }}
-    </NuxtLink>
-  </div>
-</div>
+            <div v-if="tenantCategories && tenantCategories.length" class="px-5">
+              <button
+                type="button"
+                class="w-full flex items-center justify-between text-start py-4 border-t border-wl-rule"
+                @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
+              >
+                <span class="wl-label text-wl-muted">
+                  {{ storefrontContent.nav.categories || 'Categories' }}
+                </span>
+                <Icon
+                  name="lucide:chevron-down"
+                  class="w-4 h-4 text-wl-muted transition-transform"
+                  :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
+                />
+              </button>
+              <div v-show="mobileCategoriesDropdownOpen" class="flex flex-col pb-4">
+                <NuxtLink
+                  v-for="cat in tenantCategories"
+                  :key="cat.id"
+                  :to="'/category/' + cat.slug"
+                  class="py-2.5 text-sm text-wl-muted hover:text-wl-ink transition-colors"
+                  @click="mobileMenuOpen = false"
+                >
+                  {{ categoryDisplayTitle(cat) }}
+                </NuxtLink>
+              </div>
+            </div>
           </div>
         </Transition>
       </Teleport>
@@ -367,25 +390,28 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
         <slot />
       </main>
 
-      <!-- Footer -->
-      <!-- Footer (Wellness Redesign) -->
-      <footer class="bg-stone-100 text-stone-600 pt-20 pb-10 border-t border-stone-200">
+      <!--
+        Footer — the base of the bottle. The one dark surface in the theme:
+        glazed tile green, so the cream page above it reads as a label applied
+        to something, rather than as paper floating on more paper.
+      -->
+      <footer class="wl-ground-deep pt-20 pb-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 md:gap-8 mb-16">
             <!-- Brand Column -->
-            <div class="col-span-1 md:col-span-1">
-              <h3 class="font-wellness text-2xl font-bold text-stone-800 mb-6 flex items-center gap-2">
-                 <Icon name="lucide:flower-2" class="w-6 h-6 text-brand-600" />
+            <div class="col-span-1 md:col-span-1 md:pe-12">
+              <h3 class="wl-display-sm wl-on-deep text-2xl mb-6 flex items-center gap-3">
+                 <Icon name="lucide:flower-2" class="w-5 h-5 text-wl-oliveSoft" />
                  {{ tenantName }}
               </h3>
-              
+
               <ul v-if="primaryContactInfos.length" class="space-y-3 text-sm">
                 <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
-                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4 text-brand-600 mt-1" />
+                  <Icon :name="kindDef(info.kind).iconName" class="w-4 h-4 text-wl-oliveSoft mt-0.5 flex-shrink-0" />
                   <a
                     v-if="hrefFor(info)"
                     :href="hrefFor(info)!"
-                    class="hover:text-brand-700 transition-colors"
+                    class="transition-colors"
                     :target="isExternalHref(hrefFor(info)!) ? '_blank' : undefined"
                     :rel="isExternalHref(hrefFor(info)!) ? 'noopener noreferrer' : undefined"
                   >
@@ -394,14 +420,14 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   <span v-else>{{ info.value }}</span>
                 </li>
               </ul>
-              
-              <!-- Dynamic Socials (Wellness Style) -->
-              <div v-if="socialContactInfosWithHref.length" class="flex gap-3 mt-8">
+
+              <!-- Dynamic Socials -->
+              <div v-if="socialContactInfosWithHref.length" class="flex gap-2 mt-8">
                 <a
                   v-for="info in socialContactInfosWithHref"
                   :key="info.id"
                   :href="info.href"
-                  class="h-9 w-9 rounded-full bg-white border border-stone-200 flex items-center justify-center text-stone-500 hover:text-white hover:bg-brand-600 hover:border-brand-600 transition-all shadow-sm"
+                  class="h-9 w-9 border border-white/15 flex items-center justify-center hover:bg-wl-olive hover:border-wl-olive hover:text-wl-zelligeDeep transition-colors"
                   :target="isExternalHref(info.href) ? '_blank' : undefined"
                   :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
                 >
@@ -411,44 +437,33 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             </div>
 
             <!-- Links Column (Contact) -->
-            <div>
-              <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.contact }}</h4>
+            <div v-if="legalLinks.contact.enabled" class="md:border-s md:border-white/10 md:ps-8">
+              <h4 class="wl-label text-wl-oliveSoft mb-6">{{ storefrontContent.footer.contact }}</h4>
               <ul class="space-y-3 text-sm">
-                <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.contactUs }}</a></li>
-                <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.aboutUs }}</a></li>
+                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="transition-colors">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
 
             <!-- Terms & Privacy Column -->
-            <div>
-               <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.termsPrivacy }}</h4>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled" class="md:border-s md:border-white/10 md:ps-8">
+               <h4 class="wl-label text-wl-oliveSoft mb-6">{{ storefrontContent.footer.termsPrivacy }}</h4>
                <ul class="space-y-3 text-sm">
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.termsOfService }}</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.returnPolicy }}</a></li>
+                 <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="transition-colors">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                 <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="transition-colors">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                 <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="transition-colors">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
                </ul>
             </div>
 
-            <!-- Help Column -->
-            <div>
-               <h4 class="font-wellness font-semibold text-stone-900 mb-6">{{ storefrontContent.footer.help }}</h4>
-               <ul class="space-y-3 text-sm">
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.faq }}</a></li>
-                 <li><a href="#" class="hover:text-brand-700 transition-colors">{{ storefrontContent.footer.shippingInfo }}</a></li>
-               </ul>
-            </div>
           </div>
 
           <!-- Bottom -->
-          <div class="pt-8 border-t border-stone-200 flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-stone-400">
+          <div class="pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4 wl-label !tracking-[0.12em]">
             <div>{{ storefrontContent.footer.copyright(tenantName) }}</div>
-            <div class="hidden md:block">
-               <!-- Payment icons or other bottom elements could go here -->
-            </div>
+            <StorefrontSharedPoweredBy />
           </div>
         </div>
       </footer>
-      
+
 
     </div>
   </StoreThemeProvider>
@@ -459,4 +474,5 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 </style>

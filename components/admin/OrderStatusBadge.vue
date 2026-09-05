@@ -1,16 +1,17 @@
   <template>
   <span :class="badgeClasses">
-    {{ label }}
+    {{ label }}<template v-if="detailLabel"> ({{ detailLabel }})</template>
   </span>
 </template>
 
 <script setup lang="ts">
 interface Props {
   status: string
+  detail?: string | null
 }
 
 const props = defineProps<Props>()
-const { t } = useI18n({ useScope: 'global' })
+const { t, te } = useI18n()
 
 const statusKeys: Record<string, string> = {
   PENDING: 'admin.orderStatus.pending',
@@ -22,8 +23,27 @@ const statusKeys: Record<string, string> = {
 }
 
 const label = computed(() => {
-  const key = statusKeys[String(props.status || '').toUpperCase()]
+  const key = statusKeys[String(props.status || '').trim().toUpperCase()]
   return key ? t(key) : props.status
+})
+
+// Only surface the carrier-level detail when the order status isn't already
+// self-explanatory (pending/delivered) — otherwise it's redundant noise.
+const detailLabel = computed(() => {
+  const raw = String(props.detail || '').trim()
+  if (!raw) return null
+
+  const statusCode = String(props.status || '').trim().toUpperCase()
+  if (statusCode === 'PENDING' || statusCode === 'DELIVERED') return null
+
+  const lower = raw.toLowerCase()
+  const providerKey = `admin.orderStatus.providerDetail.${lower}`
+  if (te(providerKey)) return t(providerKey)
+
+  const genericKey = statusKeys[raw.toUpperCase()]
+  if (genericKey) return t(genericKey)
+
+  return raw
 })
 
 const badgeClasses = computed(() => {
@@ -32,7 +52,7 @@ const badgeClasses = computed(() => {
   const tones: Record<string, string> = {
     PENDING: 'ui-badge--amber',
     CONFIRMED: 'ui-badge--indigo',
-    SHIPPED: 'ui-badge--teal',
+    SHIPPED: 'ui-badge--lime',
     DELIVERED: 'ui-badge--emerald',
     CANCELLED: 'ui-badge--red',
     RETURNED: 'ui-badge--slate'

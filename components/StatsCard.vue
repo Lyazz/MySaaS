@@ -1,20 +1,24 @@
 <template>
-  <div
-    class="stat-card"
-    :class="`stat-card-${color}`"
-  >
-    <div class="flex items-center justify-between">
-      <div>
-        <p class="text-sm font-medium opacity-80">
-          {{ label }}
-        </p>
-        <p class="text-3xl font-bold mt-1">
-          {{ formattedValue }}
-        </p>
-      </div>
-      <div class="text-4xl opacity-70">
-        {{ icon }}
-      </div>
+  <div class="ui-card flex items-center gap-4 p-5">
+    <div
+      class="ui-icon-tile"
+      :class="`ui-icon-tile--${color}`"
+    >
+      <Icon :name="icon" class="h-5 w-5" />
+    </div>
+    <div class="min-w-0 flex-1">
+      <p
+        class="truncate text-xs font-semibold uppercase tracking-wider"
+        style="color: var(--text-tertiary)"
+      >
+        {{ label }}
+      </p>
+      <p
+        class="mt-0.5 truncate text-2xl font-bold"
+        style="color: var(--text-primary)"
+      >
+        {{ formattedValue }}
+      </p>
     </div>
   </div>
 </template>
@@ -24,11 +28,11 @@ interface Props {
   icon: string
   label: string
   value: number | string
-  color?: 'teal' | 'blue' | 'green' | 'orange' | 'red'
+  color?: 'slate' | 'emerald' | 'blue' | 'indigo' | 'lime' | 'amber' | 'red'
 }
 
 const props = withDefaults(defineProps<Props>(), {
-  color: 'teal'
+  color: 'lime'
 })
 
 const formattedValue = computed(() => {
@@ -38,29 +42,3 @@ const formattedValue = computed(() => {
   return props.value
 })
 </script>
-
-<style scoped>
-.stat-card {
-  @apply p-6 rounded-xl backdrop-blur-sm border transition-all duration-200 hover:scale-105;
-}
-
-.stat-card-teal {
-  @apply bg-teal-900/50 border-teal-500/30 text-teal-100;
-}
-
-.stat-card-blue {
-  @apply bg-blue-900/50 border-blue-500/30 text-blue-100;
-}
-
-.stat-card-green {
-  @apply bg-green-900/50 border-green-500/30 text-green-100;
-}
-
-.stat-card-orange {
-  @apply bg-orange-900/50 border-orange-500/30 text-orange-100;
-}
-
-.stat-card-red {
-  @apply bg-red-900/50 border-red-500/30 text-red-100;
-}
-</style>

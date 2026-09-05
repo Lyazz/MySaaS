@@ -3,84 +3,93 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
       <div>
-        <h2 class="text-2xl font-semibold tracking-tight" style="color: var(--text-primary)">
+        <h2 class="text-2xl font-semibold tracking-tight text-primary">
           {{ t('admin.nav.purchases') }}
         </h2>
-        <p class="mt-1" style="color: var(--text-secondary)">
+        <p class="mt-1 text-secondary">
           {{ t('admin.pages.purchases.index.subtitle') }}
         </p>
       </div>
-      <NuxtLink
-        to="/admin/purchases/create"
-        class="ui-btn ui-btn--primary ui-btn--md"
-      >
-        <Icon name="lucide:plus" class="w-5 h-5" />
-        <span>{{ t('admin.pages.purchases.index.newPurchase') }}</span>
-      </NuxtLink>
-    </div>
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="ui-btn ui-btn--secondary ui-btn--md"
+          @click="scanOpen = true"
+        >
+          <Icon name="lucide:scan-line" class="w-5 h-5" />
+          <span>{{ t('admin.pages.aiImport.entry.scan') }}</span>
+        </button>
 
-    <!-- Filters -->
-    <div class="ui-card p-4 mb-6">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div>
-           <BaseSelect
-            v-model="selectedSupplier"
-            :label="t('admin.pages.purchases.index.filters.supplierLabel')"
-            :placeholder="t('admin.pages.purchases.index.filters.allSuppliers')"
-          >
-            <option value="">{{ t('admin.pages.purchases.index.filters.allSuppliers') }}</option>
-            <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
-          </BaseSelect>
-        </div>
-        <div>
-           <BaseSelect
-            v-model="selectedUser"
-            :label="t('admin.pages.purchases.index.filters.userLabel')"
-            :placeholder="t('admin.pages.purchases.index.filters.allUsers')"
-          >
-            <option value="">{{ t('admin.pages.purchases.index.filters.allUsers') }}</option>
-            <option v-for="u in users" :key="u.id" :value="u.id">{{ u.email }}</option>
-          </BaseSelect>
-        </div>
-        <div>
-          <DateFilter
-            v-model:startDate="startDate"
-            v-model:endDate="endDate"
-          />
-        </div>
-        <div>
-           <BaseSelect
-            v-model="selectedStatus"
-            :label="t('admin.pages.purchases.index.filters.statusLabel')"
-            :placeholder="t('admin.pages.purchases.index.filters.allStatuses')"
-          >
-            <option value="">{{ t('admin.pages.purchases.index.filters.allStatuses') }}</option>
-            <option value="DRAFT">{{ t('admin.pages.purchases.index.filters.statusValues.DRAFT') }}</option>
-            <option value="ORDERED">{{ t('admin.pages.purchases.index.filters.statusValues.ORDERED') }}</option>
-            <option value="PARTIALLY_RECEIVED">{{ t('admin.pages.purchases.index.filters.statusValues.PARTIALLY_RECEIVED') }}</option>
-            <option value="RECEIVED">{{ t('admin.pages.purchases.index.filters.statusValues.RECEIVED') }}</option>
-            <option value="CANCELLED">{{ t('admin.pages.purchases.index.filters.statusValues.CANCELLED') }}</option>
-          </BaseSelect>
-        </div>
-        <div>
-           <BaseSelect
-            v-model="selectedPaymentStatus"
-            :label="t('admin.pages.purchases.index.filters.paymentStatusLabel')"
-            :placeholder="t('admin.pages.purchases.index.filters.allPaymentStatuses')"
-          >
-            <option value="">{{ t('admin.pages.purchases.index.filters.allPaymentStatuses') }}</option>
-            <option value="UNPAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.UNPAID') }}</option>
-            <option value="PARTIALLY_PAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.PARTIALLY_PAID') }}</option>
-            <option value="PAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.PAID') }}</option>
-          </BaseSelect>
-        </div>
-        <div class="hidden">
-          <p class="text-sm" style="color: var(--text-tertiary)">
-            View and manage your purchase history.
-          </p>
-        </div>
+        <NuxtLink
+          to="/admin/purchases/create"
+          class="ui-btn ui-btn--primary ui-btn--md"
+        >
+          <Icon name="lucide:plus" class="w-5 h-5" />
+          <span>{{ t('admin.pages.purchases.index.newPurchase') }}</span>
+        </NuxtLink>
       </div>
     </div>
+
+    <AdminAiImportScanUploadModal
+      :open="scanOpen"
+      default-kind="PURCHASE_INVOICE"
+      @close="scanOpen = false"
+      @created="onScanCreated"
+    />
+
+    <!-- Filters -->
+    <AdminFilterBar
+      hide-search
+      :chips="filterChips"
+      :advanced-count="advancedFilterCount"
+      :clearable="hasActiveFilters"
+      testid="purchases-filters"
+      @clear="clearFilters"
+      @remove-chip="removeFilterChip"
+    >
+      <AdminDateRangeFilter
+        v-model:startDate="startDate"
+        v-model:endDate="endDate"
+        testid="purchases-filters"
+      />
+
+      <template #advanced>
+        <BaseSelect
+          v-model="selectedSupplier"
+          :label="t('admin.pages.purchases.index.filters.supplierLabel')"
+        >
+          <option value="">{{ t('admin.pages.purchases.index.filters.allSuppliers') }}</option>
+          <option v-for="s in suppliers" :key="s.id" :value="s.id">{{ s.name }}</option>
+        </BaseSelect>
+        <BaseSelect
+          v-model="selectedUser"
+          :label="t('admin.pages.purchases.index.filters.userLabel')"
+        >
+          <option value="">{{ t('admin.pages.purchases.index.filters.allUsers') }}</option>
+          <option v-for="u in users" :key="u.id" :value="u.id">{{ u.email }}</option>
+        </BaseSelect>
+        <BaseSelect
+          v-model="selectedStatus"
+          :label="t('admin.pages.purchases.index.filters.statusLabel')"
+        >
+          <option value="">{{ t('admin.pages.purchases.index.filters.allStatuses') }}</option>
+          <option value="DRAFT">{{ t('admin.pages.purchases.index.filters.statusValues.DRAFT') }}</option>
+          <option value="ORDERED">{{ t('admin.pages.purchases.index.filters.statusValues.ORDERED') }}</option>
+          <option value="PARTIALLY_RECEIVED">{{ t('admin.pages.purchases.index.filters.statusValues.PARTIALLY_RECEIVED') }}</option>
+          <option value="RECEIVED">{{ t('admin.pages.purchases.index.filters.statusValues.RECEIVED') }}</option>
+          <option value="CANCELLED">{{ t('admin.pages.purchases.index.filters.statusValues.CANCELLED') }}</option>
+        </BaseSelect>
+        <BaseSelect
+          v-model="selectedPaymentStatus"
+          :label="t('admin.pages.purchases.index.filters.paymentStatusLabel')"
+        >
+          <option value="">{{ t('admin.pages.purchases.index.filters.allPaymentStatuses') }}</option>
+          <option value="UNPAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.UNPAID') }}</option>
+          <option value="PARTIALLY_PAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.PARTIALLY_PAID') }}</option>
+          <option value="PAID">{{ t('admin.pages.purchases.index.filters.paymentStatusValues.PAID') }}</option>
+        </BaseSelect>
+      </template>
+    </AdminFilterBar>
 
     <!-- Loading State -->
     <div
@@ -88,7 +97,7 @@
       class="ui-card p-12 text-center"
     >
       <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 [border-color:var(--brand)]" />
-      <p class="mt-2" style="color: var(--text-secondary)">
+      <p class="mt-2 text-secondary">
         {{ t('admin.pages.purchases.index.loading') }}
       </p>
     </div>
@@ -98,11 +107,11 @@
       v-else-if="filteredOrders.length === 0"
       class="ui-card p-12 text-center"
     >
-      <Icon name="lucide:shopping-bag" class="mx-auto h-12 w-12" style="color: var(--text-muted)" />
-      <h3 class="mt-2 text-sm font-medium" style="color: var(--text-primary)">
+      <Icon name="lucide:shopping-bag" class="mx-auto h-12 w-12 text-muted" />
+      <h3 class="mt-2 text-sm font-medium text-primary">
         {{ t('admin.pages.purchases.index.empty.title') }}
       </h3>
-      <p class="mt-1 text-sm" style="color: var(--text-tertiary)">
+      <p class="mt-1 text-sm text-tertiary">
         {{ t('admin.pages.purchases.index.empty.hint') }}
       </p>
       <div class="mt-6">
@@ -110,7 +119,7 @@
           to="/admin/purchases/create"
           class="ui-btn ui-btn--primary ui-btn--md"
         >
-          <Icon name="lucide:plus" class="w-5 h-5 mr-2" />
+          <Icon name="lucide:plus" class="w-5 h-5 me-2" />
           {{ t('admin.pages.purchases.index.newPurchase') }}
         </NuxtLink>
       </div>
@@ -152,39 +161,45 @@
               <th class="ui-th">
                 {{ t('admin.pages.purchases.index.table.date') }}
               </th>
-              <th class="ui-th text-right">
+              <th class="ui-th text-end">
                 {{ t('admin.pages.purchases.index.table.action') }}
               </th>
             </tr>
           </thead>
-          <tbody class="ui-tbody">
+          <tbody class="ui-tbody" @touchstart.passive="onRowTouchStart" @touchmove.passive="onRowTouchMove">
             <tr
               v-for="order in paginatedOrders"
               :key="order.id"
-              class="ui-tr"
+              class="ui-tr ui-tr--clickable"
+              role="link"
+              tabindex="0"
+              :aria-label="`${t('admin.pages.purchases.index.table.id')}: #${order.id.slice(0, 8)}`"
+              @click="openPurchaseRow($event, order.id)"
+              @keydown.enter="openPurchaseRow($event, order.id)"
+              @keydown.space="openPurchaseRow($event, order.id)"
             >
               <td class="ui-td whitespace-nowrap">
                 <NuxtLink
-                  :to="`/admin/purchases/${order.id}`"
-                  class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-primary)"
-                >
+ :to="`/admin/purchases/${order.id}`"
+ class="font-medium hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors text-primary" 
+>
                   #{{ order.id.slice(0, 8) }}
                 </NuxtLink>
               </td>
               <td class="ui-td whitespace-nowrap text-sm">
                 <NuxtLink
-                  v-if="order.supplier"
-                  :to="`/admin/suppliers/${order.supplier.id}`"
-                  class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors" style="color: var(--text-secondary)"
-                >
+ v-if="order.supplier"
+ :to="`/admin/suppliers/${order.supplier.id}`"
+ class="hover:[color:rgba(var(--brand-rgb)/0.85)] transition-colors text-secondary" 
+>
                   {{ order.supplier.name }}
                 </NuxtLink>
-                <span v-else style="color: var(--text-muted)">—</span>
+                <span class="text-muted" v-else>—</span>
               </td>
-              <td class="ui-td whitespace-nowrap font-medium" style="color: var(--text-primary)">
+              <td class="ui-td whitespace-nowrap font-medium text-primary">
                 {{ formatCurrency(calculateTotal(order)) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 <a
                   v-if="order.createdByEmail"
                   :href="`mailto:${order.createdByEmail}`"
@@ -204,16 +219,16 @@
                   {{ order.paymentStatus }}
                 </span>
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 {{ formatCurrency(Number(order.paidAmount || 0)) }} / {{ formatCurrency(Number(order.totalAmount || calculateTotal(order))) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 {{ t('admin.pages.purchases.index.table.itemsCount', { count: order.items?.length || 0 }) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-sm" style="color: var(--text-secondary)">
+              <td class="ui-td whitespace-nowrap text-sm text-secondary">
                 {{ formatDate(order.createdAt) }}
               </td>
-              <td class="ui-td whitespace-nowrap text-right">
+              <td class="ui-td whitespace-nowrap text-end">
                 <NuxtLink
                   :to="`/admin/purchases/${order.id}`"
                   class="ui-btn ui-btn--secondary ui-btn--sm"
@@ -228,7 +243,7 @@
       </div>
 
       <!-- Pagination -->
-      <div class="px-4 py-3 flex items-center justify-between sm:px-6" style="border-top: 1px solid var(--surface-border)">
+      <div class="px-4 py-3 flex items-center justify-between sm:px-6 border-t border-line">
         <div class="flex flex-1 items-center justify-between sm:hidden">
           <button
             :disabled="currentPage === 1"
@@ -237,7 +252,7 @@
           >
             <Icon name="lucide:chevron-left" class="w-4 h-4" />
           </button>
-          <span class="text-sm" style="color: var(--text-secondary)">
+          <span class="text-sm text-secondary">
             {{ t('admin.common.page', { page: currentPage, total: totalPages }) }}
           </span>
           <button
@@ -250,7 +265,7 @@
         </div>
         <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
           <div>
-            <p class="text-sm" style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.pages.purchases.index.pagination.showing', {
                 from: (currentPage - 1) * itemsPerPage + 1,
                 to: Math.min(currentPage * itemsPerPage, filteredOrders.length),
@@ -259,12 +274,12 @@
             </p>
           </div>
           <div>
-            <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+            <nav class="relative z-0 inline-flex rounded-lg shadow-sm -space-x-px">
               <button
-                :disabled="currentPage === 1"
-                class="relative inline-flex items-center px-2 py-2 rounded-l-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage--"
-              >
+ :disabled="currentPage === 1"
+ class="relative inline-flex items-center px-2 py-2 rounded-s-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-tertiary" 
+ @click="currentPage--"
+>
                 {{ t('admin.common.previous') }}
               </button>
               <button
@@ -274,7 +289,7 @@
                   'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
                   currentPage === page
                     ? 'z-10 [border-color:var(--brand)] [color:rgba(var(--brand-rgb)/0.85)]'
-                    : 'text-slate-400'
+                    : 'text-tertiary'
                 ]"
                 :style="currentPage === page
                   ? 'background: rgba(var(--brand-rgb)/0.1); border: 1px solid var(--brand)'
@@ -284,10 +299,10 @@
                 {{ page }}
               </button>
               <button
-                :disabled="currentPage === totalPages"
-                class="relative inline-flex items-center px-2 py-2 rounded-r-md text-sm font-medium disabled:opacity-50" style="border: 1px solid var(--surface-border); background: var(--surface-2); color: var(--text-tertiary)"
-                @click="currentPage++"
-              >
+ :disabled="currentPage === totalPages"
+ class="relative inline-flex items-center px-2 py-2 rounded-e-lg text-sm font-medium disabled:opacity-50 border border-line surface-2 text-tertiary" 
+ @click="currentPage++"
+>
                 {{ t('admin.common.next') }}
               </button>
             </nav>
@@ -301,7 +316,10 @@
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
 import BaseSelect from '~/components/ui/BaseSelect.vue'
-import DateFilter from '~/components/ui/DateFilter.vue'
+import AdminFilterBar from '~/components/admin/AdminFilterBar.vue'
+import AdminDateRangeFilter from '~/components/admin/AdminDateRangeFilter.vue'
+import { getDashboardPresetDateRange } from '~/composables/admin/dashboardRange'
+import AdminAiImportScanUploadModal from '~/components/admin/ai-import/ScanUploadModal.vue'
 
 definePageMeta({
   middleware: 'auth',
@@ -325,21 +343,92 @@ type PurchaseOrder = {
 const authStore = useAuthStore()
 const { t } = useI18n({ useScope: 'global' })
 const { format: formatCurrency } = useCurrency()
+const route = useRoute()
+const router = useRouter()
+
+/** Scanning a supplier invoice into a DRAFT purchase order. */
+const scanOpen = ref(false)
+const onScanCreated = async (jobId: string) => {
+  scanOpen.value = false
+  await router.push(`/admin/ai-import/${jobId}`)
+}
+
 const suppliers = ref<Supplier[]>([])
 const users = ref<{ id: string; email: string }[]>([])
 const orders = ref<PurchaseOrder[]>([])
 const loading = ref(true)
-const selectedSupplier = ref('')
-const selectedUser = ref('')
-const selectedStatus = ref('')
-const selectedPaymentStatus = ref('')
-const today = new Date()
-const lastWeek = new Date(today)
-lastWeek.setDate(lastWeek.getDate() - 7)
+const selectedSupplier = ref(typeof route.query.supplierId === 'string' ? route.query.supplierId : '')
+const selectedUser = ref(typeof route.query.userId === 'string' ? route.query.userId : '')
+const selectedStatus = ref(typeof route.query.status === 'string' ? route.query.status : '')
+const selectedPaymentStatus = ref(typeof route.query.paymentStatus === 'string' ? route.query.paymentStatus : '')
+const defaultDateRange = getDashboardPresetDateRange('today')
+const startDate = ref(typeof route.query.startDate === 'string' ? route.query.startDate : defaultDateRange.from)
+const endDate = ref(typeof route.query.endDate === 'string' ? route.query.endDate : defaultDateRange.to)
 
-const startDate = ref(lastWeek.toISOString().split('T')[0])
-const endDate = ref(today.toISOString().split('T')[0])
-const currentPage = ref(1)
+const advancedFilterCount = computed(() => [
+  selectedSupplier.value,
+  selectedUser.value,
+  selectedStatus.value,
+  selectedPaymentStatus.value
+].filter(Boolean).length)
+
+const hasActiveFilters = computed(() => Boolean(
+  advancedFilterCount.value
+  || startDate.value !== defaultDateRange.from
+  || endDate.value !== defaultDateRange.to
+))
+
+const filterChips = computed(() => {
+  const chips: { key: string; label: string; value: string }[] = []
+  if (selectedSupplier.value) {
+    const supplier = suppliers.value.find((s) => s.id === selectedSupplier.value)
+    chips.push({
+      key: 'supplier',
+      label: t('admin.pages.purchases.index.filters.supplierLabel'),
+      value: supplier ? supplier.name : selectedSupplier.value
+    })
+  }
+  if (selectedUser.value) {
+    const user = users.value.find((u) => u.id === selectedUser.value)
+    chips.push({
+      key: 'user',
+      label: t('admin.pages.purchases.index.filters.userLabel'),
+      value: user ? user.email : selectedUser.value
+    })
+  }
+  if (selectedStatus.value) {
+    chips.push({
+      key: 'status',
+      label: t('admin.pages.purchases.index.filters.statusLabel'),
+      value: t(`admin.pages.purchases.index.filters.statusValues.${selectedStatus.value}`)
+    })
+  }
+  if (selectedPaymentStatus.value) {
+    chips.push({
+      key: 'paymentStatus',
+      label: t('admin.pages.purchases.index.filters.paymentStatusLabel'),
+      value: t(`admin.pages.purchases.index.filters.paymentStatusValues.${selectedPaymentStatus.value}`)
+    })
+  }
+  return chips
+})
+
+function removeFilterChip(key: string) {
+  if (key === 'supplier') selectedSupplier.value = ''
+  if (key === 'user') selectedUser.value = ''
+  if (key === 'status') selectedStatus.value = ''
+  if (key === 'paymentStatus') selectedPaymentStatus.value = ''
+}
+
+function clearFilters() {
+  selectedSupplier.value = ''
+  selectedUser.value = ''
+  selectedStatus.value = ''
+  selectedPaymentStatus.value = ''
+  startDate.value = defaultDateRange.from
+  endDate.value = defaultDateRange.to
+}
+const currentPage = ref(Number(route.query.page) || 1)
 const itemsPerPage = 25
 
 // Computed
@@ -398,6 +487,12 @@ const calculateTotal = (order: PurchaseOrder) => {
 
 const formatDate = (iso: string) => new Date(iso).toLocaleDateString()
 
+function openPurchaseRow(event: Event, purchaseId: string) {
+  if (shouldIgnoreRowClick(event)) return
+  if (event instanceof KeyboardEvent) event.preventDefault()
+  navigateTo(`/admin/purchases/${purchaseId}`)
+}
+
 const getStatusClass = (status: string) => {
   const base = 'ui-badge '
   switch (status.toLowerCase()) {
@@ -427,20 +522,42 @@ const getPaymentStatusClass = (status: string) => {
   }
 }
 
-watch(selectedSupplier, () => currentPage.value = 1)
+function syncToUrl() {
+  router.replace({
+    query: {
+      ...route.query,
+      supplierId: selectedSupplier.value || undefined,
+      userId: selectedUser.value || undefined,
+      status: selectedStatus.value || undefined,
+      paymentStatus: selectedPaymentStatus.value || undefined,
+      startDate: startDate.value === defaultDateRange.from ? undefined : startDate.value,
+      endDate: endDate.value === defaultDateRange.to ? undefined : endDate.value,
+      page: currentPage.value > 1 ? String(currentPage.value) : undefined
+    }
+  })
+}
+
+watch(selectedSupplier, () => { currentPage.value = 1; syncToUrl() })
 watch([startDate, endDate], () => {
     currentPage.value = 1
+    syncToUrl()
     fetchOrders()
 })
 
 watch(selectedUser, () => {
     currentPage.value = 1
+    syncToUrl()
     fetchOrders()
 })
 
 watch([selectedStatus, selectedPaymentStatus], () => {
     currentPage.value = 1
+    syncToUrl()
     fetchOrders()
+})
+
+watch(currentPage, () => {
+    syncToUrl()
 })
 
 onMounted(async () => {

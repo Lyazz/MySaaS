@@ -25,9 +25,9 @@ describe('Orders edit (unconfirmed only)', () => {
     let confirmedOrderId: string
 
     beforeAll(async () => {
-        const tenantA = await prisma.tenant.create({ data: { name: 'Tenant A', slug: slugA } })
+        const tenantA = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant A', slug: slugA } })
         tenantAId = tenantA.id
-        const tenantB = await prisma.tenant.create({ data: { name: 'Tenant B', slug: slugB } })
+        const tenantB = await prisma.tenant.create({ data: { publishedAt: new Date(), name: 'Tenant B', slug: slugB } })
         tenantBId = tenantB.id
 
         const adminA = await prisma.user.create({
@@ -247,7 +247,7 @@ describe('Orders edit (unconfirmed only)', () => {
         expect(res.body.items[0].productId).toBe(promoProductId)
     })
 
-    it('prioritizes promotional price even when promotion is inactive or out-of-window', async () => {
+    it('ignores promotional price when the product-level promotion is inactive or out-of-window', async () => {
         const res = await request(app)
             .put(`/api/admin/orders/${pendingOrderId}`)
             .set('X-Forwarded-Host', hostA)
@@ -259,9 +259,9 @@ describe('Orders edit (unconfirmed only)', () => {
             })
 
         expect(res.status).toBe(200)
-        expect(Number(res.body.totalAmount)).toBe(180)
+        expect(Number(res.body.totalAmount)).toBe(300)
         expect(res.body.items).toHaveLength(1)
-        expect(Number(res.body.items[0].price)).toBe(90)
+        expect(Number(res.body.items[0].price)).toBe(150)
         expect(res.body.items[0].productId).toBe(inactivePromoProductId)
     })
 

@@ -7,9 +7,12 @@ import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 const cartStore = useCartStore()
 const favorites = useFavorites()
 const tenant = useState<any>('tenant')
-const tenantName = computed(() => tenant.value?.name || 'Maison')
+// "Pistachio" was the design reference, not a tenant: never show it to a shopper.
+const { t } = useI18n({ useScope: 'global' })
+const tenantName = computed(() => tenant.value?.name || t('storefront.common.storeFallback'))
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -48,6 +51,16 @@ const searchQuery = ref('')
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -104,6 +117,8 @@ watch(searchQuery, async (q) => {
   <StoreThemeProvider>
     <div class="shell">
       <StorefrontSharedAnnouncementBar v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- ── Header ───────────────────────────────────────────── -->
       <header
@@ -129,7 +144,7 @@ watch(searchQuery, async (q) => {
 
             <div class="shell-nav__dropdown-wrap">
               <button class="shell-nav__link shell-nav__dropdown-trigger">
-                {{ storefrontContent.nav.categories || 'Collections' }}
+                {{ storefrontContent.nav.categories }}
                 <svg width="8" height="5" viewBox="0 0 8 5" fill="none">
                   <path d="M1 1l3 3 3-3" stroke="currentColor" stroke-width="0.85"/>
                 </svg>
@@ -166,9 +181,7 @@ watch(searchQuery, async (q) => {
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M8 13.5S1.5 9.5 1.5 5.5a3 3 0 015.5-1.7A3 3 0 0114.5 5.5C14.5 9.5 8 13.5 8 13.5z" stroke="currentColor" stroke-width="0.85"/>
               </svg>
-              <ClientOnly>
-                <span v-if="favorites.count.value > 0" class="shell-icon-btn__badge">{{ favorites.count.value }}</span>
-              </ClientOnly>
+              <span v-if="favorites.count.value > 0" class="shell-icon-btn__badge">{{ favorites.count.value }}</span>
             </button>
 
             <!-- Cart -->
@@ -178,9 +191,7 @@ watch(searchQuery, async (q) => {
                 <circle cx="7" cy="13" r="1" fill="currentColor"/>
                 <circle cx="12" cy="13" r="1" fill="currentColor"/>
               </svg>
-              <ClientOnly>
-                <span v-if="cartStore.itemCount > 0" class="shell-icon-btn__badge">{{ cartStore.itemCount }}</span>
-              </ClientOnly>
+              <span v-if="cartStore.itemCount > 0" class="shell-icon-btn__badge">{{ cartStore.itemCount }}</span>
             </NuxtLink>
 
             <!-- Hamburger -->
@@ -201,11 +212,11 @@ watch(searchQuery, async (q) => {
               <input
                 v-model="searchQuery"
                 type="text"
-                :placeholder="storefrontContent.search?.placeholder || 'Rechercher un produit...'"
+                :placeholder="storefrontContent.search.placeholder"
                 class="shell-search-bar__input"
                 autofocus
-                @blur="setTimeout(() => { isSearchDropdownOpen = false }, 200)"
-                @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
+                @blur="closeSearchDropdownSoon"
+                @focus="openSearchDropdown"
               >
               <button class="shell-search-bar__close" @click="searchOpen = false; searchQuery = ''">
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
@@ -215,8 +226,8 @@ watch(searchQuery, async (q) => {
             </div>
             <!-- Results -->
             <div v-show="isSearchDropdownOpen" class="shell-search-results pointer-events-auto">
-              <div v-if="searchLoading" class="shell-search-results__state">Recherche…</div>
-              <div v-else-if="searchResults.length === 0" class="shell-search-results__state">Aucun résultat.</div>
+              <div v-if="searchLoading" class="shell-search-results__state">{{ storefrontContent.search.searching }}</div>
+              <div v-else-if="searchResults.length === 0" class="shell-search-results__state">{{ storefrontContent.search.noResults }}</div>
               <NuxtLink
                 v-for="product in visibleSearchResults"
                 :key="product.id"
@@ -229,17 +240,17 @@ watch(searchQuery, async (q) => {
                 </div>
                 <div class="shell-search-results__info">
                   <span class="shell-search-results__name">{{ product.title }}</span>
-                  <span class="shell-search-results__price">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></span>
+                  <span class="shell-search-results__price">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="shell-search-results__discount">-{{ product.promotionDiscountPercent }}%</span></span>
                 </div>
               </NuxtLink>
               <button
                 v-if="hasMoreSearchResults"
                 type="button"
-                class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
                 @mousedown.prevent
                 @click="showMoreSearchResults"
               >
-                See more
+                {{ storefrontContent.search.seeMore }}
               </button>
             </div>
           </div>
@@ -271,15 +282,15 @@ watch(searchQuery, async (q) => {
             <div v-if="tenantCategories?.length" class="shell-drawer__cats">
   <button
     type="button"
-    class="w-full flex items-center justify-between text-left"
+    class="w-full flex items-center justify-between text-start"
     @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
   >
-    <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-      {{ storefrontContent.nav.categories || 'Collections' }}
+    <h4 class="shell-drawer__cats-title">
+      {{ storefrontContent.nav.categories }}
     </h4>
     <Icon
       name="lucide:chevron-down"
-      class="w-4 h-4 text-slate-400 transition-transform"
+      class="shell-drawer__cats-icon"
       :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
     />
   </button>
@@ -288,7 +299,7 @@ watch(searchQuery, async (q) => {
       v-for="cat in tenantCategories"
       :key="cat.id"
       :to="'/category/' + cat.slug"
-      class="py-2 text-sm text-slate-600 hover:text-brand-600 transition-colors"
+      class="shell-drawer__cat-link"
       @click="mobileMenuOpen = false"
     >
       {{ categoryDisplayTitle(cat) }}
@@ -309,7 +320,7 @@ watch(searchQuery, async (q) => {
             <!-- Brand -->
             <div class="shell-footer__brand">
               <span class="shell-logo__text" style="font-size:1.6rem;margin-bottom:16px;display:block">{{ tenantName }}</span>
-              <p class="shell-footer__tagline">Art de vivre, décoration intérieure & accessoires maison soigneusement sélectionnés.</p>
+              <p v-if="storeSettings?.description" class="shell-footer__tagline">{{ storeSettings.description }}</p>
               <ul v-if="primaryContactInfos.length" class="shell-footer__contacts">
                 <li v-for="info in primaryContactInfos" :key="info.id" class="shell-footer__contact-item">
                   <Icon :name="kindDef(info.kind).iconName" class="shell-footer__contact-icon" />
@@ -339,7 +350,7 @@ watch(searchQuery, async (q) => {
 
             <!-- Collections -->
             <div>
-              <span class="at-label" style="display:block;margin-bottom:16px">Collections</span>
+              <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.nav.categories }}</span>
               <ul class="shell-footer__links">
                 <li v-for="cat in (tenantCategories || []).slice(0, 5)" :key="cat.id">
                   <NuxtLink :to="`/category/${cat.slug}`" class="shell-footer__link">{{ categoryDisplayTitle(cat) }}</NuxtLink>
@@ -348,28 +359,28 @@ watch(searchQuery, async (q) => {
             </div>
 
             <!-- Service -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.contact }}</span>
               <ul class="shell-footer__links">
-                <li><NuxtLink to="/contact" class="shell-footer__link">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
-                <li><NuxtLink to="/about" class="shell-footer__link">{{ storefrontContent.footer.aboutUs }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.contact.enabled" :to="legalLinks.contact.path" class="shell-footer__link">{{ storefrontContent.footer.contactUs }}</NuxtLink></li>
               </ul>
             </div>
 
             <!-- Legal -->
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <span class="at-label" style="display:block;margin-bottom:16px">{{ storefrontContent.footer.termsPrivacy }}</span>
               <ul class="shell-footer__links">
-                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.termsOfService }}</a></li>
-                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.privacyPolicy }}</a></li>
-                <li><a href="#" class="shell-footer__link">{{ storefrontContent.footer.returnPolicy }}</a></li>
+                <li><NuxtLink v-if="legalLinks.terms.enabled" :to="legalLinks.terms.path" class="shell-footer__link">{{ storefrontContent.footer.termsOfService }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.privacy.enabled" :to="legalLinks.privacy.path" class="shell-footer__link">{{ storefrontContent.footer.privacyPolicy }}</NuxtLink></li>
+                <li><NuxtLink v-if="legalLinks.returns.enabled" :to="legalLinks.returns.path" class="shell-footer__link">{{ storefrontContent.footer.returnPolicy }}</NuxtLink></li>
               </ul>
             </div>
           </div>
 
           <div class="shell-footer__bottom">
             <span>{{ storefrontContent.footer.copyright(tenantName) }}</span>
-            <span>Atelier · Algérie</span>
+            <span>{{ tenantName }}</span>
+            <StorefrontSharedPoweredBy />
           </div>
         </div>
       </footer>
@@ -395,9 +406,10 @@ watch(searchQuery, async (q) => {
   transition: background 0.4s, border-color 0.4s;
 }
 .shell-header.is-scrolled {
-  background: rgba(14,13,12,0.96);
-  backdrop-filter: blur(12px);
+  background: rgba(250,242,227,0.88);
+  backdrop-filter: blur(16px) saturate(1.2);
   border-color: var(--at-border);
+  box-shadow: var(--at-shadow-xs);
 }
 .shell-header.mobile-hidden { display: none; }
 @media (min-width: 1024px) { .shell-header.mobile-hidden { display: block; } }
@@ -421,16 +433,18 @@ watch(searchQuery, async (q) => {
   height: 32px;
   max-width: 120px;
   object-fit: contain;
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 .shell-logo__text {
   font-family: var(--at-f-display);
   font-size: 1.5rem;
-  font-weight: 400;
-  letter-spacing: 0.08em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
   color: var(--at-cream);
   text-decoration: none;
+  transition: color 0.25s;
 }
+.shell-logo:hover .shell-logo__text { color: var(--at-gold-700); }
 
 /* ── Desktop nav ────────────────────────────────────────────────── */
 .shell-nav {
@@ -443,10 +457,11 @@ watch(searchQuery, async (q) => {
 @media (min-width: 1024px) { .shell-nav { display: flex; } }
 
 .shell-nav__link {
+  position: relative;
   font-family: var(--at-f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--at-sub);
   text-decoration: none;
@@ -454,9 +469,22 @@ watch(searchQuery, async (q) => {
   display: flex;
   align-items: center;
   gap: 5px;
+  padding-bottom: 3px;
+}
+.shell-nav__link::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  right: 50%;
+  bottom: 0;
+  height: 1px;
+  background: var(--at-grad-gold);
+  transition: left 0.28s cubic-bezier(0.76,0,0.24,1), right 0.28s cubic-bezier(0.76,0,0.24,1);
 }
 .shell-nav__link:hover,
-.shell-nav__link.is-active { color: var(--at-gold); }
+.shell-nav__link.is-active { color: var(--at-gold-700); }
+.shell-nav__link:hover::after,
+.shell-nav__link.is-active::after { left: 0; right: 0; }
 
 .shell-nav__dropdown-wrap {
   position: relative;
@@ -468,8 +496,11 @@ watch(searchQuery, async (q) => {
   left: 50%;
   transform: translateX(-50%);
   min-width: 180px;
-  background: var(--at-surface);
+  background: var(--at-grad-paper);
   border: 1px solid var(--at-border);
+  border-radius: var(--at-r-md);
+  box-shadow: var(--at-shadow-md);
+  overflow: hidden;
   opacity: 0;
   visibility: hidden;
   pointer-events: none;
@@ -483,11 +514,11 @@ watch(searchQuery, async (q) => {
 }
 .shell-nav__dropdown-item {
   display: block;
-  padding: 10px 16px;
+  padding: 11px 18px;
   font-family: var(--at-f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.18em;
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--at-sub);
   text-decoration: none;
@@ -495,7 +526,7 @@ watch(searchQuery, async (q) => {
   transition: color 0.15s, background 0.15s;
 }
 .shell-nav__dropdown-item:last-child { border-bottom: none; }
-.shell-nav__dropdown-item:hover { color: var(--at-gold); background: var(--at-surface-2); }
+.shell-nav__dropdown-item:hover { color: var(--at-gold-700); background: var(--at-surface-2); }
 
 /* ── Actions ────────────────────────────────────────────────────── */
 .shell-actions {
@@ -514,26 +545,31 @@ watch(searchQuery, async (q) => {
   display: flex;
   align-items: center;
   justify-content: center;
+  border-radius: var(--at-r-pill);
   color: var(--at-sub);
-  background: none;
+  background: transparent;
   border: none;
   cursor: pointer;
-  transition: color 0.2s;
+  transition: color 0.2s, background 0.2s;
   text-decoration: none;
 }
-.shell-icon-btn:hover { color: var(--at-gold); }
+.shell-icon-btn:hover { color: var(--at-gold-700); background: var(--at-gold-dim); }
 
 .shell-icon-btn__badge {
   position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 14px;
-  height: 14px;
-  background: var(--at-gold);
-  color: var(--at-bg);
+  top: 3px;
+  right: 3px;
+  min-width: 15px;
+  height: 15px;
+  padding: 0 4px;
+  border-radius: var(--at-r-pill);
+  background: var(--at-grad-green);
+  color: #FFFBF0;
   font-family: var(--at-f-mono);
   font-size: 8px;
-  font-weight: 400;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  box-shadow: var(--at-shadow-xs);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -551,17 +587,20 @@ watch(searchQuery, async (q) => {
 .shell-hamburger span {
   display: block;
   width: 20px;
-  height: 1px;
+  height: 1.5px;
+  border-radius: 2px;
   background: var(--at-sub);
-  transition: background 0.2s;
+  transition: background 0.2s, width 0.2s;
 }
 .shell-hamburger:hover span { background: var(--at-gold); }
+.shell-hamburger:hover span:nth-child(2) { width: 14px; }
 @media (min-width: 1024px) { .shell-hamburger { display: none; } }
 
 /* ── Search bar ─────────────────────────────────────────────────── */
 .shell-search-bar {
   border-top: 1px solid var(--at-border);
-  background: var(--at-surface);
+  background: var(--at-grad-paper);
+  box-shadow: var(--at-shadow-sm);
 }
 .shell-search-bar__inner {
   max-width: 1400px;
@@ -583,7 +622,7 @@ watch(searchQuery, async (q) => {
   color: var(--at-text);
   outline: none;
 }
-.shell-search-bar__input::placeholder { color: var(--at-muted); }
+.shell-search-bar__input::placeholder { color: var(--at-faint); }
 .shell-search-bar__close {
   background: none;
   border: none;
@@ -617,12 +656,15 @@ watch(searchQuery, async (q) => {
   text-decoration: none;
   transition: opacity 0.2s;
 }
-.shell-search-results__item:hover { opacity: 0.75; }
+.shell-search-results__name { transition: color 0.2s; }
+.shell-search-results__item:hover .shell-search-results__name { color: var(--at-gold-700); }
 .shell-search-results__item:last-child { border-bottom: none; }
 .shell-search-results__img {
-  width: 40px;
-  height: 40px;
-  background: var(--at-surface-2);
+  width: 44px;
+  height: 44px;
+  border-radius: var(--at-r-sm);
+  border: 1px solid var(--at-border);
+  background: var(--at-grad-shell);
   flex-shrink: 0;
   overflow: hidden;
   display: flex;
@@ -635,19 +677,32 @@ watch(searchQuery, async (q) => {
 .shell-search-results__name {
   font-family: var(--at-f-mono);
   font-size: 11px;
+  font-weight: 500;
   color: var(--at-text);
 }
 .shell-search-results__price {
   font-family: var(--at-f-mono);
   font-size: 10px;
-  color: var(--at-gold);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--at-cream);
+}
+.shell-search-results__discount {
+  margin-left: 6px;
+  padding: 1px 6px;
+  border-radius: var(--at-r-pill);
+  background: var(--at-skin-dim);
+  font-size: 9px;
+  font-weight: 600;
+  color: var(--at-skin);
 }
 
 /* ── Mobile drawer ──────────────────────────────────────────────── */
 .shell-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.65);
+  background: rgba(28,35,24,0.44);
+  backdrop-filter: blur(3px);
   z-index: 60;
 }
 .shell-drawer {
@@ -656,8 +711,9 @@ watch(searchQuery, async (q) => {
   left: 0;
   bottom: 0;
   width: min(320px, 85vw);
-  background: var(--at-surface);
+  background: var(--at-grad-paper);
   border-right: 1px solid var(--at-border);
+  box-shadow: var(--at-shadow-lg);
   z-index: 61;
   display: flex;
   flex-direction: column;
@@ -669,6 +725,7 @@ watch(searchQuery, async (q) => {
   justify-content: space-between;
   padding: 20px 24px;
   border-bottom: 1px solid var(--at-border);
+  background: var(--at-grad-shell);
 }
 .shell-drawer__close {
   background: none;
@@ -681,11 +738,11 @@ watch(searchQuery, async (q) => {
 .shell-drawer__close:hover { color: var(--at-gold); }
 .shell-drawer__nav { display: flex; flex-direction: column; padding: 8px 0; border-bottom: 1px solid var(--at-border); }
 .shell-drawer__link {
-  padding: 14px 24px;
+  padding: 15px 24px;
   font-family: var(--at-f-mono);
-  font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--at-sub);
   text-decoration: none;
@@ -693,14 +750,30 @@ watch(searchQuery, async (q) => {
   border-bottom: 1px solid var(--at-border);
 }
 .shell-drawer__link:last-child { border-bottom: none; }
-.shell-drawer__link:hover { color: var(--at-gold); }
+.shell-drawer__link:hover { color: var(--at-gold-700); background: var(--at-gold-dim); }
 .shell-drawer__cats { padding: 20px 24px; }
+.shell-drawer__cats-title {
+  margin: 0 0 8px;
+  font-family: var(--at-f-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  color: var(--at-sub);
+}
+.shell-drawer__cats-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--at-sub);
+  transition: transform 0.2s, color 0.2s;
+}
 .shell-drawer__cat-link {
   display: block;
   padding: 10px 0;
-  font-family: var(--at-f-display);
-  font-size: 1.1rem;
-  color: var(--at-text);
+  font-family: var(--at-f-mono);
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--at-sub);
   text-decoration: none;
   border-bottom: 1px solid var(--at-border);
   transition: color 0.2s;
@@ -710,8 +783,14 @@ watch(searchQuery, async (q) => {
 
 /* ── Footer ─────────────────────────────────────────────────────── */
 .shell-footer {
-  border-top: 1px solid var(--at-border);
-  background: var(--at-surface);
+  position: relative;
+  border-top: 1px solid var(--at-gold-700);
+  background: var(--at-green-900);
+  background-image:
+    radial-gradient(900px 420px at 8% 0%, color-mix(in srgb, var(--at-green) 55%, transparent), transparent 62%),
+    radial-gradient(700px 360px at 100% 100%, rgba(179,131,53,0.16), transparent 64%),
+    var(--at-grain);
+  background-repeat: no-repeat, no-repeat, repeat;
   margin-top: auto;
 }
 .shell-footer__inner {
@@ -733,57 +812,64 @@ watch(searchQuery, async (q) => {
   font-size: 11px;
   font-weight: 300;
   line-height: 1.8;
-  color: var(--at-muted);
+  color: rgba(255,251,240,0.62);
   margin-bottom: 20px;
   max-width: 260px;
 }
 .shell-footer__contacts { list-style: none; padding: 0; margin: 0 0 16px; display: flex; flex-direction: column; gap: 10px; }
 .shell-footer__contact-item { display: flex; align-items: flex-start; gap: 10px; }
-.shell-footer__contact-icon { width: 12px; height: 12px; color: var(--at-gold); flex-shrink: 0; margin-top: 2px; }
+.shell-footer__contact-icon { width: 12px; height: 12px; color: var(--at-gold-300); flex-shrink: 0; margin-top: 2px; }
 .shell-footer__contact-link {
   font-family: var(--at-f-mono);
   font-size: 11px;
   font-weight: 300;
-  color: var(--at-muted);
+  color: rgba(255,251,240,0.7);
   text-decoration: none;
   transition: color 0.2s;
 }
-.shell-footer__contact-link:hover { color: var(--at-text); }
+.shell-footer__contact-link:hover { color: var(--at-gold-300); }
 .shell-footer__socials { display: flex; gap: 8px; margin-top: 16px; }
 .shell-footer__social-btn {
-  width: 32px;
-  height: 32px;
-  border: 1px solid var(--at-border-2);
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(255,251,240,0.18);
+  border-radius: var(--at-r-pill);
+  background: rgba(255,251,240,0.04);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--at-muted);
+  color: rgba(255,251,240,0.66);
   text-decoration: none;
-  transition: border-color 0.2s, color 0.2s;
+  transition: border-color 0.2s, color 0.2s, background 0.2s, transform 0.2s;
 }
-.shell-footer__social-btn:hover { border-color: var(--at-gold); color: var(--at-gold); }
+.shell-footer__social-btn:hover {
+  border-color: var(--at-gold);
+  background: rgba(179,131,53,0.18);
+  color: var(--at-gold-300);
+  transform: translateY(-2px);
+}
 .shell-footer__links { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 10px; }
 .shell-footer__link {
   font-family: var(--at-f-mono);
   font-size: 11px;
   font-weight: 300;
-  color: var(--at-muted);
+  color: rgba(255,251,240,0.7);
   text-decoration: none;
   transition: color 0.2s;
 }
-.shell-footer__link:hover { color: var(--at-text); }
+.shell-footer__link:hover { color: var(--at-gold-300); }
 .shell-footer__bottom {
-  border-top: 1px solid var(--at-border);
+  border-top: 1px solid rgba(255,251,240,0.14);
   padding-top: 24px;
   display: flex;
   flex-direction: column;
   gap: 8px;
   font-family: var(--at-f-mono);
   font-size: 9px;
-  font-weight: 300;
-  letter-spacing: 0.15em;
+  font-weight: 400;
+  letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--at-muted);
+  color: rgba(255,251,240,0.5);
 }
 @media (min-width: 640px) {
   .shell-footer__bottom { flex-direction: row; justify-content: space-between; }

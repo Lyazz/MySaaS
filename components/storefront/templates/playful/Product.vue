@@ -1,17 +1,16 @@
 <script setup lang="ts">
-import { useCartStore } from '~/stores/cart'
 import ProductGallery from './partials/ProductGallery.vue'
 import ProductDetails from './partials/ProductDetails.vue'
 import ProductOrderForm from './partials/ProductOrderForm.vue'
 import RelatedProducts from './partials/RelatedProducts.vue'
 import { findBestVariantForSelection, getPreferredInitialSelection, type SelectedOptions } from './variant-ux'
+import { buildScopedProductPricing } from '~/shared/pricing/product-pricing'
 
 const props = defineProps<{
     product: any
     relatedProducts?: any[]
 }>()
 
-const cartStore = useCartStore()
 const storefrontContent = useStorefrontContent()
 
 const selectedOptions = ref<SelectedOptions>({})
@@ -28,22 +27,9 @@ const currentVariant = computed(() => {
     return findBestVariantForSelection({ product: props.product, selectedOptions: selectedOptions.value })
 })
 
-const isPromoValid = computed(() => {
-    if (!props.product?.isPromotionActive) return false
-    const now = new Date().getTime()
-    if (props.product.promotionStartDate && new Date(props.product.promotionStartDate).getTime() > now) return false
-    if (props.product.promotionEndDate && new Date(props.product.promotionEndDate).getTime() < now) return false
-    return true
-})
-
-const originalPrice = computed(() =>
-    currentVariant.value ? Number(currentVariant.value.price) : Number(props.product?.price || 0)
-)
-
-const currentPrice = computed(() => {
-    if (isPromoValid.value && props.product?.promotionalPrice) return Number(props.product.promotionalPrice)
-    return originalPrice.value
-})
+const pricing = computed(() => buildScopedProductPricing(props.product, currentVariant.value))
+const originalPrice = computed(() => pricing.value.originalPrice)
+const currentPrice = computed(() => pricing.value.effectivePrice)
 
 const currentStock = computed(() => {
     if (!currentVariant.value) return props.product?.stock
@@ -68,40 +54,59 @@ watch([() => props.product, selectedOptions], ([product]) => {
     const best = findBestVariantForSelection({ product, selectedOptions: selectedOptions.value })
     if (!best) selectedOptions.value = getPreferredInitialSelection(product)
 })
+
+const activeLoyaltyPreview = useActiveProductLoyaltyPreview()
+
+watchEffect(() => {
+    activeLoyaltyPreview.setPreview((currentVariant.value?.loyaltyPreview ?? props.product?.loyaltyPreview ?? null) as any)
+})
+
+onUnmounted(() => {
+    activeLoyaltyPreview.reset()
+})
 </script>
 
 <template>
-  <div class="bg-[#fffbf0] min-h-screen" style="font-family: 'DM Sans', sans-serif">
-    <!-- Announcement bar -->
-    <div class="bg-violet-700 text-white text-center py-2.5 px-4 text-xs font-black flex items-center justify-center gap-3 border-b-3 border-violet-600">
-      <Icon name="lucide:sparkles" class="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-      <span class="tracking-wide">{{ $t('storefront.product.saleBanner') }}</span>
-      <Icon name="lucide:sparkles" class="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-    </div>
-
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <!-- Breadcrumb -->
-      <nav class="flex items-center text-sm text-stone-500 mb-8 gap-1.5 flex-wrap">
-        <NuxtLink to="/" class="hover:text-violet-700 transition-colors font-medium">Home</NuxtLink>
-        <Icon name="lucide:chevron-right" class="w-3.5 h-3.5 text-stone-300 flex-shrink-0" />
-        <NuxtLink to="/products" class="hover:text-violet-700 transition-colors font-medium">Shop</NuxtLink>
-        <Icon name="lucide:chevron-right" class="w-3.5 h-3.5 text-stone-300 flex-shrink-0" />
-        <span class="font-black text-stone-900 truncate max-w-xs" style="font-family: 'Fredoka', sans-serif">{{ product?.title }}</span>
+  <div class="bg-[var(--kw-cream)] min-h-screen pb-16">
+    <div class="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6">
+      <nav class="flex items-center gap-2 text-xs font-bold text-[var(--kw-ink-soft)] mb-8 flex-wrap">
+        <NuxtLink
+          to="/"
+          class="hover:text-[var(--kw-pink-deep)] transition-colors"
+        >
+          {{ storefrontContent.nav.home }}
+        </NuxtLink>
+        <Icon
+          name="lucide:chevron-right"
+          class="w-3.5 h-3.5 opacity-50 rtl:rotate-180"
+        />
+        <NuxtLink
+          to="/products"
+          class="hover:text-[var(--kw-pink-deep)] transition-colors"
+        >
+          {{ storefrontContent.nav.shop }}
+        </NuxtLink>
+        <Icon
+          name="lucide:chevron-right"
+          class="w-3.5 h-3.5 opacity-50 rtl:rotate-180"
+        />
+        <span class="text-[var(--kw-ink)] truncate max-w-[16rem]">{{ product?.title }}</span>
       </nav>
 
       <div class="lg:grid lg:grid-cols-12 lg:gap-12 xl:gap-16 items-start">
-        <!-- Gallery -->
         <div class="lg:col-span-6 relative z-10">
-          <ProductGallery :images="images" :title="product?.title" />
+          <ProductGallery
+            :images="images"
+            :title="product?.title"
+          />
         </div>
 
-        <!-- Details + Order Form -->
-        <div class="mt-8 lg:mt-0 lg:col-span-6 flex flex-col gap-7 sticky top-24">
+        <div class="mt-10 lg:mt-0 lg:col-span-6 flex flex-col gap-7">
           <ProductDetails
+            v-model:selected-options="selectedOptions"
             :product="product"
             :current-price="currentPrice"
             :original-price="originalPrice"
-            v-model:selected-options="selectedOptions"
           />
           <ProductOrderForm
             :product="product"
@@ -113,40 +118,40 @@ watch([() => props.product, selectedOptions], ([product]) => {
         </div>
       </div>
 
-      <!-- Full Description -->
-      <div class="mt-16 max-w-4xl mx-auto animate-fade-in-up">
-        <div class="flex items-center gap-3 justify-center mb-8">
-          <span class="w-2 h-2 rounded-full bg-violet-400" />
-          <h2 class="text-2xl font-black text-stone-900 text-center" style="font-family: 'Fredoka', sans-serif">
+      <!-- ══ Description ═══════════════════════════════════════════════ -->
+      <section class="mt-20 max-w-4xl mx-auto">
+        <div class="flex items-center justify-center gap-3 mb-8">
+          <span
+            class="w-2.5 h-2.5 rounded-full"
+            style="background: var(--kw-pink)"
+          />
+          <h2 class="kw-display text-2xl md:text-3xl text-center">
             {{ storefrontContent.product.detailsTitle }}
           </h2>
-          <span class="w-2 h-2 rounded-full bg-amber-400" />
+          <span
+            class="w-2.5 h-2.5 rounded-full"
+            style="background: var(--kw-lemon)"
+          />
         </div>
-        <div class="bg-white rounded-3xl border-3 border-violet-100 shadow-[0_4px_0_0_#ddd6fe] p-8 md:p-12">
-          <SafeRichText
+        <div class="kw-card p-8 md:p-12">
+          <CommonSafeRichText
             v-if="product?.description"
-            class="prose prose-stone prose-base max-w-none leading-relaxed"
+            class="prose prose-base max-w-none leading-relaxed text-[var(--kw-ink-soft)]"
             :html="product.description"
           />
-          <p v-else class="text-stone-500 text-center">{{ storefrontContent.product.descriptionFallback }}</p>
+          <p
+            v-else
+            class="kw-lede text-center"
+          >
+            {{ storefrontContent.product.descriptionFallback }}
+          </p>
         </div>
-      </div>
+      </section>
     </div>
 
-    <!-- Related Products -->
     <RelatedProducts
       v-if="relatedProducts && relatedProducts.length > 0"
       :products="relatedProducts"
     />
   </div>
 </template>
-
-<style scoped>
-.animate-fade-in-up {
-  animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-</style>

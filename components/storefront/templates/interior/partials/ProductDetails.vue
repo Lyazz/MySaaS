@@ -54,6 +54,20 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
   if (isOptionValueUnavailable(optionId, valueId)) return;
   setOption(optionId, valueId);
 };
+
+const { inviteTick } = useVariantSelectionInvite()
+const optionNudge = ref(false)
+const hasUnselectedOptions = computed(() =>
+  Array.isArray(props.product?.options) &&
+  props.product.options.some((o: any) => !props.selectedOptions?.[o.id])
+)
+watch(inviteTick, () => {
+  optionNudge.value = false
+  setTimeout(() => {
+    optionNudge.value = true
+    setTimeout(() => { optionNudge.value = false }, 700)
+  }, 20)
+})
 </script>
 
 <template>
@@ -135,7 +149,15 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
     <div
       v-if="product?.options && product.options.length > 0"
       class="space-y-4"
+      :class="{ 'vux-invite': hasUnselectedOptions, 'vux-invite-nudge': optionNudge }"
     >
+      <p
+        v-if="hasUnselectedOptions"
+        class="vux-invite-hint inline-flex items-center gap-1.5 text-xs font-semibold text-brand-600"
+      >
+        <Icon name="lucide:arrow-down" class="w-3.5 h-3.5" />
+        {{ $t('storefront.productForm.chooseOptionsPrompt') }}
+      </p>
       <div v-for="option in product.options" :key="option.id">
         <label class="block text-sm font-medium text-slate-700 mb-2">{{
           option.name
@@ -161,7 +183,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </option>
           </select>
           <div
-            class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"
+            class="absolute end-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-500"
           >
             <Icon name="lucide:chevron-down" class="w-4 h-4" />
           </div>
@@ -277,7 +299,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             />
             <label
               :for="`${option.id}-${value.id}`"
-              class="ml-2 block text-sm font-medium text-slate-700"
+              class="ms-2 block text-sm font-medium text-slate-700"
               :class="{
                 'text-slate-400 line-through':
                   optionValueState(option.id, value.id) !== 'available',
@@ -286,7 +308,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
               }"
             >
               {{ value.label }}
-              <span class="text-xs font-normal ml-1">{{
+              <span class="text-xs font-normal ms-1">{{
                 optionValueSuffix(option.id, value.id)
               }}</span>
             </label>
@@ -324,7 +346,7 @@ const setOptionIfAllowed = (optionId: string, valueId: string) => {
             </span>
             <span
               v-if="optionValueState(option.id, value.id) !== 'available'"
-              class="ml-2 text-[10px] font-semibold"
+              class="ms-2 text-[10px] font-semibold"
             >
               {{ optionValueSuffix(option.id, value.id) }}
             </span>

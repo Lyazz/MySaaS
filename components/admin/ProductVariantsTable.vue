@@ -1,10 +1,10 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between">
-      <h3 class="text-lg font-medium" style="color: var(--text-primary)">
+      <h3 class="text-lg font-medium text-primary">
         {{ t('admin.variantsTable.title') }}
       </h3>
-      <p class="text-sm" style="color: var(--text-tertiary)">
+      <p class="text-sm text-tertiary">
         {{ t('admin.variantsTable.subtitle') }}
       </p>
     </div>
@@ -14,80 +14,86 @@
         <thead class="ui-thead">
           <tr>
             <th
-              scope="col"
-              class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold sm:pl-6" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="py-3.5 ps-4 pe-3 text-start text-sm font-semibold sm:ps-6 text-primary" 
+>
               {{ t('admin.variantsTable.columns.variant') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.price') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.cost') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
+              {{ t('admin.variantsTable.columns.promotion', 'Promotion') }}
+            </th>
+            <th
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.track') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.onHand') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.reserved') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.safety') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.available') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.sku') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.barcode') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.active') }}
             </th>
             <th
-              scope="col"
-              class="px-3 py-3.5 text-left text-sm font-semibold" style="color: var(--text-primary)"
-            >
+ scope="col"
+ class="px-3 py-3.5 text-start text-sm font-semibold text-primary" 
+>
               {{ t('admin.variantsTable.columns.images') }}
             </th>
             <th
               scope="col"
-              class="relative py-3.5 pl-3 pr-4 sm:pr-6"
+              class="relative py-3.5 ps-3 pe-4 sm:pe-6"
             >
               <span class="sr-only">{{ t('admin.common.actions') }}</span>
             </th>
@@ -99,10 +105,10 @@
             :key="variant.id"
             class="ui-tr"
           >
-            <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium sm:pl-6" style="color: var(--text-primary)">
+            <td class="whitespace-nowrap py-4 ps-4 pe-3 text-sm font-medium sm:ps-6 text-primary">
               {{ getVariantTitle(variant) }}
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <input 
                 v-model.number="variant.price" 
                 type="number"
@@ -110,7 +116,7 @@
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <input
                 v-model.number="variant.cost"
                 type="number"
@@ -119,7 +125,72 @@
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm" style="color: var(--text-secondary)">
+            <td class="px-3 py-4 text-sm align-top text-secondary">
+              <div
+                v-if="supportsVariantPromotion(variant)"
+                :class="variant.isPromotionActive ? 'space-y-2 min-w-[16rem]' : 'min-w-[12rem]'"
+              >
+                <div class="flex items-center gap-2">
+                  <input
+                    :id="`variant-promo-active-${variant.id}`"
+                    v-model="variant.isPromotionActive"
+                    type="checkbox"
+                    class="admin-checkbox"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <label
+ :for="`variant-promo-active-${variant.id}`"
+ class="text-xs text-primary"
+ 
+>
+                    {{ t('admin.forms.product.isPromotionActive.label', 'Activer la promotion') }}
+                  </label>
+                </div>
+                <div
+                  v-if="variant.isPromotionActive"
+                  class="space-y-2"
+                >
+                  <input
+                    v-model.number="variant.promotionalPrice"
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    class="ui-input w-full py-1"
+                    :placeholder="t('admin.forms.product.promotionalPrice.label', 'Prix promotionnel')"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <input
+                    v-model="variant.promotionStartDateInput"
+                    type="datetime-local"
+                    class="ui-input w-full py-1"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <input
+                    v-model="variant.promotionEndDateInput"
+                    type="datetime-local"
+                    class="ui-input w-full py-1"
+                    @change="updateVariantInfo(variant)"
+                  >
+                  <label class="flex items-center gap-2 text-xs text-secondary">
+                    <input
+                      v-model="variant.showCountdown"
+                      type="checkbox"
+                      class="admin-checkbox"
+                      @change="updateVariantInfo(variant)"
+                    >
+                    {{ t('admin.forms.product.showCountdown.label', 'Afficher le compte à rebours') }}
+                  </label>
+                </div>
+              </div>
+              <p
+ v-else
+ class="max-w-[14rem] text-xs text-tertiary"
+ 
+>
+                {{ t('admin.variantsTable.promotionSimpleProduct', 'Use the product promotion tab for the default variant of a simple product.') }}
+              </p>
+            </td>
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <input
                 v-model="variant.trackInventory"
                 type="checkbox"
@@ -128,20 +199,21 @@
                 @change="updateVariantInventory(variant, { trackInventory: Boolean(variant.trackInventory) })"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <input
                 v-model.number="variant.stock"
                 type="number"
                 min="0"
                 class="ui-input w-24 py-1 font-mono"
                 :disabled="savingStockIds.has(variant.id) || variant.trackInventory === false"
+                @focus="rememberVariantServerState(variant)"
                 @change="setVariantStock(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm" style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               {{ Number(variant.reserved || 0) }}
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <input
                 v-model.number="variant.safetyStock"
                 type="number"
@@ -151,13 +223,13 @@
                 @change="updateVariantInventory(variant, { safetyStock: Number(variant.safetyStock) })"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm" style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <span v-if="variant.trackInventory !== false">
                 {{ getAvailable(variant) }}
               </span>
-              <span v-else style="color: var(--text-muted)">∞</span>
+              <span class="text-muted" v-else>∞</span>
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <div class="flex items-center gap-2">
                 <input 
                   v-model="variant.sku" 
@@ -169,7 +241,7 @@
                 <button
                   v-if="variant.skuLocked !== true"
                   type="button"
-                  class="text-xs px-2 py-1 rounded ui-btn ui-btn--secondary"
+                  class="ui-table-action"
                   :disabled="suggestingSkuIds.has(variant.id)"
                   @click="suggestSku(variant)"
                 >
@@ -178,21 +250,21 @@
                 <button
                   v-if="variant.skuLocked !== true"
                   type="button"
-                  class="text-xs px-2 py-1 rounded ui-btn ui-btn--secondary"
+                  class="ui-table-action"
                   :disabled="lockingSkuIds.has(variant.id)"
                   @click="lockSku(variant)"
                 >
                   {{ t('admin.variantsTable.actions.lockSku') }}
                 </button>
                 <span
-                  v-else
-                  class="text-xs" style="color: var(--text-muted)"
-                >
+ v-else
+ class="text-xs text-muted" 
+>
                   {{ t('admin.variantsTable.actions.skuLocked') }}
                 </span>
               </div>
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <input
                 v-model="variant.barcode"
                 type="text"
@@ -200,7 +272,7 @@
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <input 
                 v-model="variant.isActive" 
                 type="checkbox"
@@ -208,19 +280,19 @@
                 @change="updateVariantInfo(variant)"
               >
             </td>
-            <td class="whitespace-nowrap px-3 py-4 text-sm " style="color: var(--text-secondary)">
+            <td class="whitespace-nowrap px-3 py-4 text-sm text-secondary">
               <button
                 type="button"
-                class="[color:var(--brand)] hover:[color:var(--brand)] font-medium"
+                class="ui-table-action"
                 @click="openImageEditor(variant)"
               >
                 {{ t('admin.variantsTable.actions.manageImages', { count: variant.images?.length || 0 }) }}
               </button>
             </td>
-            <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+            <td class="relative whitespace-nowrap py-4 ps-3 pe-4 text-end text-sm font-medium sm:pe-6">
               <button
                 type="button"
-                class="hover:[color:rgba(var(--brand-rgb)/0.85)]" style="color: var(--text-secondary)"
+                class="ui-table-action"
                 @click="openMovements(variant)"
               >
                 {{ t('admin.variantsTable.actions.movements') }}
@@ -236,36 +308,36 @@
       v-if="movementsVariant"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
     >
-      <div class="rounded-xl w-full max-w-3xl p-6 space-y-4" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
+      <div class="rounded-xl w-full max-w-3xl p-6 space-y-4 surface-2 border border-line shadow-overlay">
         <div class="flex items-start justify-between">
           <div class="min-w-0">
-            <h4 class="text-lg font-semibold truncate" style="color: var(--text-primary)">
+            <h4 class="text-lg font-semibold truncate text-primary">
               {{ t('admin.variantsTable.movements.title') }} — {{ getVariantTitle(movementsVariant) }}
             </h4>
-            <p class="text-sm " style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.variantsTable.movements.subtitle') }}
             </p>
           </div>
           <button
-            type="button"
-            class="hover:text-white" style="color: var(--text-muted)"
-            @click="closeMovements"
-          >
+ type="button"
+ class="hover:text-primary text-muted" 
+ @click="closeMovements"
+>
             ✕
           </button>
         </div>
 
         <div
-          v-if="movementsLoading"
-          class="text-sm p-3 rounded border border-dashed" style="color: var(--text-secondary); background: var(--surface-2); border-color: var(--surface-border)"
-        >
+ v-if="movementsLoading"
+ class="text-sm p-3 rounded-lg border border-dashed text-secondary surface-2 border-line" 
+>
           {{ t('admin.variantsTable.movements.loading') }}
         </div>
 
         <div
-          v-else-if="movements.length === 0"
-          class="text-sm p-3 rounded border border-dashed" style="color: var(--text-secondary); background: var(--surface-2); border-color: var(--surface-border)"
-        >
+ v-else-if="movements.length === 0"
+ class="text-sm p-3 rounded-lg border border-dashed text-secondary surface-2 border-line" 
+>
           {{ t('admin.variantsTable.movements.empty') }}
         </div>
 
@@ -276,35 +348,35 @@
           <table class="ui-table">
             <thead class="ui-thead">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.date') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.type') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaStock') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaReserved') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.deltaSafety') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.after') }}</th>
-                <th class="px-3 py-2 text-left text-xs font-medium uppercase" style="color: var(--text-tertiary)">{{ t('admin.variantsTable.movements.columns.by') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase text-tertiary">{{ t('admin.variantsTable.movements.columns.date') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase text-tertiary">{{ t('admin.variantsTable.movements.columns.type') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase text-tertiary">{{ t('admin.variantsTable.movements.columns.deltaStock') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase text-tertiary">{{ t('admin.variantsTable.movements.columns.deltaReserved') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase text-tertiary">{{ t('admin.variantsTable.movements.columns.deltaSafety') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase text-tertiary">{{ t('admin.variantsTable.movements.columns.after') }}</th>
+                <th class="px-3 py-2 text-start text-xs font-medium uppercase text-tertiary">{{ t('admin.variantsTable.movements.columns.by') }}</th>
               </tr>
             </thead>
             <tbody class="ui-tbody">
               <tr v-for="m in movements" :key="m.id" class="ui-tr">
-                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ formatDate(m.createdAt) }}</td>
-                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">
+                <td class="px-3 py-2 text-sm text-secondary">{{ formatDate(m.createdAt) }}</td>
+                <td class="px-3 py-2 text-sm text-secondary">
                   <div class="min-w-0">
                     <p class="truncate font-medium">{{ m.type }}</p>
-                    <p v-if="m.orderId" class="truncate text-xs " style="color: var(--text-secondary)">{{ t('admin.variantsTable.movements.order', { id: m.orderId }) }}</p>
+                    <p v-if="m.orderId" class="truncate text-xs text-secondary">{{ t('admin.variantsTable.movements.order', { id: m.orderId }) }}</p>
                   </div>
                 </td>
-                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.delta }}</td>
-                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.reservedDelta }}</td>
-                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.safetyStockDelta }}</td>
-                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">
+                <td class="px-3 py-2 text-sm text-secondary">{{ m.delta }}</td>
+                <td class="px-3 py-2 text-sm text-secondary">{{ m.reservedDelta }}</td>
+                <td class="px-3 py-2 text-sm text-secondary">{{ m.safetyStockDelta }}</td>
+                <td class="px-3 py-2 text-sm text-secondary">
                   <span v-if="m.stockAfter !== null">S={{ m.stockAfter }}</span><span v-else>—</span>
-                  <span style="color: var(--text-muted)"> · </span>
+                  <span class="text-muted"> · </span>
                   <span v-if="m.reservedAfter !== null">R={{ m.reservedAfter }}</span><span v-else>—</span>
-                  <span style="color: var(--text-muted)"> · </span>
+                  <span class="text-muted"> · </span>
                   <span v-if="m.safetyStockAfter !== null">SS={{ m.safetyStockAfter }}</span><span v-else>—</span>
                 </td>
-                <td class="px-3 py-2 text-sm" style="color: var(--text-secondary)">{{ m.createdBy?.email || t('admin.variantsTable.movements.system') }}</td>
+                <td class="px-3 py-2 text-sm text-secondary">{{ m.createdBy?.email || t('admin.variantsTable.movements.system') }}</td>
               </tr>
             </tbody>
           </table>
@@ -327,29 +399,29 @@
       v-if="editingVariantId"
       class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4"
     >
-      <div class="rounded-xl w-full max-w-xl p-6 space-y-4" style="background: var(--surface-2); border: 1px solid var(--surface-border); box-shadow: 0 24px 60px rgba(0,0,0,0.5)">
+      <div class="rounded-xl w-full max-w-xl p-6 space-y-4 surface-2 border border-line shadow-overlay">
         <div class="flex items-start justify-between">
           <div>
-            <h4 class="text-lg font-semibold" style="color: var(--text-primary)">
+            <h4 class="text-lg font-semibold text-primary">
               {{ t('admin.variantsTable.imagePicker.title') }}
             </h4>
-            <p class="text-sm " style="color: var(--text-secondary)">
+            <p class="text-sm text-secondary">
               {{ t('admin.variantsTable.imagePicker.subtitle') }}
             </p>
           </div>
           <button
-            type="button"
-            class="hover:text-white" style="color: var(--text-muted)"
-            @click="closeImageEditor"
-          >
+ type="button"
+ class="hover:text-primary text-muted" 
+ @click="closeImageEditor"
+>
             ✕
           </button>
         </div>
 
         <div
-          v-if="availableImages.length === 0"
-          class="text-sm p-3 rounded border border-dashed" style="color: var(--text-secondary); background: var(--surface-2); border-color: var(--surface-border)"
-        >
+ v-if="availableImages.length === 0"
+ class="text-sm p-3 rounded-lg border border-dashed text-secondary surface-2 border-line" 
+>
           {{ t('admin.variantsTable.imagePicker.empty') }}
         </div>
 
@@ -358,11 +430,11 @@
           class="grid grid-cols-2 sm:grid-cols-3 gap-3"
         >
           <label
-            v-for="img in availableImages"
-            :key="img.url"
-            class="rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:[border-color:rgba(var(--brand-rgb)/0.6)] transition-colors" style="border: 1px solid var(--surface-border)"
-          >
-            <div class="aspect-square overflow-hidden rounded-md" style="background: var(--surface-3); border: 1px solid var(--surface-border)">
+ v-for="img in availableImages"
+ :key="img.url"
+ class="rounded-lg p-2 flex flex-col gap-2 cursor-pointer hover:[border-color:rgba(var(--brand-rgb)/0.6)] transition-colors border border-line" 
+>
+            <div class="aspect-square overflow-hidden rounded-lg surface-3 border border-line">
               <img
                 :src="img.url"
                 class="w-full h-full object-cover"
@@ -370,7 +442,7 @@
               >
             </div>
             <div class="flex items-center justify-between text-sm">
-              <span class="truncate" style="color: var(--text-secondary)">{{ img.label || t('admin.variantsTable.imagePicker.imageFallback') }}</span>
+              <span class="truncate text-secondary">{{ img.label || t('admin.variantsTable.imagePicker.imageFallback') }}</span>
               <input
                 type="checkbox"
                 class="admin-checkbox"
@@ -392,7 +464,7 @@
           <button
             type="button"
             :disabled="savingImages"
-            class="px-6 py-2 rounded-lg text-sm font-bold text-white shadow-lg [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.2)] transition-all hover:[box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.3)] active:scale-95 flex items-center gap-2"
+            class="px-6 py-2 rounded-lg text-sm font-bold text-brand-contrast shadow-lg [box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.2)] transition-all hover:[box-shadow:0_4px_14px_rgba(var(--brand-rgb)/0.3)] active:scale-95 flex items-center gap-2"
             :class="savingImages ? '[background:var(--brand)] cursor-not-allowed' : '[background:var(--brand)] hover:[background:color-mix(in_srgb,var(--brand)_80%,#000)]'"
             @click="saveVariantImages"
           >
@@ -407,6 +479,7 @@
 
 <script setup lang="ts">
 import { useAuthStore } from '~/stores/auth'
+import { getVariantAvailableStock, PRODUCT_INFINITE_STOCK } from '~/shared/inventory/variant-availability'
 
 const { t } = useI18n({ useScope: 'global' })
 
@@ -441,29 +514,125 @@ function getVariantTitle(variant: any) {
 }
 
 function getAvailable(variant: any) {
+    if (typeof variant?.availableStock === 'number') return Number(variant.availableStock)
     const stock = Number(variant.stock || 0)
     const reserved = Number(variant.reserved || 0)
     const safetyStock = Number(variant.safetyStock || 0)
     return Math.max(stock - reserved - safetyStock, 0)
 }
 
+function supportsVariantPromotion(variant: any) {
+    return Array.isArray(variant?.optionValues) && variant.optionValues.length > 0
+}
+
+function toNullableNumber(value: unknown): number | null {
+    if (value === null || value === undefined || value === '') return null
+    const parsed = Number(value)
+    return Number.isFinite(parsed) ? parsed : null
+}
+
+function toIsoStringOrNull(value: unknown): string | null {
+    if (value === null || value === undefined || value === '') return null
+    const parsed = new Date(String(value))
+    if (Number.isNaN(parsed.getTime())) return null
+    return parsed.toISOString()
+}
+
+function rememberVariantServerState(variant: any) {
+    if (!variant || typeof variant !== 'object') return
+    if (!variant.__serverState || typeof variant.__serverState !== 'object') {
+        variant.__serverState = {}
+    }
+}
+
+function restoreVariantFromServer(variant: any) {
+    const state = variant?.__serverState
+    if (!state) return
+    variant.price = state.price
+    variant.cost = state.cost
+    variant.sku = state.sku
+    variant.barcode = state.barcode
+    variant.isActive = state.isActive
+    variant.compareAtPrice = state.compareAtPrice
+    variant.promotionalPrice = state.promotionalPrice
+    variant.isPromotionActive = state.isPromotionActive
+    variant.promotionStartDateInput = state.promotionStartDateInput
+    variant.promotionEndDateInput = state.promotionEndDateInput
+    variant.showCountdown = state.showCountdown
+    variant.stock = state.stock
+    variant.reserved = state.reserved
+    variant.safetyStock = state.safetyStock
+    variant.trackInventory = state.trackInventory
+    variant.availableStock = state.availableStock
+}
+
+function syncVariantServerState(variant: any) {
+    variant.__serverState = {
+        price: Number(variant?.price ?? 0),
+        cost: variant?.cost != null ? Number(variant.cost) : null,
+        sku: variant?.sku || '',
+        barcode: variant?.barcode || '',
+        isActive: variant?.isActive !== false,
+        compareAtPrice: variant?.compareAtPrice != null ? Number(variant.compareAtPrice) : null,
+        promotionalPrice: variant?.promotionalPrice != null ? Number(variant.promotionalPrice) : null,
+        isPromotionActive: variant?.isPromotionActive === true,
+        promotionStartDateInput: variant?.promotionStartDateInput || '',
+        promotionEndDateInput: variant?.promotionEndDateInput || '',
+        showCountdown: variant?.showCountdown === true,
+        stock: Number(variant?.stock ?? 0),
+        reserved: Number(variant?.reserved ?? 0),
+        safetyStock: Number(variant?.safetyStock ?? 0),
+        trackInventory: variant?.trackInventory !== false,
+        availableStock: Number(
+            variant?.availableStock ??
+            getVariantAvailableStock(variant, { infiniteValue: PRODUCT_INFINITE_STOCK })
+        )
+    }
+}
+
 async function updateVariantInfo(variant: any) {
+    rememberVariantServerState(variant)
     try {
-        await $fetch(`/api/admin/variants/${variant.id}`, {
+        const updated = await $fetch(`/api/admin/variants/${variant.id}`, {
             method: 'PUT',
             headers: { Authorization: `Bearer ${authStore.token}` },
             body: {
                 price: variant.price,
-                cost: variant.cost,
+                cost: toNullableNumber(variant.cost),
                 sku: variant.sku,
                 barcode: variant.barcode,
                 isActive: variant.isActive,
-                compareAtPrice: variant.compareAtPrice
+                compareAtPrice: toNullableNumber(variant.compareAtPrice),
+                promotionalPrice: supportsVariantPromotion(variant) ? toNullableNumber(variant.promotionalPrice) : null,
+                isPromotionActive: supportsVariantPromotion(variant) ? Boolean(variant.isPromotionActive) : false,
+                promotionStartDate: supportsVariantPromotion(variant) ? toIsoStringOrNull(variant.promotionStartDateInput) : null,
+                promotionEndDate: supportsVariantPromotion(variant) ? toIsoStringOrNull(variant.promotionEndDateInput) : null,
+                showCountdown: supportsVariantPromotion(variant) ? Boolean(variant.showCountdown) : false
             }
         })
+
+        if (updated && typeof updated === 'object') {
+            variant.price = Number((updated as any).price ?? variant.price ?? 0)
+            variant.cost = (updated as any).cost != null ? Number((updated as any).cost) : null
+            variant.sku = (updated as any).sku || ''
+            variant.barcode = (updated as any).barcode || ''
+            variant.isActive = (updated as any).isActive !== false
+            variant.compareAtPrice = (updated as any).compareAtPrice != null ? Number((updated as any).compareAtPrice) : null
+            variant.promotionalPrice = (updated as any).promotionalPrice != null ? Number((updated as any).promotionalPrice) : null
+            variant.isPromotionActive = (updated as any).isPromotionActive === true
+            variant.promotionStartDateInput = (updated as any).promotionStartDate ? new Date((updated as any).promotionStartDate).toISOString().slice(0, 16) : ''
+            variant.promotionEndDateInput = (updated as any).promotionEndDate ? new Date((updated as any).promotionEndDate).toISOString().slice(0, 16) : ''
+            variant.showCountdown = (updated as any).showCountdown === true
+            variant.availableStock = Number(
+                (updated as any).availableStock ??
+                getVariantAvailableStock({ ...variant, ...(updated as any) }, { infiniteValue: PRODUCT_INFINITE_STOCK })
+            )
+            syncVariantServerState(variant)
+        }
     } catch (e) {
         console.error(e)
-        alert(t('admin.variantsTable.errors.updateVariantFailed'))
+        restoreVariantFromServer(variant)
+        alert((e as any)?.data?.statusMessage || t('admin.variantsTable.errors.updateVariantFailed'))
     }
 }
 
@@ -473,6 +642,7 @@ const lockingSkuIds = ref<Set<string>>(new Set())
 const suggestingSkuIds = ref<Set<string>>(new Set())
 
 async function updateVariantInventory(variant: any, patch: any) {
+    rememberVariantServerState(variant)
     savingInventoryIds.value.add(variant.id)
     try {
         const updated = await $fetch(`/api/admin/inventory/variants/${variant.id}`, {
@@ -489,10 +659,16 @@ async function updateVariantInventory(variant: any, patch: any) {
             if (typeof (updated as any).reserved === 'number') variant.reserved = (updated as any).reserved
             if (typeof (updated as any).safetyStock === 'number') variant.safetyStock = (updated as any).safetyStock
             if (typeof (updated as any).trackInventory === 'boolean') variant.trackInventory = (updated as any).trackInventory
+            variant.availableStock = Number(
+                (updated as any).availableStock ??
+                getVariantAvailableStock({ ...variant, ...(updated as any) }, { infiniteValue: PRODUCT_INFINITE_STOCK })
+            )
+            syncVariantServerState(variant)
         }
     } catch (e) {
         console.error(e)
-        alert(t('admin.variantsTable.errors.updateInventoryFailed'))
+        restoreVariantFromServer(variant)
+        alert((e as any)?.data?.statusMessage || t('admin.variantsTable.errors.updateInventoryFailed'))
         emit('refresh')
     } finally {
         savingInventoryIds.value.delete(variant.id)
@@ -500,7 +676,8 @@ async function updateVariantInventory(variant: any, patch: any) {
 }
 
 async function setVariantStock(variant: any) {
-    const prev = Number(variant.stock || 0)
+    rememberVariantServerState(variant)
+    const prev = Number(variant.__serverState?.stock ?? 0)
     const next = Number(variant.stock || 0)
 
     if (!Number.isFinite(next) || next < 0) {
@@ -524,11 +701,16 @@ async function setVariantStock(variant: any) {
             if (typeof (updated as any).reserved === 'number') variant.reserved = (updated as any).reserved
             if (typeof (updated as any).safetyStock === 'number') variant.safetyStock = (updated as any).safetyStock
             if (typeof (updated as any).trackInventory === 'boolean') variant.trackInventory = (updated as any).trackInventory
+            variant.availableStock = Number(
+                (updated as any).availableStock ??
+                getVariantAvailableStock({ ...variant, ...(updated as any) }, { infiniteValue: PRODUCT_INFINITE_STOCK })
+            )
+            syncVariantServerState(variant)
         }
     } catch (e) {
         console.error(e)
-        variant.stock = prev
-        alert(t('admin.variantsTable.errors.updateStockFailed'))
+        restoreVariantFromServer(variant)
+        alert((e as any)?.data?.statusMessage || t('admin.variantsTable.errors.updateStockFailed'))
         emit('refresh')
     } finally {
         savingStockIds.value.delete(variant.id)
@@ -559,9 +741,9 @@ async function lockSku(variant: any) {
 async function suggestSku(variant: any) {
     suggestingSkuIds.value.add(variant.id)
     try {
-        const result = await $fetch<{ sku: string; available: boolean }>(`/api/admin/variants/${variant.id}/sku/suggest`, {
+        const result = await $fetch(`/api/admin/variants/${variant.id}/sku/suggest`, {
             headers: { Authorization: `Bearer ${authStore.token}` }
-        })
+        }) as { sku: string; available: boolean }
 
         if (!result?.sku) {
             alert(t('admin.variantsTable.errors.suggestSkuFailed'))
@@ -606,9 +788,9 @@ async function openMovements(variant: any) {
     movements.value = []
     movementsLoading.value = true
     try {
-        const data = await $fetch<Movement[]>(`/api/admin/inventory/variants/${variant.id}/movements`, {
+        const data = await $fetch(`/api/admin/inventory/variants/${variant.id}/movements`, {
             headers: { Authorization: `Bearer ${authStore.token}` }
-        })
+        }) as Movement[]
         movements.value = data
     } catch (e) {
         console.error(e)

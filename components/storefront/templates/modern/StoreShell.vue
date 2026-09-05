@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useCartStore } from '~/stores/cart'
 import StoreThemeProvider from './ThemeProvider.vue'
+import SearchResults from './partials/SearchResults.vue'
 import { CONTACT_INFO_DEF_BY_KIND, buildContactInfoHref, type ContactInfoKind } from '~/shared/contact-infos'
 import { buildActiveProductPricing } from '~/shared/pricing/product-pricing'
 
@@ -10,6 +11,7 @@ const tenant = useState<any>('tenant')
 const tenantName = computed(() => tenant.value?.name || 'Store')
 const storeSettings = useState<any>('storeSettings')
 const storefrontContent = useStorefrontContent()
+const legalLinks = useStoreLegalLinks()
 
 const categoryDisplayTitle = (category: any): string => {
     if (!category) return ""
@@ -50,11 +52,51 @@ watch(mobileMenuOpen, (open) => {
 })
 // Build dynamic menu
 
+/*
+ * The desktop categories menu used to open on `group-hover` alone: unreachable
+ * by keyboard, and unusable on touch. It is a click toggle now, with hover kept
+ * as a convenience on pointer devices.
+ */
+const categoriesMenuOpen = ref(false)
+const categoriesMenuRef = ref<HTMLElement | null>(null)
+const closeCategoriesMenu = () => { categoriesMenuOpen.value = false }
+const canHover = () =>
+    import.meta.client && window.matchMedia('(hover: hover) and (pointer: fine)').matches
+const openCategoriesMenuOnHover = () => { if (canHover()) categoriesMenuOpen.value = true }
+const closeCategoriesMenuOnHover = () => { if (canHover()) closeCategoriesMenu() }
+const onDocumentPointerDown = (event: Event) => {
+    if (!categoriesMenuOpen.value) return
+    const root = categoriesMenuRef.value
+    if (root && !root.contains(event.target as Node)) closeCategoriesMenu()
+}
+onMounted(() => {
+    document.addEventListener('pointerdown', onDocumentPointerDown)
+})
+onUnmounted(() => {
+    document.removeEventListener('pointerdown', onDocumentPointerDown)
+})
+
 // Search Logic
 const searchQuery = ref('')
+// Below `lg` the field lives in a row that toggles open under the header.
+const searchOpen = ref(false)
+const closeSearchRow = () => {
+    searchOpen.value = false
+    searchQuery.value = ''
+}
 const searchResults = ref<any[]>([])
 const searchLoading = ref(false)
 const isSearchDropdownOpen = ref(false)
+const openSearchDropdown = () => {
+    if (searchQuery.value.length >= 3) isSearchDropdownOpen.value = true
+}
+/*
+ * Blur fires before the suggestion click lands, so the close is deferred.
+ * It lives in the script because Vue templates cannot reach `setTimeout`.
+ */
+const closeSearchDropdownSoon = () => {
+    setTimeout(() => { isSearchDropdownOpen.value = false }, 200)
+}
 const searchSuggestionLimit = 5
 const visibleSearchResultCount = ref(searchSuggestionLimit)
 const visibleSearchResults = computed(() => searchResults.value.slice(0, visibleSearchResultCount.value))
@@ -123,14 +165,19 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
     <div class="min-h-screen flex flex-col font-sans text-slate-600 bg-[#f8faf9]">
       <!-- Top Announcement Bar -->
       <!-- Top Announcement Bar -->
-      <StorefrontSharedAnnouncementBar 
+      <StorefrontSharedAnnouncementBar
         v-if="!hideNavigation && !hideAnnouncementBar"
         background-color="bg-brand-600"
         text-color="text-white"
       />
+      <StorefrontSharedClearanceBanner v-if="!hideNavigation && !hideAnnouncementBar" />
+      <StorefrontSharedClearanceAnnouncementDialog />
 
       <!-- Header -->
-      <header v-if="!hideNavigation" :class="['bg-white border-b border-slate-100 dark:border-slate-800 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]">
+      <header
+        v-if="!hideNavigation"
+        :class="['bg-white border-b border-slate-100 dark:border-slate-800 sticky top-0 z-50', { 'hidden md:block': mobileHeaderHidden }]"
+      >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div class="h-16 md:h-20 flex items-center justify-between gap-4">
             <!-- Logo -->
@@ -148,56 +195,46 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
               <template v-else>
                 <div class="h-10 w-10 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center border border-brand-100">
                   <!-- Placeholder Logo Icon -->
-                  <Icon name="lucide:store" class="w-6 h-6" />
+                  <Icon
+                    name="lucide:store"
+                    class="w-6 h-6"
+                  />
                 </div>
               </template>
               <span class="text-xl font-bold text-slate-900 group-hover:text-brand-600 transition-colors tracking-tight">{{ tenantName }}</span>
             </NuxtLink>
 
             <!-- Search Bar (Centered & Rounded) -->
-               <div class="flex-1 max-w-lg hidden lg:block">
+            <div class="flex-1 max-w-lg hidden lg:block">
               <div class="relative group">
-                <input 
-                  type="text" 
-                  v-model="searchQuery" :placeholder="storefrontContent.search?.placeholder || 'Search products...'" @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null" @blur="setTimeout(() => isSearchDropdownOpen = false, 200)" 
-                  class="w-full h-10 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-500 focus:border-transparent block pl-5 pr-10 transition-all shadow-sm group-hover:bg-white" 
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  :placeholder="storefrontContent.search.placeholder"
+                  class="w-full h-10 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-500 focus:border-transparent block ps-5 pe-10 transition-all shadow-sm group-hover:bg-white"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
-                <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                  <Icon name="lucide:search" class="w-5 h-5 text-slate-400 group-hover:text-brand-500 transition-colors" />
-                  <!-- Search Dropdown -->
-                  <div
-                    v-show="isSearchDropdownOpen"
-                    class="absolute top-[100%] right-0 mt-2 w-64 bg-white border border-slate-100 shadow-xl z-50 rounded-md overflow-hidden text-left pointer-events-auto"
-                  >
-                    <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
-                    <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
-                    <div v-else class="flex flex-col">
-                      <NuxtLink
-                        v-for="product in visibleSearchResults"
-                        :key="product.id"
-                        :to="'/product/' + product.slug"
-                        class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
-                        @click="isSearchDropdownOpen = false"
-                      >
-                        <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
-                        <div class="flex-1 min-w-0">
-                          <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                          <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
-                        </div>
-                      </NuxtLink>
-                    <button
-                      v-if="hasMoreSearchResults"
-                      type="button"
-                      class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
-                      @mousedown.prevent
-                      @click="showMoreSearchResults"
-                    >
-                      See more
-                    </button>
-                    </div>
-                  </div>
-
+                <div class="absolute inset-y-0 end-0 flex items-center pe-3 pointer-events-none">
+                  <Icon
+                    name="lucide:search"
+                    class="w-5 h-5 text-slate-400 group-hover:text-brand-500 transition-colors"
+                  />
                 </div>
+
+                <!--
+                  A sibling of the input rather than a child of the icon wrapper,
+                  so the panel spans the field and inherits no `pointer-events-none`.
+                -->
+                <SearchResults
+                  v-show="isSearchDropdownOpen"
+                  class="absolute top-full start-0 end-0 mt-2 z-50"
+                  :loading="searchLoading"
+                  :results="visibleSearchResults"
+                  :has-more="hasMoreSearchResults"
+                  @show-more="showMoreSearchResults"
+                  @select="isSearchDropdownOpen = false"
+                />
               </div>
             </div>
 
@@ -205,28 +242,70 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             <div class="flex items-center gap-6">
               <!-- Desktop Menu -->
               <nav class="hidden lg:flex items-center gap-6">
-                <NuxtLink to="/" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors" active-class="text-brand-600 font-semibold">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors" active-class="text-brand-600 font-semibold">{{ storefrontContent.nav.shop }}</NuxtLink>
+                <NuxtLink
+                  to="/"
+                  class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors"
+                  active-class="text-brand-600 font-semibold"
+                >
+                  {{ storefrontContent.nav.home }}
+                </NuxtLink>
+                <NuxtLink
+                  to="/products"
+                  class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors"
+                  active-class="text-brand-600 font-semibold"
+                >
+                  {{ storefrontContent.nav.shop }}
+                </NuxtLink>
 
-              <!-- Categories Dropdown -->
-              <div class="relative group flex items-center h-full">
-                <button class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors flex items-center gap-1 cursor-pointer">
-                  {{ storefrontContent.nav.categories || 'Categories' }}
-                  <Icon name="lucide:chevron-down" class="w-4 h-4" />
-                </button>
-                <div class="absolute top-[80%] left-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 rounded-md overflow-hidden">
-                  <NuxtLink
-                    v-for="cat in tenantCategories"
-                    :key="cat.id"
-                    :to="`/category/${cat.slug}`"
-                    class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
+                <!-- Categories Dropdown -->
+                <div
+                  ref="categoriesMenuRef"
+                  class="relative group flex items-center h-full"
+                  @keydown.esc="closeCategoriesMenu"
+                  @mouseenter="openCategoriesMenuOnHover"
+                  @mouseleave="closeCategoriesMenuOnHover"
+                >
+                  <button
+                    id="modern-categories-trigger"
+                    type="button"
+                    class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors flex items-center gap-1 cursor-pointer"
+                    aria-controls="modern-categories-menu"
+                    :aria-expanded="categoriesMenuOpen"
+                    @click="categoriesMenuOpen = !categoriesMenuOpen"
                   >
-                    {{ categoryDisplayTitle(cat) }}
-                  </NuxtLink>
+                    {{ storefrontContent.nav.categories || 'Categories' }}
+                    <Icon
+                      name="lucide:chevron-down"
+                      class="w-4 h-4 transition-transform"
+                      :class="categoriesMenuOpen ? 'rotate-180' : ''"
+                    />
+                  </button>
+                  <!-- `top-full`, not `top-[80%]`: the old gap swallowed the pointer. -->
+                  <div
+                    id="modern-categories-menu"
+                    class="absolute top-full start-0 mt-2 w-48 bg-white border border-slate-100 shadow-xl transition-all duration-200 z-50 rounded-md overflow-hidden"
+                    :class="categoriesMenuOpen ? 'opacity-100 visible' : 'opacity-0 invisible group-focus-within:opacity-100 group-focus-within:visible'"
+                    aria-labelledby="modern-categories-trigger"
+                  >
+                    <NuxtLink
+                      v-for="cat in tenantCategories"
+                      :key="cat.id"
+                      :to="`/category/${cat.slug}`"
+                      class="block px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 hover:text-brand-700 transition-colors"
+                      @click="closeCategoriesMenu"
+                    >
+                      {{ categoryDisplayTitle(cat) }}
+                    </NuxtLink>
+                  </div>
                 </div>
-              </div>
 
-              <NuxtLink to="/contact" class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors" active-class="text-brand-600 font-semibold">{{ storefrontContent.nav.contact }}</NuxtLink>
+                <NuxtLink
+                  to="/contact"
+                  class="text-sm font-medium text-slate-600 hover:text-brand-600 transition-colors"
+                  active-class="text-brand-600 font-semibold"
+                >
+                  {{ storefrontContent.nav.contact }}
+                </NuxtLink>
               </nav>
 
               <div class="h-6 w-px bg-slate-200 hidden lg:block" />
@@ -234,18 +313,33 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
               <!-- Icons -->
               <div class="flex items-center gap-3">
                 <LocaleSwitcher class="hidden lg:inline-flex" />
+                <!-- The field itself is `lg:block`; below that it opens as a row under the header. -->
+                <button
+                  type="button"
+                  class="lg:hidden relative h-10 w-10 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-colors"
+                  :aria-label="storefrontContent.search.placeholder"
+                  :aria-expanded="searchOpen"
+                  @click="searchOpen ? closeSearchRow() : (searchOpen = true)"
+                >
+                  <Icon
+                    :name="searchOpen ? 'lucide:x' : 'lucide:search'"
+                    class="w-5 h-5"
+                  />
+                </button>
                 <button
                   class="relative h-10 w-10 flex items-center justify-center text-slate-500 hover:text-brand-600 hover:bg-slate-50 rounded-full transition-colors"
                   :title="storefrontContent.header.wishlistTitle"
+                  :aria-label="storefrontContent.header.wishlistTitle"
                   @click="navigateTo('/wishlist')"
                 >
-                  <Icon name="lucide:heart" class="w-5 h-5" />
-                  <ClientOnly>
-                    <span
-                      v-if="favorites.count.value > 0"
-                      class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white absolute -top-1 -right-1"
-                    >{{ favorites.count.value }}</span>
-                  </ClientOnly>
+                  <Icon
+                    name="lucide:heart"
+                    class="w-5 h-5"
+                  />
+                  <span
+                    v-if="favorites.count.value > 0"
+                    class="flex h-4 min-w-4 px-1 items-center justify-center rounded-full bg-slate-900 text-[10px] font-bold text-white absolute -top-1 -end-1"
+                  >{{ favorites.count.value }}</span>
                 </button>
                 <!-- Cart -->
                 <NuxtLink
@@ -253,35 +347,97 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   to="/cart"
                   class="group relative h-10 flex items-center justify-center px-4 rounded-full bg-brand-600 text-white shadow-md hover:bg-brand-700 transition-all hover:shadow-lg"
                 >
-                  <Icon name="lucide:handbag" class="w-5 h-5" />
+                  <Icon
+                    name="lucide:handbag"
+                    class="w-5 h-5"
+                  />
                   <span
                     v-if="cartStore.itemCount > 0"
-                    class="ml-1 text-xs font-bold"
+                    class="ms-1 text-xs font-bold"
                   >{{ cartStore.itemCount }}</span>
                 </NuxtLink>
                 <!-- Hamburger (Mobile) -->
-               <button class="lg:hidden p-1" @click="mobileMenuOpen = true">
-                 <Icon name="lucide:menu" class="w-6 h-6" />
-               </button>
-
+                <button
+                  class="lg:hidden p-1"
+                  @click="mobileMenuOpen = true"
+                >
+                  <Icon
+                    name="lucide:menu"
+                    class="w-6 h-6"
+                  />
+                </button>
               </div>
             </div>
           </div>
+
+          <!-- Search row (below `lg`, where the inline field is hidden) -->
+          <Transition
+            enter-active-class="transition-all duration-200 ease-out"
+            enter-from-class="opacity-0 -translate-y-2"
+            leave-active-class="transition-all duration-150 ease-in"
+            leave-to-class="opacity-0 -translate-y-2"
+          >
+            <div
+              v-if="searchOpen"
+              id="modern-search-row"
+              class="lg:hidden pb-4"
+            >
+              <div class="relative">
+                <input
+                  v-model="searchQuery"
+                  type="text"
+                  :placeholder="storefrontContent.search.placeholder"
+                  class="w-full h-11 bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-full focus:ring-2 focus:ring-brand-500 focus:border-transparent block ps-5 pe-11 transition-all shadow-sm"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
+                >
+                <div class="absolute inset-y-0 end-0 flex items-center pe-4 pointer-events-none">
+                  <Icon
+                    name="lucide:search"
+                    class="w-5 h-5 text-slate-400"
+                  />
+                </div>
+
+                <SearchResults
+                  v-show="isSearchDropdownOpen"
+                  class="absolute top-full start-0 end-0 mt-2 z-50"
+                  :loading="searchLoading"
+                  :results="visibleSearchResults"
+                  :has-more="hasMoreSearchResults"
+                  @show-more="showMoreSearchResults"
+                  @select="closeSearchRow"
+                />
+              </div>
+            </div>
+          </Transition>
         </div>
       </header>
 
       <!-- Mobile Drawer -->
       <Teleport to="body">
         <Transition name="fade">
-          <div v-if="mobileMenuOpen" class="fixed inset-0 bg-black/40 z-[60]" @click="mobileMenuOpen = false" />
+          <div
+            v-if="mobileMenuOpen"
+            class="fixed inset-0 bg-black/40 z-[60]"
+            @click="mobileMenuOpen = false"
+          />
         </Transition>
         <Transition name="slide">
-          <div v-if="mobileMenuOpen" class="fixed top-0 left-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto">
+          <div
+            v-if="mobileMenuOpen"
+            class="fixed top-0 start-0 bottom-0 w-[85%] max-w-xs bg-white z-[61] shadow-2xl flex flex-col overflow-y-auto"
+          >
             <!-- Drawer header -->
             <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
               <span class="text-lg font-bold text-slate-900">{{ tenantName }}</span>
-              <button @click="mobileMenuOpen = false" class="p-1 text-slate-500 hover:text-slate-900">
-                <Icon name="lucide:x" class="w-5 h-5" />
+              <button
+                class="p-1 text-slate-500 hover:text-slate-900"
+                @click="mobileMenuOpen = false"
+              >
+                <Icon
+                  name="lucide:x"
+                  class="w-5 h-5"
+                />
               </button>
             </div>
 
@@ -289,22 +445,38 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
             <div class="px-5 py-3">
               <div class="relative">
                 <input
-                  type="text"
                   v-model="searchQuery"
-                  :placeholder="storefrontContent.search?.placeholder || 'Search products...'"
-                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 pl-4 pr-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
-                  @focus="searchQuery.length >= 3 ? isSearchDropdownOpen = true : null"
-                  @blur="setTimeout(() => isSearchDropdownOpen = false, 200)"
+                  type="text"
+                  :placeholder="storefrontContent.search.placeholder"
+                  class="w-full border border-slate-200 bg-slate-50 rounded-lg py-2.5 ps-4 pe-10 text-sm placeholder:text-slate-400 text-slate-900 outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                  @focus="openSearchDropdown"
+                  @blur="closeSearchDropdownSoon"
                 >
-                <Icon name="lucide:search" class="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <Icon
+                  name="lucide:search"
+                  class="w-4 h-4 text-slate-400 absolute end-3 top-1/2 -translate-y-1/2 pointer-events-none"
+                />
 
                 <div
                   v-show="isSearchDropdownOpen"
-                  class="absolute top-[100%] left-0 right-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
+                  class="absolute top-[100%] start-0 end-0 mt-1 bg-white border border-slate-100 shadow-xl z-50 rounded-lg overflow-hidden pointer-events-auto"
                 >
-                  <div v-if="searchLoading" class="px-4 py-3 text-sm text-slate-500">Searching...</div>
-                  <div v-else-if="searchResults.length === 0" class="px-4 py-3 text-sm text-slate-500">No products found.</div>
-                  <div v-else class="flex flex-col">
+                  <div
+                    v-if="searchLoading"
+                    class="px-4 py-3 text-sm text-slate-500"
+                  >
+                    {{ storefrontContent.search.searching }}
+                  </div>
+                  <div
+                    v-else-if="searchResults.length === 0"
+                    class="px-4 py-3 text-sm text-slate-500"
+                  >
+                    {{ storefrontContent.search.noResults }}
+                  </div>
+                  <div
+                    v-else
+                    class="flex flex-col"
+                  >
                     <NuxtLink
                       v-for="product in visibleSearchResults"
                       :key="product.id"
@@ -312,21 +484,31 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                       class="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors border-b border-slate-50 last:border-0"
                       @click="isSearchDropdownOpen = false; mobileMenuOpen = false"
                     >
-                      <img :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'" class="w-10 h-10 object-cover rounded shadow-sm" />
+                      <img
+                        :src="(product.images && product.images.length > 0) ? product.images[0] : '/blank.svg?v=2'"
+                        class="w-10 h-10 object-cover rounded shadow-sm"
+                      >
                       <div class="flex-1 min-w-0">
-                        <div class="text-sm font-medium text-slate-900 truncate">{{ product.title }}</div>
-                        <div class="text-xs text-brand-600 font-bold mt-0.5">{{ formatCurrency(product.effectivePrice ?? product.price) }}<span v-if="product.promotionDiscountPercent" class="ml-1 text-[10px] text-rose-600">-{{ product.promotionDiscountPercent }}%</span></div>
+                        <div class="text-sm font-medium text-slate-900 truncate">
+                          {{ product.title }}
+                        </div>
+                        <div class="text-xs text-brand-600 font-bold mt-0.5">
+                          {{ formatCurrency(product.effectivePrice ?? product.price) }}<span
+                            v-if="product.promotionDiscountPercent"
+                            class="ms-1 text-[10px] text-rose-600"
+                          >-{{ product.promotionDiscountPercent }}%</span>
+                        </div>
                       </div>
                     </NuxtLink>
-                  <button
-                    v-if="hasMoreSearchResults"
-                    type="button"
-                    class="w-full px-4 py-3 text-left text-sm font-semibold text-current hover:opacity-80 transition-opacity"
-                    @mousedown.prevent
-                    @click="showMoreSearchResults"
-                  >
-                    See more
-                  </button>
+                    <button
+                      v-if="hasMoreSearchResults"
+                      type="button"
+                      class="w-full px-4 py-3 text-start text-sm font-semibold text-current hover:opacity-80 transition-opacity"
+                      @mousedown.prevent
+                      @click="showMoreSearchResults"
+                    >
+                      {{ storefrontContent.search.seeMore }}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -334,16 +516,41 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
             <!-- Nav links -->
             <nav class="flex flex-col px-5 py-2 gap-1">
-              <NuxtLink to="/" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.home }}</NuxtLink>
-              <NuxtLink to="/products" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.shop }}</NuxtLink>
-              <NuxtLink to="/contact" class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50" @click="mobileMenuOpen = false">{{ storefrontContent.nav.contact }}</NuxtLink>
+              <NuxtLink
+                to="/"
+                class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50"
+                @click="mobileMenuOpen = false"
+              >
+                {{ storefrontContent.nav.home }}
+              </NuxtLink>
+              <NuxtLink
+                to="/products"
+                class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50"
+                @click="mobileMenuOpen = false"
+              >
+                {{ storefrontContent.nav.shop }}
+              </NuxtLink>
+              <NuxtLink
+                to="/contact"
+                class="py-3 text-sm font-medium text-slate-700 hover:text-brand-600 border-b border-slate-50"
+                @click="mobileMenuOpen = false"
+              >
+                {{ storefrontContent.nav.contact }}
+              </NuxtLink>
             </nav>
+            <!-- Language: the header switcher is desktop-only, so the drawer carries it on mobile. -->
+            <div class="px-5 py-3">
+              <LocaleSwitcher show-labels />
+            </div>
 
             <!-- Categories -->
-            <div v-if="tenantCategories && tenantCategories.length" class="px-5 py-3">
+            <div
+              v-if="tenantCategories && tenantCategories.length"
+              class="px-5 py-3"
+            >
               <button
                 type="button"
-                class="w-full flex items-center justify-between text-left"
+                class="w-full flex items-center justify-between text-start"
                 @click="mobileCategoriesDropdownOpen = !mobileCategoriesDropdownOpen"
               >
                 <h4 class="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
@@ -355,7 +562,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   :class="mobileCategoriesDropdownOpen ? 'rotate-180' : ''"
                 />
               </button>
-              <div v-show="mobileCategoriesDropdownOpen" class="flex flex-col gap-1">
+              <div
+                v-show="mobileCategoriesDropdownOpen"
+                class="flex flex-col gap-1"
+              >
                 <NuxtLink
                   v-for="cat in tenantCategories"
                   :key="cat.id"
@@ -379,15 +589,25 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
       <!-- Footer -->
       <footer class="bg-navy-900/95 text-slate-300 pt-16 pb-8 border-t border-navy-800">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-12 mb-12">
             <!-- Brand Column -->
             <div class="col-span-1 md:col-span-1">
               <h3 class="text-white text-lg font-bold mb-6">
                 {{ tenantName }}
               </h3>
-              <ul v-if="primaryContactInfos.length" class="space-y-4 text-sm">
-                <li v-for="info in primaryContactInfos" :key="info.id" class="flex items-start gap-3">
-                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5 text-brand-500 mt-0.5" />
+              <ul
+                v-if="primaryContactInfos.length"
+                class="space-y-4 text-sm"
+              >
+                <li
+                  v-for="info in primaryContactInfos"
+                  :key="info.id"
+                  class="flex items-start gap-3"
+                >
+                  <Icon
+                    :name="kindDef(info.kind).iconName"
+                    class="w-5 h-5 text-brand-500 mt-0.5"
+                  />
                   <a
                     v-if="hrefFor(info)"
                     :href="hrefFor(info)!"
@@ -400,7 +620,10 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   <span v-else>{{ info.label ? `${info.label}: ` : '' }}{{ info.value }}</span>
                 </li>
               </ul>
-              <div v-if="socialContactInfosWithHref.length" class="flex gap-4 mt-6">
+              <div
+                v-if="socialContactInfosWithHref.length"
+                class="flex gap-4 mt-6"
+              >
                 <a
                   v-for="info in socialContactInfosWithHref"
                   :key="info.id"
@@ -409,72 +632,62 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
                   :target="isExternalHref(info.href) ? '_blank' : undefined"
                   :rel="isExternalHref(info.href) ? 'noopener noreferrer' : undefined"
                 >
-                  <Icon :name="kindDef(info.kind).iconName" class="w-5 h-5" />
+                  <Icon
+                    :name="kindDef(info.kind).iconName"
+                    class="w-5 h-5"
+                  />
                 </a>
               </div>
             </div>
 
             <!-- Links Column -->
-            <div>
+            <div v-if="legalLinks.contact.enabled">
               <h4 class="text-white font-semibold mb-6">
                 {{ storefrontContent.footer.contact }}
               </h4>
               <ul class="space-y-3 text-sm text-slate-400">
                 <li>
-                  <a
-                    href="#"
+                  <NuxtLink
+                    v-if="legalLinks.contact.enabled"
+                    :to="legalLinks.contact.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.contactUs }}</a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.aboutUs }}</a>
+                  >
+                    {{ storefrontContent.footer.contactUs }}
+                  </NuxtLink>
                 </li>
               </ul>
             </div>
-            <div>
+            <div v-if="legalLinks.terms.enabled || legalLinks.privacy.enabled || legalLinks.returns.enabled">
               <h4 class="text-white font-semibold mb-6">
                 {{ storefrontContent.footer.termsPrivacy }}
               </h4>
               <ul class="space-y-3 text-sm text-slate-400">
                 <li>
-                  <a
-                    href="#"
+                  <NuxtLink
+                    v-if="legalLinks.terms.enabled"
+                    :to="legalLinks.terms.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.termsOfService }}</a>
+                  >
+                    {{ storefrontContent.footer.termsOfService }}
+                  </NuxtLink>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <NuxtLink
+                    v-if="legalLinks.privacy.enabled"
+                    :to="legalLinks.privacy.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.privacyPolicy }}</a>
+                  >
+                    {{ storefrontContent.footer.privacyPolicy }}
+                  </NuxtLink>
                 </li>
                 <li>
-                  <a
-                    href="#"
+                  <NuxtLink
+                    v-if="legalLinks.returns.enabled"
+                    :to="legalLinks.returns.path"
                     class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.returnPolicy }}</a>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 class="text-white font-semibold mb-6">
-                {{ storefrontContent.footer.help }}
-              </h4>
-              <ul class="space-y-3 text-sm text-slate-400">
-                <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.faq }}</a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    class="hover:text-brand-400 transition-colors"
-                  >{{ storefrontContent.footer.shippingInfo }}</a>
+                  >
+                    {{ storefrontContent.footer.returnPolicy }}
+                  </NuxtLink>
                 </li>
               </ul>
             </div>
@@ -482,11 +695,12 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 
           <div class="pt-8 border-t border-navy-800 text-center text-xs text-slate-500">
             {{ storefrontContent.footer.copyright(tenantName) }}
+            <div class="mt-2">
+              <StorefrontSharedPoweredBy />
+            </div>
           </div>
         </div>
       </footer>
-      
-
     </div>
   </StoreThemeProvider>
 </template>
@@ -496,4 +710,5 @@ const questions = computed(() => []) // ... unused in displayed snippet but pres
 .fade-enter-from, .fade-leave-to { opacity: 0; }
 .slide-enter-active, .slide-leave-active { transition: transform 0.3s ease; }
 .slide-enter-from, .slide-leave-to { transform: translateX(-100%); }
+[dir='rtl'] .slide-enter-from, [dir='rtl'] .slide-leave-to { transform: translateX(100%); }
 </style>

@@ -1,5 +1,6 @@
 {
   "common": {
+    "delete": "Delete",
     "view": "View",
     "details": "Details",
     "errorPage": {
@@ -34,24 +35,113 @@
   "saasLanding": {
     "seo": {
       "title": "Swekly — Sell online, simply",
-      "description": "Build your store, take orders, and manage payments and shipping in one place."
+      "description": "Build your store, take orders, and manage payments and shipping from one dashboard."
     },
     "hero": {
+      "kicker": "The SaaS for modern merchants",
       "title": {
         "buildSell": "Launch. Run.",
         "scale": "Grow."
       },
+      "italicWord": "effortlessly",
       "subtitle": "Launch your store in minutes. We handle the website, payments, and shipping.",
       "ctaPrimary": "Try it free",
-      "ctaSecondary": "See how it works"
+      "ctaSecondary": "Explore features",
+      "scrollHint": "Scroll to explore",
+      "chips": {
+        "storefront": "Storefront",
+        "payments": "Payments",
+        "shipping": "Shipping",
+        "analytics": "Analytics",
+        "ai": "AI tools"
+      },
+      "pills": {
+        "mobile": "Mobile-friendly storefronts"
+      },
+      "orb": {
+        "newOrder": "New order",
+        "shipping": "Shipping",
+        "live": "live",
+        "payment": "Payment",
+        "codAccepted": "COD · accepted",
+        "today": "Today",
+        "metrics": {
+          "ordersPerHour": "Orders / hr",
+          "avgBasket": "Avg basket · DA",
+          "conversion": "Conversion",
+          "activeWilayas": "Active wilayas",
+          "deliveredToday": "Delivered today"
+        }
+      }
+    },
+    "storyteller": {
+      "eyebrow": "How it works",
+      "title": "Four moves. One complete storefront.",
+      "subtitle": "From pixel to parcel — every step designed to move your product faster.",
+      "steps": {
+        "design": {
+          "number": "01",
+          "caption": "Design",
+          "title": "Pick a theme, make it yours.",
+          "description": "Mobile-first templates that adapt to your brand in minutes, not weeks."
+        },
+        "sell": {
+          "number": "02",
+          "caption": "Sell",
+          "title": "Orders drop in. Automatically.",
+          "description": "Checkout, receipts, inventory — all wired up from day one."
+        },
+        "ship": {
+          "number": "03",
+          "caption": "Ship",
+          "title": "Pick the carrier. We dispatch.",
+          "description": "Multi-carrier integrations with real-time webhook updates and self-delivery options."
+        },
+        "grow": {
+          "number": "04",
+          "caption": "Grow",
+          "title": "See what works. Double down.",
+          "description": "Live analytics, pixels, and AI copy — the growth stack baked in."
+        }
+      }
+    },
+    "carousel": {
+      "eyebrow": "Themes",
+      "title": "Storefronts with a point of view.",
+      "subtitle": "Twelve themes. Every industry. One click away.",
+      "cta": "Browse all themes"
+    },
+    "pricingSection": {
+      "eyebrow": "Pricing",
+      "toggle": {
+        "monthly": "Monthly",
+        "yearly": "Yearly",
+        "discount": "Save 20%"
+      }
     },
     "features": {
       "title": {
         "prefix": "Everything you need to",
         "accent": "sell online"
       },
-      "subtitle": "Simple tools to run your store day to day.",
+      "subtitle": "Everything you need to sell online—without the headache.",
       "items": {
+        "aiTools": {
+          "title": "AI help",
+          "description": "Generate product descriptions, text, and SEO in seconds."
+        },
+        "competitivePricing": {
+          "title": "Clear pricing",
+          "description": "Simple plans with no surprises. Change anytime."
+        },
+        "templates": {
+          "title": "Ready-made themes",
+          "description": "Fast, mobile-friendly templates you can customize."
+        },
+        "fastSupport": {
+          "title": "Responsive support",
+          "description": "Quick answers when you need help."
+        },
         "storeBuilder": {
           "title": "Store Builder",
           "description": "Drag and drop to create clean pages—no code needed."
@@ -71,9 +161,10 @@
       }
     },
     "stats": {
-      "activeMerchants": "Active merchants",
-      "revenueGenerated": "Revenue generated",
-      "uptime": "Uptime"
+      "activeMerchants": "Active stores",
+      "revenueGenerated": "Monthly sales",
+      "uptime": "Uptime",
+      "gmvDetail": "Sales processed monthly"
     },
     "faq": {
       "title": "Frequently Asked Questions",
@@ -94,45 +185,359 @@
       }
     },
     "testimonials": {
+      "eyebrow": "Testimonials",
       "heading": {
         "prefix": "Made for",
         "accent": "people",
         "suffix": "like you."
       },
-      "subtitle": "Merchants and teams who want a fast store and simple operations.",
+      "subtitle": "Merchants who want a fast store and simple operations.",
       "avatarAlt": "Avatar",
       "userAvatarAlt": "User avatar",
-      "items": {
-        "sarah": {
-          "text": "I moved my store without stress. The site is fast, and checkout feels smoother for customers.",
-          "role": "CEO, FashionNova"
+      "items": [
+        {
+          "quote": "We put our products online quickly. Orders come in, and everything stays in one place.",
+          "author": "Nassim",
+          "role": "Owner"
         },
-        "karim": {
-          "text": "The dashboard is clear. I can see sales and best-sellers at a glance.",
-          "role": "Founder, TechShop"
+        {
+          "quote": "The dashboard visibility and inventory management tools transformed how we operate. Très pratique.",
+          "author": "Karim",
+          "role": "Founder"
         },
-        "emily": {
-          "text": "Custom domains were easy to set up. Support is responsive when we need help.",
-          "role": "CTO, GreenEarth"
+        {
+          "quote": "Local shipping integrations save us time every day. Dispatching became a habit.",
+          "author": "Yanis",
+          "role": "Director"
         },
-        "michael": {
-          "text": "We got what we need without overcomplicating things. Support is genuinely helpful.",
-          "role": "COO, GearUp"
+        {
+          "quote": "Integration with local payment methods was seamless. Our customers across Senegal love the options.",
+          "author": "Fatou",
+          "role": "Owner"
         },
-        "lisa": {
-          "text": "When orders picked up, the platform kept up. Stable and reliable.",
-          "role": "Owner, Kicks"
+        {
+          "quote": "The mobile-first design helped us reach more customers. Conversion rate improved remarkably.",
+          "author": "Sophie",
+          "role": "Marketing Manager"
         },
-        "david": {
-          "text": "I built my homepage with drag and drop—no developer needed.",
-          "role": "Founder, ArtSpace"
+        {
+          "quote": "Setup was straightforward, and the support team was helpful. Muy recomendado.",
+          "author": "Carlos",
+          "role": "Owner"
         }
-      }
+      ]
     },
     "finalCta": {
       "title": "Ready to get started?",
       "subtitle": "Create your store and take your first orders today.",
       "cta": "Create my store"
+    },
+    "trust": {
+      "secure": "Secure payments",
+      "ssl": "SSL included",
+      "cloud": "Reliable hosting"
+    },
+    "integrations": {
+      "title": "Works with your tools",
+      "subtitle": "Payments, shipping, and marketing—plug in what you use.",
+      "items": {
+        "checkout": "Checkout",
+        "catalog": "Product catalog",
+        "ads": "Ads tracking"
+      }
+    },
+    "themes": {
+      "title": {
+        "prefix": "Storefronts that",
+        "accent": "sell"
+      },
+      "subtitle": "Pick a fast, mobile-first theme and customize it your way.",
+      "viewAll": "View themes"
+    },
+    "contact": {
+      "title": "Contact Us",
+      "subtitle": "We're here to help and answer any question you might have. We look forward to hearing from you.",
+      "cards": {
+        "sales": {
+          "title": "Talk to Sales",
+          "description": "Interested in our enterprise plans? Just pick up the phone to chat with a member of our sales team.",
+          "contact": "+XX X XXX XXXX"
+        },
+        "support": {
+          "title": "Contact Support",
+          "description": "Sometimes you need a little help from your friends. Or a support rep. Don't worry... we're here for you.",
+          "contact": "support{'@'}swekly.com"
+        }
+      },
+      "form": {
+        "title": "Send us a message",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "email": "Email",
+        "subject": "Subject",
+        "message": "Message",
+        "submit": "Send Message"
+      },
+      "supportPill": "Help with setup and launch"
+    },
+    "visual": {
+      "storefrontLabel": "Your store",
+      "live": "Online",
+      "orders": "Orders",
+      "conversion": "Conversion",
+      "checkoutLabel": "Checkout flow",
+      "checkoutTitle": "Order confirmation in 3 clear steps",
+      "checkoutSteps": {
+        "phone": "Collect phone number and wilaya",
+        "delivery": "Choose delivery and confirm the order",
+        "dispatch": "Send the order to your carrier"
+      },
+      "today": "Today",
+      "operationsRail": "What runs in the background",
+      "whatsapp": "WhatsApp confirmations",
+      "carriers": "Real-time carrier sync with webhooks",
+      "analytics": "Sales and campaign tracking",
+      "readinessLabel": "Ready to sell",
+      "readinessText": "Everything stays simple for your team: your shop, your orders, your delivery options, and your daily follow-up.",
+      "commandCenterEyebrow": "Daily follow-up",
+      "commandCenterTitle": "One place to run your store",
+      "commandCenterBadge": "For every step",
+      "orderConfirmations": "Confirmed orders",
+      "carrierSync": "Delivery follow-up",
+      "realtime": "Live",
+      "localFleet": "Your own driver",
+      "weeklyPulse": "Weekly sales rhythm",
+      "showcase": {
+        "title": "Beautiful storefronts that feel made for your products",
+        "body": "Choose a theme, add your products, and give customers a smooth buying experience on mobile.",
+        "preview": "Store preview",
+        "analyticsBody": "See what sells, what converts, and where to push harder",
+        "logisticsBody": "Offer delivery choices that match how your customers order"
+      }
+    },
+    "pricingPreview": {
+      "storefront": "Your online store is included",
+      "delivery": "Delivery options are ready from day one"
+    },
+    "cinematic": {
+      "hero": {
+        "eyebrow": "Built for modern commerce",
+        "headlinePre": "One commerce engine.",
+        "headlineAccent": "Every",
+        "headlinePost": "merchant.",
+        "subhead": "Storefront, checkout, delivery, and analytics — unified on a single platform that ships in minutes, not months.",
+        "ctaPrimary": "Start for free",
+        "ctaSecondary": "See it work"
+      },
+      "heroCarousel": {
+        "ctaRegister": "Start scaling for free",
+        "ctaFeatures": "Explore features",
+        "slides": {
+          "delivery": {
+            "eyebrow": "Delivery network",
+            "headlinePre": "Ship with",
+            "headlineAccent": "any",
+            "headlinePost": " carrier.",
+            "subhead": "",
+            "meta": [
+              "Multi-carrier integrations",
+              "Live status sync",
+              "Returns reconciled automatically"
+            ],
+            "address": "swekly.com/admin/delivery"
+          },
+          "warehouse": {
+            "eyebrow": "Advanced inventory control",
+            "headlinePre": "Stock,",
+            "headlineAccent": "live",
+            "headlinePost": ".",
+            "subhead": "",
+            "meta": [
+              "Variants, SKUs, barcodes & batches",
+              "Reorder points & low-stock alerts",
+              "Purchases, suppliers & stock audits"
+            ],
+            "address": "swekly.com/admin/inventory"
+          },
+          "themes": {
+            "eyebrow": "Storefront templates",
+            "headlinePre": "Several themes.",
+            "headlineAccent": "One",
+            "headlinePost": " click.",
+            "subhead": "",
+            "meta": [
+              "Mobile-first themes",
+              "RTL & multilingual",
+              "Live theme builder"
+            ],
+            "address": "swekly.com/admin/themes"
+          },
+          "conversion": {
+            "eyebrow": "Conversion & analytics",
+            "headlinePre": "Track",
+            "headlineAccent": "every",
+            "headlinePost": " conversion.",
+            "subhead": "",
+            "meta": [
+              "Real-time funnel",
+              "Meta Pixel built-in",
+              "Live order dashboard"
+            ],
+            "address": "swekly.com/admin/analytics"
+          },
+          "pos": {
+            "eyebrow": "Cross-platform POS",
+            "headlinePre": "One register.",
+            "headlineAccent": "Every",
+            "headlinePost": " device.",
+            "subhead": "",
+            "meta": [
+              "Native apps · iOS · Android · Windows · macOS",
+              "Offline-first checkout, instant cloud resync",
+              "Loyalty, promos & receipts in a single tap"
+            ],
+            "address": "swekly.com/admin/pos"
+          }
+        }
+      },
+      "logoCloud": "Our integrations — carriers, pixels, tools",
+      "howItWorks": {
+        "titlePre": "From idea to",
+        "titleAccent": "income",
+        "titlePost": "in four steps.",
+        "description": "We removed every detour between launching a store and receiving your first order."
+      },
+      "preview": {
+        "eyebrow": "Real-time control",
+        "titlePre": "Watch orders",
+        "titleAccent": "land",
+        "titlePost": "as they happen.",
+        "description": "A unified pipeline shows every order, every status, every delivery — no tabs to refresh, no exports to chase.",
+        "point1": "Live status updates from every carrier",
+        "point2": "One click to confirm, edit, or refund",
+        "point3": "Built-in fraud signals on every order"
+      },
+      "features": {
+        "eyebrow": "What's inside",
+        "titlePre": "Everything you need.",
+        "titleAccent": "Nothing",
+        "titlePost": "you don't.",
+        "description": "Global-ready platform. Beautiful in every language. Built to grow with your business."
+      },
+      "pricing": {
+        "eyebrow": "Pricing",
+        "titlePre": "Built to",
+        "titleAccent": "grow",
+        "titlePost": "with you.",
+        "description": "Plans that match your stage — from first sale to fifty thousand a month.",
+        "viewAll": "Compare every plan"
+      },
+      "testimonials": {
+        "titlePre": "Merchants who",
+        "titleAccent": "shipped",
+        "titlePost": "with Swekly."
+      },
+      "faq": {
+        "titlePre": "Questions,",
+        "titleAccent": "answered",
+        "titlePost": "."
+      },
+      "cta": {
+        "eyebrow": "Ready when you are",
+        "headlinePre": "Open your store",
+        "headlineAccent": "today",
+        "headlinePost": ".",
+        "subhead": "Free to start. No credit card. Onboarding in under ten minutes.",
+        "button": "Create your store",
+        "secondary": "Talk to sales"
+      },
+      "footer": {
+        "languages": "Language",
+        "madeFor": "Made for merchants"
+      },
+      "templates": {
+        "eyebrow": "Storefront themes",
+        "titlePre": "Beautiful stores,",
+        "titleAccent": "ready to launch",
+        "titlePost": "",
+        "description": "Pick a professionally designed template and customize it to your brand. Every theme is mobile-first, RTL-ready, and blazing fast.",
+        "viewAll": "Browse all themes"
+      },
+      "integrations": {
+        "eyebrow": "Built-in integrations",
+        "titlePre": "Every tool",
+        "titleAccent": "merchants",
+        "titlePost": "actually use",
+        "description": "From local delivery couriers to WhatsApp automation, Meta Pixel tracking to AI-powered tools — it all works out of the box.",
+        "tools": {
+          "multicarrier": {
+            "name": "Multi-Carrier Support",
+            "description": "Connect with multiple carriers via real-time webhooks. Automatic dispatch, tracking, and status updates all in one place."
+          },
+          "whatsapp": {
+            "name": "WhatsApp API",
+            "description": "Send order confirmations, shipping updates and promotions directly to customers."
+          },
+          "telegram": {
+            "name": "Telegram",
+            "description": "Get instant alerts for new orders, low stock and payment confirmations in your Telegram."
+          },
+          "metapixel": {
+            "name": "Meta Pixel",
+            "description": "Track conversions, optimize ad spend and retarget visitors with Facebook & Instagram ads."
+          },
+          "googlesheets": {
+            "name": "Google Sheets",
+            "description": "Export orders and inventory to Google Sheets automatically for custom reports."
+          },
+          "ai": {
+            "name": "AI Tools",
+            "description": "AI-generated product descriptions, smart pricing suggestions and demand forecasting."
+          },
+          "imagegen": {
+            "name": "Image Generation",
+            "description": "Generate professional product photos and banners with AI — no photoshoot needed."
+          }
+        }
+      }
+    },
+    "extras": {
+      "heroProof": {
+        "rating": "4.9 / 5 rating",
+        "ratingLabel": "from 800+ merchants",
+        "merchants": "500+",
+        "merchantsLabel": "active stores",
+        "cod": "COD ready",
+        "codLabel": "out of the box",
+        "noCard": "No credit card",
+        "noCardLabel": "free 14-day trial"
+      },
+      "trustStrip": {
+        "eyebrow": "Made for merchants",
+        "items": {
+          "cod": {
+            "title": "Cash on delivery",
+            "description": "Built-in COD with auto reconciliation across all carriers."
+          },
+          "wilayas": {
+            "title": "Carrier integrations",
+            "description": "Connect with delivery carriers seamlessly — one-click activation."
+          },
+          "rtl": {
+            "title": "Multi-language support",
+            "description": "Full RTL, Arabic-friendly UI, AR/FR/EN with one switch."
+          },
+          "dzd": {
+            "title": "Stock management",
+            "description": "Real-time inventory tracking and automated reorder alerts."
+          }
+        }
+      },
+      "stickyCta": {
+        "label": "Open my store",
+        "subtle": "Free · No card"
+      },
+      "demoStore": "View live demo store"
     }
   },
   "marketing": {
@@ -153,41 +558,72 @@
           "prefix": "Everything you need to ",
           "accent": "Scale"
         },
-        "subtitle": "Swekly is more than just a store builder. It's an entire operating system for your commerce business."
+        "subtitle": "Create your store, receive orders, manage delivery, and stay in control without adding more tools."
       },
       "items": {
         "builder": {
-          "title": "Drag & Drop Store Builder",
-          "description": "Create professional, responsive storefronts without writing a single line of code. Our intuitive builder lets you customize every pixel."
+          "title": "Easy store setup",
+          "description": "Launch a clean, mobile-first store and customize it around your products in a short time."
+        },
+        "tenancy": {
+          "title": "Scalable infrastructure",
+          "description": "Enterprise-grade platform built for performance and reliability at any scale."
+        },
+        "localization": {
+          "title": "Global-ready",
+          "description": "Arabic, French, and English with full RTL support and multi-language checkout flows."
+        },
+        "mobile": {
+          "title": "Mobile-first experience",
+          "description": "Storefronts and admin both feel native on mobile, where most of your customers and team work."
         },
         "payments": {
-          "title": "Global Payments",
-          "description": "Accept payments from anywhere with integrated gateways including Stripe, PayPal, and local providers."
+          "title": "Checkout that fits local buying habits",
+          "description": "Make ordering simple with a flow built for COD, customer trust, and fast confirmation."
         },
         "analytics": {
-          "title": "Advanced Analytics",
-          "description": "Track real-time sales, visitor behavior, and conversion funnels."
+          "title": "Clear sales visibility",
+          "description": "See what is selling, what is slowing down, and what deserves more budget."
         },
         "automation": {
-          "title": "Marketing Automation",
-          "description": "Recover abandoned carts and engage customers with SMS and Email workflows."
+          "title": "Simple follow-up",
+          "description": "Keep customers engaged with better order updates and reminders that save time."
         },
         "logistics": {
-          "title": "Logistics Network",
-          "description": "Auto-dispatch orders to Yalidine, Eckoz, and 50+ other carriers."
+          "title": "Delivery connections",
+          "description": "Integrate with your carriers seamlessly for streamlined order fulfillment."
         },
         "domains": {
-          "title": "Custom Domains",
-          "description": "Connect your own domain name for a fully branded experience."
+          "title": "Your own domain",
+          "description": "Keep your brand front and center with a custom domain and a store that feels like yours."
         }
       },
+      "bullets": {
+        "checkout": "Fast order form",
+        "carriers": "Multi-carrier support",
+        "dispatch": "Easy dispatch follow-up"
+      },
+      "visual": {
+        "setupLabel": "Store setup",
+        "setupTitle": "Open your store without wasting weeks",
+        "setupTheme": "Theme and brand setup",
+        "setupCheckout": "Ready-to-use order flow",
+        "setupDelivery": "Delivery setup included",
+        "signalLabel": "Momentum"
+      },
+      "outcomeLabel": "What you gain",
+      "outcomeTitle": "Launch faster and stay organized",
+      "outcomeBody": "Every step helps you sell sooner and keep daily work lighter for your team.",
+      "surfaceLabel": "Included",
+      "surfaceBody": "Store, checkout, delivery follow-up, and sales visibility work together without extra tools.",
       "cta": {
         "title": "Ready to get started?",
         "button": "Start Your Free Trial"
       }
     },
     "footer": {
-      "tagline": "Empowering businesses with cutting-edge tools and a premium experience. Built for scale, designed for you.",
+      "tagline": "Create a professional store, receive your orders, and keep delivery under control from one simple workspace.",
+      "bottomLine": "",
       "product": {
         "title": "Product",
         "changelog": "Changelog"
@@ -199,11 +635,85 @@
         "contact": "Contact"
       },
       "copyright": "© {year} Swekly Platform. All rights reserved."
+    },
+    "aboutPage": {
+      "heroTitle": "Built for the way commerce actually runs",
+      "heroSubtitle": "Swekly helps merchants launch faster, stay organized, and keep delivery simple from the first day.",
+      "storyTitle": "Not another generic store builder",
+      "storyBody": "We designed Swekly around the realities of modern merchants: mobile-first shopping, COD confirmation, local delivery networks, and teams that need a smoother daily routine.",
+      "context": {
+        "storyLabel": "Why merchants switch",
+        "label": "Built around real habits",
+        "mobile": "Customers buy on mobile first",
+        "delivery": "Delivery is part of every sale",
+        "cod": "Trust matters before checkout"
+      },
+      "principles": {
+        "title": "What guides the product",
+        "subtitle": "A commerce system should reduce operational drag, not add more dashboards to manage.",
+        "items": {
+          "platform": {
+            "title": "One platform, one operating loop",
+            "body": "Storefront, checkout, inventory, orders, and analytics stay connected so teams work from the same source of truth."
+          },
+          "tenancy": {
+            "title": "Your brand, your own space",
+            "body": "Your store keeps its own domain, look, and day-to-day flow so customers feel they are buying directly from you."
+          },
+          "cod": {
+            "title": "Built for COD conversion",
+            "body": "Phone-first checkout, clear trust signals, and delivery-friendly steps match how customers actually order."
+          },
+          "ops": {
+            "title": "Made for daily execution",
+            "body": "Swekly is designed for teams who need to publish products quickly, confirm orders fast, and keep delivery predictable."
+          }
+        }
+      },
+      "final": {
+        "title": "Start with a stronger storefront foundation",
+        "subtitle": "Launch faster, keep operations cleaner, and scale on a platform designed for modern commerce."
+      }
     }
   },
   "auth": {
     "login": {
       "hero": {
+        "title": "Your store, fully in control.",
+        "tagline": "Manage orders, products, shipping, and analytics — all from one powerful dashboard.",
+        "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "Live Ops",
+          "focusArea": "Focus Area"
+        },
+        "side": {
+          "label": "Inside your workspace",
+          "orders": "Orders, products, and delivery in one place",
+          "workspace": "A clean workspace for your team",
+          "performance": "Quick visibility on daily results"
+        },
+        "carousel": {
+          "revenue": {
+            "title": "Revenue Tracking",
+            "description": "Real-time insights into your store's performance at a glance."
+          },
+          "orders": {
+            "title": "Order Management",
+            "description": "Process, track, and fulfill customer orders with ease."
+          },
+          "catalog": {
+            "title": "Product Catalog",
+            "description": "Manage variants, inventory, and pricing from a single place."
+          },
+          "shipping": {
+            "title": "Smart Shipping",
+            "description": "Auto-dispatch to 50+ carriers with real-time webhook updates and automatic tracking."
+          },
+          "analytics": {
+            "title": "Deep Analytics",
+            "description": "Track sales funnels, conversion rates, and customer behavior."
+          }
+        },
         "welcomeBack": "Welcome back",
         "builder": "Builder",
         "builderSuffix": ".",
@@ -211,8 +721,7 @@
         "feature": {
           "title": "Revenue Tracking",
           "description": "Real-time insights into your store's performance at a glance."
-        },
-        "copyright": "© {year} Swekly Inc."
+        }
       },
       "form": {
         "title": "Log in to your account",
@@ -236,6 +745,12 @@
       "errors": {
         "invalidCredentials": "Invalid email or password",
         "generic": "An error occurred. Please try again."
+      },
+      "social": {
+        "divider": "or continue with",
+        "google": "Continue with Google",
+        "facebook": "Continue with Facebook",
+        "apple": "Continue with Apple"
       }
     },
     "register": {
@@ -247,9 +762,29 @@
         "testimonial": {
           "quote": "Moving to Swekly was the best decision we made. Our revenue doubled in 3 months.",
           "name": "Yanis M.",
-          "role": "CEO, FashionNova"
+          "role": "Owner, Dzair Fashion"
         },
-        "copyright": "© {year} Swekly Inc."
+        "copyright": "© {year} Swekly Inc.",
+        "panel": {
+          "badge": "Launch Mode",
+          "title": "Launch Control",
+          "ready": "Ready",
+          "metrics": {
+            "goLive": "Go Live",
+            "uptime": "Uptime",
+            "localCod": "Local COD"
+          },
+          "pills": {
+            "orders": "Order Management",
+            "shipping": "Smart Shipping",
+            "analytics": "Deep Analytics"
+          },
+          "tasks": {
+            "cod": "Localized checkout and COD flows",
+            "performance": "Fast storefront performance from day one",
+            "analytics": "Clear analytics for daily decisions"
+          }
+        }
       },
       "form": {
         "title": "Create your account",
@@ -267,15 +802,39 @@
           "label": "Work Email",
           "placeholder": "name{'@'}company.com"
         },
+        "phone": {
+          "label": "Phone Number",
+          "placeholder": "+XX X XXX XXXX"
+        },
+        "otp": {
+          "label": "OTP Confirmation",
+          "placeholder": "Enter OTP code",
+          "send": "Send Code",
+          "verify": "Verify Code",
+          "placeholderNotice": "OTP code sent.",
+          "verified": "Phone confirmed.",
+          "resend": "Resend"
+        },
         "password": {
           "label": "Password"
         },
+        "confirmPassword": {
+          "label": "Confirm Password"
+        },
         "submit": {
           "creating": "Creating Account...",
-          "register": "Register & Create Store"
+          "register": "Register & Create Store",
+          "verifyOtp": "Verify OTP to Continue"
         },
         "haveAccount": "Already have an account?",
-        "logIn": "Log in"
+        "logIn": "Log in",
+        "forgotPassword": "Forgot password?",
+        "passwordStrength": {
+          "weak": "Weak",
+          "fair": "Fair",
+          "good": "Good",
+          "strong": "Strong"
+        }
       },
       "success": {
         "title": "You're in!",
@@ -283,18 +842,79 @@
         "cta": "Go to Dashboard"
       },
       "errors": {
-        "generic": "An error occurred during registration."
+        "generic": "An error occurred during registration.",
+        "sessionMissing": "Your account was created, but automatic sign-in failed. Please log in to continue.",
+        "emailInvalid": "Enter a valid email address.",
+        "passwordTooShort": "Password must be at least {min} characters.",
+        "passwordMismatch": "Passwords do not match.",
+        "phoneRequired": "Phone number is required.",
+        "phoneInvalid": "Enter a valid phone number.",
+        "phoneRestricted": "Registration is currently unavailable.",
+        "otpRequired": "Enter the OTP code.",
+        "otpSendFirst": "Send OTP code first.",
+        "otpVerifyFirst": "Verify OTP before creating your account.",
+        "otpInvalid": "Enter the {length}-digit code."
+      },
+      "social": {
+        "divider": "or continue with",
+        "google": "Continue with Google",
+        "facebook": "Continue with Facebook",
+        "apple": "Continue with Apple"
       }
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "subtitle": "Enter your email and we will send reset instructions when this feature is enabled.",
+      "placeholderNotice": "This screen is a placeholder for now. Reset emails are not active yet.",
+      "email": {
+        "label": "Email Address",
+        "placeholder": "name{'@'}company.com"
+      },
+      "submit": {
+        "send": "Send Reset Link",
+        "sent": "Request Saved (Placeholder)"
+      },
+      "backToLogin": "Back to login"
+    },
+    "errors": {
+      "offlineMode": "This device runs in local-only mode, so it cannot reach the server. Activate an online workspace to sign in.",
+      "cancelled": "The request was cancelled. Please try again.",
+      "noConnection": "No connection to the server. Check your internet and try again.",
+      "timeout": "The server took too long to respond. Please try again.",
+      "badCertificate": "Could not establish a secure connection to the server.",
+      "invalidRequest": "Some of the information you entered is not valid.",
+      "forbidden": "This account is not allowed to perform this action.",
+      "notFound": "The server could not find what was requested.",
+      "conflict": "That information is already in use.",
+      "server": "The server ran into a problem. Please try again in a moment.",
+      "unknown": "Something went wrong. Please try again.",
+      "invalidResponse": "The server sent an unexpected response.",
+      "superAdmin": "Super-admin accounts must use the web super-admin console.",
+      "sessionExpired": "Your session has expired. Please sign in again."
+    },
+    "validation": {
+      "emailRequired": "Email is required.",
+      "emailInvalid": "Enter a valid email address.",
+      "passwordRequired": "Password is required.",
+      "confirmPasswordRequired": "Confirm your password.",
+      "companyNameRequired": "Company name is required.",
+      "slugRequired": "Store URL is required.",
+      "slugInvalid": "Use lowercase letters, numbers, and hyphens only."
+    },
+    "common": {
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
+      "switchToLight": "Switch to light mode",
+      "switchToDark": "Switch to dark mode"
+    },
+    "social": {
+      "comingSoon": "Social sign-in is coming soon."
     }
   },
   "pricing": {
     "seo": {
       "title": "Pricing - Swekly",
       "description": "Choose a plan that fits your growth stage."
-    },
-    "page": {
-      "title": "Simple, transparent pricing",
-      "subtitle": "Choose the plan that fits your growth stage. No hidden fees."
     },
     "section": {
       "title": "Transparent Pricing",
@@ -310,30 +930,59 @@
       "recommended": "Recommended"
     },
     "period": {
-      "perMonth": "/mo"
+      "perMonth": "/mo",
+      "perYear": "/yr"
     },
     "features": {
-      "ordersPerMonth": "{count} Orders/mo"
+      "ordersPerMonth": "{count} Orders/mo",
+      "maxProducts": "Up to {count} products",
+      "maxPixels": "{count} marketing pixels"
+    },
+    "page": {
+      "title": "Simple, transparent pricing",
+      "subtitle": "Choose the plan that matches your order volume and the level of support you need.",
+      "includedTitle": "Included from the start",
+      "includedCheckout": "A store with a simple order flow",
+      "includedDelivery": "Delivery options ready for your orders",
+      "includedSupport": "Setup help when you launch",
+      "growthLabel": "Scale with confidence",
+      "growthTitle": "More orders, more options, same easy workflow",
+      "growthBody": "Upgrade when your store grows. Your products, team habits, and delivery flow stay the same.",
+      "enterpriseLabel": "Need more help?",
+      "enterpriseTitle": "Custom setup for bigger stores and teams",
+      "enterpriseBody": "Talk to Swekly if you need migration help, a higher monthly volume, or a guided rollout for your team.",
+      "enterpriseItems": {
+        "setup": "Store setup and migration help",
+        "ops": "Delivery and order workflow review",
+        "guidance": "Plan sizing for growing brands"
+      },
+      "features": {
+        "store": "Professional online store included",
+        "delivery": "Delivery options and follow-up",
+        "upsell": "Marketing and upsell tools",
+        "analytics": "Clear sales and conversion tracking",
+        "team": "Advanced support for larger teams"
+      }
     },
     "plans": {
       "basic": {
         "name": "Basic",
-        "description": "Best for trying out",
+        "description": "A free start to test your first products",
         "cta": "Get Started"
       },
       "beginner": {
         "name": "Beginner",
-        "description": "A simple start to boost your store",
+        "description": "For a small store that wants to sell seriously",
         "cta": "Get Started"
       },
       "merchant": {
         "name": "Merchant",
-        "description": "Smart choice for growing businesses",
+        "description": "The best fit for growing stores with regular orders",
         "cta": "Get Started"
       },
       "professional": {
         "name": "Professional",
-        "description": "Built for scaling with confidence",
+        "description": "For brands handling larger volumes every month",
         "cta": "Get 15 days for free"
       }
     }
@@ -355,6 +1004,8 @@
       "adding": "Adding…",
       "outOfStock": "Out of stock",
       "quickView": "Quick view",
+      "addToWishlist": "Add to favorites",
+      "removeFromWishlist": "Remove from favorites",
       "viewCart": "View cart",
       "checkout": "Checkout",
       "continueShopping": "Continue shopping",
@@ -364,6 +1015,10 @@
       "clearAll": "Clear all",
       "filters": "Filters",
       "search": "Search"
+    },
+    "cartTip": {
+      "message": "Tip: you can add multiple products—add what you want to your cart before placing the order.",
+      "close": "Close"
     },
     "badges": {
       "new": "New"
@@ -551,7 +1206,20 @@
       "inStock": "In stock",
       "perUnit": "per unit",
       "descriptionFallback": "Experience the perfect blend of style and functionality.",
-      "viewFullDetails": "View full details"
+      "viewFullDetails": "View full details",
+      "bestsellerBadge": "Bestseller",
+      "youMayAlsoLike": "You May Also Like",
+      "saleBanner": "EXTENDED BLACK FRIDAY SALE - ENDS SOON!",
+      "reviewsCount": "(+{count} Reviews)",
+      "highDemandBadge": "High Demand!",
+      "viewingRightNow": "{count} people are viewing this right now.",
+      "savePercentage": "SAVE {percent}%",
+      "whyChooseUs": "Why choose us?",
+      "features": {
+        "delivery": "Worldwide Fast Delivery",
+        "support": "24/7 Customer Service",
+        "securePayment": "Secure Payment"
+      }
     },
     "productForm": {
       "quantity": {
@@ -581,6 +1249,12 @@
       "addedToCart": {
         "title": "Added to cart",
         "message": "Review your cart to complete checkout."
+      },
+      "addedToWishlist": {
+        "message": "Added to favorites."
+      },
+      "removedFromWishlist": {
+        "message": "Removed from favorites."
       },
       "outOfStock": {
         "message": "Please select an in-stock option."
@@ -643,6 +1317,11 @@
       "wishlistTitle": "Wishlist",
       "accountTitle": "Account"
     },
+    "wishlist": {
+      "title": "Wishlist",
+      "emptyTitle": "No favorites yet",
+      "emptySubtitle": "Tap the heart on a product to save it here."
+    },
     "footer": {
       "contact": "Contact",
       "contactUs": "Contact us",
@@ -668,7 +1347,9 @@
       "toggleSidebar": "Toggle sidebar",
       "closeSidebar": "Close sidebar",
       "viewStore": "View Store",
-      "logout": "Logout"
+      "logout": "Logout",
+      "logoutConfirmTitle": "Log out?",
+      "logoutConfirmMessage": "You will need to sign in again to access the admin panel."
     },
     "common": {
       "name": "Name",
@@ -716,7 +1397,15 @@
       "error": "An error occurred. Please try again.",
       "saved": "Saved!",
       "filters": "Filters",
-      "noDataAvailable": "No data available"
+      "noDataAvailable": "No data available",
+      "unsavedChanges": "Unsaved changes",
+      "unsavedChangesHint": "Don't forget to save your changes.",
+      "discard": "Discard",
+      "noResults": "No results",
+      "replace": "Replace",
+      "soon": "Soon",
+      "moveUp": "Move up",
+      "moveDown": "Move down"
     },
     "confirmModal": {
       "defaults": {
@@ -733,7 +1422,10 @@
           "pngOnly": "Please upload a PNG image.",
           "squareOnly": "Image must be square (current: {w}x{h}px).",
           "uploadFailed": "Upload failed",
-          "readDimensionsFailed": "Failed to read image dimensions."
+          "readDimensionsFailed": "Failed to read image dimensions.",
+          "invalidType": "Only PNG, JPEG, and WebP images are allowed",
+          "tooLarge": "Image must be less than {max}",
+          "cropFailed": "Failed to crop image"
         }
       },
       "richTextEditor": {
@@ -760,7 +1452,39 @@
         "actions": {
           "addSelected": "Add Selected"
         }
+      },
+      "imageUploader": {
+        "clickToUpload": "Click to upload image",
+        "dragDrop": "PNG, JPEG, or WebP",
+        "errors": {
+          "invalidType": "Only PNG, JPEG, and WebP images are allowed",
+          "tooLarge": "Image must be less than {max}",
+          "cropFailed": "Failed to crop image",
+          "uploadFailed": "Upload failed"
+        }
+      },
+      "imageCropper": {
+        "title": "Crop image",
+        "confirm": "Use cropped image",
+        "subtitleFree": "Adjust the crop area freely.",
+        "subtitlePreset": "Crop with ratio {preset}.",
+        "presets": {
+          "free": "Free"
+        },
+        "errors": {
+          "noFile": "No image selected for cropping.",
+          "unavailable": "Cropper is not available.",
+          "resultFailed": "Failed to generate cropped image.",
+          "loadFailed": "Failed to load image in cropper."
+        }
       }
+    },
+    "help": {
+      "button": "Help Center",
+      "title": "Swekly Support",
+      "subtitle": "How can we help you today?",
+      "greeting": "Hi there! I'm the Swekly assistant. How can I help you manage your store today?",
+      "inputPlaceholder": "Type your message..."
     },
     "storeSettingsForm": {
       "title": "Store appearance & settings",
@@ -837,6 +1561,11 @@
         "noImage": "No image",
         "uploadImage": "Upload image",
         "addSlide": "Add slide",
+        "slide": "slide",
+        "slides": "slides",
+        "untitled": "Untitled slide",
+        "noSlides": "No slides yet",
+        "createFirst": "Create your first slide",
         "defaults": {
           "title": "New slide"
         }
@@ -849,8 +1578,10 @@
         "buttonLinkHint": "Use internal paths like \"/products\" or \"/category/shoes\".",
         "imageUrl": "Image URL",
         "imageUrlHint": "Or paste a URL if you already have one.",
-        "eyebrow": "Eyebrow",
-        "limit": "Limit"
+        "eyebrow": "Eyebrow text",
+        "limit": "Limit",
+        "sectionTitle": "Section title",
+        "numberOfProducts": "Number of products"
       },
       "sections": {
         "title": "Homepage sections",
@@ -879,6 +1610,24 @@
       }
     },
     "functionalSettingsForm": {
+      "themeGroups": {
+        "sales": {
+          "title": "Sales & checkout",
+          "subtitle": "Orders, cart, and purchase rules."
+        },
+        "invoices": {
+          "title": "Invoicing",
+          "subtitle": "Documents generated from sales."
+        },
+        "marketing": {
+          "title": "Marketing & loyalty",
+          "subtitle": "Storefront announcement and customer points."
+        },
+        "localization": {
+          "title": "Localization",
+          "subtitle": "Store currency and language."
+        }
+      },
       "features": {
         "title": "Store features",
         "subtitle": "Enable or disable core functionality for your storefront.",
@@ -892,6 +1641,59 @@
           "subtitle": "Show a 'Buy Now with COD' form directly on product pages for faster conversion.",
           "toggle": "Enable COD form"
         }
+      },
+      "checkoutRules": {
+        "title": "Checkout rules",
+        "subtitle": "Order conditions and checkout behavior.",
+        "minimumOrder": {
+          "title": "Minimum order amount",
+          "subtitle": "Block checkout when cart subtotal is below this amount.",
+          "unit": "DZD"
+        },
+        "orderIdPrefix": {
+          "title": "Customer order prefix",
+          "subtitle": "Prefix used in the public order reference shown to customers.",
+          "placeholder": "ORDR",
+          "hint": "4-5 chars"
+        },
+        "hideOptionalAddress": {
+          "title": "Hide optional address field",
+          "subtitle": "Remove the optional address input from checkout and quick order forms.",
+          "toggle": "Hide optional address"
+        }
+      },
+      "invoices": {
+        "title": "Sales invoices",
+        "subtitle": "Enable printable PDF invoices for POS and delivered sales.",
+        "enable": {
+          "title": "Enable invoicing",
+          "subtitle": "Allow admins to generate and print invoices from Sales.",
+          "toggle": "Enable sales invoices"
+        },
+        "prefix": {
+          "label": "Invoice prefix",
+          "placeholder": "INV"
+        },
+        "logo": {
+          "label": "Branding",
+          "title": "Show store logo",
+          "subtitle": "Use the logo from Appearance settings when available.",
+          "toggle": "Show logo on invoices"
+        },
+        "footer": {
+          "label": "Footer note",
+          "placeholder": "Thank you for your purchase."
+        }
+      },
+      "loyalty": {
+        "title": "Loyalty points",
+        "subtitle": "Configure points calculation and redemption rules.",
+        "enable": "Enable points",
+        "enableSubtitle": "Activate points calculation and checkout redemption.",
+        "basePoints": "Base points per order",
+        "marginFactor": "Margin factor",
+        "minRedeem": "Minimum redemption (points)",
+        "dzdPerPoint": "DZD per point"
       },
       "currency": {
         "title": "Store currency",
@@ -909,16 +1711,52 @@
           "subtitle": "Your storefront will automatically switch to Right-to-Left layout for Arabic."
         }
       },
+      "storefrontSearch": {
+        "title": "Search Bar (Storefront)",
+        "subtitle": "Display the search bar on the storefront (coming soon)."
+      },
       "actions": {
         "discardChanges": "Discard changes"
       },
       "messages": {
         "loadFailed": "Failed to load settings.",
-        "saved": "Functional settings saved successfully!",
+        "saved": "Sales settings saved successfully!",
         "saveFailed": "Failed to save changes. Please try again."
       },
       "confirm": {
         "discard": "Are you sure you want to discard your unsaved changes?"
+      }
+    },
+    "domainSettingsForm": {
+      "customDomain": {
+        "title": "Custom domain",
+        "subtitle": "Add the exact hostname customers will visit, for example www.example.com."
+      },
+      "fields": {
+        "domain": "Domain name"
+      },
+      "actions": {
+        "add": "Add domain"
+      },
+      "dns": {
+        "title": "DNS record",
+        "subtitle": "Create this CNAME record at your domain provider, then keep the domain added here.",
+        "apexNote": "For an apex domain like example.com, use ALIAS/ANAME if your DNS provider supports it, or redirect it to www.example.com."
+      },
+      "connected": {
+        "title": "Connected domains",
+        "subtitle": "Domains listed here are allowed to resolve this tenant storefront.",
+        "empty": "No custom domains connected yet."
+      },
+      "messages": {
+        "loadFailed": "Failed to load domains.",
+        "saved": "Domain connected.",
+        "saveFailed": "Failed to add domain.",
+        "deleted": "Domain removed.",
+        "deleteFailed": "Failed to remove domain."
+      },
+      "confirm": {
+        "delete": "Remove this domain?"
       }
     },
     "contactInfosForm": {
@@ -976,7 +1814,7 @@
         },
         "whatsapp": {
           "label": "WhatsApp",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "facebook": {
           "label": "Facebook",
@@ -1012,7 +1850,7 @@
         },
         "viber": {
           "label": "Viber",
-          "placeholder": "+213550000000"
+          "placeholder": "+XX X XXX XXXX"
         },
         "pinterest": {
           "label": "Pinterest",
@@ -1038,7 +1876,10 @@
         "body": "Drag and drop to reorder images. Click the star icon to set an image as the main product image."
       },
       "errors": {
-        "uploadFailed": "Failed to upload image"
+        "uploadFailed": "Failed to upload image",
+        "invalidType": "Only PNG, JPEG, and WebP images are allowed",
+        "tooLarge": "Image must be less than {max}",
+        "cropFailed": "Failed to crop image"
       }
     },
     "variantsTable": {
@@ -1056,7 +1897,8 @@
         "sku": "SKU",
         "barcode": "Barcode",
         "active": "Active",
-        "images": "Images"
+        "images": "Images",
+        "promotion": "Promotion"
       },
       "actions": {
         "manageImages": "Manage ({count})",
@@ -1099,7 +1941,8 @@
         "suggestSkuFailed": "Failed to suggest SKU",
         "suggestSkuUnavailable": "Suggested SKU is not available",
         "saveImagesFailed": "Failed to save images"
-      }
+      },
+      "promotionSimpleProduct": "Use the product promotion tab for the default variant of a simple product."
     },
     "productOptionsEditor": {
       "title": "Options",
@@ -1170,11 +2013,22 @@
         "logo": {
           "label": "Brand logo",
           "upload": "Upload logo",
-          "hint": "Square (1:1), PNG recommended."
+          "hint": "Square (1:1), PNG recommended.",
+          "magicIdentity": "Magic identity",
+          "magicHint": "Upload a logo first to generate a brand identity.",
+          "magicSuccess": "Magic identity applied."
+        },
+        "favicon": {
+          "label": "Favicon",
+          "upload": "Upload favicon",
+          "hint": "Square image (ICO, PNG), recommended size 32x32px"
         },
         "primaryColor": {
           "label": "Primary color",
-          "hint": "Used for buttons, links, and highlights."
+          "hint": "Used for buttons, links, and highlights.",
+          "suggested": "Suggested palettes",
+          "overrideLabel": "Apply brand color to template",
+          "overrideHint": "Turn off to keep the selected template's original accent color."
         }
       },
       "announcement": {
@@ -1192,35 +2046,68 @@
         "options": {
           "classic": {
             "label": "Classic Shop",
-            "description": "Timeless elegance with serif typography."
+            "description": "Timeless elegance with serif typography.",
+            "storeTypes": "Clothing, jewelry, home decor"
           },
           "modern": {
             "label": "Modern Minimal",
-            "description": "Clean aesthetic with bold accents."
+            "description": "Clean aesthetic with bold accents.",
+            "storeTypes": "Fashion, beauty, lifestyle"
           },
           "street": {
             "label": "Street Urban",
-            "description": "Energetic, high-contrast style."
+            "description": "Energetic, high-contrast style.",
+            "storeTypes": "Sneakers, streetwear, limited drops"
           },
           "cozy": {
             "label": "Cozy Warm",
-            "description": "Soft greens and rounded nuances."
+            "description": "Soft greens and rounded nuances.",
+            "storeTypes": "Candles, gifts, wellness"
           },
           "cyber": {
             "label": "Cyber Future",
-            "description": "Dark mode with neon accents."
+            "description": "Dark mode with neon accents.",
+            "storeTypes": "Tech, electronics, gaming"
           },
           "stationnery": {
             "label": "Stationery",
-            "description": "Refined structure for professionals."
+            "description": "Refined structure for professionals.",
+            "storeTypes": "Books, paper goods, office"
           },
           "food": {
             "label": "Food Market",
-            "description": "Vibrant and appetizing."
+            "description": "Vibrant and appetizing.",
+            "storeTypes": "Restaurants, bakeries, groceries"
           },
           "wellness": {
             "label": "Wellness",
-            "description": "Organic, calm, and natural."
+            "description": "Organic, calm, and natural.",
+            "storeTypes": "Supplements, cosmetics, organic"
+          },
+          "playful": {
+            "label": "Playful",
+            "description": "Fun and vibrant for kids & families.",
+            "storeTypes": "Toys, kids fashion, family products"
+          },
+          "activewear": {
+            "label": "Activewear",
+            "description": "Bold and high-energy for sports & gym.",
+            "storeTypes": "Sports, gym, outdoor gear"
+          },
+          "arena": {
+            "label": "Arena",
+            "description": "Dark performance storefront with esports energy and cyan highlights.",
+            "storeTypes": "Gaming gear, peripherals, tech, esports"
+          },
+          "chrono": {
+            "label": "Chrono Luxe",
+            "description": "Luxury dark theme with gold accents for premium accessories.",
+            "storeTypes": "Watches, sunglasses, jewelry, luxury accessories"
+          },
+          "maison": {
+            "label": "Pistachio",
+            "description": "Warm premium editorial look for gourmet and refined retail.",
+            "storeTypes": "Premium food, gifts, nuts, gourmet retail"
           }
         }
       },
@@ -1251,6 +2138,8 @@
       "delivery": "Delivery",
       "finance": "Finance",
       "cash": "Cash",
+      "storeParameters": "Store Parameters",
+      "settingsHub": "Settings",
       "settings": "Administration",
       "dashboard": "Dashboard",
       "products": "Products",
@@ -1261,16 +2150,80 @@
       "orders": "Orders",
       "salesItem": "Sales",
       "pos": "POS",
+      "devices": "Devices",
       "customers": "Customers",
       "deliveryItem": "Delivery",
       "billing": "Billing",
       "appearance": "Appearance",
       "homepage": "Homepage",
       "contactInfo": "Contact Info",
-      "functional": "Functional",
+      "legalPages": "Legal Pages",
+      "functional": "Sales & checkout",
+      "domains": "Domains",
       "apps": "Apps",
       "integrations": "Integrations",
-      "users": "Users"
+      "users": "Users",
+      "storefront": "Storefront",
+      "account": "Account",
+      "connections": "Connections",
+      "export": "Export"
+    },
+    "settingsHub": {
+      "empty": {
+        "title": "No settings themes available",
+        "description": "Your role does not grant access to this store's settings."
+      },
+      "themes": {
+        "identity": {
+          "title": "Identity & appearance",
+          "description": "Store name, URL, logo, favicon, color, and template."
+        },
+        "content": {
+          "title": "Homepage & content",
+          "description": "Homepage, contact details, and legal pages shown on the storefront."
+        },
+        "checkout": {
+          "title": "Sales & checkout",
+          "description": "Cart, COD, minimum amount, order prefix, and address behavior."
+        },
+        "invoices": {
+          "title": "Invoicing",
+          "description": "Sales invoices, invoice prefix, logo, and footer note."
+        },
+        "localization": {
+          "title": "Localization",
+          "description": "Default language, currency, and reference country."
+        },
+        "marketing": {
+          "title": "Marketing & loyalty",
+          "description": "Storefront announcement and loyalty points program."
+        },
+        "connections": {
+          "title": "Domains & integrations",
+          "description": "Custom domain and external connections."
+        },
+        "administration": {
+          "title": "Administration",
+          "description": "Users and subscription billing."
+        }
+      },
+      "links": {
+        "appearance": "Identity & appearance",
+        "homepage": "Homepage",
+        "contact": "Contact info",
+        "legal": "Legal pages",
+        "salesFeatures": "Sales",
+        "checkoutRules": "Checkout rules",
+        "salesInvoices": "Sales invoices",
+        "currency": "Currency",
+        "language": "Language",
+        "announcement": "Announcement",
+        "loyalty": "Loyalty",
+        "domains": "Domains",
+        "integrations": "Integrations",
+        "users": "Users",
+        "billing": "Subscription"
+      }
     },
     "roles": {
       "owner": "Owner",
@@ -1302,6 +2255,11 @@
           "hint": "Short description for landing page header (optional)",
           "placeholder": "Enter a short summary…"
         },
+        "searchKeywords": {
+          "label": "Search Keywords",
+          "hint": "Keywords to help customers find this product in storefront search.",
+          "placeholder": "Type and press Enter..."
+        },
         "description": {
           "label": "Description",
           "placeholder": "Enter product description with rich formatting…"
@@ -1326,6 +2284,15 @@
         },
         "isActive": {
           "label": "Product is active and visible to customers"
+        },
+        "isPromotionActive": {
+          "label": "Active Promotion"
+        },
+        "promotionalPrice": {
+          "label": "Promotional Price"
+        },
+        "showCountdown": {
+          "label": "Show Countdown Timer"
         }
       },
       "category": {
@@ -1412,7 +2379,7 @@
             "discount": "Discount",
             "reprint": "Reprint Last",
             "reprintLastOrder": "Reprint Last Order",
-            "quickCharge": "Quick Charge",
+            "customAmount": "Custom Amount",
             "sort": "Sort",
             "columns": "Columns"
           },
@@ -1474,7 +2441,14 @@
           "saleFailed": "Sale failed: {message}",
           "unknownError": "An unknown error occurred",
           "featureComingSoon": "Feature {feature} coming soon",
-          "reprintNotImplemented": "Reprinting last sale is not implemented yet"
+          "reprintNotImplemented": "Reprinting last sale is not implemented yet",
+          "printInvoicePrompt": "Print invoice for this sale?",
+          "invoicePopupBlocked": "Invoice popup was blocked by the browser.",
+          "invoiceFailed": "Invoice failed: {message}",
+          "invoicesDisabled": "Sales invoices are disabled in Functional settings.",
+          "noLastSale": "No recent sale to reprint.",
+          "noOpenSession": "Open a cash session before ringing up a sale.",
+          "ambiguousCashbox": "Several cashboxes have an open session. Assign this terminal to one before selling."
         }
       },
       "cash": {
@@ -1898,17 +2872,62 @@
         "title": "Dashboard",
         "welcomeBack": "Welcome back, {tenant}",
         "snapshot": "A quick snapshot of your store.",
+        "periodLabel": "Period: {from} to {to} ({days} days)",
         "refresh": "Refresh",
         "finishSetup": "Finish setup",
         "loadErrorTitle": "Dashboard data couldn’t be loaded.",
         "loadErrorHint": "Try refreshing. If it keeps happening, check your connection or login session.",
+        "filters": {
+          "range": "Range",
+          "ranges": {
+            "today": "Today",
+            "7d": "Last 7 days",
+            "30d": "Last 30 days",
+            "90d": "Last 90 days",
+            "custom": "Custom"
+          }
+        },
         "stats": {
+          "totalRevenue": "Total revenue",
+          "ordersRevenue": "Orders revenue",
+          "posRevenue": "POS revenue",
+          "ordersCount": "Orders count",
           "activeSessions": "Active Sessions",
           "orders7d": "Orders (7 days)",
           "revenue7d": "Revenue (7 days)",
           "products": "Products",
           "lowStock": "Low stock",
           "outOfStock": "{count} out of stock"
+        },
+        "trends": {
+          "revenue": {
+            "title": "Revenue trend",
+            "hint": "Orders + POS revenue over the selected period."
+          },
+          "orders": {
+            "title": "Orders trend",
+            "hint": "Order volume over the selected period."
+          },
+          "empty": "No trend data for this period."
+        },
+        "insights": {
+          "units": "{count} units",
+          "topProducts": {
+            "title": "Top products",
+            "hint": "Best selling products in the selected period.",
+            "empty": "No product sales in this period."
+          },
+          "topCategories": {
+            "title": "Top categories",
+            "hint": "Best performing categories in the selected period.",
+            "empty": "No category sales in this period."
+          },
+          "criticalStock": {
+            "title": "Critical stock",
+            "hint": "Products below or at low-stock threshold.",
+            "empty": "No critical stock products right now.",
+            "threshold": "Threshold {count}"
+          }
         },
         "recentOrders": {
           "title": "Recent orders",
@@ -1935,8 +2954,10 @@
         "quickLinks": {
           "title": "Quick actions",
           "hint": "The most common admin tasks.",
+          "orders": "Orders",
           "addProduct": "Add product",
           "manageProducts": "Manage products",
+          "inventory": "Inventory",
           "categories": "Categories",
           "appearance": "Appearance",
           "pos": "Point of Sale",
@@ -1951,6 +2972,17 @@
         "seePricing": "See Pricing",
         "errors": {
           "loadFailed": "Failed to load billing info."
+        },
+        "status": {
+          "pending": {
+            "title": "Payment under review",
+            "desc": "We received your payment proof and our team is reviewing it. Your subscription will be updated once approved.",
+            "badge": "pending"
+          },
+          "approved": {
+            "title": "Payment approved",
+            "desc": "Your latest payment was approved and your subscription is active."
+          }
         },
         "currentPlan": {
           "title": "Current Plan",
@@ -1973,6 +3005,68 @@
           "title": "Available Plans",
           "ordersPerMonth": "{count} Orders / month",
           "perMonth": "/mo"
+        },
+        "interval": {
+          "monthly": "Monthly Billing",
+          "yearly": "Yearly Billing",
+          "annual": "Annual",
+          "save": "Save {pct}%"
+        },
+        "mo": "mo",
+        "yr": "yr",
+        "currentPlanBadge": "Your Plan",
+        "unlimitedOrders": "Unlimited Orders",
+        "upToOrders": "Up to {count} orders/mo",
+        "selectedBtn": "Selected",
+        "selectBtn": "Select Plan",
+        "prioritySupport": "Priority support",
+        "customBranding": "Custom branding & SMS config",
+        "payment": {
+          "methods": {
+            "myfin": "MyFin",
+            "paysera": "Paysera",
+            "baridimob": "BaridiMob",
+            "ccp": "CCP / Poste",
+            "chargily": "Chargily (CIB/Edahabia)"
+          },
+          "emptyTitle": "Checkout",
+          "emptyDesc": "Select a plan from the list to start your upgrade.",
+          "instructions": {
+            "myfin": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our MyFin account:\nIBAN: BG98MYFI123123123\nName: MySaaS LLC",
+            "paysera": "Please send {eurAmount} EUR (Rate: 1€ = {rate} DA) to our Paysera account:\nEmail: payments{'@'}mysaas.com\nName: MySaaS LLC",
+            "baridimob": "Please send {amount} DZD via BaridiMob to:\nRIP: 00799999000000000012\nPhone: +XX X XXX XXXX",
+            "ccp": "Please deposit {amount} DZD to our CCP account:\nAccount: 12345678 99\nName: MySaaS LLC"
+          },
+          "title": "Complete your upgrade",
+          "subtitle": "Select a payment method to proceed.",
+          "totalLabel": "Total to pay",
+          "uploadProof": "Upload Receipt/Proof",
+          "uploadSuccess": "Receipt attached successfully",
+          "chargilyNote": "Automatic payment gateway integration is currently unavailable. Please choose another manual method like CCP or BaridiMob in the meantime.",
+          "submitBtn": "Confirm & Submit Payment",
+          "submitting": "Submitting…",
+          "success": "Payment submitted! Our team will review your receipt and activate your subscription.",
+          "errors": {
+            "proofRequired": "Please attach a payment proof.",
+            "submitFailed": "Failed to submit payment. Please try again."
+          }
+        },
+        "history": {
+          "title": "Payment history",
+          "entries": "entries",
+          "col": {
+            "date": "Date",
+            "plan": "Plan",
+            "amount": "Amount",
+            "method": "Method",
+            "status": "Status",
+            "proof": "Proof"
+          },
+          "viewProof": "View"
+        },
+        "common": {
+          "uploading": "Uploading...",
+          "clickToUpload": "Click to upload receipt"
         }
       },
       "products": {
@@ -2029,7 +3123,8 @@
           "deleteModal": {
             "title": "Delete product",
             "message": "Are you sure you want to delete “{title}”? This action cannot be undone.",
-            "error": "Failed to delete product. Please try again."
+            "error": "Failed to delete product. Please try again.",
+            "errorHasTransactions": "Cannot delete this product because it is referenced by existing sales or purchase orders."
           },
           "bulk": {
             "selected": "{count} selected",
@@ -2038,6 +3133,8 @@
             "update": "Bulk edit",
             "duplicate": "Duplicate",
             "delete": "Delete",
+            "deleteTitle": "Delete products",
+            "deleteMessage": "Are you sure you want to delete {count} selected product(s)? This action cannot be undone.",
             "exportError": "Failed to export CSV. Please try again.",
             "importTitle": "Import products CSV",
             "importHint": "Upload a CSV with columns: id (optional), slug, title, price, stock (create only), isActive, categoryId/categorySlug, description, miniDescription, images.",
@@ -2087,7 +3184,9 @@
             "general": "General",
             "description": "Landing page description",
             "variants": "Variants / Stock",
-            "bundles": "Bundles"
+            "promotions": "Promotions",
+            "bundles": "Bundles",
+            "tracking": "Tracking"
           },
           "links": {
             "label": "Links",
@@ -2104,7 +3203,24 @@
           "variantsTab": {
             "title": "Options / Variants / Stock",
             "showArchived": "Show archived variants",
-            "archivedCount": "Archived: {count}"
+            "archivedCount": "Archived: {count}",
+            "pricingHint": "Manage selling prices, costs, inventory, and per-variant promotions here.",
+            "allocationTitle": "Allocate stock before using these variants",
+            "allocationMessage": "Existing stock is still parked on the hidden source variant. Split the full stock, reserved stock, and safety stock across active variants to make inventory sellable again.",
+            "onHandShort": "on hand",
+            "reservedShort": "reserved",
+            "safetyShort": "safety",
+            "totalOnHand": "Allocated on hand",
+            "totalReserved": "Allocated reserved",
+            "totalSafety": "Allocated safety",
+            "allocationBalanced": "Allocation is balanced",
+            "allocationUnbalanced": "Allocation must match the hidden source balances exactly",
+            "allocateAction": "Allocate stock",
+            "allocationSaved": "Variant stock allocation saved",
+            "empty": "No variants generated yet. Add options to generate variants.",
+            "saveFirst": "Please save the product first to add variants.",
+            "noSku": "No SKU",
+            "inStock": "{count} in stock"
           },
           "bundlesTab": {
             "title": "Bundle deals",
@@ -2129,7 +3245,13 @@
             "updateFailed": "Failed to update product. Please try again.",
             "bundlesLoadFailed": "Failed to load bundle deals",
             "bundlesSaveFailed": "Failed to save bundle deal",
-            "bundlesDeleteFailed": "Failed to delete bundle deal"
+            "bundlesDeleteFailed": "Failed to delete bundle deal",
+            "imagePickFailed": "Failed to pick image. Please try again."
+          },
+          "generalTab": {
+            "imagesTitle": "Product images",
+            "imagesHint": "Upload and manage your product visuals.",
+            "addImage": "Add image"
           }
         }
       },
@@ -2169,11 +3291,22 @@
           "pagination": {
             "showing": "Showing {from} to {to} of {total} results"
           },
+          "workspace": {
+            "parentsTitle": "Main categories",
+            "parentsHint": "Select a category to open its subcategories on the side.",
+            "subcategoriesTitle": "Subcategories",
+            "subcategoriesHint": "Manage subcategories and open, copy, edit, or delete them quickly.",
+            "subcategoriesCount": "{count} subcategories",
+            "noSubcategories": "No subcategories for this category yet.",
+            "selectCategory": "Select a category to view its subcategories."
+          },
           "deleteModal": {
             "title": "Delete category",
             "message": "Are you sure you want to delete this category? Products in this category will become uncategorized.",
             "messageWithTitle": "Are you sure you want to delete “{title}”? Products in this category will become uncategorized.",
-            "error": "Failed to delete category. Please try again."
+            "error": "Failed to delete category. Please try again.",
+            "errorHasProducts": "Cannot delete this category because it still contains products. Move or delete them first.",
+            "errorHasChildren": "Cannot delete this category because it still contains subcategories. Move or delete them first."
           }
         },
         "create": {
@@ -2241,10 +3374,22 @@
           "subtitle": "Manage customer orders",
           "addBtn": "New order",
           "filters": {
+            "rangeLabel": "Date range",
             "searchLabel": "Search",
             "searchPlaceholder": "Search by customer name or phone…",
             "statusLabel": "Status filter",
             "allOrders": "All orders"
+          },
+          "stats": {
+            "total": "Total",
+            "pending": "Pending",
+            "delivered": "Delivered",
+            "cancelled": "Cancelled"
+          },
+          "deliveryModes": {
+            "home": "Home delivery",
+            "store": "Store pickup",
+            "pickup": "Pickup point"
           },
           "loading": "Loading orders…",
           "empty": {
@@ -2259,6 +3404,7 @@
             "total": "Total",
             "status": "Status",
             "date": "Date",
+            "delivery": "Delivery",
             "actions": "Actions"
           }
         },
@@ -2279,6 +3425,7 @@
             "customerName": "Name",
             "customerPhone": "Phone",
             "deliveryAddress": "Delivery address",
+            "calledCustomer": "Called Customer?",
             "callStatus": "Call Status",
             "callStatusValues": {
               "not_called": "Not Called",
@@ -2287,7 +3434,9 @@
               "attempt_1": "1st Attempt",
               "attempt_2": "2nd Attempt",
               "attempt_3": "3rd Attempt",
-              "switched_off": "Switched Off"
+              "switched_off": "Switched Off",
+              "whatsapp_sms_sent": "WhatsApp SMS Sent",
+              "whatsapp_link_confirmed": "WhatsApp Link Confirmed"
             },
             "internalNotesPlaceholder": "Add private remarks about this order..."
           },
@@ -2379,6 +3528,13 @@
             "totalSpent": "Total spent",
             "lastOrder": "Last order",
             "actions": "Actions"
+          },
+          "deleteModal": {
+            "title": "Delete customer",
+            "message": "Are you sure you want to delete this customer? This action cannot be undone.",
+            "messageWithName": "Are you sure you want to delete \"{name}\"? This action cannot be undone.",
+            "error": "Failed to delete customer. Please try again.",
+            "errorHasTransactions": "Cannot delete this customer because they have existing sales or payments."
           }
         },
         "create": {
@@ -2492,37 +3648,88 @@
         "subtitle": "Manage delivery providers and pricing per Wilaya",
         "providers": {
           "toggleLabel": "Use setting",
+          "noCredentials": "No credentials",
+          "connected": "Connected",
+          "notConnected": "Not connected",
           "wilayasSupported": "{count} Wilayas supported",
           "managePricing": "Manage pricing"
+        },
+        "credentials": {
+          "title": "API credentials — {provider}",
+          "hint": "Connect the provider to enable live quotes and shipment creation.",
+          "enableLabel": "Enable API integration",
+          "enableHint": "Requires valid credentials for provider calls.",
+          "noCredentials": "This provider does not require credentials.",
+          "secretSet": "Configured",
+          "secretNotSet": "Not configured",
+          "secretPlaceholderSet": "Configured (enter to replace)",
+          "secretPlaceholderNotSet": "Enter token",
+          "errors": {
+            "saveFailed": "Failed to save credentials"
+          }
         },
         "pricing": {
           "title": "Pricing configuration: {provider}",
           "hint": "Set standard delivery rates for each Wilaya. These rates apply to all communes within the Wilaya.",
           "loading": "Loading rates…",
+          "modes": {
+            "home": "Home",
+            "office": "Office"
+          },
+          "searchPlaceholder": "Search wilaya (code or name)…",
+          "overridePlaceholder": "Leave blank to use carrier",
+          "filters": {
+            "all": "All",
+            "overrides": "Overrides",
+            "noOverrides": "No override",
+            "missingCarrier": "Missing carrier rate"
+          },
+          "showingCount": "Showing {shown} of {total}",
+          "pageOf": "Page {page} / {pages}",
+          "fetchCarrierRates": "Fetch carrier rates",
+          "fetchingCarrierRates": "Fetching…",
           "table": {
             "code": "Code",
             "wilaya": "Wilaya name",
-            "price": "Price (DZD)"
+            "price": "Price (DZD)",
+            "carrierPrice": "Carrier rate",
+            "overridePrice": "Your rate"
           }
         },
         "errors": {
           "updateProviderFailed": "Failed to update provider status",
-          "saveFailed": "Failed to save pricing"
+          "saveFailed": "Failed to save pricing",
+          "fetchCarrierRatesFailed": "Failed to fetch carrier rates"
         }
       },
       "onboarding": {
         "metaTitle": "Store setup",
         "title": "Store setup",
-        "subtitle": "Choose your brand color, template, and language.",
+        "subtitle": "Set up your store in a few quick steps.",
         "loadingSettings": "Loading your store settings…",
         "progress": {
           "stepOf": "Step {current} of {total}"
         },
         "steps": {
-          "brand": "Brand",
-          "template": "Template",
+          "storeInfo": "Store Info",
+          "template": "Choose Template",
+          "brandColor": "Brand Color",
           "language": "Language",
+          "firstProduct": "First Product",
+          "done": "All Done",
+          "brand": "Brand",
           "summary": "Summary"
+        },
+        "storeInfo": {
+          "title": "Tell us about your store",
+          "nameLabel": "Store name",
+          "namePlaceholder": "My Store",
+          "logoLabel": "Store logo",
+          "logoHint": "Recommended: 200×200px PNG or SVG",
+          "logoUpload": "Upload logo",
+          "logoChange": "Change logo",
+          "descriptionLabel": "Short description (optional)",
+          "descriptionPlaceholder": "A few words about your store…"
         },
         "brand": {
           "title": "Brand color",
@@ -2535,6 +3742,37 @@
         "template": {
           "title": "Store template"
         },
+        "language": {
+          "title": "Language",
+          "label": "Language",
+          "rtlHint": "Selecting Arabic will enable right-to-left layout."
+        },
+        "firstProduct": {
+          "title": "Add your first product",
+          "subtitle": "You can always add more from the Products section.",
+          "nameLabel": "Product name",
+          "namePlaceholder": "e.g. T-Shirt, Phone Case…",
+          "priceLabel": "Price (DZD)",
+          "imageLabel": "Product image (optional)",
+          "imageUpload": "Upload image",
+          "imageChange": "Change image",
+          "skipLink": "Skip for now",
+          "errorCreate": "Failed to create product. You can skip and add it later."
+        },
+        "done": {
+          "title": "Your store is ready!",
+          "subtitle": "Here's what you set up:",
+          "storeUrlLabel": "Your store URL",
+          "offlineNote": "Your store is currently offline. Publish it from the dashboard when you're ready.",
+          "ctaDashboard": "Go to Dashboard",
+          "ctaProducts": "Add More Products"
+        },
+        "saveFinish": "Finish Setup",
+        "errors": {
+          "loadFailed": "Failed to load store settings.",
+          "saveFailed": "Failed to save store settings.",
+          "summaryFailed": "Failed to generate summary."
+        },
         "templates": {
           "classic": {
             "label": "Classic",
@@ -2544,11 +3782,6 @@
             "label": "Modern",
             "description": "Bolder typography and more visual spacing."
           }
-        },
-        "language": {
-          "title": "Language",
-          "label": "Language",
-          "rtlHint": "If Arabic, consider RTL layout."
         },
         "summary": {
           "title": "Summary",
@@ -2561,13 +3794,22 @@
           "generate": "Generate",
           "generating": "Generating…",
           "placeholder": "Click Generate to create a brief for your frontend agent."
-        },
-        "saveFinish": "Save & finish",
-        "errors": {
-          "loadFailed": "Failed to load store settings.",
-          "saveFailed": "Failed to save store settings.",
-          "summaryFailed": "Failed to generate summary."
         }
+      },
+      "gettingStarted": {
+        "title": "Getting Started",
+        "progress": "{done} of {total} completed",
+        "dismiss": "Dismiss",
+        "complete": "Setup complete",
+        "items": {
+          "logo": "Upload your logo",
+          "product": "Add your first product",
+          "category": "Create a category",
+          "delivery": "Configure delivery",
+          "publish": "Publish your store"
+        },
+        "publishBtn": "Publish now",
+        "publishing": "Publishing…"
       },
       "purchases": {
         "index": {
@@ -2578,7 +3820,23 @@
             "supplierLabel": "Filter by supplier",
             "allSuppliers": "All suppliers",
             "userLabel": "Filter by user",
-            "allUsers": "All users"
+            "allUsers": "All users",
+            "allStatuses": "All Statuses",
+            "statusLabel": "Status",
+            "allPaymentStatuses": "All Payment Statuses",
+            "paymentStatusLabel": "Payment Status",
+            "statusValues": {
+              "DRAFT": "Draft",
+              "ORDERED": "Ordered",
+              "PARTIALLY_RECEIVED": "Partially Received",
+              "RECEIVED": "Received",
+              "CANCELLED": "Cancelled"
+            },
+            "paymentStatusValues": {
+              "UNPAID": "Unpaid",
+              "PARTIALLY_PAID": "Partially Paid",
+              "PAID": "Paid"
+            }
           },
           "loading": "Loading purchases…",
           "empty": {
@@ -2595,7 +3853,9 @@
             "date": "Date",
             "action": "Action",
             "itemsCount": "{count} items",
-            "manage": "Manage"
+            "manage": "Manage",
+            "paymentStatus": "Payment Status",
+            "payment": "Payment"
           },
           "pagination": {
             "showing": "Showing {from} to {to} of {total} results"
@@ -2660,10 +3920,12 @@
               "removeItem": "Remove item",
               "totalOrderValue": "Total order value",
               "costMode": {
+                "label": "Cost calculation mode",
                 "replace": "Replace cost",
                 "weighted": "Avg cost"
               },
               "salePriceMode": {
+                "label": "Sell price calculation mode",
                 "replace": "Replace sell price",
                 "weighted": "Weighted avg"
               }
@@ -2726,6 +3988,33 @@
             "actions": "Actions"
           }
         },
+        "actions": {
+          "refund": "Refund",
+          "invoice": "Invoice",
+          "printInvoice": "Print invoice"
+        },
+        "refundModal": {
+          "title": "Refund sale",
+          "subtitle": "Record a cash outflow and mark this sale as refunded.",
+          "cashboxLabel": "Cashbox",
+          "cashboxPlaceholder": "Select a cashbox",
+          "noOpenSession": "No open session",
+          "methodLabel": "Payment method",
+          "referenceLabel": "Reference (optional)",
+          "referencePlaceholder": "Receipt or bank reference",
+          "noteLabel": "Note (optional)",
+          "notePlaceholder": "Reason for refund"
+        },
+        "messages": {
+          "refundFromOrderFlow": "Order-origin sales must be returned from the order flow.",
+          "alreadyRefunded": "This sale is already refunded.",
+          "onlyCompletedPos": "Only completed POS sales can be refunded.",
+          "noOpenCashbox": "No open cashbox available. Open a cash session first.",
+          "refundSuccess": "Sale refunded successfully.",
+          "refundFailed": "Failed to refund sale.",
+          "invoiceFailed": "Failed to generate invoice.",
+          "invoicePopupBlocked": "Invoice popup was blocked by the browser."
+        },
         "detail": {
           "metaTitle": "Sale",
           "breadcrumb": "Sale #{id}",
@@ -2757,6 +4046,11 @@
         }
       },
       "settings": {
+        "index": {
+          "metaTitle": "Settings",
+          "title": "Settings by theme",
+          "subtitle": "Find each setting by business intent: storefront, sales, localization, marketing, domains, and administration."
+        },
         "appearance": {
           "metaTitle": "Appearance",
           "title": "Appearance settings",
@@ -2773,9 +4067,14 @@
           "subtitle": "Manage the contact details shown in your storefront footer."
         },
         "functional": {
-          "metaTitle": "Functional",
-          "title": "Functional settings",
-          "subtitle": "Manage core functionality and features of your store."
+          "metaTitle": "Sales & checkout",
+          "title": "Sales, checkout, and operations",
+          "subtitle": "Tune checkout, invoices, localization, announcements, and loyalty."
+        },
+        "domains": {
+          "metaTitle": "Domains",
+          "title": "Domain settings",
+          "subtitle": "Connect a bought domain to this storefront with a CNAME record."
         }
       },
       "suppliers": {
@@ -2813,7 +4112,8 @@
             "title": "Delete supplier",
             "message": "Are you sure you want to delete this supplier?",
             "messageWithName": "Are you sure you want to delete supplier “{name}”?",
-            "error": "Failed to delete supplier. Please try again."
+            "error": "Failed to delete supplier. Please try again.",
+            "errorHasTransactions": "Cannot delete this supplier because they have existing purchase orders."
           }
         },
         "create": {
@@ -2837,10 +4137,179 @@
             "updateFailed": "Failed to update supplier. Please try again."
           }
         }
+      },
+      "sale": {
+        "detail": {
+          "metaTitle": "Sale Details"
+        }
       }
     },
     "validation": {
-      "invalidNumber": "Enter a valid number"
+      "invalidNumber": "Enter a valid number",
+      "required": "Required"
+    },
+    "tours": {
+      "next": "Next",
+      "prev": "Back",
+      "done": "Done",
+      "menuLabel": "Tours & Help",
+      "sidebar": {
+        "label": "Admin overview",
+        "steps": {
+          "logo": {
+            "title": "Your store",
+            "desc": "This is your store name and logo. You can change them in Appearance settings."
+          },
+          "dashboard": {
+            "title": "Dashboard",
+            "desc": "Get a quick overview of your sales, orders, and revenue at a glance."
+          },
+          "products": {
+            "title": "Products",
+            "desc": "Add and manage everything you sell — products, prices, images, and stock."
+          },
+          "orders": {
+            "title": "Orders",
+            "desc": "Track every customer order from new to delivered. Update statuses and export reports."
+          },
+          "delivery": {
+            "title": "Delivery",
+            "desc": "Connect with multiple carriers via webhooks or manage your own delivery. Set up zones and rates here."
+          },
+          "settings": {
+            "title": "Settings",
+            "desc": "Customize your store's look, contact details, language, and go live when ready."
+          },
+          "help": {
+            "title": "Tours & Help",
+            "desc": "Click here anytime to relaunch this tour or start a tour for a specific section."
+          }
+        }
+      },
+      "dashboard": {
+        "label": "Dashboard tour",
+        "steps": {
+          "stats": {
+            "title": "Your metrics",
+            "desc": "See total orders, revenue, and new customers for the selected period."
+          },
+          "checklist": {
+            "title": "Launch checklist",
+            "desc": "Complete these steps to get your store fully ready. You can dismiss it once done."
+          },
+          "chart": {
+            "title": "Sales trend",
+            "desc": "This chart shows your sales volume over time so you can spot patterns."
+          }
+        }
+      },
+      "products": {
+        "label": "Products tour",
+        "steps": {
+          "create": {
+            "title": "Add a product",
+            "desc": "Click here to create a new product. Add a name, price, images, and stock."
+          },
+          "search": {
+            "title": "Find products",
+            "desc": "Search by name, filter by category or status to quickly locate any product."
+          },
+          "table": {
+            "title": "Product list",
+            "desc": "All your products are listed here. Click any row to edit it."
+          }
+        }
+      },
+      "orders": {
+        "label": "Orders tour",
+        "steps": {
+          "tabs": {
+            "title": "Filter by status",
+            "desc": "Switch between All, Pending, Confirmed, Shipped, Delivered, and Cancelled orders."
+          },
+          "export": {
+            "title": "Export orders",
+            "desc": "Export your orders to Excel or Google Sheets for reporting and accounting."
+          },
+          "table": {
+            "title": "Order list",
+            "desc": "Each row is a customer order. Click it to see details, update status, or print a receipt."
+          }
+        }
+      },
+      "delivery": {
+        "label": "Delivery tour",
+        "steps": {
+          "providers": {
+            "title": "Delivery partners",
+            "desc": "Choose from multiple carriers or self-managed delivery. Enable real-time webhooks for instant updates."
+          },
+          "config": {
+            "title": "Provider settings",
+            "desc": "Enter your API credentials and configure fees, zones, and pickup options."
+          }
+        }
+      },
+      "settings": {
+        "label": "Settings tour",
+        "steps": {
+          "appearance": {
+            "title": "Appearance",
+            "desc": "Change your store template, brand color, and logo to match your identity."
+          },
+          "template": {
+            "title": "Store template",
+            "desc": "Pick from 10 storefront themes. Each has a unique layout tailored to a product type."
+          },
+          "color": {
+            "title": "Brand color",
+            "desc": "Your brand color is used on buttons and accents across your entire storefront."
+          }
+        }
+      }
+    },
+    "receipt": {
+      "editor": {
+        "title": "Edit Receipt Layout",
+        "tabEditor": "Editor",
+        "tabPreview": "Preview",
+        "saveLayout": "Save Layout",
+        "storeInformation": "Store Information",
+        "showLogo": "Show Logo",
+        "showStoreName": "Show Store Name",
+        "storeNameOverride": "Store Name Override (Optional)",
+        "showStoreAddress": "Show Store Address",
+        "storeAddressOverride": "Store Address Override (Optional)",
+        "showStorePhone": "Show Store Phone",
+        "storePhoneOverride": "Store Phone Override (Optional)",
+        "showStoreEmail": "Show Store Email",
+        "storeEmailOverride": "Store Email Override (Optional)",
+        "headerLegacy": "Header (Legacy)",
+        "showCustomHeader": "Show Custom Header Text",
+        "headerText": "Header Text",
+        "content": "Content",
+        "showOrderNumber": "Show Order Number",
+        "showDate": "Show Date & Time",
+        "showCustomerInfo": "Show Customer Info",
+        "showTaxBreakdown": "Show Tax Breakdown",
+        "footer": "Footer",
+        "showFooterMessage": "Show Footer Message",
+        "footerText": "Footer Text",
+        "printAsImage": "Print as Image (Arabic Support)"
+      },
+      "print": {
+        "item": "Item",
+        "qty": "Qty",
+        "price": "Price",
+        "total": "Total",
+        "discount": "Discount",
+        "grandTotal": "TOTAL",
+        "orderNum": "Order #{id}",
+        "customer": "Customer: {name}",
+        "phone": "Phone: {phone}",
+        "tel": "Tel: {phone}",
+        "email": "Email: {email}"
+      }
     }
   },
   "superAdmin": {
@@ -2984,6 +4453,1211 @@
         "suspend": "Are you sure you want to suspend {name}?",
         "delete": "Are you sure you want to DELETE {name}? This action cannot be undone!"
       }
+    },
+    "paymentsPage": {
+      "title": "Tenant payments",
+      "subtitle": "Import payment proofs and review billing history for this tenant.",
+      "actions": {
+        "refresh": "Refresh"
+      },
+      "import": {
+        "title": "Import payment proof",
+        "fields": {
+          "plan": "Plan",
+          "interval": "Billing interval",
+          "proofUrl": "Proof URL",
+          "proofUrlPlaceholder": "https://...",
+          "proofUrlHint": "Optional. Link to a receipt or screenshot.",
+          "externalReference": "External reference",
+          "externalReferencePlaceholder": "Bank transfer reference…",
+          "notes": "Notes",
+          "notesPlaceholder": "Add notes…"
+        },
+        "applySubscription": {
+          "label": "Apply subscription",
+          "hint": "If enabled, this will update the tenant subscription based on the selected plan and interval."
+        },
+        "actions": {
+          "importing": "Importing…",
+          "importProof": "Import proof"
+        }
+      },
+      "history": {
+        "title": "Payment history",
+        "lastEntries": "{count} entries",
+        "loading": "Loading payments…",
+        "empty": "No payments found",
+        "table": {
+          "date": "Date",
+          "plan": "Plan",
+          "amount": "Amount",
+          "method": "Method",
+          "status": "Status",
+          "proof": "Proof"
+        },
+        "proof": {
+          "open": "Open"
+        },
+        "actions": {
+          "approve": "Approve",
+          "reject": "Reject"
+        }
+      },
+      "planOption": {
+        "ordersPerMonth": "{count} Orders/mo"
+      },
+      "interval": {
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "errors": {
+        "loadFailed": "Failed to load payments",
+        "importFailed": "Failed to import payment",
+        "reviewFailed": "Failed to review payment"
+      }
+    }
+  },
+  "app": {
+    "9100": "9100",
+    "offline_activation": "Offline Activation",
+    "generate_this_request_code_on": "Generate this Request Code on the device, then in the tenant admin panel open Devices > Offline Activation and paste it there to receive a signed activation code.",
+    "verify": "Verify",
+    "trusted_activation": "Trusted activation",
+    "activation_uses_defaultapibase": "Activation uses `$defaultApiBaseUrl` and stores tenant/workspace binding from a server-signed activation token. No tenant IDs are entered manually on the device.",
+    "paste_signed_activation_code_h": "Paste signed activation code here",
+    "activation_key": "Activation key",
+    "paste_the_tenant_issued_key_fo": "Paste the tenant-issued key for online activation",
+    "start_offline_activation": "Start Offline Activation",
+    "billing_subscription": "Billing & Subscription",
+    "usage_plans_and_payment_submis": "Usage, plans, and payment submission backed by the live billing endpoints.",
+    "pricefor_plan_billingstate_in": "${_priceFor(plan, billingState.interval)} ${plan.currency}/${billingState.interval == ",
+    "orders_mo_plan_orderspermonth": "Orders/mo: ${plan.ordersPerMonth}",
+    "max_products_plan_maxproducts": "Max products: ${plan.maxProducts}",
+    "max_pixels_plan_maxpixels": "Max pixels: ${plan.maxPixels}",
+    "submit_or_simulate_payment": "Submit or Simulate Payment",
+    "recent_payments": "Recent Payments",
+    "payment_plancode_touppercase": "${payment.planCode.toUpperCase()} • ${payment.method}",
+    "payment_status_payment_amount": "${payment.status} • ${payment.amountDzd} ${payment.currency}",
+    "snapshot_subscription_status": "${snapshot.subscription.status} • ${snapshot.subscription.interval}",
+    "usage_snapshot_usage_ordersinp": "Usage: ${snapshot.usage.ordersInPeriod} / ${snapshot.usage.ordersLimit} orders this period",
+    "period_dateformat_ymmmd_format": "Period: ${DateFormat.yMMMd().format(snapshot.usage.periodStart)} - ${DateFormat.yMMMd().format(snapshot.usage.periodEnd)}",
+    "simulate_payment": "Simulate Payment",
+    "submit_payment": "Submit Payment",
+    "cashboxes_transactions_and_ses": "Cashboxes, transactions, and session history.",
+    "new_customer_payment": "New customer payment",
+    "new_supplier_payment": "New supplier payment",
+    "no_cashboxes_yet": "No cashboxes yet",
+    "create_one_to_start_tracking_c": "Create one to start tracking cash sessions.",
+    "expected_closing_money_format": "Expected closing: ${money.format(expected.expectedClosing)}",
+    "opening": "Opening",
+    "money_format_expected_insum": "+${money.format(expected.inSum)}",
+    "money_format_expected_outsum": "-${money.format(expected.outSum)}",
+    "something_went_wrong": "Something went wrong",
+    "sale_payment": "SALE_PAYMENT",
+    "customer_payment": "CUSTOMER_PAYMENT",
+    "supplier_payment": "SUPPLIER_PAYMENT",
+    "all_directions": "All directions",
+    "cashboxname_useremail": "$cashboxName · $userEmail",
+    "tx_direction": "${tx.direction == ",
+    "useremail_formatdate_session": "$userEmail · ${_formatDate(session.openedAt)}",
+    "closed_formatdate_session_clos": "Closed: ${_formatDate(session.closedAt)}",
+    "ref_tx_reference": "Ref: ${tx.reference!}",
+    "admin_pages_cash_sessions_tabl": "admin.pages.cash.sessions.table.openedAt",
+    "admin_pages_cash_sessions_tabl2": "admin.pages.cash.sessions.table.closedAt",
+    "admin_pages_cash_sessions_tabl3": "admin.pages.cash.sessions.table.openingFloat",
+    "admin_pages_cash_sessions_tabl4": "admin.pages.cash.sessions.table.expectedClosing",
+    "admin_pages_cash_sessions_tabl5": "admin.pages.cash.sessions.table.closingCount",
+    "select_cashbox": "Select cashbox",
+    "select_customer": "Select customer",
+    "c_name_c_phone": "${c.name} • ${c.phone}",
+    "no_customers_match_your_search": "No customers match your search.",
+    "direction_is_enforced_by_backe": "Direction is enforced by backend for each type ($_direction).",
+    "note_both_cashboxes_must_have": "Note: both cashboxes must have an OPEN session.",
+    "from_and_to_must_differ": "From and To must differ",
+    "new_action": "New action",
+    "total_in_today": "Total In (Today)",
+    "total_out_today": "Total Out (Today)",
+    "net_today": "Net (Today)",
+    "loading_transactions": "Loading transactions...",
+    "loading_sessions": "Loading sessions...",
+    "direction": "Direction",
+    "dateformat": "${DateFormat(",
+    "closing": "Closing",
+    "diff": "Diff",
+    "opening_float_expected_opening": "Opening float: ${expected.openingFloat.toStringAsFixed(2)}",
+    "in_expected_insum_tostringasfi": "In: +${expected.inSum.toStringAsFixed(2)}",
+    "out_expected_outsum_tostringas": "Out: -${expected.outSum.toStringAsFixed(2)}",
+    "opened_at": "OPENED AT",
+    "closed_at": "CLOSED AT",
+    "sessions": "Sessions",
+    "error_state_error": "Error: ${state.error}",
+    "manage_your_product_categories": "Manage your product categories",
+    "stats": "STATS",
+    "category_link_copied_to_clipbo": "Category link copied to clipboard",
+    "category_deleted_successfully": "Category deleted successfully",
+    "cannot_delete_category": "Cannot Delete Category",
+    "ok": "OK",
+    "are_you_sure_you_want_to_delet": "Are you sure you want to delete \"${_categoryToDelete?.title}\"? This action cannot be undone.",
+    "error_loading_category_e": "Error loading category: $e",
+    "please_fix_the_errors_before_s": "Please fix the errors before saving",
+    "error_e": "Error: $e",
+    "none_top_level": "None (Top Level)",
+    "parent_category": "Parent Category",
+    "admin_nav_salesitem": "admin.nav.salesItem",
+    "shortid": "#$shortId",
+    "str_389": "—",
+    "admin_pages_customers_detail_e": "admin.pages.customers.detail.errors.loadFailed",
+    "admin_pages_customers_detail_n": "admin.pages.customers.detail.notFound.title",
+    "admin_pages_customers_detail_n2": "admin.pages.customers.detail.notFound.hint",
+    "admin_forms_customer_openingba": "admin.forms.customer.openingBalance.label",
+    "customer_orderscount": "${customer.ordersCount}",
+    "admin_pages_customers_index_fi": "admin.pages.customers.index.filters.searchLabel",
+    "admin_pages_customers_index_ad": "admin.pages.customers.index.addCustomer",
+    "snapshot": "SNAPSHOT",
+    "welcome_back_storename": "Welcome back, $storeName",
+    "could_not_load_dashboard_data": "Could not load dashboard data",
+    "latest_orders_for_this_tenant": "Latest orders for this tenant.",
+    "no_recent_orders": "No recent orders",
+    "new_orders_will_appear_here": "New orders will appear here.",
+    "quick_overview_by_status": "Quick overview by status.",
+    "quick_links": "Quick links",
+    "common_actions_to_get_things_d": "Common actions to get things done.",
+    "upgrade_to_online": "Upgrade to Online",
+    "delivery_settings": "Delivery Settings",
+    "manage_delivery_providers_and": "Manage delivery providers and rates",
+    "upgrade_to_an_online_tier_to_u": "Upgrade to an online tier to unlock hosted storefront capabilities from this app.",
+    "back_to_settings": "Back to Settings",
+    "connect_third_party_services_t": "Connect third-party services to your store",
+    "widget_name_saved": "${widget.name} saved",
+    "conversion_api_token": "Conversion API Token",
+    "manage_your_inventory_and_stoc": "Manage your inventory and stock levels",
+    "no_inventory_found_matching_yo": "No inventory found matching your criteria.",
+    "on_hand": "ON HAND",
+    "sku_sku_isempty": "SKU: ${sku.isEmpty ? ",
+    "stock": "$stock",
+    "reserved": "$reserved",
+    "safetystock": "$safetyStock",
+    "available": "$available",
+    "str_952": "∞",
+    "your_dashboard_is_ready_contin": "Your dashboard is ready. Continue managing orders, products, delivery, and analytics from one place.",
+    "real_time_insights_into_store": "Real-time insights into store performance.",
+    "2026_swekly_inc": "© 2026 Swekly Inc.",
+    "don": "Don\\",
+    "swekly": "Swekly",
+    "google": "Google",
+    "apple": "Apple",
+    "setup_checklist": "Setup Checklist",
+    "failed_to_load_error": "Failed to load: $_error",
+    "retry": "Retry",
+    "progress": "Progress: ",
+    "done_total_steps_completed": "$done / $total steps completed",
+    "new_customer": "-- New customer --",
+    "c_name_c_phone_isnotempty_c_p": "${c.name}${c.phone.isNotEmpty ? \" (${c.phone})\" : \"\"}",
+    "yalidine": "Yalidine",
+    "maystro": "Maystro",
+    "stop_desk": "Stop desk",
+    "select": "-- Select --",
+    "w_1_w_2": "${w.$1} - ${w.$2}",
+    "p_price_tostringasfixed_0_cur": "${p.price.toStringAsFixed(0)} $currencyCode",
+    "item_price_item_quantity_tost": "${(item.price * item.quantity).toStringAsFixed(0)} $currencyCode",
+    "item_quantity": "${item.quantity}",
+    "carttotal_tostringasfixed_0_c": "${_cartTotal.toStringAsFixed(0)} $currencyCode",
+    "select_existing_customer_optio": "Select existing customer (optional)",
+    "customer_name": "Customer Name *",
+    "provider": "Provider",
+    "str_712": "  /  ",
+    "placed_dateformat_ymd_add_jm_f": "Placed ${DateFormat.yMd().add_jm().format(order.createdAt)}",
+    "copied_to_clipboard": "Copied to clipboard",
+    "copied_phone": "Copied phone",
+    "notes_are_only_visible_to_your": "Notes are only visible to your team.",
+    "order_items_length": "${order.items.length}",
+    "no_items": "No items",
+    "qty": "×$qty",
+    "save_notes": "Save Notes",
+    "blacklist_ip": "Blacklist IP",
+    "blacklist_phone": "Blacklist phone",
+    "loading_orders": "Loading orders...",
+    "product_not_found_for_sku_code": "Product not found for SKU: $code",
+    "added_1x_product_title_selecte": "Added 1x ${product.title} • ${selected.title}",
+    "added_1x_label": "Added 1x $label",
+    "barcode_lookup_failed_e": "Barcode lookup failed: $e",
+    "could_not_create_customer_erro": "Could not create customer: $error",
+    "scan_barcode": "Scan Barcode",
+    "add_products_before_applying_a": "Add products before applying a discount",
+    "currency_format_posstate_disc": "-${currency.format(posState.discountAmount)}",
+    "invalid_payment_amounts": "Invalid payment amounts",
+    "remaining_currency_format_brea": "Remaining: ${currency.format(breakdown.remaining)}",
+    "show_numpad": "Show Numpad",
+    "charge_currency_format_total_t": "Charge ${currency.format(total)} to Card",
+    "waiting_for_terminal": "Waiting for terminal...",
+    "reprinting_last_order": "Reprinting last order…",
+    "return_refund_coming_soon": "Return / Refund — coming soon",
+    "name_a_to_z": "Name (A to Z)",
+    "price_low_to_high": "Price (low to high)",
+    "price_high_to_low": "Price (high to low)",
+    "recently_added": "Recently added",
+    "3_columns": "3 columns",
+    "4_columns": "4 columns",
+    "5_columns": "5 columns",
+    "6_columns": "6 columns",
+    "posstate_crossaxiscount": "${posState.crossAxisCount}",
+    "error_loading_products": "Error loading products",
+    "posstate_products_where_p_p_c": "${posState.products.where((p) => p.categoryId == posState.browsingCategoryId || p.category?.id == posState.browsingCategoryId).length} products",
+    "productcount_productcount_1": "$productCount ${productCount == 1 ? ",
+    "admin_pages_pos_cart_actions_v": "admin.pages.pos.cart.actions.viewCart",
+    "admin_pages_pos_cart_itemscoun": "admin.pages.pos.cart.itemsCount",
+    "waitingcount": "$waitingCount",
+    "no_customer_found": "No customer found",
+    "create_one_and_assign_this_sal": "Create one and assign this sale",
+    "tap_a_product_card_or_use_quic": "Tap a product card or use quick charge.",
+    "itemcount": "$itemCount",
+    "admin_pages_pos_actions_viewca": "admin.pages.pos.actions.viewCart",
+    "failed_to_load_product_variant": "Failed to load product variants",
+    "no_active_variants_for_this_pr": "No active variants for this product.",
+    "confirm_payment_enter": "Confirm Payment (Enter)",
+    "admin_pages_pos_catalog_search": "admin.pages.pos.catalog.searchPlaceholder",
+    "more_actions": "More actions",
+    "apply_discount": "Apply discount",
+    "hold_order": "Hold Order",
+    "open_cash_drawer": "Open Cash Drawer",
+    "keyboard_shortcuts": "Keyboard Shortcuts",
+    "admin_pages_pos_cart_actions_c": "admin.pages.pos.cart.actions.clearCart",
+    "percent": "Percent",
+    "reason": "Reason",
+    "new_total": "New total",
+    "str_220": "${",
+    "label": "$label:",
+    "admin_forms_product_isactive_l": "admin.forms.product.isActive.label",
+    "admin_forms_product_minidescri": "admin.forms.product.miniDescription.hint",
+    "admin_forms_product_stock_hint": "admin.forms.product.stock.hintSystemManaged",
+    "admin_forms_product_lowstockth": "admin.forms.product.lowStockThreshold.hint",
+    "admin_common_noneselected": "admin.common.noneSelected",
+    "admin_pages_products_edit_gene": "admin.pages.products.edit.generalTab.imagesTitle",
+    "admin_pages_products_edit_gene2": "admin.pages.products.edit.generalTab.imagesHint",
+    "admin_pages_products_edit_gene3": "admin.pages.products.edit.generalTab.addImage",
+    "admin_pages_products_edit_desc": "admin.pages.products.edit.descriptionTab.title",
+    "admin_variantstable_errors_upd": "admin.variantsTable.errors.updateStockFailed",
+    "admin_variantstable_imagepicke": "admin.variantsTable.imagePicker.title",
+    "admin_variantstable_imagepicke2": "admin.variantsTable.imagePicker.subtitle",
+    "admin_variantstable_imagepicke3": "admin.variantsTable.imagePicker.empty",
+    "admin_variantstable_imagepicke4": "admin.variantsTable.imagePicker.imageWithIndex",
+    "admin_variantstable_movements": "admin.variantsTable.movements.subtitle",
+    "admin_variantstable_movements2": "admin.variantsTable.movements.empty",
+    "admin_pages_products_edit_vari": "admin.pages.products.edit.variantsTab.allocationSaved",
+    "admin_pages_products_edit_vari2": "admin.pages.products.edit.variantsTab.saveFirst",
+    "admin_pages_products_edit_vari3": "admin.pages.products.edit.variantsTab.title",
+    "admin_pages_products_edit_vari4": "admin.pages.products.edit.variantsTab.pricingHint",
+    "admin_pages_products_edit_vari5": "admin.pages.products.edit.variantsTab.allocationTitle",
+    "admin_pages_products_edit_vari6": "admin.pages.products.edit.variantsTab.allocationMessage",
+    "widget_product_stockallocatio": "${widget.product!.stockAllocationSourceVariantTitle ?? ",
+    "admin_pages_products_edit_vari7": "admin.pages.products.edit.variantsTab.showArchived",
+    "admin_pages_products_edit_vari8": "admin.pages.products.edit.variantsTab.archivedCount",
+    "admin_pages_products_edit_vari9": "admin.pages.products.edit.variantsTab.empty",
+    "admin_forms_product_ispromotio": "admin.forms.product.isPromotionActive.label",
+    "admin_forms_product_showcountd": "admin.forms.product.showCountdown.label",
+    "admin_variantstable_promotions": "admin.variantsTable.promotionSimpleProduct",
+    "admin_variantstable_actions_sk": "admin.variantsTable.actions.skuLocked",
+    "admin_forms_product_minidescri2": "admin.forms.product.miniDescription.label",
+    "admin_forms_product_lowstockth2": "admin.forms.product.lowStockThreshold.label",
+    "admin_forms_product_promotiona": "admin.forms.product.promotionalPrice.label",
+    "yyyy_mm_ddthh_mm": "YYYY-MM-DDTHH:mm",
+    "admin_variantstable_actions_su": "admin.variantsTable.actions.suggestSku",
+    "admin_variantstable_actions_lo": "admin.variantsTable.actions.lockSku",
+    "admin_variantstable_actions_ma": "admin.variantsTable.actions.manageImages",
+    "admin_variantstable_actions_mo": "admin.variantsTable.actions.movements",
+    "admin_common_featurecomingsoon": "admin.common.featureComingSoon",
+    "admin_pages_products_index_sor": "admin.pages.products.index.sort.sortBy",
+    "admin_pages_products_index_fil": "admin.pages.products.index.filters.allCategories",
+    "admin_pages_products_index_fil2": "admin.pages.products.index.filters.allStatus",
+    "admin_pages_products_index_fil3": "admin.pages.products.index.filters.lowStock",
+    "admin_pages_products_index_add": "admin.pages.products.index.addProduct",
+    "product_stock": "${product.stock}",
+    "admin_pages_products_index_lin": "admin.pages.products.index.links.openProduct",
+    "admin_pages_products_index_lin2": "admin.pages.products.index.links.copyProduct",
+    "admin_pages_products_index_lin3": "admin.pages.products.index.links.openLanding",
+    "admin_pages_products_index_lin4": "admin.pages.products.index.links.copyLanding",
+    "exp_dateformat": "exp. ${DateFormat(",
+    "admin_pages_products_index_fil4": "admin.pages.products.index.filters.searchLabel",
+    "admin_pages_products_index_emp": "admin.pages.products.index.empty.newProduct",
+    "admin_pages_products_index_tab": "admin.pages.products.index.table.outOfStock",
+    "are_you_sure_you_want_to_delet2": "Are you sure you want to delete this purchase order?",
+    "not_found": "Not Found",
+    "purchase_order_not_found": "Purchase order not found",
+    "purchase_purchase_id_length_8": "Purchase #${purchase.id.length > 8 ? purchase.id.substring(0, 8) : purchase.id}",
+    "purchase_items_length_items": "${purchase.items.length} items",
+    "no_notes_added": "No notes added",
+    "no_items_added_yet": "No items added yet",
+    "add_products_to_this_purchase": "Add products to this purchase order",
+    "sku_widget_item_sku": "SKU: ${widget.item.sku}",
+    "widget_item_quantityordered": "${widget.item.quantityOrdered}",
+    "widget_item_quantityreceived": "${widget.item.quantityReceived.toInt()} / ${widget.item.quantityOrdered.toInt()}",
+    "replace_price": "Replace Price",
+    "product_variants_length_varia": "${product.variants.length} variants",
+    "sku_variant_sku_isnotempty_var": "SKU: ${variant.sku.isNotEmpty ? variant.sku : \"-\"}  |  Stock: ${variant.stock}",
+    "estimated_total": "Estimated Total",
+    "qty_ordered": "Qty ordered",
+    "receive": "Receive",
+    "mode": "Mode",
+    "add": "Add",
+    "a_draft_purchase_order_will_be": "A draft purchase order will be created. You can add products and finalize details in the next step.",
+    "manage_your_purchase_orders": "Manage your purchase orders",
+    "error_purchasesstate_error": "Error: ${purchasesState.error}",
+    "create_a_purchase_order_to_res": "Create a purchase order to restock your inventory",
+    "purchase_id_length_8_purchase": "#${purchase.id.length > 8 ? purchase.id.substring(0, 8) : purchase.id}",
+    "create_your_tenant_configure_y": "Create your tenant, configure your operations, and go live with COD-ready workflows built for Algeria.",
+    "everything_you_need_for_produc": "Everything you need for product catalog, orders, shipping, and team access in one platform.",
+    "set_up_your_tenant_and_start_s": "Set up your tenant and start selling today.",
+    "account_created_successfully": "Account created successfully",
+    "welcome_to_swekly_tenantname_y": "Welcome to Swekly, $tenantName. Your workspace is ready.",
+    "swekly_com": ".swekly.com",
+    "slugcontroller_text_trim_swek": "${_slugController.text.trim()}.swekly.com",
+    "otp_verification": "OTP Verification",
+    "send": "Send",
+    "sale_shortid": "Sale #$shortId",
+    "create_refund_cash_outflow_and": "Create refund cash outflow and mark this sale as REFUNDED.",
+    "sale_refunded_successfully": "Sale refunded successfully",
+    "failed_to_refund_sale_e": "Failed to refund sale: $e",
+    "no_items_found": "No items found",
+    "loading_sale": "Loading sale...",
+    "error_salesstate_error": "Error: ${salesState.error}",
+    "admin_pages_sales_index_filter": "admin.pages.sales.index.filters.searchLabel",
+    "contact_info_saved": "Contact info saved",
+    "contact_information": "Contact Information",
+    "custom_domains": "Custom Domains",
+    "point_your_cname_record_to": "Point your CNAME record to:",
+    "tenant_subdomain_tenantsubdoma": "Tenant subdomain: $_tenantSubdomain",
+    "new_domain": "New domain",
+    "homepage_settings_saved": "Homepage settings saved",
+    "show_section": "Show section",
+    "hero_image_url": "Hero image URL",
+    "hero_title": "Hero title",
+    "hero_subtitle": "Hero subtitle",
+    "hero_button_text": "Hero button text",
+    "hero_button_link": "Hero button link",
+    "eyebrow": "Eyebrow",
+    "legal_pages_saved": "Legal pages saved",
+    "publish_this_legal_page": "Publish this legal page",
+    "page": "Page",
+    "printer_saved_successfully": "Printer saved successfully",
+    "printer_settings": "Printer Settings",
+    "manage_your_receipt_printers_a": "Manage your receipt printers and layout settings.",
+    "no_printers_configured": "No printers configured",
+    "add_a_printer_to_start_printin": "Add a printer to start printing receipts",
+    "saved_printers": "Saved Printers",
+    "receipt_layout_configuration": "Receipt Layout Configuration",
+    "customize_your_receipt_header": "Customize your receipt header, footer, and content",
+    "layout_saved": "Layout Saved",
+    "edit_config": "Edit Config",
+    "set_as_default": "Set as Default",
+    "test_print": "Test Print",
+    "are_you_sure_you_want_to_delet3": "Are you sure you want to delete this profile?",
+    "uses_system_default_print_dial": "Uses system default print dialog.",
+    "80mm_standard": "80mm (Standard)",
+    "58mm_narrow": "58mm (Narrow)",
+    "auto_cut_paper": "Auto Cut Paper",
+    "after_printing": "After printing",
+    "print_as_image_arabic_support": "Print as Image (Arabic Support)",
+    "rasterize_pdf_to_image_for_per": "Rasterize PDF to image for perfect Arabic rendering (slower)",
+    "no_serial_ports_found": "No serial ports found",
+    "select_serial_port": "Select Serial Port",
+    "test_print_sent": "Test print sent",
+    "test_print_failed_e": "Test print failed: $e",
+    "no_devices_found": "No devices found",
+    "result_rssi_dbm": "${result.rssi} dBm",
+    "add_printer": "Add Printer",
+    "add_new": "Add New",
+    "profile_name": "Profile Name",
+    "transport_type": "Transport Type",
+    "ip_address": "IP Address",
+    "port": "Port",
+    "mac_address": "MAC Address",
+    "device_id_uuid": "Device ID (UUID)",
+    "scan_for_ble_devices": "Scan for BLE Devices",
+    "printer_name": "Printer Name",
+    "serial_port": "Serial Port",
+    "scan_for_ports": "Scan for Ports",
+    "paper_width": "Paper Width",
+    "save_profile": "Save Profile",
+    "admin_receipt_editor_title": "admin.receipt.editor.title",
+    "customize_your_receipt_layout": "Customize your receipt layout",
+    "quick_presets": "Quick Presets",
+    "receipt_updates_instantly_as_y": "Receipt updates instantly as you edit",
+    "receipt_printer": "RECEIPT PRINTER",
+    "receipt_layout": "Receipt Layout",
+    "minimal": "Minimal",
+    "full_detail": "Full Detail",
+    "quick_print": "Quick Print",
+    "admin_receipt_editor_savelayou": "admin.receipt.editor.saveLayout",
+    "admin_receipt_editor_showlogo": "admin.receipt.editor.showLogo",
+    "admin_receipt_editor_showstore": "admin.receipt.editor.showStoreName",
+    "admin_receipt_editor_storename": "admin.receipt.editor.storeNameOverride",
+    "admin_receipt_editor_showstore2": "admin.receipt.editor.showStoreAddress",
+    "admin_receipt_editor_storeaddr": "admin.receipt.editor.storeAddressOverride",
+    "admin_receipt_editor_showstore3": "admin.receipt.editor.showStorePhone",
+    "admin_receipt_editor_storephon": "admin.receipt.editor.storePhoneOverride",
+    "admin_receipt_editor_showstore4": "admin.receipt.editor.showStoreEmail",
+    "admin_receipt_editor_storeemai": "admin.receipt.editor.storeEmailOverride",
+    "admin_receipt_editor_showcusto": "admin.receipt.editor.showCustomHeader",
+    "admin_receipt_editor_headertex": "admin.receipt.editor.headerText",
+    "admin_receipt_editor_showorder": "admin.receipt.editor.showOrderNumber",
+    "admin_receipt_editor_showdate": "admin.receipt.editor.showDate",
+    "admin_receipt_editor_showcusto2": "admin.receipt.editor.showCustomerInfo",
+    "admin_receipt_editor_showtaxbr": "admin.receipt.editor.showTaxBreakdown",
+    "admin_receipt_editor_showfoote": "admin.receipt.editor.showFooterMessage",
+    "admin_receipt_editor_footertex": "admin.receipt.editor.footerText",
+    "off": "OFF",
+    "on": "ON",
+    "save_layout": "Save Layout",
+    "appearance_settings_saved": "Appearance settings saved",
+    "storefront_appearance": "Storefront Appearance",
+    "use_brand_color_on_the_storefr": "Use brand color on the storefront",
+    "scroll_announcement_bar": "Scroll announcement bar",
+    "logo_url": "Logo URL",
+    "favicon_url": "Favicon URL",
+    "primary_brand_color": "Primary brand color",
+    "template": "Template",
+    "announcement_text": "Announcement text",
+    "store_settings_saved": "Store settings saved",
+    "store_settings": "Store Settings",
+    "enable_cart": "Enable cart",
+    "allow_storefront_visitors_to_b": "Allow storefront visitors to build a cart before checkout.",
+    "enable_cash_on_delivery": "Enable cash on delivery",
+    "keep_cod_ordering_active_for_t": "Keep COD ordering active for the storefront.",
+    "simplify_checkout_when_detaile": "Simplify checkout when detailed address is not required.",
+    "provisioning_and_workspace_bin": "Provisioning and workspace binding are managed outside this screen. Workspace URLs are no longer editable from normal app settings.",
+    "store_slug": "Store slug",
+    "currency_code": "Currency code",
+    "currency_country": "Currency country",
+    "order_id_prefix": "Order ID prefix",
+    "minimum_order_amount_dzd": "Minimum order amount (DZD)",
+    "manage_your_store_identity_bra": "Manage your store identity, brand assets, and storefront settings.",
+    "this_tenant_is_on_an_offline_o": "This tenant is on an offline-only subscription tier. Hosted storefront and cloud features stay visible here but remain locked until the tenant upgrades to an online tier.",
+    "reprovision_workspace": "Reprovision workspace",
+    "this_clears_local_tenant_data": "This clears local tenant data.",
+    "toggle_dark_mode": "Toggle Dark Mode",
+    "printers": "Printers",
+    "reprovision": "Reprovision",
+    "checklist": "Checklist",
+    "open_web_admin_tool": "Open Web Admin Tool",
+    "open_storefront": "Open Storefront",
+    "name_a_z": "Name A-Z",
+    "name_z_a": "Name Z-A",
+    "admin_pages_suppliers_index_ad": "admin.pages.suppliers.index.addSupplier",
+    "admin_pages_suppliers_index_fi": "admin.pages.suppliers.index.filters.searchLabel",
+    "admin_pages_suppliers_index_em": "admin.pages.suppliers.index.empty.newSupplier",
+    "upgrade_to_online_tier": "Upgrade to Online Tier",
+    "create_your_online_account": "Create your Online Account",
+    "your_offline_data_will_automat": "Your offline data will automatically be synced to the cloud.",
+    "store_url_slug": "Store URL (Slug)",
+    "admin_email": "Admin Email",
+    "admin_phone": "Admin Phone",
+    "admin_pages_users_includeinact": "admin.pages.users.includeInactive",
+    "count": "$count ${",
+    "no_staff_role": "No staff role",
+    "select_at_least_one_permission": "Select at least one permission",
+    "admin_pages_users_roles_action": "admin.pages.users.roles.actions.addRole",
+    "role_name": "Role name",
+    "failed_to_update_variant_e": "Failed to update variant: $e",
+    "no_sku_suggestion": "No SKU suggestion",
+    "failed_to_suggest_sku_e": "Failed to suggest SKU: $e",
+    "sku_locked": "SKU locked",
+    "failed_to_lock_sku_e": "Failed to lock SKU: $e",
+    "sku_is_locked": "SKU is locked",
+    "visible_to_customers": "Visible to customers",
+    "track_inventory": "Track Inventory",
+    "cost_purchase_price": "Cost (Purchase price)",
+    "suggest_sku": "Suggest SKU",
+    "lock_sku": "Lock SKU",
+    "safety_stock": "Safety Stock",
+    "admin_receipt_print_tel": "admin.receipt.print.tel",
+    "admin_receipt_print_email": "admin.receipt.print.email",
+    "admin_receipt_print_ordernum": "admin.receipt.print.orderNum",
+    "admin_receipt_print_customer": "admin.receipt.print.customer",
+    "admin_receipt_print_phone": "admin.receipt.print.phone",
+    "item": "Item",
+    "admin_receipt_print_discount": "admin.receipt.print.discount",
+    "money_format_discountamount": "-${money.format(discountAmount)}",
+    "admin_receipt_print_grandtotal": "admin.receipt.print.grandTotal",
+    "view_details": "View details",
+    "admin_actions_logoutconfirmtit": "admin.actions.logoutConfirmTitle",
+    "admin_actions_logoutconfirmmes": "admin.actions.logoutConfirmMessage",
+    "admin_actions_viewstore": "admin.actions.viewStore",
+    "sync_recovery": "Sync recovery",
+    "no_queued_failures": "No queued failures.",
+    "issue_entitytype_issue_action": "${issue.entityType} • ${issue.action}",
+    "retry_failed": "Retry failed",
+    "sync_conflicted": "Sync conflicted",
+    "modelabel_syncing": "$modeLabel syncing",
+    "sync_failed": "Sync failed",
+    "failed_to_update_e": "Failed to update: $e",
+    "no_image_url": "No image URL",
+    "failed_to_create_option_e": "Failed to create option: $e",
+    "are_you_sure_you_want_to_delet4": "Are you sure you want to delete this option?",
+    "failed_to_delete_option_e": "Failed to delete option: $e",
+    "failed_to_add_value_e": "Failed to add value: $e",
+    "failed_to_delete_value_e": "Failed to delete value: $e",
+    "new_option": "New Option",
+    "add_option": "Add Option",
+    "values": "Values",
+    "add_value": "Add value",
+    "admin_common_nodataavailable": "admin.common.noDataAvailable",
+    "admin_common_rowsperpage": "admin.common.rowsPerPage",
+    "storeslug_swekly_com": "$storeSlug.swekly.com",
+    "admin_nav_deliveryitem": "admin.nav.deliveryItem",
+    "create_cashbox": "Create cashbox",
+    "no_transactions_found": "No transactions found",
+    "try_expanding_the_date_range_o": "Try expanding the date range or clearing filters.",
+    "no_sessions_found": "No sessions found",
+    "record_a_transaction_expense_c": "Record a transaction (expense, charge, or customer/supplier payment).",
+    "move_funds_between_two_open_ca": "Move funds between two open cashbox sessions.",
+    "transactions_for_this_cashbox": "Transactions for this cashbox (last 7 days).",
+    "no_categories_found": "No categories found",
+    "basic_information": "Basic Information",
+    "category_image": "Category Image",
+    "admin_pages_customers_detail_s": "admin.pages.customers.detail.stats.totalSpent",
+    "admin_pages_customers_detail_s2": "admin.pages.customers.detail.stats.totalPaid",
+    "admin_pages_customers_detail_s3": "admin.pages.customers.detail.stats.currentBalance",
+    "str_273": "—",
+    "feature_locked": "Feature Locked",
+    "this_feature_is_not_available": "This feature is not available for the current subscription.",
+    "track_conversions_and_retarget": "Track conversions and retarget customers via Facebook Ads.",
+    "receive_new_order_alerts_direc": "Receive new order alerts directly in a Telegram chat.",
+    "welcome_back_n": "Welcome back,\\n",
+    "builder": "Builder.",
+    "add_a_customer_and_attach_this": "Add a customer and attach this sale to their account.",
+    "return_refund": "Return / Refund",
+    "admin_pages_pos_catalog_noprod": "admin.pages.pos.catalog.noProducts",
+    "browse": "Browse →",
+    "apply_a_cart_wide_fixed_amount": "Apply a cart-wide fixed amount or percentage discount.",
+    "style_textstyle_fontsize_12_c": ",\n          style: TextStyle(\n            fontSize: 12,\n            color: Theme.of(\n              context,\n            ).colorScheme.onSurface.withValues(alpha: 0.6),\n          ),\n        ),\n        const SizedBox(width: 4),\n        IconButton(\n          icon: const Icon(LucideIcons.externalLink, size: 16),\n          color: const Color(0xFF65A30D),\n          splashRadius: 16,\n          tooltip: openTooltip,\n          onPressed: canUseLinks ? onOpen : null,\n        ),\n        IconButton(\n          icon: const Icon(LucideIcons.copy, size: 16),\n          color: const Color(0xFF94A3B8),\n          splashRadius: 16,\n          tooltip: copyTooltip,\n          onPressed: canUseLinks ? onCopy : null,\n        ),\n      ],\n    );\n  }\n}\n\nclass _ErrorBanner extends StatelessWidget {\n  final String message;\n\n  const _ErrorBanner({required this.message});\n\n  @override\n  Widget build(BuildContext context) {\n    final isDark = Theme.of(context).brightness == Brightness.dark;\n    return Container(\n      width: double.infinity,\n      padding: const EdgeInsets.all(12),\n      decoration: BoxDecoration(\n        color: isDark ? AppColors.redSurface : const Color(0xFFFEF2F2),\n        borderRadius: BorderRadius.circular(8),\n        border: Border.all(\n          color: isDark\n              ? AppColors.redText.withValues(alpha: 0.3)\n              : const Color(0xFFFECACA),\n        ),\n      ),\n      child: Text(\n        message,\n        style: TextStyle(\n          fontSize: 14,\n          color: isDark ? AppColors.redText : const Color(0xFFB91C1C),\n        ),\n      ),\n    );\n  }\n}\n\nclass _LoadingCard extends StatelessWidget {\n  const _LoadingCard();\n\n  @override\n  Widget build(BuildContext context) {\n    return Container(\n      decoration: BoxDecoration(\n        borderRadius: BorderRadius.circular(12),\n        border: Border.all(\n          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.25),\n        ),\n      ),\n      child: const Center(child: CircularProgressIndicator()),\n    );\n  }\n}\n\nclass _ProductTabsCard extends StatelessWidget {\n  final GlobalKey<FormState> formKey;\n  final List<Category> categories;\n  final bool isEditing;\n  final bool isSubmitting;\n  final TextEditingController titleController;\n  final TextEditingController slugController;\n  final TextEditingController miniDescriptionController;\n  final TextEditingController landingDescriptionController;\n  final TextEditingController priceController;\n  final TextEditingController stockController;\n  final TextEditingController lowStockThresholdController;\n  final String? selectedCategoryId;\n  final ValueChanged<String?> onCategoryChanged;\n  final bool isActive;\n  final ValueChanged<bool> onActiveChanged;\n  final List<String> images;\n  final bool isUploading;\n  final VoidCallback onAddImage;\n  final ValueChanged<int> onRemoveImage;\n  final Product? product;\n  final String? productId;\n  final VoidCallback onVariantUpdated;\n  final VoidCallback onCancel;\n  final VoidCallback onSubmit;\n\n  const _ProductTabsCard({\n    required this.formKey,\n    required this.categories,\n    required this.isEditing,\n    required this.isSubmitting,\n    required this.titleController,\n    required this.slugController,\n    required this.miniDescriptionController,\n    required this.landingDescriptionController,\n    required this.priceController,\n    required this.stockController,\n    required this.lowStockThresholdController,\n    required this.selectedCategoryId,\n    required this.onCategoryChanged,\n    required this.isActive,\n    required this.onActiveChanged,\n    required this.images,\n    required this.isUploading,\n    required this.onAddImage,\n    required this.onRemoveImage,\n    required this.product,\n    required this.productId,\n    required this.onVariantUpdated,\n    required this.onCancel,\n    required this.onSubmit,\n  });\n\n  @override\n  Widget build(BuildContext context) {\n    final isDark = Theme.of(context).brightness == Brightness.dark;\n\n    return DefaultTabController(\n      length: 3,\n      child: Container(\n        decoration: BoxDecoration(\n          color: isDark ? AppColors.surface1 : AppColors.lightSurface1,\n          borderRadius: BorderRadius.circular(12),\n          border: Border.all(\n            color: isDark\n                ? AppColors.surfaceBorder\n                : AppColors.lightSurfaceBorder,\n          ),\n        ),\n        child: Column(\n          children: [\n            TabBar(\n              isScrollable: true,\n              tabAlignment: TabAlignment.start,\n              labelColor: const Color(0xFF65A30D),\n              unselectedLabelColor: const Color(0xFF64748B),\n              indicatorColor: const Color(0xFF65A30D),\n              indicatorSize: TabBarIndicatorSize.tab,\n              tabs: [\n                Tab(text: ",
+    "create_purchase_order": "Create Purchase Order",
+    "select_a_supplier_to_start_a_n": "Select a supplier to start a new purchase order. You can add items later.",
+    "start_your_n": "Start your\\n",
+    "e_commerce_empire": "e-commerce empire",
+    "primary_channels": "Primary Channels",
+    "social_messaging": "Social & Messaging",
+    "titles": "Titles",
+    "content": "Content",
+    "delete_printer": "Delete Printer?",
+    "connection_details": "Connection Details",
+    "capabilities": "Capabilities",
+    "scanning_ble_devices": "Scanning BLE Devices",
+    "store_name_items_total_only": "Store name, items & total only",
+    "everything_logo_contacts_tax_f": "Everything — logo, contacts, tax, footer",
+    "welcome": "Welcome!",
+    "thank_you_for_your_purchase": "Thank you for your purchase!",
+    "rtl_safe_no_logo_clean_layout": "RTL-safe, no logo, clean layout",
+    "str_442": "شكراً لزيارتكم",
+    "items_only_kitchen_ticket_styl": "Items only — kitchen ticket style",
+    "editor": "Editor",
+    "operational_settings_used_acro": "Operational settings used across orders and admin flows.",
+    "configure_default_order_behavi": "Configure default order behavior for local and online admin flows.",
+    "manage_local_admin_preferences": "Manage local admin preferences, operational settings, and hosted storefront access.",
+    "dark_mode": "Dark Mode",
+    "enable_the_dark_admin_theme": "Enable the dark admin theme.",
+    "provisioned_workspace": "Provisioned workspace",
+    "clear_local_tenant_data_on_thi": "Clear local tenant data on this install and return to secure activation.",
+    "this_clears_the_local_workspac": "This clears the local workspace database, sync queue, files, and image cache for this tenant binding on this device.",
+    "clear_and_reprovision": "Clear and reprovision",
+    "manage_receipt_and_device_prin": "Manage receipt and device printing.",
+    "order_prefixes_checkout_rules": "Order prefixes, checkout rules, and operational defaults.",
+    "manage_phone_email_address_and": "Manage phone, email, address, and social links.",
+    "track_onboarding_progress_for": "Track onboarding progress for this tenant.",
+    "theme_logo_color_language_and": "Theme, logo, color, language, and announcement bar.",
+    "hero_carousel_and_storefront_h": "Hero carousel and storefront homepage sections.",
+    "terms_privacy_returns_and_publ": "Terms, privacy, returns, and public contact pages.",
+    "attach_a_custom_domain_to_the": "Attach a custom domain to the hosted storefront.",
+    "storefront_preview": "Storefront Preview",
+    "open_the_existing_hosted_store": "Open the existing hosted storefront preview.",
+    "template_builder": "Template Builder",
+    "open_the_web_based_template_bu": "Open the web-based template builder.",
+    "landing_page_builder": "Landing Page Builder",
+    "open_the_web_based_marketing_l": "Open the web-based marketing landing page builder.",
+    "cloud_connected_integrations_a": "Cloud-connected integrations and notifications.",
+    "usage_plans_and_payment_submis2": "Usage, plans, and payment submission.",
+    "admin_pages_suppliers_index_de": "admin.pages.suppliers.index.deleteModal.title",
+    "admin_pages_suppliers_index_de2": "admin.pages.suppliers.index.deleteModal.messageWithName",
+    "swekly_com2": "swekly.com/",
+    "admin_pages_users_hints_deacti": "admin.pages.users.hints.deactivateHint",
+    "admin_pages_users_roles_create": "admin.pages.users.roles.createTitle",
+    "admin_pages_users_roles_editti": "admin.pages.users.roles.editTitle",
+    "admin_confirmmodal_defaults_ti": "admin.confirmModal.defaults.title",
+    "admin_confirmmodal_defaults_me": "admin.confirmModal.defaults.message",
+    "create_or_update_an_admin_staf": "Create or update an admin/staff user for this tenant.",
+    "define_a_role_and_its_permissi": "Define a role and its permissions.",
+    "general_information": "General Information",
+    "block_sync_if_the_remote_order": "Block sync if the remote order status changed since the local edit.",
+    "block_sync_if_remote_store_set": "Block sync if remote store settings diverged from the local baseline snapshot.",
+    "block_sync_if_the_remote_conta": "Block sync if the remote contact info changed or was deleted since the local edit.",
+    "block_sync_if_the_remote_conta2": "Block sync if the remote contact info changed before the local delete is replayed.",
+    "block_sync_if_remote_cashbox_m": "Block sync if remote cashbox metadata diverged from the local baseline snapshot.",
+    "block_sync_if_remote_delivery": "Block sync if remote delivery provider activation changed since the local edit.",
+    "billing_and_subscription_manag": "Billing and subscription management are available on online tiers only.",
+    "cloud_integrations": "Cloud Integrations",
+    "cloud_integrations_require_an": "Cloud integrations require an online tier with remote services enabled.",
+    "custom_domains_depend_on_the_h": "Custom domains depend on the hosted storefront and require an online tier.",
+    "storefront_appearance_controls": "Storefront appearance controls apply to the hosted storefront and require an online tier.",
+    "homepage_sections_and_carousel": "Homepage sections and carousel settings are storefront-managed and require an online tier.",
+    "public_legal_pages_belong_to_t": "Public legal pages belong to the hosted storefront and require an online tier.",
+    "previewing_the_hosted_storefro": "Previewing the hosted storefront requires an online tier storefront.",
+    "the_template_builder_is_part_o": "The template builder is part of hosted storefront management and requires an online tier.",
+    "the_landing_page_builder_is_av": "The landing page builder is available on online tiers only.",
+    "this_will_delete_all_variants": "This will delete all variants associated with this option.",
+    "admin_nav_storeparameters": "admin.nav.storeParameters",
+    "app_offline_activation": "app.offline_activation",
+    "app_generate_this_request_code": "app.generate_this_request_code_on",
+    "app_paste_signed_activation_co": "app.paste_signed_activation_code_h",
+    "app_verify": "app.verify",
+    "app_trusted_activation": "app.trusted_activation",
+    "app_activation_key": "app.activation_key",
+    "app_paste_the_tenant_issued_ke": "app.paste_the_tenant_issued_key_fo",
+    "app_start_offline_activation": "app.start_offline_activation",
+    "app_billing_subscription": "app.billing_subscription",
+    "app_usage_plans_and_payment_su": "app.usage_plans_and_payment_submis",
+    "superadmin_paymentspage_interv": "superAdmin.paymentsPage.interval.monthly",
+    "superadmin_paymentspage_interv2": "superAdmin.paymentsPage.interval.yearly",
+    "app_submit_or_simulate_payment": "app.submit_or_simulate_payment",
+    "superadmin_paymentspage_import": "superAdmin.paymentsPage.import.fields.notes",
+    "app_simulate_payment": "app.simulate_payment",
+    "app_submit_payment": "app.submit_payment",
+    "app_recent_payments": "app.recent_payments",
+    "admin_pages_cash_methods_cash": "admin.pages.cash.methods.CASH",
+    "app_cashboxes_transactions_and": "app.cashboxes_transactions_and_ses",
+    "app_new_customer_payment": "app.new_customer_payment",
+    "app_new_supplier_payment": "app.new_supplier_payment",
+    "admin_pages_cash_transactions": "admin.pages.cash.transactions.types.TRANSFER",
+    "app_new_action": "app.new_action",
+    "app_total_in_today": "app.total_in_today",
+    "app_total_out_today": "app.total_out_today",
+    "admin_pages_dashboard_stats_ac": "admin.pages.dashboard.stats.activeSessions",
+    "app_net_today": "app.net_today",
+    "superadmin_paymentspage_action": "superAdmin.paymentsPage.actions.refresh",
+    "app_no_cashboxes_yet": "app.no_cashboxes_yet",
+    "app_create_one_to_start_tracki": "app.create_one_to_start_tracking_c",
+    "app_create_cashbox": "app.create_cashbox",
+    "superadmin_tenants_table_name": "superAdmin.tenants.table.name",
+    "superadmin_tenants_status_acti": "superAdmin.tenants.status.active",
+    "admin_pages_sales_refundmodal": "admin.pages.sales.refundModal.noteLabel",
+    "app_opening": "app.opening",
+    "admin_pages_cash_closingcount": "admin.pages.cash.closingCount",
+    "app_something_went_wrong": "app.something_went_wrong",
+    "superadmin_paymentspage_histor": "superAdmin.paymentsPage.history.proof.open",
+    "admin_pages_cash_modals_closes": "admin.pages.cash.modals.closeSession.confirm",
+    "app_loading_transactions": "app.loading_transactions",
+    "app_no_transactions_found": "app.no_transactions_found",
+    "app_try_expanding_the_date_ran": "app.try_expanding_the_date_range_o",
+    "app_loading_sessions": "app.loading_sessions",
+    "app_no_sessions_found": "app.no_sessions_found",
+    "admin_pages_sales_refundmodal2": "admin.pages.sales.refundModal.cashboxLabel",
+    "admin_pages_cash_sessions_filt": "admin.pages.cash.sessions.filters.allCashboxes",
+    "admin_pages_cash_transactions2": "admin.pages.cash.transactions.filters.allTypes",
+    "app_sale_payment": "app.sale_payment",
+    "app_customer_payment": "app.customer_payment",
+    "app_supplier_payment": "app.supplier_payment",
+    "admin_pages_cash_transactions3": "admin.pages.cash.transactions.types.EXPENSE",
+    "admin_pages_cash_transactions4": "admin.pages.cash.transactions.types.CHARGE",
+    "app_direction": "app.direction",
+    "app_all_directions": "app.all_directions",
+    "superadmin_paymentspage_histor2": "superAdmin.paymentsPage.history.table.method",
+    "admin_pages_cash_transactions5": "admin.pages.cash.transactions.filters.allMethods",
+    "admin_pages_cash_methods_card": "admin.pages.cash.methods.CARD",
+    "admin_pages_cash_methods_other": "admin.pages.cash.methods.OTHER",
+    "admin_pages_sales_index_filter2": "admin.pages.sales.index.filters.allUsers",
+    "superadmin_paymentspage_histor3": "superAdmin.paymentsPage.history.table.status",
+    "admin_pages_purchases_index_fi": "admin.pages.purchases.index.filters.allStatuses",
+    "admin_pages_cash_status_closed": "admin.pages.cash.status.CLOSED",
+    "app_closing": "app.closing",
+    "app_diff": "app.diff",
+    "app_admin_pages_cash_sessions": "app.admin_pages_cash_sessions_tabl",
+    "app_admin_pages_cash_sessions2": "app.admin_pages_cash_sessions_tabl2",
+    "app_admin_pages_cash_sessions3": "app.admin_pages_cash_sessions_tabl3",
+    "app_admin_pages_cash_sessions4": "app.admin_pages_cash_sessions_tabl4",
+    "app_admin_pages_cash_sessions5": "app.admin_pages_cash_sessions_tabl5",
+    "app_record_a_transaction_expen": "app.record_a_transaction_expense_c",
+    "app_select_cashbox": "app.select_cashbox",
+    "superadmin_paymentspage_histor4": "superAdmin.paymentsPage.history.table.amount",
+    "admin_settingshub_links_curren": "admin.settingsHub.links.currency",
+    "app_select_customer": "app.select_customer",
+    "app_no_customers_match_your_se": "app.no_customers_match_your_search",
+    "admin_pages_suppliers_index_em2": "admin.pages.suppliers.index.empty.hintFiltered",
+    "admin_pages_purchases_detail_p": "admin.pages.purchases.detail.paymentModal.referenceLabel",
+    "admin_pages_purchases_detail_p2": "admin.pages.purchases.detail.paymentModal.noteLabel",
+    "app_move_funds_between_two_ope": "app.move_funds_between_two_open_ca",
+    "admin_pages_cash_modals_transf": "admin.pages.cash.modals.transfer.fromLabel",
+    "admin_pages_cash_modals_transf2": "admin.pages.cash.modals.transfer.toLabel",
+    "app_note_both_cashboxes_must_h": "app.note_both_cashboxes_must_have",
+    "app_from_and_to_must_differ": "app.from_and_to_must_differ",
+    "admin_pages_cash_opensession": "admin.pages.cash.openSession",
+    "admin_pages_cash_closesession": "admin.pages.cash.closeSession",
+    "app_transactions_for_this_cash": "app.transactions_for_this_cashbox",
+    "superadmin_paymentspage_histor5": "superAdmin.paymentsPage.history.table.date",
+    "app_manage_your_product_catego": "app.manage_your_product_categories",
+    "admin_pages_categories_index_a": "admin.pages.categories.index.addCategory",
+    "superadmin_tenants_modal_field": "superAdmin.tenants.modal.fields.slug.slugFallback",
+    "superadmin_tenants_table_produ": "superAdmin.tenants.table.products",
+    "app_no_categories_found": "app.no_categories_found",
+    "superadmin_tenants_table_actio": "superAdmin.tenants.table.actions",
+    "admin_pages_categories_edit_li": "admin.pages.categories.edit.links.openCategory",
+    "admin_pages_categories_edit_li2": "admin.pages.categories.edit.links.copyCategory",
+    "app_category_link_copied_to_cl": "app.category_link_copied_to_clipbo",
+    "admin_pages_categories_edit_de": "admin.pages.categories.edit.deleteModal.title",
+    "app_basic_information": "app.basic_information",
+    "app_category_image": "app.category_image",
+    "app_admin_pages_customers_deta": "app.admin_pages_customers_detail_s",
+    "app_admin_pages_customers_deta2": "app.admin_pages_customers_detail_s2",
+    "app_admin_pages_customers_deta3": "app.admin_pages_customers_detail_s3",
+    "app_str_273": "app.str_273",
+    "app_admin_pages_customers_deta4": "app.admin_pages_customers_detail_e",
+    "app_admin_pages_customers_deta5": "app.admin_pages_customers_detail_n",
+    "app_admin_pages_customers_deta6": "app.admin_pages_customers_detail_n2",
+    "app_admin_forms_customer_openi": "app.admin_forms_customer_openingba",
+    "app_admin_pages_customers_inde": "app.admin_pages_customers_index_fi",
+    "app_admin_pages_customers_inde2": "app.admin_pages_customers_index_ad",
+    "admin_pages_onboarding_savefin": "admin.pages.onboarding.saveFinish",
+    "app_could_not_load_dashboard_d": "app.could_not_load_dashboard_data",
+    "admin_pages_products_index_tab2": "admin.pages.products.index.table.lowStock",
+    "admin_pages_dashboard_recentor": "admin.pages.dashboard.recentOrders.title",
+    "app_latest_orders_for_this_ten": "app.latest_orders_for_this_tenant",
+    "superadmin_dashboard_recentact": "superAdmin.dashboard.recentActivity.viewAll",
+    "app_no_recent_orders": "app.no_recent_orders",
+    "app_new_orders_will_appear_her": "app.new_orders_will_appear_here",
+    "admin_pages_billing_history_vi": "admin.pages.billing.history.viewProof",
+    "admin_orderstatus_confirmed": "admin.orderStatus.confirmed",
+    "admin_orderstatus_shipped": "admin.orderStatus.shipped",
+    "admin_orderstatus_delivered": "admin.orderStatus.delivered",
+    "admin_pages_purchases_index_fi2": "admin.pages.purchases.index.filters.statusValues.CANCELLED",
+    "admin_orderstatus_returned": "admin.orderStatus.returned",
+    "admin_pages_dashboard_ordersta": "admin.pages.dashboard.orderStatus.title",
+    "app_quick_overview_by_status": "app.quick_overview_by_status",
+    "admin_pages_dashboard_quicklin": "admin.pages.dashboard.quickLinks.manageProducts",
+    "app_upgrade_to_online": "app.upgrade_to_online",
+    "app_quick_links": "app.quick_links",
+    "app_common_actions_to_get_thin": "app.common_actions_to_get_things_d",
+    "app_delivery_settings": "app.delivery_settings",
+    "app_manage_delivery_providers": "app.manage_delivery_providers_and",
+    "app_feature_locked": "app.feature_locked",
+    "app_this_feature_is_not_availa": "app.this_feature_is_not_available",
+    "app_upgrade_to_an_online_tier": "app.upgrade_to_an_online_tier_to_u",
+    "app_back_to_settings": "app.back_to_settings",
+    "admin_settingshub_links_integr": "admin.settingsHub.links.integrations",
+    "app_connect_third_party_servic": "app.connect_third_party_services_t",
+    "app_track_conversions_and_reta": "app.track_conversions_and_retarget",
+    "admin_pages_integrations_metap": "admin.pages.integrations.metaPixels.table.pixelId",
+    "app_conversion_api_token": "app.conversion_api_token",
+    "app_receive_new_order_alerts_d": "app.receive_new_order_alerts_direc",
+    "admin_pages_integrations_teleg": "admin.pages.integrations.telegram.modal.fields.botToken.label",
+    "admin_pages_integrations_teleg2": "admin.pages.integrations.telegram.modal.fields.chatId.label",
+    "admin_pages_sales_detail_items": "admin.pages.sales.detail.itemsTable.product",
+    "app_welcome_back_n": "app.welcome_back_n",
+    "app_builder": "app.builder",
+    "app_your_dashboard_is_ready_co": "app.your_dashboard_is_ready_contin",
+    "app_real_time_insights_into_st": "app.real_time_insights_into_store",
+    "app_2026_swekly_inc": "app.2026_swekly_inc",
+    "app_google": "app.google",
+    "admin_contactinfosform_kinds_f": "admin.contactInfosForm.kinds.facebook.label",
+    "app_apple": "app.apple",
+    "superadmin_login_form_email_la": "superAdmin.login.form.email.label",
+    "superadmin_login_form_password": "superAdmin.login.form.password.label",
+    "app_dont_have_account": "app.dont_have_account",
+    "auth_login_form_startfree": "auth.login.form.startFree",
+    "app_swekly": "app.swekly",
+    "app_setup_checklist": "app.setup_checklist",
+    "app_retry": "app.retry",
+    "app_progress": "app.progress",
+    "admin_pages_orders_index_addbt": "admin.pages.orders.index.addBtn",
+    "app_select_existing_customer_o": "app.select_existing_customer_optio",
+    "app_new_customer": "app.new_customer",
+    "app_customer_name": "app.customer_name",
+    "admin_pages_sales_detail_field": "admin.pages.sales.detail.fields.customerPhone",
+    "app_provider": "app.provider",
+    "admin_pages_products_edit_bund": "admin.pages.products.edit.bundlesTab.tags.none",
+    "app_yalidine": "app.yalidine",
+    "app_maystro": "app.maystro",
+    "admin_pages_orders_create_deli": "admin.pages.orders.create.deliveryMode",
+    "app_stop_desk": "app.stop_desk",
+    "app_select": "app.select",
+    "admin_pages_orders_create_empt": "admin.pages.orders.create.emptyCart",
+    "admin_pages_sales_detail_items2": "admin.pages.sales.detail.itemsTable.total",
+    "admin_pages_orders_detail_back": "admin.pages.orders.detail.backToOrders",
+    "superadmin_tenants_table_creat": "superAdmin.tenants.table.created",
+    "app_no_items": "app.no_items",
+    "superadmin_tenants_table_order": "superAdmin.tenants.table.orders",
+    "admin_pages_orders_index_filte": "admin.pages.orders.index.filters.allOrders",
+    "app_loading_orders": "app.loading_orders",
+    "app_add_a_customer_and_attach": "app.add_a_customer_and_attach_this",
+    "app_scan_barcode": "app.scan_barcode",
+    "app_add_products_before_applyi": "app.add_products_before_applying_a",
+    "admin_pages_orders_detail_item": "admin.pages.orders.detail.itemsTable.subtotal",
+    "app_invalid_payment_amounts": "app.invalid_payment_amounts",
+    "admin_pages_billing_payment_em": "admin.pages.billing.payment.emptyTitle",
+    "admin_pages_billing_payment_to": "admin.pages.billing.payment.totalLabel",
+    "admin_pages_pos_paymentmodal_c": "admin.pages.pos.paymentModal.cashReceived",
+    "app_show_numpad": "app.show_numpad",
+    "app_waiting_for_terminal": "app.waiting_for_terminal",
+    "admin_pages_pos_paymentmodal_k": "admin.pages.pos.paymentModal.keypad",
+    "app_confirm_payment_enter": "app.confirm_payment_enter",
+    "app_reprinting_last_order": "app.reprinting_last_order",
+    "app_admin_pages_pos_catalog_se": "app.admin_pages_pos_catalog_search",
+    "app_name_a_to_z": "app.name_a_to_z",
+    "app_price_low_to_high": "app.price_low_to_high",
+    "app_price_high_to_low": "app.price_high_to_low",
+    "app_recently_added": "app.recently_added",
+    "app_3_columns": "app.3_columns",
+    "app_4_columns": "app.4_columns",
+    "app_5_columns": "app.5_columns",
+    "app_6_columns": "app.6_columns",
+    "app_more_actions": "app.more_actions",
+    "app_apply_discount": "app.apply_discount",
+    "admin_pages_pos_catalog_action": "admin.pages.pos.catalog.actions.reprintLastOrder",
+    "app_error_loading_products": "app.error_loading_products",
+    "app_admin_pages_pos_catalog_no": "app.admin_pages_pos_catalog_noprod",
+    "app_browse": "app.browse",
+    "app_admin_pages_pos_cart_actio": "app.admin_pages_pos_cart_actions_v",
+    "app_admin_pages_pos_cart_items": "app.admin_pages_pos_cart_itemscoun",
+    "app_admin_pages_pos_cart_actio2": "app.admin_pages_pos_cart_actions_c",
+    "app_no_customer_found": "app.no_customer_found",
+    "app_create_one_and_assign_this": "app.create_one_and_assign_this_sal",
+    "app_tap_a_product_card_or_use": "app.tap_a_product_card_or_use_quic",
+    "app_admin_pages_pos_actions_vi": "app.admin_pages_pos_actions_viewca",
+    "app_failed_to_load_product_var": "app.failed_to_load_product_variant",
+    "app_no_active_variants_for_thi": "app.no_active_variants_for_this_pr",
+    "app_apply_a_cart_wide_fixed_am": "app.apply_a_cart_wide_fixed_amount",
+    "app_percent": "app.percent",
+    "app_reason": "app.reason",
+    "app_new_total": "app.new_total",
+    "app_admin_pages_products_index": "app.admin_pages_products_index_add",
+    "app_admin_common_featurecoming": "app.admin_common_featurecomingsoon",
+    "app_admin_pages_products_index2": "app.admin_pages_products_index_sor",
+    "app_admin_pages_products_index3": "app.admin_pages_products_index_fil4",
+    "app_admin_pages_products_index4": "app.admin_pages_products_index_fil",
+    "app_admin_pages_products_index5": "app.admin_pages_products_index_fil2",
+    "app_admin_pages_products_index6": "app.admin_pages_products_index_fil3",
+    "app_admin_pages_products_index7": "app.admin_pages_products_index_emp",
+    "app_admin_pages_products_index8": "app.admin_pages_products_index_tab",
+    "app_admin_pages_products_index9": "app.admin_pages_products_index_lin",
+    "app_admin_pages_products_index10": "app.admin_pages_products_index_lin2",
+    "app_admin_pages_products_index11": "app.admin_pages_products_index_lin3",
+    "app_admin_pages_products_index12": "app.admin_pages_products_index_lin4",
+    "admin_pages_purchases_detail_d": "admin.pages.purchases.detail.deleteModal.title",
+    "app_are_you_sure_you_want_to_d": "app.are_you_sure_you_want_to_delet2",
+    "app_not_found": "app.not_found",
+    "app_purchase_order_not_found": "app.purchase_order_not_found",
+    "admin_pages_purchases_detail_a": "admin.pages.purchases.detail.addProducts",
+    "admin_pages_purchases_detail_d2": "admin.pages.purchases.detail.deleteModal.confirm",
+    "admin_pages_purchases_detail_c": "admin.pages.purchases.detail.cards.itemsOrdered",
+    "admin_pages_purchases_detail_c2": "admin.pages.purchases.detail.cards.itemsReceived",
+    "app_estimated_total": "app.estimated_total",
+    "app_no_notes_added": "app.no_notes_added",
+    "app_no_items_added_yet": "app.no_items_added_yet",
+    "app_add_products_to_this_purch": "app.add_products_to_this_purchase",
+    "admin_pages_purchases_detail_i": "admin.pages.purchases.detail.items.table.totalOrderValue",
+    "admin_pages_purchases_detail_i2": "admin.pages.purchases.detail.items.table.unitCost",
+    "admin_pages_purchases_detail_i3": "admin.pages.purchases.detail.items.table.receiveNow",
+    "app_qty_ordered": "app.qty_ordered",
+    "app_receive": "app.receive",
+    "app_mode": "app.mode",
+    "app_replace_price": "app.replace_price",
+    "admin_pages_purchases_detail_i4": "admin.pages.purchases.detail.items.table.salePriceMode.weighted",
+    "app_add": "app.add",
+    "app_create_purchase_order": "app.create_purchase_order",
+    "app_select_a_supplier_to_start": "app.select_a_supplier_to_start_a_n",
+    "app_a_draft_purchase_order_wil": "app.a_draft_purchase_order_will_be",
+    "app_manage_your_purchase_order": "app.manage_your_purchase_orders",
+    "admin_pages_purchases_index_fi3": "admin.pages.purchases.index.filters.allSuppliers",
+    "app_start_your_n": "app.start_your_n",
+    "app_e_commerce_empire": "app.e_commerce_empire",
+    "app_create_your_tenant_configu": "app.create_your_tenant_configure_y",
+    "app_everything_you_need_for_pr": "app.everything_you_need_for_produc",
+    "app_set_up_your_tenant_and_sta": "app.set_up_your_tenant_and_start_s",
+    "auth_register_form_companyname": "auth.register.form.companyName.label",
+    "admin_pages_users_fields_confi": "admin.pages.users.fields.confirmPassword",
+    "auth_register_form_haveaccount": "auth.register.form.haveAccount",
+    "auth_register_form_login": "auth.register.form.logIn",
+    "app_account_created_successful": "app.account_created_successfully",
+    "admin_pages_onboarding_done_ct": "admin.pages.onboarding.done.ctaDashboard",
+    "admin_appearancesettingsform_i": "admin.appearanceSettingsForm.identity.slug.placeholder",
+    "app_swekly_com": "app.swekly_com",
+    "app_otp_verification": "app.otp_verification",
+    "app_send": "app.send",
+    "admin_pages_sales_messages_noo": "admin.pages.sales.messages.noOpenCashbox",
+    "admin_pages_sales_refundmodal3": "admin.pages.sales.refundModal.title",
+    "app_create_refund_cash_outflow": "app.create_refund_cash_outflow_and",
+    "admin_pages_sales_refundmodal4": "admin.pages.sales.refundModal.referenceLabel",
+    "app_sale_refunded_successfully": "app.sale_refunded_successfully",
+    "app_no_items_found": "app.no_items_found",
+    "app_loading_sale": "app.loading_sale",
+    "admin_pages_sales_detail_notfo": "admin.pages.sales.detail.notFound.title",
+    "admin_pages_sales_detail_notfo2": "admin.pages.sales.detail.notFound.hint",
+    "app_admin_pages_sales_index_fi": "app.admin_pages_sales_index_filter",
+    "app_contact_info_saved": "app.contact_info_saved",
+    "app_contact_information": "app.contact_information",
+    "app_primary_channels": "app.primary_channels",
+    "app_social_messaging": "app.social_messaging",
+    "admin_contactinfosform_kinds_w": "admin.contactInfosForm.kinds.whatsapp.label",
+    "admin_contactinfosform_kinds_i": "admin.contactInfosForm.kinds.instagram.label",
+    "admin_contactinfosform_kinds_t": "admin.contactInfosForm.kinds.tiktok.label",
+    "app_custom_domains": "app.custom_domains",
+    "app_point_your_cname_record_to": "app.point_your_cname_record_to",
+    "app_new_domain": "app.new_domain",
+    "app_homepage_settings_saved": "app.homepage_settings_saved",
+    "app_hero_image_url": "app.hero_image_url",
+    "app_hero_title": "app.hero_title",
+    "app_hero_subtitle": "app.hero_subtitle",
+    "app_hero_button_text": "app.hero_button_text",
+    "app_hero_button_link": "app.hero_button_link",
+    "admin_homepagesettingsform_sec": "admin.homepageSettingsForm.sections.browseByCategory.title",
+    "admin_homepagesettingsform_sec2": "admin.homepageSettingsForm.sections.newArrivals.title",
+    "admin_homepagesettingsform_sec3": "admin.homepageSettingsForm.sections.bestSellers.title",
+    "app_eyebrow": "app.eyebrow",
+    "admin_homepagesettingsform_fie": "admin.homepageSettingsForm.fields.limit",
+    "app_legal_pages_saved": "app.legal_pages_saved",
+    "admin_settingshub_links_legal": "admin.settingsHub.links.legal",
+    "app_page": "app.page",
+    "app_publish_this_legal_page": "app.publish_this_legal_page",
+    "app_titles": "app.titles",
+    "app_content": "app.content",
+    "app_9100": "app.9100",
+    "app_printer_saved_successfully": "app.printer_saved_successfully",
+    "app_printer_settings": "app.printer_settings",
+    "app_manage_your_receipt_printe": "app.manage_your_receipt_printers_a",
+    "app_no_printers_configured": "app.no_printers_configured",
+    "app_add_a_printer_to_start_pri": "app.add_a_printer_to_start_printin",
+    "app_add_printer": "app.add_printer",
+    "app_saved_printers": "app.saved_printers",
+    "app_add_new": "app.add_new",
+    "app_receipt_layout_configurati": "app.receipt_layout_configuration",
+    "app_customize_your_receipt_hea": "app.customize_your_receipt_header",
+    "app_layout_saved": "app.layout_saved",
+    "admin_pages_sales_detail_items3": "admin.pages.sales.detail.itemsTable.defaultVariant",
+    "app_edit_config": "app.edit_config",
+    "app_set_as_default": "app.set_as_default",
+    "app_test_print": "app.test_print",
+    "app_delete_printer": "app.delete_printer",
+    "app_are_you_sure_you_want_to_d2": "app.are_you_sure_you_want_to_delet3",
+    "app_profile_name": "app.profile_name",
+    "app_transport_type": "app.transport_type",
+    "app_connection_details": "app.connection_details",
+    "app_ip_address": "app.ip_address",
+    "app_port": "app.port",
+    "app_mac_address": "app.mac_address",
+    "app_device_id_uuid": "app.device_id_uuid",
+    "app_scan_for_ble_devices": "app.scan_for_ble_devices",
+    "app_printer_name": "app.printer_name",
+    "app_serial_port": "app.serial_port",
+    "app_scan_for_ports": "app.scan_for_ports",
+    "app_uses_system_default_print": "app.uses_system_default_print_dial",
+    "app_capabilities": "app.capabilities",
+    "app_paper_width": "app.paper_width",
+    "app_80mm_standard": "app.80mm_standard",
+    "app_58mm_narrow": "app.58mm_narrow",
+    "app_auto_cut_paper": "app.auto_cut_paper",
+    "app_open_cash_drawer": "app.open_cash_drawer",
+    "app_after_printing": "app.after_printing",
+    "app_print_as_image_arabic_supp": "app.print_as_image_arabic_support",
+    "app_rasterize_pdf_to_image_for": "app.rasterize_pdf_to_image_for_per",
+    "app_save_profile": "app.save_profile",
+    "app_no_serial_ports_found": "app.no_serial_ports_found",
+    "app_select_serial_port": "app.select_serial_port",
+    "app_test_print_sent": "app.test_print_sent",
+    "app_scanning_ble_devices": "app.scanning_ble_devices",
+    "app_no_devices_found": "app.no_devices_found",
+    "app_minimal": "app.minimal",
+    "app_store_name_items_total_onl": "app.store_name_items_total_only",
+    "app_full_detail": "app.full_detail",
+    "app_everything_logo_contacts_t": "app.everything_logo_contacts_tax_f",
+    "app_welcome": "app.welcome",
+    "app_thank_you_for_your_purchas": "app.thank_you_for_your_purchase",
+    "app_rtl_safe_no_logo_clean_lay": "app.rtl_safe_no_logo_clean_layout",
+    "app_str_442": "app.str_442",
+    "app_quick_print": "app.quick_print",
+    "app_items_only_kitchen_ticket": "app.items_only_kitchen_ticket_styl",
+    "app_admin_receipt_editor_title": "app.admin_receipt_editor_title",
+    "app_customize_your_receipt_lay": "app.customize_your_receipt_layout",
+    "app_admin_receipt_editor_savel": "app.admin_receipt_editor_savelayou",
+    "app_quick_presets": "app.quick_presets",
+    "app_admin_receipt_editor_showl": "app.admin_receipt_editor_showlogo",
+    "app_admin_receipt_editor_shows": "app.admin_receipt_editor_showstore",
+    "app_admin_receipt_editor_store": "app.admin_receipt_editor_storename",
+    "app_admin_receipt_editor_shows2": "app.admin_receipt_editor_showstore2",
+    "app_admin_receipt_editor_store2": "app.admin_receipt_editor_storeaddr",
+    "app_admin_receipt_editor_shows3": "app.admin_receipt_editor_showstore3",
+    "app_admin_receipt_editor_store3": "app.admin_receipt_editor_storephon",
+    "app_admin_receipt_editor_shows4": "app.admin_receipt_editor_showstore4",
+    "app_admin_receipt_editor_store4": "app.admin_receipt_editor_storeemai",
+    "app_admin_receipt_editor_showc": "app.admin_receipt_editor_showcusto",
+    "app_admin_receipt_editor_heade": "app.admin_receipt_editor_headertex",
+    "app_admin_receipt_editor_showo": "app.admin_receipt_editor_showorder",
+    "app_admin_receipt_editor_showd": "app.admin_receipt_editor_showdate",
+    "app_admin_receipt_editor_showc2": "app.admin_receipt_editor_showcusto2",
+    "app_admin_receipt_editor_showt": "app.admin_receipt_editor_showtaxbr",
+    "app_admin_receipt_editor_showf": "app.admin_receipt_editor_showfoote",
+    "app_admin_receipt_editor_foote": "app.admin_receipt_editor_footertex",
+    "admin_appearancesettingsform_p": "admin.appearanceSettingsForm.preview.title",
+    "app_receipt_updates_instantly": "app.receipt_updates_instantly_as_y",
+    "app_receipt_printer": "app.receipt_printer",
+    "app_off": "app.off",
+    "app_on": "app.on",
+    "app_receipt_layout": "app.receipt_layout",
+    "app_editor": "app.editor",
+    "app_save_layout": "app.save_layout",
+    "app_appearance_settings_saved": "app.appearance_settings_saved",
+    "app_storefront_appearance": "app.storefront_appearance",
+    "app_logo_url": "app.logo_url",
+    "app_favicon_url": "app.favicon_url",
+    "app_primary_brand_color": "app.primary_brand_color",
+    "app_template": "app.template",
+    "admin_functionalsettingsform_l": "admin.functionalSettingsForm.localization.defaultLanguage",
+    "app_announcement_text": "app.announcement_text",
+    "app_use_brand_color_on_the_sto": "app.use_brand_color_on_the_storefr",
+    "app_scroll_announcement_bar": "app.scroll_announcement_bar",
+    "app_store_settings_saved": "app.store_settings_saved",
+    "app_store_settings": "app.store_settings",
+    "admin_appearancesettingsform_i2": "admin.appearanceSettingsForm.identity.title",
+    "app_operational_settings_used": "app.operational_settings_used_acro",
+    "admin_pages_onboarding_storein": "admin.pages.onboarding.storeInfo.nameLabel",
+    "app_store_slug": "app.store_slug",
+    "app_currency_code": "app.currency_code",
+    "app_currency_country": "app.currency_country",
+    "admin_settingshub_links_checko": "admin.settingsHub.links.checkoutRules",
+    "app_configure_default_order_be": "app.configure_default_order_behavi",
+    "app_order_id_prefix": "app.order_id_prefix",
+    "app_minimum_order_amount_dzd": "app.minimum_order_amount_dzd",
+    "app_enable_cart": "app.enable_cart",
+    "app_allow_storefront_visitors": "app.allow_storefront_visitors_to_b",
+    "app_enable_cash_on_delivery": "app.enable_cash_on_delivery",
+    "app_keep_cod_ordering_active_f": "app.keep_cod_ordering_active_for_t",
+    "admin_functionalsettingsform_c": "admin.functionalSettingsForm.checkoutRules.hideOptionalAddress.title",
+    "app_simplify_checkout_when_det": "app.simplify_checkout_when_detaile",
+    "app_provisioning_and_workspace": "app.provisioning_and_workspace_bin",
+    "app_manage_local_admin_prefere": "app.manage_local_admin_preferences",
+    "app_dark_mode": "app.dark_mode",
+    "app_enable_the_dark_admin_them": "app.enable_the_dark_admin_theme",
+    "app_provisioned_workspace": "app.provisioned_workspace",
+    "app_reprovision_workspace": "app.reprovision_workspace",
+    "app_clear_local_tenant_data_on": "app.clear_local_tenant_data_on_thi",
+    "app_this_clears_the_local_work": "app.this_clears_the_local_workspac",
+    "app_clear_and_reprovision": "app.clear_and_reprovision",
+    "app_printers": "app.printers",
+    "app_manage_receipt_and_device": "app.manage_receipt_and_device_prin",
+    "app_order_prefixes_checkout_ru": "app.order_prefixes_checkout_rules",
+    "app_manage_phone_email_address": "app.manage_phone_email_address_and",
+    "app_track_onboarding_progress": "app.track_onboarding_progress_for",
+    "app_theme_logo_color_language": "app.theme_logo_color_language_and",
+    "admin_pages_settings_homepage": "admin.pages.settings.homepage.metaTitle",
+    "app_hero_carousel_and_storefro": "app.hero_carousel_and_storefront_h",
+    "app_terms_privacy_returns_and": "app.terms_privacy_returns_and_publ",
+    "app_attach_a_custom_domain_to": "app.attach_a_custom_domain_to_the",
+    "app_storefront_preview": "app.storefront_preview",
+    "app_open_the_existing_hosted_s": "app.open_the_existing_hosted_store",
+    "app_template_builder": "app.template_builder",
+    "app_open_the_web_based_templat": "app.open_the_web_based_template_bu",
+    "app_landing_page_builder": "app.landing_page_builder",
+    "app_open_the_web_based_marketi": "app.open_the_web_based_marketing_l",
+    "app_cloud_connected_integratio": "app.cloud_connected_integrations_a",
+    "app_usage_plans_and_payment_su2": "app.usage_plans_and_payment_submis2",
+    "app_this_tenant_is_on_an_offli": "app.this_tenant_is_on_an_offline_o",
+    "app_open_web_admin_tool": "app.open_web_admin_tool",
+    "app_open_storefront": "app.open_storefront",
+    "app_admin_pages_suppliers_inde": "app.admin_pages_suppliers_index_ad",
+    "app_admin_pages_suppliers_inde2": "app.admin_pages_suppliers_index_fi",
+    "app_name_a_z": "app.name_a_z",
+    "app_name_z_a": "app.name_z_a",
+    "app_admin_pages_suppliers_inde3": "app.admin_pages_suppliers_index_de",
+    "app_admin_pages_suppliers_inde4": "app.admin_pages_suppliers_index_de2",
+    "app_upgrade_to_online_tier": "app.upgrade_to_online_tier",
+    "app_create_your_online_account": "app.create_your_online_account",
+    "app_your_offline_data_will_aut": "app.your_offline_data_will_automat",
+    "app_store_url_slug": "app.store_url_slug",
+    "app_swekly_com2": "app.swekly_com2",
+    "app_admin_email": "app.admin_email",
+    "app_admin_phone": "app.admin_phone",
+    "app_admin_pages_users_roles_ac": "app.admin_pages_users_roles_action",
+    "app_admin_pages_users_includei": "app.admin_pages_users_includeinact",
+    "app_admin_pages_users_hints_de": "app.admin_pages_users_hints_deacti",
+    "app_admin_pages_users_roles_cr": "app.admin_pages_users_roles_create",
+    "app_admin_pages_users_roles_ed": "app.admin_pages_users_roles_editti",
+    "app_admin_confirmmodal_default": "app.admin_confirmmodal_defaults_ti",
+    "app_admin_confirmmodal_default2": "app.admin_confirmmodal_defaults_me",
+    "app_create_or_update_an_admin": "app.create_or_update_an_admin_staf",
+    "admin_pages_users_fields_staff": "admin.pages.users.fields.staffRole",
+    "app_no_staff_role": "app.no_staff_role",
+    "app_define_a_role_and_its_perm": "app.define_a_role_and_its_permissi",
+    "app_role_name": "app.role_name",
+    "app_select_at_least_one_permis": "app.select_at_least_one_permission",
+    "app_general_information": "app.general_information",
+    "admin_pages_sales_detail_items4": "admin.pages.sales.detail.itemsTable.price",
+    "app_cost_purchase_price": "app.cost_purchase_price",
+    "app_suggest_sku": "app.suggest_sku",
+    "app_no_sku_suggestion": "app.no_sku_suggestion",
+    "admin_variantstable_columns_ba": "admin.variantsTable.columns.barcode",
+    "app_lock_sku": "app.lock_sku",
+    "app_sku_locked": "app.sku_locked",
+    "app_sku_is_locked": "app.sku_is_locked",
+    "app_visible_to_customers": "app.visible_to_customers",
+    "app_track_inventory": "app.track_inventory",
+    "app_safety_stock": "app.safety_stock",
+    "admin_common_savechanges": "admin.common.saveChanges",
+    "app_admin_receipt_print_tel": "app.admin_receipt_print_tel",
+    "app_admin_receipt_print_email": "app.admin_receipt_print_email",
+    "app_admin_receipt_print_ordern": "app.admin_receipt_print_ordernum",
+    "app_admin_receipt_print_custom": "app.admin_receipt_print_customer",
+    "app_admin_receipt_print_phone": "app.admin_receipt_print_phone",
+    "app_item": "app.item",
+    "admin_pages_sales_detail_items5": "admin.pages.sales.detail.itemsTable.qty",
+    "app_admin_receipt_print_discou": "app.admin_receipt_print_discount",
+    "app_admin_receipt_print_grandt": "app.admin_receipt_print_grandtotal",
+    "app_block_sync_if_the_remote_o": "app.block_sync_if_the_remote_order",
+    "app_block_sync_if_remote_store": "app.block_sync_if_remote_store_set",
+    "app_block_sync_if_the_remote_c": "app.block_sync_if_the_remote_conta",
+    "app_block_sync_if_the_remote_c2": "app.block_sync_if_the_remote_conta2",
+    "app_block_sync_if_remote_cashb": "app.block_sync_if_remote_cashbox_m",
+    "app_block_sync_if_remote_deliv": "app.block_sync_if_remote_delivery",
+    "app_billing_and_subscription_m": "app.billing_and_subscription_manag",
+    "app_cloud_integrations": "app.cloud_integrations",
+    "app_cloud_integrations_require": "app.cloud_integrations_require_an",
+    "app_custom_domains_depend_on_t": "app.custom_domains_depend_on_the_h",
+    "app_storefront_appearance_cont": "app.storefront_appearance_controls",
+    "app_homepage_sections_and_caro": "app.homepage_sections_and_carousel",
+    "app_public_legal_pages_belong": "app.public_legal_pages_belong_to_t",
+    "app_previewing_the_hosted_stor": "app.previewing_the_hosted_storefro",
+    "app_the_template_builder_is_pa": "app.the_template_builder_is_part_o",
+    "app_the_landing_page_builder_i": "app.the_landing_page_builder_is_av",
+    "app_admin_actions_viewstore": "app.admin_actions_viewstore",
+    "app_admin_actions_logoutconfir": "app.admin_actions_logoutconfirmtit",
+    "app_admin_actions_logoutconfir2": "app.admin_actions_logoutconfirmmes",
+    "app_sync_recovery": "app.sync_recovery",
+    "app_no_queued_failures": "app.no_queued_failures",
+    "app_retry_failed": "app.retry_failed",
+    "app_sync_conflicted": "app.sync_conflicted",
+    "app_sync_failed": "app.sync_failed",
+    "admin_productoptionseditor_pre": "admin.productOptionsEditor.preview.title",
+    "app_no_image_url": "app.no_image_url",
+    "admin_productoptionseditor_del": "admin.productOptionsEditor.deleteModal.title",
+    "app_this_will_delete_all_varia": "app.this_will_delete_all_variants",
+    "app_are_you_sure_you_want_to_d3": "app.are_you_sure_you_want_to_delet4",
+    "admin_productoptionseditor_tit": "admin.productOptionsEditor.title",
+    "app_add_option": "app.add_option",
+    "app_new_option": "app.new_option",
+    "admin_productoptionseditor_fie": "admin.productOptionsEditor.fields.optionName",
+    "admin_productoptionseditor_fie2": "admin.productOptionsEditor.fields.displayType",
+    "admin_productoptionseditor_dis": "admin.productOptionsEditor.displayTypes.dropdown",
+    "admin_productoptionseditor_dis2": "admin.productOptionsEditor.displayTypes.button",
+    "admin_productoptionseditor_dis3": "admin.productOptionsEditor.displayTypes.radio",
+    "admin_productoptionseditor_dis4": "admin.productOptionsEditor.displayTypes.color",
+    "admin_productoptionseditor_dis5": "admin.productOptionsEditor.displayTypes.image",
+    "app_values": "app.values",
+    "app_add_value": "app.add_value",
+    "app_admin_common_nodataavailab": "app.admin_common_nodataavailable",
+    "app_admin_common_rowsperpage": "app.admin_common_rowsperpage",
+    "app_admin_nav_deliveryitem": "app.admin_nav_deliveryitem",
+    "app_admin_nav_salesitem": "app.admin_nav_salesitem",
+    "app_admin_nav_storeparameters": "app.admin_nav_storeparameters",
+    "str_204": "—",
+    "str_378": "شكراً لزيارتكم"
+  },
+  "store": {
+    "countdown": {
+      "days": "Days"
     }
   }
 }

@@ -5,8 +5,10 @@ import { MaystroPickupPointService } from './maystro-pickup-point.service'
 import { MaystroDeliveryService } from './maystro-delivery.service'
 import { MaystroHooksService } from './maystro-hooks.service'
 import { MaystroBordereauService } from './maystro-bordereau.service'
+import { MaystroProductService } from './maystro-product.service'
 import { MaystroIntegrationError } from './maystro.errors'
 import { getMaystroCredentials } from './maystro.credentials'
+import { normalizeLocationName } from '../shared/normalize-location-name'
 
 export class MaystroController {
     private location = new MaystroLocationService()
@@ -14,10 +16,49 @@ export class MaystroController {
     private delivery = new MaystroDeliveryService()
     private hooks = new MaystroHooksService()
     private bordereau = new MaystroBordereauService()
+    private products = new MaystroProductService()
+
+    /**
+     * Maystro's `/base/*` endpoints key communes by numeric id, but the storefront
+     * now picks communes from the carrier-agnostic list, which only carries names —
+     * a merged multi-carrier list has no single id to offer. Resolve a name back to
+     * this carrier's id here, at the boundary, so both forms are accepted.
+     */
+    private async resolveCommuneId(input: {
+        apiToken?: string
+        commune: string
+        wilaya: string
+    }): Promise<string> {
+        const commune = input.commune.trim()
+        if (Number.isFinite(Number.parseInt(commune, 10))) return commune
+
+        if (!input.wilaya.trim()) {
+            throw new MaystroIntegrationError({
+                statusCode: 400,
+                statusMessage: 'wilaya is required to resolve a commune by name'
+            })
+        }
+
+        const communes = await this.location.listCommunes({ apiToken: input.apiToken, wilaya: input.wilaya })
+        const match = communes.find((c) => normalizeLocationName(c.name) === normalizeLocationName(commune))
+        if (!match) {
+            throw new MaystroIntegrationError({ statusCode: 400, statusMessage: 'Invalid commune for wilaya' })
+        }
+        return String(match.id)
+    }
 
     async listWilayas(req: Request, res: Response) {
+        const tenantId = req.tenant?.id || req.user?.tenantId
         try {
+            let apiToken: string | undefined
+            if (tenantId) {
+                try {
+                    const creds = await getMaystroCredentials(tenantId)
+                    apiToken = creds.apiToken
+                } catch { /* no creds configured — attempt unauthenticated */ }
+            }
             const wilayas = await this.location.listWilayas({
+                apiToken,
                 language: typeof req.query.language === 'string' ? req.query.language : undefined,
                 country: typeof req.query.country === 'string' ? req.query.country : undefined
             })
@@ -35,8 +76,16 @@ export class MaystroController {
         const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya : ''
         if (!wilaya.trim()) return res.status(400).json({ statusCode: 400, statusMessage: 'wilaya is required' })
 
+        const tenantId = req.tenant?.id || req.user?.tenantId
         try {
-            const communes = await this.location.listCommunes({ wilaya })
+            let apiToken: string | undefined
+            if (tenantId) {
+                try {
+                    const creds = await getMaystroCredentials(tenantId)
+                    apiToken = creds.apiToken
+                } catch { /* no creds configured — attempt unauthenticated */ }
+            }
+            const communes = await this.location.listCommunes({ apiToken, wilaya })
             return res.json(communes)
         } catch (error: any) {
             if (error instanceof MaystroIntegrationError) {
@@ -62,22 +111,27 @@ export class MaystroController {
 
         try {
             const creds = await getMaystroCredentials(tenantId)
+            const communeId = await this.resolveCommuneId({ apiToken: creds.apiToken, commune, wilaya })
 
             if (deliveryType) {
                 const points = nearby && wilaya.trim()
                     ? await this.pickupPoints.listActivePickupPointsNearby({
                           apiToken: creds.apiToken,
-                          commune,
+                          commune: communeId,
                           wilaya,
                           deliveryType
                       })
-                    : await this.pickupPoints.listActivePickupPoints({ apiToken: creds.apiToken, commune, deliveryType })
+                    : await this.pickupPoints.listActivePickupPoints({
+                          apiToken: creds.apiToken,
+                          commune: communeId,
+                          deliveryType
+                      })
                 return res.json(points)
             }
 
             const directPoints = await this.pickupPoints.listActivePickupPoints({
                 apiToken: creds.apiToken,
-                commune
+                commune: communeId
             })
             const directPickupPoints = directPoints.filter((point) => point.delivery_type === 3)
             if (directPickupPoints.length > 0) return res.json(directPickupPoints)
@@ -88,7 +142,7 @@ export class MaystroController {
             if (nearby && wilaya.trim()) {
                 const nearbyStopDesks = await this.pickupPoints.listActivePickupPointsNearby({
                     apiToken: creds.apiToken,
-                    commune,
+                    commune: communeId,
                     wilaya,
                     deliveryType: 2
                 })
@@ -96,7 +150,7 @@ export class MaystroController {
 
                 const nearbyPickupPoints = await this.pickupPoints.listActivePickupPointsNearby({
                     apiToken: creds.apiToken,
-                    commune,
+                    commune: communeId,
                     wilaya,
                     deliveryType: 3
                 })
@@ -145,11 +199,13 @@ export class MaystroController {
         if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         const commune = typeof req.query.commune === 'string' ? req.query.commune : ''
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya : ''
         if (!commune.trim()) return res.status(400).json({ statusCode: 400, statusMessage: 'commune is required' })
 
         try {
             const creds = await getMaystroCredentials(tenantId)
-            const options = await this.delivery.listDeliveryOptions({ apiToken: creds.apiToken, commune })
+            const communeId = await this.resolveCommuneId({ apiToken: creds.apiToken, commune, wilaya })
+            const options = await this.delivery.listDeliveryOptions({ apiToken: creds.apiToken, commune: communeId })
             return res.json(options)
         } catch (error: any) {
             if (error instanceof MaystroIntegrationError) {
@@ -165,6 +221,7 @@ export class MaystroController {
         if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         const commune = typeof req.query.commune === 'string' ? req.query.commune : ''
+        const wilaya = typeof req.query.wilaya === 'string' ? req.query.wilaya : ''
         const deliveryType = typeof req.query.deliveryType === 'string' ? Number(req.query.deliveryType) : NaN
         if (!commune.trim()) return res.status(400).json({ statusCode: 400, statusMessage: 'commune is required' })
         if (!Number.isFinite(deliveryType)) {
@@ -173,10 +230,18 @@ export class MaystroController {
 
         try {
             const creds = await getMaystroCredentials(tenantId)
-            const price = await this.delivery.getDeliveryPrice({ apiToken: creds.apiToken, commune, deliveryType })
+            const communeId = await this.resolveCommuneId({ apiToken: creds.apiToken, commune, wilaya })
+            const price = await this.delivery.getDeliveryPrice({
+                apiToken: creds.apiToken,
+                commune: communeId,
+                deliveryType
+            })
             return res.json(price)
         } catch (error: any) {
             if (error instanceof MaystroIntegrationError) {
+                if (error.statusCode === 404) {
+                    return res.json({ delivery_price: null })
+                }
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
             console.error('Maystro delivery price error', error)
@@ -223,10 +288,10 @@ export class MaystroController {
         if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
         const endpoint = typeof req.body?.endpoint === 'string' ? req.body.endpoint.trim() : ''
-        const triggerTypeId = typeof req.body?.trigger_type_id === 'number' ? req.body.trigger_type_id : Number(req.body?.trigger_type_id)
+        const triggerTypeId = typeof req.body?.trigger_type_id === 'string' ? req.body.trigger_type_id.trim() : ''
 
         if (!endpoint) return res.status(400).json({ statusCode: 400, statusMessage: 'endpoint is required' })
-        if (!Number.isFinite(triggerTypeId)) {
+        if (!triggerTypeId) {
             return res.status(400).json({ statusCode: 400, statusMessage: 'trigger_type_id is required' })
         }
 
@@ -247,8 +312,8 @@ export class MaystroController {
         const tenantId = req.tenant?.id || req.user?.tenantId
         if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
 
-        const id = Number(req.params.id)
-        if (!Number.isFinite(id)) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid id' })
+        const id = typeof req.params.id === 'string' ? req.params.id.trim() : ''
+        if (!id) return res.status(400).json({ statusCode: 400, statusMessage: 'Invalid id' })
 
         try {
             const creds = await getMaystroCredentials(tenantId)
@@ -259,6 +324,27 @@ export class MaystroController {
                 return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
             }
             console.error('Maystro delete hook error', error)
+            return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
+        }
+    }
+
+    async resyncProducts(req: Request, res: Response) {
+        const tenantId = req.tenant?.id || req.user?.tenantId
+        if (!tenantId) return res.status(400).json({ statusCode: 400, statusMessage: 'Tenant is required' })
+
+        try {
+            const creds = await getMaystroCredentials(tenantId)
+            const result = await this.products.resyncNullProductIds({
+                tenantId,
+                apiToken: creds.apiToken,
+                storeId: creds.storeId
+            })
+            return res.json(result)
+        } catch (error: any) {
+            if (error instanceof MaystroIntegrationError) {
+                return res.status(error.statusCode).json({ statusCode: error.statusCode, statusMessage: error.statusMessage })
+            }
+            console.error('Maystro resync products error', error)
             return res.status(500).json({ statusCode: 500, statusMessage: 'Internal Server Error' })
         }
     }

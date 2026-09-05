@@ -12,7 +12,7 @@ export class PublicProductsController {
 
         try {
             const search = typeof req.query.q === 'string' ? req.query.q : undefined
-            const products = await this.service.listProducts(tenant.id, search)
+            const products = await this.service.listProducts(tenant.id, { search })
             res.json(products)
         } catch (error) {
             console.error('Public products list error:', error)

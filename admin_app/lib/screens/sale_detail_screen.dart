@@ -4,17 +4,22 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:lucide_icons/lucide_icons.dart';
+import 'package:lucide_icons_flutter/lucide_icons.dart';
 import 'package:dio/dio.dart';
 
 import '../services/api_service.dart';
 import '../services/database_service.dart';
 import '../repositories/product_repository.dart';
+import '../providers/store_settings_provider.dart';
 import '../models/product.dart';
+import '../theme/app_theme.dart';
+import '../utils/tenant_currency.dart';
 import '../widgets/badges/status_badges.dart';
 import '../widgets/badges/ui_badge.dart';
 import '../widgets/buttons/app_button.dart';
 import '../widgets/responsive_server_paginated_table.dart';
+import 'package:easy_localization/easy_localization.dart';
+import '../utils/app_toasts.dart';
 
 class SaleDetailScreen extends ConsumerStatefulWidget {
   final String saleId;
@@ -44,7 +49,8 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       // POS sale details have a dedicated route on the backend.
       final res = await api.client.get('/admin/sales/pos/$id');
       final data = res.data;
-      if (data is Map) return _SaleDetail.fromJson(data.cast<String, dynamic>());
+      if (data is Map)
+        return _SaleDetail.fromJson(data.cast<String, dynamic>());
     } on DioException catch (e) {
       if (e.response?.statusCode != 404) {
         // fall through to local fallback
@@ -54,14 +60,20 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
     try {
       final res = await api.client.get('/admin/sales/$id');
       final data = res.data;
-      if (data is Map) return _SaleDetail.fromJson(data.cast<String, dynamic>());
+      if (data is Map)
+        return _SaleDetail.fromJson(data.cast<String, dynamic>());
     } catch (_) {
       // fall through to local fallback
     }
 
     // Offline/local fallback: read from local `sales` table (POS sales).
     final db = await DatabaseService().database;
-    final rows = await db.query('sales', where: 'id = ?', whereArgs: [id], limit: 1);
+    final rows = await db.query(
+      'sales',
+      where: 'id = ?',
+      whereArgs: [id],
+      limit: 1,
+    );
     if (rows.isEmpty) return null;
     final row = rows.first;
 
@@ -104,35 +116,35 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 
     final itemsRaw = payload?['items'];
     final items = (itemsRaw is List)
-        ? itemsRaw
-            .whereType<Map>()
-            .map((m) => m.cast<String, dynamic>())
-            .map((item) {
-              final productId = item['productId']?.toString() ?? '';
-              final variantId = item['variantId']?.toString();
-              final product = productById[productId];
-              String label = product?.title ?? (productId.isNotEmpty ? productId : 'Item');
-              if (product != null && variantId != null) {
-                ProductVariant? v;
-                for (final vv in product.variants) {
-                  if (vv.id == variantId) {
-                    v = vv;
-                    break;
-                  }
-                }
-                if (v != null) {
-                  final vLabel = variantLabel(v);
-                  if (vLabel.trim().isNotEmpty) label = '${product.title} · $vLabel';
+        ? itemsRaw.whereType<Map>().map((m) => m.cast<String, dynamic>()).map((
+            item,
+          ) {
+            final productId = item['productId']?.toString() ?? '';
+            final variantId = item['variantId']?.toString();
+            final product = productById[productId];
+            String label =
+                product?.title ?? (productId.isNotEmpty ? productId : 'Item');
+            if (product != null && variantId != null) {
+              ProductVariant? v;
+              for (final vv in product.variants) {
+                if (vv.id == variantId) {
+                  v = vv;
+                  break;
                 }
               }
-              return _SaleItem.fromJson({
-                'product': {'title': label},
-                'variant': const {},
-                'quantity': item['quantity'],
-                'price': item['price'],
-              });
-            })
-            .toList()
+              if (v != null) {
+                final vLabel = variantLabel(v);
+                if (vLabel.trim().isNotEmpty)
+                  label = '${product.title} · $vLabel';
+              }
+            }
+            return _SaleItem.fromJson({
+              'product': {'title': label},
+              'variant': const {},
+              'quantity': item['quantity'],
+              'price': item['price'],
+            });
+          }).toList()
         : <_SaleItem>[];
 
     return _SaleDetail(
@@ -155,9 +167,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   @override
   Widget build(BuildContext context) {
     final isMobile = MediaQuery.sizeOf(context).width < 800;
+    final tenantMoney = tenantCurrencyFormatter(
+      ref.watch(storeSettingsProvider).settings,
+    );
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF9FAFB),
       body: SingleChildScrollView(
         child: Center(
           child: ConstrainedBox(
@@ -176,7 +190,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   final sale = snapshot.data;
                   if (sale == null) return _notFoundCard();
 
-                  final money = NumberFormat.simpleCurrency(name: 'DZD');
+                  final money = tenantMoney;
                   final shortId = sale.id.length > 8
                       ? sale.id.substring(0, 8)
                       : sale.id;
@@ -195,10 +209,12 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                               children: [
                                 Text(
                                   'Sale #$shortId',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w700,
-                                    color: Color(0xFF0F172A),
+                                    color: Theme.of(
+                                      context,
+                                    ).colorScheme.onSurface,
                                     letterSpacing: -0.5,
                                   ),
                                 ),
@@ -210,7 +226,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                     UiBadge(
                                       label: sale.source,
                                       tone: sale.source.toUpperCase() == 'POS'
-                                          ? UiBadgeTone.teal
+                                          ? UiBadgeTone.lime
                                           : UiBadgeTone.indigo,
                                       uppercase: true,
                                     ),
@@ -234,9 +250,12 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                     if (sale.customerAddress.trim().isNotEmpty)
                                       sale.customerAddress.trim(),
                                   ].join(' · '),
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
-                                    color: Color(0xFF64748B),
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurface
+                                        .withValues(alpha: 0.5),
                                   ),
                                 ),
                               ],
@@ -253,12 +272,12 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         _totalCard(money.format(sale.totalAmount)),
                       ],
                       const SizedBox(height: 20),
-                      const Text(
-                        'Items',
+                      Text(
+                        'admin.pages.sales.detail.sections.items'.tr(),
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
-                          color: Color(0xFF0F172A),
+                          color: Theme.of(context).colorScheme.onSurface,
                         ),
                       ),
                       const SizedBox(height: 12),
@@ -294,16 +313,24 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             }
           },
           borderRadius: BorderRadius.circular(8),
-          child: const Padding(
-            padding: EdgeInsets.symmetric(vertical: 6),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 6),
             child: Row(
               children: [
-                Icon(LucideIcons.arrowLeft, size: 16, color: Color(0xFF64748B)),
-                SizedBox(width: 6),
+                Icon(
+                  LucideIcons.arrowLeft,
+                  size: 16,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurface.withValues(alpha: 0.5),
+                ),
+                const SizedBox(width: 6),
                 Text(
-                  'Sales',
+                  'admin.pages.sales.index.title'.tr(),
                   style: TextStyle(
-                    color: Color(0xFF64748B),
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.5),
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -315,7 +342,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
         const Spacer(),
         if (sale != null) ...[
           AppButton.danger(
-            label: 'Refund',
+            label: 'admin.pages.sales.actions.refund'.tr(),
             icon: LucideIcons.rotateCcw,
             size: AppButtonSize.sm,
             loading: _isRefunding,
@@ -329,15 +356,13 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                     final reason = isOrder
                         ? 'Order-origin sales must be returned from the order flow.'
                         : 'Only COMPLETED POS sales can be refunded.';
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text(reason)),
-                    );
+                    AppToasts.show(context, reason);
                   },
           ),
           const SizedBox(width: 8),
         ],
         AppButton.secondary(
-          label: 'Retry',
+          label: 'app.retry'.tr(),
           icon: LucideIcons.refreshCw,
           size: AppButtonSize.sm,
           onPressed: _retry,
@@ -353,15 +378,18 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       final api = ref.read(apiProvider);
       final response = await api.client.get('/admin/cash/cashboxes');
       final raw = response.data;
-      final cashboxes = raw is List ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList() : <Map<String, dynamic>>[];
+      final cashboxes = raw is List
+          ? raw.whereType<Map>().map((e) => e.cast<String, dynamic>()).toList()
+          : <Map<String, dynamic>>[];
       final openCashboxes = cashboxes
           .where((c) => c['isActive'] == true && c['openSession'] is Map)
           .toList();
 
       if (!mounted) return;
       if (openCashboxes.isEmpty) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No open cashbox available. Open a cash session first.')),
+        AppToasts.show(
+          context,
+          'admin.pages.sales.messages.noOpenCashbox'.tr(),
         );
         return;
       }
@@ -369,7 +397,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       String selectedCashboxId = (openCashboxes.first['id'] ?? '').toString();
       String selectedMethod = 'CASH';
       final referenceCtrl = TextEditingController();
-      final noteCtrl = TextEditingController(text: 'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}');
+      final noteCtrl = TextEditingController(
+        text:
+            'Sale refund ${sale.id.substring(0, sale.id.length > 8 ? 8 : sale.id.length)}',
+      );
       bool submitting = false;
       String? formError;
 
@@ -379,16 +410,16 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
           return StatefulBuilder(
             builder: (context, setDialogState) {
               return AlertDialog(
-                title: const Text('Refund Sale'),
+                title: Text('admin.pages.sales.refundModal.title'.tr()),
                 content: SizedBox(
                   width: 420,
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Create refund cash outflow and mark this sale as REFUNDED.',
-                        style: TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                      Text(
+                        'app.create_refund_cash_outflow_and'.tr(),
+                        style: TextStyle(fontSize: 13),
                       ),
                       const SizedBox(height: 12),
                       DropdownButtonFormField<String>(
@@ -403,26 +434,50 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                             .toList(),
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedCashboxId = v ?? selectedCashboxId),
-                        decoration: const InputDecoration(
-                          labelText: 'Cashbox',
+                            : (v) => setDialogState(
+                                () =>
+                                    selectedCashboxId = v ?? selectedCashboxId,
+                              ),
+                        decoration: InputDecoration(
+                          labelText:
+                              'admin.pages.sales.refundModal.cashboxLabel'.tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
-                      const SizedBox(height: 10),
+                      SizedBox(height: 10),
                       DropdownButtonFormField<String>(
                         initialValue: selectedMethod,
-                        items: const [
-                          DropdownMenuItem(value: 'CASH', child: Text('Cash')),
-                          DropdownMenuItem(value: 'CARD', child: Text('Card')),
-                          DropdownMenuItem(value: 'TRANSFER', child: Text('Transfer')),
-                          DropdownMenuItem(value: 'OTHER', child: Text('Other')),
+                        items: [
+                          DropdownMenuItem(
+                            value: 'CASH',
+                            child: Text('admin.pages.cash.methods.CASH'.tr()),
+                          ),
+                          DropdownMenuItem(
+                            value: 'CARD',
+                            child: Text('admin.pages.cash.methods.CARD'.tr()),
+                          ),
+                          DropdownMenuItem(
+                            value: 'TRANSFER',
+                            child: Text(
+                              'admin.pages.cash.transactions.types.TRANSFER'
+                                  .tr(),
+                            ),
+                          ),
+                          DropdownMenuItem(
+                            value: 'OTHER',
+                            child: Text('admin.pages.cash.methods.OTHER'.tr()),
+                          ),
                         ],
                         onChanged: submitting
                             ? null
-                            : (v) => setDialogState(() => selectedMethod = (v ?? 'CASH').toUpperCase()),
-                        decoration: const InputDecoration(
-                          labelText: 'Method',
+                            : (v) => setDialogState(
+                                () => selectedMethod = (v ?? 'CASH')
+                                    .toUpperCase(),
+                              ),
+                        decoration: InputDecoration(
+                          labelText:
+                              'superAdmin.paymentsPage.history.table.method'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -430,8 +485,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                       TextField(
                         controller: referenceCtrl,
                         enabled: !submitting,
-                        decoration: const InputDecoration(
-                          labelText: 'Reference (optional)',
+                        decoration: InputDecoration(
+                          labelText:
+                              'admin.pages.sales.refundModal.referenceLabel'
+                                  .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -440,8 +497,9 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         controller: noteCtrl,
                         enabled: !submitting,
                         maxLines: 2,
-                        decoration: const InputDecoration(
-                          labelText: 'Note (optional)',
+                        decoration: InputDecoration(
+                          labelText: 'admin.pages.sales.refundModal.noteLabel'
+                              .tr(),
                           border: OutlineInputBorder(),
                         ),
                       ),
@@ -449,7 +507,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                         const SizedBox(height: 10),
                         Text(
                           formError!,
-                          style: const TextStyle(color: Colors.red, fontSize: 12),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontSize: 12,
+                          ),
                         ),
                       ],
                     ],
@@ -457,11 +518,13 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                 ),
                 actions: [
                   TextButton(
-                    onPressed: submitting ? null : () => Navigator.of(dialogContext).pop(false),
-                    child: const Text('Cancel'),
+                    onPressed: submitting
+                        ? null
+                        : () => Navigator.of(dialogContext).pop(false),
+                    child: Text('admin.common.cancel'.tr()),
                   ),
                   AppButton.danger(
-                    label: 'Refund',
+                    label: 'admin.pages.sales.actions.refund'.tr(),
                     icon: LucideIcons.rotateCcw,
                     loading: submitting,
                     onPressed: submitting
@@ -479,9 +542,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                                   'refund': {
                                     'cashboxId': selectedCashboxId,
                                     'method': selectedMethod,
-                                    if (referenceCtrl.text.trim().isNotEmpty) 'reference': referenceCtrl.text.trim(),
-                                    if (noteCtrl.text.trim().isNotEmpty) 'note': noteCtrl.text.trim(),
-                                  }
+                                    if (referenceCtrl.text.trim().isNotEmpty)
+                                      'reference': referenceCtrl.text.trim(),
+                                    if (noteCtrl.text.trim().isNotEmpty)
+                                      'note': noteCtrl.text.trim(),
+                                  },
                                 },
                               );
                               if (!dialogContext.mounted) return;
@@ -507,15 +572,11 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       if (confirmed == true) {
         _retry();
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Sale refunded successfully')),
-        );
+        AppToasts.show(context, 'app.sale_refunded_successfully'.tr());
       }
     } catch (e) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to refund sale: $e')),
-      );
+      AppToasts.show(context, 'Failed to refund sale: $e');
     } finally {
       if (mounted) {
         setState(() => _isRefunding = false);
@@ -524,12 +585,17 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   }
 
   Widget _totalCard(String total) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -541,21 +607,23 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Total',
+          Text(
+            'admin.pages.sales.detail.itemsTable.total'.tr(),
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: Color(0xFF64748B),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
             ),
           ),
           const SizedBox(height: 8),
           Text(
             total,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.w700,
-              color: Color(0xFF0F172A),
+              color: Theme.of(context).colorScheme.onSurface,
             ),
           ),
         ],
@@ -572,10 +640,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       totalItems: items.length,
       itemsPerPage: items.isEmpty ? 1 : items.length,
       onPageChanged: (_) {},
-      emptyState: const Center(
+      emptyState: Center(
         child: Padding(
           padding: EdgeInsets.all(48),
-          child: Text('No items found'),
+          child: Text('app.no_items_found'.tr()),
         ),
       ),
       header: Row(
@@ -589,7 +657,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
       rowBuilder: (context, item, index) {
         final lineTotal = item.price * item.quantity;
         return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 13),
           child: Row(
             children: [
               Expanded(
@@ -598,9 +666,10 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   item.label,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0F172A),
+                    fontSize: 13,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -608,14 +677,24 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                 flex: 1,
                 child: Text(
                   item.quantity.toString(),
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
               ),
               Expanded(
                 flex: 2,
                 child: Text(
                   money.format(item.price),
-                  style: const TextStyle(color: Color(0xFF475569)),
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.6),
+                  ),
                 ),
               ),
               Expanded(
@@ -624,6 +703,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
                   money.format(lineTotal),
                   style: const TextStyle(
                     fontWeight: FontWeight.w700,
+                    fontSize: 13,
                     color: Color(0xFF0F172A),
                   ),
                 ),
@@ -636,14 +716,16 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   }
 
   Widget _headerCell(String text, {required int flex}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Expanded(
       flex: flex,
       child: Text(
-        text,
-        style: const TextStyle(
-          color: Color(0xFF64748B),
-          fontSize: 12,
+        text.toUpperCase(),
+        style: TextStyle(
+          color: isDark ? AppColors.textTertiary : AppColors.lightTextTertiary,
+          fontSize: 11,
           fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
         ),
       ),
     );
@@ -651,19 +733,23 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
 
   Widget _loadingCard() {
     return _card(
-      child: const Padding(
-        padding: EdgeInsets.all(48),
+      child: Padding(
+        padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            SizedBox(
+            const SizedBox(
               height: 32,
               width: 32,
               child: CircularProgressIndicator(strokeWidth: 3),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
-              'Loading sale...',
-              style: TextStyle(color: Color(0xFF64748B)),
+              'app.loading_sale'.tr(),
+              style: TextStyle(
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -682,7 +768,7 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
             Text(message, textAlign: TextAlign.center),
             const SizedBox(height: 16),
             AppButton.secondary(
-              label: 'Retry',
+              label: 'app.retry'.tr(),
               icon: LucideIcons.refreshCw,
               onPressed: _retry,
             ),
@@ -698,21 +784,32 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
         padding: const EdgeInsets.all(48),
         child: Column(
           children: [
-            Icon(LucideIcons.receipt, size: 48, color: Colors.grey[400]),
+            Icon(
+              LucideIcons.receipt,
+              size: 48,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
+            ),
             const SizedBox(height: 12),
-            const Text(
-              'Sale not found',
+            Text(
+              'admin.pages.sales.detail.notFound.title'.tr(),
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF111827),
+                color: Theme.of(context).colorScheme.onSurface,
               ),
             ),
             const SizedBox(height: 8),
-            const Text(
-              'This sale may have been deleted.',
+            Text(
+              'admin.pages.sales.detail.notFound.hint'.tr(),
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 13, color: Color(0xFF6B7280)),
+              style: TextStyle(
+                fontSize: 13,
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.5),
+              ),
             ),
           ],
         ),
@@ -721,12 +818,17 @@ class _SaleDetailScreenState extends ConsumerState<SaleDetailScreen> {
   }
 
   Widget _card({required Widget child}) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFFE2E8F0)),
+        border: Border.all(
+          color: isDark
+              ? AppColors.surfaceBorder
+              : AppColors.lightSurfaceBorder,
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.02),
@@ -779,9 +881,9 @@ class _SaleDetail {
     final itemsRaw = json['items'];
     final items = (itemsRaw is List)
         ? itemsRaw
-            .whereType<Map>()
-            .map((e) => _SaleItem.fromJson(e.cast<String, dynamic>()))
-            .toList()
+              .whereType<Map>()
+              .map((e) => _SaleItem.fromJson(e.cast<String, dynamic>()))
+              .toList()
         : <_SaleItem>[];
 
     final customerAddress = json['customerAddress']?.toString() ?? '';
